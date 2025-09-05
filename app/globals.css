@@ -1,0 +1,1126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --radius: 0.5rem;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+
+  /* MANOR ROOM THEMES - Ground Floor */
+
+  /* 1. Main Hall - Burgundy, Mahogany, Gold, Cream */
+  [data-theme="main-hall"] {
+    --background: 345 80% 10%; /* Deep burgundy base */
+    --foreground: 0 0% 98%; /* White text */
+    --card: 345 60% 15%; /* Lighter burgundy cards */
+    --card-foreground: 0 0% 98%;
+    --popover: 345 60% 15%;
+    --popover-foreground: 0 0% 98%;
+
+    /* 8-color palette */
+    --primary: 345 80% 25%; /* Rich burgundy */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 25 60% 35%; /* Mahogany */
+    --secondary-foreground: 0 0% 98%;
+    --tertiary: 40 30% 92%; /* Cream marble */
+    --tertiary-foreground: 345 80% 10%;
+    --accent-gold: 45 80% 60%; /* Golden accents restored */
+    --accent-gold-foreground: 345 80% 10%; /* Dark text on golden */
+    --accent-copper: 30 50% 45%; /* Copper details */
+    --accent-copper-foreground: 0 0% 98%;
+    --surface-dark: 345 80% 8%; /* Deep shadows */
+    --surface-dark-foreground: 0 0% 98%;
+    --surface-light: 40 30% 95%; /* Light surfaces */
+    --surface-light-foreground: 345 80% 10%;
+    --text-contrast: 0 0% 98%; /* High contrast text */
+
+    --muted: 345 40% 20%;
+    --muted-foreground: 40 20% 80%;
+    --accent: 345 60% 40%; /* Burgundy accent */
+    --accent-foreground: 0 0% 98%;
+    --border: 345 40% 35%; /* Burgundy border */
+    --input: 345 40% 20%;
+    --ring: 345 70% 35%; /* Burgundy ring */
+  }
+
+  /* 2. Library - Deep Mahogany, Rich Brown, Aged Silver, Cream */
+  [data-theme="library"] {
+    --background: 25 60% 8%; /* Deep mahogany base */
+    --foreground: 0 0% 98%; /* White text */
+    --card: 25 50% 12%; /* Lighter mahogany cards */
+    --card-foreground: 0 0% 98%;
+    --popover: 25 50% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    /* 8-color palette */
+    --primary: 25 60% 20%; /* Deep mahogany */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 25 50% 30%; /* Rich brown */
+    --secondary-foreground: 0 0% 98%;
+    --tertiary: 40 30% 92%; /* Cream */
+    --tertiary-foreground: 25 60% 8%;
+    --accent-gold: 0 0% 75%; /* Aged silver accents instead of gold */
+    --accent-gold-foreground: 25 60% 8%; /* Dark text on silver */
+    --accent-copper: 30 50% 45%; /* Copper details */
+    --accent-copper-foreground: 0 0% 98%;
+    --surface-dark: 25 60% 6%; /* Deep shadows */
+    --surface-dark-foreground: 0 0% 98%;
+    --surface-light: 40 30% 95%; /* Light surfaces */
+    --surface-light-foreground: 25 60% 8%;
+    --text-contrast: 0 0% 98%; /* High contrast text */
+
+    --muted: 25 40% 15%;
+    --muted-foreground: 40 20% 80%;
+    --accent: 25 50% 35%; /* Mahogany accent */
+    --accent-foreground: 0 0% 98%;
+    --border: 25 40% 25%; /* Mahogany border */
+    --input: 25 40% 15%;
+    --ring: 25 60% 25%; /* Mahogany ring */
+  }
+
+  /* 3. Conservatory - Forest Green, Sage, Copper, Ivory */
+  [data-theme="conservatory"] {
+    --background: 120 60% 8%; /* Deep forest green base */
+    --foreground: 0 0% 98%; /* White text */
+    --card: 120 50% 12%; /* Lighter forest green cards */
+    --card-foreground: 0 0% 98%;
+    --popover: 120 50% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    /* 8-color palette */
+    --primary: 120 60% 20%; /* Deep forest green */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 90 40% 35%; /* Sage green */
+    --secondary-foreground: 0 0% 98%;
+    --tertiary: 60 30% 95%; /* Ivory */
+    --tertiary-foreground: 120 60% 8%;
+    --accent-gold: 30 70% 55%; /* Copper accents */
+    --accent-gold-foreground: 120 60% 8%; /* Dark text on copper */
+    --accent-copper: 30 50% 45%; /* Copper details */
+    --accent-copper-foreground: 0 0% 98%;
+    --surface-dark: 120 60% 6%; /* Deep shadows */
+    --surface-dark-foreground: 0 0% 98%;
+    --surface-light: 60 30% 95%; /* Light surfaces */
+    --surface-light-foreground: 120 60% 8%;
+    --text-contrast: 0 0% 98%; /* High contrast text */
+
+    --muted: 120 40% 15%;
+    --muted-foreground: 60 20% 80%;
+    --accent: 120 50% 35%; /* Forest green accent */
+    --accent-foreground: 0 0% 98%;
+    --border: 120 40% 25%; /* Forest green border */
+    --input: 120 40% 15%;
+    --ring: 120 60% 25%; /* Forest green ring */
+  }
+
+  /* 4. Fireside Lounge - Obsidian, Steel, Orange, Dark Stone */
+  [data-theme="fireside-lounge"] {
+    --background: 0 0% 11%; /* Obsidian base */
+    --foreground: 0 0% 98%; /* White text */
+    --card: 0 0% 15%; /* Lighter obsidian cards */
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 15%;
+    --popover-foreground: 0 0% 98%;
+
+    /* 8-color palette */
+    --primary: 0 0% 18%; /* Obsidian */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 210 10% 56%; /* Steel gray */
+    --secondary-foreground: 0 0% 98%;
+    --tertiary: 0 0% 18%; /* Dark stone */
+    --tertiary-foreground: 0 0% 98%;
+    --accent-gold: 16 100% 50%; /* Orange fire accents */
+    --accent-gold-foreground: 0 0% 98%; /* White text on orange */
+    --accent-copper: 210 15% 65%; /* Light steel details */
+    --accent-copper-foreground: 0 0% 10%;
+    --surface-dark: 0 0% 8%; /* Deep obsidian shadows */
+    --surface-dark-foreground: 0 0% 98%;
+    --surface-light: 210 5% 25%; /* Light steel surfaces */
+    --surface-light-foreground: 0 0% 98%;
+    --text-contrast: 0 0% 98%; /* High contrast text */
+
+    --muted: 0 0% 20%;
+    --muted-foreground: 210 5% 70%;
+    --accent: 16 100% 45%; /* Orange accent */
+    --accent-foreground: 0 0% 98%;
+    --border: 210 10% 35%; /* Steel border */
+    --input: 0 0% 20%;
+    --ring: 16 100% 50%; /* Orange ring */
+  }
+
+  /* 5. Bar - Amber, Dark Brass, Golden, Cornsilk */
+  [data-theme="bar"] {
+    --background: 45 100% 8%; /* Deep amber base */
+    --foreground: 0 0% 98%; /* White text */
+    --card: 45 80% 12%; /* Lighter amber cards */
+    --card-foreground: 0 0% 98%;
+    --popover: 45 80% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    /* 8-color palette */
+    --primary: 45 100% 25%; /* Rich amber */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 30 50% 40%; /* Dark brass */
+    --secondary-foreground: 0 0% 98%;
+    --tertiary: 60 30% 95%; /* Cornsilk */
+    --tertiary-foreground: 45 100% 8%;
+    --accent-gold: 45 80% 60%; /* Golden highlights */
+    --accent-gold-foreground: 45 100% 8%; /* Dark text on golden */
+    --accent-copper: 30 60% 50%; /* Brass details */
+    --accent-copper-foreground: 0 0% 98%;
+    --surface-dark: 45 100% 6%; /* Deep amber shadows */
+    --surface-dark-foreground: 0 0% 98%;
+    --surface-light: 60 30% 95%; /* Light cornsilk surfaces */
+    --surface-light-foreground: 45 100% 8%;
+    --text-contrast: 0 0% 98%; /* High contrast text */
+
+    --muted: 45 60% 15%;
+    --muted-foreground: 60 20% 80%;
+    --accent: 45 80% 35%; /* Amber accent */
+    --accent-foreground: 0 0% 98%;
+    --border: 45 60% 25%; /* Amber border */
+    --input: 45 60% 15%;
+    --ring: 45 80% 35%; /* Amber ring */
+  }
+
+  /* 6. Garden - Sandy Beige, Warm Burlywood, Terracotta, Cream */
+  [data-theme="garden"] {
+    --background: 40 35% 12%; /* Lighter sandy base instead of deep sandy */
+    --foreground: 0 0% 98%; /* White text */
+    --card: 40 30% 18%; /* Lighter sandy cards */
+    --card-foreground: 0 0% 98%;
+    --popover: 40 30% 18%;
+    --popover-foreground: 0 0% 98%;
+
+    /* 8-color palette */
+    --primary: 40 35% 75%; /* Much lighter wheat beige (from F5DEB3) */
+    --primary-foreground: 40 30% 8%;
+    --secondary: 35 30% 70%; /* Light sandy beige (from E6D3A3) */
+    --secondary-foreground: 40 30% 8%;
+    --tertiary: 40 30% 92%; /* Cream pathways */
+    --tertiary-foreground: 40 30% 8%;
+    --accent-gold: 25 70% 55%; /* Brighter terracotta orange (from D2691E) */
+    --accent-gold-foreground: 0 0% 98%; /* White text on terracotta */
+    --accent-copper: 30 50% 45%; /* Earth tone details */
+    --accent-copper-foreground: 0 0% 98%;
+    --surface-dark: 40 35% 8%; /* Deep earth shadows */
+    --surface-dark-foreground: 0 0% 98%;
+    --surface-light: 40 30% 95%; /* Light sandy surfaces */
+    --surface-light-foreground: 40 30% 8%;
+    --text-contrast: 0 0% 98%; /* High contrast text */
+
+    --muted: 40 25% 20%; /* Lighter muted tone */
+    --muted-foreground: 40 20% 80%;
+    --accent: 40 35% 65%; /* Much lighter sandy accent */
+    --accent-foreground: 40 30% 8%;
+    --border: 40 30% 35%; /* Lighter sandy border */
+    --input: 40 25% 20%;
+    --ring: 40 35% 35%; /* Lighter sandy ring */
+  }
+
+  /* 7. Gallery - Navy Blue, White, Golden Frames, Ivory */
+  [data-theme="gallery"] {
+    --background: 240 100% 8%; /* Deep navy blue base */
+    --foreground: 0 0% 98%; /* White text */
+    --card: 240 80% 12%; /* Lighter navy blue cards */
+    --card-foreground: 0 0% 98%;
+    --popover: 240 80% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    /* 8-color palette */
+    --primary: 240 100% 25%; /* Royal navy blue */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96%; /* White gallery walls */
+    --secondary-foreground: 240 100% 8%;
+    --tertiary: 60 30% 97%; /* Ivory backgrounds */
+    --tertiary-foreground: 240 100% 8%;
+    --accent-gold: 45 80% 60%; /* Golden frame accents */
+    --accent-gold-foreground: 240 100% 8%; /* Dark text on golden */
+    --accent-copper: 45 70% 55%; /* Golden details */
+    --accent-copper-foreground: 240 100% 8%;
+    --surface-dark: 240 100% 6%; /* Deep navy shadows */
+    --surface-dark-foreground: 0 0% 98%;
+    --surface-light: 60 30% 95%; /* Light ivory surfaces */
+    --surface-light-foreground: 240 100% 8%;
+    --text-contrast: 0 0% 98%; /* High contrast text */
+
+    --muted: 240 60% 15%;
+    --muted-foreground: 60 20% 80%;
+    --accent: 240 80% 35%; /* Navy blue accent */
+    --accent-foreground: 0 0% 98%;
+    --border: 240 60% 25%; /* Navy blue border */
+    --input: 240 60% 15%;
+    --ring: 240 80% 35%; /* Navy blue ring */
+  }
+
+  /* 8. Balcony - Lavender, Midnight Blue, Silver, Ivory */
+  [data-theme="balcony"] {
+    --background: 240 60% 5%; /* Darker midnight blue base */
+    --foreground: 260 40% 75%; /* Lavender text instead of white */
+    --card: 240 50% 12%; /* Reverted to darker cards */
+    --card-foreground: 0 0% 98%;
+    --popover: 240 50% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    /* 8-color palette */
+    --primary: 260 40% 65%; /* Lavender */
+    --primary-foreground: 240 60% 8%;
+    --secondary: 240 60% 20%; /* Midnight blue */
+    --secondary-foreground: 0 0% 98%;
+    --tertiary: 60 30% 97%; /* Ivory */
+    --tertiary-foreground: 240 60% 8%;
+    --accent-gold: 0 0% 75%; /* Silver moonlight accents */
+    --accent-gold-foreground: 240 60% 8%; /* Dark text on silver */
+    --accent-copper: 0 0% 65%; /* Light silver details */
+    --accent-copper-foreground: 240 60% 8%;
+    --surface-dark: 240 60% 25%; /* Midnight blue shadows */
+    --surface-dark-foreground: 0 0% 98%;
+    --surface-light: 60 30% 95%; /* Light ivory surfaces */
+    --surface-light-foreground: 240 60% 8%;
+    --text-contrast: 260 40% 75%; /* Lavender contrast text */
+
+    --muted: 240 40% 15%;
+    --muted-foreground: 0 10% 80%;
+    --accent: 260 40% 55%; /* Lavender accent */
+    --accent-foreground: 240 60% 8%;
+    --border: 240 30% 18%; /* Reverted to darker border */
+    --input: 240 30% 15%;
+    --ring: 260 40% 60%; /* Lavender ring */
+  }
+
+  /* 9. Ballroom - Crystal White, Golden, Pure Gold, Ivory */
+  [data-theme="ballroom"] {
+    --background: 0 0% 98%; /* Crystal white base - kept light */
+    --foreground: 0 0% 15%; /* Darker text for better readability */
+    --card: 0 0% 95%; /* Light crystal cards */
+    --card-foreground: 0 0% 15%;
+    --popover: 0 0% 95%;
+    --popover-foreground: 0 0% 15%;
+
+    /* 8-color palette */
+    --primary: 0 0% 98%; /* Crystal white */
+    --primary-foreground: 0 0% 15%;
+    --secondary: 45 80% 60%; /* Golden */
+    --secondary-foreground: 0 0% 15%;
+    --tertiary: 60 30% 97%; /* Ivory */
+    --tertiary-foreground: 0 0% 15%;
+    --accent-gold: 45 100% 50%; /* Pure gold accents */
+    --accent-gold-foreground: 0 0% 15%; /* Dark text on gold */
+    --accent-copper: 45 90% 55%; /* Golden details */
+    --accent-copper-foreground: 0 0% 15%;
+    --surface-dark: 45 20% 85%; /* Light golden shadows */
+    --surface-dark-foreground: 0 0% 98%;
+    --surface-light: 60 30% 95%; /* Light ivory surfaces */
+    --surface-light-foreground: 0 0% 15%;
+    --text-contrast: 0 0% 15%; /* Dark contrast text */
+
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 25%;
+    --accent: 45 80% 50%; /* Golden accent */
+    --accent-foreground: 0 0% 15%;
+    --border: 45 60% 70%; /* Light golden border */
+    --input: 0 0% 95%;
+    --ring: 45 80% 50%; /* Golden ring */
+  }
+
+  /* 10. Map Room - Burlywood, Dark Brass, Golden Compass, Parchment */
+  [data-theme="map-room"] {
+    --background: 30 50% 5%; /* Darker brass base */
+    --foreground: 40 40% 65%; /* Burlywood text instead of white */
+    --card: 30 40% 12%; /* Reverted to darker cards */
+    --card-foreground: 0 0% 98%;
+    --popover: 30 40% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    /* 8-color palette */
+    --primary: 40 40% 58%; /* Burlywood */
+    --primary-foreground: 0 0% 15%;
+    --secondary: 30 50% 40%; /* Dark brass */
+    --secondary-foreground: 0 0% 98%;
+    --tertiary: 45 30% 92%; /* Parchment */
+    --tertiary-foreground: 40 40% 15%;
+    --accent-gold: 45 80% 60%; /* Golden compass accents */
+    --accent-gold-foreground: 40 40% 15%; /* Dark text on golden */
+    --accent-copper: 30 60% 50%; /* Brass details */
+    --accent-copper-foreground: 0 0% 98%;
+    --surface-dark: 30 50% 35%; /* Dark brass shadows */
+    --surface-dark-foreground: 0 0% 98%;
+    --surface-light: 45 30% 95%; /* Light parchment surfaces */
+    --surface-light-foreground: 40 40% 15%;
+    --text-contrast: 40 40% 65%; /* Burlywood contrast text */
+
+    --muted: 30 30% 15%;
+    --muted-foreground: 0 10% 80%;
+    --accent: 40 35% 45%; /* Burlywood accent */
+    --accent-foreground: 0 0% 98%;
+    --border: 30 20% 18%; /* Reverted to darker border */
+    --input: 30 20% 15%;
+    --ring: 40 40% 50%; /* Burlywood ring */
+  }
+
+  /* 11. Observatory - Brighter Crimson, Silver, Steel Telescope, Midnight */
+  [data-theme="observatory"] {
+    --background: 0 70% 15%; /* Darker crimson base */
+    --foreground: 0 70% 65%; /* Brighter crimson text instead of white */
+    --card: 0 60% 30%; /* Lighter crimson cards */
+    --card-foreground: 0 0% 98%;
+    --popover: 0 60% 30%;
+    --popover-foreground: 0 0% 98%;
+
+    /* 8-color palette */
+    --primary: 0 70% 35%; /* Brighter crimson */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 75%; /* Silver */
+    --secondary-foreground: 0 0% 15%;
+    --tertiary: 240 20% 15%; /* Midnight */
+    --tertiary-foreground: 0 0% 98%;
+    --accent-gold: 210 15% 65%; /* Steel telescope accents */
+    --accent-gold-foreground: 0 0% 15%; /* Dark text on steel */
+    --accent-copper: 0 0% 70%; /* Silver details */
+    --accent-copper-foreground: 0 0% 15%;
+    --surface-dark: 0 70% 20%; /* Purple shadows */
+    --surface-dark-foreground: 0 0% 98%;
+    --surface-light: 0 0% 85%; /* Light silver surfaces */
+    --surface-light-foreground: 0 0% 15%;
+    --text-contrast: 0 70% 65%; /* Brighter crimson contrast text */
+
+    --muted: 0 50% 35%;
+    --muted-foreground: 0 10% 80%;
+    --accent: 0 60% 45%; /* Brighter crimson accent */
+    --accent-foreground: 0 0% 98%;
+    --border: 0 50% 40%; /* Brighter crimson border */
+    --input: 0 50% 35%;
+    --ring: 0 70% 40%; /* Brighter crimson ring */
+  }
+
+  /* 12. Theater Room - Royal Purple, Golden Stage Lights, Gold Trim, Velvet */
+  [data-theme="theater-room"] {
+    --background: 270 60% 5%; /* Darker purple base */
+    --foreground: 270 60% 65%; /* Royal purple text instead of white */
+    --card: 270 50% 12%; /* Reverted to darker cards */
+    --card-foreground: 0 0% 98%;
+    --popover: 270 50% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    /* 8-color palette */
+    --primary: 270 60% 25%; /* Royal purple */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 45 80% 60%; /* Golden stage lights */
+    --secondary-foreground: 0 0% 15%;
+    --tertiary: 270 40% 15%; /* Deep velvet */
+    --tertiary-foreground: 0 0% 98%;
+    --accent-gold: 45 100% 50%; /* Gold trim accents */
+    --accent-gold-foreground: 270 60% 15%; /* Dark text on gold */
+    --accent-copper: 45 90% 55%; /* Golden details */
+    --accent-copper-foreground: 270 60% 15%;
+    --surface-dark: 270 60% 20%; /* Purple shadows */
+    --surface-dark-foreground: 0 0% 98%;
+    --surface-light: 45 30% 90%; /* Light golden surfaces */
+    --surface-light-foreground: 270 60% 15%;
+    --text-contrast: 270 60% 65%; /* Royal purple contrast text */
+
+    --muted: 270 40% 15%;
+    --muted-foreground: 0 10% 80%;
+    --accent: 270 50% 40%; /* Royal purple accent */
+    --accent-foreground: 0 0% 98%;
+    --border: 270 30% 18%; /* Reverted to darker border */
+    --input: 270 30% 15%;
+    --ring: 270 60% 50%; /* Royal purple ring */
+  }
+
+  /* 13. Clock Tower - Ice Blue, Steel, Chrome, Frost */
+  [data-theme="clock-tower"] {
+    --background: 200 60% 5%; /* Darker ice blue base */
+    --foreground: 200 60% 70%; /* Ice blue text instead of white */
+    --card: 200 50% 12%; /* Reverted to darker cards */
+    --card-foreground: 0 0% 98%;
+    --popover: 200 50% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    /* 8-color palette */
+    --primary: 200 60% 25%; /* Ice blue */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 210 15% 65%; /* Steel */
+    --secondary-foreground: 0 0% 15%;
+    --tertiary: 200 30% 95%; /* Frost */
+    --tertiary-foreground: 200 60% 15%;
+    --accent-gold: 0 0% 85%; /* Chrome accents */
+    --accent-gold-foreground: 200 60% 15%; /* Dark text on chrome */
+    --accent-copper: 210 10% 75%; /* Steel details */
+    --accent-copper-foreground: 0 0% 15%;
+    --surface-dark: 200 60% 30%; /* Ice blue shadows */
+    --surface-dark-foreground: 0 0% 98%;
+    --surface-light: 200 30% 95%; /* Light frost surfaces */
+    --surface-light-foreground: 200 60% 15%;
+    --text-contrast: 200 60% 70%; /* Ice blue contrast text */
+
+    --muted: 200 40% 15%;
+    --muted-foreground: 0 10% 80%;
+    --accent: 200 50% 40%; /* Ice blue accent */
+    --accent-foreground: 0 0% 98%;
+    --border: 200 30% 18%; /* Reverted to darker border */
+    --input: 200 30% 15%;
+    --ring: 200 60% 50%; /* Ice blue ring */
+  }
+
+  /* 14. War Room - Hunter Green, Bronze, Aged Golden Medals, Khaki */
+  [data-theme="war-room"] {
+    --background: 120 40% 5%; /* Darker hunter green base */
+    --foreground: 120 40% 65%; /* Hunter green text instead of white */
+    --card: 120 30% 12%; /* Reverted to darker cards */
+    --card-foreground: 0 0% 98%;
+    --popover: 120 30% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    /* 8-color palette */
+    --primary: 120 40% 22%; /* Hunter green */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 30 50% 45%; /* Bronze */
+    --secondary-foreground: 0 0% 98%;
+    --tertiary: 60 25% 75%; /* Khaki */
+    --tertiary-foreground: 120 40% 15%;
+    --accent-gold: 45 60% 45%; /* Aged golden medals accents */
+    --accent-gold-foreground: 0 0% 98%; /* White text on aged gold */
+    --accent-copper: 30 60% 50%; /* Bronze details */
+    --accent-copper-foreground: 0 0% 98%;
+    --surface-dark: 120 40% 25%; /* Hunter green shadows */
+    --surface-dark-foreground: 0 0% 98%;
+    --surface-light: 60 25% 85%; /* Light khaki surfaces */
+    --surface-light-foreground: 120 40% 15%;
+    --text-contrast: 120 40% 65%; /* Hunter green contrast text */
+
+    --muted: 120 30% 15%;
+    --muted-foreground: 0 10% 80%;
+    --accent: 120 35% 35%; /* Hunter green accent */
+    --accent-foreground: 0 0% 98%;
+    --border: 120 20% 18%; /* Reverted to darker border */
+    --input: 120 20% 15%;
+    --ring: 120 40% 35%; /* Hunter green ring */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-marcellus;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    /* Add padding-top to account for fixed navbar */
+    padding-top: 4rem;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-charm;
+  }
+}
+
+@layer utilities {
+  /* Theme-aware utilities */
+  .theme-primary {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  .theme-secondary {
+    @apply bg-secondary text-secondary-foreground;
+  }
+
+  .theme-accent-gold {
+    @apply bg-accent-gold text-accent-gold-foreground;
+  }
+
+  .theme-burgundy-button {
+    @apply bg-primary text-primary-foreground border-primary/20;
+    transition: all 0.2s ease;
+  }
+
+  .theme-burgundy-button:hover {
+    @apply bg-primary/90 border-primary/30 transform scale-105;
+  }
+
+  .theme-surface-light {
+    @apply bg-surface-light text-surface-light-foreground;
+  }
+
+  /* ELEGANT CARD SYSTEM - Wider Borders with Straight Corners */
+  .room-furniture {
+    position: relative;
+    padding: 1.5rem;
+    /* Remove border-radius for straight corners */
+    border-radius: 0;
+
+    /* Standardized border width to 4px for consistency across all cards */
+    background: hsl(var(--card));
+    border: 4px solid hsl(var(--accent-gold) / 0.6);
+    /* Enhanced card shadow for better picture frame feeling */
+    box-shadow: 0 4px 12px hsl(var(--surface-dark) / 0.3), 0 2px 6px hsl(var(--surface-dark) / 0.2), inset 0 1px 0
+      hsl(var(--accent-gold) / 0.1);
+
+    transition: all 0.3s ease;
+  }
+
+  /* Beautiful hover effects - border gets thinner and lifts */
+  .room-furniture:hover {
+    transform: translateY(-3px);
+    /* Standardized hover border to 2px for consistency */
+    border-width: 2px;
+    border-color: hsl(var(--accent-gold) / 0.8);
+    /* Stronger hover shadow for dramatic picture frame effect */
+    box-shadow: 0 12px 32px hsl(var(--surface-dark) / 0.4), 0 6px 16px hsl(var(--surface-dark) / 0.3), 0 0 0 1px
+      hsl(var(--accent-gold) / 0.2), inset 0 1px 0 hsl(var(--accent-gold) / 0.2);
+  }
+
+  /* Also update picture-frame for consistency */
+  .picture-frame {
+    position: relative;
+    padding: 1rem;
+    border-radius: 0; /* Straight corners */
+    background: hsl(var(--card));
+    /* Standardized border width to 4px to match room-furniture */
+    border: 4px solid hsl(var(--accent-gold) / 0.4);
+    /* Enhanced picture frame shadow */
+    box-shadow: 0 3px 10px hsl(var(--surface-dark) / 0.25), 0 1px 4px hsl(var(--surface-dark) / 0.15), inset 0 1px 0
+      hsl(var(--accent-gold) / 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .picture-frame:hover {
+    transform: translateY(-2px);
+    /* Standardized hover border to 2px to match room-furniture */
+    border-width: 2px;
+    border-color: hsl(var(--accent-gold) / 0.6);
+    /* Enhanced hover shadow for picture frame effect */
+    box-shadow: 0 8px 24px hsl(var(--surface-dark) / 0.35), 0 4px 12px hsl(var(--surface-dark) / 0.25), inset 0 1px 0
+      hsl(var(--accent-gold) / 0.15);
+  }
+
+  /* PROPER MANOR BACKGROUND PATTERNS - From Attachment */
+
+  /* Main Hall Background Pattern - Subtle Diagonal Wallpaper */
+  .main-hall-bg-pattern {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(345, 80%, 10%),
+      hsl(345, 80%, 10%) 2px,
+      hsl(345, 80%, 12%) 2px,
+      hsl(345, 80%, 12%) 4px
+    );
+  }
+
+  /* Universal Hexagonal Gaming Pattern Overlay */
+  .gametable-hex-bg {
+    background-image: linear-gradient(
+        30deg,
+        rgba(250, 250, 250, 0.02) 12%,
+        transparent 12.5%,
+        transparent 87%,
+        rgba(250, 250, 250, 0.02) 87.5%
+      ),
+      linear-gradient(
+        150deg,
+        rgba(250, 250, 250, 0.02) 12%,
+        transparent 12.5%,
+        transparent 87%,
+        rgba(250, 250, 250, 0.02) 87.5%
+      ),
+      linear-gradient(
+        60deg,
+        rgba(250, 250, 250, 0.03) 25%,
+        transparent 25.5%,
+        transparent 75%,
+        rgba(250, 250, 250, 0.03) 75%
+      );
+    background-size: 80px 140px;
+    background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;
+  }
+
+  /* Manor Texture Effects */
+  .manor-texture::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(circle at 20% 50%, hsla(var(--primary), 0.03) 1px, transparent 1px),
+      radial-gradient(circle at 80% 50%, hsla(var(--secondary), 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  /* Enhanced Room Backgrounds - Updated */
+  [data-theme="main-hall"] .room-environment {
+    /* Use the proper main hall pattern */
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(345, 80%, 10%),
+      hsl(345, 80%, 10%) 2px,
+      hsl(345, 80%, 12%) 2px,
+      hsl(345, 80%, 12%) 4px
+    );
+  }
+
+  [data-theme="library"] .room-environment {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(25, 60%, 8%),
+      hsl(25, 60%, 8%) 2px,
+      hsl(25, 60%, 10%) 2px,
+      hsl(25, 60%, 10%) 4px
+    );
+  }
+
+  [data-theme="conservatory"] .room-environment {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(120, 60%, 8%),
+      hsl(120, 60%, 8%) 2px,
+      hsl(120, 60%, 10%) 2px,
+      hsl(120, 60%, 10%) 4px
+    );
+  }
+
+  /* Fireside Lounge Room Environment Background */
+  [data-theme="fireside-lounge"] .room-environment {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(0, 0%, 11%),
+      hsl(0, 0%, 11%) 2px,
+      hsl(0, 0%, 13%) 2px,
+      hsl(0, 0%, 13%) 4px
+    );
+  }
+
+  /* Bar Room Environment Background */
+  [data-theme="bar"] .room-environment {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(45, 100%, 8%),
+      hsl(45, 100%, 8%) 2px,
+      hsl(45, 100%, 10%) 2px,
+      hsl(45, 100%, 10%) 4px
+    );
+  }
+
+  /* Garden Room Environment Background */
+  [data-theme="garden"] .room-environment {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(40, 35%, 12%) /* Updated to match new lighter background */,
+      hsl(40, 35%, 12%) 2px,
+      hsl(40, 35%, 14%) 2px /* Slightly lighter stripe */,
+      hsl(40, 35%, 14%) 4px
+    );
+  }
+
+  /* Gallery Room Environment Background */
+  [data-theme="gallery"] .room-environment {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(240, 100%, 8%),
+      hsl(240, 100%, 8%) 2px,
+      hsl(240, 100%, 10%) 2px,
+      hsl(240, 100%, 10%) 4px
+    );
+  }
+
+  /* Balcony Room Environment Background */
+  [data-theme="balcony"] .room-environment {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(260, 40%, 85%) /* Updated to match new lighter background */,
+      hsl(260, 40%, 85%) 2px,
+      hsl(260, 30%, 90%) 2px /* Slightly lighter stripe */,
+      hsl(260, 30%, 90%) 4px
+    );
+  }
+
+  /* Ballroom Room Environment Background */
+  [data-theme="ballroom"] .room-environment {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(0, 0%, 98%),
+      hsl(0, 0%, 98%) 2px,
+      hsl(0, 0%, 95%) 2px /* Slightly lighter stripe */,
+      hsl(0, 0%, 95%) 4px
+    );
+  }
+
+  /* Map Room Room Environment Background */
+  [data-theme="map-room"] .room-environment {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(45, 30%, 92%) /* Updated to match new lighter background */,
+      hsl(45, 30%, 92%) 2px,
+      hsl(45, 25%, 88%) 2px /* Slightly lighter stripe */,
+      hsl(45, 25%, 88%) 4px
+    );
+  }
+
+  /* Observatory Room Environment Background */
+  [data-theme="observatory"] .room-environment {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(0, 70%, 25%) /* Updated to match new brighter crimson background */,
+      hsl(0, 70%, 25%) 2px,
+      hsl(0, 60%, 30%) 2px /* Slightly lighter stripe */,
+      hsl(0, 60%, 30%) 4px
+    );
+  }
+
+  /* Theater Room Room Environment Background */
+  [data-theme="theater-room"] .room-environment {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(270, 40%, 85%) /* Updated to match new lighter background */,
+      hsl(270, 40%, 85%) 2px,
+      hsl(270, 30%, 90%) 2px /* Slightly lighter stripe */,
+      hsl(270, 30%, 90%) 4px
+    );
+  }
+
+  /* Clock Tower Room Environment Background */
+  [data-theme="clock-tower"] .room-environment {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(200, 30%, 90%) /* Updated to match new lighter background */,
+      hsl(200, 30%, 90%) 2px,
+      hsl(200, 25%, 95%) 2px /* Slightly lighter stripe */,
+      hsl(200, 25%, 95%) 4px
+    );
+  }
+
+  /* War Room Room Environment Background */
+  [data-theme="war-room"] .room-environment {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(60, 25%, 85%) /* Updated to match new lighter background */,
+      hsl(60, 25%, 85%) 2px,
+      hsl(60, 20%, 90%) 2px /* Slightly lighter stripe */,
+      hsl(60, 20%, 90%) 4px
+    );
+  }
+
+  /* Main Hall Navbar */
+  [data-theme="main-hall"] .navbar-bg {
+    /* Changed from brown/mahogany gradient to burgundy gradient to match deployed version */
+    background: linear-gradient(135deg, hsl(345, 70%, 15%) 0%, hsl(345, 60%, 18%) 50%, hsl(345, 50%, 20%) 100%);
+    border-bottom: 1px solid hsl(45, 60%, 45%);
+    box-shadow: 0 1px 0 hsla(45, 80%, 60%, 0.1);
+  }
+
+  /* Library Navbar */
+  [data-theme="library"] .navbar-bg {
+    background: linear-gradient(135deg, hsl(25, 60%, 12%) 0%, hsl(25, 50%, 15%) 50%, hsl(25, 40%, 18%) 100%);
+    border-bottom: 1px solid hsl(45, 60%, 45%);
+    box-shadow: 0 1px 0 hsla(45, 80%, 60%, 0.1);
+  }
+
+  /* Conservatory Navbar */
+  [data-theme="conservatory"] .navbar-bg {
+    background: linear-gradient(135deg, hsl(120, 60%, 12%) 0%, hsl(120, 50%, 15%) 50%, hsl(120, 40%, 18%) 100%);
+    border-bottom: 1px solid hsl(45, 60%, 45%);
+    box-shadow: 0 1px 0 hsla(45, 80%, 60%, 0.1);
+  }
+
+  /* Fireside Lounge Navbar */
+  [data-theme="fireside-lounge"] .navbar-bg {
+    background: linear-gradient(135deg, hsl(0, 0%, 12%) 0%, hsl(210, 10%, 15%) 50%, hsl(0, 0%, 18%) 100%);
+    border-bottom: 1px solid hsl(16, 100%, 50%);
+    box-shadow: 0 1px 0 hsla(16, 100%, 50%, 0.1);
+  }
+
+  /* Bar Navbar */
+  [data-theme="bar"] .navbar-bg {
+    background: linear-gradient(135deg, hsl(45, 100%, 12%) 0%, hsl(45, 80%, 15%) 50%, hsl(45, 60%, 18%) 100%);
+    border-bottom: 1px solid hsl(45, 80%, 60%);
+    box-shadow: 0 1px 0 hsla(45, 80%, 60%, 0.1);
+  }
+
+  /* Garden Navbar */
+  [data-theme="garden"] .navbar-bg {
+    background: linear-gradient(135deg, hsl(40, 35%, 15%) 0%, hsl(35, 30%, 18%) 50%, hsl(40, 30%, 20%) 100%); /* Lighter gradient to match new colors */
+    border-bottom: 1px solid hsl(25, 70%, 55%); /* Updated to match new terracotta accent */
+    box-shadow: 0 1px 0 hsla(25, 70%, 55%, 0.1);
+  }
+
+  /* Gallery Navbar */
+  [data-theme="gallery"] .navbar-bg {
+    background: linear-gradient(135deg, hsl(240, 100%, 12%) 0%, hsl(240, 80%, 15%) 50%, hsl(240, 60%, 18%) 100%);
+    border-bottom: 1px solid hsl(45, 80%, 60%);
+    box-shadow: 0 1px 0 hsla(45, 80%, 60%, 0.1);
+  }
+
+  /* Balcony Navbar */
+  [data-theme="balcony"] .navbar-bg {
+    background: linear-gradient(135deg, hsl(260, 40%, 85%) 0%, hsl(240, 60%, 15%) 50%, hsl(240, 40%, 18%) 100%);
+    border-bottom: 1px solid hsl(0, 0%, 75%);
+    box-shadow: 0 1px 0 hsla(0, 0%, 75%, 0.1);
+  }
+
+  /* Ballroom Navbar */
+  [data-theme="ballroom"] .navbar-bg {
+    background: linear-gradient(135deg, hsl(0, 0%, 12%) 0%, hsl(45, 80%, 15%) 50%, hsl(45, 60%, 18%) 100%);
+    border-bottom: 1px solid hsl(45, 100%, 50%);
+    box-shadow: 0 1px 0 hsla(45, 100%, 50%, 0.1);
+  }
+
+  /* Map Room Navbar */
+  [data-theme="map-room"] .navbar-bg {
+    background: linear-gradient(135deg, hsl(45, 30%, 92%) 0%, hsl(40, 40%, 15%) 50%, hsl(40, 30%, 18%) 100%);
+    border-bottom: 1px solid hsl(45, 80%, 60%);
+    box-shadow: 0 1px 0 hsla(45, 80%, 60%, 0.1);
+  }
+
+  /* Observatory Navbar */
+  [data-theme="observatory"] .navbar-bg {
+    background: linear-gradient(135deg, hsl(0, 70%, 25%) 0%, hsl(0, 60%, 30%) 50%, hsl(0, 50%, 35%) 100%);
+    border-bottom: 1px solid hsl(210, 15%, 65%);
+    box-shadow: 0 1px 0 hsla(210, 15%, 65%, 0.1);
+  }
+
+  /* Theater Room Navbar */
+  [data-theme="theater-room"] .navbar-bg {
+    background: linear-gradient(135deg, hsl(270, 40%, 85%) 0%, hsl(270, 30%, 90%) 50%, hsl(270, 20%, 95%) 100%);
+    border-bottom: 1px solid hsl(45, 100%, 50%);
+    box-shadow: 0 1px 0 hsla(45, 100%, 50%, 0.1);
+  }
+
+  /* Clock Tower Navbar */
+  [data-theme="clock-tower"] .navbar-bg {
+    background: linear-gradient(135deg, hsl(200, 30%, 90%) 0%, hsl(200, 25%, 95%) 50%, hsl(200, 20%, 100%) 100%);
+    border-bottom: 1px solid hsl(0, 0%, 85%);
+    box-shadow: 0 1px 0 hsla(0, 0%, 85%, 0.1);
+  }
+
+  /* War Room Navbar */
+  [data-theme="war-room"] .navbar-bg {
+    background: linear-gradient(135deg, hsl(60, 25%, 85%) 0%, hsl(120, 40%, 15%) 50%, hsl(120, 30%, 18%) 100%);
+    border-bottom: 1px solid hsl(45, 60%, 45%);
+    box-shadow: 0 1px 0 hsla(45, 60%, 45%, 0.1);
+  }
+
+  /* Theme-aware homepage and discover page backgrounds */
+  [data-theme="main-hall"] .page-background {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(345, 80%, 10%),
+      hsl(345, 80%, 10%) 2px,
+      hsl(345, 80%, 12%) 2px,
+      hsl(345, 80%, 12%) 4px
+    );
+  }
+
+  [data-theme="library"] .page-background {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(25, 60%, 8%),
+      hsl(25, 60%, 8%) 2px,
+      hsl(25, 60%, 10%) 2px,
+      hsl(25, 60%, 10%) 4px
+    );
+  }
+
+  [data-theme="conservatory"] .page-background {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(120, 60%, 8%),
+      hsl(120, 60%, 8%) 2px,
+      hsl(120, 60%, 10%) 2px,
+      hsl(120, 60%, 10%) 4px
+    );
+  }
+
+  /* Fireside Lounge Page Background */
+  [data-theme="fireside-lounge"] .page-background {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(0, 0%, 11%),
+      hsl(0, 0%, 11%) 2px,
+      hsl(0, 0%, 13%) 2px,
+      hsl(0, 0%, 13%) 4px
+    );
+  }
+
+  /* Bar Page Background */
+  [data-theme="bar"] .page-background {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(45, 100%, 8%),
+      hsl(45, 100%, 8%) 2px,
+      hsl(45, 100%, 10%) 2px,
+      hsl(45, 100%, 10%) 4px
+    );
+  }
+
+  /* Garden Page Background */
+  [data-theme="garden"] .page-background {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(40, 35%, 12%) /* Updated to match new lighter background */,
+      hsl(40, 35%, 12%) 2px,
+      hsl(40, 35%, 14%) 2px /* Slightly lighter stripe */,
+      hsl(40, 35%, 14%) 4px
+    );
+  }
+
+  /* Gallery Page Background */
+  [data-theme="gallery"] .page-background {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(240, 100%, 8%),
+      hsl(240, 100%, 8%) 2px,
+      hsl(240, 100%, 10%) 2px,
+      hsl(240, 100%, 10%) 4px
+    );
+  }
+
+  /* Balcony Page Background */
+  [data-theme="balcony"] .page-background {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(260, 40%, 85%) /* Updated to match new lighter background */,
+      hsl(260, 40%, 85%) 2px,
+      hsl(260, 30%, 90%) 2px /* Slightly lighter stripe */,
+      hsl(260, 30%, 90%) 4px
+    );
+  }
+
+  /* Ballroom Page Background */
+  [data-theme="ballroom"] .page-background {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(0, 0%, 98%),
+      hsl(0, 0%, 98%) 2px,
+      hsl(0, 0%, 95%) 2px /* Slightly lighter stripe */,
+      hsl(0, 0%, 95%) 4px
+    );
+  }
+
+  /* Map Room Page Background */
+  [data-theme="map-room"] .page-background {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(45, 30%, 92%) /* Updated to match new lighter background */,
+      hsl(45, 30%, 92%) 2px,
+      hsl(45, 25%, 88%) 2px /* Slightly lighter stripe */,
+      hsl(45, 25%, 88%) 4px
+    );
+  }
+
+  /* Observatory Page Background */
+  [data-theme="observatory"] .page-background {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(0, 70%, 25%) /* Updated to match new brighter crimson background */,
+      hsl(0, 70%, 25%) 2px,
+      hsl(0, 60%, 30%) 2px /* Slightly lighter stripe */,
+      hsl(0, 60%, 30%) 4px
+    );
+  }
+
+  /* Theater Room Page Background */
+  [data-theme="theater-room"] .page-background {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(270, 40%, 85%) /* Updated to match new lighter background */,
+      hsl(270, 40%, 85%) 2px,
+      hsl(270, 30%, 90%) 2px /* Slightly lighter stripe */,
+      hsl(270, 30%, 90%) 4px
+    );
+  }
+
+  /* Clock Tower Page Background */
+  [data-theme="clock-tower"] .page-background {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(200, 30%, 90%) /* Updated to match new lighter background */,
+      hsl(200, 30%, 90%) 2px,
+      hsl(200, 25%, 95%) 2px /* Slightly lighter stripe */,
+      hsl(200, 25%, 95%) 4px
+    );
+  }
+
+  /* War Room Page Background */
+  [data-theme="war-room"] .page-background {
+    background: repeating-linear-gradient(
+      45deg,
+      hsl(60, 25%, 85%) /* Updated to match new lighter background */,
+      hsl(60, 25%, 85%) 2px,
+      hsl(60, 20%, 90%) 2px /* Slightly lighter stripe */,
+      hsl(60, 20%, 90%) 4px
+    );
+  }
+}
+
+/* Custom Manor Theme Styles - FIXED FONT HIERARCHY */
+.font-charm {
+  font-family: "Charm", cursive;
+}
+
+.font-marcellus {
+  font-family: "Marcellus", serif;
+}
+
+.font-cinzel {
+  font-family: "Cinzel", serif;
+}
+
+.font-merriweather {
+  font-family: "Merriweather", serif;
+}
