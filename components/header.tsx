@@ -1,11 +1,15 @@
-import { Bell, User } from "lucide-react"
+"use client"
+
+import { Bell, User, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useState } from "react"
 
 export function Header() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const navItems = ["Collection", "Discover", "Events", "Themes", "Messages", "Trophies", "Contact"]
 
   return (
-    <header className="w-full px-6 py-4">
+    <header className="w-full px-6 py-4 relative">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Left side - Logo and Level */}
         <div className="flex items-center gap-4">
@@ -20,7 +24,7 @@ export function Header() {
           </div>
         </div>
 
-        {/* Center - Navigation */}
+        {/* Center - Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8">
           {navItems.map((item) => (
             <button key={item} className="text-yellow-400 hover:text-yellow-300 transition-colors text-sm font-medium">
@@ -29,7 +33,7 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Right side - Notifications and Profile */}
+        {/* Right side - Notifications, Profile, and Mobile Menu Button */}
         <div className="flex items-center gap-4">
           <div className="relative">
             <Bell className="w-5 h-5 text-yellow-400" />
@@ -40,8 +44,33 @@ export function Header() {
           <Button variant="ghost" size="sm" className="text-yellow-400 hover:text-yellow-300">
             <User className="w-5 h-5" />
           </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="md:hidden text-yellow-400 hover:text-yellow-300"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </Button>
         </div>
       </div>
+
+      {isMobileMenuOpen && (
+        <div className="absolute top-full left-0 right-0 bg-black/95 backdrop-blur-sm border-t border-yellow-400/20 md:hidden z-50">
+          <nav className="flex flex-col p-6 gap-4">
+            {navItems.map((item) => (
+              <button
+                key={item}
+                className="text-yellow-400 hover:text-yellow-300 transition-colors text-sm font-medium text-left py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {item}
+              </button>
+            ))}
+          </nav>
+        </div>
+      )}
     </header>
   )
 }
