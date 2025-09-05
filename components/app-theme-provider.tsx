@@ -301,18 +301,7 @@ interface AppThemeProviderProps {
 }
 
 export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) => {
-  // Load theme from localStorage or use default
-  const [currentAppTheme, setCurrentAppTheme] = useState<AppThemeName>(() => {
-    try {
-      const saved = localStorage.getItem(APP_THEME_STORAGE_KEY)
-      if (saved && MANOR_THEMES.some((theme) => theme.id === saved)) {
-        return saved as AppThemeName
-      }
-    } catch (error) {
-      console.warn("Failed to load theme from localStorage", error)
-    }
-    return DEFAULT_THEME
-  })
+  const [currentAppTheme, setCurrentAppTheme] = useState<AppThemeName>(DEFAULT_THEME)
 
   const setAppTheme = (theme: AppThemeName) => {
     setCurrentAppTheme(theme)
@@ -321,6 +310,17 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
   const getThemeData = (themeId: AppThemeName) => {
     return MANOR_THEMES.find((theme) => theme.id === themeId)
   }
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(APP_THEME_STORAGE_KEY)
+      if (saved && MANOR_THEMES.some((theme) => theme.id === saved)) {
+        setCurrentAppTheme(saved as AppThemeName)
+      }
+    } catch (error) {
+      console.warn("Failed to load theme from localStorage", error)
+    }
+  }, [])
 
   useEffect(() => {
     // Apply the theme to the document's data-theme attribute
