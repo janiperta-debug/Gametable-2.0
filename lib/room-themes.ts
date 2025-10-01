@@ -41,7 +41,7 @@ export const roomThemes: RoomTheme[] = [
   {
     id: "library",
     name: "Library",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Library_preview-JMul7atyfEMRiPbgmCiap1yOhU67gu.jpg", // Updated Library preview image
     colors: {
       primary: "#3C2415", // Deep mahogany
       secondary: "#8B4513", // Rich brown
@@ -58,7 +58,8 @@ export const roomThemes: RoomTheme[] = [
   {
     id: "conservatory",
     name: "Conservatory",
-    image: "/placeholder.svg?height=300&width=400",
+    image:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Conservatory_preview-AwHbu34NGqKXTrNKWBhpUPuKlJg2L6.jpg", // Updated Conservatory preview image
     colors: {
       primary: "#228B22", // Forest green
       secondary: "#90EE90", // Light green
@@ -77,7 +78,7 @@ export const roomThemes: RoomTheme[] = [
     id: "fireside-lounge",
     name: "Fireside Lounge",
     image:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Fireside%20Lounge%2001.jpg-M3u72S7v7OEudxT8hqP812tt9gR2Jb.jpeg",
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Firesidelounge_preview-kxdZv4DDhz1Te5QCSLIrUuqBz7GLrN.jpg", // Updated Fireside Lounge preview image with correct version
     colors: {
       primary: "#1C1C1C", // Obsidian (dark charcoal)
       secondary: "#708090", // Steel gray
@@ -95,7 +96,7 @@ export const roomThemes: RoomTheme[] = [
   {
     id: "bar",
     name: "Bar",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Bar_preview-QXvb5tjqmm4JSZlIzAYj9VHZSqc94q.jpg", // Updated Bar preview image
     colors: {
       primary: "#FFBF00", // Amber
       secondary: "#B87333", // Dark brass
@@ -111,18 +112,17 @@ export const roomThemes: RoomTheme[] = [
     canUnlock: true,
   },
   {
-    id: "garden",
-    name: "Garden",
-    image:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Garden%2002.jpg-XxukuZGkzYw89WbYIH9btWaF2ddlvH.jpeg",
+    id: "spa",
+    name: "Spa",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Spa_preview-0TLQfJM6yHwiWZ32UbsYaIq4Y8cB4j.jpg",
     colors: {
-      primary: "#F5DEB3", // Wheat beige (lighter)
-      secondary: "#E6D3A3", // Light sandy beige
-      accent: "#D2691E", // Terracotta orange (brighter, less brown)
-      background: "#FAF0E6", // Linen cream
+      primary: "#4A148C", // Deep purple (amethyst spa stones)
+      secondary: "#D1C4E9", // Medium lavender
+      accent: "#E6D7F0", // Soft lavender mist
+      background: "#F5F0FA", // Very pale lavender
     },
-    description: "Sandy pathways and warm earth tones of estate gardens",
-    atmosphere: "Natural and grounding",
+    description: "Serene lavender sanctuary with amethyst accents and spa tranquility",
+    atmosphere: "Peaceful and rejuvenating",
     unlockLevel: 30,
     category: "Ground Floor",
     isActive: false,
@@ -132,8 +132,7 @@ export const roomThemes: RoomTheme[] = [
   {
     id: "gallery",
     name: "Gallery",
-    image:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gallery%2001.jpg-6ENDBJTG0rOy3yXPcrdwoNETWilXcm.jpeg",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gallery_preview-p46uru4BBuOHBDwqGNL9FAuma1sKzi.jpg", // Updated Gallery preview image with correct version
     colors: {
       primary: "#000080", // Navy blue
       secondary: "#F5F5F5", // White walls
@@ -151,27 +150,10 @@ export const roomThemes: RoomTheme[] = [
 
   // Second Floor Rooms
   {
-    id: "balcony",
-    name: "Balcony",
-    image: "/placeholder.svg?height=300&width=400",
-    colors: {
-      primary: "#191970", // Nightsky blue
-      secondary: "#E6E6FA", // Lavender
-      accent: "#C0C0C0", // Silver
-      background: "#F8F8FF", // Ghost white
-    },
-    description: "Nightsky elegance with lavender moonlight over the grounds",
-    atmosphere: "Moonlit romance",
-    unlockLevel: 40,
-    category: "Second Floor",
-    isActive: false,
-    isUnlocked: true,
-    canUnlock: true,
-  },
-  {
     id: "ballroom",
     name: "Ballroom",
-    image: "/placeholder.svg?height=300&width=400",
+    image:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ballroom_preview-SA32wXWWcc0WCsoYWFgRT4VBGw9Pbo.jpg", // Added Ballroom preview image
     colors: {
       primary: "#F8F8FF", // Crystal white
       secondary: "#DAA520", // Golden
@@ -189,7 +171,7 @@ export const roomThemes: RoomTheme[] = [
   {
     id: "map-room",
     name: "Map Room",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Maproom_preview-s0RItqqXhroH13jzfmhtamUAGj2BSB.jpg", // Added Map Room preview image
     colors: {
       primary: "#DEB887", // Burlywood
       secondary: "#B87333", // Dark brass
@@ -207,7 +189,8 @@ export const roomThemes: RoomTheme[] = [
   {
     id: "observatory",
     name: "Observatory",
-    image: "/placeholder.svg?height=300&width=400",
+    image:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Observatory_preview-kKplQCLHCDVVXfbD7YiT13AWU4RK7k.jpg", // Added Observatory preview image
     colors: {
       primary: "#8B0000", // Dark crimson
       secondary: "#C0C0C0", // Silver
@@ -225,7 +208,7 @@ export const roomThemes: RoomTheme[] = [
   {
     id: "theater-room",
     name: "Theater Room",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theater_preview-3GkN2MM6ZwPBwJe5XBmhjglDk5c8km.jpg", // Added Theater Room preview image
     colors: {
       primary: "#663399", // Royal purple
       secondary: "#DAA520", // Golden stage lights
@@ -243,7 +226,8 @@ export const roomThemes: RoomTheme[] = [
   {
     id: "clock-tower",
     name: "Clock Tower",
-    image: "/placeholder.svg?height=300&width=400",
+    image:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Clocktower_preview-42Gp4hNsxqeY0hDxUPckEhLCsZmtZm.jpg", // Added Clock Tower preview image
     colors: {
       primary: "#B0E0E6", // Ice blue
       secondary: "#708090", // Steel
@@ -261,7 +245,7 @@ export const roomThemes: RoomTheme[] = [
   {
     id: "war-room",
     name: "War Room",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Warroom_preview-YdBB3GsdH7HNmkxI9MFfll6iXge22j.jpg", // Added War Room preview image
     colors: {
       primary: "#355E3B", // Hunter green
       secondary: "#CD7F32", // Bronze
@@ -276,12 +260,31 @@ export const roomThemes: RoomTheme[] = [
     isUnlocked: true,
     canUnlock: true,
   },
+  {
+    id: "artroom",
+    name: "Artroom",
+    image: "/artroom-preview.jpg",
+    colors: {
+      primary: "#2F2F2F", // Deep charcoal (charcoal drawing tools)
+      secondary: "#E6C547", // Bright mustard
+      accent: "#D4AF37", // Rich mustard yellow
+      background: "#FFFEF7", // Warm cream
+    },
+    description: "Creative studio with rich mustard walls and charcoal drawing tools",
+    atmosphere: "Artistic and inspiring",
+    unlockLevel: 40,
+    category: "Second Floor",
+    isActive: false,
+    isUnlocked: true,
+    canUnlock: true,
+  },
 
   // Basement Rooms
   {
     id: "alchemist-laboratory",
     name: "Alchemist Laboratory",
-    image: "/placeholder.svg?height=300&width=400",
+    image:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Alchemistlaboratory_preview-mZrguouzyf96R2MAIev4lj8bePTbFC.jpg", // Added Alchemist Laboratory preview image
     colors: {
       primary: "#50C878", // Emerald
       secondary: "#007FFF", // Azure
@@ -290,16 +293,16 @@ export const roomThemes: RoomTheme[] = [
     },
     description: "Emerald potions and azure mystical energies",
     atmosphere: "Magical and experimental",
-    unlockLevel: 75,
+    unlockLevel: 80,
     category: "Basement",
     isActive: false,
-    isUnlocked: false,
-    canUnlock: false,
+    isUnlocked: true, // Unlocked for testing
+    canUnlock: true,
   },
   {
     id: "dungeon",
     name: "Dungeon",
-    image: "/placeholder.svg?height=300&width=400",
+    image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Dungeon_preview-anNkHACNjPyaikVPDUukwfqkRKeMJQ.jpg", // Added Dungeon preview image
     colors: {
       primary: "#DAA520", // Honey gold
       secondary: "#CD7F32", // Bronze
@@ -308,16 +311,17 @@ export const roomThemes: RoomTheme[] = [
     },
     description: "Honey stone walls with bronze torch brackets",
     atmosphere: "Mysterious and ancient",
-    unlockLevel: 80,
+    unlockLevel: 85,
     category: "Basement",
     isActive: false,
-    isUnlocked: false,
-    canUnlock: false,
+    isUnlocked: true, // Unlocked for testing
+    canUnlock: true,
   },
   {
     id: "underground-temple",
     name: "Underground Temple",
-    image: "/placeholder.svg?height=300&width=400",
+    image:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Undergroundtemple_preview-M4A1mAOBLuSMpsdKOq9DT7QbzNZu3H.jpg", // Added Underground Temple preview image
     colors: {
       primary: "#708090", // Slate gray
       secondary: "#008080", // Teal
@@ -326,16 +330,17 @@ export const roomThemes: RoomTheme[] = [
     },
     description: "Stone gray sanctity with teal sacred waters",
     atmosphere: "Sacred and timeless",
-    unlockLevel: 85,
+    unlockLevel: 75,
     category: "Basement",
     isActive: false,
-    isUnlocked: false,
-    canUnlock: false,
+    isUnlocked: true, // Unlocked for testing
+    canUnlock: true,
   },
   {
     id: "crystal-cavern",
     name: "Crystal Cavern",
-    image: "/placeholder.svg?height=300&width=400",
+    image:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Crystalcavern_preview-42IZ1e1x5O4i0E5WSJIuTYcrWFUl7R.jpg", // Added Crystal Cavern preview image
     colors: {
       primary: "#F7CAC9", // Rose quartz
       secondary: "#9966CC", // Amethyst
@@ -347,13 +352,14 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 90,
     category: "Basement",
     isActive: false,
-    isUnlocked: false,
-    canUnlock: false,
+    isUnlocked: true, // Unlocked for testing
+    canUnlock: true,
   },
   {
     id: "treasure-vault",
     name: "Treasure Vault",
-    image: "/placeholder.svg?height=300&width=400",
+    image:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Treasurevault_preview-cbh4bVaOsXnFIP0OfXGjRfICIqtDpz.jpg", // Added Treasure Vault preview image
     colors: {
       primary: "#DAA520", // Golden treasures
       secondary: "#50C878", // Emerald gems
@@ -365,8 +371,8 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 95,
     category: "Basement",
     isActive: false,
-    isUnlocked: false,
-    canUnlock: false,
+    isUnlocked: true, // Unlocked for testing
+    canUnlock: true,
   },
 ]
 
@@ -382,3 +388,24 @@ export function getActiveTheme(): RoomTheme {
 export function getRoomsByCategory(category: RoomTheme["category"]): RoomTheme[] {
   return roomThemes.filter((room) => room.category === category)
 }
+
+export type AppThemeName =
+  | "main-hall"
+  | "library"
+  | "conservatory"
+  | "fireside-lounge"
+  | "bar"
+  | "spa"
+  | "gallery"
+  | "ballroom"
+  | "map-room"
+  | "observatory"
+  | "theater-room"
+  | "clock-tower"
+  | "war-room"
+  | "artroom"
+  | "alchemist-laboratory"
+  | "dungeon"
+  | "underground-temple"
+  | "crystal-cavern"
+  | "treasure-vault"

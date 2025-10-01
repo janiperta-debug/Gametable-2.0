@@ -94,7 +94,7 @@ export default function MessagingPage() {
 
   return (
     <div className="min-h-screen room-environment">
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 max-w-full overflow-x-hidden">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
@@ -106,9 +106,9 @@ export default function MessagingPage() {
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-4 max-w-7xl mx-auto">
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-4 max-w-7xl mx-auto">
           {/* Conversations Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="w-full lg:col-span-1">
             <Card className="room-furniture h-[600px] flex flex-col">
               <CardHeader className="flex-shrink-0">
                 <div className="flex items-center justify-between">
@@ -132,8 +132,8 @@ export default function MessagingPage() {
                         selectedConversation.id === conversation.id ? "bg-accent-gold/20" : ""
                       }`}
                     >
-                      <div className="flex items-center space-x-3">
-                        <div className="relative">
+                      <div className="flex items-start gap-3 min-w-0">
+                        <div className="relative flex-shrink-0">
                           <Avatar className="h-12 w-12">
                             <AvatarImage src={conversation.avatar || "/placeholder.svg"} alt={conversation.name} />
                             <AvatarFallback className="font-body">
@@ -147,21 +147,26 @@ export default function MessagingPage() {
                             <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
                           )}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-body font-semibold text-sm truncate">{conversation.name}</h4>
-                            <div className="flex items-center space-x-2">
-                              <span className="text-xs text-muted-foreground font-body">{conversation.time}</span>
-                              {conversation.unread > 0 && (
-                                <Badge variant="destructive" className="h-5 w-5 rounded-full p-0 text-xs">
-                                  {conversation.unread}
-                                </Badge>
-                              )}
-                            </div>
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <div className="flex items-baseline justify-between gap-2 mb-1">
+                            <h4 className="font-body font-semibold text-sm truncate flex-1">{conversation.name}</h4>
+                            <span className="text-xs text-muted-foreground font-body whitespace-nowrap flex-shrink-0">
+                              {conversation.time}
+                            </span>
                           </div>
-                          <p className="text-sm text-muted-foreground font-body truncate mt-1">
-                            {conversation.lastMessage}
-                          </p>
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm text-muted-foreground font-body truncate flex-1 min-w-0">
+                              {conversation.lastMessage}
+                            </p>
+                            {conversation.unread > 0 && (
+                              <Badge
+                                variant="destructive"
+                                className="h-5 min-w-[20px] rounded-full px-1.5 text-xs flex items-center justify-center flex-shrink-0"
+                              >
+                                {conversation.unread}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -172,7 +177,7 @@ export default function MessagingPage() {
           </div>
 
           {/* Chat Area */}
-          <div className="lg:col-span-3">
+          <div className="w-full lg:col-span-3">
             <Card className="room-furniture h-[600px] flex flex-col">
               {/* Chat Header */}
               <CardHeader className="flex-shrink-0 border-b border-accent-gold/20">
@@ -222,13 +227,13 @@ export default function MessagingPage() {
                   {messages.map((message) => (
                     <div key={message.id} className={`flex ${message.isOwn ? "justify-end" : "justify-start"}`}>
                       <div
-                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                        className={`max-w-[85%] sm:max-w-xs lg:max-w-md px-4 py-2 rounded-lg break-words ${
                           message.isOwn
                             ? "bg-accent-gold text-accent-gold-foreground"
                             : "bg-muted text-muted-foreground"
                         }`}
                       >
-                        <p className="font-body text-sm">{message.content}</p>
+                        <p className="font-body text-sm break-words">{message.content}</p>
                         <p
                           className={`text-xs mt-1 ${message.isOwn ? "text-accent-gold-foreground/70" : "text-muted-foreground"}`}
                         >

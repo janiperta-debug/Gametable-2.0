@@ -3,18 +3,18 @@
 import type React from "react"
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 
-// Define all 19 manor theme names
+// Define all 20 manor theme names
 export type AppThemeName =
   | "main-hall"
   | "library"
   | "conservatory"
   | "fireside-lounge"
   | "bar"
-  | "garden"
+  | "spa"
   | "gallery"
   | "balcony"
   | "ballroom"
-  | "maproom"
+  | "map-room"
   | "observatory"
   | "theater-room"
   | "clock-tower"
@@ -24,6 +24,7 @@ export type AppThemeName =
   | "underground-temple"
   | "crystal-cavern"
   | "treasure-vault"
+  | "artroom"
 
 export interface ManorTheme {
   id: AppThemeName
@@ -106,18 +107,17 @@ export const MANOR_THEMES: ManorTheme[] = [
     atmosphere: "Elegant and refined, for distinguished guests",
   },
   {
-    id: "garden",
-    name: "Garden",
-    description: "Sage green foliage with golden sunlight and natural beauty",
+    id: "spa",
+    name: "Spa",
+    description: "Serene lavender sanctuary with amethyst spa stones and tranquil atmosphere",
     floor: "Ground Floor",
     colors: {
-      primary: "Sage Green",
-      secondary: "Gold",
-      accent: "Natural Stone",
+      primary: "Deep Purple",
+      secondary: "Lavender",
+      accent: "Soft Lavender Mist",
     },
-    atmosphere: "Fresh and vibrant, outdoor elegance",
-    imageUrl:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Garden%2002.jpg-XxukuZGkzYw89WbYIH9btWaF2ddlvH.jpeg",
+    atmosphere: "Peaceful and rejuvenating, a place of wellness",
+    imageUrl: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Spa_preview-0TLQfJM6yHwiWZ32UbsYaIq4Y8cB4j.jpg",
   },
   {
     id: "gallery",
@@ -138,86 +138,99 @@ export const MANOR_THEMES: ManorTheme[] = [
   {
     id: "balcony",
     name: "Balcony",
-    description: "Cream stonework overlooking sunset vistas with warm golden hour lighting",
+    description: "Nightsky elegance with lavender moonlight over the grounds",
     floor: "Second Floor",
     colors: {
-      primary: "Cream",
-      secondary: "Sunset Orange",
-      accent: "Rose Gold",
+      primary: "Nightsky Blue",
+      secondary: "Lavender",
+      accent: "Silver",
     },
-    atmosphere: "Romantic and airy, with panoramic views",
+    atmosphere: "Moonlit romance",
   },
   {
     id: "ballroom",
     name: "Ballroom",
-    description: "Golden grandeur with crystal white accents and sparkling chandeliers",
+    description: "Crystal white grandeur with golden accents",
     floor: "Second Floor",
     colors: {
-      primary: "Gold",
-      secondary: "Crystal White",
-      accent: "Champagne",
+      primary: "Crystal White",
+      secondary: "Golden",
+      accent: "Pure Gold",
     },
-    atmosphere: "Grand and ceremonial, for elegant gatherings",
+    atmosphere: "Luxurious celebration",
   },
   {
-    id: "maproom",
+    id: "map-room",
     name: "Map Room",
-    description: "Sepia-toned maps and charts with gleaming brass instruments",
+    description: "Sepia charts and brass instruments for strategic planning",
     floor: "Second Floor",
     colors: {
-      primary: "Sepia",
-      secondary: "Brass",
-      accent: "Parchment",
+      primary: "Burlywood",
+      secondary: "Dark Brass",
+      accent: "Golden Compass",
     },
-    atmosphere: "Adventurous and scholarly, for planning expeditions",
+    atmosphere: "Adventurous strategy",
   },
   {
     id: "observatory",
     name: "Observatory",
-    description: "Cosmic blue dome with silver telescope and starlight ambiance",
+    description: "Dark crimson depths with silver starlight",
     floor: "Second Floor",
     colors: {
-      primary: "Cosmic Blue",
+      primary: "Dark Crimson",
       secondary: "Silver",
-      accent: "Starlight",
+      accent: "Steel Telescope",
     },
-    atmosphere: "Mysterious and celestial, reaching for the stars",
+    atmosphere: "Cosmic contemplation",
   },
   {
     id: "theater-room",
     name: "Theater Room",
-    description: "Rich velvet red seating with golden stage lighting and dramatic flair",
+    description: "Royal purple curtains and golden stage lights",
     floor: "Second Floor",
     colors: {
-      primary: "Velvet Red",
-      secondary: "Gold",
-      accent: "Deep Crimson",
+      primary: "Royal Purple",
+      secondary: "Golden Stage Lights",
+      accent: "Gold Trim",
     },
-    atmosphere: "Dramatic and entertaining, for grand performances",
+    atmosphere: "Dramatic entertainment",
   },
   {
     id: "clock-tower",
     name: "Clock Tower",
-    description: "Brass clockwork mechanisms with bronze gears and timepiece elegance",
+    description: "Ice blue precision with steel and chrome mechanisms",
     floor: "Second Floor",
     colors: {
-      primary: "Brass",
-      secondary: "Bronze",
-      accent: "Copper",
+      primary: "Ice Blue",
+      secondary: "Steel",
+      accent: "Chrome",
     },
-    atmosphere: "Mechanical and precise, marking the passage of time",
+    atmosphere: "Mechanical precision",
   },
   {
     id: "war-room",
     name: "War Room",
-    description: "Military green strategy tables with bronze instruments and tactical lighting",
+    description: "Military green strategy with bronze battle plans",
     floor: "Second Floor",
     colors: {
-      primary: "Military Green",
+      primary: "Hunter Green",
       secondary: "Bronze",
-      accent: "Olive",
+      accent: "Aged Golden Medals",
     },
-    atmosphere: "Strategic and focused, for important decisions",
+    atmosphere: "Strategic command",
+  },
+  {
+    id: "artroom",
+    name: "Artroom",
+    description: "Creative studio with rich mustard yellow walls and charcoal drawing tools",
+    floor: "Second Floor",
+    colors: {
+      primary: "Deep Charcoal",
+      secondary: "Bright Mustard",
+      accent: "Rich Mustard Yellow",
+    },
+    atmosphere: "Artistic and inspiring, a space for creativity",
+    imageUrl: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Artroom_preview-va34f.jpg",
   },
 
   // Basement

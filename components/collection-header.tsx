@@ -26,15 +26,15 @@ export function CollectionHeader() {
 
   return (
     <div className="mb-8 space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="flex-1">
           <h2 className="ornate-text font-heading text-3xl font-bold mb-2">My Collection</h2>
-          <div className="flex items-center space-x-4 mt-2">
+          <div className="flex flex-wrap gap-2 mt-2 max-w-full">
             {categories.map((category) => (
               <Badge
                 key={category.id}
                 variant={selectedCategory === category.id ? "secondary" : "outline"}
-                className="font-body cursor-pointer hover:bg-accent-gold/20 transition-colors border-accent-gold"
+                className="font-body cursor-pointer hover:bg-accent-gold/20 transition-colors border-accent-gold whitespace-nowrap"
                 onClick={() => setSelectedCategory(category.id)}
               >
                 {category.id === "all" ? category.label : `${category.label}: ${category.count}`}
@@ -42,20 +42,20 @@ export function CollectionHeader() {
             ))}
           </div>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <Button className="theme-accent-gold">
             <Plus className="h-4 w-4 mr-2" />
             <span className="font-body">Add Game</span>
           </Button>
           <Button variant="outline" className="theme-accent-gold bg-transparent">
             <Download className="h-4 w-4 mr-2" />
-            <span className="font-body">Import from {currentCategory.importSource}</span>
+            <span className="font-body whitespace-nowrap">Import from {currentCategory.importSource}</span>
           </Button>
         </div>
       </div>
 
-      <div className="flex items-center space-x-4">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search your collection..."
@@ -65,40 +65,42 @@ export function CollectionHeader() {
           />
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">
-              <SortAsc className="h-4 w-4 mr-2" />
-              <span className="font-body">Sort</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem className="font-body">Name (A-Z)</DropdownMenuItem>
-            <DropdownMenuItem className="font-body">Name (Z-A)</DropdownMenuItem>
-            <DropdownMenuItem className="font-body">Rating (High to Low)</DropdownMenuItem>
-            <DropdownMenuItem className="font-body">Rating (Low to High)</DropdownMenuItem>
-            <DropdownMenuItem className="font-body">Year Published</DropdownMenuItem>
-            <DropdownMenuItem className="font-body">Play Time</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="flex-1 sm:flex-none bg-transparent">
+                <SortAsc className="h-4 w-4 mr-2" />
+                <span className="font-body">Sort</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem className="font-body">Name (A-Z)</DropdownMenuItem>
+              <DropdownMenuItem className="font-body">Name (Z-A)</DropdownMenuItem>
+              <DropdownMenuItem className="font-body">Rating (High to Low)</DropdownMenuItem>
+              <DropdownMenuItem className="font-body">Rating (Low to High)</DropdownMenuItem>
+              <DropdownMenuItem className="font-body">Year Published</DropdownMenuItem>
+              <DropdownMenuItem className="font-body">Play Time</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-        <div className="flex items-center border rounded-md">
-          <Button
-            variant={viewMode === "grid" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setViewMode("grid")}
-            className={`rounded-r-none ${viewMode === "grid" ? "theme-accent-gold" : ""}`}
-          >
-            <Grid className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === "list" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setViewMode("list")}
-            className={`rounded-l-none ${viewMode === "list" ? "theme-accent-gold" : ""}`}
-          >
-            <List className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center border rounded-md">
+            <Button
+              variant={viewMode === "grid" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("grid")}
+              className={`rounded-r-none ${viewMode === "grid" ? "theme-accent-gold" : ""}`}
+            >
+              <Grid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "list" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("list")}
+              className={`rounded-l-none ${viewMode === "list" ? "theme-accent-gold" : ""}`}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>

@@ -124,8 +124,8 @@ function EventCard({ event, onViewDetails }: { event: any; onViewDetails: (event
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <CardTitle className="font-heading text-xl mb-2">{event.title}</CardTitle>
-            <div className="flex items-center space-x-2 mb-3">
+            <CardTitle className="font-heading text-lg md:text-xl mb-2 break-words">{event.title}</CardTitle>
+            <div className="flex items-center flex-wrap gap-2 mb-3">
               <Badge className={statusColors[event.status as keyof typeof statusColors]}>{event.status}</Badge>
               <Badge variant="outline" className={categoryColors[event.category as keyof typeof categoryColors]}>
                 {event.category}
@@ -133,36 +133,36 @@ function EventCard({ event, onViewDetails }: { event: any; onViewDetails: (event
             </div>
           </div>
         </div>
-        <p className="font-body text-sm text-muted-foreground">{event.description}</p>
+        <p className="font-body text-sm text-muted-foreground break-words">{event.description}</p>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-3 text-sm">
           <div className="flex items-center space-x-2">
-            <Calendar className="h-4 w-4 text-accent-gold" />
+            <Calendar className="h-4 w-4 text-accent-gold flex-shrink-0" />
             <span className="font-body">{event.date}</span>
           </div>
           <div className="flex items-center space-x-2">
-            <Clock className="h-4 w-4 text-accent-gold" />
+            <Clock className="h-4 w-4 text-accent-gold flex-shrink-0" />
             <span className="font-body">{event.time}</span>
           </div>
           <div className="flex items-center space-x-2">
-            <MapPin className="h-4 w-4 text-accent-gold" />
-            <div>
-              <div className="font-body">{event.location}</div>
-              <div className="font-body text-xs text-muted-foreground">{event.address}</div>
+            <MapPin className="h-4 w-4 text-accent-gold flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <div className="font-body break-words">{event.location}</div>
+              <div className="font-body text-xs text-muted-foreground break-words">{event.address}</div>
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <Users className="h-4 w-4 text-accent-gold" />
+            <Users className="h-4 w-4 text-accent-gold flex-shrink-0" />
             <span className="font-body">
               {event.attendees}/{event.maxAttendees} attending
             </span>
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-accent-gold/20">
+        <div className="flex flex-col space-y-3 pt-4 border-t border-accent-gold/20">
           <div className="flex items-center space-x-2">
-            <Avatar className="h-6 w-6">
+            <Avatar className="h-6 w-6 flex-shrink-0">
               <AvatarImage src={event.hostAvatar || "/placeholder.svg"} alt={event.host} />
               <AvatarFallback className="text-xs font-body">
                 {event.host
@@ -171,30 +171,35 @@ function EventCard({ event, onViewDetails }: { event: any; onViewDetails: (event
                   .join("")}
               </AvatarFallback>
             </Avatar>
-            <span className="font-body text-sm text-muted-foreground">Hosted by {event.host}</span>
+            <span className="font-body text-sm text-muted-foreground truncate">Hosted by {event.host}</span>
           </div>
-          <div className="flex space-x-2">
+          <div className="flex flex-wrap gap-2">
             {event.status === "invited" && (
               <>
-                <Button size="sm" className="theme-accent-gold">
+                <Button size="sm" className="theme-accent-gold flex-1 min-w-[80px]">
                   Join
                 </Button>
-                <Button size="sm" variant="outline" className="bg-transparent">
+                <Button size="sm" variant="outline" className="bg-transparent flex-1 min-w-[80px]">
                   Maybe
                 </Button>
               </>
             )}
             {event.status === "maybe" && (
-              <Button size="sm" className="theme-accent-gold">
+              <Button size="sm" className="theme-accent-gold flex-1 min-w-[100px]">
                 Confirm
               </Button>
             )}
             {event.status === "hosting" && (
-              <Button size="sm" variant="outline" className="bg-transparent">
+              <Button size="sm" variant="outline" className="bg-transparent flex-1 min-w-[100px]">
                 Manage
               </Button>
             )}
-            <Button size="sm" variant="outline" className="bg-transparent" onClick={() => onViewDetails(event)}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="bg-transparent flex-1 min-w-[100px]"
+              onClick={() => onViewDetails(event)}
+            >
               View Details
             </Button>
           </div>
@@ -221,26 +226,26 @@ export default function EventsPage() {
     <div className="min-h-screen room-environment">
       <main className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8 md:mb-12">
           <div className="flex items-center justify-center mb-4">
-            <Calendar className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="ornate-text font-heading text-5xl font-bold">Events</h1>
+            <Calendar className="h-6 w-6 md:h-8 md:w-8 text-accent-gold mr-2 md:mr-3" />
+            <h1 className="ornate-text font-heading text-3xl md:text-5xl font-bold">Events</h1>
           </div>
-          <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
+          <p className="font-body text-muted-foreground text-base md:text-xl max-w-3xl mx-auto px-4">
             Discover, join, and host amazing gaming events in your community
           </p>
         </div>
 
         {/* Action Bar */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
-          <div className="flex items-center space-x-4 w-full sm:w-auto">
-            <div className="relative flex-1 sm:flex-initial sm:w-80">
+        <div className="flex flex-col gap-3 mb-6 md:mb-8">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search events..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 font-body"
+                className="pl-10 font-body w-full"
               />
             </div>
             <Button variant="outline" className="bg-transparent">
@@ -248,7 +253,7 @@ export default function EventsPage() {
               <span className="font-body">Filters</span>
             </Button>
           </div>
-          <Button size="lg" className="theme-accent-gold w-full sm:w-auto" onClick={handleCreateEvent}>
+          <Button size="lg" className="theme-accent-gold w-full" onClick={handleCreateEvent}>
             <Plus className="h-4 w-4 mr-2" />
             <span className="font-body">Create Event</span>
           </Button>
@@ -256,20 +261,26 @@ export default function EventsPage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8 bg-surface-light/50">
-            <TabsTrigger value="upcoming" className="font-body data-[state=active]:theme-accent-gold">
-              Upcoming Events
+          <TabsList className="grid w-full grid-cols-3 mb-6 md:mb-8 bg-surface-light/50">
+            <TabsTrigger
+              value="upcoming"
+              className="font-body text-xs sm:text-sm data-[state=active]:theme-accent-gold"
+            >
+              Upcoming
             </TabsTrigger>
-            <TabsTrigger value="my-events" className="font-body data-[state=active]:theme-accent-gold">
+            <TabsTrigger
+              value="my-events"
+              className="font-body text-xs sm:text-sm data-[state=active]:theme-accent-gold"
+            >
               My Events
             </TabsTrigger>
-            <TabsTrigger value="past" className="font-body data-[state=active]:theme-accent-gold">
-              Past Events
+            <TabsTrigger value="past" className="font-body text-xs sm:text-sm data-[state=active]:theme-accent-gold">
+              Past
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="upcoming">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {upcomingEvents.map((event) => (
                 <EventCard key={event.id} event={event} onViewDetails={handleViewDetails} />
               ))}
@@ -277,7 +288,7 @@ export default function EventsPage() {
           </TabsContent>
 
           <TabsContent value="my-events">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {myEvents.map((event) => (
                 <EventCard key={event.id} event={event} onViewDetails={handleViewDetails} />
               ))}
@@ -298,9 +309,11 @@ export default function EventsPage() {
         </Tabs>
 
         {/* Quick Actions */}
-        <div className="mt-16">
-          <h2 className="ornate-text font-heading text-3xl font-bold text-center mb-8">Quick Actions</h2>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 max-w-4xl mx-auto">
+        <div className="mt-12 md:mt-16">
+          <h2 className="ornate-text font-heading text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8">
+            Quick Actions
+          </h2>
+          <div className="grid gap-4 md:gap-6 grid-cols-2 lg:grid-cols-4 max-w-4xl mx-auto">
             <Card className="room-furniture hover:shadow-lg transition-shadow cursor-pointer">
               <CardContent className="p-6 text-center">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 mb-4">
@@ -344,7 +357,7 @@ export default function EventsPage() {
         </div>
 
         {/* Event Management Hub */}
-        <div className="mt-16">
+        <div className="mt-12 md:mt-16">
           <Card className="room-furniture max-w-4xl mx-auto">
             <CardHeader className="text-center">
               <CardTitle className="ornate-text font-heading text-3xl font-bold">Event Management Hub</CardTitle>

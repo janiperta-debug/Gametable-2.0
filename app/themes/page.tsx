@@ -1,6 +1,10 @@
+"use client"
+
+import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { ThemeSelector } from "@/components/theme-selector"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Palette,
   Home,
@@ -110,6 +114,8 @@ function RoomCard({ room, floorComplete }: { room: RoomTheme; floorComplete: boo
 }
 
 export default function ThemesPage() {
+  const [activeTab, setActiveTab] = useState("ground-floor")
+
   const xpProgress =
     ((currentUser.xp - currentUser.xpForCurrentLevel) / (currentUser.xpToNextLevel - currentUser.xpForCurrentLevel)) *
     100
@@ -197,69 +203,93 @@ export default function ThemesPage() {
           </div>
         </div>
 
-        {/* Ground Floor - Heritage Rooms */}
-        <div className="mb-16">
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-4">
-              <Home className="h-7 w-7 text-accent-gold mr-3" />
-              <h2 className="ornate-text font-heading text-3xl font-bold">Ground Floor</h2>
-              <Badge variant="secondary" className="ml-4 font-body text-base px-4 py-2">
-                Choose Your Path
-              </Badge>
-            </div>
-            <div className="text-sm text-muted-foreground font-body">
-              {groundFloorProgress} of {groundFloorRooms.length} unlocked •{" "}
-              {groundFloorComplete ? "Floor Complete!" : `${currentUser.availableUnlocks} choices available`}
-            </div>
-          </div>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {groundFloorRooms.map((room) => (
-              <RoomCard key={room.id} room={room} floorComplete={groundFloorComplete} />
-            ))}
-          </div>
-        </div>
+        {/* Tabs component to organize floors */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-8 bg-surface-light/50 max-w-2xl mx-auto">
+            <TabsTrigger value="basement" className="font-body text-sm data-[state=active]:theme-accent-gold">
+              <ArrowDown className="h-4 w-4 mr-2" />
+              Basement
+            </TabsTrigger>
+            <TabsTrigger value="ground-floor" className="font-body text-sm data-[state=active]:theme-accent-gold">
+              <Home className="h-4 w-4 mr-2" />
+              Ground Floor
+            </TabsTrigger>
+            <TabsTrigger value="second-floor" className="font-body text-sm data-[state=active]:theme-accent-gold">
+              <ArrowUp className="h-4 w-4 mr-2" />
+              Second Floor
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Second Floor - Club Rooms */}
-        <div className="mb-16">
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-4">
-              <ArrowUp className="h-7 w-7 text-accent-gold mr-3" />
-              <h2 className="ornate-text font-heading text-3xl font-bold">Second Floor</h2>
-              <Badge variant="secondary" className="ml-4 font-body text-base px-4 py-2">
-                Levels 40-70
-              </Badge>
+          {/* Ground Floor content in TabsContent */}
+          <TabsContent value="ground-floor">
+            <div className="mb-16">
+              <div className="text-center mb-8">
+                <div className="flex items-center justify-center mb-4">
+                  <Home className="h-7 w-7 text-accent-gold mr-3" />
+                  <h2 className="ornate-text font-heading text-3xl font-bold">Ground Floor</h2>
+                  <Badge variant="secondary" className="ml-4 font-body text-base px-4 py-2">
+                    Choose Your Path
+                  </Badge>
+                </div>
+                <div className="text-sm text-muted-foreground font-body">
+                  {groundFloorProgress} of {groundFloorRooms.length} unlocked •{" "}
+                  {groundFloorComplete ? "Floor Complete!" : `${currentUser.availableUnlocks} choices available`}
+                </div>
+              </div>
+              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                {groundFloorRooms.map((room) => (
+                  <RoomCard key={room.id} room={room} floorComplete={groundFloorComplete} />
+                ))}
+              </div>
             </div>
-            <div className="text-sm text-muted-foreground font-body">
-              {groundFloorComplete ? "Available after Ground Floor completion" : "Complete Ground Floor first"}
-            </div>
-          </div>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {secondFloorRooms.map((room) => (
-              <RoomCard key={room.id} room={room} floorComplete={groundFloorComplete} />
-            ))}
-          </div>
-        </div>
+          </TabsContent>
 
-        {/* Basement - Secret Chambers */}
-        <div className="mb-16">
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-4">
-              <ArrowDown className="h-7 w-7 text-accent-gold mr-3" />
-              <h2 className="ornate-text font-heading text-3xl font-bold">Basement</h2>
-              <Badge variant="secondary" className="ml-4 font-body text-base px-4 py-2">
-                Levels 75-95
-              </Badge>
+          {/* Second Floor content in TabsContent */}
+          <TabsContent value="second-floor">
+            <div className="mb-16">
+              <div className="text-center mb-8">
+                <div className="flex items-center justify-center mb-4">
+                  <ArrowUp className="h-7 w-7 text-accent-gold mr-3" />
+                  <h2 className="ornate-text font-heading text-3xl font-bold">Second Floor</h2>
+                  <Badge variant="secondary" className="ml-4 font-body text-base px-4 py-2">
+                    Levels 40-70
+                  </Badge>
+                </div>
+                <div className="text-sm text-muted-foreground font-body">
+                  {groundFloorComplete ? "Available after Ground Floor completion" : "Complete Ground Floor first"}
+                </div>
+              </div>
+              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                {secondFloorRooms.map((room) => (
+                  <RoomCard key={room.id} room={room} floorComplete={groundFloorComplete} />
+                ))}
+              </div>
             </div>
-            <div className="text-sm text-muted-foreground font-body">
-              {false ? "Available after Second Floor completion" : "Complete Second Floor first"}
+          </TabsContent>
+
+          {/* Basement content in TabsContent */}
+          <TabsContent value="basement">
+            <div className="mb-16">
+              <div className="text-center mb-8">
+                <div className="flex items-center justify-center mb-4">
+                  <ArrowDown className="h-7 w-7 text-accent-gold mr-3" />
+                  <h2 className="ornate-text font-heading text-3xl font-bold">Basement</h2>
+                  <Badge variant="secondary" className="ml-4 font-body text-base px-4 py-2">
+                    Levels 75-95
+                  </Badge>
+                </div>
+                <div className="text-sm text-muted-foreground font-body">
+                  {false ? "Available after Second Floor completion" : "Complete Second Floor first"}
+                </div>
+              </div>
+              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                {basementRooms.map((room) => (
+                  <RoomCard key={room.id} room={room} floorComplete={false} />
+                ))}
+              </div>
             </div>
-          </div>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {basementRooms.map((room) => (
-              <RoomCard key={room.id} room={room} floorComplete={false} />
-            ))}
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Portal System Card */}
         <div className="room-furniture text-center">

@@ -52,7 +52,7 @@ export default function RootLayout({
         <AppThemeProvider>
           <div className="min-h-screen room-environment">
             <Navigation />
-            <main>{children}</main>
+            <main className="pt-16">{children}</main>
           </div>
         </AppThemeProvider>
       </body>
