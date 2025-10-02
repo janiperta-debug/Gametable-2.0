@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const categories = [
   { id: "all", label: "All Games", count: 247 },
@@ -18,24 +18,20 @@ export function GameCategoryTabs() {
   return (
     <Card className="room-furniture">
       <CardContent className="p-4">
-        <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <Button
-              key={category.id}
-              variant={activeCategory === category.id ? "default" : "outline"}
-              size="sm"
-              onClick={() => setActiveCategory(category.id)}
-              className={
-                activeCategory === category.id
-                  ? "bg-accent-gold text-surface-dark hover:bg-accent-copper font-cinzel"
-                  : "border-accent-gold/20 text-accent-gold hover:bg-accent-gold/10 font-cinzel"
-              }
-            >
-              {category.label}
-              <span className="ml-2 text-xs opacity-70">({category.count})</span>
-            </Button>
-          ))}
-        </div>
+        <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full">
+          <TabsList className="w-full h-auto flex-wrap justify-start gap-2 bg-transparent border-0 p-0">
+            {categories.map((category) => (
+              <TabsTrigger
+                key={category.id}
+                value={category.id}
+                className="font-cinzel data-[state=active]:font-semibold"
+              >
+                {category.label}
+                <span className="ml-2 text-xs opacity-70">({category.count})</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </CardContent>
     </Card>
   )

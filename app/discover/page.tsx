@@ -1,5 +1,6 @@
 "use client"
 
+import { Navigation } from "@/components/navigation"
 import { DiscoverPlayers } from "@/components/discover-players"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -35,6 +36,7 @@ export default function CommunityPage() {
 
   return (
     <div className="min-h-screen room-environment">
+      <Navigation />
       <main className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">

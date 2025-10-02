@@ -5,100 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Search, Filter, ExternalLink } from "lucide-react"
+import { Search, Filter, ExternalLink, Heart } from "lucide-react"
+import Link from "next/link"
+import { DISCOVER_GAMES } from "@/lib/discover-games"
 
 const categories = ["Board Games", "RPGs", "Miniatures", "Trading Cards"]
 
 const gamesByCategory = {
-  "Board Games": [
-    {
-      id: 1,
-      title: "Everdell",
-      category: "Strategy",
-      players: "1-4",
-      time: "40-80 min",
-      rating: 8.1,
-      image: "/placeholder.svg?height=120&width=80",
-    },
-    {
-      id: 2,
-      title: "Root",
-      category: "Strategy",
-      players: "2-4",
-      time: "60-90 min",
-      rating: 8.3,
-      image: "/placeholder.svg?height=120&width=80",
-    },
-    {
-      id: 3,
-      title: "Wingspan",
-      category: "Engine Building",
-      players: "1-5",
-      time: "40-70 min",
-      rating: 8.1,
-      image: "/placeholder.svg?height=120&width=80",
-    },
-  ],
-  RPGs: [
-    {
-      id: 4,
-      title: "Dungeons & Dragons 5E",
-      category: "Fantasy RPG",
-      players: "3-6",
-      time: "3-4 hours",
-      rating: 8.7,
-      image: "/placeholder.svg?height=120&width=80",
-    },
-    {
-      id: 5,
-      title: "Pathfinder 2E",
-      category: "Fantasy RPG",
-      players: "3-6",
-      time: "3-5 hours",
-      rating: 8.5,
-      image: "/placeholder.svg?height=120&width=80",
-    },
-  ],
-  Miniatures: [
-    {
-      id: 6,
-      title: "Warhammer 40K",
-      category: "Tactical Combat",
-      players: "2",
-      time: "2-3 hours",
-      rating: 8.2,
-      image: "/placeholder.svg?height=120&width=80",
-    },
-    {
-      id: 7,
-      title: "X-Wing Miniatures",
-      category: "Space Combat",
-      players: "2",
-      time: "45-75 min",
-      rating: 7.9,
-      image: "/placeholder.svg?height=120&width=80",
-    },
-  ],
-  "Trading Cards": [
-    {
-      id: 8,
-      title: "Magic: The Gathering",
-      category: "Trading Card Game",
-      players: "2",
-      time: "20-60 min",
-      rating: 8.4,
-      image: "/placeholder.svg?height=120&width=80",
-    },
-    {
-      id: 9,
-      title: "Pokemon TCG",
-      category: "Trading Card Game",
-      players: "2",
-      time: "15-30 min",
-      rating: 7.8,
-      image: "/placeholder.svg?height=120&width=80",
-    },
-  ],
+  "Board Games": DISCOVER_GAMES.filter((g) => [101, 102, 103].includes(g.id)),
+  RPGs: DISCOVER_GAMES.filter((g) => [104, 105].includes(g.id)),
+  Miniatures: DISCOVER_GAMES.filter((g) => [106, 107].includes(g.id)),
+  "Trading Cards": DISCOVER_GAMES.filter((g) => [108, 109].includes(g.id)),
 }
 
 const databaseSources = {
@@ -213,6 +130,20 @@ export function DiscoverGames() {
                   <div className="flex items-center space-x-1">
                     <span className="text-sm font-medium">⭐ {game.rating}</span>
                   </div>
+                </div>
+                <div className="flex gap-2">
+                  <Link href={`/game/${game.id}`} className="flex-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full font-cinzel border-accent-gold/20 hover:border-accent-gold bg-transparent"
+                    >
+                      View Details
+                    </Button>
+                  </Link>
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-accent-gold">
+                    <Heart className="h-4 w-4" />
+                  </Button>
                 </div>
                 <Button className="w-full font-cinzel theme-accent-gold">Add to Collection</Button>
               </div>

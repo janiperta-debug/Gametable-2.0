@@ -1,252 +1,161 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Trophy, Crown, Star, Award, Target, Users, Calendar, BookOpen, Zap, Shield } from "lucide-react"
+"use client"
 
-const earnedTrophies = [
-  {
-    id: 1,
-    title: "Collection Curator",
-    description: "Own 250+ games in your collection",
-    icon: BookOpen,
-    rarity: "Gold",
-    earnedDate: "2 days ago",
-    points: 500,
-    category: "Collection",
-  },
-  {
-    id: 2,
-    title: "Social Butterfly",
-    description: "Connect with 25+ fellow gamers",
-    icon: Users,
-    rarity: "Silver",
-    earnedDate: "1 week ago",
-    points: 300,
-    category: "Social",
-  },
-  {
-    id: 3,
-    title: "Event Master",
-    description: "Host 10 successful gaming events",
-    icon: Calendar,
-    rarity: "Bronze",
-    earnedDate: "2 weeks ago",
-    points: 200,
-    category: "Events",
-  },
-  {
-    id: 4,
-    title: "First Steps",
-    description: "Complete your profile setup",
-    icon: Star,
-    rarity: "Bronze",
-    earnedDate: "1 month ago",
-    points: 100,
-    category: "Getting Started",
-  },
-]
-
-const availableTrophies = [
-  {
-    id: 5,
-    title: "Game Master",
-    description: "Own 500+ games in your collection",
-    icon: Crown,
-    rarity: "Platinum",
-    progress: 50,
-    maxProgress: 100,
-    points: 1000,
-    category: "Collection",
-  },
-  {
-    id: 6,
-    title: "Community Leader",
-    description: "Connect with 100+ fellow gamers",
-    icon: Shield,
-    rarity: "Gold",
-    progress: 38,
-    maxProgress: 100,
-    points: 750,
-    category: "Social",
-  },
-  {
-    id: 7,
-    title: "Tournament Champion",
-    description: "Win 5 competitive tournaments",
-    icon: Trophy,
-    rarity: "Gold",
-    progress: 2,
-    maxProgress: 5,
-    points: 600,
-    category: "Competition",
-  },
-  {
-    id: 8,
-    title: "Streak Master",
-    description: "Play games for 30 consecutive days",
-    icon: Zap,
-    rarity: "Silver",
-    progress: 12,
-    maxProgress: 30,
-    points: 400,
-    category: "Activity",
-  },
-]
-
-const rarityColors = {
-  Bronze: "text-amber-600 bg-amber-100 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400",
-  Silver: "text-gray-500 bg-gray-100 border-gray-200 dark:bg-gray-900/30 dark:text-gray-400",
-  Gold: "text-yellow-600 bg-yellow-100 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400",
-  Platinum: "text-purple-600 bg-purple-100 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400",
-}
-
-const categoryColors = {
-  Collection: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
-  Social: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
-  Events: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
-  Competition: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
-  Activity: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
-  "Getting Started": "bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400",
-}
+import { Navigation } from "@/components/navigation"
+import { BadgeIcon, Lock, Trophy, Award } from "lucide-react"
+import { BADGE_DEFINITIONS, type BadgeSeries } from "@/lib/badge-definitions"
+import { getUserBadgeProgress } from "@/lib/mock-user-progress"
+import Image from "next/image"
 
 export default function TrophiesPage() {
-  const totalPoints = earnedTrophies.reduce((sum, trophy) => sum + trophy.points, 0)
-  const totalTrophies = earnedTrophies.length
-  const completionRate = Math.round((earnedTrophies.length / (earnedTrophies.length + availableTrophies.length)) * 100)
+  const currentUserId = "user-1" // This will be replaced with actual auth user ID from Firebase
+  const userProgress = getUserBadgeProgress(currentUserId)
+
+  // Group badges by series
+  const seriesOrder: BadgeSeries[] = ["collection", "explorer", "social", "hosting", "attendance", "manor", "portal"]
+  const badgesBySeries = seriesOrder.map((series) => {
+    const badges = BADGE_DEFINITIONS.filter((b) => b.series === series).sort((a, b) => {
+      const tierOrder = { bronze: 0, silver: 1, gold: 2 }
+      return tierOrder[a.tier] - tierOrder[b.tier]
+    })
+    return {
+      series,
+      seriesName: badges[0]?.seriesName || "",
+      badges,
+    }
+  })
+
+  // Calculate stats
+  const totalBadges = BADGE_DEFINITIONS.length
+  const earnedBadges = userProgress.earnedBadges.length
+  const totalXP = userProgress.earnedBadges.reduce((sum, badgeId) => {
+    const badge = BADGE_DEFINITIONS.find((b) => b.id === badgeId)
+    return sum + (badge?.xp || 0)
+  }, 0)
 
   return (
-    <div className="min-h-screen room-environment">
-      <main className="container mx-auto px-4 py-8">
+    <div className="min-h-screen manor-bg">
+      <Navigation />
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-4">
-            <Trophy className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="ornate-text font-heading text-5xl font-bold">Trophy Collection</h1>
-          </div>
-          <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
-            Showcase your gaming achievements and unlock prestigious honors
-          </p>
-        </div>
-
-        {/* Stats Overview */}
-        <div className="grid gap-6 md:grid-cols-3 mb-12">
-          <Card className="room-furniture text-center">
-            <CardContent className="p-6">
-              <Trophy className="h-12 w-12 text-accent-gold mx-auto mb-4" />
-              <div className="text-3xl font-bold text-accent-gold font-heading mb-2">{totalTrophies}</div>
-              <div className="text-sm text-muted-foreground font-body">Trophies Earned</div>
-            </CardContent>
-          </Card>
-
-          <Card className="room-furniture text-center">
-            <CardContent className="p-6">
-              <Star className="h-12 w-12 text-accent-gold mx-auto mb-4" />
-              <div className="text-3xl font-bold text-accent-gold font-heading mb-2">
-                {totalPoints.toLocaleString()}
-              </div>
-              <div className="text-sm text-muted-foreground font-body">Trophy Points</div>
-            </CardContent>
-          </Card>
-
-          <Card className="room-furniture text-center">
-            <CardContent className="p-6">
-              <Target className="h-12 w-12 text-accent-gold mx-auto mb-4" />
-              <div className="text-3xl font-bold text-accent-gold font-heading mb-2">{completionRate}%</div>
-              <div className="text-sm text-muted-foreground font-body">Completion Rate</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Earned Trophies */}
-        <div className="mb-12">
-          <h2 className="ornate-text font-heading text-3xl font-bold mb-8 text-center">Earned Trophies</h2>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {earnedTrophies.map((trophy) => (
-              <Card key={trophy.id} className="room-furniture hover:shadow-lg transition-shadow">
-                <CardHeader className="text-center pb-4">
-                  <div className="flex justify-center mb-4">
-                    <div className="p-4 rounded-full bg-accent-gold/20">
-                      <trophy.icon className="h-8 w-8 text-accent-gold" />
-                    </div>
-                  </div>
-                  <CardTitle className="font-heading text-lg">{trophy.title}</CardTitle>
-                  <div className="flex justify-center space-x-2 mt-2">
-                    <Badge className={rarityColors[trophy.rarity as keyof typeof rarityColors]}>{trophy.rarity}</Badge>
-                    <Badge variant="outline" className={categoryColors[trophy.category as keyof typeof categoryColors]}>
-                      {trophy.category}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <p className="font-body text-sm text-muted-foreground mb-4">{trophy.description}</p>
-                  <div className="space-y-2">
-                    <div className="text-lg font-bold text-accent-gold font-heading">+{trophy.points} points</div>
-                    <div className="text-xs text-muted-foreground font-body">Earned {trophy.earnedDate}</div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Available Trophies */}
-        <div>
-          <h2 className="ornate-text font-heading text-3xl font-bold mb-8 text-center">Available Trophies</h2>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {availableTrophies.map((trophy) => (
-              <Card key={trophy.id} className="room-furniture hover:shadow-lg transition-shadow opacity-80">
-                <CardHeader className="text-center pb-4">
-                  <div className="flex justify-center mb-4">
-                    <div className="p-4 rounded-full bg-muted">
-                      <trophy.icon className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                  </div>
-                  <CardTitle className="font-heading text-lg">{trophy.title}</CardTitle>
-                  <div className="flex justify-center space-x-2 mt-2">
-                    <Badge variant="outline" className={rarityColors[trophy.rarity as keyof typeof rarityColors]}>
-                      {trophy.rarity}
-                    </Badge>
-                    <Badge variant="outline" className={categoryColors[trophy.category as keyof typeof categoryColors]}>
-                      {trophy.category}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <p className="font-body text-sm text-muted-foreground mb-4">{trophy.description}</p>
-                  <div className="space-y-3">
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm font-body">
-                        <span>Progress</span>
-                        <span>
-                          {trophy.progress}/{trophy.maxProgress}
-                        </span>
-                      </div>
-                      <Progress value={(trophy.progress / trophy.maxProgress) * 100} className="h-2" />
-                    </div>
-                    <div className="text-lg font-bold text-muted-foreground font-heading">+{trophy.points} points</div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Call to Action */}
-        <div className="mt-16 text-center">
-          <Card className="room-furniture max-w-2xl mx-auto">
-            <CardContent className="p-8">
-              <Award className="h-16 w-16 text-accent-gold mx-auto mb-6" />
-              <h3 className="ornate-text font-heading text-2xl font-bold mb-4">Keep Collecting!</h3>
-              <p className="font-body text-muted-foreground mb-6">
-                Complete challenges, reach milestones, and unlock exclusive trophies that showcase your gaming journey.
-                Every achievement brings you closer to legendary status!
+        <div className="room-furniture p-8 mb-8">
+          <div className="flex items-center justify-between flex-wrap gap-6">
+            <div>
+              <h1 className="text-5xl font-charm ornate-text text-accent-gold mb-2">Trophy Collection</h1>
+              <p className="text-lg font-merriweather text-muted-foreground">
+                Achievements earned through dedication and mastery
               </p>
-              <Button size="lg" className="theme-accent-gold">
-                View All Challenges
-              </Button>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="flex gap-6">
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <Trophy className="h-5 w-5 text-accent-gold" />
+                  <span className="text-3xl font-cinzel text-accent-gold">{earnedBadges}</span>
+                  <span className="text-xl font-merriweather text-muted-foreground">/ {totalBadges}</span>
+                </div>
+                <p className="text-sm font-merriweather text-muted-foreground">Badges Earned</p>
+              </div>
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <Award className="h-5 w-5 text-accent-gold" />
+                  <span className="text-3xl font-cinzel text-accent-gold">{totalXP}</span>
+                </div>
+                <p className="text-sm font-merriweather text-muted-foreground">Total XP</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Badge Series Grid */}
+        <div className="space-y-6">
+          {badgesBySeries.map(({ series, seriesName, badges }) => {
+            const earnedInSeries = badges.filter((b) => userProgress.earnedBadges.includes(b.id)).length
+
+            return (
+              <div key={series} className="room-furniture p-6">
+                {/* Series Header */}
+                <div className="flex items-center justify-between mb-6 pb-4 border-b border-accent-gold/20">
+                  <div>
+                    <h2 className="text-2xl font-charm text-accent-gold mb-1">{seriesName}</h2>
+                    <p className="text-sm font-merriweather text-muted-foreground">
+                      {earnedInSeries} of {badges.length} tiers earned
+                    </p>
+                  </div>
+                  <BadgeIcon className="h-6 w-6 text-accent-gold/60" />
+                </div>
+
+                {/* Badge Tiers */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {badges.map((badge) => {
+                    const isEarned = userProgress.earnedBadges.includes(badge.id)
+
+                    return (
+                      <div
+                        key={badge.id}
+                        className={`relative group transition-all duration-300 ${
+                          isEarned ? "scale-100" : "scale-95 opacity-75"
+                        }`}
+                      >
+                        <div
+                          className={`relative p-6 rounded-lg border-2 transition-all duration-300 ${
+                            isEarned
+                              ? "bg-gradient-to-br from-accent-gold/10 to-accent-gold/5 border-accent-gold/40 shadow-lg shadow-accent-gold/20"
+                              : "bg-background/30 border-border/50"
+                          }`}
+                        >
+                          {/* Badge Image */}
+                          <div className="relative w-32 h-32 mx-auto mb-4">
+                            <Image
+                              src={badge.image || "/placeholder.svg"}
+                              alt={badge.name}
+                              fill
+                              className={`object-contain transition-all duration-300 ${
+                                isEarned ? "grayscale-0" : "grayscale opacity-40"
+                              }`}
+                            />
+                            {!isEarned && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="bg-background/80 rounded-full p-3">
+                                  <Lock className="h-6 w-6 text-muted-foreground" />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Badge Info */}
+                          <div className="text-center space-y-2">
+                            <div className="flex items-center justify-center gap-2">
+                              <h3 className="text-lg font-cinzel text-accent-gold">{badge.name}</h3>
+                              <span
+                                className={`text-xs font-merriweather uppercase px-2 py-0.5 rounded ${
+                                  badge.tier === "bronze"
+                                    ? "bg-orange-900/30 text-orange-400"
+                                    : badge.tier === "silver"
+                                      ? "bg-slate-700/30 text-slate-300"
+                                      : "bg-yellow-900/30 text-yellow-400"
+                                }`}
+                              >
+                                {badge.tier}
+                              </span>
+                            </div>
+                            <p className="text-sm font-merriweather text-muted-foreground">{badge.description}</p>
+                            <div className="pt-2 space-y-1">
+                              <p className="text-xs font-merriweather text-foreground">{badge.requirementText}</p>
+                              <p className="text-xs font-merriweather text-accent-gold">Reward: +{badge.xp} XP</p>
+                            </div>
+                          </div>
+
+                          {/* Earned Badge Glow Effect */}
+                          {isEarned && (
+                            <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-accent-gold/5 to-transparent pointer-events-none" />
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
         </div>
       </main>
     </div>

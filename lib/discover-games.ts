@@ -1,0 +1,133 @@
+export interface DiscoverGame {
+  id: number
+  title: string
+  category: string
+  players: string
+  time: string
+  rating: number
+  image: string
+  playerCount: string
+  playTime: string
+  yearPublished: number
+  mechanics: string[]
+}
+
+export const DISCOVER_GAMES: DiscoverGame[] = [
+  {
+    id: 101,
+    title: "Everdell",
+    category: "Strategy",
+    players: "1-4",
+    playerCount: "1-4",
+    time: "40-80 min",
+    playTime: "40-80",
+    rating: 8.1,
+    image: "/placeholder.svg?height=120&width=80",
+    yearPublished: 2018,
+    mechanics: ["worker-placement", "tableau-building", "hand-management"],
+  },
+  {
+    id: 102,
+    title: "Root",
+    category: "Strategy",
+    players: "2-4",
+    playerCount: "2-4",
+    time: "60-90 min",
+    playTime: "60-90",
+    rating: 8.3,
+    image: "/placeholder.svg?height=120&width=80",
+    yearPublished: 2018,
+    mechanics: ["area-control", "asymmetric", "hand-management"],
+  },
+  {
+    id: 103,
+    title: "Wingspan",
+    category: "Engine Building",
+    players: "1-5",
+    playerCount: "1-5",
+    time: "40-70 min",
+    playTime: "40-70",
+    rating: 8.1,
+    image: "/placeholder.svg?height=120&width=80",
+    yearPublished: 2019,
+    mechanics: ["engine-building", "card-drafting", "set-collection"],
+  },
+  {
+    id: 104,
+    title: "Dungeons & Dragons 5E",
+    category: "Fantasy RPG",
+    players: "3-6",
+    playerCount: "3-6",
+    time: "3-4 hours",
+    playTime: "180-240",
+    rating: 8.7,
+    image: "/placeholder.svg?height=120&width=80",
+    yearPublished: 2014,
+    mechanics: ["role-playing", "storytelling", "dice-rolling"],
+  },
+  {
+    id: 105,
+    title: "Pathfinder 2E",
+    category: "Fantasy RPG",
+    players: "3-6",
+    playerCount: "3-6",
+    time: "3-5 hours",
+    playTime: "180-300",
+    rating: 8.5,
+    image: "/placeholder.svg?height=120&width=80",
+    yearPublished: 2019,
+    mechanics: ["role-playing", "storytelling", "character-building"],
+  },
+  {
+    id: 106,
+    title: "Warhammer 40K",
+    category: "Tactical Combat",
+    players: "2",
+    playerCount: "2",
+    time: "2-3 hours",
+    playTime: "120-180",
+    rating: 8.2,
+    image: "/placeholder.svg?height=120&width=80",
+    yearPublished: 1987,
+    mechanics: ["miniatures", "dice-rolling", "tactical-combat"],
+  },
+  {
+    id: 107,
+    title: "X-Wing Miniatures",
+    category: "Space Combat",
+    players: "2",
+    playerCount: "2",
+    time: "45-75 min",
+    playTime: "45-75",
+    rating: 7.9,
+    image: "/placeholder.svg?height=120&width=80",
+    yearPublished: 2012,
+    mechanics: ["miniatures", "dice-rolling", "movement"],
+  },
+  {
+    id: 108,
+    title: "Magic: The Gathering",
+    category: "Trading Card Game",
+    players: "2",
+    playerCount: "2",
+    time: "20-60 min",
+    playTime: "20-60",
+    rating: 8.4,
+    image: "/placeholder.svg?height=120&width=80",
+    yearPublished: 1993,
+    mechanics: ["deck-building", "hand-management", "resource-management"],
+  },
+  {
+    id: 109,
+    title: "Pokemon TCG",
+    category: "Trading Card Game",
+    players: "2",
+    playerCount: "2",
+    time: "15-30 min",
+    playTime: "15-30",
+    rating: 7.8,
+    image: "/placeholder.svg?height=120&width=80",
+    yearPublished: 1996,
+    mechanics: ["deck-building", "hand-management", "card-drafting"],
+  },
+]

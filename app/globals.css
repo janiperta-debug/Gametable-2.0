@@ -814,8 +814,10 @@
     @apply bg-secondary text-secondary-foreground;
   }
 
+  /* Fixed theme-accent-gold to use proper CSS custom property syntax */
   .theme-accent-gold {
-    @apply bg-accent-gold text-accent-gold-foreground;
+    background-color: hsl(var(--accent-gold));
+    color: hsl(var(--accent-gold-foreground));
   }
 
   .theme-burgundy-button {

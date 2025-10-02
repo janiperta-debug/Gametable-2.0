@@ -1,92 +1,104 @@
+"use client"
+
 import { Navigation } from "@/components/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Users, MapPin, Search, UserPlus } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { MapPin, Search } from "lucide-react"
+import { PlayerCard } from "@/components/player-card"
 
 export default function FindPlayersPage() {
+  // TODO: Fetch real players from Firebase
+  const mockPlayers = [
+    {
+      userId: "1",
+      name: "Sarah Chen",
+      location: "Seattle, WA",
+      profilePicture: "/placeholder.svg?height=80&width=80",
+      gamesCount: 156,
+      interests: ["Strategy", "Euro Games", "Worker Placement"],
+      status: "Looking for group",
+    },
+    {
+      userId: "2",
+      name: "Mike Rodriguez",
+      location: "Portland, OR",
+      profilePicture: "/placeholder.svg?height=80&width=80",
+      gamesCount: 89,
+      interests: ["RPG", "D&D", "Storytelling"],
+      status: "Available weekends",
+    },
+    {
+      userId: "3",
+      name: "Emma Thompson",
+      location: "Vancouver, BC",
+      profilePicture: "/placeholder.svg?height=80&width=80",
+      gamesCount: 203,
+      interests: ["Cooperative", "Legacy", "Campaign"],
+      status: "Hosting weekly",
+    },
+  ]
+
   return (
     <div className="min-h-screen manor-bg">
       <Navigation />
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <div className="flex items-center mb-4">
-            <Users className="h-8 w-8 text-amber-600 mr-3" />
-            <h1 className="font-cinzel text-4xl font-bold">Find Players</h1>
-          </div>
-          <p className="font-merriweather text-muted-foreground text-lg">
-            Connect with fellow gaming enthusiasts in your area and beyond
-          </p>
-        </div>
+        <Card className="decorative-border mb-8">
+          <CardContent className="pt-6">
+            <h2 className="font-cinzel text-2xl font-bold mb-2">Refine Your Search</h2>
+            <p className="font-merriweather text-muted-foreground mb-6">
+              Connect with fellow gamers in your area and expand your gaming circle.
+            </p>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-1">
-            <Card className="decorative-border">
-              <CardHeader>
-                <CardTitle className="font-cinzel">Search Filters</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button variant="outline" className="w-full justify-start bg-transparent">
-                  <MapPin className="h-4 w-4 mr-2" />
+            <div className="grid md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label className="text-sm font-semibold text-amber-600 mb-2 block uppercase tracking-wide">
                   Location
-                </Button>
-                <Button variant="outline" className="w-full justify-start bg-transparent">
-                  <Search className="h-4 w-4 mr-2" />
-                  Game Preferences
-                </Button>
-                <Button variant="outline" className="w-full justify-start bg-transparent">
-                  <Users className="h-4 w-4 mr-2" />
-                  Group Size
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="lg:col-span-2">
-            <Card className="decorative-border">
-              <CardHeader>
-                <CardTitle className="font-cinzel">Gaming Community</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4 mb-8">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex items-center space-x-4 p-4 rounded-lg border bg-card/50">
-                      <Avatar>
-                        <AvatarImage src={`/placeholder.svg?height=40&width=40`} />
-                        <AvatarFallback>GM</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <h4 className="font-semibold">Gaming Enthusiast {i}</h4>
-                        <p className="text-sm text-muted-foreground">Seattle, WA • 5 miles away</p>
-                        <div className="flex gap-1 mt-2">
-                          <Badge variant="secondary" className="text-xs">
-                            Strategy
-                          </Badge>
-                          <Badge variant="secondary" className="text-xs">
-                            Cooperative
-                          </Badge>
-                        </div>
-                      </div>
-                      <Button size="sm">
-                        <UserPlus className="h-4 w-4 mr-2" />
-                        Connect
-                      </Button>
-                    </div>
-                  ))}
+                </label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input placeholder="e.g., Mystic Valley or postal code" className="pl-10 bg-background/50" />
                 </div>
+              </div>
 
-                <div className="text-center py-8">
-                  <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="font-cinzel text-xl font-semibold mb-2">Build Your Gaming Circle</h3>
-                  <p className="font-merriweather text-muted-foreground mb-6">
-                    Advanced player matching, local group discovery, and social features coming soon.
-                  </p>
-                  <Button size="lg">Join the Community</Button>
+              <div>
+                <label className="text-sm font-semibold text-amber-600 mb-2 block uppercase tracking-wide">
+                  Search by Game Title
+                </label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input placeholder="e.g., Gloomhaven, Dungeons & Dragons" className="pl-10 bg-background/50" />
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-semibold text-amber-600 mb-2 block uppercase tracking-wide">
+                  Preferred Game Type
+                </label>
+                <Select>
+                  <SelectTrigger className="bg-background/50">
+                    <SelectValue placeholder="Any Game Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any Game Type</SelectItem>
+                    <SelectItem value="board">Board Games</SelectItem>
+                    <SelectItem value="rpg">RPGs</SelectItem>
+                    <SelectItem value="miniatures">Miniatures</SelectItem>
+                    <SelectItem value="card">Card Games</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <Button className="w-full md:w-auto bg-amber-600 hover:bg-amber-700">Search for Players</Button>
+          </CardContent>
+        </Card>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {mockPlayers.map((player) => (
+            <PlayerCard key={player.userId} {...player} />
+          ))}
         </div>
       </main>
     </div>

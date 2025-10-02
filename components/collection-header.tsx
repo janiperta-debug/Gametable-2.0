@@ -1,19 +1,39 @@
 "use client"
 
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Plus, Download, Search, SortAsc, Grid, List } from "lucide-react"
+import { Plus, Search, SortAsc, Grid, List } from "lucide-react"
+import Link from "next/link"
 
 type CategoryType = "all" | "board-games" | "rpgs" | "miniatures" | "trading-cards"
+export type SortOption = "name-asc" | "name-desc" | "rating-high" | "rating-low" | "year" | "playtime"
+export type ViewMode = "grid" | "list"
 
-export function CollectionHeader() {
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState<CategoryType>("all")
+interface CollectionHeaderProps {
+  viewMode: ViewMode
+  setViewMode: (mode: ViewMode) => void
+  searchQuery: string
+  setSearchQuery: (query: string) => void
+  selectedCategory: CategoryType
+  setSelectedCategory: (category: CategoryType) => void
+  sortBy: SortOption
+  setSortBy: (sort: SortOption) => void
+  onAddGame: () => void
+  onImport: () => void
+}
 
+export function CollectionHeader({
+  viewMode,
+  setViewMode,
+  searchQuery,
+  setSearchQuery,
+  selectedCategory,
+  setSelectedCategory,
+  sortBy,
+  setSortBy,
+}: CollectionHeaderProps) {
   const categories = [
     { id: "all" as CategoryType, label: "247 Games", count: 247, importSource: "BGG" },
     { id: "board-games" as CategoryType, label: "Board Games", count: 189, importSource: "BGG" },
@@ -22,7 +42,16 @@ export function CollectionHeader() {
     { id: "trading-cards" as CategoryType, label: "Trading Cards", count: 12, importSource: "TCGPlayer" },
   ]
 
-  const currentCategory = categories.find((cat) => cat.id === selectedCategory) || categories[0]
+  const sortOptions = [
+    { value: "name-asc" as SortOption, label: "Name (A-Z)" },
+    { value: "name-desc" as SortOption, label: "Name (Z-A)" },
+    { value: "rating-high" as SortOption, label: "Rating (High to Low)" },
+    { value: "rating-low" as SortOption, label: "Rating (Low to High)" },
+    { value: "year" as SortOption, label: "Year Published" },
+    { value: "playtime" as SortOption, label: "Play Time" },
+  ]
+
+  const currentSort = sortOptions.find((opt) => opt.value === sortBy) || sortOptions[0]
 
   return (
     <div className="mb-8 space-y-4">
@@ -43,14 +72,12 @@ export function CollectionHeader() {
           </div>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-          <Button className="theme-accent-gold">
-            <Plus className="h-4 w-4 mr-2" />
-            <span className="font-body">Add Game</span>
-          </Button>
-          <Button variant="outline" className="theme-accent-gold bg-transparent">
-            <Download className="h-4 w-4 mr-2" />
-            <span className="font-body whitespace-nowrap">Import from {currentCategory.importSource}</span>
-          </Button>
+          <Link href="/game/new">
+            <Button className="theme-accent-gold w-full sm:w-auto">
+              <Plus className="h-4 w-4 mr-2" />
+              <span className="font-body">Add Game</span>
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -68,22 +95,21 @@ export function CollectionHeader() {
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex-1 sm:flex-none bg-transparent">
-                <SortAsc className="h-4 w-4 mr-2" />
-                <span className="font-body">Sort</span>
+              <Button variant="outline" className="flex-1 sm:flex-none bg-transparent min-w-0 flex-shrink">
+                <SortAsc className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span className="font-body truncate">{currentSort.label}</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem className="font-body">Name (A-Z)</DropdownMenuItem>
-              <DropdownMenuItem className="font-body">Name (Z-A)</DropdownMenuItem>
-              <DropdownMenuItem className="font-body">Rating (High to Low)</DropdownMenuItem>
-              <DropdownMenuItem className="font-body">Rating (Low to High)</DropdownMenuItem>
-              <DropdownMenuItem className="font-body">Year Published</DropdownMenuItem>
-              <DropdownMenuItem className="font-body">Play Time</DropdownMenuItem>
+            <DropdownMenuContent align="end">
+              {sortOptions.map((option) => (
+                <DropdownMenuItem key={option.value} className="font-body" onClick={() => setSortBy(option.value)}>
+                  {option.label}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div className="flex items-center border rounded-md">
+          <div className="flex items-center border rounded-md flex-shrink-0">
             <Button
               variant={viewMode === "grid" ? "default" : "ghost"}
               size="sm"

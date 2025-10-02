@@ -261,20 +261,14 @@ export default function EventsPage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6 md:mb-8 bg-surface-light/50">
-            <TabsTrigger
-              value="upcoming"
-              className="font-body text-xs sm:text-sm data-[state=active]:theme-accent-gold"
-            >
+          <TabsList className="grid w-full grid-cols-3 mb-6 md:mb-8 max-w-2xl mx-auto">
+            <TabsTrigger value="upcoming" className="font-body text-xs sm:text-sm">
               Upcoming
             </TabsTrigger>
-            <TabsTrigger
-              value="my-events"
-              className="font-body text-xs sm:text-sm data-[state=active]:theme-accent-gold"
-            >
+            <TabsTrigger value="my-events" className="font-body text-xs sm:text-sm">
               My Events
             </TabsTrigger>
-            <TabsTrigger value="past" className="font-body text-xs sm:text-sm data-[state=active]:theme-accent-gold">
+            <TabsTrigger value="past" className="font-body text-xs sm:text-sm">
               Past
             </TabsTrigger>
           </TabsList>

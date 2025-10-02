@@ -1,0 +1,287 @@
+export type BadgeTier = "bronze" | "silver" | "gold"
+export type BadgeSeries = "collection" | "social" | "hosting" | "attendance" | "portal" | "explorer" | "manor"
+
+export interface Badge {
+  id: string
+  name: string
+  description: string
+  tier: BadgeTier
+  series: BadgeSeries
+  seriesName: string
+  requirement: number
+  requirementText: string
+  xp: number
+  image: string
+}
+
+export const BADGE_DEFINITIONS: Badge[] = [
+  // Collection Curator Series
+  {
+    id: "collection-bronze",
+    name: "Apprentice Curator",
+    description: "Begin your journey as a collector",
+    tier: "bronze",
+    series: "collection",
+    seriesName: "Curator of Wonders",
+    requirement: 5,
+    requirementText: "Add 5 games to your collection",
+    xp: 100,
+    image: "/badges/collection/apprentice-curator-bronze.png",
+  },
+  {
+    id: "collection-silver",
+    name: "Master Curator",
+    description: "Your collection grows impressive",
+    tier: "silver",
+    series: "collection",
+    seriesName: "Curator of Wonders",
+    requirement: 25,
+    requirementText: "Add 25 games to your collection",
+    xp: 250,
+    image: "/badges/collection/master-curator-silver.png",
+  },
+  {
+    id: "collection-gold",
+    name: "Grand Curator",
+    description: "A legendary collection worthy of the manor",
+    tier: "gold",
+    series: "collection",
+    seriesName: "Curator of Wonders",
+    requirement: 100,
+    requirementText: "Add 100 games to your collection",
+    xp: 500,
+    image: "/badges/collection/grand-curator-gold.png",
+  },
+  // Category Explorer (Dimensional Wanderer) series
+  {
+    id: "explorer-bronze",
+    name: "Curious Explorer",
+    description: "Begin exploring different gaming realms",
+    tier: "bronze",
+    series: "explorer",
+    seriesName: "Dimensional Wanderer",
+    requirement: 2,
+    requirementText: "Own games from 2 different categories",
+    xp: 100,
+    image: "/badges/category/curious-explorer-bronze.png",
+  },
+  {
+    id: "explorer-silver",
+    name: "Realm Walker",
+    description: "Your travels span multiple dimensions",
+    tier: "silver",
+    series: "explorer",
+    seriesName: "Dimensional Wanderer",
+    requirement: 3,
+    requirementText: "Own games from 3 different categories",
+    xp: 250,
+    image: "/badges/category/realm-walker-silver.png",
+  },
+  {
+    id: "explorer-gold",
+    name: "Dimensional Master",
+    description: "Master of all gaming dimensions",
+    tier: "gold",
+    series: "explorer",
+    seriesName: "Dimensional Wanderer",
+    requirement: 4,
+    requirementText: "Own games from all 4 categories",
+    xp: 500,
+    image: "/badges/category/dimensional-master-gold.png",
+  },
+  // Social Connector (Fellowship Weaver) series
+  {
+    id: "social-bronze",
+    name: "Bond Forger",
+    description: "Begin building your fellowship",
+    tier: "bronze",
+    series: "social",
+    seriesName: "Fellowship Weaver",
+    requirement: 3,
+    requirementText: "Connect with 3 friends",
+    xp: 100,
+    image: "/badges/social/bond-forger-bronze.png",
+  },
+  {
+    id: "social-silver",
+    name: "Circle Builder",
+    description: "Your circle of friends grows strong",
+    tier: "silver",
+    series: "social",
+    seriesName: "Fellowship Weaver",
+    requirement: 10,
+    requirementText: "Connect with 10 friends",
+    xp: 250,
+    image: "/badges/social/circle-builder-silver.png",
+  },
+  {
+    id: "social-gold",
+    name: "Fellowship Master",
+    description: "A true master of fellowship and community",
+    tier: "gold",
+    series: "social",
+    seriesName: "Fellowship Weaver",
+    requirement: 25,
+    requirementText: "Connect with 25 friends",
+    xp: 500,
+    image: "/badges/social/fellowship-master-gold.png",
+  },
+  // Gathering Master (Event Hosting) series
+  {
+    id: "hosting-bronze",
+    name: "First Gathering",
+    description: "Host your first gaming event",
+    tier: "bronze",
+    series: "hosting",
+    seriesName: "Gathering Master",
+    requirement: 1,
+    requirementText: "Host 1 event",
+    xp: 100,
+    image: "/badges/events-hosted/first-gathering-bronze.png",
+  },
+  {
+    id: "hosting-silver",
+    name: "Regular Host",
+    description: "Become a regular event organizer",
+    tier: "silver",
+    series: "hosting",
+    seriesName: "Gathering Master",
+    requirement: 5,
+    requirementText: "Host 5 events",
+    xp: 250,
+    image: "/badges/events-hosted/regular-host-silver.png",
+  },
+  {
+    id: "hosting-gold",
+    name: "Grand Orchestrator",
+    description: "Master the art of grand gatherings",
+    tier: "gold",
+    series: "hosting",
+    seriesName: "Gathering Master",
+    requirement: 20,
+    requirementText: "Host 20 events",
+    xp: 500,
+    image: "/badges/events-hosted/grand-orchestrator-gold.png",
+  },
+  // Manor Keeper (Manor Ascendant) series
+  {
+    id: "manor-bronze",
+    name: "Ground Floor Master",
+    description: "Master the ground floor of the manor",
+    tier: "bronze",
+    series: "manor",
+    seriesName: "Manor Ascendant",
+    requirement: 5,
+    requirementText: "Reach Level 5",
+    xp: 100,
+    image: "/badges/manor/ground-floor-master-bronze.png",
+  },
+  {
+    id: "manor-silver",
+    name: "Second Floor Master",
+    description: "Ascend to the second floor",
+    tier: "silver",
+    series: "manor",
+    seriesName: "Manor Ascendant",
+    requirement: 10,
+    requirementText: "Reach Level 10",
+    xp: 250,
+    image: "/badges/manor/second-floor-master-silver.png",
+  },
+  {
+    id: "manor-gold",
+    name: "Basement Lord",
+    description: "Unlock the secrets of the basement",
+    tier: "gold",
+    series: "manor",
+    seriesName: "Manor Ascendant",
+    requirement: 15,
+    requirementText: "Reach Level 15",
+    xp: 500,
+    image: "/badges/manor/basement-lord-gold.png",
+  },
+  // Portal Keeper (BGG Integration) series
+  {
+    id: "portal-bronze",
+    name: "Portal Novice",
+    description: "Open your first portal to BoardGameGeek",
+    tier: "bronze",
+    series: "portal",
+    seriesName: "Portal Keeper",
+    requirement: 1,
+    requirementText: "Import 1 game from BGG",
+    xp: 100,
+    image: "/badges/bgg/portal-novice-bronze.png",
+  },
+  {
+    id: "portal-silver",
+    name: "Portal Adept",
+    description: "Harness the power of the BGG portal",
+    tier: "silver",
+    series: "portal",
+    seriesName: "Portal Keeper",
+    requirement: 10,
+    requirementText: "Import 10 games from BGG",
+    xp: 250,
+    image: "/badges/bgg/portal-adept-silver.png",
+  },
+  {
+    id: "portal-gold",
+    name: "Portal Master",
+    description: "Master of dimensional game collection",
+    tier: "gold",
+    series: "portal",
+    seriesName: "Portal Keeper",
+    requirement: 50,
+    requirementText: "Import 50 games from BGG",
+    xp: 500,
+    image: "/badges/bgg/portal-master-gold.png",
+  },
+  // Stalwart Companion (Event Attendance) series
+  {
+    id: "attendance-bronze",
+    name: "Eager Newcomer",
+    description: "Join your first gaming gatherings",
+    tier: "bronze",
+    series: "attendance",
+    seriesName: "Stalwart Companion",
+    requirement: 3,
+    requirementText: "Attend 3 events",
+    xp: 100,
+    image: "/badges/events-attended/eager-newcomer-bronze.png",
+  },
+  {
+    id: "attendance-silver",
+    name: "Reliable Ally",
+    description: "Become a dependable companion",
+    tier: "silver",
+    series: "attendance",
+    seriesName: "Stalwart Companion",
+    requirement: 10,
+    requirementText: "Attend 10 events",
+    xp: 250,
+    image: "/badges/events-attended/reliable-ally-silver.png",
+  },
+  {
+    id: "attendance-gold",
+    name: "Legendary Companion",
+    description: "A legendary presence at every gathering",
+    tier: "gold",
+    series: "attendance",
+    seriesName: "Stalwart Companion",
+    requirement: 25,
+    requirementText: "Attend 25 events",
+    xp: 500,
+    image: "/badges/events-attended/legendary-companion-gold.png",
+  },
+]
+
+// Helper function to get badges by series
+export function getBadgesBySeries(series: BadgeSeries): Badge[] {
+  return BADGE_DEFINITIONS.filter((badge) => badge.series === series)
+}
+
+// Helper function to get badge by id
+export function getBadgeById(id: string): Badge | undefined {
+  return BADGE_DEFINITIONS.find((badge) => badge.id === id)
+}

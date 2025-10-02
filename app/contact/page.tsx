@@ -1,11 +1,51 @@
+"use client"
+
+import type React from "react"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Mail, Send, Shield, FileText, Facebook, Twitter, Instagram } from "lucide-react"
+import Link from "next/link"
+import { useState } from "react"
+import { sendContactEmail } from "@/app/actions/send-email"
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    subject: "",
+    message: "",
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitStatus("idle")
+
+    const result = await sendContactEmail(formData)
+
+    if (result.success) {
+      setSubmitStatus("success")
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        subject: "",
+        message: "",
+      })
+    } else {
+      setSubmitStatus("error")
+    }
+
+    setIsSubmitting(false)
+  }
+
   return (
     <div className="min-h-screen room-environment">
       <main className="container mx-auto px-4 py-8">
@@ -32,47 +72,87 @@ export default function ContactPage() {
                   Have a question, suggestion, or need assistance? We'd love to hear from you.
                 </p>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName" className="font-body">
-                      First Name
-                    </Label>
-                    <Input id="firstName" placeholder="Enter your first name" className="font-body" />
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName" className="font-body">
+                        First Name
+                      </Label>
+                      <Input
+                        id="firstName"
+                        placeholder="Enter your first name"
+                        className="font-body"
+                        value={formData.firstName}
+                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName" className="font-body">
+                        Last Name
+                      </Label>
+                      <Input
+                        id="lastName"
+                        placeholder="Enter your last name"
+                        className="font-body"
+                        value={formData.lastName}
+                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                        required
+                      />
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName" className="font-body">
-                      Last Name
+                    <Label htmlFor="email" className="font-body">
+                      Email Address
                     </Label>
-                    <Input id="lastName" placeholder="Enter your last name" className="font-body" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="your.email@example.com"
+                      className="font-body"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                    />
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="font-body">
-                    Email Address
-                  </Label>
-                  <Input id="email" type="email" placeholder="your.email@example.com" className="font-body" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="subject" className="font-body">
-                    Subject
-                  </Label>
-                  <Input id="subject" placeholder="What's this about?" className="font-body" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="message" className="font-body">
-                    Message
-                  </Label>
-                  <Textarea
-                    id="message"
-                    placeholder="Tell us how we can help you..."
-                    className="min-h-[120px] font-body"
-                  />
-                </div>
-                <Button className="w-full theme-accent-gold" size="lg">
-                  <Send className="h-4 w-4 mr-2" />
-                  <span className="font-body">Send Message</span>
-                </Button>
+                  <div className="space-y-2">
+                    <Label htmlFor="subject" className="font-body">
+                      Subject
+                    </Label>
+                    <Input
+                      id="subject"
+                      placeholder="What's this about?"
+                      className="font-body"
+                      value={formData.subject}
+                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="message" className="font-body">
+                      Message
+                    </Label>
+                    <Textarea
+                      id="message"
+                      placeholder="Tell us how we can help you..."
+                      className="min-h-[120px] font-body"
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      required
+                    />
+                  </div>
+                  {submitStatus === "success" && (
+                    <p className="text-sm text-green-600 dark:text-green-400">Message sent successfully!</p>
+                  )}
+                  {submitStatus === "error" && (
+                    <p className="text-sm text-red-600 dark:text-red-400">Failed to send message. Please try again.</p>
+                  )}
+                  <Button type="submit" className="w-full theme-accent-gold" size="lg" disabled={isSubmitting}>
+                    <Send className="h-4 w-4 mr-2" />
+                    <span className="font-body">{isSubmitting ? "Sending..." : "Send Message"}</span>
+                  </Button>
+                </form>
               </CardContent>
             </Card>
           </div>
@@ -85,7 +165,9 @@ export default function ContactPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <a
-                  href="#"
+                  href="https://x.com/gametable_app?s=21"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center space-x-4 p-4 rounded-lg hover:bg-accent-gold/10 transition-colors"
                 >
                   <div className="p-3 rounded-lg bg-accent-gold/20 text-accent-gold flex-shrink-0">
@@ -98,7 +180,9 @@ export default function ContactPage() {
                 </a>
 
                 <a
-                  href="#"
+                  href="https://www.facebook.com/share/16nV4yGpQa/?mibextid=wwXIfr"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center space-x-4 p-4 rounded-lg hover:bg-accent-gold/10 transition-colors"
                 >
                   <div className="p-3 rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 flex-shrink-0">
@@ -111,7 +195,9 @@ export default function ContactPage() {
                 </a>
 
                 <a
-                  href="#"
+                  href="https://www.instagram.com/gametable_app?igsh=c256bWM2ZWJ6MHY0&utm_source=qr"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center space-x-4 p-4 rounded-lg hover:bg-accent-gold/10 transition-colors"
                 >
                   <div className="p-3 rounded-lg bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400 flex-shrink-0">
@@ -124,7 +210,9 @@ export default function ContactPage() {
                 </a>
 
                 <a
-                  href="#"
+                  href="https://www.tiktok.com/@gametable_app?_t=ZN-8z8y4M4oPuo&_r=1"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center space-x-4 p-4 rounded-lg hover:bg-accent-gold/10 transition-colors"
                 >
                   <div className="p-3 rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 flex-shrink-0">
@@ -159,9 +247,11 @@ export default function ContactPage() {
                     <p className="font-body text-sm text-muted-foreground mb-4">
                       How we collect, use, and protect your data
                     </p>
-                    <Button variant="outline" className="bg-transparent">
-                      <span className="font-body">Read Policy</span>
-                    </Button>
+                    <Link href="/privacy-page">
+                      <Button variant="outline" className="bg-transparent">
+                        <span className="font-body">Read Policy</span>
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
 
@@ -172,9 +262,11 @@ export default function ContactPage() {
                     </div>
                     <h3 className="ornate-text font-heading text-xl font-bold mb-2">Terms of Service</h3>
                     <p className="font-body text-sm text-muted-foreground mb-4">Your rights and responsibilities</p>
-                    <Button variant="outline" className="bg-transparent">
-                      <span className="font-body">Read Terms</span>
-                    </Button>
+                    <Link href="/terms-page">
+                      <Button variant="outline" className="bg-transparent">
+                        <span className="font-body">Read Terms</span>
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
               </div>

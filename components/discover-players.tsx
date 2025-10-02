@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -154,7 +155,12 @@ export function DiscoverPlayers() {
                   </Badge>
                 </div>
 
-                <Button className="w-full font-cinzel">Connect</Button>
+                <div className="flex gap-2">
+                  <Button asChild variant="outline" className="flex-1 font-cinzel bg-transparent">
+                    <Link href={`/profile/${player.id}`}>View Profile</Link>
+                  </Button>
+                  <Button className="flex-1 font-cinzel bg-accent-gold hover:bg-accent-copper">Connect</Button>
+                </div>
               </div>
             </CardContent>
           </Card>

@@ -4,76 +4,21 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Star, Users, Clock, Heart, MoreVertical } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
+import type { Game } from "@/lib/mock-games"
 
-export function GameGrid() {
-  const games = [
-    {
-      id: 1,
-      title: "Wingspan",
-      image: "/wingspan-board-game-box.png",
-      rating: 4.8,
-      playerCount: "1-5",
-      playTime: "40-70",
-      category: "Strategy",
-      owned: true,
-      wishlist: false,
-    },
-    {
-      id: 2,
-      title: "Azul",
-      image: "/azul-board-game-box.png",
-      rating: 4.6,
-      playerCount: "2-4",
-      playTime: "30-45",
-      category: "Abstract",
-      owned: true,
-      wishlist: false,
-    },
-    {
-      id: 3,
-      title: "Gloomhaven",
-      image: "/gloomhaven-board-game-box.png",
-      rating: 4.9,
-      playerCount: "1-4",
-      playTime: "60-120",
-      category: "Thematic",
-      owned: true,
-      wishlist: false,
-    },
-    {
-      id: 4,
-      title: "Ticket to Ride",
-      image: "/ticket-to-ride-board-game-box.png",
-      rating: 4.4,
-      playerCount: "2-5",
-      playTime: "30-60",
-      category: "Family",
-      owned: false,
-      wishlist: true,
-    },
-    {
-      id: 5,
-      title: "Scythe",
-      image: "/scythe-board-game-box.png",
-      rating: 4.7,
-      playerCount: "1-5",
-      playTime: "90-115",
-      category: "Strategy",
-      owned: true,
-      wishlist: false,
-    },
-    {
-      id: 6,
-      title: "Pandemic",
-      image: "/pandemic-board-game-box.png",
-      rating: 4.5,
-      playerCount: "2-4",
-      playTime: "45-60",
-      category: "Cooperative",
-      owned: true,
-      wishlist: false,
-    },
-  ]
+interface GameGridProps {
+  games: Game[]
+}
+
+export function GameGrid({ games }: GameGridProps) {
+  if (games.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground font-body text-lg">No games found matching your criteria.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -132,13 +77,15 @@ export function GameGrid() {
 
             <div className="flex gap-2 pt-2">
               {game.owned ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 border-accent-gold/20 hover:border-accent-gold bg-transparent"
-                >
-                  View Details
-                </Button>
+                <Link href={`/game/${game.id}`} className="flex-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full border-accent-gold/20 hover:border-accent-gold bg-transparent"
+                  >
+                    View Details
+                  </Button>
+                </Link>
               ) : (
                 <Button size="sm" className="flex-1 bg-accent-gold hover:bg-accent-gold/90 text-background">
                   Add to Collection

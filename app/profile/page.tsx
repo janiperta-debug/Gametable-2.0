@@ -1,11 +1,11 @@
 import { ProfileHeader } from "@/components/profile-header"
-import { ProfileStats } from "@/components/profile-stats"
-import { RecentActivity } from "@/components/profile-recent-activity"
-import { CollectionHighlights } from "@/components/collection-highlights"
-import { QuickActions } from "@/components/quick-actions"
-import { UpcomingEvents } from "@/components/profile-upcoming-events"
-import { TrophyShowcase } from "@/components/trophy-showcase"
-import { FriendActivity } from "@/components/friend-activity"
+import { GamingProgress } from "@/components/gaming-progress"
+import { ProfileNotifications } from "@/components/profile-notifications"
+import { GameInterests } from "@/components/game-interests"
+import { ManorCorrespondence } from "@/components/manor-correspondence"
+import { PrivacyControls } from "@/components/privacy-controls"
+import { FriendsList } from "@/components/friends-list"
+import { AccountManagement } from "@/components/account-management"
 
 export default function ProfilePage() {
   return (
@@ -14,34 +14,27 @@ export default function ProfilePage() {
         {/* Profile Header */}
         <ProfileHeader />
 
-        {/* Main Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Left Column - Main Content */}
-          <div className="lg:col-span-3 space-y-8">
-            {/* Gaming Progress Stats */}
-            <ProfileStats />
+        {/* Profile Content */}
+        <div className="max-w-6xl mx-auto space-y-8">
+          <GamingProgress />
 
-            {/* Recent Activity */}
-            <RecentActivity />
+          {/* My Notifications */}
+          <ProfileNotifications />
 
-            {/* Collection Highlights */}
-            <CollectionHighlights />
-          </div>
+          {/* Game Interests */}
+          <GameInterests />
 
-          {/* Right Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Quick Actions */}
-            <QuickActions />
+          {/* Manor Correspondence */}
+          <ManorCorrespondence />
 
-            {/* Upcoming Events */}
-            <UpcomingEvents />
+          {/* Privacy Controls */}
+          <PrivacyControls />
 
-            {/* Trophy Showcase */}
-            <TrophyShowcase />
+          {/* Friends */}
+          <FriendsList />
 
-            {/* Friend Activity */}
-            <FriendActivity />
-          </div>
+          {/* Account Management */}
+          <AccountManagement />
         </div>
       </div>
     </div>

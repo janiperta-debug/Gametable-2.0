@@ -205,16 +205,16 @@ export default function ThemesPage() {
 
         {/* Tabs component to organize floors */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8 bg-surface-light/50 max-w-2xl mx-auto">
-            <TabsTrigger value="basement" className="font-body text-sm data-[state=active]:theme-accent-gold">
+          <TabsList className="grid w-full grid-cols-3 mb-8 max-w-2xl mx-auto">
+            <TabsTrigger value="basement" className="font-body text-sm">
               <ArrowDown className="h-4 w-4 mr-2" />
               Basement
             </TabsTrigger>
-            <TabsTrigger value="ground-floor" className="font-body text-sm data-[state=active]:theme-accent-gold">
+            <TabsTrigger value="ground-floor" className="font-body text-sm">
               <Home className="h-4 w-4 mr-2" />
               Ground Floor
             </TabsTrigger>
-            <TabsTrigger value="second-floor" className="font-body text-sm data-[state=active]:theme-accent-gold">
+            <TabsTrigger value="second-floor" className="font-body text-sm">
               <ArrowUp className="h-4 w-4 mr-2" />
               Second Floor
             </TabsTrigger>
