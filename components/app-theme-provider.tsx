@@ -12,7 +12,6 @@ export type AppThemeName =
   | "bar"
   | "spa"
   | "gallery"
-  | "balcony"
   | "ballroom"
   | "map-room"
   | "observatory"
@@ -135,18 +134,6 @@ export const MANOR_THEMES: ManorTheme[] = [
   },
 
   // Second Floor
-  {
-    id: "balcony",
-    name: "Balcony",
-    description: "Nightsky elegance with lavender moonlight over the grounds",
-    floor: "Second Floor",
-    colors: {
-      primary: "Nightsky Blue",
-      secondary: "Lavender",
-      accent: "Silver",
-    },
-    atmosphere: "Moonlit romance",
-  },
   {
     id: "ballroom",
     name: "Ballroom",

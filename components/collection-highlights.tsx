@@ -46,7 +46,7 @@ export function CollectionHighlights() {
   return (
     <Card className="room-furniture">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-2xl font-charm ornate-text">Collection Highlights</CardTitle>
+        <CardTitle className="text-2xl font-merriweather">Collection Highlights</CardTitle>
         <Button variant="ghost" size="sm">
           <span className="font-cinzel">View All</span>
           <ExternalLink className="h-4 w-4 ml-2" />

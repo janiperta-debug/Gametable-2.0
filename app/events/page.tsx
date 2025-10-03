@@ -229,7 +229,7 @@ export default function EventsPage() {
         <div className="text-center mb-8 md:mb-12">
           <div className="flex items-center justify-center mb-4">
             <Calendar className="h-6 w-6 md:h-8 md:w-8 text-accent-gold mr-2 md:mr-3" />
-            <h1 className="ornate-text font-heading text-3xl md:text-5xl font-bold">Events</h1>
+            <h1 className="logo-text text-3xl md:text-5xl font-bold">Events</h1>
           </div>
           <p className="font-body text-muted-foreground text-base md:text-xl max-w-3xl mx-auto px-4">
             Discover, join, and host amazing gaming events in your community
@@ -304,9 +304,7 @@ export default function EventsPage() {
 
         {/* Quick Actions */}
         <div className="mt-12 md:mt-16">
-          <h2 className="ornate-text font-heading text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8">
-            Quick Actions
-          </h2>
+          <h2 className="font-heading text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8">Quick Actions</h2>
           <div className="grid gap-4 md:gap-6 grid-cols-2 lg:grid-cols-4 max-w-4xl mx-auto">
             <Card className="room-furniture hover:shadow-lg transition-shadow cursor-pointer">
               <CardContent className="p-6 text-center">
@@ -354,7 +352,7 @@ export default function EventsPage() {
         <div className="mt-12 md:mt-16">
           <Card className="room-furniture max-w-4xl mx-auto">
             <CardHeader className="text-center">
-              <CardTitle className="ornate-text font-heading text-3xl font-bold">Event Management Hub</CardTitle>
+              <CardTitle className="font-heading text-3xl font-bold">Event Management Hub</CardTitle>
               <p className="font-body text-muted-foreground">
                 Comprehensive tools for organizing and managing your gaming events
               </p>

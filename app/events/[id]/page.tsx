@@ -91,7 +91,7 @@ export default function EventDetailsPage() {
       <div className="min-h-screen bg-gradient-to-b from-surface-dark to-background flex items-center justify-center">
         <Card className="room-furniture max-w-md">
           <CardContent className="p-8 text-center">
-            <h1 className="text-2xl font-charm text-accent-gold mb-4">Event Not Found</h1>
+            <h1 className="text-2xl text-accent-gold mb-4">Event Not Found</h1>
             <p className="text-muted-foreground mb-6">The event you're looking for doesn't exist.</p>
             <Button onClick={() => router.push("/events")} className="theme-accent-gold">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -126,7 +126,7 @@ export default function EventDetailsPage() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle className="text-3xl font-charm text-accent-gold mb-2">{event.title}</CardTitle>
+                    <CardTitle className="text-3xl text-accent-gold mb-2">{event.title}</CardTitle>
                     <div className="flex items-center gap-2 text-muted-foreground mb-4">
                       {getPrivacyIcon(event.privacy)}
                       <span className="text-sm">{getPrivacyLabel(event.privacy)}</span>

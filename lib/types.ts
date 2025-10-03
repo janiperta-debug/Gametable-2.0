@@ -15,6 +15,9 @@ export interface Game {
   source: "BGG" | "MANUAL"
   addedAt: Date
   userId: string
+  forTrade?: boolean
+  tradeNotes?: string
+  wishlist?: boolean
 }
 
 // User profile type

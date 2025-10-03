@@ -45,7 +45,7 @@ export function ProfileStats() {
   return (
     <Card className="room-furniture">
       <CardHeader>
-        <CardTitle className="text-2xl font-charm ornate-text">Gaming Progress</CardTitle>
+        <CardTitle className="text-2xl">Gaming Progress</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

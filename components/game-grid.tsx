@@ -2,16 +2,26 @@
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Star, Users, Clock, Heart, MoreVertical } from "lucide-react"
+import { Star, Users, Clock, Heart, ShoppingBag } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import type { Game } from "@/lib/mock-games"
 
 interface GameGridProps {
   games: Game[]
+  onToggleForTrade?: (gameId: string) => void
+  onToggleWishlist?: (gameId: string) => void
+  showMarketplaceButton?: boolean
+  showWishlistButton?: boolean
 }
 
-export function GameGrid({ games }: GameGridProps) {
+export function GameGrid({
+  games,
+  onToggleForTrade,
+  onToggleWishlist,
+  showMarketplaceButton = false,
+  showWishlistButton = false,
+}: GameGridProps) {
   if (games.length === 0) {
     return (
       <div className="text-center py-12">
@@ -32,28 +42,29 @@ export function GameGrid({ games }: GameGridProps) {
                 fill
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
               />
+              {game.forTrade && (
+                <div className="absolute top-2 left-2">
+                  <Badge variant="secondary" className="bg-green-600/90 text-white font-body">
+                    <ShoppingBag className="h-3 w-3 mr-1" />
+                    For Trade
+                  </Badge>
+                </div>
+              )}
               {game.wishlist && (
                 <div className="absolute top-2 right-2">
-                  <Badge variant="secondary" className="bg-accent-gold/90 text-background">
+                  <Badge variant="secondary" className="bg-accent-gold/90 text-background font-body">
                     <Heart className="h-3 w-3 mr-1 fill-current" />
                     Wishlist
                   </Badge>
                 </div>
               )}
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 hover:bg-background"
-            >
-              <MoreVertical className="h-4 w-4" />
-            </Button>
           </div>
 
           <div className="space-y-3">
             <div>
               <h3 className="font-heading font-semibold text-lg mb-1">{game.title}</h3>
-              <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold">
+              <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">
                 {game.category}
               </Badge>
             </div>
@@ -81,23 +92,36 @@ export function GameGrid({ games }: GameGridProps) {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full border-accent-gold/20 hover:border-accent-gold bg-transparent"
+                    className="w-full border-accent-gold/20 hover:border-accent-gold bg-transparent font-body"
                   >
                     View Details
                   </Button>
                 </Link>
               ) : (
-                <Button size="sm" className="flex-1 bg-accent-gold hover:bg-accent-gold/90 text-background">
+                <Button size="sm" className="flex-1 bg-accent-gold hover:bg-accent-gold/90 text-background font-body">
                   Add to Collection
                 </Button>
               )}
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`${game.wishlist ? "text-accent-gold" : "text-muted-foreground"} hover:text-accent-gold`}
-              >
-                <Heart className={`h-4 w-4 ${game.wishlist ? "fill-current" : ""}`} />
-              </Button>
+              {showMarketplaceButton && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onToggleForTrade?.(game.id)}
+                  className={`${game.forTrade ? "border-green-600 text-green-600 hover:bg-green-600/10" : "border-accent-gold/20 hover:border-accent-gold"} bg-transparent font-body`}
+                >
+                  <ShoppingBag className="h-4 w-4" />
+                </Button>
+              )}
+              {showWishlistButton && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onToggleWishlist?.(game.id)}
+                  className={`${game.wishlist ? "text-accent-gold" : "text-muted-foreground"} hover:text-accent-gold`}
+                >
+                  <Heart className={`h-4 w-4 ${game.wishlist ? "fill-current" : ""}`} />
+                </Button>
+              )}
             </div>
           </div>
         </div>

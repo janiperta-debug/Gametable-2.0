@@ -18,7 +18,7 @@ export function GameInterests() {
   return (
     <div className="room-furniture p-8 space-y-6">
       <div>
-        <h2 className="text-2xl font-charm ornate-text mb-2">My Game Interests</h2>
+        <h2 className="text-2xl mb-2">My Game Interests</h2>
         <p className="text-sm font-merriweather text-muted-foreground">
           Select the types of games you play or are interested in finding partners for.
         </p>

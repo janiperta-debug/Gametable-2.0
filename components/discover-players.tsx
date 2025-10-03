@@ -49,7 +49,7 @@ export function DiscoverPlayers() {
     <div className="space-y-8">
       <Card className="room-furniture">
         <CardHeader>
-          <CardTitle className="text-2xl font-charm ornate-text">Refine Your Search</CardTitle>
+          <CardTitle className="text-2xl">Refine Your Search</CardTitle>
           <p className="font-merriweather text-muted-foreground">
             Connect with fellow gamers in your area and expand your gaming circle.
           </p>

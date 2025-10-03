@@ -788,23 +788,24 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-marcellus;
+    @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
     /* Add padding-top to account for fixed navbar */
     padding-top: 4rem;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply font-charm;
-  }
+  /* Removed h1-h6 Charm rule - headings now use Merriweather by default */
 }
 
 @layer utilities {
+  /* Added logo-text class for large titles with Charm font + outline/shadow */
+  .logo-text {
+    font-family: var(--font-charm);
+    text-shadow: 0 0 20px hsl(var(--accent-gold) / 0.3), 0 2px 4px hsl(var(--surface-dark) / 0.5), 1px 1px 0
+      hsl(var(--accent-gold) / 0.2), -1px -1px 0 hsl(var(--accent-gold) / 0.2);
+    -webkit-text-stroke: 0.5px hsl(var(--accent-gold) / 0.3);
+  }
+
   /* Theme-aware utilities */
   .theme-primary {
     @apply bg-primary text-primary-foreground;

@@ -17,7 +17,7 @@ export function ManorCorrespondence() {
     <div className="room-furniture p-8 space-y-6">
       <div className="flex items-center space-x-3">
         <Mail className="w-6 h-6 text-accent-gold" />
-        <h2 className="text-2xl font-charm ornate-text">Manor Correspondence</h2>
+        <h2 className="text-2xl">Manor Correspondence</h2>
       </div>
 
       <div className="space-y-6">

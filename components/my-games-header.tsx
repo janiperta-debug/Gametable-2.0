@@ -7,7 +7,7 @@ export function MyGamesHeader() {
   return (
     <Card className="room-furniture">
       <CardHeader>
-        <CardTitle className="text-2xl font-charm ornate-text">My Games</CardTitle>
+        <CardTitle className="text-2xl">My Games</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
@@ -15,7 +15,7 @@ export function MyGamesHeader() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-accent-gold h-4 w-4" />
             <Input
               placeholder="Search your games..."
-              className="pl-10 bg-surface-dark border-accent-gold/20 text-foreground placeholder:text-muted-foreground font-merriweather"
+              className="pl-10 bg-surface-dark border-accent-gold/20 text-foreground placeholder:text-muted-foreground"
             />
           </div>
           <div className="flex gap-2">
@@ -27,7 +27,7 @@ export function MyGamesHeader() {
               <Filter className="h-4 w-4 mr-2" />
               Filter
             </Button>
-            <Button size="sm" className="bg-accent-gold text-surface-dark hover:bg-accent-copper font-cinzel">
+            <Button size="sm" className="bg-accent-gold text-surface-dark hover:bg-accent-copper">
               <Plus className="h-4 w-4 mr-2" />
               Add Game
             </Button>

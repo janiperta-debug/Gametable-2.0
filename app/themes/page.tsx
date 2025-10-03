@@ -130,7 +130,7 @@ export default function ThemesPage() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <Palette className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="ornate-text font-heading text-5xl font-bold">Dimensional Manor System</h1>
+            <h1 className="logo-text text-5xl font-bold">Dimensional Manor System</h1>
           </div>
           <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
             Choose your path through each floor, unlock dimensions, and discover infinite gaming realms
@@ -141,7 +141,7 @@ export default function ThemesPage() {
         <div className="grid gap-8 md:grid-cols-2 mb-12">
           <div className="room-furniture">
             <div className="space-y-6">
-              <h2 className="ornate-text font-heading text-2xl font-bold flex items-center">
+              <h2 className="font-heading text-2xl font-bold flex items-center">
                 <Star className="h-6 w-6 mr-3" />
                 Your Progress
               </h2>
@@ -172,7 +172,7 @@ export default function ThemesPage() {
 
           <div className="room-furniture">
             <div className="space-y-6">
-              <h2 className="ornate-text font-heading text-2xl font-bold flex items-center">
+              <h2 className="font-heading text-2xl font-bold flex items-center">
                 <Zap className="h-6 w-6 mr-3" />
                 Unlock Choices
               </h2>
@@ -226,7 +226,7 @@ export default function ThemesPage() {
               <div className="text-center mb-8">
                 <div className="flex items-center justify-center mb-4">
                   <Home className="h-7 w-7 text-accent-gold mr-3" />
-                  <h2 className="ornate-text font-heading text-3xl font-bold">Ground Floor</h2>
+                  <h2 className="font-heading text-3xl font-bold">Ground Floor</h2>
                   <Badge variant="secondary" className="ml-4 font-body text-base px-4 py-2">
                     Choose Your Path
                   </Badge>
@@ -250,7 +250,7 @@ export default function ThemesPage() {
               <div className="text-center mb-8">
                 <div className="flex items-center justify-center mb-4">
                   <ArrowUp className="h-7 w-7 text-accent-gold mr-3" />
-                  <h2 className="ornate-text font-heading text-3xl font-bold">Second Floor</h2>
+                  <h2 className="font-heading text-3xl font-bold">Second Floor</h2>
                   <Badge variant="secondary" className="ml-4 font-body text-base px-4 py-2">
                     Levels 40-70
                   </Badge>
@@ -273,7 +273,7 @@ export default function ThemesPage() {
               <div className="text-center mb-8">
                 <div className="flex items-center justify-center mb-4">
                   <ArrowDown className="h-7 w-7 text-accent-gold mr-3" />
-                  <h2 className="ornate-text font-heading text-3xl font-bold">Basement</h2>
+                  <h2 className="font-heading text-3xl font-bold">Basement</h2>
                   <Badge variant="secondary" className="ml-4 font-body text-base px-4 py-2">
                     Levels 75-95
                   </Badge>
@@ -295,7 +295,7 @@ export default function ThemesPage() {
         <div className="room-furniture text-center">
           <div className="space-y-6">
             <Portal className="h-20 w-20 text-accent-gold mx-auto animate-pulse" />
-            <h3 className="ornate-text font-heading text-3xl font-bold">The Ultimate Adventure Awaits</h3>
+            <h3 className="font-heading text-3xl font-bold">The Ultimate Adventure Awaits</h3>
             <p className="font-body text-muted-foreground max-w-4xl mx-auto text-lg leading-relaxed">
               Reach Level 100 to unlock the Portal System and access infinite dimensional realms. Each dimension offers
               unique rooms, fresh XP activities, and completely new ways to experience your gaming journey. No grinding

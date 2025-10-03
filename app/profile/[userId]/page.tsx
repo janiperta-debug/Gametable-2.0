@@ -149,7 +149,7 @@ export default function UserProfilePage({ params }: { params: { userId: string }
           <div className="space-y-6">
             {/* Header with Level and XP */}
             <div className="flex items-center justify-between flex-wrap gap-4 pb-4 border-b border-accent-gold/20">
-              <h2 className="text-3xl font-charm ornate-text text-accent-gold">Gaming Progress</h2>
+              <h2 className="text-3xl text-accent-gold font-merriweather">Gaming Progress</h2>
               <div className="flex items-center gap-4">
                 <div className="px-5 py-2 bg-accent-gold/20 border border-accent-gold/40 rounded-lg">
                   <span className="text-xl font-cinzel text-accent-gold">LEVEL {userData.level}</span>

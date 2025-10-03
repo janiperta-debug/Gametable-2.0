@@ -16,7 +16,7 @@ export function FriendsList() {
   return (
     <div className="room-furniture p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-charm ornate-text text-accent-gold">Friends ({mockFriends.length})</h2>
+        <h2 className="text-3xl text-accent-gold">Friends ({mockFriends.length})</h2>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

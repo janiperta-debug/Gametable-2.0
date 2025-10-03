@@ -11,17 +11,45 @@ import { BookOpen, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MOCK_GAMES } from "@/lib/mock-games"
+import { useToast } from "@/hooks/use-toast"
 
 type CategoryType = "all" | "board-games" | "rpgs" | "miniatures" | "trading-cards"
 
 export default function Collection() {
   const [activeTab, setActiveTab] = useState<"my-games" | "find-games">("my-games")
   const [showFilters, setShowFilters] = useState(false)
+  const { toast } = useToast()
 
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>("all")
   const [sortBy, setSortBy] = useState<SortOption>("name-asc")
+
+  const handleToggleForTrade = (gameId: string) => {
+    const game = MOCK_GAMES.find((g) => g.id === gameId)
+    if (game) {
+      // In real implementation, this would update Firebase
+      toast({
+        title: game.forTrade ? "Removed from Marketplace" : "Added to Marketplace",
+        description: game.forTrade
+          ? `${game.title} is no longer available for trade`
+          : `${game.title} is now available in the Marketplace`,
+      })
+    }
+  }
+
+  const handleToggleWishlist = (gameId: string) => {
+    const game = MOCK_GAMES.find((g) => g.id === gameId)
+    if (game) {
+      // In real implementation, this would update Firebase
+      toast({
+        title: game.wishlist ? "Removed from Wishlist" : "Added to Wishlist",
+        description: game.wishlist
+          ? `${game.title} removed from your wishlist`
+          : `${game.title} added to your wishlist`,
+      })
+    }
+  }
 
   const filteredAndSortedGames = useMemo(() => {
     let filtered = [...MOCK_GAMES]
@@ -60,7 +88,7 @@ export default function Collection() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <BookOpen className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="ornate-text font-heading text-5xl font-bold">Game Collection</h1>
+            <h1 className="logo-text text-5xl font-bold">Game Collection</h1>
           </div>
           <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
             Manage your library and discover new games to add to your collection
@@ -117,7 +145,11 @@ export default function Collection() {
                   </Button>
                 </div>
                 {viewMode === "grid" ? (
-                  <GameGrid games={filteredAndSortedGames} />
+                  <GameGrid
+                    games={filteredAndSortedGames}
+                    onToggleForTrade={handleToggleForTrade}
+                    showMarketplaceButton={true}
+                  />
                 ) : (
                   <GameList games={filteredAndSortedGames} />
                 )}
@@ -125,7 +157,7 @@ export default function Collection() {
             </div>
           </>
         ) : (
-          <DiscoverGames />
+          <DiscoverGames onToggleWishlist={handleToggleWishlist} />
         )}
       </main>
     </div>

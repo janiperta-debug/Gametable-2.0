@@ -10,7 +10,7 @@ export function ProfileNotifications() {
   return (
     <div className="room-furniture p-6">
       <button onClick={() => setIsExpanded(!isExpanded)} className="w-full flex items-center justify-between text-left">
-        <h2 className="text-2xl font-charm ornate-text text-accent-gold">My Notifications ({unreadCount} unread)</h2>
+        <h2 className="text-2xl text-accent-gold">My Notifications ({unreadCount} unread)</h2>
         {isExpanded ? (
           <ChevronUp className="w-5 h-5 text-accent-gold" />
         ) : (

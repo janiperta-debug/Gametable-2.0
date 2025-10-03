@@ -71,7 +71,7 @@ export default function NotificationsPage() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <Bell className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="ornate-text font-heading text-5xl font-bold">Notifications</h1>
+            <h1 className="logo-text text-5xl font-bold">Notifications</h1>
             {unreadCount > 0 && (
               <Badge variant="destructive" className="ml-3">
                 {unreadCount} new
@@ -158,7 +158,7 @@ export default function NotificationsPage() {
           <Card className="room-furniture max-w-2xl mx-auto">
             <CardContent className="p-12 text-center">
               <Bell className="h-16 w-16 text-accent-gold mx-auto mb-4" />
-              <h3 className="ornate-text font-heading text-xl font-semibold mb-2">All Caught Up!</h3>
+              <h3 className="font-heading text-xl font-semibold mb-2">All Caught Up!</h3>
               <p className="font-body text-muted-foreground">
                 You have no new notifications. Check back later for updates from your gaming community.
               </p>

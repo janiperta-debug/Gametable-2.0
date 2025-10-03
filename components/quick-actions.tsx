@@ -33,7 +33,7 @@ export function QuickActions() {
   return (
     <Card className="room-furniture">
       <CardHeader>
-        <CardTitle className="text-xl font-charm ornate-text">Quick Actions</CardTitle>
+        <CardTitle className="text-xl">Quick Actions</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">

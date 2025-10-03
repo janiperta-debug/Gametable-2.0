@@ -53,9 +53,9 @@ export default function ContactPage() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <Mail className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="ornate-text font-heading text-5xl font-bold">Contact Us</h1>
+            <h1 className="logo-text text-5xl font-bold">Contact Us</h1>
           </div>
-          <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
+          <p className="text-muted-foreground text-xl max-w-3xl mx-auto">
             Get in touch with the GameTable team - we're here to help enhance your gaming experience
           </p>
         </div>
@@ -64,11 +64,11 @@ export default function ContactPage() {
           <div>
             <Card className="room-furniture">
               <CardHeader>
-                <CardTitle className="ornate-text font-heading text-2xl font-bold flex items-center">
+                <CardTitle className="text-2xl font-bold flex items-center">
                   <Send className="h-6 w-6 mr-3 text-accent-gold" />
                   Send us a Message
                 </CardTitle>
-                <p className="font-body text-muted-foreground">
+                <p className="text-muted-foreground">
                   Have a question, suggestion, or need assistance? We'd love to hear from you.
                 </p>
               </CardHeader>
@@ -76,26 +76,20 @@ export default function ContactPage() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="firstName" className="font-body">
-                        First Name
-                      </Label>
+                      <Label htmlFor="firstName">First Name</Label>
                       <Input
                         id="firstName"
                         placeholder="Enter your first name"
-                        className="font-body"
                         value={formData.firstName}
                         onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="lastName" className="font-body">
-                        Last Name
-                      </Label>
+                      <Label htmlFor="lastName">Last Name</Label>
                       <Input
                         id="lastName"
                         placeholder="Enter your last name"
-                        className="font-body"
                         value={formData.lastName}
                         onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                         required
@@ -103,40 +97,32 @@ export default function ContactPage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="font-body">
-                      Email Address
-                    </Label>
+                    <Label htmlFor="email">Email Address</Label>
                     <Input
                       id="email"
                       type="email"
                       placeholder="your.email@example.com"
-                      className="font-body"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="subject" className="font-body">
-                      Subject
-                    </Label>
+                    <Label htmlFor="subject">Subject</Label>
                     <Input
                       id="subject"
                       placeholder="What's this about?"
-                      className="font-body"
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="message" className="font-body">
-                      Message
-                    </Label>
+                    <Label htmlFor="message">Message</Label>
                     <Textarea
                       id="message"
                       placeholder="Tell us how we can help you..."
-                      className="min-h-[120px] font-body"
+                      className="min-h-[120px]"
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       required
@@ -150,7 +136,7 @@ export default function ContactPage() {
                   )}
                   <Button type="submit" className="w-full theme-accent-gold" size="lg" disabled={isSubmitting}>
                     <Send className="h-4 w-4 mr-2" />
-                    <span className="font-body">{isSubmitting ? "Sending..." : "Send Message"}</span>
+                    <span>{isSubmitting ? "Sending..." : "Send Message"}</span>
                   </Button>
                 </form>
               </CardContent>
@@ -160,8 +146,8 @@ export default function ContactPage() {
           <div>
             <Card className="room-furniture">
               <CardHeader>
-                <CardTitle className="ornate-text font-heading text-2xl font-bold">Get in Touch</CardTitle>
-                <p className="font-body text-muted-foreground">Connect with us on social media</p>
+                <CardTitle className="text-2xl font-bold">Get in Touch</CardTitle>
+                <p className="text-muted-foreground">Connect with us on social media</p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <a
@@ -174,8 +160,8 @@ export default function ContactPage() {
                     <Twitter className="h-6 w-6" />
                   </div>
                   <div>
-                    <h4 className="font-heading font-semibold text-lg">X (Twitter)</h4>
-                    <p className="font-body text-sm text-muted-foreground">Follow us for updates and news</p>
+                    <h4 className="font-semibold text-lg">X (Twitter)</h4>
+                    <p className="text-sm text-muted-foreground">Follow us for updates and news</p>
                   </div>
                 </a>
 
@@ -189,8 +175,8 @@ export default function ContactPage() {
                     <Facebook className="h-6 w-6" />
                   </div>
                   <div>
-                    <h4 className="font-heading font-semibold text-lg">Facebook</h4>
-                    <p className="font-body text-sm text-muted-foreground">Join our community</p>
+                    <h4 className="font-semibold text-lg">Facebook</h4>
+                    <p className="text-sm text-muted-foreground">Join our community</p>
                   </div>
                 </a>
 
@@ -204,8 +190,8 @@ export default function ContactPage() {
                     <Instagram className="h-6 w-6" />
                   </div>
                   <div>
-                    <h4 className="font-heading font-semibold text-lg">Instagram</h4>
-                    <p className="font-body text-sm text-muted-foreground">See our latest photos</p>
+                    <h4 className="font-semibold text-lg">Instagram</h4>
+                    <p className="text-sm text-muted-foreground">See our latest photos</p>
                   </div>
                 </a>
 
@@ -221,8 +207,8 @@ export default function ContactPage() {
                     </svg>
                   </div>
                   <div>
-                    <h4 className="font-heading font-semibold text-lg">TikTok</h4>
-                    <p className="font-body text-sm text-muted-foreground">Watch our gaming content</p>
+                    <h4 className="font-semibold text-lg">TikTok</h4>
+                    <p className="text-sm text-muted-foreground">Watch our gaming content</p>
                   </div>
                 </a>
               </CardContent>
@@ -233,8 +219,8 @@ export default function ContactPage() {
         <div className="mt-16 max-w-6xl mx-auto">
           <Card className="room-furniture border-accent-gold/30">
             <CardHeader className="text-center">
-              <CardTitle className="ornate-text font-heading text-3xl font-bold">Legal Information</CardTitle>
-              <p className="font-body text-muted-foreground">Learn about our policies and your rights</p>
+              <CardTitle className="text-3xl font-bold">Legal Information</CardTitle>
+              <p className="text-muted-foreground">Learn about our policies and your rights</p>
             </CardHeader>
             <CardContent>
               <div className="grid gap-6 md:grid-cols-2 mb-8">
@@ -243,13 +229,11 @@ export default function ContactPage() {
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent-gold/20 mb-4">
                       <Shield className="h-8 w-8 text-accent-gold" />
                     </div>
-                    <h3 className="ornate-text font-heading text-xl font-bold mb-2">Privacy Policy</h3>
-                    <p className="font-body text-sm text-muted-foreground mb-4">
-                      How we collect, use, and protect your data
-                    </p>
+                    <h3 className="text-xl font-bold mb-2">Privacy Policy</h3>
+                    <p className="text-sm text-muted-foreground mb-4">How we collect, use, and protect your data</p>
                     <Link href="/privacy-page">
                       <Button variant="outline" className="bg-transparent">
-                        <span className="font-body">Read Policy</span>
+                        <span>Read Policy</span>
                       </Button>
                     </Link>
                   </CardContent>
@@ -260,11 +244,11 @@ export default function ContactPage() {
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent-gold/20 mb-4">
                       <FileText className="h-8 w-8 text-accent-gold" />
                     </div>
-                    <h3 className="ornate-text font-heading text-xl font-bold mb-2">Terms of Service</h3>
-                    <p className="font-body text-sm text-muted-foreground mb-4">Your rights and responsibilities</p>
+                    <h3 className="text-xl font-bold mb-2">Terms of Service</h3>
+                    <p className="text-sm text-muted-foreground mb-4">Your rights and responsibilities</p>
                     <Link href="/terms-page">
                       <Button variant="outline" className="bg-transparent">
-                        <span className="font-body">Read Terms</span>
+                        <span>Read Terms</span>
                       </Button>
                     </Link>
                   </CardContent>
@@ -272,7 +256,7 @@ export default function ContactPage() {
               </div>
 
               <div className="text-center p-4 rounded-lg bg-accent-gold/10 border border-accent-gold/20">
-                <p className="font-body text-sm">
+                <p className="text-sm">
                   For GDPR-related inquiries, please email{" "}
                   <a href="mailto:gametableapp.contact@gmail.com" className="text-accent-gold hover:underline">
                     gametableapp.contact@gmail.com

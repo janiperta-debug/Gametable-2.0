@@ -62,13 +62,18 @@ export default function AnnouncementsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#2D0A0A] to-[#1A0505] p-6">
+    <div className="min-h-screen page-background p-6">
       <div className="max-w-4xl mx-auto">
-        <div className="border-2 border-[#8B6914] rounded-lg p-8 bg-[#3D1010]/80 backdrop-blur">
+        <div className="room-furniture p-8">
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-2">
-              <svg className="w-8 h-8 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-8 h-8 text-[hsl(var(--accent-gold))]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -76,9 +81,9 @@ export default function AnnouncementsPage() {
                   d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                 />
               </svg>
-              <h1 className="text-3xl font-serif text-[#D4AF37]">Manor Announcement Composer</h1>
+              <h1 className="text-3xl font-serif text-[hsl(var(--accent-gold))]">Manor Announcement Composer</h1>
             </div>
-            <p className="text-[#D4AF37]/70 text-sm">
+            <p className="text-[hsl(var(--accent-gold)/0.7)] text-sm">
               Create formal correspondence from the manor staff to all residents. Your message will be delivered with
               elegant manor theming.
             </p>
@@ -86,7 +91,7 @@ export default function AnnouncementsPage() {
 
           {/* Subject Field */}
           <div className="mb-6">
-            <Label htmlFor="subject" className="text-[#D4AF37] mb-2 block">
+            <Label htmlFor="subject" className="text-[hsl(var(--accent-gold))] mb-2 block">
               Subject
             </Label>
             <Input
@@ -94,15 +99,15 @@ export default function AnnouncementsPage() {
               value={subject}
               onChange={(e) => setSubject(e.target.value.slice(0, 200))}
               placeholder="e.g., New Gaming Features Available, Manor Maintenance Notice..."
-              className="bg-[#2D0A0A] border-[#8B6914] text-[#D4AF37] placeholder:text-[#8B6914]"
+              className="bg-[hsl(var(--surface-dark))] border-[hsl(var(--accent-gold)/0.4)] text-[hsl(var(--accent-gold))] placeholder:text-[hsl(var(--accent-copper))]"
               maxLength={200}
             />
-            <p className="text-xs text-[#8B6914] mt-1">{subject.length}/200 characters</p>
+            <p className="text-xs text-[hsl(var(--accent-copper))] mt-1">{subject.length}/200 characters</p>
           </div>
 
           {/* Message Field */}
           <div className="mb-6">
-            <Label htmlFor="message" className="text-[#D4AF37] mb-2 block">
+            <Label htmlFor="message" className="text-[hsl(var(--accent-gold))] mb-2 block">
               Message
             </Label>
             <Textarea
@@ -110,35 +115,35 @@ export default function AnnouncementsPage() {
               value={message}
               onChange={(e) => setMessage(e.target.value.slice(0, 5000))}
               placeholder="Compose your manor announcement here. This will be formatted as elegant correspondence from the manor staff..."
-              className="bg-[#2D0A0A] border-[#8B6914] text-[#D4AF37] placeholder:text-[#8B6914] min-h-[200px]"
+              className="bg-[hsl(var(--surface-dark))] border-[hsl(var(--accent-gold)/0.4)] text-[hsl(var(--accent-gold))] placeholder:text-[hsl(var(--accent-copper))] min-h-[200px]"
               maxLength={5000}
             />
-            <p className="text-xs text-[#8B6914] mt-1">{message.length}/5000 characters</p>
+            <p className="text-xs text-[hsl(var(--accent-copper))] mt-1">{message.length}/5000 characters</p>
           </div>
 
           {/* Test Mode Toggle */}
-          <div className="mb-6 flex items-center gap-3 p-4 bg-[#2D0A0A] border border-[#8B6914] rounded">
+          <div className="mb-6 flex items-center gap-3 p-4 bg-[hsl(var(--surface-dark))] border border-[hsl(var(--accent-gold)/0.4)] rounded">
             <Switch
               id="test-mode"
               checked={testMode}
               onCheckedChange={setTestMode}
-              className="data-[state=checked]:bg-[#D4AF37]"
+              className="data-[state=checked]:bg-[hsl(var(--accent-gold))]"
             />
             <div className="flex-1">
-              <Label htmlFor="test-mode" className="text-[#D4AF37] font-semibold cursor-pointer">
+              <Label htmlFor="test-mode" className="text-[hsl(var(--accent-gold))] font-semibold cursor-pointer">
                 🧪 Test Mode (send only to me)
               </Label>
-              <p className="text-xs text-[#D4AF37]/70 mt-1">
+              <p className="text-xs text-[hsl(var(--accent-gold)/0.7)] mt-1">
                 ✓ Safe mode: Announcement will only be sent to your email for testing
               </p>
             </div>
           </div>
 
           {/* Info Box */}
-          <div className="mb-6 p-4 bg-[#8B6914]/20 border border-[#8B6914] rounded">
+          <div className="mb-6 p-4 bg-[hsl(var(--accent-gold)/0.1)] border border-[hsl(var(--accent-gold)/0.4)] rounded">
             <div className="flex gap-2">
               <svg
-                className="w-5 h-5 text-[#D4AF37] flex-shrink-0 mt-0.5"
+                className="w-5 h-5 text-[hsl(var(--accent-gold))] flex-shrink-0 mt-0.5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -150,14 +155,14 @@ export default function AnnouncementsPage() {
                   d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <div className="text-sm text-[#D4AF37]">
+              <div className="text-sm text-[hsl(var(--accent-gold))]">
                 <p className="mb-1">
                   Your announcement will be formatted with manor theming and sent as{" "}
                   <span className="font-semibold">"The manor staff wishes to inform you..."</span> followed by your
                   message.
                 </p>
                 {testMode && (
-                  <p className="text-[#D4AF37] font-semibold flex items-center gap-1">
+                  <p className="text-[hsl(var(--accent-gold))] font-semibold flex items-center gap-1">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path
                         fillRule="evenodd"
@@ -176,7 +181,7 @@ export default function AnnouncementsPage() {
           <Button
             onClick={handleSend}
             disabled={isSending || !subject.trim() || !message.trim()}
-            className="w-full bg-[#8B6914] hover:bg-[#D4AF37] text-[#2D0A0A] font-semibold py-6 text-lg"
+            className="w-full theme-accent-gold font-semibold py-6 text-lg"
           >
             {isSending ? (
               <span className="flex items-center gap-2">

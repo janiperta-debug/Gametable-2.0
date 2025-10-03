@@ -44,7 +44,7 @@ export default function HomePage() {
         </div>
 
         {/* Main title */}
-        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-charm ornate-text mb-4">GameTable</h1>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl logo-text ornate-text mb-4">GameTable</h1>
 
         {/* Decorative line with diamond */}
         <div className="flex items-center justify-center space-x-2 md:space-x-4 mb-4 md:mb-6">
@@ -56,15 +56,12 @@ export default function HomePage() {
         </div>
 
         {/* Subtitle */}
-        <h2
-          className="text-xl sm:text-2xl md:text-3xl font-cinzel mb-6 md:mb-8 px-4"
-          style={{ color: "hsl(var(--accent-gold))" }}
-        >
+        <h2 className="text-xl sm:text-2xl md:text-3xl mb-6 md:mb-8 px-4" style={{ color: "hsl(var(--accent-gold))" }}>
           Welcome to Your Exclusive Gaming Manor
         </h2>
 
         {/* Description */}
-        <p className="text-base sm:text-lg md:text-xl font-merriweather text-foreground max-w-3xl mx-auto leading-relaxed mb-6 md:mb-8 px-4">
+        <p className="text-base sm:text-lg md:text-xl text-foreground max-w-3xl mx-auto leading-relaxed mb-6 md:mb-8 px-4">
           Step into an elegant sanctuary where tabletop enthusiasts gather to discover remarkable games, forge lasting
           friendships, and create unforgettable gaming experiences.
         </p>
@@ -73,7 +70,7 @@ export default function HomePage() {
         <div className="flex items-center justify-center space-x-2 mb-8 md:mb-12 px-4">
           <span style={{ color: "hsl(var(--accent-gold))" }}>♦</span>
           <span
-            className="font-cinzel uppercase tracking-wider text-xs sm:text-sm text-center"
+            className="uppercase tracking-wider text-xs sm:text-sm text-center"
             style={{ color: "hsl(var(--accent-gold))" }}
           >
             Est. for Distinguished Gaming Society
@@ -84,7 +81,7 @@ export default function HomePage() {
         {/* Call to action */}
         <Link
           href="/profile"
-          className="inline-block px-6 py-3 md:px-8 md:py-4 font-cinzel text-base md:text-lg border-2 hover:text-background transition-all duration-300 rounded-lg"
+          className="inline-block px-6 py-3 md:px-8 md:py-4 text-base md:text-lg border-2 hover:text-background transition-all duration-300 rounded-lg"
           style={{
             color: "hsl(var(--accent-gold))",
             borderColor: "hsl(var(--accent-gold))",

@@ -17,7 +17,7 @@ export function AccountManagement() {
   return (
     <div className="room-furniture p-6 space-y-6">
       <div>
-        <h2 className="text-2xl font-charm ornate-text text-accent-gold mb-2">Account Management</h2>
+        <h2 className="text-2xl text-accent-gold mb-2">Account Management</h2>
         <p className="text-sm font-merriweather text-accent-gold/60">
           Manage your account data and deletion. These actions cannot be undone.
         </p>

@@ -16,7 +16,7 @@ export function PrivacyControls() {
       <div className="flex items-center space-x-3">
         <Shield className="w-6 h-6 text-accent-gold" />
         <div>
-          <h2 className="text-2xl font-charm ornate-text">Privacy Controls</h2>
+          <h2 className="text-2xl">Privacy Controls</h2>
           <p className="text-sm font-merriweather text-muted-foreground">
             Control what information is visible to other players and manage your profile privacy settings.
           </p>

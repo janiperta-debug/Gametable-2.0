@@ -9,7 +9,7 @@ import { AccountManagement } from "@/components/account-management"
 
 export default function ProfilePage() {
   return (
-    <div className="min-h-screen main-hall-bg-pattern">
+    <div className="min-h-screen page-background">
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Profile Header */}
         <ProfileHeader />

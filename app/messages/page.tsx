@@ -99,7 +99,7 @@ export default function MessagingPage() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <MessageCircle className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="ornate-text font-heading text-5xl font-bold">Messages</h1>
+            <h1 className="logo-text text-5xl font-bold">Messages</h1>
           </div>
           <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
             Connect and communicate with your gaming community

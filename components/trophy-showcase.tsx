@@ -36,7 +36,7 @@ export function TrophyShowcase() {
   return (
     <Card className="room-furniture">
       <CardHeader>
-        <CardTitle className="text-xl font-charm ornate-text">Trophy Showcase</CardTitle>
+        <CardTitle className="text-xl">Trophy Showcase</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -45,12 +45,12 @@ export function TrophyShowcase() {
               <trophy.icon className={`h-8 w-8 ${trophy.color}`} />
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
-                  <h4 className="font-cinzel font-medium text-sm">{trophy.title}</h4>
+                  <h4 className="font-medium text-sm">{trophy.title}</h4>
                   <Badge variant="outline" className="text-xs">
                     {trophy.rarity}
                   </Badge>
                 </div>
-                <p className="text-xs text-muted-foreground font-merriweather">{trophy.description}</p>
+                <p className="text-xs text-muted-foreground">{trophy.description}</p>
                 <p className="text-xs text-muted-foreground mt-1">Earned {trophy.earned}</p>
               </div>
             </div>

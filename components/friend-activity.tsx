@@ -37,7 +37,7 @@ export function FriendActivity() {
   return (
     <Card className="room-furniture">
       <CardHeader>
-        <CardTitle className="text-xl font-charm ornate-text">Friend Activity</CardTitle>
+        <CardTitle className="text-xl font-merriweather">Friend Activity</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

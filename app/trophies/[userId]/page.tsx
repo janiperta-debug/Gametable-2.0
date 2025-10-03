@@ -51,7 +51,7 @@ export default function TrophiesPage({ params }: { params: { userId: string } })
         <div className="room-furniture p-8 mb-8">
           <div className="flex items-center justify-between flex-wrap gap-6">
             <div>
-              <h1 className="text-5xl font-charm ornate-text text-accent-gold mb-2">Trophy Collection</h1>
+              <h1 className="text-5xl font-charm logo-text mb-2">Trophy Collection</h1>
               <p className="text-lg font-merriweather text-muted-foreground">
                 Achievements earned through dedication and mastery
               </p>
@@ -86,7 +86,7 @@ export default function TrophiesPage({ params }: { params: { userId: string } })
                 {/* Series Header */}
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-accent-gold/20">
                   <div>
-                    <h2 className="text-2xl font-charm text-accent-gold mb-1">{seriesName}</h2>
+                    <h2 className="text-2xl text-accent-gold mb-1">{seriesName}</h2>
                     <p className="text-sm font-merriweather text-muted-foreground">
                       {earnedInSeries} of {badges.length} tiers earned
                     </p>

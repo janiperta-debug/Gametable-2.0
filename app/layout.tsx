@@ -48,7 +48,7 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${charm.variable} ${cinzel.variable} ${marcellus.variable} ${merriweather.variable}`}
     >
-      <body className={inter.className}>
+      <body className={merriweather.className}>
         <AppThemeProvider>
           <div className="min-h-screen room-environment">
             <Navigation />

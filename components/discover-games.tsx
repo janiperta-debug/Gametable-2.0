@@ -25,7 +25,11 @@ const databaseSources = {
   "Trading Cards": { name: "TCGPlayer", url: "https://www.tcgplayer.com/search/all/product?q=" },
 }
 
-export function DiscoverGames() {
+interface DiscoverGamesProps {
+  onToggleWishlist?: (gameId: string) => void
+}
+
+export function DiscoverGames({ onToggleWishlist }: DiscoverGamesProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("Board Games")
   const [searchQuery, setSearchQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
@@ -52,7 +56,7 @@ export function DiscoverGames() {
       {/* Search and Filters */}
       <Card className="room-furniture">
         <CardHeader>
-          <CardTitle className="text-2xl font-charm ornate-text">Discover New Games</CardTitle>
+          <CardTitle className="text-2xl">Discover New Games</CardTitle>
           <p className="font-merriweather text-muted-foreground">
             Search the vast library to find and add games to your personal collection.
           </p>
@@ -141,7 +145,12 @@ export function DiscoverGames() {
                       View Details
                     </Button>
                   </Link>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-accent-gold">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onToggleWishlist?.(game.id.toString())}
+                    className="text-muted-foreground hover:text-accent-gold"
+                  >
                     <Heart className="h-4 w-4" />
                   </Button>
                 </div>

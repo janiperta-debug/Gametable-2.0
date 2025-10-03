@@ -12,10 +12,10 @@ export function ProgressLevel() {
 
   return (
     <div className="room-furniture p-6 space-y-4">
-      <h2 className="text-2xl font-charm ornate-text text-accent-gold">Progress & Level</h2>
+      {/* Level Display */}
+      <h2 className="text-2xl text-accent-gold">Progress & Level</h2>
 
       <div className="space-y-4">
-        {/* Level Display */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="px-6 py-3 bg-accent-gold/20 border border-accent-gold/40 rounded">

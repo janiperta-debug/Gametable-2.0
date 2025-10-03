@@ -22,7 +22,7 @@ export function GamingProgress() {
       {/* Header with Level and XP */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-6">
-          <h2 className="text-3xl font-charm ornate-text text-accent-gold">Gaming Progress</h2>
+          <h2 className="text-3xl text-accent-gold">Gaming Progress</h2>
           <div className="flex items-center gap-4">
             <div className="px-5 py-2 bg-accent-gold/20 border border-accent-gold/40 rounded-lg">
               <span className="text-xl font-cinzel text-accent-gold">LEVEL {stats.level}</span>

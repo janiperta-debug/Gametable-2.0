@@ -14,7 +14,8 @@ export function Navigation() {
 
   const navItems = [
     { href: "/collection", label: "Collection" },
-    { href: "/discover", label: "Community" }, // Point Community to discover page which has both friend activity and player search
+    { href: "/discover", label: "Community" },
+    { href: "/marketplace", label: "Marketplace" },
     { href: "/events", label: "Events" },
     { href: "/themes", label: "Themes" },
     { href: "/messages", label: "Messages" },
