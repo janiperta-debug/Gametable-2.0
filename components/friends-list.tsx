@@ -4,23 +4,20 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import Link from "next/link"
 
-// Mock data - will be replaced with Firebase data
-const mockFriends = [
-  { id: "1", name: "Harsberi", avatar: "H", color: "bg-green-500" },
-  { id: "2", name: "kasper toikka", avatar: "k", color: "bg-pink-500" },
-  { id: "3", name: "Jesper Toikka", avatar: "J", color: "bg-blue-500" },
-  { id: "4", name: "jyri Perta", avatar: "j", color: "bg-orange-500" },
-]
-
 export function FriendsList() {
+  const friends: any[] = []
+
   return (
     <div className="room-furniture p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl text-accent-gold">Friends ({mockFriends.length})</h2>
+        <h2 className="text-3xl text-accent-gold">Friends ({friends.length})</h2>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {mockFriends.map((friend) => (
+      {friends.length === 0 ? (
+        <p className="text-muted-foreground font-merriweather">No friends yet. Connect with other gamers!</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {friends.map((friend) => (
           <div
             key={friend.id}
             className="p-5 bg-background/40 border border-accent-gold/30 rounded-lg hover:border-accent-gold/50 transition-colors"
@@ -50,8 +47,9 @@ export function FriendsList() {
               </Button>
             </div>
           </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <p className="text-sm font-merriweather text-accent-gold/60 italic pt-2">
         Your location and game interests are visible to others to help find gaming partners. Direct messaging and event

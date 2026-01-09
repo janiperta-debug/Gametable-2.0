@@ -3,45 +3,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Clock, Trophy, Gamepad2 } from "lucide-react"
 
-const activities = [
-  {
-    id: 1,
-    user: { name: "Alex Chen", avatar: "/placeholder.svg?height=32&width=32", initials: "AC" },
-    action: "completed",
-    game: "Wingspan",
-    time: "2 hours ago",
-    type: "game",
-    icon: Gamepad2,
-  },
-  {
-    id: 2,
-    user: { name: "Sarah Kim", avatar: "/placeholder.svg?height=32&width=32", initials: "SK" },
-    action: "earned trophy",
-    game: "Master Strategist",
-    time: "4 hours ago",
-    type: "trophy",
-    icon: Trophy,
-  },
-  {
-    id: 3,
-    user: { name: "Mike Johnson", avatar: "/placeholder.svg?height=32&width=32", initials: "MJ" },
-    action: "joined event",
-    game: "D&D Campaign Night",
-    time: "6 hours ago",
-    type: "event",
-    icon: Clock,
-  },
-]
-
 export function FriendActivity() {
+  const activities: any[] = []
+
   return (
     <Card className="room-furniture">
       <CardHeader>
         <CardTitle className="text-xl font-merriweather">Friend Activity</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {activities.map((activity) => (
+        {activities.length === 0 ? (
+          <p className="text-muted-foreground font-merriweather">No friend activity yet.</p>
+        ) : (
+          <div className="space-y-4">
+            {activities.map((activity) => (
             <div
               key={activity.id}
               className="flex items-center gap-3 p-3 rounded-lg bg-surface-dark/50 border border-accent-gold/10"
@@ -67,8 +42,9 @@ export function FriendActivity() {
                 {activity.type}
               </Badge>
             </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   )

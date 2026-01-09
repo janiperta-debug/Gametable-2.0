@@ -10,35 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, MapPin, Users } from "lucide-react"
 
-const players = [
-  {
-    id: 1,
-    name: "Sarah Chen",
-    location: "Seattle, WA",
-    avatar: "/placeholder.svg?height=64&width=64",
-    games: 156,
-    interests: ["Strategy", "Euro Games", "Worker Placement"],
-    status: "Looking for group",
-  },
-  {
-    id: 2,
-    name: "Mike Rodriguez",
-    location: "Portland, OR",
-    avatar: "/placeholder.svg?height=64&width=64",
-    games: 89,
-    interests: ["RPG", "D&D", "Storytelling"],
-    status: "Available weekends",
-  },
-  {
-    id: 3,
-    name: "Emma Thompson",
-    location: "Vancouver, BC",
-    avatar: "/placeholder.svg?height=64&width=64",
-    games: 203,
-    interests: ["Cooperative", "Legacy", "Campaign"],
-    status: "Hosting weekly",
-  },
-]
+const players: any[] = []
 
 export function DiscoverPlayers() {
   const [locationFilter, setLocationFilter] = useState("")

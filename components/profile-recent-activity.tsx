@@ -2,58 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { BookOpen, Calendar, Trophy, Users, Star, ExternalLink } from "lucide-react"
 
-const activities = [
-  {
-    id: 1,
-    type: "game_added",
-    title: "Added Everdell to collection",
-    description: "Rated 9/10 - 'Beautiful artwork and engaging gameplay'",
-    time: "2 hours ago",
-    icon: BookOpen,
-    color: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
-    action: "View Game",
-  },
-  {
-    id: 2,
-    type: "event_created",
-    title: "Created 'Strategy Game Night'",
-    description: "Friday 7:00 PM at The Gaming Lounge - 8 spots available",
-    time: "5 hours ago",
-    icon: Calendar,
-    color: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
-    action: "View Event",
-  },
-  {
-    id: 3,
-    type: "trophy_earned",
-    title: "Earned 'Collection Curator' trophy",
-    description: "Reached 250 games in your collection",
-    time: "1 day ago",
-    icon: Trophy,
-    color: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",
-    action: "View Trophy",
-  },
-  {
-    id: 4,
-    type: "friend_added",
-    title: "Connected with Sarah Chen",
-    description: "You now have 38 gaming friends",
-    time: "2 days ago",
-    icon: Users,
-    color: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
-    action: "View Profile",
-  },
-  {
-    id: 5,
-    type: "game_played",
-    title: "Played Wingspan",
-    description: "Won with 87 points - Personal best!",
-    time: "3 days ago",
-    icon: Star,
-    color: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
-    action: "Log Details",
-  },
-]
+const activities: any[] = []
 
 export function RecentActivity() {
   return (

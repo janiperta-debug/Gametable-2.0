@@ -1,38 +1,26 @@
-import { db } from "./firebase"
-import { collection, doc, getDocs, query, where, orderBy, updateDoc } from "firebase/firestore"
+import { supabase } from "./supabase"
 import type { Notification } from "./types"
-
-// Convert Firestore timestamp to Date
-function convertTimestamp(timestamp: any): Date {
-  if (timestamp?.toDate) {
-    return timestamp.toDate()
-  }
-  return new Date(timestamp)
-}
 
 // Get notifications for a user
 export async function getUserNotifications(userId: string): Promise<Notification[]> {
   console.log("[v0] Fetching notifications for user:", userId)
   try {
-    const notificationsRef = collection(db, "notifications")
-    const q = query(notificationsRef, where("userId", "==", userId), orderBy("createdAt", "desc"))
-    const snapshot = await getDocs(q)
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
 
-    const notifications = snapshot.docs.map((doc) => {
-      const data = doc.data()
-      return {
-        id: doc.id,
-        userId: data.userId,
-        type: data.type,
-        message: data.message,
-        read: data.read || false,
-        createdAt: convertTimestamp(data.createdAt),
-        relatedId: data.relatedId,
-      } as Notification
-    })
-
-    console.log(`[v0] Found ${notifications.length} notifications`)
-    return notifications
+    if (error) throw error
+    return (data || []).map((notif) => ({
+      id: notif.id,
+      userId: notif.user_id,
+      type: notif.type,
+      message: notif.message,
+      read: notif.read || false,
+      createdAt: new Date(notif.created_at),
+      relatedId: notif.related_id,
+    })) as Notification[]
   } catch (error) {
     console.error("[v0] Error fetching notifications:", error)
     return []
@@ -43,12 +31,15 @@ export async function getUserNotifications(userId: string): Promise<Notification
 export async function getUnreadNotificationCount(userId: string): Promise<number> {
   console.log("[v0] Fetching unread notification count for user:", userId)
   try {
-    const notificationsRef = collection(db, "notifications")
-    const q = query(notificationsRef, where("userId", "==", userId), where("read", "==", false))
-    const snapshot = await getDocs(q)
+    const { count, error } = await supabase
+      .from("notifications")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("read", false)
 
-    console.log(`[v0] Found ${snapshot.size} unread notifications`)
-    return snapshot.size
+    if (error) throw error
+    console.log(`[v0] Found ${count} unread notifications`)
+    return count || 0
   } catch (error) {
     console.error("[v0] Error fetching unread count:", error)
     return 0
@@ -59,8 +50,12 @@ export async function getUnreadNotificationCount(userId: string): Promise<number
 export async function markNotificationAsRead(notificationId: string): Promise<void> {
   console.log("[v0] Marking notification as read:", notificationId)
   try {
-    const notificationRef = doc(db, "notifications", notificationId)
-    await updateDoc(notificationRef, { read: true })
+    const { error } = await supabase
+      .from("notifications")
+      .update({ read: true })
+      .eq("id", notificationId)
+
+    if (error) throw error
     console.log("[v0] Notification marked as read")
   } catch (error) {
     console.error("[v0] Error marking notification as read:", error)

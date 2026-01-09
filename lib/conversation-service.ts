@@ -1,40 +1,24 @@
-import { db } from "./firebase"
-import { collection, getDocs, query, where, orderBy } from "firebase/firestore"
+import { supabase } from "./supabase"
 import type { Conversation, Message } from "./types"
-
-// Convert Firestore timestamp to Date
-function convertTimestamp(timestamp: any): Date {
-  if (timestamp?.toDate) {
-    return timestamp.toDate()
-  }
-  return new Date(timestamp)
-}
 
 // Get conversations for a user
 export async function getUserConversations(userId: string): Promise<Conversation[]> {
   console.log("[v0] Fetching conversations for user:", userId)
   try {
-    const conversationsRef = collection(db, "conversations")
-    const q = query(
-      conversationsRef,
-      where("participants", "array-contains", userId),
-      orderBy("lastMessageTime", "desc"),
-    )
-    const snapshot = await getDocs(q)
+    const { data, error } = await supabase
+      .from("conversations")
+      .select("*")
+      .contains("participants", [userId])
+      .order("last_message_time", { ascending: false })
 
-    const conversations = snapshot.docs.map((doc) => {
-      const data = doc.data()
-      return {
-        id: doc.id,
-        participants: data.participants,
-        lastMessage: data.lastMessage,
-        lastMessageTime: convertTimestamp(data.lastMessageTime),
-        unreadBy: data.unreadBy || [],
-      } as Conversation
-    })
-
-    console.log(`[v0] Found ${conversations.length} conversations`)
-    return conversations
+    if (error) throw error
+    return (data || []).map((conv) => ({
+      id: conv.id,
+      participants: conv.participants,
+      lastMessage: conv.last_message,
+      lastMessageTime: new Date(conv.last_message_time),
+      unreadBy: conv.unread_by || [],
+    })) as Conversation[]
   } catch (error) {
     console.error("[v0] Error fetching conversations:", error)
     return []
@@ -45,23 +29,20 @@ export async function getUserConversations(userId: string): Promise<Conversation
 export async function getConversationMessages(conversationId: string): Promise<Message[]> {
   console.log("[v0] Fetching messages for conversation:", conversationId)
   try {
-    const messagesRef = collection(db, "conversations", conversationId, "messages")
-    const q = query(messagesRef, orderBy("timestamp", "asc"))
-    const snapshot = await getDocs(q)
+    const { data, error } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("conversation_id", conversationId)
+      .order("timestamp", { ascending: true })
 
-    const messages = snapshot.docs.map((doc) => {
-      const data = doc.data()
-      return {
-        id: doc.id,
-        senderId: data.senderId,
-        content: data.content,
-        timestamp: convertTimestamp(data.timestamp),
-        read: data.read || false,
-      } as Message
-    })
-
-    console.log(`[v0] Found ${messages.length} messages`)
-    return messages
+    if (error) throw error
+    return (data || []).map((msg) => ({
+      id: msg.id,
+      senderId: msg.sender_id,
+      content: msg.content,
+      timestamp: new Date(msg.timestamp),
+      read: msg.read || false,
+    })) as Message[]
   } catch (error) {
     console.error("[v0] Error fetching messages:", error)
     return []
