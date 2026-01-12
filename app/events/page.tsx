@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -9,92 +9,10 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar, MapPin, Users, Clock, Plus, Search, Filter, Star, Gamepad2 } from "lucide-react"
+import { getPublicEvents } from "@/lib/event-service"
 
-const upcomingEvents = [
-  {
-    id: 1,
-    title: "Strategy Game Night",
-    date: "Tonight",
-    time: "7:00 PM - 11:00 PM",
-    location: "The Gaming Lounge",
-    address: "123 Board Game Ave, Seattle, WA",
-    attendees: 8,
-    maxAttendees: 12,
-    host: "Mike Johnson",
-    hostAvatar: "/placeholder.svg?height=32&width=32",
-    category: "Board Games",
-    description: "Join us for an evening of strategic board games including Wingspan, Azul, and more!",
-    status: "attending",
-    featured: true,
-  },
-  {
-    id: 2,
-    title: "D&D: The Lost Mines Campaign",
-    date: "Tomorrow",
-    time: "2:00 PM - 6:00 PM",
-    location: "Mike's House",
-    address: "Private Location",
-    attendees: 5,
-    maxAttendees: 6,
-    host: "Sarah Chen",
-    hostAvatar: "/placeholder.svg?height=32&width=32",
-    category: "RPG",
-    description: "Continue our epic D&D 5e campaign as we explore the mysterious Lost Mines of Phandelver.",
-    status: "maybe",
-    featured: false,
-  },
-  {
-    id: 3,
-    title: "Magic: The Gathering Draft",
-    date: "Friday, Dec 15",
-    time: "6:30 PM - 10:00 PM",
-    location: "Local Game Store",
-    address: "456 Card Game St, Seattle, WA",
-    attendees: 12,
-    maxAttendees: 16,
-    host: "Alex Rivera",
-    hostAvatar: "/placeholder.svg?height=32&width=32",
-    category: "Card Game",
-    description: "Weekly MTG draft tournament with prizes for top performers. All skill levels welcome!",
-    status: "invited",
-    featured: false,
-  },
-  {
-    id: 4,
-    title: "Warhammer 40K Tournament",
-    date: "Saturday, Dec 16",
-    time: "10:00 AM - 6:00 PM",
-    location: "Gaming Convention Center",
-    address: "789 Miniature Way, Seattle, WA",
-    attendees: 24,
-    maxAttendees: 32,
-    host: "Emma Thompson",
-    hostAvatar: "/placeholder.svg?height=32&width=32",
-    category: "Miniatures",
-    description: "Competitive 40K tournament with multiple rounds. Bring your best army!",
-    status: "not_attending",
-    featured: true,
-  },
-]
-
-const myEvents = [
-  {
-    id: 5,
-    title: "Cooperative Game Night",
-    date: "Sunday, Dec 17",
-    time: "3:00 PM - 8:00 PM",
-    location: "My Place",
-    address: "Private Location",
-    attendees: 6,
-    maxAttendees: 8,
-    host: "You",
-    hostAvatar: "/placeholder.svg?height=32&width=32",
-    category: "Board Games",
-    description: "Let's tackle some challenging cooperative games like Pandemic Legacy and Spirit Island.",
-    status: "hosting",
-    featured: false,
-  },
-]
+const upcomingEvents: any[] = []
+const myEvents: any[] = []
 
 const statusColors = {
   attending: "bg-green-100 text-green-600 border-green-200 dark:bg-green-900/30 dark:text-green-400",
@@ -212,7 +130,19 @@ function EventCard({ event, onViewDetails }: { event: any; onViewDetails: (event
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState("upcoming")
   const [searchQuery, setSearchQuery] = useState("")
+  const [events, setEvents] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setLoading(true)
+      const data = await getPublicEvents()
+      setEvents(data)
+      setLoading(false)
+    }
+    fetchEvents()
+  }, [])
 
   const handleViewDetails = (event: any) => {
     router.push(`/events/${event.id}`)
@@ -274,19 +204,37 @@ export default function EventsPage() {
           </TabsList>
 
           <TabsContent value="upcoming">
-            <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {upcomingEvents.map((event) => (
-                <EventCard key={event.id} event={event} onViewDetails={handleViewDetails} />
-              ))}
-            </div>
+            {loading ? (
+              <Card className="room-furniture text-center py-12">
+                <CardContent>
+                  <p className="font-body text-muted-foreground">Loading events...</p>
+                </CardContent>
+              </Card>
+            ) : events.length === 0 ? (
+              <Card className="room-furniture text-center py-12">
+                <CardContent>
+                  <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
+                  <h3 className="ornate-text font-heading text-xl font-semibold mb-2">No Events Yet</h3>
+                  <p className="font-body text-muted-foreground">Create your first event or check back soon!</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {events.map((event) => (
+                  <EventCard key={event.id} event={event} onViewDetails={handleViewDetails} />
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="my-events">
-            <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {myEvents.map((event) => (
-                <EventCard key={event.id} event={event} onViewDetails={handleViewDetails} />
-              ))}
-            </div>
+            <Card className="room-furniture text-center py-12">
+              <CardContent>
+                <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
+                <h3 className="ornate-text font-heading text-xl font-semibold mb-2">No My Events Yet</h3>
+                <p className="font-body text-muted-foreground">Create your first event to see it here.</p>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="past">

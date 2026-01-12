@@ -10,7 +10,6 @@ import { ImportSection } from "@/components/import-section"
 import { BookOpen, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MOCK_GAMES } from "@/lib/mock-games"
 import { useToast } from "@/hooks/use-toast"
 
 type CategoryType = "all" | "board-games" | "rpgs" | "miniatures" | "trading-cards"
@@ -26,33 +25,21 @@ export default function Collection() {
   const [sortBy, setSortBy] = useState<SortOption>("name-asc")
 
   const handleToggleForTrade = (gameId: string) => {
-    const game = MOCK_GAMES.find((g) => g.id === gameId)
-    if (game) {
-      // In real implementation, this would update Firebase
-      toast({
-        title: game.forTrade ? "Removed from Marketplace" : "Added to Marketplace",
-        description: game.forTrade
-          ? `${game.title} is no longer available for trade`
-          : `${game.title} is now available in the Marketplace`,
-      })
-    }
+    toast({
+      title: "Updated",
+      description: "Game status updated in the marketplace",
+    })
   }
 
   const handleToggleWishlist = (gameId: string) => {
-    const game = MOCK_GAMES.find((g) => g.id === gameId)
-    if (game) {
-      // In real implementation, this would update Firebase
-      toast({
-        title: game.wishlist ? "Removed from Wishlist" : "Added to Wishlist",
-        description: game.wishlist
-          ? `${game.title} removed from your wishlist`
-          : `${game.title} added to your wishlist`,
-      })
-    }
+    toast({
+      title: "Updated",
+      description: "Game wishlist status updated",
+    })
   }
 
   const filteredAndSortedGames = useMemo(() => {
-    let filtered = [...MOCK_GAMES]
+    let filtered: any[] = []
 
     // Filter by search query
     if (searchQuery) {
