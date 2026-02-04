@@ -302,6 +302,9 @@ interface AppThemeProviderProps {
 
 export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) => {
   const [currentAppTheme, setCurrentAppTheme] = useState<AppThemeName>(DEFAULT_THEME)
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  console.log("[v0] AppThemeProvider rendering, currentAppTheme:", currentAppTheme, "isHydrated:", isHydrated)
 
   const setAppTheme = (theme: AppThemeName) => {
     setCurrentAppTheme(theme)
@@ -312,8 +315,11 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
   }
 
   useEffect(() => {
+    console.log("[v0] Initial useEffect running - loading theme from localStorage")
+    setIsHydrated(true)
     try {
       const saved = localStorage.getItem(APP_THEME_STORAGE_KEY)
+      console.log("[v0] Loaded theme from localStorage:", saved)
       if (saved && MANOR_THEMES.some((theme) => theme.id === saved)) {
         setCurrentAppTheme(saved as AppThemeName)
       }
