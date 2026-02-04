@@ -1,8 +1,5 @@
 "use server"
 
-import { db } from "@/lib/firebase"
-import { collection, getDocs } from "firebase/firestore"
-
 interface AnnouncementData {
   subject: string
   message: string
@@ -15,6 +12,13 @@ interface AnnouncementResult {
   recipientCount?: number
 }
 
+// Mock recipients for development
+const mockRecipients = [
+  "dragon@example.com",
+  "dice@example.com",
+  "mini@example.com",
+]
+
 export async function sendAnnouncement(data: AnnouncementData): Promise<AnnouncementResult> {
   try {
     const { subject, message, testMode } = data
@@ -24,12 +28,11 @@ export async function sendAnnouncement(data: AnnouncementData): Promise<Announce
 
     if (testMode) {
       // Test mode: send only to admin email
-      recipients = ["jani.perta@gmail.com"]
+      recipients = ["test@example.com"]
     } else {
-      // Production mode: get all user emails from Firebase
-      const usersRef = collection(db, "userProfiles")
-      const usersSnapshot = await getDocs(usersRef)
-      recipients = usersSnapshot.docs.map((doc) => doc.data().email).filter((email) => email) // Filter out any undefined emails
+      // Development mode: use mock recipients
+      // In production with Supabase, this will query the database
+      recipients = mockRecipients
     }
 
     if (recipients.length === 0) {
@@ -43,7 +46,7 @@ export async function sendAnnouncement(data: AnnouncementData): Promise<Announce
     const formattedMessage = `
       <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; background: linear-gradient(to bottom, #2D0A0A, #1A0505); color: #D4AF37; padding: 40px; border: 2px solid #8B6914; border-radius: 8px;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #D4AF37; font-size: 28px; margin: 0;">🏰 GameTable Manor</h1>
+          <h1 style="color: #D4AF37; font-size: 28px; margin: 0;">GameTable Manor</h1>
           <p style="color: #8B6914; font-size: 14px; margin-top: 8px;">Official Manor Correspondence</p>
         </div>
         
@@ -68,27 +71,34 @@ export async function sendAnnouncement(data: AnnouncementData): Promise<Announce
       </div>
     `
 
-    // Send emails using Resend
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: "GameTable Manor <onboarding@resend.dev>",
-        to: recipients,
-        subject: `🏰 ${subject}`,
-        html: formattedMessage,
-      }),
-    })
+    // In development, just log the email
+    // In production, this will use Resend
+    console.log("[v0] Mock announcement would be sent to:", recipients)
+    console.log("[v0] Subject:", subject)
 
-    if (!response.ok) {
-      const errorData = await response.json()
-      console.error("[v0] Resend error:", errorData)
-      return {
-        success: false,
-        error: errorData.message || "Failed to send announcement",
+    // Check if Resend API key is available for real sending
+    if (process.env.RESEND_API_KEY) {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        },
+        body: JSON.stringify({
+          from: "GameTable Manor <onboarding@resend.dev>",
+          to: recipients,
+          subject: `${subject}`,
+          html: formattedMessage,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error("[v0] Resend error:", errorData)
+        return {
+          success: false,
+          error: errorData.message || "Failed to send announcement",
+        }
       }
     }
 
