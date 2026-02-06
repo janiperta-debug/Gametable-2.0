@@ -3,6 +3,7 @@ import type { Conversation, Message } from "./types"
 
 // Get conversations for a user
 export async function getUserConversations(userId: string): Promise<Conversation[]> {
+  if (!supabase) return []
   console.log("[v0] Fetching conversations for user:", userId)
   try {
     const { data, error } = await supabase
@@ -27,6 +28,7 @@ export async function getUserConversations(userId: string): Promise<Conversation
 
 // Get messages for a conversation
 export async function getConversationMessages(conversationId: string): Promise<Message[]> {
+  if (!supabase) return []
   console.log("[v0] Fetching messages for conversation:", conversationId)
   try {
     const { data, error } = await supabase
