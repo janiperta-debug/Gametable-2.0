@@ -3,6 +3,7 @@ import type { Notification } from "./types"
 
 // Get notifications for a user
 export async function getUserNotifications(userId: string): Promise<Notification[]> {
+  if (!supabase) return []
   console.log("[v0] Fetching notifications for user:", userId)
   try {
     const { data, error } = await supabase
@@ -29,6 +30,7 @@ export async function getUserNotifications(userId: string): Promise<Notification
 
 // Get unread notification count
 export async function getUnreadNotificationCount(userId: string): Promise<number> {
+  if (!supabase) return 0
   console.log("[v0] Fetching unread notification count for user:", userId)
   try {
     const { count, error } = await supabase
@@ -48,6 +50,7 @@ export async function getUnreadNotificationCount(userId: string): Promise<number
 
 // Mark notification as read
 export async function markNotificationAsRead(notificationId: string): Promise<void> {
+  if (!supabase) return
   console.log("[v0] Marking notification as read:", notificationId)
   try {
     const { error } = await supabase

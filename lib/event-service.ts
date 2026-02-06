@@ -3,6 +3,7 @@ import type { Event } from "./types"
 
 // Get all public events
 export async function getPublicEvents(): Promise<Event[]> {
+  if (!supabase) return []
   console.log("[v0] Fetching public events")
   try {
     const { data, error } = await supabase
@@ -33,6 +34,7 @@ export async function getPublicEvents(): Promise<Event[]> {
 
 // Get events for a specific user (created by them or RSVP'd)
 export async function getUserEvents(userId: string): Promise<Event[]> {
+  if (!supabase) return []
   console.log("[v0] Fetching events for user:", userId)
   try {
     const { data, error } = await supabase
@@ -63,6 +65,7 @@ export async function getUserEvents(userId: string): Promise<Event[]> {
 
 // Get a single event by ID
 export async function getEventById(eventId: string): Promise<Event | null> {
+  if (!supabase) return null
   console.log("[v0] Fetching event:", eventId)
   try {
     const { data, error } = await supabase
