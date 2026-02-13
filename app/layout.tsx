@@ -2,8 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter, Charm, Cinzel, Marcellus, Merriweather } from "next/font/google"
 import "./globals.css"
-import { Navigation } from "@/components/navigation"
-import { AppThemeProvider } from "@/components/app-theme-provider"
+import { AppShell } from "@/components/app-shell"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -49,12 +48,7 @@ export default function RootLayout({
       className={`${inter.variable} ${charm.variable} ${cinzel.variable} ${marcellus.variable} ${merriweather.variable}`}
     >
       <body className={merriweather.className}>
-        <AppThemeProvider>
-          <div className="min-h-screen room-environment">
-            <Navigation />
-            <main className="pt-16">{children}</main>
-          </div>
-        </AppThemeProvider>
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   )
