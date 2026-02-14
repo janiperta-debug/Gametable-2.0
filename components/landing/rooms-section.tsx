@@ -1,56 +1,56 @@
 const rooms = [
   {
-    name: "Main Hall",
-    palette: "Burgundy & Gold",
+    name: "Pääsali",
+    palette: "Viininpunainen & Kulta",
     bg: "bg-[hsl(345,80%,15%)]",
     border: "border-[hsl(45,80%,60%)]/40",
     accent: "hsl(45,80%,60%)",
   },
   {
-    name: "Library",
-    palette: "Mahogany & Silver",
+    name: "Kirjasto",
+    palette: "Mahonki & Hopea",
     bg: "bg-[hsl(25,60%,12%)]",
     border: "border-[hsl(0,0%,75%)]/40",
     accent: "hsl(0,0%,75%)",
   },
   {
-    name: "Conservatory",
-    palette: "Forest Green & Copper",
+    name: "Talvipuutarha",
+    palette: "Metsänvihreä & Kupari",
     bg: "bg-[hsl(120,60%,10%)]",
     border: "border-[hsl(30,70%,55%)]/40",
     accent: "hsl(30,70%,55%)",
   },
   {
-    name: "Fireside Lounge",
-    palette: "Obsidian & Flame",
+    name: "Takkahuone",
+    palette: "Obsidiaani & Liekki",
     bg: "bg-[hsl(0,0%,13%)]",
     border: "border-[hsl(16,100%,50%)]/40",
     accent: "hsl(16,100%,50%)",
   },
   {
-    name: "Gallery",
-    palette: "Navy & Gold",
+    name: "Galleria",
+    palette: "Laivastonsininen & Kulta",
     bg: "bg-[hsl(240,100%,10%)]",
     border: "border-[hsl(45,80%,60%)]/40",
     accent: "hsl(45,80%,60%)",
   },
   {
-    name: "Ballroom",
-    palette: "Crystal White & Gold",
+    name: "Juhlasali",
+    palette: "Kristallinvalkoinen & Kulta",
     bg: "bg-[hsl(0,0%,95%)]",
     border: "border-[hsl(45,100%,50%)]/40",
     accent: "hsl(45,100%,50%)",
   },
   {
-    name: "Observatory",
-    palette: "Crimson & Silver",
+    name: "Observatorio",
+    palette: "Karmiininpunainen & Hopea",
     bg: "bg-[hsl(0,70%,18%)]",
     border: "border-[hsl(210,15%,65%)]/40",
     accent: "hsl(210,15%,65%)",
   },
   {
-    name: "Crystal Cavern",
-    palette: "Rose Quartz & Amethyst",
+    name: "Kristalliluola",
+    palette: "Ruusukvartsit & Ametisti",
     bg: "bg-[hsl(345,45%,57%)]",
     border: "border-[hsl(221,83%,32%)]/40",
     accent: "hsl(221,83%,32%)",
@@ -66,17 +66,17 @@ export function RoomsSection() {
           <div className="flex items-center justify-center gap-4 mb-6">
             <div className="h-px w-12 bg-[hsl(45,80%,60%)]/40" />
             <span className="font-cinzel text-xs uppercase tracking-[0.3em] text-[hsl(45,80%,60%)]">
-              Explore the Manor
+              Tutustu Kartanoon
             </span>
             <div className="h-px w-12 bg-[hsl(45,80%,60%)]/40" />
           </div>
           <h2 className="font-charm text-3xl sm:text-4xl md:text-5xl text-[hsl(0,0%,98%)] mb-4 text-balance">
-            20 Uniquely Themed Rooms
+            20 Ainutlaatuista Teemahuonetta
           </h2>
           <p className="font-merriweather text-base md:text-lg text-[hsl(0,0%,75%)] max-w-2xl mx-auto leading-relaxed">
-            Each room transforms your entire experience with its own colour
-            palette, atmosphere, and personality. Choose the room that suits
-            your mood.
+            Jokainen huone muuttaa koko kokemuksesi omalla väripaletillaan,
+            tunnelmallaan ja persoonallisuudellaan. Valitse huone, joka
+            sopii mielialaasi.
           </p>
         </div>
 
@@ -104,7 +104,7 @@ export function RoomsSection() {
         </div>
 
         <p className="text-center mt-8 font-cinzel text-sm text-[hsl(0,0%,60%)]">
-          {"+ 12 more rooms including Bar, Spa, Theater, Clock Tower, Dungeon, and more"}
+          {"+ 12 muuta huonetta mukaan lukien Baari, Kylpylä, Teatteri, Kellotorni, Tyrmä ja paljon muuta"}
         </p>
       </div>
     </section>

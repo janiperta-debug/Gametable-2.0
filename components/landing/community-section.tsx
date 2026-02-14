@@ -8,7 +8,7 @@ export function CommunitySection() {
             <div className="relative overflow-hidden border-2 border-[hsl(45,80%,60%)]/20">
               <img
                 src="/images/landing-community.jpg"
-                alt="Elegant gaming room with leather chairs and board games"
+                alt="Tyylikäs pelihuone nahkatuoleilla ja lautapeleillä"
                 className="w-full h-64 sm:h-80 md:h-96 object-cover"
               />
               <div className="absolute inset-0 bg-[hsl(345,80%,8%)]/20" />
@@ -23,28 +23,28 @@ export function CommunitySection() {
             <div className="flex items-center gap-4 mb-6">
               <div className="h-px w-12 bg-[hsl(45,80%,60%)]/40" />
               <span className="font-cinzel text-xs uppercase tracking-[0.3em] text-[hsl(45,80%,60%)]">
-                Join the Society
+                Liity Seuraan
               </span>
             </div>
 
             <h2 className="font-charm text-3xl sm:text-4xl md:text-5xl text-[hsl(0,0%,98%)] mb-6 text-balance">
-              A Community Built for Gamers
+              Pelaajille rakennettu yhteiso
             </h2>
 
             <p className="font-merriweather text-base md:text-lg text-[hsl(0,0%,75%)] leading-relaxed mb-8">
-              GameTable is more than a platform - it is a gathering place for
-              those who appreciate the art of tabletop gaming. Whether you are a
-              seasoned strategist or just discovering your first game, there is
-              a seat at our table.
+              GameTable on enemmän kuin alusta - se on kokoontumispaikka niille,
+              jotka arvostavat lautapelaamisen taidetta. Olitpa kokenut strategi
+              tai vasta löytämässä ensimmäistä peliäsi, pöydässämme on sinulle
+              paikka.
             </p>
 
             <div className="space-y-5 mb-10">
               {[
-                "Curate and showcase your personal game collection",
-                "Connect with players who match your gaming style",
-                "Organise events and never play solo again",
-                "Trade games and discover hidden gems in the marketplace",
-                "Earn recognition through trophies and achievements",
+                "Kuratoi ja esittele henkilökohtaista pelikokoelmaasi",
+                "Yhdisty pelaajiin, jotka sopivat pelityyliisi",
+                "Järjestä tapahtumia etkä pelaa enää koskaan yksin",
+                "Vaihda pelejä ja löydä piilotettuja helmiä kauppapaikalta",
+                "Ansaitse tunnustusta palkinnoilla ja saavutuksilla",
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3">
                   <div className="w-2 h-2 rotate-45 bg-[hsl(45,80%,60%)] mt-2 flex-shrink-0" />
@@ -62,26 +62,26 @@ export function CommunitySection() {
           <div className="relative overflow-hidden border border-[hsl(45,80%,60%)]/15">
             <img
               src="/images/landing-collection.jpg"
-              alt="Beautifully arranged board game collection on a mahogany table"
+              alt="Kauniisti järjestetty lautapelikokoelma mahonkipöydällä"
               className="w-full h-48 sm:h-56 md:h-64 object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[hsl(345,80%,6%)] via-transparent to-transparent" />
             <div className="absolute bottom-4 left-4">
               <span className="font-cinzel text-xs uppercase tracking-wider text-[hsl(45,80%,60%)]">
-                Curate Your Collection
+                Kuratoi Kokoelmasi
               </span>
             </div>
           </div>
           <div className="relative overflow-hidden border border-[hsl(45,80%,60%)]/15">
             <img
               src="/images/landing-hero.jpg"
-              alt="Grand manor interior with gaming setup"
+              alt="Upea kartanon sisätila peliasetelmalla"
               className="w-full h-48 sm:h-56 md:h-64 object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[hsl(345,80%,6%)] via-transparent to-transparent" />
             <div className="absolute bottom-4 left-4">
               <span className="font-cinzel text-xs uppercase tracking-wider text-[hsl(45,80%,60%)]">
-                Host Memorable Events
+                Järjestä Unohtumattomia Tapahtumia
               </span>
             </div>
           </div>

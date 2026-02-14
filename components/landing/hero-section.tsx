@@ -29,7 +29,7 @@ export function HeroSection() {
         <div className="flex items-center justify-center gap-4 mb-8">
           <div className="h-px w-16 md:w-24 bg-[hsl(45,80%,60%)]/40" />
           <span className="text-[hsl(45,80%,60%)]/60 font-cinzel text-xs uppercase tracking-[0.3em]">
-            An Exclusive Gaming Society
+            Eksklusiivinen Peliseura
           </span>
           <div className="h-px w-16 md:w-24 bg-[hsl(45,80%,60%)]/40" />
         </div>
@@ -44,31 +44,31 @@ export function HeroSection() {
         </h1>
 
         <h2 className="font-cinzel text-xl sm:text-2xl md:text-3xl text-[hsl(45,80%,60%)] mb-6 tracking-wide">
-          Your Exclusive Gaming Manor
+          Eksklusiivinen Pelikartanosi
         </h2>
 
         {/* Description */}
         <p className="font-merriweather text-base sm:text-lg md:text-xl text-[hsl(0,0%,85%)] max-w-3xl mx-auto leading-relaxed mb-10 px-4">
-          Step into an elegant sanctuary where tabletop enthusiasts gather to discover
-          remarkable games, forge lasting friendships, and create unforgettable
-          gaming experiences.
+          Astu tyylikkääseen turvapaikkaan, jossa lautapelienta löytävät
+          unohtumattomia pelejä, solmivat kestäviä ystävyyssuhteita ja
+          luovat ainutlaatuisia pelikokemuksia.
         </p>
 
         {/* Stats row */}
         <div className="flex flex-wrap items-center justify-center gap-6 md:gap-12 mb-12">
           <div className="text-center">
             <div className="font-cinzel text-2xl md:text-3xl text-[hsl(45,80%,60%)]">20</div>
-            <div className="font-cinzel text-xs uppercase tracking-wider text-[hsl(0,0%,70%)]">Themed Rooms</div>
+            <div className="font-cinzel text-xs uppercase tracking-wider text-[hsl(0,0%,70%)]">Teemahuonetta</div>
           </div>
           <div className="w-px h-8 bg-[hsl(45,80%,60%)]/30 hidden sm:block" />
           <div className="text-center">
             <div className="font-cinzel text-2xl md:text-3xl text-[hsl(45,80%,60%)]">1000+</div>
-            <div className="font-cinzel text-xs uppercase tracking-wider text-[hsl(0,0%,70%)]">Games</div>
+            <div className="font-cinzel text-xs uppercase tracking-wider text-[hsl(0,0%,70%)]">Pelia</div>
           </div>
           <div className="w-px h-8 bg-[hsl(45,80%,60%)]/30 hidden sm:block" />
           <div className="text-center">
-            <div className="font-cinzel text-2xl md:text-3xl text-[hsl(45,80%,60%)]">Free</div>
-            <div className="font-cinzel text-xs uppercase tracking-wider text-[hsl(0,0%,70%)]">To Join</div>
+            <div className="font-cinzel text-2xl md:text-3xl text-[hsl(45,80%,60%)]">Ilmainen</div>
+            <div className="font-cinzel text-xs uppercase tracking-wider text-[hsl(0,0%,70%)]">Liittyminen</div>
           </div>
         </div>
 
@@ -78,7 +78,7 @@ export function HeroSection() {
             href="/profile"
             className="font-cinzel text-sm md:text-base uppercase tracking-wider px-8 py-4 bg-[hsl(45,80%,60%)] text-[hsl(345,80%,10%)] hover:bg-[hsl(45,80%,65%)] transition-all duration-300 shadow-lg shadow-[hsl(45,80%,60%)]/20"
           >
-            Enter the Manor
+            Astu Kartanoon
           </Link>
           <button
             onClick={() => {
@@ -87,7 +87,7 @@ export function HeroSection() {
             }}
             className="font-cinzel text-sm md:text-base uppercase tracking-wider px-8 py-4 border border-[hsl(45,80%,60%)]/50 text-[hsl(45,80%,60%)] hover:border-[hsl(45,80%,60%)] hover:bg-[hsl(45,80%,60%)]/10 transition-all duration-300"
           >
-            Explore Features
+            Tutustu Ominaisuuksiin
           </button>
         </div>
 
