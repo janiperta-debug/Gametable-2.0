@@ -1,5 +1,3 @@
-import Image from "next/image"
-
 export function CommunitySection() {
   return (
     <section id="community" className="py-20 md:py-32 bg-[hsl(345,80%,6%)]">
