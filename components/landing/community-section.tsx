@@ -57,8 +57,21 @@ export function CommunitySection() {
           </div>
         </div>
 
-        {/* Showcase image */}
-        <div className="mt-16 md:mt-24">
+        {/* Showcase images row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16 md:mt-24">
+          <div className="relative overflow-hidden border border-[hsl(45,80%,60%)]/15">
+            <img
+              src="/images/landing-community.jpg"
+              alt="Tyylikäs pelihuone nahkatuoleilla ja lautapeleillä"
+              className="w-full h-48 sm:h-56 md:h-64 object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[hsl(345,80%,6%)] via-transparent to-transparent" />
+            <div className="absolute bottom-4 left-4">
+              <span className="font-cinzel text-xs uppercase tracking-wider text-[hsl(45,80%,60%)]">
+                Kuratoi Kokoelmasi
+              </span>
+            </div>
+          </div>
           <div className="relative overflow-hidden border border-[hsl(45,80%,60%)]/15">
             <img
               src="/images/landing-hero.jpg"
@@ -68,7 +81,7 @@ export function CommunitySection() {
             <div className="absolute inset-0 bg-gradient-to-t from-[hsl(345,80%,6%)] via-transparent to-transparent" />
             <div className="absolute bottom-4 left-4">
               <span className="font-cinzel text-xs uppercase tracking-wider text-[hsl(45,80%,60%)]">
-                Järjestä Unohtumattomia Tapahtumia
+                Astu Sisään
               </span>
             </div>
           </div>
