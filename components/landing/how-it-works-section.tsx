@@ -1,27 +1,27 @@
 const steps = [
   {
     number: "01",
-    title: "Create Your Profile",
+    title: "Luo Profiilisi",
     description:
-      "Sign up and build your gaming identity. Set your preferences, list favourite games, and tell the community what you love to play.",
+      "Rekisteröidy ja rakenna peli-identiteettisi. Aseta mieltymyksesi, listaa suosikkipelisi ja kerro yhteisölle, mitä rakastat pelata.",
   },
   {
     number: "02",
-    title: "Build Your Collection",
+    title: "Rakenna Kokoelmasi",
     description:
-      "Add your board games to your personal collection. Track plays, rate games, and maintain a beautiful catalogue of your library.",
+      "Lisää lautapelisi henkilökohtaiseen kokoelmaasi. Seuraa pelikertoja, arvostele pelejä ja ylläpidä kaunista luetteloa kirjastostasi.",
   },
   {
     number: "03",
-    title: "Find Your People",
+    title: "Löydä Peliporukkasi",
     description:
-      "Discover players who share your interests. Browse the community, join events, and connect through messaging to arrange sessions.",
+      "Löydä pelaajia, jotka jakavat kiinnostuksesi. Selaa yhteisöä, liity tapahtumiin ja yhdisty viestien kautta pelisessioiden järjestämiseksi.",
   },
   {
     number: "04",
-    title: "Play & Earn",
+    title: "Pelaa & Ansaitse",
     description:
-      "Attend events, complete games, and engage with the community to earn XP and unlock trophies. Rise through the ranks of the manor.",
+      "Osallistu tapahtumiin, pelaa pelejä ja ole aktiivinen yhteisössä ansaitaksesi XP:tä ja avataksesi palkintoja. Nouse kartanon arvoasteikolla.",
   },
 ]
 
@@ -34,16 +34,16 @@ export function HowItWorksSection() {
           <div className="flex items-center justify-center gap-4 mb-6">
             <div className="h-px w-12 bg-[hsl(45,80%,60%)]/40" />
             <span className="font-cinzel text-xs uppercase tracking-[0.3em] text-[hsl(45,80%,60%)]">
-              Your Journey Begins
+              Matkasi Alkaa
             </span>
             <div className="h-px w-12 bg-[hsl(45,80%,60%)]/40" />
           </div>
           <h2 className="font-charm text-3xl sm:text-4xl md:text-5xl text-[hsl(0,0%,98%)] mb-4 text-balance">
-            How It Works
+            Miten se toimii
           </h2>
           <p className="font-merriweather text-base md:text-lg text-[hsl(0,0%,75%)] max-w-2xl mx-auto leading-relaxed">
-            Four simple steps to becoming a distinguished member of the
-            GameTable society.
+            Neljä yksinkertaista askelta arvostetuksi jäseneksi
+            GameTable-peliseurassa.
           </p>
         </div>
 

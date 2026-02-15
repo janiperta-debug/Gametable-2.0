@@ -23,25 +23,25 @@ export function LandingFooter() {
               href="/terms-page"
               className="font-cinzel text-xs uppercase tracking-wider text-[hsl(0,0%,50%)] hover:text-[hsl(45,80%,60%)] transition-colors"
             >
-              Terms
+              Ehdot
             </Link>
             <Link
               href="/privacy-page"
               className="font-cinzel text-xs uppercase tracking-wider text-[hsl(0,0%,50%)] hover:text-[hsl(45,80%,60%)] transition-colors"
             >
-              Privacy
+              Tietosuoja
             </Link>
             <Link
               href="/contact"
               className="font-cinzel text-xs uppercase tracking-wider text-[hsl(0,0%,50%)] hover:text-[hsl(45,80%,60%)] transition-colors"
             >
-              Contact
+              Yhteystiedot
             </Link>
           </div>
 
           {/* Copyright */}
           <p className="font-merriweather text-xs text-[hsl(0,0%,40%)]">
-            {"\u00A9"} {new Date().getFullYear()} GameTable Manor. All rights reserved.
+            {"\u00A9"} {new Date().getFullYear()} GameTable Kartano. Kaikki oikeudet pidätetään.
           </p>
         </div>
       </div>

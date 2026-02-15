@@ -35,25 +35,25 @@ export function LandingNavbar() {
               onClick={() => scrollToSection("features")}
               className="font-cinzel text-sm uppercase tracking-wide text-[hsl(0,0%,90%)] hover:text-[hsl(45,80%,60%)] transition-colors"
             >
-              Features
+              Ominaisuudet
             </button>
             <button
               onClick={() => scrollToSection("rooms")}
               className="font-cinzel text-sm uppercase tracking-wide text-[hsl(0,0%,90%)] hover:text-[hsl(45,80%,60%)] transition-colors"
             >
-              The Manor
+              Kartano
             </button>
             <button
               onClick={() => scrollToSection("how-it-works")}
               className="font-cinzel text-sm uppercase tracking-wide text-[hsl(0,0%,90%)] hover:text-[hsl(45,80%,60%)] transition-colors"
             >
-              How It Works
+              Miten se toimii
             </button>
             <button
               onClick={() => scrollToSection("community")}
               className="font-cinzel text-sm uppercase tracking-wide text-[hsl(0,0%,90%)] hover:text-[hsl(45,80%,60%)] transition-colors"
             >
-              Community
+              Yhteiso
             </button>
           </div>
 
@@ -63,7 +63,7 @@ export function LandingNavbar() {
               href="/profile"
               className="hidden sm:inline-block font-cinzel text-sm uppercase tracking-wide px-5 py-2 border border-[hsl(45,80%,60%)] text-[hsl(45,80%,60%)] hover:bg-[hsl(45,80%,60%)] hover:text-[hsl(345,80%,10%)] transition-all duration-300"
             >
-              Enter the Manor
+              Astu Kartanoon
             </Link>
             <button
               className="md:hidden text-[hsl(45,80%,60%)] hover:text-[hsl(0,0%,98%)] transition-colors p-1"
@@ -83,32 +83,32 @@ export function LandingNavbar() {
                 onClick={() => scrollToSection("features")}
                 className="font-cinzel text-sm uppercase tracking-wide text-[hsl(0,0%,90%)] hover:text-[hsl(45,80%,60%)] transition-colors py-2 text-left"
               >
-                Features
+                Ominaisuudet
               </button>
               <button
                 onClick={() => scrollToSection("rooms")}
                 className="font-cinzel text-sm uppercase tracking-wide text-[hsl(0,0%,90%)] hover:text-[hsl(45,80%,60%)] transition-colors py-2 text-left"
               >
-                The Manor
+                Kartano
               </button>
               <button
                 onClick={() => scrollToSection("how-it-works")}
                 className="font-cinzel text-sm uppercase tracking-wide text-[hsl(0,0%,90%)] hover:text-[hsl(45,80%,60%)] transition-colors py-2 text-left"
               >
-                How It Works
+                Miten se toimii
               </button>
               <button
                 onClick={() => scrollToSection("community")}
                 className="font-cinzel text-sm uppercase tracking-wide text-[hsl(0,0%,90%)] hover:text-[hsl(45,80%,60%)] transition-colors py-2 text-left"
               >
-                Community
+                Yhteiso
               </button>
               <Link
                 href="/profile"
                 className="sm:hidden font-cinzel text-sm uppercase tracking-wide px-5 py-2 border border-[hsl(45,80%,60%)] text-[hsl(45,80%,60%)] hover:bg-[hsl(45,80%,60%)] hover:text-[hsl(345,80%,10%)] transition-all duration-300 text-center mt-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Enter the Manor
+                Astu Kartanoon
               </Link>
             </div>
           </div>

@@ -12,51 +12,51 @@ import {
 const features = [
   {
     icon: BookOpen,
-    title: "Game Collection",
+    title: "Pelikokoelma",
     description:
-      "Catalogue your entire board game library with detailed tracking, ratings, and play history. Never forget which games you own.",
+      "Luetteloi koko lautapelikirjastosi yksityiskohtaisella seurannalla, arvioilla ja pelihistorialla. Älä koskaan unohda, mitä pelejä omistat.",
   },
   {
     icon: Users,
-    title: "Community",
+    title: "Yhteisö",
     description:
-      "Discover fellow tabletop enthusiasts in your area. Browse profiles, see gaming preferences, and connect with like-minded players.",
+      "Löydä lautapeliharrastajia alueeltasi. Selaa profiileja, tutustu pelimieltymyksiin ja yhdisty samanmielisten pelaajien kanssa.",
   },
   {
     icon: ShoppingBag,
-    title: "Marketplace",
+    title: "Kauppapaikka",
     description:
-      "Buy, sell, and trade games within the community. Find rare titles and give your shelf space a refresh.",
+      "Osta, myy ja vaihda pelejä yhteisön sisällä. Löydä harvinaisia nimikkeitä ja tee tilaa hyllyysi.",
   },
   {
     icon: Calendar,
-    title: "Events",
+    title: "Tapahtumat",
     description:
-      "Create and join gaming events. Organize game nights, tournaments, and meetups with built-in RSVP and scheduling.",
+      "Luo ja liity pelitapahtumiin. Järjestä peli-iltoja, turnauksia ja tapaamisia sisäänrakennetulla ilmoittautumisella.",
   },
   {
     icon: Palette,
-    title: "20 Themed Rooms",
+    title: "20 Teemahuonetta",
     description:
-      "Personalize your experience with 20 uniquely styled manor rooms, from the grand Main Hall to the mysterious Crystal Cavern.",
+      "Personoi kokemuksesi 20 ainutlaatuisella kartanohuoneella, suuresta Pääsalista salaperäiseen Kristalliluolaan.",
   },
   {
     icon: Trophy,
-    title: "Trophies & XP",
+    title: "Palkinnot & XP",
     description:
-      "Earn achievements and experience points as you play, collect, and engage. Level up your gaming profile.",
+      "Ansaitse saavutuksia ja kokemuspisteitä pelatessasi, kerätessäsi ja osallistuessasi. Nosta peliprofiilisi tasoa.",
   },
   {
     icon: MessageCircle,
-    title: "Messaging",
+    title: "Viestit",
     description:
-      "Private conversations with other members. Coordinate game sessions, negotiate trades, and build friendships.",
+      "Yksityiset keskustelut muiden jäsenten kanssa. Koordinoi pelisessioita, neuvottele vaihdoista ja rakenna ystävyyssuhteita.",
   },
   {
     icon: UserSearch,
-    title: "Find Players",
+    title: "Etsi Pelaajia",
     description:
-      "Advanced player matching based on game preferences, availability, and location. Never struggle to fill a table again.",
+      "Edistynyt pelaajien yhdistäminen pelimieltymysten, saatavuuden ja sijainnin perusteella. Pöytäsi ei ole enää koskaan vajaa.",
   },
 ]
 
@@ -69,16 +69,16 @@ export function FeaturesSection() {
           <div className="flex items-center justify-center gap-4 mb-6">
             <div className="h-px w-12 bg-[hsl(45,80%,60%)]/40" />
             <span className="font-cinzel text-xs uppercase tracking-[0.3em] text-[hsl(45,80%,60%)]">
-              What Awaits Within
+              Mitä sisältä löytyy
             </span>
             <div className="h-px w-12 bg-[hsl(45,80%,60%)]/40" />
           </div>
           <h2 className="font-charm text-3xl sm:text-4xl md:text-5xl text-[hsl(0,0%,98%)] mb-4 text-balance">
-            Everything a Gaming Society Needs
+            Kaikki mitä peliseura tarvitsee
           </h2>
           <p className="font-merriweather text-base md:text-lg text-[hsl(0,0%,75%)] max-w-2xl mx-auto leading-relaxed">
-            A complete platform designed for the discerning tabletop enthusiast,
-            wrapped in the elegance of a Victorian manor.
+            Täydellinen alusta vaativalle lautapeliharrastajalle,
+            kääritty viktoriaanisen kartanon eleganssin.
           </p>
         </div>
 
