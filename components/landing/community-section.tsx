@@ -68,7 +68,7 @@ export function CommunitySection() {
             <div className="absolute inset-0 bg-gradient-to-t from-[hsl(345,80%,6%)] via-transparent to-transparent" />
             <div className="absolute bottom-4 left-4">
               <span className="font-cinzel text-xs uppercase tracking-wider text-[hsl(45,80%,60%)]">
-                Järjestä Unohtumattomia Tapahtumia
+                Kuratoi Kokoelmasi
               </span>
             </div>
           </div>
