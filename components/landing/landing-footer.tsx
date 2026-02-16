@@ -2,48 +2,50 @@ import Link from "next/link"
 
 export function LandingFooter() {
   return (
-    <footer className="py-12 bg-[hsl(345,80%,6%)] border-t border-[hsl(45,80%,60%)]/10">
+    <footer className="py-12 bg-[hsl(345,80%,5%)] border-t border-[hsl(45,80%,60%)]/15">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <img
-              src="/images/mainhall-crest-original.png"
-              alt="GameTable Crest"
-              className="w-8 h-8 opacity-60"
-            />
-            <span className="font-charm text-xl text-[hsl(45,80%,60%)]/60">
-              GameTable
-            </span>
-          </div>
+        {/* Ornamental divider */}
+        <div className="flex items-center gap-4 max-w-[400px] mx-auto mb-10">
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[hsl(45,80%,60%)] to-transparent opacity-40" />
+          <span className="text-[hsl(45,80%,60%)]/50 text-base">&#10087;</span>
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[hsl(45,80%,60%)] to-transparent opacity-40" />
+        </div>
 
-          {/* Links */}
-          <div className="flex items-center gap-6">
-            <Link
-              href="/terms-page"
-              className="font-cinzel text-xs uppercase tracking-wider text-[hsl(0,0%,50%)] hover:text-[hsl(45,80%,60%)] transition-colors"
-            >
-              Ehdot
-            </Link>
-            <Link
-              href="/privacy-page"
-              className="font-cinzel text-xs uppercase tracking-wider text-[hsl(0,0%,50%)] hover:text-[hsl(45,80%,60%)] transition-colors"
-            >
-              Tietosuoja
-            </Link>
-            <Link
-              href="/contact"
-              className="font-cinzel text-xs uppercase tracking-wider text-[hsl(0,0%,50%)] hover:text-[hsl(45,80%,60%)] transition-colors"
-            >
-              Yhteystiedot
-            </Link>
-          </div>
-
-          {/* Copyright */}
-          <p className="font-merriweather text-xs text-[hsl(0,0%,40%)]">
-            {"\u00A9"} {new Date().getFullYear()} GameTable Kartano. Kaikki oikeudet pidätetään.
+        <div className="flex flex-col items-center gap-2 mb-8">
+          <span className="font-charm text-xl font-bold text-[hsl(45,80%,60%)] tracking-wider">
+            GameTable
+          </span>
+          <p className="font-merriweather text-sm italic text-[hsl(0,0%,55%)]">
+            Perustettu Kaikkien Pöytäpelaajien Kunniaksi
           </p>
         </div>
+
+        {/* Links */}
+        <div className="flex items-center justify-center gap-8 mb-8">
+          <Link
+            href="/terms-page"
+            className="font-merriweather text-sm text-[hsl(0,0%,55%)] hover:text-[hsl(45,80%,60%)] transition-colors tracking-wide"
+          >
+            Ehdot
+          </Link>
+          <Link
+            href="/privacy-page"
+            className="font-merriweather text-sm text-[hsl(0,0%,55%)] hover:text-[hsl(45,80%,60%)] transition-colors tracking-wide"
+          >
+            Tietosuoja
+          </Link>
+          <Link
+            href="/contact"
+            className="font-merriweather text-sm text-[hsl(0,0%,55%)] hover:text-[hsl(45,80%,60%)] transition-colors tracking-wide"
+          >
+            Yhteystiedot
+          </Link>
+        </div>
+
+        {/* Copyright */}
+        <p className="font-merriweather text-xs text-[hsl(0,0%,35%)] text-center">
+          {"\u00A9"} {new Date().getFullYear()} GameTable Kartano. Kaikki oikeudet pidätetään.
+        </p>
       </div>
     </footer>
   )

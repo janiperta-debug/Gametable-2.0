@@ -29,7 +29,7 @@ export function HeroSection() {
         <div className="flex items-center justify-center gap-4 mb-8">
           <div className="h-px w-16 md:w-24 bg-[hsl(45,80%,60%)]/40" />
           <span className="text-[hsl(45,80%,60%)]/60 font-cinzel text-xs uppercase tracking-[0.3em]">
-            Eksklusiivinen Peliseura
+            Ensiluokkainen Peliseura
           </span>
           <div className="h-px w-16 md:w-24 bg-[hsl(45,80%,60%)]/40" />
         </div>
@@ -43,15 +43,15 @@ export function HeroSection() {
           GameTable
         </h1>
 
-        <h2 className="font-cinzel text-xl sm:text-2xl md:text-3xl text-[hsl(45,80%,60%)] mb-6 tracking-wide">
-          Eksklusiivinen Pelikartanosi
+        <h2 className="font-cinzel text-xl sm:text-2xl md:text-3xl text-[hsl(45,80%,60%)] mb-6 tracking-wide font-italic">
+          Ensiluokkainen Pelikartanosi
         </h2>
 
         {/* Description */}
-        <p className="font-merriweather text-base sm:text-lg md:text-xl text-[hsl(0,0%,85%)] max-w-3xl mx-auto leading-relaxed mb-10 px-4">
-          Astu tyylikkääseen turvapaikkaan, jossa lautapelienta löytävät
-          unohtumattomia pelejä, solmivat kestäviä ystävyyssuhteita ja
-          luovat ainutlaatuisia pelikokemuksia.
+        <p className="font-merriweather text-base sm:text-lg md:text-xl text-[hsl(0,0%,70%)] max-w-3xl mx-auto leading-relaxed mb-10 px-4">
+          Astu tyylikkääseen kokoontumispaikkaan, jossa jokainen pöytäpelaaja
+          löytää kotinsa — olipa intohimosi lautapelit, roolipelit,
+          miniatyyrit tai keräilykortit.
         </p>
 
         {/* Stats row */}
@@ -69,6 +69,11 @@ export function HeroSection() {
           <div className="text-center">
             <div className="font-cinzel text-2xl md:text-3xl text-[hsl(45,80%,60%)]">Ilmainen</div>
             <div className="font-cinzel text-xs uppercase tracking-wider text-[hsl(0,0%,70%)]">Liittyminen</div>
+          </div>
+          <div className="w-px h-8 bg-[hsl(45,80%,60%)]/30 hidden sm:block" />
+          <div className="text-center">
+            <div className="font-cinzel text-2xl md:text-3xl text-[hsl(45,80%,60%)]">Kaikille</div>
+            <div className="font-cinzel text-xs uppercase tracking-wider text-[hsl(0,0%,70%)]">Pöytäpelaajille</div>
           </div>
         </div>
 
