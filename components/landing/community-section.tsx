@@ -31,24 +31,24 @@ export function CommunitySection() {
               Pelaajille rakennettu yhteiso
             </h2>
 
-            <p className="font-merriweather text-base md:text-lg text-[hsl(0,0%,75%)] leading-relaxed mb-8">
-              GameTable on enemmän kuin alusta - se on kokoontumispaikka niille,
-              jotka arvostavat lautapelaamisen taidetta. Olitpa kokenut strategi
-              tai vasta löytämässä ensimmäistä peliäsi, pöydässämme on sinulle
-              paikka.
+            <p className="font-merriweather text-base md:text-lg text-[hsl(0,0%,70%)] leading-relaxed mb-8 italic">
+              GameTable on enemmän kuin alusta — se on kokoontumispaikka kaikille,
+              jotka arvostavat pöytäpelaamisen taidetta. Olitpa kokenut strategi,
+              pelinjohtaja, maalaaja tai vasta löytämässä ensimmäistä peliäsi —
+              pöydässämme on sinulle paikka.
             </p>
 
-            <div className="space-y-5 mb-10">
+            <div className="space-y-4 mb-10">
               {[
-                "Kuratoi ja esittele henkilökohtaista pelikokoelmaasi",
-                "Yhdisty pelaajiin, jotka sopivat pelityyliisi",
-                "Järjestä tapahtumia etkä pelaa enää koskaan yksin",
+                "Kuratoi ja esittele henkilökohtaista pelikokoelmaasi — lautapeleistä miniatyyriarmeijoihin",
+                "Yhdisty pelaajiin, jotka jakavat lajityyppisi ja pelityylisi",
+                "Järjestä kampanjasessioita, turnauksia ja maalaustapahtumia",
                 "Vaihda pelejä ja löydä piilotettuja helmiä kauppapaikalta",
-                "Ansaitse tunnustusta palkinnoilla ja saavutuksilla",
+                "Käytä kasvavaa työkaluarsenalia — armeijanrakentajasta hahmonrakentajaan",
+                "Ansaitse tunnustusta palkinnoilla ja saavutuksilla joka sessiosta",
               ].map((item) => (
-                <div key={item} className="flex items-start gap-3">
-                  <div className="w-2 h-2 rotate-45 bg-[hsl(45,80%,60%)] mt-2 flex-shrink-0" />
-                  <span className="font-merriweather text-sm md:text-base text-[hsl(0,0%,80%)]">
+                <div key={item} className="flex items-start gap-3 py-1 pl-4 bg-[hsl(45,80%,60%)]/[0.03] border-l-2 border-[hsl(45,80%,60%)]">
+                  <span className="font-merriweather text-sm md:text-base text-[hsl(0,0%,82%)]">
                     {item}
                   </span>
                 </div>

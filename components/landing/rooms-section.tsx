@@ -2,58 +2,50 @@ const rooms = [
   {
     name: "Pääsali",
     palette: "Viininpunainen & Kulta",
-    bg: "bg-[hsl(345,80%,15%)]",
-    border: "border-[hsl(45,80%,60%)]/40",
-    accent: "hsl(45,80%,60%)",
+    accent: "#8B1A1A",
+    dotSecondary: "#C9A84C",
   },
   {
     name: "Kirjasto",
     palette: "Mahonki & Hopea",
-    bg: "bg-[hsl(25,60%,12%)]",
-    border: "border-[hsl(0,0%,75%)]/40",
-    accent: "hsl(0,0%,75%)",
+    accent: "#6B3E26",
+    dotSecondary: "#C0C0C0",
   },
   {
     name: "Talvipuutarha",
     palette: "Metsänvihreä & Kupari",
-    bg: "bg-[hsl(120,60%,10%)]",
-    border: "border-[hsl(30,70%,55%)]/40",
-    accent: "hsl(30,70%,55%)",
+    accent: "#2D5016",
+    dotSecondary: "#B87333",
   },
   {
     name: "Takkahuone",
     palette: "Obsidiaani & Liekki",
-    bg: "bg-[hsl(0,0%,13%)]",
-    border: "border-[hsl(16,100%,50%)]/40",
-    accent: "hsl(16,100%,50%)",
+    accent: "#1A1A1A",
+    dotSecondary: "#FF4500",
   },
   {
     name: "Galleria",
     palette: "Laivastonsininen & Kulta",
-    bg: "bg-[hsl(240,100%,10%)]",
-    border: "border-[hsl(45,80%,60%)]/40",
-    accent: "hsl(45,80%,60%)",
+    accent: "#1B3A5C",
+    dotSecondary: "#C9A84C",
   },
   {
     name: "Juhlasali",
     palette: "Kristallinvalkoinen & Kulta",
-    bg: "bg-[hsl(0,0%,95%)]",
-    border: "border-[hsl(45,100%,50%)]/40",
-    accent: "hsl(45,100%,50%)",
+    accent: "#E8E0D0",
+    dotSecondary: "#C9A84C",
   },
   {
     name: "Observatorio",
-    palette: "Karmiininpunainen & Hopea",
-    bg: "bg-[hsl(0,70%,18%)]",
-    border: "border-[hsl(210,15%,65%)]/40",
-    accent: "hsl(210,15%,65%)",
+    palette: "Karmiini & Hopea",
+    accent: "#5C0E0E",
+    dotSecondary: "#C0C0C0",
   },
   {
     name: "Kristalliluola",
     palette: "Ruusukvartsit & Ametisti",
-    bg: "bg-[hsl(345,45%,57%)]",
-    border: "border-[hsl(221,83%,32%)]/40",
-    accent: "hsl(221,83%,32%)",
+    accent: "#B76E79",
+    dotSecondary: "#9B59B6",
   },
 ]
 
@@ -66,7 +58,7 @@ export function RoomsSection() {
           <div className="flex items-center justify-center gap-4 mb-6">
             <div className="h-px w-12 bg-[hsl(45,80%,60%)]/40" />
             <span className="font-cinzel text-xs uppercase tracking-[0.3em] text-[hsl(45,80%,60%)]">
-              Tutustu Kartanoon
+              Personointi
             </span>
             <div className="h-px w-12 bg-[hsl(45,80%,60%)]/40" />
           </div>
@@ -80,32 +72,47 @@ export function RoomsSection() {
           </p>
         </div>
 
-        {/* Room Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        {/* Room Horizontal Scroll */}
+        <div className="flex gap-4 overflow-x-auto pb-5 mt-12 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[hsl(45,80%,60%)]/30">
           {rooms.map((room) => (
             <div
               key={room.name}
-              className={`group relative p-5 md:p-6 ${room.bg} border ${room.border} hover:scale-[1.02] transition-all duration-300 overflow-hidden`}
+              className="group flex-shrink-0 w-[200px] relative p-7 text-center bg-[hsl(345,80%,4%)]/90 border border-[hsl(45,80%,60%)]/15 hover:border-[hsl(45,80%,60%)]/40 hover:-translate-y-1 transition-all duration-300 overflow-hidden"
             >
+              {/* Bottom accent line on hover */}
               <div
-                className="absolute top-0 right-0 w-16 h-16 opacity-10"
+                className="absolute bottom-0 left-0 right-0 h-[3px] scale-x-0 group-hover:scale-x-100 transition-transform duration-300"
+                style={{ background: room.accent }}
+              />
+
+              {/* Color dot */}
+              <div
+                className="w-7 h-7 rounded-full mx-auto mb-4"
                 style={{
-                  background: `radial-gradient(circle at top right, ${room.accent}, transparent 70%)`,
+                  background: `linear-gradient(135deg, ${room.accent}, ${room.dotSecondary || room.accent})`,
                 }}
               />
-              <h3 className="font-cinzel text-xs md:text-sm uppercase tracking-wide text-[hsl(0,0%,98%)] mb-2">
+
+              <h3 className="font-charm text-sm text-[hsl(0,0%,98%)] mb-2 tracking-wide">
                 {room.name}
               </h3>
-              <p className="font-merriweather text-xs text-[hsl(0,0%,65%)]">
+              <p className="font-merriweather text-xs text-[hsl(0,0%,65%)] italic">
                 {room.palette}
               </p>
             </div>
           ))}
-        </div>
 
-        <p className="text-center mt-8 font-cinzel text-sm text-[hsl(0,0%,60%)]">
-          {"+ 12 muuta huonetta mukaan lukien Baari, Kylpylä, Teatteri, Kellotorni, Tyrmä ja paljon muuta"}
-        </p>
+          {/* +12 more card */}
+          <div className="flex-shrink-0 w-[200px] relative p-7 text-center bg-[hsl(345,80%,4%)]/90 border border-[hsl(45,80%,60%)]/10 opacity-70">
+            <div className="w-7 h-7 rounded-full mx-auto mb-4" style={{ background: "linear-gradient(135deg, #555, #888)" }} />
+            <h3 className="font-charm text-sm text-[hsl(0,0%,98%)] mb-2 tracking-wide">
+              + 12 muuta
+            </h3>
+            <p className="font-merriweather text-xs text-[hsl(0,0%,65%)] italic">
+              Baari, Teatteri, Tyrmä...
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   )

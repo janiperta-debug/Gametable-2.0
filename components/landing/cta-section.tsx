@@ -12,36 +12,34 @@ export function CtaSection() {
       />
 
       <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        {/* Decorative diamond */}
-        <div className="flex items-center justify-center gap-4 mb-8">
-          <div className="h-px w-16 bg-[hsl(45,80%,60%)]/30" />
-          <div className="w-3 h-3 rotate-45 border border-[hsl(45,80%,60%)]/50" />
-          <div className="h-px w-16 bg-[hsl(45,80%,60%)]/30" />
-        </div>
+        {/* Ornament */}
+        <div className="text-[hsl(45,80%,60%)]/50 text-xl mb-6">&#10087;</div>
+
+        <p className="font-cinzel text-xs uppercase tracking-[0.45em] text-[hsl(45,80%,60%)]/80 mb-6">
+          Pöytäsi Odottaa
+        </p>
 
         <h2 className="font-charm text-3xl sm:text-4xl md:text-5xl text-[hsl(0,0%,98%)] mb-6 text-balance">
-          Pöytäsi Odottaa
+          Astu Kartanoon
         </h2>
 
-        <p className="font-merriweather text-base md:text-lg text-[hsl(0,0%,75%)] leading-relaxed mb-10 max-w-xl mx-auto">
+        <p className="font-merriweather text-base md:text-lg text-[hsl(0,0%,70%)] leading-relaxed mb-10 max-w-xl mx-auto">
           Liity GameTable-peliseuraan ja löydä uusi tapa nauttia
-          lautapelaamisesta. Jäsenyys on ilmainen ja pysyy sellaisena.
+          pöytäpelaamisesta — missä lajityypissä tahansa.
+          Jäsenyys on ilmainen ja pysyy sellaisena.
         </p>
 
         <Link
           href="/profile"
-          className="inline-block font-cinzel text-sm md:text-base uppercase tracking-wider px-10 py-4 bg-[hsl(45,80%,60%)] text-[hsl(345,80%,10%)] hover:bg-[hsl(45,80%,65%)] transition-all duration-300 shadow-lg shadow-[hsl(45,80%,60%)]/20"
+          className="inline-block font-cinzel text-[0.8rem] font-semibold uppercase tracking-[0.18em] px-12 py-4 bg-gradient-to-br from-[hsl(45,80%,60%)] via-[hsl(45,75%,65%)] to-[hsl(45,80%,60%)] text-[hsl(345,80%,5%)] hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(201,168,76,0.4)] transition-all duration-300"
+          style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}
         >
           Astu Kartanoon
         </Link>
 
-        {/* Bottom ornament */}
-        <div className="mt-16">
-          <div className="text-[hsl(45,80%,60%)]/30 text-lg">&#10086;</div>
-          <p className="font-cinzel text-xs uppercase tracking-[0.3em] text-[hsl(0,0%,50%)] mt-4">
-            Perustettu Arvostetun Peliseuran Kunniaksi
-          </p>
-        </div>
+        <p className="font-merriweather text-sm italic text-[hsl(0,0%,55%)] mt-5">
+          — Ilmainen jäsenyys, aina —
+        </p>
       </div>
     </section>
   )
