@@ -11,7 +11,12 @@ export function LandingFooter() {
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[hsl(45,80%,60%)] to-transparent opacity-40" />
         </div>
 
-        <div className="flex flex-col items-center gap-2 mb-8">
+        <div className="flex flex-col items-center gap-3 mb-8">
+          <img
+            src="/images/janope-logo.png"
+            alt="Janope"
+            className="w-12 h-12"
+          />
           <span className="font-charm text-xl font-bold text-[hsl(45,80%,60%)] tracking-wider">
             GameTable
           </span>
@@ -44,7 +49,7 @@ export function LandingFooter() {
 
         {/* Copyright */}
         <p className="font-merriweather text-xs text-[hsl(0,0%,35%)] text-center">
-          {"\u00A9"} {new Date().getFullYear()} GameTable Kartano. Kaikki oikeudet pidätetään.
+          {"\u00A9"} {new Date().getFullYear()} Janope. Kaikki oikeudet pidätetään.
         </p>
       </div>
     </footer>

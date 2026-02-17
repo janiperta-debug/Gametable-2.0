@@ -22,8 +22,8 @@ export function LandingNavbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
             <img
-              src="/images/mainhall-crest-original.png"
-              alt="GameTable Crest"
+              src="/images/janope-logo.png"
+              alt="Janope"
               className="w-10 h-10"
             />
             <span className="font-charm text-2xl text-[hsl(45,80%,60%)]">GameTable</span>
