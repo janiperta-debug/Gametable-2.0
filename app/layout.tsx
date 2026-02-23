@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter, Charm, Cinzel, Marcellus, Merriweather } from "next/font/google"
+import { Inter, Charm, Cinzel, Marcellus, Merriweather, Cormorant_Garamond, DM_Sans } from "next/font/google"
 import "./globals.css"
 import { AppShell } from "@/components/app-shell"
 
@@ -30,6 +30,20 @@ const merriweather = Merriweather({
   variable: "--font-merriweather",
 })
 
+const cormorantGaramond = Cormorant_Garamond({
+  weight: ["300", "400", "500", "600"],
+  subsets: ["latin"],
+  variable: "--font-cormorant",
+  style: ["normal", "italic"],
+})
+
+const dmSans = DM_Sans({
+  weight: ["300", "400", "500", "600"],
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
+  style: ["normal", "italic"],
+})
+
 export const metadata: Metadata = {
   title: "GameTable - Your Exclusive Gaming Manor",
   description:
@@ -45,7 +59,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${charm.variable} ${cinzel.variable} ${marcellus.variable} ${merriweather.variable}`}
+      className={`${inter.variable} ${charm.variable} ${cinzel.variable} ${marcellus.variable} ${merriweather.variable} ${cormorantGaramond.variable} ${dmSans.variable}`}
     >
       <body className={merriweather.className}>
         <AppShell>{children}</AppShell>

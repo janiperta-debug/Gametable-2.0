@@ -31,6 +31,8 @@ const config: Config = {
         marcellus: ["Marcellus", "serif"],
         cinzel: ["Cinzel", "serif"],
         merriweather: ["Merriweather", "serif"],
+        cormorant: ["var(--font-cormorant)", "Cormorant Garamond", "serif"],
+        "dm-sans": ["var(--font-dm-sans)", "DM Sans", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
