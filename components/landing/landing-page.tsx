@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
+import Image from "next/image"
 
 /* ────────────────────────────────────────────
    Scroll-reveal hook
@@ -73,14 +74,16 @@ function LandingNav() {
     <nav className="fixed top-0 left-0 right-0 z-[500] flex items-center justify-between px-6 lg:px-12 py-4 border-b border-[#f2ece0]/[0.07]"
       style={{ background: "rgba(12,9,6,0.82)", backdropFilter: "blur(20px)" }}
     >
-      <a href="/" className="flex items-center gap-3 no-underline">
-        <div className="w-7 h-7 rounded-full flex items-center justify-center text-sm"
-          style={{ background: "rgba(201,149,58,0.22)", border: "1px solid rgba(201,149,58,0.22)" }}
-        >
-          <span className="font-cormorant text-[#c9953a]">G</span>
-        </div>
-        <span className="font-cormorant text-xl font-semibold text-[#f2ece0] tracking-wide">
-          Game<em className="italic text-[#c9953a]">Table</em>
+      <a href="/" className="flex items-center gap-2.5 no-underline">
+        <Image
+          src="/images/gametable-logo.png"
+          alt="GameTable logo"
+          width={36}
+          height={36}
+          className="shrink-0"
+        />
+        <span className="font-charm text-2xl text-[#f2ece0] tracking-wide leading-none">
+          Gametable
         </span>
       </a>
 
@@ -125,12 +128,25 @@ function LandingNav() {
 function HeroSection() {
   return (
     <section className="min-h-screen relative flex flex-col justify-end overflow-hidden">
-      {/* BG image */}
-      <div className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url('https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Main%20hall%2001.jpg-DpsYcUHFaTwvTp9wXy5kieQgoDHKMM.jpeg')` }}
-      >
+      {/* BG image with effects to soften resolution */}
+      <div className="absolute inset-0">
+        {/* Base image with slight blur to mask grain */}
+        <div
+          className="absolute inset-0 bg-cover bg-center scale-105"
+          style={{
+            backgroundImage: `url('https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Main%20hall%2001.jpg-DpsYcUHFaTwvTp9wXy5kieQgoDHKMM.jpeg')`,
+            filter: "blur(1.5px) saturate(1.15) contrast(1.05)",
+          }}
+        />
+        {/* Warm color wash to unify tones */}
+        <div className="absolute inset-0" style={{ background: "rgba(30,20,8,0.18)", mixBlendMode: "multiply" }} />
+        {/* Bottom-heavy gradient for text readability */}
         <div className="absolute inset-0" style={{
-          background: "linear-gradient(to bottom, rgba(12,9,6,0.35) 0%, rgba(12,9,6,0.15) 30%, rgba(12,9,6,0.55) 65%, rgba(12,9,6,0.97) 100%)"
+          background: "linear-gradient(to bottom, rgba(12,9,6,0.4) 0%, rgba(12,9,6,0.1) 25%, rgba(12,9,6,0.3) 55%, rgba(12,9,6,0.92) 85%, rgba(12,9,6,1) 100%)"
+        }} />
+        {/* Vignette edges */}
+        <div className="absolute inset-0" style={{
+          background: "radial-gradient(ellipse at center, transparent 40%, rgba(12,9,6,0.6) 100%)"
         }} />
       </div>
 
@@ -139,7 +155,7 @@ function HeroSection() {
         <div className="flex items-center gap-3 mb-7 opacity-0 animate-[fadeUp_0.8s_0.1s_forwards]">
           <div className="w-9 h-px bg-[#c9953a] opacity-60" />
           <span className="font-cormorant text-xs font-medium uppercase tracking-[0.22em] text-[#c9953a] opacity-80">
-            Janope Estate &middot; The Manor
+            {"Kaikkien p\u00f6yt\u00e4pelaajien kartano"}
           </span>
         </div>
 
@@ -733,13 +749,19 @@ function LandingFooter() {
     <footer className="flex flex-col md:flex-row justify-between items-center gap-4 px-5 lg:px-12 py-8 border-t border-[#f2ece0]/[0.07]"
       style={{ background: "#100d09" }}
     >
-      <div className="font-cormorant text-lg font-semibold text-[#f2ece0] flex items-center gap-2.5">
-        GameTable
-        <span className="text-[0.65rem] uppercase tracking-[0.12em] text-[#c9953a] opacity-50 pl-2.5 border-l border-[#f2ece0]/[0.13]">
-          Janope Estate
+      <a href="/" className="flex items-center gap-2 no-underline">
+        <Image
+          src="/images/gametable-logo.png"
+          alt="GameTable logo"
+          width={28}
+          height={28}
+          className="shrink-0"
+        />
+        <span className="font-charm text-xl text-[#f2ece0] leading-none">
+          Gametable
         </span>
-      </div>
-      <p className="text-[0.72rem] text-[#7a6e5a]">{"© 2025 Janope \u00b7 T:mi Janope \u00b7 Y-tunnus 3600818-6"}</p>
+      </a>
+      <p className="text-[0.72rem] text-[#7a6e5a]">{"© 2025 GameTable \u00b7 Kaikki oikeudet pid\u00e4tet\u00e4\u00e4n."}</p>
       <div className="flex gap-6">
         <Link href="/terms-page" className="text-[0.72rem] text-[#7a6e5a] no-underline hover:text-[#f2ece0] transition-colors">Ehdot</Link>
         <Link href="/privacy-page" className="text-[0.72rem] text-[#7a6e5a] no-underline hover:text-[#f2ece0] transition-colors">Tietosuoja</Link>
