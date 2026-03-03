@@ -11,6 +11,7 @@ import { BookOpen, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
+import { useTranslations } from "@/lib/i18n"
 
 type CategoryType = "all" | "board-games" | "rpgs" | "miniatures" | "trading-cards"
 
@@ -18,6 +19,7 @@ export default function Collection() {
   const [activeTab, setActiveTab] = useState<"my-games" | "find-games">("my-games")
   const [showFilters, setShowFilters] = useState(false)
   const { toast } = useToast()
+  const t = useTranslations()
 
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [searchQuery, setSearchQuery] = useState("")
@@ -26,15 +28,15 @@ export default function Collection() {
 
   const handleToggleForTrade = (gameId: string) => {
     toast({
-      title: "Updated",
-      description: "Game status updated in the marketplace",
+      title: t("common.updated"),
+      description: t("collection.marketplaceUpdated"),
     })
   }
 
   const handleToggleWishlist = (gameId: string) => {
     toast({
-      title: "Updated",
-      description: "Game wishlist status updated",
+      title: t("common.updated"),
+      description: t("collection.wishlistUpdated"),
     })
   }
 
@@ -75,10 +77,10 @@ export default function Collection() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <BookOpen className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="logo-text text-5xl font-bold">Game Collection</h1>
+            <h1 className="logo-text text-5xl font-bold">{t("collection.title")}</h1>
           </div>
           <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
-            Manage your library and discover new games to add to your collection
+            {t("collection.subtitle")}
           </p>
         </div>
 
@@ -86,10 +88,10 @@ export default function Collection() {
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "my-games" | "find-games")}>
             <TabsList className="grid w-full grid-cols-2 mb-6 md:mb-8 max-w-md mx-auto">
               <TabsTrigger value="my-games" className="font-cinzel text-xs sm:text-sm">
-                My Games
+                {t("collection.myGames")}
               </TabsTrigger>
               <TabsTrigger value="find-games" className="font-cinzel text-xs sm:text-sm">
-                Find Games
+                {t("collection.findGames")}
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -128,7 +130,7 @@ export default function Collection() {
                     className="theme-accent-gold bg-transparent"
                   >
                     <Filter className="h-4 w-4 mr-2" />
-                    <span className="font-cinzel">{showFilters ? "Hide Filters" : "Show Filters"}</span>
+                    <span className="font-cinzel">{showFilters ? t("collection.hideFilters") : t("collection.showFilters")}</span>
                   </Button>
                 </div>
                 {viewMode === "grid" ? (

@@ -4,23 +4,26 @@ import Link from "next/link"
 import { User, Menu, X, Zap, LogOut, Bell } from "lucide-react"
 import { useState } from "react"
 import { useAppTheme } from "@/components/app-theme-provider"
+import { useTranslations } from "@/lib/i18n"
+import { LanguageSwitcher } from "@/components/language-switcher"
 
 export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
   const { currentAppTheme } = useAppTheme()
+  const t = useTranslations()
 
   const hasUnreadNotifications = true
 
   const navItems = [
-    { href: "/collection", label: "Collection" },
-    { href: "/discover", label: "Community" },
-    { href: "/marketplace", label: "Marketplace" },
-    { href: "/events", label: "Events" },
-    { href: "/themes", label: "Themes" },
-    { href: "/messages", label: "Messages" },
-    { href: "/trophies", label: "Trophies" },
-    { href: "/contact", label: "Contact" },
+    { href: "/collection", label: t("nav.collection") },
+    { href: "/discover", label: t("nav.community") },
+    { href: "/marketplace", label: t("nav.marketplace") },
+    { href: "/events", label: t("nav.events") },
+    { href: "/themes", label: t("nav.themes") },
+    { href: "/messages", label: t("nav.messages") },
+    { href: "/trophies", label: t("nav.trophies") },
+    { href: "/contact", label: t("nav.contact") },
   ]
 
   const getCrestImage = (theme: string) => {
@@ -76,6 +79,9 @@ export function Navigation() {
           </div>
 
           <div className="flex items-center space-x-2 sm:space-x-4">
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+
             <div className="relative">
               <button
                 onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
@@ -121,7 +127,7 @@ export function Navigation() {
                     onClick={() => setIsUserDropdownOpen(false)}
                   >
                     <User className="w-4 h-4 text-accent-gold" />
-                    <span className="text-foreground font-cinzel text-sm">Profile</span>
+                    <span className="text-foreground font-cinzel text-sm">{t("nav.profile")}</span>
                   </Link>
                   <Link
                     href="/notifications"
@@ -129,7 +135,7 @@ export function Navigation() {
                     onClick={() => setIsUserDropdownOpen(false)}
                   >
                     <Bell className="w-4 h-4 text-accent-gold" />
-                    <span className="text-foreground font-cinzel text-sm">Notifications</span>
+                    <span className="text-foreground font-cinzel text-sm">{t("nav.notifications")}</span>
                     {hasUnreadNotifications && <span className="ml-auto w-2 h-2 bg-red-500 rounded-full"></span>}
                   </Link>
                   <button
@@ -140,7 +146,7 @@ export function Navigation() {
                     }}
                   >
                     <LogOut className="w-4 h-4 text-accent-gold" />
-                    <span className="text-foreground font-cinzel text-sm">Logout</span>
+                    <span className="text-foreground font-cinzel text-sm">{t("nav.logout")}</span>
                   </button>
                 </div>
               )}

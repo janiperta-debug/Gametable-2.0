@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { MessageCircle, Send, Search, Plus, MoreHorizontal, Phone, Video } from "lucide-react"
+import { useTranslations } from "@/lib/i18n"
 
 const conversations = [
   {
@@ -83,6 +84,7 @@ const messages = [
 export default function MessagingPage() {
   const [selectedConversation, setSelectedConversation] = useState(conversations[0])
   const [newMessage, setNewMessage] = useState("")
+  const t = useTranslations()
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
@@ -99,10 +101,10 @@ export default function MessagingPage() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <MessageCircle className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="logo-text text-5xl font-bold">Messages</h1>
+            <h1 className="logo-text text-5xl font-bold">{t("messages.title")}</h1>
           </div>
           <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
-            Connect and communicate with your gaming community
+            {t("messages.subtitle")}
           </p>
         </div>
 
@@ -112,14 +114,14 @@ export default function MessagingPage() {
             <Card className="room-furniture h-[600px] flex flex-col">
               <CardHeader className="flex-shrink-0">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="font-heading text-xl">Conversations</CardTitle>
+                  <CardTitle className="font-heading text-xl">{t("messages.conversations")}</CardTitle>
                   <Button size="sm" className="theme-accent-gold">
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Search conversations..." className="pl-10 font-body" />
+                  <Input placeholder={t("messages.searchConversations")} className="pl-10 font-body" />
                 </div>
               </CardHeader>
               <CardContent className="flex-1 overflow-y-auto p-0">
@@ -203,7 +205,7 @@ export default function MessagingPage() {
                     <div>
                       <h3 className="font-heading font-semibold">{selectedConversation.name}</h3>
                       <p className="text-sm text-muted-foreground font-body">
-                        {selectedConversation.online ? "Online" : "Last seen 2 hours ago"}
+                        {selectedConversation.online ? t("messages.online") : t("common.lastSeen")}
                       </p>
                     </div>
                   </div>
@@ -249,7 +251,7 @@ export default function MessagingPage() {
               <div className="flex-shrink-0 p-4 border-t border-accent-gold/20">
                 <div className="flex space-x-2">
                   <Textarea
-                    placeholder="Type your message..."
+                    placeholder={t("messages.typeMessage")}
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     className="flex-1 min-h-[40px] max-h-[120px] font-body"

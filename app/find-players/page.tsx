@@ -2,6 +2,7 @@
 
 import { Navigation } from "@/components/navigation"
 import { Card, CardContent } from "@/components/ui/card"
+import { useTranslations } from "@/lib/i18n"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -9,7 +10,8 @@ import { MapPin, Search } from "lucide-react"
 import { PlayerCard } from "@/components/player-card"
 
 export default function FindPlayersPage() {
-  // TODO: Fetch real players from Firebase
+  const t = useTranslations()
+  // TODO: Fetch real players from database
   const mockPlayers = [
     {
       userId: "1",
@@ -46,35 +48,35 @@ export default function FindPlayersPage() {
       <main className="container mx-auto px-4 py-8">
         <Card className="decorative-border mb-8">
           <CardContent className="pt-6">
-            <h2 className="font-cinzel text-2xl font-bold mb-2">Refine Your Search</h2>
+            <h2 className="font-cinzel text-2xl font-bold mb-2">{t("findPlayers.refineSearch")}</h2>
             <p className="font-merriweather text-muted-foreground mb-6">
-              Connect with fellow gamers in your area and expand your gaming circle.
+              {t("findPlayers.subtitle")}
             </p>
 
             <div className="grid md:grid-cols-3 gap-4 mb-4">
               <div>
                 <label className="text-sm font-semibold text-amber-600 mb-2 block uppercase tracking-wide">
-                  Location
+                  {t("findPlayers.location")}
                 </label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="e.g., Mystic Valley or postal code" className="pl-10 bg-background/50" />
+                  <Input placeholder={t("findPlayers.locationPlaceholder")} className="pl-10 bg-background/50" />
                 </div>
               </div>
 
               <div>
                 <label className="text-sm font-semibold text-amber-600 mb-2 block uppercase tracking-wide">
-                  Search by Game Title
+                  {t("findPlayers.searchByGame")}
                 </label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="e.g., Gloomhaven, Dungeons & Dragons" className="pl-10 bg-background/50" />
+                  <Input placeholder={t("findPlayers.gamePlaceholder")} className="pl-10 bg-background/50" />
                 </div>
               </div>
 
               <div>
                 <label className="text-sm font-semibold text-amber-600 mb-2 block uppercase tracking-wide">
-                  Preferred Game Type
+                  {t("findPlayers.preferredGameType")}
                 </label>
                 <Select>
                   <SelectTrigger className="bg-background/50">
@@ -91,7 +93,7 @@ export default function FindPlayersPage() {
               </div>
             </div>
 
-            <Button className="w-full md:w-auto bg-amber-600 hover:bg-amber-700">Search for Players</Button>
+            <Button className="w-full md:w-auto bg-amber-600 hover:bg-amber-700">{t("findPlayers.searchForPlayers")}</Button>
           </CardContent>
         </Card>
 

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
+import { useTranslations } from "@/lib/i18n"
 import { Progress } from "@/components/ui/progress"
 import { ThemeSelector } from "@/components/theme-selector"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -115,6 +116,7 @@ function RoomCard({ room, floorComplete }: { room: RoomTheme; floorComplete: boo
 
 export default function ThemesPage() {
   const [activeTab, setActiveTab] = useState("ground-floor")
+  const t = useTranslations()
 
   const xpProgress =
     ((currentUser.xp - currentUser.xpForCurrentLevel) / (currentUser.xpToNextLevel - currentUser.xpForCurrentLevel)) *
@@ -130,10 +132,10 @@ export default function ThemesPage() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <Palette className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="logo-text text-5xl font-bold">Dimensional Manor System</h1>
+            <h1 className="logo-text text-5xl font-bold">{t("themes.title")}</h1>
           </div>
           <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
-            Choose your path through each floor, unlock dimensions, and discover infinite gaming realms
+            {t("themes.subtitle")}
           </p>
         </div>
 
@@ -143,7 +145,7 @@ export default function ThemesPage() {
             <div className="space-y-6">
               <h2 className="font-heading text-2xl font-bold flex items-center">
                 <Star className="h-6 w-6 mr-3" />
-                Your Progress
+                {t("themes.yourProgress")}
               </h2>
               <div className="flex items-center justify-between">
                 <div>
@@ -174,7 +176,7 @@ export default function ThemesPage() {
             <div className="space-y-6">
               <h2 className="font-heading text-2xl font-bold flex items-center">
                 <Zap className="h-6 w-6 mr-3" />
-                Unlock Choices
+                {t("themes.unlockChoices")}
               </h2>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">

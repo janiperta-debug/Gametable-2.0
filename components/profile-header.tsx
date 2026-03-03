@@ -6,14 +6,16 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Edit, X, Check } from "lucide-react"
+import { useTranslations } from "@/lib/i18n"
 
 export function ProfileHeader() {
   const [isEditing, setIsEditing] = useState(false)
   const [bio, setBio] = useState("Into all kind of board games and very interested in Warhammer 40 000")
   const [profilePictureUrl, setProfilePictureUrl] = useState("")
+  const t = useTranslations()
 
   const handleSave = () => {
-    // TODO: Save to Firebase
+    // TODO: Save to database
     setIsEditing(false)
   }
 
@@ -44,7 +46,7 @@ export function ProfileHeader() {
           {isEditing ? (
             <div className="space-y-4 max-w-2xl">
               <div className="space-y-2">
-                <label className="text-sm font-cinzel text-accent-gold">Bio</label>
+                <label className="text-sm font-cinzel text-accent-gold">{t("profile.bio")}</label>
                 <Textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
@@ -52,7 +54,7 @@ export function ProfileHeader() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-cinzel text-accent-gold">Profile Picture URL</label>
+                <label className="text-sm font-cinzel text-accent-gold">{t("profile.profilePictureUrl")}</label>
                 <Input
                   value={profilePictureUrl}
                   onChange={(e) => setProfilePictureUrl(e.target.value)}
@@ -63,7 +65,7 @@ export function ProfileHeader() {
               <div className="flex gap-3">
                 <Button onClick={handleSave} className="bg-accent-gold hover:bg-accent-gold/90 text-background">
                   <Check className="w-4 h-4 mr-2" />
-                  Save Changes
+                  {t("common.save")}
                 </Button>
                 <Button
                   onClick={() => setIsEditing(false)}
@@ -71,7 +73,7 @@ export function ProfileHeader() {
                   className="border-accent-gold/40 text-accent-gold"
                 >
                   <X className="w-4 h-4 mr-2" />
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
               </div>
             </div>
@@ -87,7 +89,7 @@ export function ProfileHeader() {
                   className="border-accent-gold/40 text-accent-gold hover:bg-accent-gold hover:text-background"
                 >
                   <Edit className="w-4 h-4 mr-2" />
-                  Edit Profile
+                  {t("profile.editProfile")}
                 </Button>
               </div>
             </>

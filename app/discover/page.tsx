@@ -5,8 +5,10 @@ import { DiscoverPlayers } from "@/components/discover-players"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Users, Clock } from "lucide-react"
+import { useTranslations } from "@/lib/i18n"
 
 export default function CommunityPage() {
+  const t = useTranslations()
   const recentActivity = [
     {
       id: 1,
@@ -41,10 +43,10 @@ export default function CommunityPage() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <Users className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="logo-text text-5xl font-bold">Discover</h1>
+            <h1 className="logo-text text-5xl font-bold">{t("discover.title")}</h1>
           </div>
           <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
-            Connect with fellow gamers and stay updated with your gaming circle
+            {t("discover.subtitle")}
           </p>
         </div>
 
@@ -53,7 +55,7 @@ export default function CommunityPage() {
             <CardHeader>
               <CardTitle className="text-2xl flex items-center">
                 <Clock className="h-6 w-6 mr-2 text-accent-gold" />
-                Recent Friend Activity
+                {t("discover.recentFriendActivity")}
               </CardTitle>
             </CardHeader>
             <CardContent>

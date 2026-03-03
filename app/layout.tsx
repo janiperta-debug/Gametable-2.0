@@ -63,7 +63,9 @@ export default function RootLayout({
       className={`${inter.variable} ${charm.variable} ${cinzel.variable} ${marcellus.variable} ${merriweather.variable} ${cormorantGaramond.variable} ${dmSans.variable}`}
     >
       <body className={merriweather.className}>
-        <AppShell>{children}</AppShell>
+        <I18nProvider>
+          <AppShell>{children}</AppShell>
+        </I18nProvider>
       </body>
     </html>
   )

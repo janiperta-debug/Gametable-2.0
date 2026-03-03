@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
+import { useTranslations } from "@/lib/i18n"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -94,6 +95,7 @@ export default function Marketplace() {
   const [searchQuery, setSearchQuery] = useState("")
   const [conditionFilter, setConditionFilter] = useState<string>("all")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
+  const t = useTranslations()
 
   const filteredListings = useMemo(() => {
     let filtered = [...MOCK_MARKETPLACE_LISTINGS]
@@ -129,10 +131,10 @@ export default function Marketplace() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <Store className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="logo-text text-5xl font-bold">Marketplace</h1>
+            <h1 className="logo-text text-5xl font-bold">{t("marketplace.title")}</h1>
           </div>
           <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
-            Trade games with other players or find someone who has what you're looking for
+            {t("marketplace.subtitle")}
           </p>
         </div>
 
@@ -140,10 +142,10 @@ export default function Marketplace() {
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "listings" | "wishlists")}>
             <TabsList className="grid w-full grid-cols-2 mb-6 md:mb-8 max-w-md mx-auto">
               <TabsTrigger value="listings" className="font-cinzel text-xs sm:text-sm">
-                Available Games
+                {t("marketplace.availableGames")}
               </TabsTrigger>
               <TabsTrigger value="wishlists" className="font-cinzel text-xs sm:text-sm">
-                User Wishlists
+                {t("marketplace.userWishlists")}
               </TabsTrigger>
             </TabsList>
           </Tabs>

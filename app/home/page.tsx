@@ -2,9 +2,11 @@
 
 import Link from "next/link"
 import { useAppTheme } from "@/components/app-theme-provider"
+import { useTranslations } from "@/lib/i18n"
 
 export default function HomePage() {
   const { currentAppTheme } = useAppTheme()
+  const t = useTranslations()
 
   const getCrestImage = (theme: string) => {
     const crestMap: { [key: string]: string } = {
@@ -57,13 +59,12 @@ export default function HomePage() {
 
         {/* Subtitle */}
         <h2 className="text-xl sm:text-2xl md:text-3xl mb-6 md:mb-8 px-4" style={{ color: "hsl(var(--accent-gold))" }}>
-          Welcome to Your Exclusive Gaming Manor
+          {t("home.welcome")}
         </h2>
 
         {/* Description */}
         <p className="text-base sm:text-lg md:text-xl text-foreground max-w-3xl mx-auto leading-relaxed mb-6 md:mb-8 px-4">
-          Step into an elegant sanctuary where tabletop enthusiasts gather to discover remarkable games, forge lasting
-          friendships, and create unforgettable gaming experiences.
+          {t("home.description")}
         </p>
 
         {/* Establishment line */}
@@ -73,7 +74,7 @@ export default function HomePage() {
             className="uppercase tracking-wider text-xs sm:text-sm text-center"
             style={{ color: "hsl(var(--accent-gold))" }}
           >
-            Est. for Distinguished Gaming Society
+            {t("home.established")}
           </span>
           <span style={{ color: "hsl(var(--accent-gold))" }}>&#9670;</span>
         </div>
@@ -93,7 +94,7 @@ export default function HomePage() {
             e.currentTarget.style.backgroundColor = "transparent"
           }}
         >
-          Enter the Manor
+          {t("home.enterManor")}
         </Link>
 
         {/* Bottom ornamental elements */}

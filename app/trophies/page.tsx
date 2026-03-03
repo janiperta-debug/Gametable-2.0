@@ -2,13 +2,15 @@
 
 import { Navigation } from "@/components/navigation"
 import { BadgeIcon, Lock, Trophy, Award } from "lucide-react"
+import { useTranslations } from "@/lib/i18n"
 import { BADGE_DEFINITIONS, type BadgeSeries } from "@/lib/badge-definitions"
 import { getUserBadgeProgress } from "@/lib/mock-user-progress"
 import Image from "next/image"
 
 export default function TrophiesPage() {
-  const currentUserId = "user-1" // This will be replaced with actual auth user ID from Firebase
+  const currentUserId = "user-1" // This will be replaced with actual auth user ID from database
   const userProgress = getUserBadgeProgress(currentUserId)
+  const t = useTranslations()
 
   // Group badges by series
   const seriesOrder: BadgeSeries[] = ["collection", "explorer", "social", "hosting", "attendance", "manor", "portal"]
@@ -40,9 +42,9 @@ export default function TrophiesPage() {
         <div className="room-furniture p-8 mb-8">
           <div className="flex items-center justify-between flex-wrap gap-6">
             <div>
-              <h1 className="text-5xl logo-text mb-2">Trophy Collection</h1>
+              <h1 className="text-5xl logo-text mb-2">{t("trophies.title")}</h1>
               <p className="text-lg font-merriweather text-muted-foreground">
-                Achievements earned through dedication and mastery
+                {t("trophies.subtitle")}
               </p>
             </div>
             <div className="flex gap-6">
@@ -52,14 +54,14 @@ export default function TrophiesPage() {
                   <span className="text-3xl font-cinzel text-accent-gold">{earnedBadges}</span>
                   <span className="text-xl font-merriweather text-muted-foreground">/ {totalBadges}</span>
                 </div>
-                <p className="text-sm font-merriweather text-muted-foreground">Badges Earned</p>
+                <p className="text-sm font-merriweather text-muted-foreground">{t("trophies.badgesEarned")}</p>
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2 mb-1">
                   <Award className="h-5 w-5 text-accent-gold" />
                   <span className="text-3xl font-cinzel text-accent-gold">{totalXP}</span>
                 </div>
-                <p className="text-sm font-merriweather text-muted-foreground">Total XP</p>
+                <p className="text-sm font-merriweather text-muted-foreground">{t("trophies.totalXP")}</p>
               </div>
             </div>
           </div>
