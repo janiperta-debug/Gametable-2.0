@@ -88,31 +88,31 @@ export function Navigation() {
             <div className="relative">
               <button
                 onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                className="flex items-center space-x-2 sm:space-x-3 bg-card/50 backdrop-blur-sm px-2 sm:px-4 py-2 rounded-lg hover:bg-card transition-colors border border-accent-gold/20"
+                className="flex items-center gap-2 bg-card/50 backdrop-blur-sm px-2 sm:px-3 py-1.5 rounded-lg hover:bg-card transition-colors border border-accent-gold/20"
               >
                 {/* Notification indicator */}
-                <div className="relative">
-                  {hasUnreadNotifications ? (
-                    <Zap className="w-4 h-4 text-red-500 fill-red-500" />
-                  ) : (
-                    <Zap className="w-4 h-4 text-accent-gold" />
-                  )}
-                </div>
+                {hasUnreadNotifications ? (
+                  <Zap className="w-3.5 h-3.5 text-red-500 fill-red-500" />
+                ) : (
+                  <Zap className="w-3.5 h-3.5 text-accent-gold" />
+                )}
 
                 {/* User avatar */}
-                <div className="w-8 h-8 bg-accent-gold rounded-full flex items-center justify-center flex-shrink-0">
-                  <User className="w-4 h-4 text-background" />
+                <div className="w-6 h-6 bg-accent-gold rounded-full flex items-center justify-center flex-shrink-0">
+                  <User className="w-3 h-3 text-background" />
                 </div>
 
-                {/* User info - hidden on mobile */}
-                <div className="hidden md:flex flex-col items-start">
-                  <span className="text-foreground font-cinzel text-sm font-medium">JANI PERTA</span>
-                  <span className="text-accent-gold text-xs">LVL 1 ♦ 30 XP</span>
-                </div>
+                {/* User info - single line on desktop */}
+                <span className="hidden md:inline text-foreground font-cinzel text-xs font-medium whitespace-nowrap">
+                  JANI PERTA
+                </span>
+                <span className="hidden lg:inline text-accent-gold text-xs whitespace-nowrap">
+                  LVL 1 ♦ 30 XP
+                </span>
 
                 {/* Dropdown arrow */}
                 <svg
-                  className={`w-4 h-4 text-accent-gold transition-transform ${isUserDropdownOpen ? "rotate-180" : ""}`}
+                  className={`w-3 h-3 text-accent-gold transition-transform ${isUserDropdownOpen ? "rotate-180" : ""}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
