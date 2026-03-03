@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter, Charm, Cinzel, Marcellus, Merriweather, Cormorant_Garamond, DM_Sans } from "next/font/google"
 import "./globals.css"
 import { AppShell } from "@/components/app-shell"
+import { I18nProvider } from "@/lib/i18n"
 
 const inter = Inter({ subsets: ["latin"] })
 
