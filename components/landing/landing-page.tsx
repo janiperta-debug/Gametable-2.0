@@ -109,13 +109,13 @@ function LandingNav() {
           </button>
         </li>
         <li>
-          <a
-            href="https://www.gametable.site"
+          <Link
+            href="/home"
             className="text-xs font-bold tracking-wide px-5 py-2 rounded-sm no-underline transition-opacity hover:opacity-85"
             style={{ background: "#c9953a", color: "#0c0906", letterSpacing: "0.05em" }}
           >
             {"Astu Kartanoon \u2192"}
-          </a>
+          </Link>
         </li>
       </ul>
     </nav>
@@ -176,13 +176,13 @@ function HeroSection() {
         </p>
 
         <div className="flex items-center gap-4 opacity-0 animate-[fadeUp_0.8s_0.5s_forwards]">
-          <a
-            href="https://www.gametable.site"
+          <Link
+            href="/home"
             className="inline-block px-9 py-4 rounded-sm text-sm font-bold no-underline tracking-wide transition-opacity hover:opacity-85"
             style={{ background: "#c9953a", color: "#0c0906", boxShadow: "0 8px 32px rgba(201,149,58,0.3)", letterSpacing: "0.05em" }}
           >
             {"Astu Kartanoon \u2192"}
-          </a>
+          </Link>
           <button
             onClick={() => scrollTo("kokoelma")}
             className="font-cormorant italic text-base text-[#c8bca8] hover:text-[#f2ece0] transition-colors bg-transparent border-none cursor-pointer flex items-center gap-2"
@@ -727,13 +727,13 @@ function CtaSection() {
         {"Liity GameTable-peliseuraan. Ilmainen, aina."}<br />
         {"Kaikki p\u00f6yt\u00e4pelaajat tervetulleita \u2014 lajityypist\u00e4 riippumatta."}
       </p>
-      <a
-        href="https://www.gametable.site"
+      <Link
+        href="/home"
         className="inline-block px-9 py-4 rounded-sm text-sm font-bold no-underline tracking-wide transition-opacity hover:opacity-85 relative reveal rd2"
         style={{ background: "#c9953a", color: "#0c0906", boxShadow: "0 8px 32px rgba(201,149,58,0.3)", letterSpacing: "0.05em" }}
       >
         {"Astu Kartanoon \u2192"}
-      </a>
+      </Link>
       <div className="mt-5 font-cormorant italic text-sm text-[#7a6e5a] opacity-60 relative reveal rd3">
         {"— Ilmainen j\u00e4senyys, aina —"}
       </div>

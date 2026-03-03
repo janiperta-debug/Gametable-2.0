@@ -107,3 +107,9 @@ export function useTranslation() {
   const { t, locale } = useI18n()
   return { t, locale }
 }
+
+// Alias for components that use useTranslations
+export function useTranslations() {
+  const { t } = useI18n()
+  return t
+}
