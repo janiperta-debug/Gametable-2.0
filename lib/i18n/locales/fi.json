@@ -55,6 +55,9 @@
   "home": {
     "title": "Tervetuloa Kartanoon",
     "subtitle": "Pöytäpelaamisen koti",
+    "welcome": "Tervetuloa Kartanoon",
+    "description": "Astukaa sisään, arvoisat vieraat. GameTable on eksklusiivinen kartano, joka on omistettu pöytäpelaamisen taiteelle. Täältä löydätte seuraa, tapahtumia ja kokoelmien hallintaa kaikille pöytäpelaajille.",
+    "established": "Perustettu 2024 - Pöytäpelaajien yhteisö",
     "enterManor": "Astu Kartanoon",
     "welcomeBack": "Tervetuloa takaisin",
     "todaysQuest": "Päivän tehtävä",

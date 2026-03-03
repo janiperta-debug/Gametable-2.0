@@ -55,6 +55,9 @@
   "home": {
     "title": "Welcome to the Manor",
     "subtitle": "The home of tabletop gaming",
+    "welcome": "Welcome to the Manor",
+    "description": "Step inside, esteemed guests. GameTable is an exclusive manor dedicated to the art of tabletop gaming. Here you'll find companions, events, and collection management for all tabletop enthusiasts.",
+    "established": "Established 2024 - A Community for Tabletop Gamers",
     "enterManor": "Enter the Manor",
     "welcomeBack": "Welcome back",
     "todaysQuest": "Today's Quest",
