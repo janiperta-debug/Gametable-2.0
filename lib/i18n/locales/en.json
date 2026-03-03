@@ -29,11 +29,13 @@
     "hoursAgo": "hours ago",
     "daysAgo": "days ago",
     "minutesAgo": "minutes ago",
-    "justNow": "Just now"
+    "justNow": "Just now",
+    "new": "new"
   },
   "nav": {
     "home": "Home",
     "collection": "Collection",
+    "community": "Community",
     "discover": "Discover",
     "events": "Events",
     "messages": "Messages",
@@ -43,6 +45,7 @@
     "findPlayers": "Find Players",
     "marketplace": "Marketplace",
     "notifications": "Notifications",
+    "contact": "Contact",
     "myGames": "My Games",
     "settings": "Settings",
     "logout": "Log Out",
@@ -361,6 +364,38 @@
     "newMessage": "New message",
     "badgeEarned": "Badge earned",
     "levelUp": "Level Up!"
+  },
+  "correspondence": {
+    "title": "Manor Correspondence",
+    "manorAdmin": "Manor Administration",
+    "announcements": "Manor Announcements",
+    "announcementsDesc": "The manor staff may occasionally send important updates about new features, events, or significant announcements. All correspondence maintains the manor's elegant and respectful tone.",
+    "emailNotifications": "Email Notifications",
+    "emailNotificationsDesc": "Forward in-app notifications (messages, session suggestions, event invitations) to your email address with elegant manor-themed formatting.",
+    "savePreferences": "Save Correspondence Preferences"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Get in touch with the GameTable team - we're here to help enhance your gaming experience",
+    "sendMessage": "Send us a Message",
+    "sendMessageDesc": "Have a question, suggestion, or need assistance? We'd love to hear from you.",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email Address",
+    "subject": "Subject",
+    "message": "Message",
+    "send": "Send Message",
+    "sending": "Sending...",
+    "success": "Message sent successfully!",
+    "error": "Failed to send message. Please try again.",
+    "getInTouch": "Get in Touch",
+    "socialDesc": "Connect with us on social media",
+    "legalInfo": "Legal Information",
+    "legalDesc": "Learn about our policies and your rights",
+    "privacyPolicy": "Privacy Policy",
+    "privacyDesc": "How we collect, use, and protect your data",
+    "termsOfService": "Terms of Service",
+    "termsDesc": "Your rights and responsibilities"
   },
   "footer": {
     "copyright": "All rights reserved.",

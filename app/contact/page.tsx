@@ -11,6 +11,7 @@ import { Mail, Send, Shield, FileText, Facebook, Twitter, Instagram } from "luci
 import Link from "next/link"
 import { useState } from "react"
 import { sendContactEmail } from "@/app/actions/send-email"
+import { useTranslations } from "@/lib/i18n"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -22,6 +23,7 @@ export default function ContactPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
+  const t = useTranslations()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,10 +55,10 @@ export default function ContactPage() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <Mail className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="logo-text text-5xl font-bold">Contact Us</h1>
+            <h1 className="logo-text text-5xl font-bold">{t("contact.title")}</h1>
           </div>
           <p className="text-muted-foreground text-xl max-w-3xl mx-auto">
-            Get in touch with the GameTable team - we're here to help enhance your gaming experience
+            {t("contact.subtitle")}
           </p>
         </div>
 

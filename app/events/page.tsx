@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar, MapPin, Users, Clock, Plus, Search, Filter, Star, Gamepad2 } from "lucide-react"
 import { getPublicEvents } from "@/lib/event-service"
+import { useTranslations } from "@/lib/i18n"
 
 const upcomingEvents: any[] = []
 const myEvents: any[] = []
@@ -133,6 +134,7 @@ export default function EventsPage() {
   const [events, setEvents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const router = useRouter()
+  const t = useTranslations()
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -159,10 +161,10 @@ export default function EventsPage() {
         <div className="text-center mb-8 md:mb-12">
           <div className="flex items-center justify-center mb-4">
             <Calendar className="h-6 w-6 md:h-8 md:w-8 text-accent-gold mr-2 md:mr-3" />
-            <h1 className="logo-text text-3xl md:text-5xl font-bold">Events</h1>
+            <h1 className="logo-text text-3xl md:text-5xl font-bold">{t("events.title")}</h1>
           </div>
           <p className="font-body text-muted-foreground text-base md:text-xl max-w-3xl mx-auto px-4">
-            Discover, join, and host amazing gaming events in your community
+            {t("events.subtitle")}
           </p>
         </div>
 
@@ -172,7 +174,7 @@ export default function EventsPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search events..."
+                placeholder={t("events.searchEvents")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 font-body w-full"
@@ -185,7 +187,7 @@ export default function EventsPage() {
           </div>
           <Button size="lg" className="theme-accent-gold w-full" onClick={handleCreateEvent}>
             <Plus className="h-4 w-4 mr-2" />
-            <span className="font-body">Create Event</span>
+            <span className="font-body">{t("events.createEvent")}</span>
           </Button>
         </div>
 
@@ -193,13 +195,13 @@ export default function EventsPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6 md:mb-8 max-w-2xl mx-auto">
             <TabsTrigger value="upcoming" className="font-body text-xs sm:text-sm">
-              Upcoming
+              {t("events.upcomingEvents")}
             </TabsTrigger>
             <TabsTrigger value="my-events" className="font-body text-xs sm:text-sm">
-              My Events
+              {t("events.myEvents")}
             </TabsTrigger>
             <TabsTrigger value="past" className="font-body text-xs sm:text-sm">
-              Past
+              {t("events.pastEvents")}
             </TabsTrigger>
           </TabsList>
 

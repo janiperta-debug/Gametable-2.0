@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { User, Menu, X, Zap, LogOut, Bell } from "lucide-react"
 import { useState } from "react"
 import { useAppTheme } from "@/components/app-theme-provider"
@@ -24,7 +25,7 @@ export function Navigation() {
     { href: "/messages", label: t("nav.messages") },
     { href: "/trophies", label: t("nav.trophies") },
     { href: "/contact", label: t("nav.contact") },
-  ]
+  ] as const
 
   const getCrestImage = (theme: string) => {
     const crestMap: { [key: string]: string } = {
@@ -57,9 +58,11 @@ export function Navigation() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link href="/home" className="hover:opacity-80 transition-opacity">
-              <img
-                src={getCrestImage(currentAppTheme) || "/placeholder.svg"}
+              <Image
+                src={getCrestImage(currentAppTheme)}
                 alt="GameTable Crest"
+                width={40}
+                height={40}
                 className="w-10 h-10"
               />
             </Link>

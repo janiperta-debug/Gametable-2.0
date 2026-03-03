@@ -1,7 +1,10 @@
+"use client"
+
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Bell, Check, X, Users, Calendar, Trophy, MessageCircle, Star, Settings } from "lucide-react"
+import { useTranslations } from "@/lib/i18n"
 
 const notifications = [
   {
@@ -63,6 +66,7 @@ const notifications = [
 
 export default function NotificationsPage() {
   const unreadCount = notifications.filter((n) => !n.isRead).length
+  const t = useTranslations()
 
   return (
     <div className="min-h-screen room-environment">
@@ -71,15 +75,15 @@ export default function NotificationsPage() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <Bell className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="logo-text text-5xl font-bold">Notifications</h1>
+            <h1 className="logo-text text-5xl font-bold">{t("notifications.title")}</h1>
             {unreadCount > 0 && (
               <Badge variant="destructive" className="ml-3">
-                {unreadCount} new
+                {unreadCount} {t("common.new")}
               </Badge>
             )}
           </div>
           <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
-            Stay updated with your gaming community activities
+            {t("notifications.subtitle")}
           </p>
         </div>
 
@@ -88,7 +92,7 @@ export default function NotificationsPage() {
           <div className="flex space-x-2">
             <Button variant="outline" size="sm" className="bg-transparent">
               <Check className="h-4 w-4 mr-2" />
-              Mark All Read
+              {t("notifications.markAllRead")}
             </Button>
             <Button variant="outline" size="sm" className="bg-transparent">
               <X className="h-4 w-4 mr-2" />

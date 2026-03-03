@@ -29,11 +29,13 @@
     "hoursAgo": "tuntia sitten",
     "daysAgo": "päivää sitten",
     "minutesAgo": "minuuttia sitten",
-    "justNow": "Juuri nyt"
+    "justNow": "Juuri nyt",
+    "new": "uutta"
   },
   "nav": {
     "home": "Koti",
     "collection": "Kokoelma",
+    "community": "Yhteisö",
     "discover": "Löydä",
     "events": "Tapahtumat",
     "messages": "Viestit",
@@ -43,6 +45,7 @@
     "findPlayers": "Etsi pelaajia",
     "marketplace": "Kauppapaikka",
     "notifications": "Ilmoitukset",
+    "contact": "Yhteystiedot",
     "myGames": "Omat pelit",
     "settings": "Asetukset",
     "logout": "Kirjaudu ulos",
@@ -361,6 +364,38 @@
     "newMessage": "Uusi viesti",
     "badgeEarned": "Palkinto ansaittu",
     "levelUp": "Tasonnousu!"
+  },
+  "correspondence": {
+    "title": "Kartanon kirjeenvaihto",
+    "manorAdmin": "Kartanon hallinta",
+    "announcements": "Kartanon tiedotteet",
+    "announcementsDesc": "Kartanon henkilökunta saattaa ajoittain lähettää tärkeitä päivityksiä uusista ominaisuuksista, tapahtumista tai merkittävistä ilmoituksista. Kaikki viestintä noudattaa kartanon eleganttia ja kunnioittavaa tyyliä.",
+    "emailNotifications": "Sähköposti-ilmoitukset",
+    "emailNotificationsDesc": "Välitä sovelluksen sisäiset ilmoitukset (viestit, peliehdotukset, tapahtumakutsut) sähköpostiisi elegantilla kartano-teemaisella muotoilulla.",
+    "savePreferences": "Tallenna viestiasetukset"
+  },
+  "contact": {
+    "title": "Ota yhteyttä",
+    "subtitle": "Ota yhteyttä GameTable-tiimiin - autamme mielellämme parantamaan pelikokemustasi",
+    "sendMessage": "Lähetä viesti",
+    "sendMessageDesc": "Onko sinulla kysymys, ehdotus tai tarvitsetko apua? Kuulemme mielellämme sinusta.",
+    "firstName": "Etunimi",
+    "lastName": "Sukunimi",
+    "email": "Sähköpostiosoite",
+    "subject": "Aihe",
+    "message": "Viesti",
+    "send": "Lähetä viesti",
+    "sending": "Lähetetään...",
+    "success": "Viesti lähetetty onnistuneesti!",
+    "error": "Viestin lähetys epäonnistui. Yritä uudelleen.",
+    "getInTouch": "Ota yhteyttä",
+    "socialDesc": "Seuraa meitä sosiaalisessa mediassa",
+    "legalInfo": "Lakitiedot",
+    "legalDesc": "Tutustu käytäntöihimme ja oikeuksiisi",
+    "privacyPolicy": "Tietosuojakäytäntö",
+    "privacyDesc": "Miten keräämme, käytämme ja suojaamme tietojasi",
+    "termsOfService": "Käyttöehdot",
+    "termsDesc": "Oikeutesi ja velvollisuutesi"
   },
   "footer": {
     "copyright": "Kaikki oikeudet pidätetään.",
