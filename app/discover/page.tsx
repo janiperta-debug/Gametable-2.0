@@ -43,10 +43,10 @@ export default function CommunityPage() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <Users className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="logo-text text-5xl font-bold">{t("discover.title")}</h1>
+            <h1 className="logo-text text-5xl font-bold">{t("community.title")}</h1>
           </div>
           <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
-            {t("discover.subtitle")}
+            {t("community.subtitle")}
           </p>
         </div>
 
@@ -55,7 +55,7 @@ export default function CommunityPage() {
             <CardHeader>
               <CardTitle className="text-2xl flex items-center">
                 <Clock className="h-6 w-6 mr-2 text-accent-gold" />
-                {t("discover.recentFriendActivity")}
+                {t("community.recentFriendActivity")}
               </CardTitle>
             </CardHeader>
             <CardContent>

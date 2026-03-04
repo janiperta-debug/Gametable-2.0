@@ -156,6 +156,20 @@
     "addGame": "Add Game",
     "myGames": "My Games",
     "findGames": "Find Games",
+    "myCollection": "My Collection",
+    "games": "Games",
+    "allGames": "All Games",
+    "boardGames": "Board Games",
+    "rpgs": "RPGs",
+    "miniatures": "Miniatures",
+    "tradingCards": "Trading Cards",
+    "searchCollection": "Search your collection...",
+    "sortNameAZ": "Name (A-Z)",
+    "sortNameZA": "Name (Z-A)",
+    "sortRatingHigh": "Rating (High to Low)",
+    "sortRatingLow": "Rating (Low to High)",
+    "sortYear": "Year Published",
+    "sortPlaytime": "Play Time",
     "searchGames": "Search games...",
     "filterByCategory": "Filter by category",
     "sortBy": "Sort by",
@@ -239,6 +253,11 @@
       "isPrivate": "Private Event",
       "requiresApproval": "Requires Approval"
     }
+  },
+  "community": {
+    "title": "Community",
+    "subtitle": "Connect with fellow gamers and stay updated with your gaming circle",
+    "recentFriendActivity": "Recent Friend Activity"
   },
   "discover": {
     "title": "Discover",

@@ -80,14 +80,14 @@ export default function FindPlayersPage() {
                 </label>
                 <Select>
                   <SelectTrigger className="bg-background/50">
-                    <SelectValue placeholder="Any Game Type" />
+                    <SelectValue placeholder={t("findPlayers.anyGameType")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="any">Any Game Type</SelectItem>
-                    <SelectItem value="board">Board Games</SelectItem>
-                    <SelectItem value="rpg">RPGs</SelectItem>
-                    <SelectItem value="miniatures">Miniatures</SelectItem>
-                    <SelectItem value="card">Card Games</SelectItem>
+                    <SelectItem value="any">{t("findPlayers.anyGameType")}</SelectItem>
+                    <SelectItem value="board">{t("findPlayers.boardGames")}</SelectItem>
+                    <SelectItem value="rpg">{t("findPlayers.rpgs")}</SelectItem>
+                    <SelectItem value="miniatures">{t("findPlayers.miniatures")}</SelectItem>
+                    <SelectItem value="card">{t("findPlayers.cardGames")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

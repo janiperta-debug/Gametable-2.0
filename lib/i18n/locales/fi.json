@@ -156,6 +156,20 @@
     "addGame": "Lisää peli",
     "myGames": "Omat pelit",
     "findGames": "Etsi pelejä",
+    "myCollection": "Kokoelmani",
+    "games": "peliä",
+    "allGames": "Kaikki pelit",
+    "boardGames": "Lautapelit",
+    "rpgs": "Roolipelit",
+    "miniatures": "Miniatyyrit",
+    "tradingCards": "Keräilykortit",
+    "searchCollection": "Hae kokoelmasta...",
+    "sortNameAZ": "Nimi (A-Ö)",
+    "sortNameZA": "Nimi (Ö-A)",
+    "sortRatingHigh": "Arvosana (korkein ensin)",
+    "sortRatingLow": "Arvosana (matalin ensin)",
+    "sortYear": "Julkaisuvuosi",
+    "sortPlaytime": "Peliaika",
     "searchGames": "Hae pelejä...",
     "filterByCategory": "Suodata kategorian mukaan",
     "sortBy": "Järjestä",
@@ -239,6 +253,11 @@
       "isPrivate": "Yksityinen tapahtuma",
       "requiresApproval": "Vaatii hyväksynnän"
     }
+  },
+  "community": {
+    "title": "Yhteisö",
+    "subtitle": "Yhdistä muihin pelaajiin ja seuraa pelipiiriäsi",
+    "recentFriendActivity": "Ystävien viimeaikainen toiminta"
   },
   "discover": {
     "title": "Löydä",
