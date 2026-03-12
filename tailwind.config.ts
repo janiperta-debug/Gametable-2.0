@@ -20,14 +20,14 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        // FIXED: Proper font hierarchy
-        heading: ["Charm", "cursive"], // Main headers, GameTable logo
+        // FIXED: Proper font hierarchy - using Cinzel for better readability
+        heading: ["Cinzel", "serif"], // Main headers, navigation
         body: ["Marcellus", "serif"], // Body text, descriptions
-        display: ["Charm", "cursive"], // Same as heading for consistency
-        elegant: ["Cinzel", "serif"], // Special accent text only
+        display: ["Cinzel", "serif"], // Same as heading for consistency
+        elegant: ["Cinzel", "serif"], // Special accent text
         script: ["Merriweather", "serif"], // Special accent text only
         // Individual font access
-        charm: ["Charm", "cursive"],
+        charm: ["Charm", "cursive"], // Keep for special decorative use only
         marcellus: ["Marcellus", "serif"],
         cinzel: ["Cinzel", "serif"],
         merriweather: ["Merriweather", "serif"],
