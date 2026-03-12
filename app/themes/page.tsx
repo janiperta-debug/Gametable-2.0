@@ -12,8 +12,6 @@ import {
   Lock,
   Star,
   Zap,
-  Sparkles,
-  SortAsc as Portal,
   CheckCircle,
   Circle,
   ArrowUp,
@@ -101,10 +99,12 @@ function RoomCard({ room, floorComplete, t }: { room: RoomTheme; floorComplete: 
 
         {/* Description */}
         <div className="space-y-3">
-          <p className="font-body text-sm text-muted-foreground leading-relaxed">{room.description}</p>
+          <p className="font-body text-sm text-muted-foreground leading-relaxed">
+            {t(`rooms.${room.id.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())}.description`) || room.description}
+          </p>
           <div className="flex items-center justify-between">
             <Badge variant="outline" className="text-xs font-heading border-accent-copper/40 bg-accent-copper/10">
-              {room.atmosphere}
+              {t(`rooms.${room.id.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())}.atmosphere`) || room.atmosphere}
             </Badge>
             <ThemeSelector room={room} />
           </div>
@@ -292,36 +292,6 @@ export default function ThemesPage() {
             </div>
           </TabsContent>
         </Tabs>
-
-        {/* Portal System Card */}
-        <div className="room-furniture text-center">
-          <div className="space-y-6">
-            <Portal className="h-20 w-20 text-accent-gold mx-auto animate-pulse" />
-            <h3 className="font-heading text-3xl font-bold">{t("themes.portalSystem")}</h3>
-            <p className="font-body text-muted-foreground max-w-4xl mx-auto text-lg leading-relaxed">
-              {t("themes.portalDescription")}
-            </p>
-            <div className="grid gap-6 md:grid-cols-3 max-w-3xl mx-auto mt-8">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-accent-gold font-heading">∞</div>
-                <div className="text-sm text-muted-foreground font-body">{t("themes.dimensions")}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-accent-gold font-heading">19×∞</div>
-                <div className="text-sm text-muted-foreground font-body">{t("themes.uniqueRooms")}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-accent-gold font-heading">Fresh</div>
-                <div className="text-sm text-muted-foreground font-body">{t("themes.freshXPActivities")}</div>
-              </div>
-            </div>
-            <div className="flex justify-center space-x-2 mt-8">
-              <Sparkles className="h-5 w-5 text-accent-gold" />
-              <span className="text-base font-heading text-accent-gold">{t("themes.everyDimensionTellsStory")}</span>
-              <Sparkles className="h-5 w-5 text-accent-gold" />
-            </div>
-          </div>
-        </div>
       </main>
     </div>
   )

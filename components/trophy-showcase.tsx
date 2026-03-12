@@ -1,42 +1,47 @@
+"use client"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Trophy, Target, Users } from "lucide-react"
+import { useTranslations } from "@/lib/i18n"
 
 const trophies = [
   {
     id: 1,
-    title: "Collection Curator",
-    description: "Own 250+ games",
+    titleKey: "trophies.collectionCurator",
+    descKey: "trophies.collectionCuratorDesc",
     icon: Trophy,
-    rarity: "Gold",
-    earned: "2 days ago",
+    rarityKey: "trophies.gold",
+    earnedKey: "trophies.twoDaysAgo",
     color: "text-amber-500",
   },
   {
     id: 2,
-    title: "Social Butterfly",
-    description: "Connect with 25+ gamers",
+    titleKey: "trophies.socialButterfly",
+    descKey: "trophies.socialButterflyDesc",
     icon: Users,
-    rarity: "Silver",
-    earned: "1 week ago",
+    rarityKey: "trophies.silver",
+    earnedKey: "trophies.oneWeekAgo",
     color: "text-gray-400",
   },
   {
     id: 3,
-    title: "Event Master",
-    description: "Host 10 successful events",
+    titleKey: "trophies.eventMaster",
+    descKey: "trophies.eventMasterDesc",
     icon: Target,
-    rarity: "Bronze",
-    earned: "2 weeks ago",
+    rarityKey: "trophies.bronze",
+    earnedKey: "trophies.twoWeeksAgo",
     color: "text-amber-600",
   },
 ]
 
 export function TrophyShowcase() {
+  const t = useTranslations()
+  
   return (
     <Card className="room-furniture">
       <CardHeader>
-        <CardTitle className="text-xl">Trophy Showcase</CardTitle>
+        <CardTitle className="text-xl">{t("trophies.showcase")}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -45,13 +50,13 @@ export function TrophyShowcase() {
               <trophy.icon className={`h-8 w-8 ${trophy.color}`} />
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
-                  <h4 className="font-medium text-sm">{trophy.title}</h4>
+                  <h4 className="font-medium text-sm">{t(trophy.titleKey)}</h4>
                   <Badge variant="outline" className="text-xs">
-                    {trophy.rarity}
+                    {t(trophy.rarityKey)}
                   </Badge>
                 </div>
-                <p className="text-xs text-muted-foreground">{trophy.description}</p>
-                <p className="text-xs text-muted-foreground mt-1">Earned {trophy.earned}</p>
+                <p className="text-xs text-muted-foreground">{t(trophy.descKey)}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t("trophies.earned")} {t(trophy.earnedKey)}</p>
               </div>
             </div>
           ))}

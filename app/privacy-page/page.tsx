@@ -1,24 +1,29 @@
+"use client"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Shield, Lock, Eye, Database, UserCheck, Mail } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { useTranslations } from "@/lib/i18n"
 
 export default function PrivacyPage() {
+  const t = useTranslations()
+  
   return (
     <div className="min-h-screen room-environment">
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <Shield className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="ornate-text font-heading text-5xl font-bold">Privacy Policy</h1>
+            <h1 className="ornate-text font-heading text-5xl font-bold">{t("privacy.title")}</h1>
           </div>
-          <p className="font-body text-muted-foreground text-lg">Last Updated: January 2025</p>
+          <p className="font-body text-muted-foreground text-lg">{t("privacy.lastUpdated")}</p>
         </div>
 
         <Card className="room-furniture mb-8">
           <CardHeader>
             <CardTitle className="ornate-text font-heading text-2xl font-bold">
-              Our Commitment to Your Privacy
+              {t("privacy.commitment")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
@@ -37,7 +42,7 @@ export default function PrivacyPage() {
           <CardHeader>
             <CardTitle className="ornate-text font-heading text-xl font-bold flex items-center">
               <Database className="h-6 w-6 mr-3 text-accent-gold" />
-              Information We Collect
+              {t("privacy.infoWeCollect")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
@@ -92,7 +97,7 @@ export default function PrivacyPage() {
           <CardHeader>
             <CardTitle className="ornate-text font-heading text-xl font-bold flex items-center">
               <Eye className="h-6 w-6 mr-3 text-accent-gold" />
-              How We Use Your Information
+              {t("privacy.howWeUse")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
@@ -114,7 +119,7 @@ export default function PrivacyPage() {
           <CardHeader>
             <CardTitle className="ornate-text font-heading text-xl font-bold flex items-center">
               <Lock className="h-6 w-6 mr-3 text-accent-gold" />
-              How We Share Your Information
+              {t("privacy.howWeShare")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
@@ -153,7 +158,7 @@ export default function PrivacyPage() {
           <CardHeader>
             <CardTitle className="ornate-text font-heading text-xl font-bold flex items-center">
               <UserCheck className="h-6 w-6 mr-3 text-accent-gold" />
-              Your Rights and Choices
+              {t("privacy.yourRights")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
@@ -180,8 +185,8 @@ export default function PrivacyPage() {
             </ul>
             <p className="mt-4">
               To exercise these rights, please contact us at{" "}
-              <a href="mailto:gametableapp.contact@gmail.com" className="text-accent-gold hover:underline">
-                gametableapp.contact@gmail.com
+              <a href="mailto:contact@gametable.fi" className="text-accent-gold hover:underline">
+                contact@gametable.fi
               </a>
             </p>
           </CardContent>
@@ -189,7 +194,7 @@ export default function PrivacyPage() {
 
         <Card className="room-furniture mb-8">
           <CardHeader>
-            <CardTitle className="ornate-text font-heading text-xl font-bold">Data Security</CardTitle>
+            <CardTitle className="ornate-text font-heading text-xl font-bold">{t("privacy.dataSecurity")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
             <p>
@@ -211,7 +216,7 @@ export default function PrivacyPage() {
 
         <Card className="room-furniture mb-8">
           <CardHeader>
-            <CardTitle className="ornate-text font-heading text-xl font-bold">Children's Privacy</CardTitle>
+            <CardTitle className="ornate-text font-heading text-xl font-bold">{t("privacy.childrensPrivacy")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
             <p>
@@ -224,7 +229,7 @@ export default function PrivacyPage() {
 
         <Card className="room-furniture mb-8">
           <CardHeader>
-            <CardTitle className="ornate-text font-heading text-xl font-bold">International Data Transfers</CardTitle>
+            <CardTitle className="ornate-text font-heading text-xl font-bold">{t("privacy.internationalTransfers")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
             <p>
@@ -237,7 +242,7 @@ export default function PrivacyPage() {
 
         <Card className="room-furniture mb-8">
           <CardHeader>
-            <CardTitle className="ornate-text font-heading text-xl font-bold">Changes to This Policy</CardTitle>
+            <CardTitle className="ornate-text font-heading text-xl font-bold">{t("privacy.changesToPolicy")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
             <p>
@@ -252,7 +257,7 @@ export default function PrivacyPage() {
           <CardHeader>
             <CardTitle className="ornate-text font-heading text-xl font-bold flex items-center">
               <Mail className="h-6 w-6 mr-3 text-accent-gold" />
-              Contact Us
+              {t("privacy.contactUs")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
@@ -261,8 +266,8 @@ export default function PrivacyPage() {
               <p className="font-semibold mb-2">GameTable Support</p>
               <p>
                 Email:{" "}
-                <a href="mailto:gametableapp.contact@gmail.com" className="text-accent-gold hover:underline">
-                  gametableapp.contact@gmail.com
+                <a href="mailto:contact@gametable.fi" className="text-accent-gold hover:underline">
+                  contact@gametable.fi
                 </a>
               </p>
               <p className="mt-2 text-sm">
@@ -275,7 +280,7 @@ export default function PrivacyPage() {
         <div className="text-center mt-8">
           <Link href="/contact">
             <Button variant="outline" className="bg-transparent">
-              <span className="font-body">Back to Contact</span>
+              <span className="font-body">{t("privacy.backToContact")}</span>
             </Button>
           </Link>
         </div>

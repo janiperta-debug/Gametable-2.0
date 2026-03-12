@@ -1,23 +1,28 @@
+"use client"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { FileText, Scale, AlertTriangle, Users, Mail } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { useTranslations } from "@/lib/i18n"
 
 export default function TermsPage() {
+  const t = useTranslations()
+  
   return (
     <div className="min-h-screen room-environment">
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <FileText className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="ornate-text font-heading text-5xl font-bold">Terms of Service</h1>
+            <h1 className="ornate-text font-heading text-5xl font-bold">{t("terms.title")}</h1>
           </div>
-          <p className="font-body text-muted-foreground text-lg">Last Updated: January 2025</p>
+          <p className="font-body text-muted-foreground text-lg">{t("terms.lastUpdated")}</p>
         </div>
 
         <Card className="room-furniture mb-8">
           <CardHeader>
-            <CardTitle className="ornate-text font-heading text-2xl font-bold">Agreement to Terms</CardTitle>
+            <CardTitle className="ornate-text font-heading text-2xl font-bold">{t("terms.agreement")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
             <p>
@@ -35,7 +40,7 @@ export default function TermsPage() {
           <CardHeader>
             <CardTitle className="ornate-text font-heading text-xl font-bold flex items-center">
               <Users className="h-6 w-6 mr-3 text-accent-gold" />
-              User Accounts
+              {t("terms.userAccounts")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
@@ -73,7 +78,7 @@ export default function TermsPage() {
           <CardHeader>
             <CardTitle className="ornate-text font-heading text-xl font-bold flex items-center">
               <Scale className="h-6 w-6 mr-3 text-accent-gold" />
-              Acceptable Use
+              {t("terms.acceptableUse")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
@@ -94,7 +99,7 @@ export default function TermsPage() {
 
         <Card className="room-furniture mb-8">
           <CardHeader>
-            <CardTitle className="ornate-text font-heading text-xl font-bold">User Content</CardTitle>
+            <CardTitle className="ornate-text font-heading text-xl font-bold">{t("terms.userContent")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
             <div>
@@ -131,7 +136,7 @@ export default function TermsPage() {
 
         <Card className="room-furniture mb-8">
           <CardHeader>
-            <CardTitle className="ornate-text font-heading text-xl font-bold">Intellectual Property</CardTitle>
+            <CardTitle className="ornate-text font-heading text-xl font-bold">{t("terms.intellectualProperty")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
             <p>
@@ -148,7 +153,7 @@ export default function TermsPage() {
 
         <Card className="room-furniture mb-8">
           <CardHeader>
-            <CardTitle className="ornate-text font-heading text-xl font-bold">Third-Party Services</CardTitle>
+            <CardTitle className="ornate-text font-heading text-xl font-bold">{t("terms.thirdPartyServices")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
             <p>
@@ -163,7 +168,7 @@ export default function TermsPage() {
           <CardHeader>
             <CardTitle className="ornate-text font-heading text-xl font-bold flex items-center">
               <AlertTriangle className="h-6 w-6 mr-3 text-accent-gold" />
-              Disclaimers and Limitations
+              {t("terms.disclaimers")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
@@ -197,7 +202,7 @@ export default function TermsPage() {
 
         <Card className="room-furniture mb-8">
           <CardHeader>
-            <CardTitle className="ornate-text font-heading text-xl font-bold">Indemnification</CardTitle>
+            <CardTitle className="ornate-text font-heading text-xl font-bold">{t("terms.indemnification")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
             <p>
@@ -210,7 +215,7 @@ export default function TermsPage() {
 
         <Card className="room-furniture mb-8">
           <CardHeader>
-            <CardTitle className="ornate-text font-heading text-xl font-bold">Privacy</CardTitle>
+            <CardTitle className="ornate-text font-heading text-xl font-bold">{t("terms.privacy")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
             <p>
@@ -226,7 +231,7 @@ export default function TermsPage() {
 
         <Card className="room-furniture mb-8">
           <CardHeader>
-            <CardTitle className="ornate-text font-heading text-xl font-bold">Changes to Terms</CardTitle>
+            <CardTitle className="ornate-text font-heading text-xl font-bold">{t("terms.changesToTerms")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
             <p>
@@ -239,7 +244,7 @@ export default function TermsPage() {
 
         <Card className="room-furniture mb-8">
           <CardHeader>
-            <CardTitle className="ornate-text font-heading text-xl font-bold">Governing Law</CardTitle>
+            <CardTitle className="ornate-text font-heading text-xl font-bold">{t("terms.governingLaw")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
             <p>
@@ -252,7 +257,7 @@ export default function TermsPage() {
 
         <Card className="room-furniture mb-8">
           <CardHeader>
-            <CardTitle className="ornate-text font-heading text-xl font-bold">Severability</CardTitle>
+            <CardTitle className="ornate-text font-heading text-xl font-bold">{t("terms.severability")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
             <p>
@@ -266,7 +271,7 @@ export default function TermsPage() {
           <CardHeader>
             <CardTitle className="ornate-text font-heading text-xl font-bold flex items-center">
               <Mail className="h-6 w-6 mr-3 text-accent-gold" />
-              Contact Us
+              {t("privacy.contactUs")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
@@ -275,8 +280,8 @@ export default function TermsPage() {
               <p className="font-semibold mb-2">GameTable Support</p>
               <p>
                 Email:{" "}
-                <a href="mailto:gametableapp.contact@gmail.com" className="text-accent-gold hover:underline">
-                  gametableapp.contact@gmail.com
+                <a href="mailto:contact@gametable.fi" className="text-accent-gold hover:underline">
+                  contact@gametable.fi
                 </a>
               </p>
             </div>
@@ -286,7 +291,7 @@ export default function TermsPage() {
         <div className="text-center mt-8">
           <Link href="/contact">
             <Button variant="outline" className="bg-transparent">
-              <span className="font-body">Back to Contact</span>
+              <span className="font-body">{t("terms.backToContact")}</span>
             </Button>
           </Link>
         </div>

@@ -259,11 +259,10 @@ export default function ContactPage() {
 
               <div className="text-center p-4 rounded-lg bg-accent-gold/10 border border-accent-gold/20">
                 <p className="text-sm">
-                  For GDPR-related inquiries, please email{" "}
-                  <a href="mailto:gametableapp.contact@gmail.com" className="text-accent-gold hover:underline">
-                    gametableapp.contact@gmail.com
-                  </a>{" "}
-                  with "GDPR Request" in the subject line.
+                  {t("contact.gdprInquiry")}{" "}
+                  <a href="mailto:contact@gametable.fi" className="text-accent-gold hover:underline">
+                    contact@gametable.fi
+                  </a>
                 </p>
               </div>
             </CardContent>
