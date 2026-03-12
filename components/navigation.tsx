@@ -55,18 +55,17 @@ export function Navigation() {
     <nav className="fixed top-0 left-0 right-0 z-50 navbar-bg backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
-            <Link href="/home" className="hover:opacity-80 transition-opacity">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={getCrestImage(currentAppTheme)}
-                alt="GameTable Crest"
-                width={40}
-                height={40}
-                className="w-10 h-10 object-contain"
-              />
-            </Link>
-          </div>
+          {/* Crest - Left Side */}
+          <Link href="/home" className="hover:opacity-80 transition-opacity flex-shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={getCrestImage(currentAppTheme)}
+              alt="GameTable Crest"
+              width={40}
+              height={40}
+              className="w-10 h-10 object-contain"
+            />
+          </Link>
 
           {/* Center - Desktop Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">

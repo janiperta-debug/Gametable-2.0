@@ -36,7 +36,7 @@ const groundFloorRooms = getRoomsByCategory("Ground Floor")
 const secondFloorRooms = getRoomsByCategory("Second Floor")
 const basementRooms = getRoomsByCategory("Basement")
 
-function RoomCard({ room, floorComplete }: { room: RoomTheme; floorComplete: boolean }) {
+function RoomCard({ room, floorComplete, t }: { room: RoomTheme; floorComplete: boolean; t: (key: string) => string }) {
   const canActuallyUnlock = room.canUnlock && currentUser.availableUnlocks > 0 && floorComplete
 
   return (
@@ -54,7 +54,7 @@ function RoomCard({ room, floorComplete }: { room: RoomTheme; floorComplete: boo
             <div className="text-center text-text-contrast">
               <Lock className="h-8 w-8 mx-auto mb-2" />
               <Badge variant="secondary" className="text-xs">
-                {!floorComplete ? "Complete previous floor" : "Choose unlock order"}
+                {!floorComplete ? t("themes.completePreviousFloor") : t("themes.chooseUnlockOrder")}
               </Badge>
             </div>
           </div>
@@ -74,8 +74,8 @@ function RoomCard({ room, floorComplete }: { room: RoomTheme; floorComplete: boo
             {room.name}
           </h3>
           <div className="flex flex-col items-end space-y-1">
-            {room.isActive && <Badge className="theme-accent-gold text-xs">Current Room</Badge>}
-            {canActuallyUnlock && <Badge className="bg-info/10 text-info border-info/20 text-xs">Can Unlock</Badge>}
+            {room.isActive && <Badge className="theme-accent-gold text-xs">{t("themes.currentRoom")}</Badge>}
+            {canActuallyUnlock && <Badge className="bg-info/10 text-info border-info/20 text-xs">{t("themes.canUnlock")}</Badge>}
             <Badge
               variant="outline"
               className={`text-xs ${
@@ -149,24 +149,24 @@ export default function ThemesPage() {
               </h2>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-4xl font-bold text-accent-gold font-heading">Level {currentUser.level}</div>
+                  <div className="text-4xl font-bold text-accent-gold font-heading">{t("themes.level")} {currentUser.level}</div>
                   <div className="text-sm text-muted-foreground font-body">
-                    {currentUser.xp.toLocaleString()} XP earned
+                    {currentUser.xp.toLocaleString()} XP {t("themes.earned")}
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-xl font-semibold font-heading">
                     {(currentUser.xpToNextLevel - currentUser.xp).toLocaleString()} XP
                   </div>
-                  <div className="text-sm text-muted-foreground font-body">to Level {currentUser.level + 1}</div>
+                  <div className="text-sm text-muted-foreground font-body">{t("themes.toLevel")} {currentUser.level + 1}</div>
                 </div>
               </div>
               <div className="space-y-2">
                 <Progress value={xpProgress} className="h-4 border-2 border-accent-gold/40" />
                 <div className="flex justify-between text-xs text-muted-foreground font-body">
-                  <span>Level {currentUser.level}</span>
-                  <span>{Math.round(xpProgress)}% complete</span>
-                  <span>Level {currentUser.level + 1}</span>
+                  <span>{t("themes.level")} {currentUser.level}</span>
+                  <span>{Math.round(xpProgress)}% {t("themes.complete")}</span>
+                  <span>{t("themes.level")} {currentUser.level + 1}</span>
                 </div>
               </div>
             </div>
@@ -180,17 +180,17 @@ export default function ThemesPage() {
               </h2>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold font-body">Available Unlocks:</span>
+                  <span className="font-semibold font-body">{t("themes.availableUnlocks")}:</span>
                   <Badge className="bg-info/10 text-info border-info/20 text-lg px-3 py-1">
                     {currentUser.availableUnlocks}
                   </Badge>
                 </div>
                 <div className="text-sm text-muted-foreground font-body">
-                  You can choose which Ground Floor room to unlock next! Complete all 7 to access Second Floor.
+                  {t("themes.unlockDescription")}
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm font-body">
-                    <span>Ground Floor Rooms</span>
+                    <span>{t("themes.groundFloorRooms")}</span>
                     <span>
                       {groundFloorProgress}/{groundFloorRooms.length}
                     </span>
@@ -240,7 +240,7 @@ export default function ThemesPage() {
               </div>
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {groundFloorRooms.map((room) => (
-                  <RoomCard key={room.id} room={room} floorComplete={groundFloorComplete} />
+                  <RoomCard key={room.id} room={room} floorComplete={groundFloorComplete} t={t} />
                 ))}
               </div>
             </div>
@@ -263,7 +263,7 @@ export default function ThemesPage() {
               </div>
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {secondFloorRooms.map((room) => (
-                  <RoomCard key={room.id} room={room} floorComplete={groundFloorComplete} />
+                  <RoomCard key={room.id} room={room} floorComplete={groundFloorComplete} t={t} />
                 ))}
               </div>
             </div>
@@ -286,7 +286,7 @@ export default function ThemesPage() {
               </div>
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {basementRooms.map((room) => (
-                  <RoomCard key={room.id} room={room} floorComplete={false} />
+                  <RoomCard key={room.id} room={room} floorComplete={false} t={t} />
                 ))}
               </div>
             </div>

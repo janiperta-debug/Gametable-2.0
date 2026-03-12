@@ -30,7 +30,7 @@ const categoryColors = {
   Miniatures: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
 }
 
-function EventCard({ event, onViewDetails }: { event: any; onViewDetails: (event: any) => void }) {
+function EventCard({ event, onViewDetails, t }: { event: any; onViewDetails: (event: any) => void; t: (key: string) => string }) {
   return (
     <Card className={`room-furniture hover:shadow-lg transition-all ${event.featured ? "border-accent-gold/60" : ""}`}>
       {event.featured && (
@@ -74,7 +74,7 @@ function EventCard({ event, onViewDetails }: { event: any; onViewDetails: (event
           <div className="flex items-center space-x-2">
             <Users className="h-4 w-4 text-accent-gold flex-shrink-0" />
             <span className="font-body">
-              {event.attendees}/{event.maxAttendees} attending
+              {event.attendees}/{event.maxAttendees} {t("events.attending")}
             </span>
           </div>
         </div>
@@ -90,27 +90,27 @@ function EventCard({ event, onViewDetails }: { event: any; onViewDetails: (event
                   .join("")}
               </AvatarFallback>
             </Avatar>
-            <span className="font-body text-sm text-muted-foreground truncate">Hosted by {event.host}</span>
+            <span className="font-body text-sm text-muted-foreground truncate">{t("events.hostedBy")} {event.host}</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {event.status === "invited" && (
               <>
                 <Button size="sm" className="theme-accent-gold flex-1 min-w-[80px]">
-                  Join
+                  {t("events.join")}
                 </Button>
                 <Button size="sm" variant="outline" className="bg-transparent flex-1 min-w-[80px]">
-                  Maybe
+                  {t("events.maybe")}
                 </Button>
               </>
             )}
             {event.status === "maybe" && (
               <Button size="sm" className="theme-accent-gold flex-1 min-w-[100px]">
-                Confirm
+                {t("events.confirm")}
               </Button>
             )}
             {event.status === "hosting" && (
               <Button size="sm" variant="outline" className="bg-transparent flex-1 min-w-[100px]">
-                Manage
+                {t("events.manage")}
               </Button>
             )}
             <Button
@@ -119,7 +119,7 @@ function EventCard({ event, onViewDetails }: { event: any; onViewDetails: (event
               className="bg-transparent flex-1 min-w-[100px]"
               onClick={() => onViewDetails(event)}
             >
-              View Details
+              {t("events.viewDetails")}
             </Button>
           </div>
         </div>
@@ -182,7 +182,7 @@ export default function EventsPage() {
             </div>
             <Button variant="outline" className="bg-transparent">
               <Filter className="h-4 w-4 mr-2" />
-              <span className="font-body">Filters</span>
+              <span className="font-body">{t("common.filters")}</span>
             </Button>
           </div>
           <Button size="lg" className="theme-accent-gold w-full" onClick={handleCreateEvent}>
@@ -209,21 +209,21 @@ export default function EventsPage() {
             {loading ? (
               <Card className="room-furniture text-center py-12">
                 <CardContent>
-                  <p className="font-body text-muted-foreground">Loading events...</p>
+                  <p className="font-body text-muted-foreground">{t("common.loading")}</p>
                 </CardContent>
               </Card>
             ) : events.length === 0 ? (
               <Card className="room-furniture text-center py-12">
                 <CardContent>
                   <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
-                  <h3 className="ornate-text font-heading text-xl font-semibold mb-2">No Events Yet</h3>
-                  <p className="font-body text-muted-foreground">Create your first event or check back soon!</p>
+                  <h3 className="ornate-text font-heading text-xl font-semibold mb-2">{t("events.noEvents")}</h3>
+                  <p className="font-body text-muted-foreground">{t("events.noEventsDesc")}</p>
                 </CardContent>
               </Card>
             ) : (
               <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {events.map((event) => (
-                  <EventCard key={event.id} event={event} onViewDetails={handleViewDetails} />
+                  <EventCard key={event.id} event={event} onViewDetails={handleViewDetails} t={t} />
                 ))}
               </div>
             )}
@@ -254,15 +254,15 @@ export default function EventsPage() {
 
         {/* Quick Actions */}
         <div className="mt-12 md:mt-16">
-          <h2 className="font-heading text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8">Quick Actions</h2>
+          <h2 className="font-heading text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8">{t("events.quickActions")}</h2>
           <div className="grid gap-4 md:gap-6 grid-cols-2 lg:grid-cols-4 max-w-4xl mx-auto">
             <Card className="room-furniture hover:shadow-lg transition-shadow cursor-pointer">
               <CardContent className="p-6 text-center">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 mb-4">
                   <Gamepad2 className="h-6 w-6" />
                 </div>
-                <h3 className="font-heading font-semibold mb-2">Board Game Night</h3>
-                <p className="font-body text-sm text-muted-foreground">Host a casual board game evening</p>
+                <h3 className="font-heading font-semibold mb-2">{t("events.boardGameNight")}</h3>
+                <p className="font-body text-sm text-muted-foreground">{t("events.boardGameNightDesc")}</p>
               </CardContent>
             </Card>
 
@@ -271,8 +271,8 @@ export default function EventsPage() {
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 mb-4">
                   <Users className="h-6 w-6" />
                 </div>
-                <h3 className="font-heading font-semibold mb-2">RPG Session</h3>
-                <p className="font-body text-sm text-muted-foreground">Start a new campaign or one-shot</p>
+                <h3 className="font-heading font-semibold mb-2">{t("events.rpgSession")}</h3>
+                <p className="font-body text-sm text-muted-foreground">{t("events.rpgSessionDesc")}</p>
               </CardContent>
             </Card>
 
@@ -281,8 +281,8 @@ export default function EventsPage() {
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 mb-4">
                   <Star className="h-6 w-6" />
                 </div>
-                <h3 className="font-heading font-semibold mb-2">Tournament</h3>
-                <p className="font-body text-sm text-muted-foreground">Organize a competitive event</p>
+                <h3 className="font-heading font-semibold mb-2">{t("events.tournament")}</h3>
+                <p className="font-body text-sm text-muted-foreground">{t("events.tournamentDesc")}</p>
               </CardContent>
             </Card>
 
@@ -291,8 +291,8 @@ export default function EventsPage() {
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 mb-4">
                   <Calendar className="h-6 w-6" />
                 </div>
-                <h3 className="font-heading font-semibold mb-2">Custom Event</h3>
-                <p className="font-body text-sm text-muted-foreground">Create your own unique gathering</p>
+                <h3 className="font-heading font-semibold mb-2">{t("events.customEvent")}</h3>
+                <p className="font-body text-sm text-muted-foreground">{t("events.customEventDesc")}</p>
               </CardContent>
             </Card>
           </div>
@@ -302,29 +302,29 @@ export default function EventsPage() {
         <div className="mt-12 md:mt-16">
           <Card className="room-furniture max-w-4xl mx-auto">
             <CardHeader className="text-center">
-              <CardTitle className="font-heading text-3xl font-bold">Event Management Hub</CardTitle>
+              <CardTitle className="font-heading text-3xl font-bold">{t("events.managementHub")}</CardTitle>
               <p className="font-body text-muted-foreground">
-                Comprehensive tools for organizing and managing your gaming events
+                {t("events.managementHubDesc")}
               </p>
             </CardHeader>
             <CardContent>
               <div className="grid gap-6 md:grid-cols-3 text-center">
                 <div>
                   <div className="text-3xl font-bold text-accent-gold font-heading mb-2">24</div>
-                  <div className="font-body text-sm text-muted-foreground">Events This Month</div>
+                  <div className="font-body text-sm text-muted-foreground">{t("events.eventsThisMonth")}</div>
                 </div>
                 <div>
                   <div className="text-3xl font-bold text-accent-gold font-heading mb-2">156</div>
-                  <div className="font-body text-sm text-muted-foreground">Total Attendees</div>
+                  <div className="font-body text-sm text-muted-foreground">{t("events.totalAttendees")}</div>
                 </div>
                 <div>
                   <div className="text-3xl font-bold text-accent-gold font-heading mb-2">8</div>
-                  <div className="font-body text-sm text-muted-foreground">Events Hosted</div>
+                  <div className="font-body text-sm text-muted-foreground">{t("events.eventsHosted")}</div>
                 </div>
               </div>
               <div className="text-center mt-8">
                 <Button size="lg" className="theme-accent-gold">
-                  <span className="font-body">Explore Event Tools</span>
+                  <span className="font-body">{t("events.exploreEventTools")}</span>
                 </Button>
               </div>
             </CardContent>
