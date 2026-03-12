@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { BGGGameDetails } from '@/lib/types/database'
+import { awardXP } from './xp'
 
 const XP_FOR_ADDING_GAME = 10
 
@@ -107,8 +108,8 @@ export async function addGameToCollection(
     return { error: userGameError.message }
   }
 
-  // Award XP
-  await awardXP(user.id, XP_FOR_ADDING_GAME)
+  // Award XP using the centralized server action
+  await awardXP(user.id, 'add_game', XP_FOR_ADDING_GAME)
 
   revalidatePath('/collection')
   return { success: true, gameId }
@@ -168,38 +169,4 @@ export async function updateUserGame(
   return { success: true }
 }
 
-async function awardXP(userId: string, amount: number) {
-  const supabase = await createClient()
-  
-  // Get current XP
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('xp, level')
-    .eq('id', userId)
-    .single()
 
-  if (!profile) return
-
-  const newXP = (profile.xp || 0) + amount
-  // Simple level formula: level up every 100 XP
-  const newLevel = Math.floor(newXP / 100) + 1
-
-  // Update profile
-  await supabase
-    .from('profiles')
-    .update({ 
-      xp: newXP,
-      level: newLevel > profile.level ? newLevel : profile.level
-    })
-    .eq('id', userId)
-
-  // Log XP event (if table exists)
-  await supabase
-    .from('xp_events')
-    .insert({
-      user_id: userId,
-      amount,
-      reason: 'add_game',
-    })
-    .catch(() => {}) // Ignore if table doesn't exist
-}

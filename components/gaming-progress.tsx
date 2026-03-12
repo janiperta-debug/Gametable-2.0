@@ -2,22 +2,41 @@
 
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { RefreshCw, BookOpen, Users, Calendar, Trophy } from "lucide-react"
+import { RefreshCw, BookOpen, Users, Calendar, Trophy, Loader2 } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
+import { useUser } from "@/hooks/useUser"
+import { xpForNextLevel, xpForCurrentLevel } from "@/app/actions/xp"
 
 export function GamingProgress() {
   const t = useTranslations()
+  const { profile, loading } = useUser()
   
-  // Mock data - will be replaced with database data
+  // Calculate XP progress from profile data
+  const level = profile?.level ?? 1
+  const totalXP = profile?.xp ?? 0
+  const currentLevelXP = xpForCurrentLevel(level)
+  const nextLevelXP = xpForNextLevel(level)
+  const xpInCurrentLevel = totalXP - currentLevelXP
+  const xpNeededForLevel = nextLevelXP - currentLevelXP
+  
+  // Stats - some will be connected to real data later
   const stats = {
-    level: 9,
-    totalXP: 800,
-    currentXP: 0,
-    xpToNextLevel: 100,
-    gamesOwned: { current: 247, goal: 300, percentComplete: 82, recentChange: "+12" },
-    gamingFriends: { current: 38, goal: 50, percentComplete: 76, recentChange: "+3" },
-    eventsHosted: { current: 15, goal: 25, percentComplete: 60, recentChange: "+5" },
-    trophiesEarned: { current: 23, goal: 50, percentComplete: 46, recentChange: "+2" },
+    level,
+    totalXP,
+    currentXP: xpInCurrentLevel,
+    xpToNextLevel: xpNeededForLevel,
+    gamesOwned: { current: 0, goal: 300, percentComplete: 0, recentChange: "+0" },
+    gamingFriends: { current: 0, goal: 50, percentComplete: 0, recentChange: "+0" },
+    eventsHosted: { current: 0, goal: 25, percentComplete: 0, recentChange: "+0" },
+    trophiesEarned: { current: 0, goal: 50, percentComplete: 0, recentChange: "+0" },
+  }
+
+  if (loading) {
+    return (
+      <div className="room-furniture p-8 flex items-center justify-center min-h-[200px]">
+        <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
+      </div>
+    )
   }
 
   return (

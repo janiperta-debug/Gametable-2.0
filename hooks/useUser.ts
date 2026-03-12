@@ -6,12 +6,18 @@ import type { User } from '@supabase/supabase-js'
 
 export interface UserProfile {
   id: string
+  username: string | null
   display_name: string | null
   avatar_url: string | null
+  bio: string | null
   xp: number
   level: number
+  location: string | null
+  theme: string | null
+  show_collection: boolean
+  preferences: Record<string, unknown> | null
+  unlocked_themes: string[] | null
   created_at: string
-  updated_at: string
 }
 
 interface UseUserReturn {

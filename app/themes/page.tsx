@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Badge } from "@/components/ui/badge"
 import { useTranslations } from "@/lib/i18n"
 import { Progress } from "@/components/ui/progress"
@@ -16,26 +16,29 @@ import {
   Circle,
   ArrowUp,
   ArrowDown,
+  Loader2,
 } from "lucide-react"
 import { getRoomsByCategory, type RoomTheme } from "@/lib/room-themes"
-
-// Mock user data - in real app this would come from your backend
-const currentUser = {
-  level: 12,
-  xp: 1850,
-  xpToNextLevel: 2400,
-  xpForCurrentLevel: 2200,
-  unlockedRooms: ["main-hall", "library"], // User has unlocked 2 ground floor rooms
-  availableUnlocks: 1, // User can unlock 1 more ground floor room
-  currentDimension: "classic", // classic, cyberpunk-2050, cartoon-world, steampunk, etc.
-}
+import { useUser } from "@/hooks/useUser"
+import { xpForNextLevel, xpForCurrentLevel } from "@/app/actions/xp"
 
 const groundFloorRooms = getRoomsByCategory("Ground Floor")
 const secondFloorRooms = getRoomsByCategory("Second Floor")
 const basementRooms = getRoomsByCategory("Basement")
 
-function RoomCard({ room, floorComplete, t }: { room: RoomTheme; floorComplete: boolean; t: (key: string) => string }) {
-  const canActuallyUnlock = room.canUnlock && currentUser.availableUnlocks > 0 && floorComplete
+interface RoomCardProps {
+  room: RoomTheme
+  floorComplete: boolean
+  t: (key: string) => string
+  unlockedRooms: string[]
+  availableUnlocks: number
+  activeRoom: string | null
+}
+
+function RoomCard({ room, floorComplete, t, unlockedRooms, availableUnlocks, activeRoom }: RoomCardProps) {
+  const isUnlocked = unlockedRooms.includes(room.id)
+  const isActive = activeRoom === room.id
+  const canActuallyUnlock = room.canUnlock && availableUnlocks > 0 && floorComplete && !isUnlocked
 
   return (
     <div className="room-furniture relative">
@@ -47,7 +50,7 @@ function RoomCard({ room, floorComplete, t }: { room: RoomTheme; floorComplete: 
           className="h-full w-full object-cover transition-transform group-hover:scale-105"
         />
         {/* Unlock Status Overlay */}
-        {!room.isUnlocked && !canActuallyUnlock && (
+        {!isUnlocked && !canActuallyUnlock && (
           <div className="absolute inset-0 bg-surface-dark/40 backdrop-blur-sm flex items-center justify-center">
             <div className="text-center text-text-contrast">
               <Lock className="h-8 w-8 mx-auto mb-2" />
@@ -62,7 +65,7 @@ function RoomCard({ room, floorComplete, t }: { room: RoomTheme; floorComplete: 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="ornate-text font-heading text-xl font-bold flex items-center">
-            {room.isUnlocked ? (
+            {isUnlocked ? (
               <CheckCircle className="h-5 w-5 mr-2 text-success" />
             ) : canActuallyUnlock ? (
               <Circle className="h-5 w-5 mr-2 text-info" />
@@ -72,7 +75,7 @@ function RoomCard({ room, floorComplete, t }: { room: RoomTheme; floorComplete: 
             {room.name}
           </h3>
           <div className="flex flex-col items-end space-y-1">
-            {room.isActive && <Badge className="theme-accent-gold text-xs">{t("themes.currentRoom")}</Badge>}
+            {isActive && <Badge className="theme-accent-gold text-xs">{t("themes.currentRoom")}</Badge>}
             {canActuallyUnlock && <Badge className="bg-info/10 text-info border-info/20 text-xs">{t("themes.canUnlock")}</Badge>}
             <Badge
               variant="outline"
@@ -117,13 +120,43 @@ function RoomCard({ room, floorComplete, t }: { room: RoomTheme; floorComplete: 
 export default function ThemesPage() {
   const [activeTab, setActiveTab] = useState("ground-floor")
   const t = useTranslations()
+  const { profile, loading } = useUser()
 
-  const xpProgress =
-    ((currentUser.xp - currentUser.xpForCurrentLevel) / (currentUser.xpToNextLevel - currentUser.xpForCurrentLevel)) *
-    100
+  // Calculate XP progress from profile data
+  const level = profile?.level ?? 1
+  const totalXP = profile?.xp ?? 0
+  const currentLevelXP = xpForCurrentLevel(level)
+  const nextLevelXP = xpForNextLevel(level)
+  const xpInCurrentLevel = totalXP - currentLevelXP
+  const xpNeededForLevel = nextLevelXP - currentLevelXP
+  const xpProgress = xpNeededForLevel > 0 ? (xpInCurrentLevel / xpNeededForLevel) * 100 : 0
 
-  const groundFloorProgress = currentUser.unlockedRooms.length
+  // Get unlocked rooms from profile
+  const unlockedRooms = useMemo(() => {
+    // Main-hall is always unlocked by default
+    const defaultRooms = ["main-hall"]
+    const profileRooms = profile?.unlocked_themes ?? []
+    return [...new Set([...defaultRooms, ...profileRooms])]
+  }, [profile?.unlocked_themes])
+
+  const activeRoom = profile?.theme ?? "main-hall"
+  
+  // Calculate available unlocks based on level
+  // For now, simple logic: 1 unlock per 5 levels
+  const availableUnlocks = Math.max(0, Math.floor(level / 5) - (unlockedRooms.length - 1))
+
+  const groundFloorProgress = unlockedRooms.filter(r => 
+    groundFloorRooms.some(gfr => gfr.id === r)
+  ).length
   const groundFloorComplete = groundFloorProgress === groundFloorRooms.length
+
+  if (loading) {
+    return (
+      <div className="min-h-screen room-environment flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-accent-gold" />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen room-environment">
@@ -149,24 +182,24 @@ export default function ThemesPage() {
               </h2>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-4xl font-bold text-accent-gold font-heading">{t("themes.level")} {currentUser.level}</div>
+                  <div className="text-4xl font-bold text-accent-gold font-heading">{t("themes.level")} {level}</div>
                   <div className="text-sm text-muted-foreground font-body">
-                    {currentUser.xp.toLocaleString()} XP {t("themes.earned")}
+                    {totalXP.toLocaleString()} XP {t("themes.earned")}
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-xl font-semibold font-heading">
-                    {(currentUser.xpToNextLevel - currentUser.xp).toLocaleString()} XP
+                    {(xpNeededForLevel - xpInCurrentLevel).toLocaleString()} XP
                   </div>
-                  <div className="text-sm text-muted-foreground font-body">{t("themes.toLevel")} {currentUser.level + 1}</div>
+                  <div className="text-sm text-muted-foreground font-body">{t("themes.toLevel")} {level + 1}</div>
                 </div>
               </div>
               <div className="space-y-2">
                 <Progress value={xpProgress} className="h-4 border-2 border-accent-gold/40" />
                 <div className="flex justify-between text-xs text-muted-foreground font-body">
-                  <span>{t("themes.level")} {currentUser.level}</span>
+                  <span>{t("themes.level")} {level}</span>
                   <span>{Math.round(xpProgress)}% {t("themes.complete")}</span>
-                  <span>{t("themes.level")} {currentUser.level + 1}</span>
+                  <span>{t("themes.level")} {level + 1}</span>
                 </div>
               </div>
             </div>
@@ -182,7 +215,7 @@ export default function ThemesPage() {
                 <div className="flex items-center justify-between">
                   <span className="font-semibold font-body">{t("themes.availableUnlocks")}:</span>
                   <Badge className="bg-info/10 text-info border-info/20 text-lg px-3 py-1">
-                    {currentUser.availableUnlocks}
+                    {availableUnlocks}
                   </Badge>
                 </div>
                 <div className="text-sm text-muted-foreground font-body">
@@ -240,7 +273,15 @@ export default function ThemesPage() {
               </div>
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {groundFloorRooms.map((room) => (
-                  <RoomCard key={room.id} room={room} floorComplete={groundFloorComplete} t={t} />
+                  <RoomCard 
+                    key={room.id} 
+                    room={room} 
+                    floorComplete={groundFloorComplete} 
+                    t={t}
+                    unlockedRooms={unlockedRooms}
+                    availableUnlocks={availableUnlocks}
+                    activeRoom={activeRoom}
+                  />
                 ))}
               </div>
             </div>
@@ -263,7 +304,15 @@ export default function ThemesPage() {
               </div>
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {secondFloorRooms.map((room) => (
-                  <RoomCard key={room.id} room={room} floorComplete={groundFloorComplete} t={t} />
+                  <RoomCard 
+                    key={room.id} 
+                    room={room} 
+                    floorComplete={groundFloorComplete} 
+                    t={t}
+                    unlockedRooms={unlockedRooms}
+                    availableUnlocks={availableUnlocks}
+                    activeRoom={activeRoom}
+                  />
                 ))}
               </div>
             </div>
@@ -286,7 +335,15 @@ export default function ThemesPage() {
               </div>
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {basementRooms.map((room) => (
-                  <RoomCard key={room.id} room={room} floorComplete={false} t={t} />
+                  <RoomCard 
+                    key={room.id} 
+                    room={room} 
+                    floorComplete={false} 
+                    t={t}
+                    unlockedRooms={unlockedRooms}
+                    availableUnlocks={availableUnlocks}
+                    activeRoom={activeRoom}
+                  />
                 ))}
               </div>
             </div>
