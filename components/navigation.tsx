@@ -1,19 +1,33 @@
 "use client"
 
 import Link from "next/link"
-import { User, Menu, X, Zap, LogOut, Bell } from "lucide-react"
+import { User, Menu, X, Zap, LogOut, Bell, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useAppTheme } from "@/components/app-theme-provider"
 import { useTranslations } from "@/lib/i18n"
 import { LanguageSwitcher } from "@/components/language-switcher"
+import { useUser } from "@/hooks/useUser"
+import { createClient } from "@/lib/supabase/client"
 
 export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
   const { currentAppTheme } = useAppTheme()
   const t = useTranslations()
+  const { user, profile, loading } = useUser()
 
   const hasUnreadNotifications = true
+  
+  // Get display name from profile, fallback to email or "Guest"
+  const displayName = profile?.display_name || user?.email?.split('@')[0] || t("nav.guest")
+  const userLevel = profile?.level ?? 1
+  const userXp = profile?.xp ?? 0
+
+  const handleLogout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    setIsUserDropdownOpen(false)
+  }
 
   const navItems = [
     { href: "/collection", label: t("nav.collection") },
@@ -103,12 +117,18 @@ export function Navigation() {
 
                 {/* User info - stacked on medium, inline on large */}
                 <div className="hidden md:flex flex-col lg:flex-row lg:items-center lg:gap-2">
-                  <span className="text-foreground font-cinzel text-[10px] lg:text-xs font-medium whitespace-nowrap leading-tight">
-                    JANI PERTA
-                  </span>
-                  <span className="text-accent-gold text-[9px] lg:text-xs whitespace-nowrap leading-tight">
-                    LVL 1 ♦ 30 XP
-                  </span>
+                  {loading ? (
+                    <Loader2 className="w-3 h-3 animate-spin text-accent-gold" />
+                  ) : (
+                    <>
+                      <span className="text-foreground font-cinzel text-[10px] lg:text-xs font-medium whitespace-nowrap leading-tight uppercase">
+                        {displayName}
+                      </span>
+                      <span className="text-accent-gold text-[9px] lg:text-xs whitespace-nowrap leading-tight">
+                        LVL {userLevel} ♦ {userXp} XP
+                      </span>
+                    </>
+                  )}
                 </div>
 
                 {/* Dropdown arrow */}
@@ -144,10 +164,7 @@ export function Navigation() {
                   </Link>
                   <button
                     className="flex items-center space-x-3 px-4 py-3 hover:bg-accent-gold/10 transition-colors w-full text-left border-t border-accent-gold/20"
-                    onClick={() => {
-                      setIsUserDropdownOpen(false)
-                      // Add logout logic here
-                    }}
+                    onClick={handleLogout}
                   >
                     <LogOut className="w-4 h-4 text-accent-gold" />
                     <span className="text-foreground font-cinzel text-sm">{t("nav.logout")}</span>

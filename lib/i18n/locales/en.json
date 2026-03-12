@@ -52,7 +52,8 @@
     "settings": "Settings",
     "logout": "Log Out",
     "login": "Log In",
-    "register": "Register"
+    "register": "Register",
+    "guest": "Guest"
   },
   "home": {
     "title": "Welcome to the Manor",
