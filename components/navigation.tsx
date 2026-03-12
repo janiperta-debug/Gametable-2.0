@@ -54,7 +54,7 @@ export function Navigation() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 navbar-bg backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 h-16">
           {/* Crest - Left Side */}
           <Link href="/home" className="hover:opacity-80 transition-opacity flex-shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -68,50 +68,52 @@ export function Navigation() {
           </Link>
 
           {/* Center - Desktop Navigation Links */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center justify-center gap-3 lg:gap-5 xl:gap-6">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-foreground hover:text-accent-gold transition-colors font-cinzel text-sm uppercase tracking-wide"
+                className="text-foreground hover:text-accent-gold transition-colors font-cinzel text-[11px] lg:text-xs uppercase tracking-wide whitespace-nowrap"
               >
                 {item.label}
               </Link>
             ))}
           </div>
 
-          <div className="flex items-center space-x-2 sm:space-x-4">
+          <div className="flex items-center gap-2 lg:gap-3">
             {/* Language Switcher */}
             <LanguageSwitcher />
 
             <div className="relative">
               <button
                 onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                className="flex items-center gap-2 bg-card/50 backdrop-blur-sm px-2 sm:px-3 py-1.5 rounded-lg hover:bg-card transition-colors border border-accent-gold/20"
+                className="flex items-center gap-1.5 lg:gap-2 bg-card/50 backdrop-blur-sm px-2 py-1 rounded-lg hover:bg-card transition-colors border border-accent-gold/20"
               >
                 {/* Notification indicator */}
                 {hasUnreadNotifications ? (
-                  <Zap className="w-3.5 h-3.5 text-red-500 fill-red-500" />
+                  <Zap className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-red-500 fill-red-500" />
                 ) : (
-                  <Zap className="w-3.5 h-3.5 text-accent-gold" />
+                  <Zap className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-accent-gold" />
                 )}
 
                 {/* User avatar */}
-                <div className="w-6 h-6 bg-accent-gold rounded-full flex items-center justify-center flex-shrink-0">
-                  <User className="w-3 h-3 text-background" />
+                <div className="w-5 h-5 lg:w-6 lg:h-6 bg-accent-gold rounded-full flex items-center justify-center flex-shrink-0">
+                  <User className="w-2.5 h-2.5 lg:w-3 lg:h-3 text-background" />
                 </div>
 
-                {/* User info - single line on desktop */}
-                <span className="hidden md:inline text-foreground font-cinzel text-xs font-medium whitespace-nowrap">
-                  JANI PERTA
-                </span>
-                <span className="hidden lg:inline text-accent-gold text-xs whitespace-nowrap">
-                  LVL 1 ♦ 30 XP
-                </span>
+                {/* User info - stacked on medium, inline on large */}
+                <div className="hidden md:flex flex-col lg:flex-row lg:items-center lg:gap-2">
+                  <span className="text-foreground font-cinzel text-[10px] lg:text-xs font-medium whitespace-nowrap leading-tight">
+                    JANI PERTA
+                  </span>
+                  <span className="text-accent-gold text-[9px] lg:text-xs whitespace-nowrap leading-tight">
+                    LVL 1 ♦ 30 XP
+                  </span>
+                </div>
 
                 {/* Dropdown arrow */}
                 <svg
-                  className={`w-3 h-3 text-accent-gold transition-transform ${isUserDropdownOpen ? "rotate-180" : ""}`}
+                  className={`w-2.5 h-2.5 lg:w-3 lg:h-3 text-accent-gold transition-transform ${isUserDropdownOpen ? "rotate-180" : ""}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -159,7 +161,7 @@ export function Navigation() {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle mobile menu"
             >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
