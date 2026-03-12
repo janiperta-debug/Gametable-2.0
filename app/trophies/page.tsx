@@ -69,17 +69,18 @@ export default function TrophiesPage() {
 
         {/* Badge Series Grid */}
         <div className="space-y-6">
-          {badgesBySeries.map(({ series, seriesName, badges }) => {
+          {badgesBySeries.map(({ series, badges }) => {
             const earnedInSeries = badges.filter((b) => userProgress.earnedBadges.includes(b.id)).length
+            const seriesNameTranslated = t(`trophies.series.${series}`)
 
             return (
               <div key={series} className="room-furniture p-6">
                 {/* Series Header */}
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-accent-gold/20">
                   <div>
-                    <h2 className="text-2xl text-accent-gold mb-1">{seriesName}</h2>
+                    <h2 className="text-2xl text-accent-gold mb-1">{seriesNameTranslated}</h2>
                     <p className="text-sm font-merriweather text-muted-foreground">
-                      {earnedInSeries} of {badges.length} tiers earned
+                      {earnedInSeries} / {badges.length} {t("trophies.tiersEarned")}
                     </p>
                   </div>
                   <BadgeIcon className="h-6 w-6 text-accent-gold/60" />
@@ -126,7 +127,7 @@ export default function TrophiesPage() {
                           {/* Badge Info */}
                           <div className="text-center space-y-2">
                             <div className="flex items-center justify-center gap-2">
-                              <h3 className="text-lg font-cinzel text-accent-gold">{badge.name}</h3>
+                              <h3 className="text-lg font-cinzel text-accent-gold">{t(`trophies.badges.${badge.id}.name`)}</h3>
                               <span
                                 className={`text-xs font-merriweather uppercase px-2 py-0.5 rounded ${
                                   badge.tier === "bronze"
@@ -136,13 +137,13 @@ export default function TrophiesPage() {
                                       : "bg-yellow-900/30 text-yellow-400"
                                 }`}
                               >
-                                {badge.tier}
+                                {t(`trophies.${badge.tier}`)}
                               </span>
                             </div>
-                            <p className="text-sm font-merriweather text-muted-foreground">{badge.description}</p>
+                            <p className="text-sm font-merriweather text-muted-foreground">{t(`trophies.badges.${badge.id}.description`)}</p>
                             <div className="pt-2 space-y-1">
-                              <p className="text-xs font-merriweather text-foreground">{badge.requirementText}</p>
-                              <p className="text-xs font-merriweather text-accent-gold">Reward: +{badge.xp} XP</p>
+                              <p className="text-xs font-merriweather text-foreground">{t(`trophies.badges.${badge.id}.requirement`)}</p>
+                              <p className="text-xs font-merriweather text-accent-gold">{t("trophies.reward")}: +{badge.xp} XP</p>
                             </div>
                           </div>
 

@@ -352,31 +352,134 @@
     "badgesEarned": "Ansaitut palkinnot",
     "totalXP": "Yhteensä XP",
     "tiersEarned": "tasoa ansaittu",
+    "ofTiersEarned": "/ {count} tasoa ansaittu",
     "reward": "Palkinto",
+    "rewardXP": "Palkinto: +{xp} XP",
     "requirement": "Vaatimus",
     "bronze": "Pronssi",
     "silver": "Hopea",
     "gold": "Kulta",
     "locked": "Lukittu",
     "showcase": "Palkintonäyttely",
-    "collectionCurator": "Kokoelman kuraattori",
-    "collectionCuratorDesc": "Omista yli 250 peliä",
-    "socialButterfly": "Sosiaalinen perhonen",
-    "socialButterflyDesc": "Yhdistä yli 25 pelaajan kanssa",
-    "eventMaster": "Tapahtumamestari",
-    "eventMasterDesc": "Järjestä 10 onnistunutta tapahtumaa",
     "earned": "Ansaittu",
     "twoDaysAgo": "2 päivää sitten",
     "oneWeekAgo": "1 viikko sitten",
     "twoWeeksAgo": "2 viikkoa sitten",
     "series": {
-      "collection": "Kokoelmasarja",
-      "explorer": "Tutkijasarja",
-      "social": "Sosiaalinen sarja",
-      "hosting": "Järjestäjäsarja",
-      "attendance": "Osallistujasarja",
-      "manor": "Kartanosarja",
-      "portal": "Portaalisarja"
+      "collection": "Ihmeiden kuraattori",
+      "explorer": "Ulottuvuuksien kulkija",
+      "social": "Toverikunnan kutoja",
+      "hosting": "Kokoontumisten mestari",
+      "attendance": "Vakaa kumppani",
+      "manor": "Kartanon nousija",
+      "portal": "Portaalin vartija"
+    },
+    "badges": {
+      "collection-bronze": {
+        "name": "Aloitteleva kuraattori",
+        "description": "Aloita matkasi kerääjänä",
+        "requirement": "Lisää 5 peliä kokoelmaasi"
+      },
+      "collection-silver": {
+        "name": "Mestarikuraattori",
+        "description": "Kokoelmasi kasvaa vaikuttavaksi",
+        "requirement": "Lisää 25 peliä kokoelmaasi"
+      },
+      "collection-gold": {
+        "name": "Suurkuraattori",
+        "description": "Legendaarinen kokoelma kartanon arvoisena",
+        "requirement": "Lisää 100 peliä kokoelmaasi"
+      },
+      "explorer-bronze": {
+        "name": "Utelias tutkija",
+        "description": "Aloita eri pelimaailmojen tutkiminen",
+        "requirement": "Omista pelejä 2 eri kategoriasta"
+      },
+      "explorer-silver": {
+        "name": "Maailmojen kulkija",
+        "description": "Matkasi ulottuu useisiin ulottuvuuksiin",
+        "requirement": "Omista pelejä 3 eri kategoriasta"
+      },
+      "explorer-gold": {
+        "name": "Ulottuvuuksien mestari",
+        "description": "Kaikkien peliulottuvuuksien mestari",
+        "requirement": "Omista pelejä kaikista 4 kategoriasta"
+      },
+      "social-bronze": {
+        "name": "Siteen luoja",
+        "description": "Aloita toverikuntasi rakentaminen",
+        "requirement": "Yhdistä 3 ystävän kanssa"
+      },
+      "social-silver": {
+        "name": "Piirin rakentaja",
+        "description": "Ystäväpiirisi kasvaa vahvaksi",
+        "requirement": "Yhdistä 10 ystävän kanssa"
+      },
+      "social-gold": {
+        "name": "Toverikunnan mestari",
+        "description": "Todellinen toverikunnan ja yhteisön mestari",
+        "requirement": "Yhdistä 25 ystävän kanssa"
+      },
+      "hosting-bronze": {
+        "name": "Ensimmäinen kokoontuminen",
+        "description": "Järjestä ensimmäinen pelitapahtumasi",
+        "requirement": "Järjestä 1 tapahtuma"
+      },
+      "hosting-silver": {
+        "name": "Vakituinen isäntä",
+        "description": "Tule säännölliseksi tapahtumajärjestäjäksi",
+        "requirement": "Järjestä 5 tapahtumaa"
+      },
+      "hosting-gold": {
+        "name": "Suuri orkestroija",
+        "description": "Hallitse suurten kokoontumisten taide",
+        "requirement": "Järjestä 20 tapahtumaa"
+      },
+      "manor-bronze": {
+        "name": "Ensimmäisen kerroksen mestari",
+        "description": "Hallitse kartanon ensimmäinen kerros",
+        "requirement": "Saavuta taso 5"
+      },
+      "manor-silver": {
+        "name": "Toisen kerroksen mestari",
+        "description": "Nouse toiseen kerrokseen",
+        "requirement": "Saavuta taso 10"
+      },
+      "manor-gold": {
+        "name": "Kellarin herra",
+        "description": "Avaa kellarin salaisuudet",
+        "requirement": "Saavuta taso 15"
+      },
+      "portal-bronze": {
+        "name": "Portaalin noviisi",
+        "description": "Avaa ensimmäinen portaalisi BoardGameGeekiin",
+        "requirement": "Tuo 1 peli BGG:stä"
+      },
+      "portal-silver": {
+        "name": "Portaalin taitaja",
+        "description": "Valjasta BGG-portaalin voima",
+        "requirement": "Tuo 10 peliä BGG:stä"
+      },
+      "portal-gold": {
+        "name": "Portaalin mestari",
+        "description": "Ulottuvuuksien välisen pelikeräilyn mestari",
+        "requirement": "Tuo 50 peliä BGG:stä"
+      },
+      "attendance-bronze": {
+        "name": "Innokas tulokas",
+        "description": "Liity ensimmäisiin pelikokoontumisiin",
+        "requirement": "Osallistu 3 tapahtumaan"
+      },
+      "attendance-silver": {
+        "name": "Luotettava liittolainen",
+        "description": "Tule luotettavaksi kumppaniksi",
+        "requirement": "Osallistu 10 tapahtumaan"
+      },
+      "attendance-gold": {
+        "name": "Legendaarinen kumppani",
+        "description": "Legendaarinen läsnäolo jokaisessa kokoontumisessa",
+        "requirement": "Osallistu 25 tapahtumaan"
+      }
     }
   },
   "findPlayers": {

@@ -352,31 +352,134 @@
     "badgesEarned": "Badges Earned",
     "totalXP": "Total XP",
     "tiersEarned": "tiers earned",
+    "ofTiersEarned": "of {count} tiers earned",
     "reward": "Reward",
+    "rewardXP": "Reward: +{xp} XP",
     "requirement": "Requirement",
     "bronze": "Bronze",
     "silver": "Silver",
     "gold": "Gold",
     "locked": "Locked",
     "showcase": "Trophy Showcase",
-    "collectionCurator": "Collection Curator",
-    "collectionCuratorDesc": "Own 250+ games",
-    "socialButterfly": "Social Butterfly",
-    "socialButterflyDesc": "Connect with 25+ gamers",
-    "eventMaster": "Event Master",
-    "eventMasterDesc": "Host 10 successful events",
     "earned": "Earned",
     "twoDaysAgo": "2 days ago",
     "oneWeekAgo": "1 week ago",
     "twoWeeksAgo": "2 weeks ago",
     "series": {
-      "collection": "Collection Series",
-      "explorer": "Explorer Series",
-      "social": "Social Series",
-      "hosting": "Hosting Series",
-      "attendance": "Attendance Series",
-      "manor": "Manor Series",
-      "portal": "Portal Series"
+      "collection": "Curator of Wonders",
+      "explorer": "Dimensional Wanderer",
+      "social": "Fellowship Weaver",
+      "hosting": "Gathering Master",
+      "attendance": "Stalwart Companion",
+      "manor": "Manor Ascendant",
+      "portal": "Portal Keeper"
+    },
+    "badges": {
+      "collection-bronze": {
+        "name": "Apprentice Curator",
+        "description": "Begin your journey as a collector",
+        "requirement": "Add 5 games to your collection"
+      },
+      "collection-silver": {
+        "name": "Master Curator",
+        "description": "Your collection grows impressive",
+        "requirement": "Add 25 games to your collection"
+      },
+      "collection-gold": {
+        "name": "Grand Curator",
+        "description": "A legendary collection worthy of the manor",
+        "requirement": "Add 100 games to your collection"
+      },
+      "explorer-bronze": {
+        "name": "Curious Explorer",
+        "description": "Begin exploring different gaming realms",
+        "requirement": "Own games from 2 different categories"
+      },
+      "explorer-silver": {
+        "name": "Realm Walker",
+        "description": "Your travels span multiple dimensions",
+        "requirement": "Own games from 3 different categories"
+      },
+      "explorer-gold": {
+        "name": "Dimensional Master",
+        "description": "Master of all gaming dimensions",
+        "requirement": "Own games from all 4 categories"
+      },
+      "social-bronze": {
+        "name": "Bond Forger",
+        "description": "Begin building your fellowship",
+        "requirement": "Connect with 3 friends"
+      },
+      "social-silver": {
+        "name": "Circle Builder",
+        "description": "Your circle of friends grows strong",
+        "requirement": "Connect with 10 friends"
+      },
+      "social-gold": {
+        "name": "Fellowship Master",
+        "description": "A true master of fellowship and community",
+        "requirement": "Connect with 25 friends"
+      },
+      "hosting-bronze": {
+        "name": "First Gathering",
+        "description": "Host your first gaming event",
+        "requirement": "Host 1 event"
+      },
+      "hosting-silver": {
+        "name": "Regular Host",
+        "description": "Become a regular event organizer",
+        "requirement": "Host 5 events"
+      },
+      "hosting-gold": {
+        "name": "Grand Orchestrator",
+        "description": "Master the art of grand gatherings",
+        "requirement": "Host 20 events"
+      },
+      "manor-bronze": {
+        "name": "Ground Floor Master",
+        "description": "Master the ground floor of the manor",
+        "requirement": "Reach Level 5"
+      },
+      "manor-silver": {
+        "name": "Second Floor Master",
+        "description": "Ascend to the second floor",
+        "requirement": "Reach Level 10"
+      },
+      "manor-gold": {
+        "name": "Basement Lord",
+        "description": "Unlock the secrets of the basement",
+        "requirement": "Reach Level 15"
+      },
+      "portal-bronze": {
+        "name": "Portal Novice",
+        "description": "Open your first portal to BoardGameGeek",
+        "requirement": "Import 1 game from BGG"
+      },
+      "portal-silver": {
+        "name": "Portal Adept",
+        "description": "Harness the power of the BGG portal",
+        "requirement": "Import 10 games from BGG"
+      },
+      "portal-gold": {
+        "name": "Portal Master",
+        "description": "Master of dimensional game collection",
+        "requirement": "Import 50 games from BGG"
+      },
+      "attendance-bronze": {
+        "name": "Eager Newcomer",
+        "description": "Join your first gaming gatherings",
+        "requirement": "Attend 3 events"
+      },
+      "attendance-silver": {
+        "name": "Reliable Ally",
+        "description": "Become a dependable companion",
+        "requirement": "Attend 10 events"
+      },
+      "attendance-gold": {
+        "name": "Legendary Companion",
+        "description": "A legendary presence at every gathering",
+        "requirement": "Attend 25 events"
+      }
     }
   },
   "findPlayers": {
