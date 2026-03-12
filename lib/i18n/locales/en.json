@@ -3,6 +3,8 @@
     "loading": "Loading...",
     "save": "Save",
     "cancel": "Cancel",
+    "success": "Success",
+    "error": "Error",
     "refresh": "Refresh",
     "updated": "Updated",
     "delete": "Delete",
@@ -210,7 +212,17 @@
       "wishlist": "On Wishlist",
       "forTrade": "For Trade",
       "wantToBuy": "Want to Buy"
-    }
+    },
+    "searchBGG": "Search BoardGameGeek",
+    "searchBGGDescription": "Search the BoardGameGeek database to add games to your collection.",
+    "searchPlaceholder": "Enter game name...",
+    "searchFailed": "Failed to search BoardGameGeek. Please try again.",
+    "detailsFailed": "Failed to fetch game details. Please try again.",
+    "addFailed": "Failed to add game. Please try again.",
+    "addedToCollection": "has been added to your collection! (+10 XP)",
+    "addToCollection": "Add to Collection",
+    "noResults": "No games found. Try a different search term.",
+    "searchPrompt": "Search for a game to add to your collection."
   },
   "events": {
     "title": "Events",

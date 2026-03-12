@@ -3,6 +3,8 @@
     "loading": "Ladataan...",
     "save": "Tallenna",
     "cancel": "Peruuta",
+    "success": "Onnistui",
+    "error": "Virhe",
     "refresh": "Päivitä",
     "updated": "Päivitetty",
     "delete": "Poista",
@@ -178,7 +180,7 @@
     "sortBy": "Järjestä",
     "gridView": "Ruudukkonäkymä",
     "listView": "Listanäkymä",
-    "showFilters": "Näytä suodattimet",
+    "showFilters": "N��ytä suodattimet",
     "hideFilters": "Piilota suodattimet",
     "gamesInCollection": "peliä kokoelmassa",
     "noGamesYet": "Ei vielä pelejä",
@@ -210,7 +212,17 @@
       "wishlist": "Toivelistalla",
       "forTrade": "Vaihdettavana",
       "wantToBuy": "Haluan ostaa"
-    }
+    },
+    "searchBGG": "Etsi BoardGameGeekistä",
+    "searchBGGDescription": "Etsi pelejä BoardGameGeekin tietokannasta ja lisää ne kokoelmaasi.",
+    "searchPlaceholder": "Syötä pelin nimi...",
+    "searchFailed": "Haku BoardGameGeekistä epäonnistui. Yritä uudelleen.",
+    "detailsFailed": "Pelin tietojen haku epäonnistui. Yritä uudelleen.",
+    "addFailed": "Pelin lisäys epäonnistui. Yritä uudelleen.",
+    "addedToCollection": "on lisätty kokoelmaasi! (+10 XP)",
+    "addToCollection": "Lisää kokoelmaan",
+    "noResults": "Pelejä ei löytynyt. Kokeile toista hakutermiä.",
+    "searchPrompt": "Etsi peli lisätäksesi sen kokoelmaasi."
   },
   "events": {
     "title": "Tapahtumat",

@@ -7,19 +7,24 @@ import { GameGrid } from "@/components/game-grid"
 import { GameList } from "@/components/game-list"
 import { DiscoverGames } from "@/components/discover-games"
 import { ImportSection } from "@/components/import-section"
-import { BookOpen, Filter } from "lucide-react"
+import { AddGameDialog } from "@/components/add-game-dialog"
+import { BookOpen, Filter, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "@/lib/i18n"
+import { useCollection } from "@/hooks/useCollection"
+import type { Game } from "@/lib/mock-games"
 
 type CategoryType = "all" | "board-games" | "rpgs" | "miniatures" | "trading-cards"
 
 export default function Collection() {
   const [activeTab, setActiveTab] = useState<"my-games" | "find-games">("my-games")
   const [showFilters, setShowFilters] = useState(false)
+  const [addGameOpen, setAddGameOpen] = useState(false)
   const { toast } = useToast()
   const t = useTranslations()
+  const { games: userGames, loading, refetch } = useCollection()
 
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [searchQuery, setSearchQuery] = useState("")
@@ -40,12 +45,49 @@ export default function Collection() {
     })
   }
 
+  // Transform database games to the format expected by GameGrid
+  const transformedGames: Game[] = useMemo(() => {
+    return userGames.map((ug) => ({
+      id: parseInt(ug.game.bgg_id?.toString() || "0", 10) || Math.random(),
+      title: ug.game.name,
+      image: ug.game.image_url || ug.game.thumbnail_url || "/placeholder.svg",
+      rating: ug.personal_rating || ug.game.bgg_rating || 0,
+      playerCount: ug.game.min_players && ug.game.max_players 
+        ? `${ug.game.min_players}-${ug.game.max_players}` 
+        : "?",
+      minPlayers: ug.game.min_players || 1,
+      maxPlayers: ug.game.max_players || 4,
+      playTime: ug.game.min_playtime && ug.game.max_playtime
+        ? `${ug.game.min_playtime}-${ug.game.max_playtime}`
+        : "?",
+      minPlayTime: ug.game.min_playtime || 30,
+      maxPlayTime: ug.game.max_playtime || 60,
+      category: ug.game.category || "Board Game",
+      mechanics: [],
+      yearPublished: ug.game.year || 0,
+      owned: ug.status === "owned",
+      wishlist: ug.status === "wishlist",
+      forTrade: false, // TODO: Connect to marketplace
+      // Store the user_game id for actions
+      userGameId: ug.id,
+    }))
+  }, [userGames])
+
   const filteredAndSortedGames = useMemo(() => {
-    let filtered: any[] = []
+    let filtered = [...transformedGames]
 
     // Filter by search query
     if (searchQuery) {
-      filtered = filtered.filter((game) => game.title.toLowerCase().includes(searchQuery.toLowerCase()))
+      filtered = filtered.filter((game) => 
+        game.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
+
+    // Filter by category
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter((game) => 
+        game.category?.toLowerCase().includes(selectedCategory.replace("-", " "))
+      )
     }
 
     // Sort games
@@ -56,20 +98,39 @@ export default function Collection() {
         case "name-desc":
           return b.title.localeCompare(a.title)
         case "rating-high":
-          return b.rating - a.rating
+          return (b.rating || 0) - (a.rating || 0)
         case "rating-low":
-          return a.rating - b.rating
+          return (a.rating || 0) - (b.rating || 0)
         case "year":
-          return b.yearPublished - a.yearPublished
+          return (b.yearPublished || 0) - (a.yearPublished || 0)
         case "playtime":
-          return a.minPlayTime - b.minPlayTime
+          return (a.minPlayTime || 0) - (b.minPlayTime || 0)
         default:
           return 0
       }
     })
 
     return filtered
-  }, [searchQuery, sortBy])
+  }, [transformedGames, searchQuery, selectedCategory, sortBy])
+
+  // Calculate category counts
+  const categoryCounts = useMemo(() => {
+    const counts = {
+      all: transformedGames.length,
+      "board-games": 0,
+      rpgs: 0,
+      miniatures: 0,
+      "trading-cards": 0,
+    }
+    transformedGames.forEach((game) => {
+      const cat = game.category?.toLowerCase() || ""
+      if (cat.includes("rpg") || cat.includes("role")) counts.rpgs++
+      else if (cat.includes("miniature") || cat.includes("wargame")) counts.miniatures++
+      else if (cat.includes("trading") || cat.includes("tcg") || cat.includes("card game")) counts["trading-cards"]++
+      else counts["board-games"]++
+    })
+    return counts
+  }, [transformedGames])
 
   return (
     <div className="min-h-screen room-environment">
@@ -108,8 +169,9 @@ export default function Collection() {
               setSelectedCategory={setSelectedCategory}
               sortBy={sortBy}
               setSortBy={setSortBy}
-              onAddGame={() => {}}
+              onAddGame={() => setAddGameOpen(true)}
               onImport={() => {}}
+              categoryCounts={categoryCounts}
             />
 
             {selectedCategory !== "all" && (
@@ -133,7 +195,11 @@ export default function Collection() {
                     <span className="font-cinzel">{showFilters ? t("collection.hideFilters") : t("collection.showFilters")}</span>
                   </Button>
                 </div>
-                {viewMode === "grid" ? (
+                {loading ? (
+                  <div className="flex items-center justify-center py-16">
+                    <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
+                  </div>
+                ) : viewMode === "grid" ? (
                   <GameGrid
                     games={filteredAndSortedGames}
                     onToggleForTrade={handleToggleForTrade}
@@ -144,6 +210,12 @@ export default function Collection() {
                 )}
               </div>
             </div>
+
+            <AddGameDialog 
+              open={addGameOpen} 
+              onOpenChange={setAddGameOpen} 
+              onGameAdded={refetch}
+            />
           </>
         ) : (
           <DiscoverGames onToggleWishlist={handleToggleWishlist} />

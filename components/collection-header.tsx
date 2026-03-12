@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Plus, Search, SortAsc, Grid, List } from "lucide-react"
-import Link from "next/link"
 import { useTranslations } from "@/lib/i18n"
 
 type CategoryType = "all" | "board-games" | "rpgs" | "miniatures" | "trading-cards"
@@ -23,6 +22,13 @@ interface CollectionHeaderProps {
   setSortBy: (sort: SortOption) => void
   onAddGame: () => void
   onImport: () => void
+  categoryCounts?: {
+    all: number
+    "board-games": number
+    rpgs: number
+    miniatures: number
+    "trading-cards": number
+  }
 }
 
 export function CollectionHeader({
@@ -34,15 +40,17 @@ export function CollectionHeader({
   setSelectedCategory,
   sortBy,
   setSortBy,
+  onAddGame,
+  categoryCounts,
 }: CollectionHeaderProps) {
   const t = useTranslations()
   
   const categories = [
-    { id: "all" as CategoryType, labelKey: "collection.allGames", count: 247, importSource: "BGG" },
-    { id: "board-games" as CategoryType, labelKey: "collection.boardGames", count: 189, importSource: "BGG" },
-    { id: "rpgs" as CategoryType, labelKey: "collection.rpgs", count: 34, importSource: "RPGG" },
-    { id: "miniatures" as CategoryType, labelKey: "collection.miniatures", count: 24, importSource: "Miniature Market" },
-    { id: "trading-cards" as CategoryType, labelKey: "collection.tradingCards", count: 12, importSource: "TCGPlayer" },
+    { id: "all" as CategoryType, labelKey: "collection.allGames", count: categoryCounts?.all ?? 0, importSource: "BGG" },
+    { id: "board-games" as CategoryType, labelKey: "collection.boardGames", count: categoryCounts?.["board-games"] ?? 0, importSource: "BGG" },
+    { id: "rpgs" as CategoryType, labelKey: "collection.rpgs", count: categoryCounts?.rpgs ?? 0, importSource: "RPGG" },
+    { id: "miniatures" as CategoryType, labelKey: "collection.miniatures", count: categoryCounts?.miniatures ?? 0, importSource: "Miniature Market" },
+    { id: "trading-cards" as CategoryType, labelKey: "collection.tradingCards", count: categoryCounts?.["trading-cards"] ?? 0, importSource: "TCGPlayer" },
   ]
 
   const sortOptions = [
@@ -75,12 +83,10 @@ export function CollectionHeader({
           </div>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-          <Link href="/game/new">
-            <Button className="theme-accent-gold w-full sm:w-auto">
-              <Plus className="h-4 w-4 mr-2" />
-              <span className="font-body">{t("collection.addGame")}</span>
-            </Button>
-          </Link>
+          <Button onClick={onAddGame} className="theme-accent-gold w-full sm:w-auto">
+            <Plus className="h-4 w-4 mr-2" />
+            <span className="font-body">{t("collection.addGame")}</span>
+          </Button>
         </div>
       </div>
 
