@@ -157,7 +157,7 @@ export default function Marketplace() {
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={activeTab === "listings" ? "Search games..." : "Search users or games..."}
+                placeholder={activeTab === "listings" ? t("marketplace.searchGames") : t("marketplace.searchUsersOrGames")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 font-body bg-surface/50 border-accent-gold/20 focus:border-accent-gold"
@@ -168,49 +168,49 @@ export default function Marketplace() {
               <>
                 <Select value={conditionFilter} onValueChange={setConditionFilter}>
                   <SelectTrigger className="w-full md:w-[180px] bg-surface/50 border-accent-gold/20 font-body">
-                    <SelectValue placeholder="Condition" />
+                    <SelectValue placeholder={t("marketplace.condition")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all" className="font-body">
-                      All Conditions
+                      {t("marketplace.allConditions")}
                     </SelectItem>
                     <SelectItem value="Like New" className="font-body">
-                      Like New
+                      {t("marketplace.likeNew")}
                     </SelectItem>
                     <SelectItem value="Very Good" className="font-body">
-                      Very Good
+                      {t("marketplace.veryGood")}
                     </SelectItem>
                     <SelectItem value="Good" className="font-body">
-                      Good
+                      {t("marketplace.good")}
                     </SelectItem>
                     <SelectItem value="Fair" className="font-body">
-                      Fair
+                      {t("marketplace.fair")}
                     </SelectItem>
                   </SelectContent>
                 </Select>
 
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                   <SelectTrigger className="w-full md:w-[180px] bg-surface/50 border-accent-gold/20 font-body">
-                    <SelectValue placeholder="Category" />
+                    <SelectValue placeholder={t("marketplace.category")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all" className="font-body">
-                      All Categories
+                      {t("marketplace.allCategories")}
                     </SelectItem>
                     <SelectItem value="Strategy" className="font-body">
-                      Strategy
+                      {t("games.categories.strategy")}
                     </SelectItem>
                     <SelectItem value="Cooperative" className="font-body">
-                      Cooperative
+                      {t("games.categories.cooperative")}
                     </SelectItem>
                     <SelectItem value="Family" className="font-body">
-                      Family
+                      {t("games.categories.family")}
                     </SelectItem>
                     <SelectItem value="Thematic" className="font-body">
-                      Thematic
+                      {t("games.categories.thematic")}
                     </SelectItem>
                     <SelectItem value="Abstract" className="font-body">
-                      Abstract
+                      {t("games.categories.abstract")}
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -225,7 +225,7 @@ export default function Marketplace() {
             {filteredListings.length === 0 ? (
               <div className="text-center py-12 manor-card">
                 <Store className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground font-body text-lg">No listings found matching your criteria.</p>
+                <p className="text-muted-foreground font-body text-lg">{t("marketplace.noListings")}</p>
               </div>
             ) : (
               filteredListings.map((listing) => (
@@ -288,7 +288,7 @@ export default function Marketplace() {
                             </div>
                             <div>
                               <p className="font-heading font-medium text-sm">{listing.seller.name}</p>
-                              <p className="text-xs text-muted-foreground">Listed {listing.listedDate}</p>
+                              <p className="text-xs text-muted-foreground">{t("marketplace.listed")} {listing.listedDate}</p>
                             </div>
                           </div>
 
@@ -300,13 +300,13 @@ export default function Marketplace() {
                                 className="border-accent-gold/20 hover:border-accent-gold bg-transparent"
                               >
                                 <User className="h-4 w-4 mr-2" />
-                                View Profile
+                                {t("profile.viewProfile")}
                               </Button>
                             </Link>
                             <Link href={`/messages?user=${listing.seller.id}`}>
                               <Button size="sm" className="bg-accent-gold hover:bg-accent-gold/90 text-background">
                                 <MessageCircle className="h-4 w-4 mr-2" />
-                                Contact Seller
+                                {t("marketplace.contactSeller")}
                               </Button>
                             </Link>
                           </div>
@@ -323,7 +323,7 @@ export default function Marketplace() {
             {filteredWishlists.length === 0 ? (
               <div className="text-center py-12 manor-card">
                 <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground font-body text-lg">No wishlists found matching your search.</p>
+                <p className="text-muted-foreground font-body text-lg">{t("marketplace.noWishlists")}</p>
               </div>
             ) : (
               filteredWishlists.map((wishlist) => (
@@ -352,13 +352,13 @@ export default function Marketplace() {
                           className="border-accent-gold/20 hover:border-accent-gold bg-transparent"
                         >
                           <User className="h-4 w-4 mr-2" />
-                          View Profile
+                          {t("profile.viewProfile")}
                         </Button>
                       </Link>
                       <Link href={`/messages?user=${wishlist.userId}`}>
                         <Button size="sm" className="bg-accent-gold hover:bg-accent-gold/90 text-background">
                           <MessageCircle className="h-4 w-4 mr-2" />
-                          Offer Trade
+                          {t("marketplace.offerTrade")}
                         </Button>
                       </Link>
                     </div>
@@ -367,7 +367,7 @@ export default function Marketplace() {
                   <div>
                     <div className="flex items-center gap-2 mb-3">
                       <Heart className="h-4 w-4 text-accent-gold" />
-                      <h4 className="font-heading font-medium">Wishlist ({wishlist.wishlistGames.length} games)</h4>
+                      <h4 className="font-heading font-medium">{t("marketplace.wishlist")} ({wishlist.wishlistGames.length} {t("marketplace.games")})</h4>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {wishlist.wishlistGames.map((game, index) => (

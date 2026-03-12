@@ -233,6 +233,12 @@
     "spotsLeft": "paikkaa jäljellä",
     "full": "Täynnä",
     "free": "Ilmainen",
+    "hostedBy": "Järjestäjä:",
+    "join": "Liity",
+    "decline": "Hylkää",
+    "viewDetails": "Näytä tiedot",
+    "noEvents": "Ei tapahtumia",
+    "noEventsDesc": "Luo oma tapahtumasi tai etsi läheltäsi.",
     "eventTypes": {
       "all": "Kaikki",
       "gameNight": "Peli-ilta",

@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { User, Menu, X, Zap, LogOut, Bell } from "lucide-react"
 import { useState } from "react"
 import { useAppTheme } from "@/components/app-theme-provider"
@@ -58,12 +57,13 @@ export function Navigation() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link href="/home" className="hover:opacity-80 transition-opacity">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={getCrestImage(currentAppTheme)}
                 alt="GameTable Crest"
                 width={40}
                 height={40}
-                className="w-10 h-10"
+                className="w-10 h-10 object-contain"
               />
             </Link>
           </div>

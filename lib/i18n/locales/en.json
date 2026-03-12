@@ -233,6 +233,12 @@
     "spotsLeft": "spots left",
     "full": "Full",
     "free": "Free",
+    "hostedBy": "Hosted by",
+    "join": "Join",
+    "decline": "Decline",
+    "viewDetails": "View Details",
+    "noEvents": "No events",
+    "noEventsDesc": "Create your own event or search nearby.",
     "eventTypes": {
       "all": "All",
       "gameNight": "Game Night",

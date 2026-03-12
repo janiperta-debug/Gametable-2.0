@@ -210,15 +210,15 @@ export default function ThemesPage() {
           <TabsList className="grid w-full grid-cols-3 mb-8 max-w-2xl mx-auto">
             <TabsTrigger value="basement" className="font-body text-sm">
               <ArrowDown className="h-4 w-4 mr-2" />
-              Basement
+              {t("themes.basement")}
             </TabsTrigger>
             <TabsTrigger value="ground-floor" className="font-body text-sm">
               <Home className="h-4 w-4 mr-2" />
-              Ground Floor
+              {t("themes.groundFloor")}
             </TabsTrigger>
             <TabsTrigger value="second-floor" className="font-body text-sm">
               <ArrowUp className="h-4 w-4 mr-2" />
-              Second Floor
+              {t("themes.secondFloor")}
             </TabsTrigger>
           </TabsList>
 
@@ -228,14 +228,14 @@ export default function ThemesPage() {
               <div className="text-center mb-8">
                 <div className="flex items-center justify-center mb-4">
                   <Home className="h-7 w-7 text-accent-gold mr-3" />
-                  <h2 className="font-heading text-3xl font-bold">Ground Floor</h2>
+                  <h2 className="font-heading text-3xl font-bold">{t("themes.groundFloor")}</h2>
                   <Badge variant="secondary" className="ml-4 font-body text-base px-4 py-2">
-                    Choose Your Path
+                    {t("themes.chooseYourPath")}
                   </Badge>
                 </div>
                 <div className="text-sm text-muted-foreground font-body">
-                  {groundFloorProgress} of {groundFloorRooms.length} unlocked •{" "}
-                  {groundFloorComplete ? "Floor Complete!" : `${currentUser.availableUnlocks} choices available`}
+                  {groundFloorProgress} / {groundFloorRooms.length} {t("themes.unlocked")} •{" "}
+                  {groundFloorComplete ? t("themes.floorComplete") : `${currentUser.availableUnlocks} ${t("themes.availableUnlocks")}`}
                 </div>
               </div>
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -252,13 +252,13 @@ export default function ThemesPage() {
               <div className="text-center mb-8">
                 <div className="flex items-center justify-center mb-4">
                   <ArrowUp className="h-7 w-7 text-accent-gold mr-3" />
-                  <h2 className="font-heading text-3xl font-bold">Second Floor</h2>
+                  <h2 className="font-heading text-3xl font-bold">{t("themes.secondFloor")}</h2>
                   <Badge variant="secondary" className="ml-4 font-body text-base px-4 py-2">
                     Levels 40-70
                   </Badge>
                 </div>
                 <div className="text-sm text-muted-foreground font-body">
-                  {groundFloorComplete ? "Available after Ground Floor completion" : "Complete Ground Floor first"}
+                  {groundFloorComplete ? t("themes.floorComplete") : t("themes.completeFloorFirst")}
                 </div>
               </div>
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -275,13 +275,13 @@ export default function ThemesPage() {
               <div className="text-center mb-8">
                 <div className="flex items-center justify-center mb-4">
                   <ArrowDown className="h-7 w-7 text-accent-gold mr-3" />
-                  <h2 className="font-heading text-3xl font-bold">Basement</h2>
+                  <h2 className="font-heading text-3xl font-bold">{t("themes.basement")}</h2>
                   <Badge variant="secondary" className="ml-4 font-body text-base px-4 py-2">
                     Levels 75-95
                   </Badge>
                 </div>
                 <div className="text-sm text-muted-foreground font-body">
-                  {false ? "Available after Second Floor completion" : "Complete Second Floor first"}
+                  {t("themes.completeFloorFirst")}
                 </div>
               </div>
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -297,29 +297,27 @@ export default function ThemesPage() {
         <div className="room-furniture text-center">
           <div className="space-y-6">
             <Portal className="h-20 w-20 text-accent-gold mx-auto animate-pulse" />
-            <h3 className="font-heading text-3xl font-bold">The Ultimate Adventure Awaits</h3>
+            <h3 className="font-heading text-3xl font-bold">{t("themes.portalSystem")}</h3>
             <p className="font-body text-muted-foreground max-w-4xl mx-auto text-lg leading-relaxed">
-              Reach Level 100 to unlock the Portal System and access infinite dimensional realms. Each dimension offers
-              unique rooms, fresh XP activities, and completely new ways to experience your gaming journey. No grinding
-              - just endless discovery!
+              {t("themes.portalDescription")}
             </p>
             <div className="grid gap-6 md:grid-cols-3 max-w-3xl mx-auto mt-8">
               <div className="text-center">
                 <div className="text-4xl font-bold text-accent-gold font-heading">∞</div>
-                <div className="text-sm text-muted-foreground font-body">Dimensions</div>
+                <div className="text-sm text-muted-foreground font-body">{t("themes.dimensions")}</div>
               </div>
               <div className="text-center">
                 <div className="text-4xl font-bold text-accent-gold font-heading">19×∞</div>
-                <div className="text-sm text-muted-foreground font-body">Unique Rooms</div>
+                <div className="text-sm text-muted-foreground font-body">{t("themes.uniqueRooms")}</div>
               </div>
               <div className="text-center">
                 <div className="text-4xl font-bold text-accent-gold font-heading">Fresh</div>
-                <div className="text-sm text-muted-foreground font-body">XP Activities</div>
+                <div className="text-sm text-muted-foreground font-body">{t("themes.freshXPActivities")}</div>
               </div>
             </div>
             <div className="flex justify-center space-x-2 mt-8">
               <Sparkles className="h-5 w-5 text-accent-gold" />
-              <span className="text-base font-heading text-accent-gold">Every dimension tells a different story</span>
+              <span className="text-base font-heading text-accent-gold">{t("themes.everyDimensionTellsStory")}</span>
               <Sparkles className="h-5 w-5 text-accent-gold" />
             </div>
           </div>
