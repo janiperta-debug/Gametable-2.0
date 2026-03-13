@@ -8,11 +8,10 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Calendar, MapPin, Users, Clock, Plus, Search, Filter, Star, Gamepad2, Loader2, Check, HelpCircle, X } from "lucide-react"
+import { Calendar, MapPin, Users, Clock, Plus, Search, Filter, Loader2, Check, HelpCircle, X } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { useEvents } from "@/hooks/useEvents"
 import { updateRSVP, type Event, type RSVPStatus } from "@/app/actions/events"
-import { CreateEventModal } from "@/components/create-event-modal"
 import { useToast } from "@/hooks/use-toast"
 import { useUser } from "@/hooks/useUser"
 
@@ -174,7 +173,6 @@ function EventCard({ event, onViewDetails, onRSVP, t, isLoggedIn, currentUserId 
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState("upcoming")
   const [searchQuery, setSearchQuery] = useState("")
-  const [createModalOpen, setCreateModalOpen] = useState(false)
   const router = useRouter()
   const t = useTranslations()
   const { toast } = useToast()
@@ -243,7 +241,7 @@ export default function EventsPage() {
               <span className="font-body">{t("common.filters")}</span>
             </Button>
           </div>
-          <Button size="lg" className="theme-accent-gold w-full" onClick={() => setCreateModalOpen(true)}>
+          <Button size="lg" className="theme-accent-gold w-full" onClick={() => router.push("/events/create")}>
             <Plus className="h-4 w-4 mr-2" />
             <span className="font-body">{t("events.createEvent")}</span>
           </Button>
@@ -343,92 +341,6 @@ export default function EventsPage() {
             </Card>
           </TabsContent>
         </Tabs>
-
-        {/* Quick Actions */}
-        <div className="mt-12 md:mt-16">
-          <h2 className="font-heading text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8">{t("events.quickActions")}</h2>
-          <div className="grid gap-4 md:gap-6 grid-cols-2 lg:grid-cols-4 max-w-4xl mx-auto">
-            <Card className="room-furniture hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6 text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 mb-4">
-                  <Gamepad2 className="h-6 w-6" />
-                </div>
-                <h3 className="font-heading font-semibold mb-2">{t("events.boardGameNight")}</h3>
-                <p className="font-body text-sm text-muted-foreground">{t("events.boardGameNightDesc")}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="room-furniture hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6 text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 mb-4">
-                  <Users className="h-6 w-6" />
-                </div>
-                <h3 className="font-heading font-semibold mb-2">{t("events.rpgSession")}</h3>
-                <p className="font-body text-sm text-muted-foreground">{t("events.rpgSessionDesc")}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="room-furniture hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6 text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 mb-4">
-                  <Star className="h-6 w-6" />
-                </div>
-                <h3 className="font-heading font-semibold mb-2">{t("events.tournament")}</h3>
-                <p className="font-body text-sm text-muted-foreground">{t("events.tournamentDesc")}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="room-furniture hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-6 text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 mb-4">
-                  <Calendar className="h-6 w-6" />
-                </div>
-                <h3 className="font-heading font-semibold mb-2">{t("events.customEvent")}</h3>
-                <p className="font-body text-sm text-muted-foreground">{t("events.customEventDesc")}</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Event Management Hub */}
-        <div className="mt-12 md:mt-16">
-          <Card className="room-furniture max-w-4xl mx-auto">
-            <CardHeader className="text-center">
-              <CardTitle className="font-heading text-3xl font-bold">{t("events.managementHub")}</CardTitle>
-              <p className="font-body text-muted-foreground">
-                {t("events.managementHubDesc")}
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-6 md:grid-cols-3 text-center">
-                <div>
-                  <div className="text-3xl font-bold text-accent-gold font-heading mb-2">24</div>
-                  <div className="font-body text-sm text-muted-foreground">{t("events.eventsThisMonth")}</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-accent-gold font-heading mb-2">156</div>
-                  <div className="font-body text-sm text-muted-foreground">{t("events.totalAttendees")}</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-accent-gold font-heading mb-2">8</div>
-                  <div className="font-body text-sm text-muted-foreground">{t("events.eventsHosted")}</div>
-                </div>
-              </div>
-              <div className="text-center mt-8">
-                <Button size="lg" className="theme-accent-gold">
-                  <span className="font-body">{t("events.exploreEventTools")}</span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Create Event Modal */}
-        <CreateEventModal 
-          open={createModalOpen} 
-          onOpenChange={setCreateModalOpen}
-          onEventCreated={refetch}
-        />
       </main>
     </div>
   )
