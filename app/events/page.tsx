@@ -181,11 +181,11 @@ export default function EventsPage() {
   const { user } = useUser()
   const { publicEvents, myEvents, loading, refetch } = useEvents()
 
-  const handleViewDetails = (event: Event) => {
-    router.push(`/events/${event.id}`)
+  function handleViewDetails(event: Event) {
+    router.push("/events/" + event.id)
   }
 
-  const handleRSVP = async (eventId: string, status: RSVPStatus) => {
+  async function handleRSVP(eventId: string, status: RSVPStatus) {
     const result = await updateRSVP(eventId, status)
     if (result.error) {
       toast({
@@ -203,18 +203,13 @@ export default function EventsPage() {
   }
 
   // Filter events by search query
+  const query = searchQuery.toLowerCase()
   const filteredPublicEvents = publicEvents.filter(function(event) {
-    const query = searchQuery.toLowerCase()
-    const titleMatch = event.title.toLowerCase().includes(query)
-    const descMatch = event.description?.toLowerCase().includes(query) || false
-    return titleMatch || descMatch
+    return event.title.toLowerCase().includes(query) || (event.description ? event.description.toLowerCase().includes(query) : false)
   })
 
   const filteredMyEvents = myEvents.filter(function(event) {
-    const query = searchQuery.toLowerCase()
-    const titleMatch = event.title.toLowerCase().includes(query)
-    const descMatch = event.description?.toLowerCase().includes(query) || false
-    return titleMatch || descMatch
+    return event.title.toLowerCase().includes(query) || (event.description ? event.description.toLowerCase().includes(query) : false)
   })
 
   return (
