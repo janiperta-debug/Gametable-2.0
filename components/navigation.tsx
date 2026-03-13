@@ -1,22 +1,65 @@
 "use client"
 
 import Link from "next/link"
-import { User, Menu, X, Zap, LogOut, Bell, Loader2 } from "lucide-react"
-import { useState } from "react"
+import { User, Menu, X, Zap, LogOut, Bell, Loader2, MessageCircle } from "lucide-react"
+import { useState, useEffect } from "react"
 import { useAppTheme } from "@/components/app-theme-provider"
 import { useTranslations } from "@/lib/i18n"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { useUser } from "@/hooks/useUser"
 import { createClient } from "@/lib/supabase/client"
+import { getUnreadCount } from "@/app/actions/messages"
 
 export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0)
   const { currentAppTheme } = useAppTheme()
   const t = useTranslations()
   const { user, profile, loading } = useUser()
 
   const hasUnreadNotifications = true
+
+  // Fetch unread message count
+  useEffect(() => {
+    async function fetchUnreadCount() {
+      if (!user) {
+        setUnreadMessageCount(0)
+        return
+      }
+      const result = await getUnreadCount()
+      setUnreadMessageCount(result.count)
+    }
+    fetchUnreadCount()
+
+    // Subscribe to new messages for real-time badge updates
+    if (!user) return
+    
+    const supabase = createClient()
+    const channel = supabase
+      .channel("nav-messages")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages" },
+        () => {
+          // Refetch unread count when any new message arrives
+          fetchUnreadCount()
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "messages" },
+        () => {
+          // Refetch when messages are marked as read
+          fetchUnreadCount()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user])
   
   // Get display name from profile, fallback to email or "Guest"
   const displayName = profile?.display_name || user?.email?.split('@')[0] || t("nav.guest")
@@ -35,10 +78,10 @@ export function Navigation() {
     { href: "/marketplace", label: t("nav.marketplace") },
     { href: "/events", label: t("nav.events") },
     { href: "/themes", label: t("nav.themes") },
-    { href: "/messages", label: t("nav.messages") },
+    { href: "/messages", label: t("nav.messages"), badge: unreadMessageCount },
     { href: "/trophies", label: t("nav.trophies") },
     { href: "/contact", label: t("nav.contact") },
-  ] as const
+  ] as { href: string; label: string; badge?: number }[]
 
   const getCrestImage = (theme: string) => {
     const crestMap: { [key: string]: string } = {
@@ -87,9 +130,14 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-foreground hover:text-accent-gold transition-colors font-cinzel text-[11px] lg:text-xs uppercase tracking-wide whitespace-nowrap"
+                className="relative text-foreground hover:text-accent-gold transition-colors font-cinzel text-[11px] lg:text-xs uppercase tracking-wide whitespace-nowrap"
               >
                 {item.label}
+                {item.badge && item.badge > 0 && (
+                  <span className="absolute -top-2 -right-3 bg-red-500 text-white text-[10px] rounded-full h-4 min-w-[16px] flex items-center justify-center px-1">
+                    {item.badge > 99 ? "99+" : item.badge}
+                  </span>
+                )}
               </Link>
             ))}
           </div>
