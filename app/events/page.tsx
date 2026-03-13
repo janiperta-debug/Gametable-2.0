@@ -417,7 +417,8 @@ export default function EventsPage() {
               <div className="text-center mt-8">
                 <Button size="lg" className="theme-accent-gold">
                   <span className="font-body">{t("events.exploreEventTools")}</span>
-</Button>
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
