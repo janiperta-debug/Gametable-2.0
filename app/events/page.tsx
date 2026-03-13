@@ -203,15 +203,19 @@ export default function EventsPage() {
   }
 
   // Filter events by search query
-  const filteredPublicEvents = publicEvents.filter(event =>
-    event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    event.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredPublicEvents = publicEvents.filter(function(event) {
+    const query = searchQuery.toLowerCase()
+    const titleMatch = event.title.toLowerCase().includes(query)
+    const descMatch = event.description?.toLowerCase().includes(query) || false
+    return titleMatch || descMatch
+  })
 
-  const filteredMyEvents = myEvents.filter(event =>
-    event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    event.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredMyEvents = myEvents.filter(function(event) {
+    const query = searchQuery.toLowerCase()
+    const titleMatch = event.title.toLowerCase().includes(query)
+    const descMatch = event.description?.toLowerCase().includes(query) || false
+    return titleMatch || descMatch
+  })
 
   return (
     <div className="min-h-screen room-environment">
