@@ -2,31 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
-
-/**
- * Calculate level from XP
- * Level = floor(xp / 100) + 1
- * Level 1: 0-99 XP
- * Level 2: 100-199 XP
- * etc.
- */
-export function calculateLevel(xp: number): number {
-  return Math.floor(xp / 100) + 1
-}
-
-/**
- * Get XP required for next level
- */
-export function xpForNextLevel(currentLevel: number): number {
-  return currentLevel * 100
-}
-
-/**
- * Get XP required for current level start
- */
-export function xpForCurrentLevel(currentLevel: number): number {
-  return (currentLevel - 1) * 100
-}
+import { calculateLevel } from "@/lib/xp-utils"
 
 /**
  * Award XP to a user - Server-side only, never trust client

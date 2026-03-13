@@ -20,7 +20,7 @@ import {
 } from "lucide-react"
 import { getRoomsByCategory, type RoomTheme } from "@/lib/room-themes"
 import { useUser } from "@/hooks/useUser"
-import { xpForNextLevel, xpForCurrentLevel } from "@/app/actions/xp"
+import { xpForNextLevel, xpForCurrentLevel } from "@/lib/xp-utils"
 
 const groundFloorRooms = getRoomsByCategory("Ground Floor")
 const secondFloorRooms = getRoomsByCategory("Second Floor")
@@ -268,7 +268,7 @@ export default function ThemesPage() {
                 </div>
                 <div className="text-sm text-muted-foreground font-body">
                   {groundFloorProgress} / {groundFloorRooms.length} {t("themes.unlocked")} •{" "}
-                  {groundFloorComplete ? t("themes.floorComplete") : `${currentUser.availableUnlocks} ${t("themes.availableUnlocks")}`}
+                  {groundFloorComplete ? t("themes.floorComplete") : `${availableUnlocks} ${t("themes.availableUnlocks")}`}
                 </div>
               </div>
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">

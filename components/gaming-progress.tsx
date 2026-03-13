@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress"
 import { RefreshCw, BookOpen, Users, Calendar, Trophy, Loader2 } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { useUser } from "@/hooks/useUser"
-import { xpForNextLevel, xpForCurrentLevel } from "@/app/actions/xp"
+import { xpForNextLevel, xpForCurrentLevel } from "@/lib/xp-utils"
 
 export function GamingProgress() {
   const t = useTranslations()
