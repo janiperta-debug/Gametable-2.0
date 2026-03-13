@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -8,12 +8,13 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Calendar, MapPin, Users, Clock, Plus, Search, Filter, Star, Gamepad2 } from "lucide-react"
-import { getPublicEvents } from "@/lib/event-service"
+import { Calendar, MapPin, Users, Clock, Plus, Search, Filter, Star, Gamepad2, Loader2, Check, HelpCircle, X } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
-
-const upcomingEvents: any[] = []
-const myEvents: any[] = []
+import { useEvents } from "@/hooks/useEvents"
+import { updateRSVP, type Event, type RSVPStatus } from "@/app/actions/events"
+import { CreateEventModal } from "@/components/create-event-modal"
+import { useToast } from "@/hooks/use-toast"
+import { useUser } from "@/hooks/useUser"
 
 const statusColors = {
   attending: "bg-green-100 text-green-600 border-green-200 dark:bg-green-900/30 dark:text-green-400",
@@ -23,58 +24,92 @@ const statusColors = {
   not_attending: "bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-900/30 dark:text-gray-400",
 }
 
-const categoryColors = {
-  "Board Games": "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
-  RPG: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
-  "Card Game": "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
-  Miniatures: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
+const eventTypeLabels: Record<string, string> = {
+  board_game_night: "Board Games",
+  rpg_session: "RPG",
+  tournament: "Tournament",
+  custom: "Custom",
 }
 
-function EventCard({ event, onViewDetails, t }: { event: any; onViewDetails: (event: any) => void; t: (key: string) => string }) {
+const eventTypeColors: Record<string, string> = {
+  board_game_night: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
+  rpg_session: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
+  tournament: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
+  custom: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
+}
+
+interface EventCardProps {
+  event: Event
+  onViewDetails: (event: Event) => void
+  onRSVP: (eventId: string, status: RSVPStatus) => void
+  t: (key: string) => string
+  isLoggedIn: boolean
+  currentUserId?: string
+}
+
+function EventCard({ event, onViewDetails, onRSVP, t, isLoggedIn, currentUserId }: EventCardProps) {
+  const [rsvpLoading, setRsvpLoading] = useState<RSVPStatus | null>(null)
+  
+  const isHost = currentUserId === event.host_id
+  const eventDate = new Date(event.starts_at)
+  const dateStr = eventDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
+  const timeStr = eventDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+  const hostName = event.host?.display_name || 'Unknown Host'
+  const hostInitials = hostName.split(' ').map((n: string) => n[0]).join('').toUpperCase()
+
+  const handleRSVP = async (status: RSVPStatus) => {
+    setRsvpLoading(status)
+    await onRSVP(event.id, status)
+    setRsvpLoading(null)
+  }
+
   return (
-    <Card className={`room-furniture hover:shadow-lg transition-all ${event.featured ? "border-accent-gold/60" : ""}`}>
-      {event.featured && (
-        <div className="absolute -top-2 -right-2 z-10">
-          <div className="bg-accent-gold text-accent-gold-foreground rounded-full p-2">
-            <Star className="h-4 w-4" />
-          </div>
-        </div>
-      )}
+    <Card className="room-furniture hover:shadow-lg transition-all">
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className="font-heading text-lg md:text-xl mb-2 break-words">{event.title}</CardTitle>
             <div className="flex items-center flex-wrap gap-2 mb-3">
-              <Badge className={statusColors[event.status as keyof typeof statusColors]}>{event.status}</Badge>
-              <Badge variant="outline" className={categoryColors[event.category as keyof typeof categoryColors]}>
-                {event.category}
-              </Badge>
+              {isHost && (
+                <Badge className={statusColors.hosting}>{t("events.hosting")}</Badge>
+              )}
+              {event.user_rsvp && !isHost && (
+                <Badge className={statusColors[event.user_rsvp as keyof typeof statusColors]}>
+                  {event.user_rsvp}
+                </Badge>
+              )}
+              {event.event_type && (
+                <Badge variant="outline" className={eventTypeColors[event.event_type] || eventTypeColors.custom}>
+                  {eventTypeLabels[event.event_type] || event.event_type}
+                </Badge>
+              )}
             </div>
           </div>
         </div>
-        <p className="font-body text-sm text-muted-foreground break-words">{event.description}</p>
+        {event.description && (
+          <p className="font-body text-sm text-muted-foreground break-words line-clamp-2">{event.description}</p>
+        )}
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-3 text-sm">
           <div className="flex items-center space-x-2">
             <Calendar className="h-4 w-4 text-accent-gold flex-shrink-0" />
-            <span className="font-body">{event.date}</span>
+            <span className="font-body">{dateStr}</span>
           </div>
           <div className="flex items-center space-x-2">
             <Clock className="h-4 w-4 text-accent-gold flex-shrink-0" />
-            <span className="font-body">{event.time}</span>
+            <span className="font-body">{timeStr}</span>
           </div>
-          <div className="flex items-center space-x-2">
-            <MapPin className="h-4 w-4 text-accent-gold flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <div className="font-body break-words">{event.location}</div>
-              <div className="font-body text-xs text-muted-foreground break-words">{event.address}</div>
+          {event.location && (
+            <div className="flex items-center space-x-2">
+              <MapPin className="h-4 w-4 text-accent-gold flex-shrink-0" />
+              <span className="font-body break-words">{event.location}</span>
             </div>
-          </div>
+          )}
           <div className="flex items-center space-x-2">
             <Users className="h-4 w-4 text-accent-gold flex-shrink-0" />
             <span className="font-body">
-              {event.attendees}/{event.maxAttendees} {t("events.attending")}
+              {event.participant_count || 0}{event.max_players ? `/${event.max_players}` : ''} {t("events.attending")}
             </span>
           </div>
         </div>
@@ -82,46 +117,53 @@ function EventCard({ event, onViewDetails, t }: { event: any; onViewDetails: (ev
         <div className="flex flex-col space-y-3 pt-4 border-t border-accent-gold/20">
           <div className="flex items-center space-x-2">
             <Avatar className="h-6 w-6 flex-shrink-0">
-              <AvatarImage src={event.hostAvatar || "/placeholder.svg"} alt={event.host} />
-              <AvatarFallback className="text-xs font-body">
-                {event.host
-                  .split(" ")
-                  .map((n: string) => n[0])
-                  .join("")}
-              </AvatarFallback>
+              <AvatarImage src={event.host?.avatar_url || "/placeholder.svg"} alt={hostName} />
+              <AvatarFallback className="text-xs font-body">{hostInitials}</AvatarFallback>
             </Avatar>
-            <span className="font-body text-sm text-muted-foreground truncate">{t("events.hostedBy")} {event.host}</span>
+            <span className="font-body text-sm text-muted-foreground truncate">{t("events.hostedBy")} {hostName}</span>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {event.status === "invited" && (
-              <>
-                <Button size="sm" className="theme-accent-gold flex-1 min-w-[80px]">
-                  {t("events.join")}
-                </Button>
-                <Button size="sm" variant="outline" className="bg-transparent flex-1 min-w-[80px]">
-                  {t("events.maybe")}
-                </Button>
-              </>
-            )}
-            {event.status === "maybe" && (
-              <Button size="sm" className="theme-accent-gold flex-1 min-w-[100px]">
-                {t("events.confirm")}
+          
+          {/* RSVP Buttons */}
+          {isLoggedIn && !isHost && (
+            <div className="flex flex-wrap gap-2">
+              <Button 
+                size="sm" 
+                className={event.user_rsvp === 'attending' ? 'theme-accent-gold' : 'bg-transparent'}
+                variant={event.user_rsvp === 'attending' ? 'default' : 'outline'}
+                onClick={() => handleRSVP('attending')}
+                disabled={rsvpLoading !== null}
+              >
+                {rsvpLoading === 'attending' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3 mr-1" />}
+                {t("events.join")}
               </Button>
-            )}
-            {event.status === "hosting" && (
-              <Button size="sm" variant="outline" className="bg-transparent flex-1 min-w-[100px]">
-                {t("events.manage")}
+              <Button 
+                size="sm" 
+                variant="outline"
+                className={event.user_rsvp === 'maybe' ? 'border-yellow-500 text-yellow-600' : 'bg-transparent'}
+                onClick={() => handleRSVP('maybe')}
+                disabled={rsvpLoading !== null}
+              >
+                {rsvpLoading === 'maybe' ? <Loader2 className="h-3 w-3 animate-spin" /> : <HelpCircle className="h-3 w-3 mr-1" />}
+                {t("events.maybe")}
               </Button>
-            )}
-            <Button
-              size="sm"
-              variant="outline"
-              className="bg-transparent flex-1 min-w-[100px]"
-              onClick={() => onViewDetails(event)}
-            >
-              {t("events.viewDetails")}
+              <Button 
+                size="sm" 
+                variant="outline"
+                className={event.user_rsvp === 'declined' ? 'border-red-500 text-red-600' : 'bg-transparent'}
+                onClick={() => handleRSVP('declined')}
+                disabled={rsvpLoading !== null}
+              >
+                {rsvpLoading === 'declined' ? <Loader2 className="h-3 w-3 animate-spin" /> : <X className="h-3 w-3 mr-1" />}
+                {t("events.decline")}
+              </Button>
+            </div>
+          )}
+          
+          {isHost && (
+            <Button size="sm" variant="outline" className="bg-transparent" onClick={() => onViewDetails(event)}>
+              {t("events.manage")}
             </Button>
-          </div>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -131,28 +173,44 @@ function EventCard({ event, onViewDetails, t }: { event: any; onViewDetails: (ev
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState("upcoming")
   const [searchQuery, setSearchQuery] = useState("")
-  const [events, setEvents] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [createModalOpen, setCreateModalOpen] = useState(false)
   const router = useRouter()
   const t = useTranslations()
+  const { toast } = useToast()
+  const { user } = useUser()
+  const { publicEvents, myEvents, loading, refetch } = useEvents()
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      setLoading(true)
-      const data = await getPublicEvents()
-      setEvents(data)
-      setLoading(false)
-    }
-    fetchEvents()
-  }, [])
-
-  const handleViewDetails = (event: any) => {
+  const handleViewDetails = (event: Event) => {
     router.push(`/events/${event.id}`)
   }
 
-  const handleCreateEvent = () => {
-    router.push("/events/create")
+  const handleRSVP = async (eventId: string, status: RSVPStatus) => {
+    const result = await updateRSVP(eventId, status)
+    if (result.error) {
+      toast({
+        title: t("common.error"),
+        description: result.error,
+        variant: "destructive",
+      })
+    } else {
+      toast({
+        title: t("common.success"),
+        description: t("events.rsvpUpdated"),
+      })
+      refetch()
+    }
   }
+
+  // Filter events by search query
+  const filteredPublicEvents = publicEvents.filter(event =>
+    event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    event.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const filteredMyEvents = myEvents.filter(event =>
+    event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    event.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   return (
     <div className="min-h-screen room-environment">
@@ -185,7 +243,7 @@ export default function EventsPage() {
               <span className="font-body">{t("common.filters")}</span>
             </Button>
           </div>
-          <Button size="lg" className="theme-accent-gold w-full" onClick={handleCreateEvent}>
+          <Button size="lg" className="theme-accent-gold w-full" onClick={() => setCreateModalOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             <span className="font-body">{t("events.createEvent")}</span>
           </Button>
@@ -207,12 +265,10 @@ export default function EventsPage() {
 
           <TabsContent value="upcoming">
             {loading ? (
-              <Card className="room-furniture text-center py-12">
-                <CardContent>
-                  <p className="font-body text-muted-foreground">{t("common.loading")}</p>
-                </CardContent>
-              </Card>
-            ) : events.length === 0 ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
+              </div>
+            ) : filteredPublicEvents.length === 0 ? (
               <Card className="room-furniture text-center py-12">
                 <CardContent>
                   <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
@@ -222,21 +278,57 @@ export default function EventsPage() {
               </Card>
             ) : (
               <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {events.map((event) => (
-                  <EventCard key={event.id} event={event} onViewDetails={handleViewDetails} t={t} />
+                {filteredPublicEvents.map((event) => (
+                  <EventCard 
+                    key={event.id} 
+                    event={event} 
+                    onViewDetails={handleViewDetails} 
+                    onRSVP={handleRSVP}
+                    t={t}
+                    isLoggedIn={!!user}
+                    currentUserId={user?.id}
+                  />
                 ))}
               </div>
             )}
           </TabsContent>
 
           <TabsContent value="my-events">
-            <Card className="room-furniture text-center py-12">
-              <CardContent>
-                <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
-                <h3 className="ornate-text font-heading text-xl font-semibold mb-2">No My Events Yet</h3>
-                <p className="font-body text-muted-foreground">Create your first event to see it here.</p>
-              </CardContent>
-            </Card>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
+              </div>
+            ) : !user ? (
+              <Card className="room-furniture text-center py-12">
+                <CardContent>
+                  <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
+                  <h3 className="ornate-text font-heading text-xl font-semibold mb-2">{t("events.loginRequired")}</h3>
+                  <p className="font-body text-muted-foreground">{t("events.loginToSeeMyEvents")}</p>
+                </CardContent>
+              </Card>
+            ) : filteredMyEvents.length === 0 ? (
+              <Card className="room-furniture text-center py-12">
+                <CardContent>
+                  <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
+                  <h3 className="ornate-text font-heading text-xl font-semibold mb-2">{t("events.noMyEvents")}</h3>
+                  <p className="font-body text-muted-foreground">{t("events.noMyEventsDesc")}</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredMyEvents.map((event) => (
+                  <EventCard 
+                    key={event.id} 
+                    event={event} 
+                    onViewDetails={handleViewDetails}
+                    onRSVP={handleRSVP}
+                    t={t}
+                    isLoggedIn={!!user}
+                    currentUserId={user?.id}
+                  />
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="past">
@@ -325,11 +417,17 @@ export default function EventsPage() {
               <div className="text-center mt-8">
                 <Button size="lg" className="theme-accent-gold">
                   <span className="font-body">{t("events.exploreEventTools")}</span>
-                </Button>
-              </div>
+</Button>
             </CardContent>
           </Card>
         </div>
+
+        {/* Create Event Modal */}
+        <CreateEventModal 
+          open={createModalOpen} 
+          onOpenChange={setCreateModalOpen}
+          onEventCreated={refetch}
+        />
       </main>
     </div>
   )

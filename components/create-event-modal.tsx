@@ -10,27 +10,35 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Globe, UserCheck, Lock } from "lucide-react"
+import { Globe, UserCheck, Lock, Loader2 } from "lucide-react"
+import { createEvent, type EventType, type EventPrivacy } from "@/app/actions/events"
+import { useToast } from "@/hooks/use-toast"
+import { useTranslations } from "@/lib/i18n"
 
 interface CreateEventModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onEventCreated?: () => void
 }
 
-export function CreateEventModal({ open, onOpenChange }: CreateEventModalProps) {
+export function CreateEventModal({ open, onOpenChange, onEventCreated }: CreateEventModalProps) {
   const [gameSource, setGameSource] = useState<"collection" | "manual">("collection")
-  const [privacy, setPrivacy] = useState("public")
+  const [eventType, setEventType] = useState<EventType>("board_game_night")
+  const [privacy, setPrivacy] = useState<EventPrivacy>("public")
+  const [saving, setSaving] = useState(false)
+  const { toast } = useToast()
+  const t = useTranslations()
   const [formData, setFormData] = useState({
     title: "",
     game: "",
     date: "",
-    time: "",
+    time: "19:00",
     location: "",
     maxPlayers: "",
     description: "",
   })
 
-  // Mock user collection games
+  // Mock user collection games - TODO: Connect to real collection
   const collectionGames = [
     "Wingspan",
     "Azul",
@@ -42,11 +50,63 @@ export function CreateEventModal({ open, onOpenChange }: CreateEventModalProps) 
     "Splendor",
   ]
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle event creation
-    console.log("[v0] Creating event:", { ...formData, gameSource, privacy })
-    onOpenChange(false)
+    if (!formData.title.trim() || !formData.date || !formData.time) return
+
+    setSaving(true)
+
+    try {
+      // Combine date and time into ISO string
+      const startsAt = new Date(`${formData.date}T${formData.time}:00`)
+
+      const result = await createEvent({
+        title: formData.title.trim(),
+        description: formData.description.trim() || undefined,
+        event_type: eventType,
+        privacy: privacy,
+        location: formData.location.trim() || undefined,
+        starts_at: startsAt.toISOString(),
+        max_players: formData.maxPlayers ? parseInt(formData.maxPlayers) : undefined,
+      })
+
+      if (result.error) {
+        toast({
+          title: t("common.error"),
+          description: result.error,
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: t("common.success"),
+          description: t("events.eventCreated"),
+        })
+
+        // Reset form
+        setFormData({
+          title: "",
+          game: "",
+          date: "",
+          time: "19:00",
+          location: "",
+          maxPlayers: "",
+          description: "",
+        })
+        setPrivacy("public")
+        setEventType("board_game_night")
+        onEventCreated?.()
+        onOpenChange(false)
+      }
+    } catch (error) {
+      console.error("Error creating event:", error)
+      toast({
+        title: t("common.error"),
+        description: t("events.createFailed"),
+        variant: "destructive",
+      })
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -249,11 +309,18 @@ export function CreateEventModal({ open, onOpenChange }: CreateEventModalProps) 
 
         {/* Action Buttons */}
         <div className="flex justify-end space-x-3 pt-6 border-t border-accent-gold/20 bg-background">
-          <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-            Cancel
+          <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} disabled={saving}>
+            {t("common.cancel")}
           </Button>
-          <Button type="submit" className="theme-accent-gold" onClick={handleSubmit}>
-            Create Event
+          <Button type="submit" className="theme-accent-gold" onClick={handleSubmit} disabled={saving}>
+            {saving ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                {t("common.loading")}
+              </>
+            ) : (
+              t("events.createEvent")
+            )}
           </Button>
         </div>
       </DialogContent>
