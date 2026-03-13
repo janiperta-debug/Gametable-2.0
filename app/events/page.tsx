@@ -16,11 +16,12 @@ import { CreateEventModal } from "@/components/create-event-modal"
 import { useToast } from "@/hooks/use-toast"
 import { useUser } from "@/hooks/useUser"
 
-const statusColors = {
+const statusColors: Record<string, string> = {
   attending: "bg-green-100 text-green-600 border-green-200 dark:bg-green-900/30 dark:text-green-400",
   maybe: "bg-yellow-100 text-yellow-600 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400",
   invited: "bg-blue-100 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400",
   hosting: "bg-purple-100 text-purple-600 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400",
+  declined: "bg-red-100 text-red-600 border-red-200 dark:bg-red-900/30 dark:text-red-400",
   not_attending: "bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-900/30 dark:text-gray-400",
 }
 
@@ -74,7 +75,7 @@ function EventCard({ event, onViewDetails, onRSVP, t, isLoggedIn, currentUserId 
                 <Badge className={statusColors.hosting}>{t("events.hosting")}</Badge>
               )}
               {event.user_rsvp && !isHost && (
-                <Badge className={statusColors[event.user_rsvp as keyof typeof statusColors]}>
+                <Badge className={statusColors[event.user_rsvp] || statusColors.attending}>
                   {event.user_rsvp}
                 </Badge>
               )}
