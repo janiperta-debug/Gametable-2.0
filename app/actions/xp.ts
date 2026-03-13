@@ -130,6 +130,35 @@ export async function updateActiveRoom(
 }
 
 /**
+ * Update user profile
+ */
+export async function updateProfile(
+  updates: { bio?: string; avatar_url?: string; display_name?: string; location?: string }
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  
+  if (authError || !user) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  const { error: updateError } = await supabase
+    .from("profiles")
+    .update(updates)
+    .eq("id", user.id)
+
+  if (updateError) {
+    console.error("Error updating profile:", updateError)
+    return { success: false, error: "Failed to update profile" }
+  }
+
+  revalidatePath("/profile")
+
+  return { success: true }
+}
+
+/**
  * Get user's XP history
  */
 export async function getXPHistory(userId: string) {

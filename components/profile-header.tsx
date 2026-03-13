@@ -1,22 +1,55 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Edit, X, Check } from "lucide-react"
+import { Edit, X, Check, Loader2 } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
+import { useUser } from "@/hooks/useUser"
+import { updateProfile } from "@/app/actions/xp"
 
 export function ProfileHeader() {
   const [isEditing, setIsEditing] = useState(false)
-  const [bio, setBio] = useState("Into all kind of board games and very interested in Warhammer 40 000")
+  const [saving, setSaving] = useState(false)
+  const { profile, loading, refetch } = useUser()
+  const [bio, setBio] = useState("")
   const [profilePictureUrl, setProfilePictureUrl] = useState("")
   const t = useTranslations()
 
-  const handleSave = () => {
-    // TODO: Save to database
-    setIsEditing(false)
+  // Sync local state with profile data
+  useEffect(() => {
+    if (profile) {
+      setBio(profile.bio || "")
+      setProfilePictureUrl(profile.avatar_url || "")
+    }
+  }, [profile])
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      await updateProfile({ bio, avatar_url: profilePictureUrl })
+      await refetch()
+      setIsEditing(false)
+    } catch (error) {
+      console.error("Failed to save profile:", error)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Get initials for avatar fallback
+  const initials = profile?.display_name 
+    ? profile.display_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : 'U'
+
+  if (loading) {
+    return (
+      <div className="room-furniture p-8 flex items-center justify-center min-h-[200px]">
+        <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
+      </div>
+    )
   }
 
   return (
@@ -33,9 +66,9 @@ export function ProfileHeader() {
         <div className="absolute -top-16 left-8">
           <div className="relative">
             <Avatar className="w-32 h-32 border-4 border-accent-gold shadow-lg">
-              <AvatarImage src={profilePictureUrl || "/placeholder.svg"} />
+              <AvatarImage src={profile?.avatar_url || "/placeholder.svg"} />
               <AvatarFallback className="bg-gradient-to-br from-accent-gold/20 to-accent-copper/20 text-4xl text-accent-gold">
-                J
+                {initials}
               </AvatarFallback>
             </Avatar>
           </div>
@@ -63,8 +96,16 @@ export function ProfileHeader() {
                 />
               </div>
               <div className="flex gap-3">
-                <Button onClick={handleSave} className="bg-accent-gold hover:bg-accent-gold/90 text-background">
-                  <Check className="w-4 h-4 mr-2" />
+                <Button 
+                  onClick={handleSave} 
+                  disabled={saving}
+                  className="bg-accent-gold hover:bg-accent-gold/90 text-background"
+                >
+                  {saving ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Check className="w-4 h-4 mr-2" />
+                  )}
                   {t("common.save")}
                 </Button>
                 <Button

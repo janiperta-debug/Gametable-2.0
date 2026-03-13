@@ -357,7 +357,9 @@
     "freshXPActivities": "Uusia XP-aktiviteetteja",
     "everyDimensionTellsStory": "Jokainen ulottuvuus kertoo eri tarinan",
     "selectTheme": "Valitse teema",
-    "applyTheme": "Käytä teemaa"
+    "applyTheme": "Käytä teemaa",
+    "currentlyActive": "Tällä hetkellä aktiivinen",
+    "enterRoom": "Siirry huoneeseen"
   },
   "trophies": {
     "title": "Palkintokokoelma",

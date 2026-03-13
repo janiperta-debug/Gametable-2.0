@@ -25,6 +25,7 @@ interface UseUserReturn {
   profile: UserProfile | null
   loading: boolean
   error: Error | null
+  refetch: () => Promise<void>
 }
 
 export function useUser(): UseUserReturn {
@@ -33,8 +34,30 @@ export function useUser(): UseUserReturn {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
+  const supabase = createClient()
+
+  const fetchProfile = async (userId: string) => {
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single()
+
+    if (!profileError) {
+      setProfile(profileData)
+    } else {
+      console.error('Error fetching profile:', profileError)
+      setProfile(null)
+    }
+  }
+
+  const refetch = async () => {
+    if (user) {
+      await fetchProfile(user.id)
+    }
+  }
+
   useEffect(() => {
-    const supabase = createClient()
 
     // Get initial session
     const getInitialSession = async () => {
@@ -52,20 +75,7 @@ export function useUser(): UseUserReturn {
         setUser(user)
 
         if (user) {
-          // Fetch profile from profiles table
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single()
-
-          if (profileError) {
-            console.error('Error fetching profile:', profileError)
-            // Profile might not exist yet - not a critical error
-            setProfile(null)
-          } else {
-            setProfile(profileData)
-          }
+          await fetchProfile(user.id)
         }
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Unknown error'))
@@ -83,18 +93,7 @@ export function useUser(): UseUserReturn {
         setUser(currentUser)
 
         if (currentUser) {
-          // Fetch profile when auth state changes
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', currentUser.id)
-            .single()
-
-          if (!profileError) {
-            setProfile(profileData)
-          } else {
-            setProfile(null)
-          }
+          await fetchProfile(currentUser.id)
         } else {
           setProfile(null)
         }
@@ -106,5 +105,5 @@ export function useUser(): UseUserReturn {
     }
   }, [])
 
-  return { user, profile, loading, error }
+  return { user, profile, loading, error, refetch }
 }

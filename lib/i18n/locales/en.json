@@ -357,7 +357,9 @@
     "freshXPActivities": "Fresh XP Activities",
     "everyDimensionTellsStory": "Every dimension tells a different story",
     "selectTheme": "Select Theme",
-    "applyTheme": "Apply Theme"
+    "applyTheme": "Apply Theme",
+    "currentlyActive": "Currently Active",
+    "enterRoom": "Enter Room"
   },
   "trophies": {
     "title": "Trophy Collection",
