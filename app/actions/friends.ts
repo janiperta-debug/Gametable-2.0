@@ -54,8 +54,12 @@ export async function searchUsers(params: {
       location,
       bio
     `)
-    .neq("id", user?.id || "") // Exclude current user
     .limit(50)
+
+  // Exclude current user if logged in
+  if (user?.id) {
+    query = query.neq("id", user.id)
+  }
 
   // Filter by location if provided
   if (params.location && params.location.trim()) {
