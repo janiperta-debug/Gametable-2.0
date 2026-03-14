@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import { calculateLevel } from "@/lib/xp-utils"
+import { checkAndAwardBadges } from "./badges"
 
 /**
  * Award XP to a user - Server-side only, never trust client
@@ -71,6 +72,9 @@ export async function awardXP(
   revalidatePath("/profile")
   revalidatePath("/themes")
   revalidatePath("/home")
+
+  // Check and award any badges the user has now earned
+  await checkAndAwardBadges(userId)
 
   return { success: true, newXP, newLevel }
 }

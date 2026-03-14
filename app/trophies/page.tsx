@@ -1,38 +1,147 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Navigation } from "@/components/navigation"
-import { BadgeIcon, Lock, Trophy, Award } from "lucide-react"
+import { BadgeIcon, Lock, Trophy, Award, Loader2 } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { BADGE_DEFINITIONS, type BadgeSeries } from "@/lib/badge-definitions"
-import { getUserBadgeProgress } from "@/lib/mock-user-progress"
+import { getBadgesWithProgress, type BadgeWithProgress } from "@/app/actions/badges"
+import { useUser } from "@/hooks/useUser"
 import Image from "next/image"
+import { formatDistanceToNow } from "date-fns"
 
 export default function TrophiesPage() {
-  const currentUserId = "user-1" // This will be replaced with actual auth user ID from database
-  const userProgress = getUserBadgeProgress(currentUserId)
+  const { user, loading: userLoading } = useUser()
   const t = useTranslations()
+  const [badges, setBadges] = useState<BadgeWithProgress[]>([])
+  const [earnedCount, setEarnedCount] = useState(0)
+  const [totalXP, setTotalXP] = useState(0)
+  const [loading, setLoading] = useState(true)
 
-  // Group badges by series
+  useEffect(() => {
+    async function loadBadges() {
+      if (!user) {
+        // Use local badge definitions with no progress for non-logged in users
+        const localBadges: BadgeWithProgress[] = BADGE_DEFINITIONS.map((b) => ({
+          id: b.id,
+          series: b.series,
+          tier: b.tier,
+          name: b.name,
+          description: b.description,
+          requirement_type: getRequirementType(b.series),
+          requirement_value: b.requirement,
+          xp_reward: b.xp,
+          image_url: b.image,
+          earned: false,
+          current_progress: 0,
+        }))
+        setBadges(localBadges)
+        setEarnedCount(0)
+        setTotalXP(0)
+        setLoading(false)
+        return
+      }
+
+      const result = await getBadgesWithProgress(user.id)
+      if (!result.error) {
+        // If we got data from Supabase, use it; otherwise fall back to local definitions
+        if (result.badges.length > 0) {
+          setBadges(result.badges)
+          setEarnedCount(result.earnedCount)
+          setTotalXP(result.totalXP)
+        } else {
+          // Fallback to local definitions with Supabase progress
+          const localBadges: BadgeWithProgress[] = BADGE_DEFINITIONS.map((b) => ({
+            id: b.id,
+            series: b.series,
+            tier: b.tier,
+            name: b.name,
+            description: b.description,
+            requirement_type: getRequirementType(b.series),
+            requirement_value: b.requirement,
+            xp_reward: b.xp,
+            image_url: b.image,
+            earned: false,
+            current_progress: 0,
+          }))
+          setBadges(localBadges)
+          setEarnedCount(0)
+          setTotalXP(0)
+        }
+      }
+      setLoading(false)
+    }
+    
+    if (!userLoading) {
+      loadBadges()
+    }
+  }, [user, userLoading])
+
+  // Helper to map series to requirement type
+  function getRequirementType(series: string): string {
+    switch (series) {
+      case "collection": return "game_count"
+      case "explorer": return "category_count"
+      case "social": return "friend_count"
+      case "hosting": return "events_hosted"
+      case "attendance": return "events_attended"
+      case "manor": return "level"
+      case "portal": return "bgg_imports"
+      default: return "game_count"
+    }
+  }
+
+  // Group badges by series using local definitions as fallback
   const seriesOrder: BadgeSeries[] = ["collection", "explorer", "social", "hosting", "attendance", "manor", "portal"]
+  
   const badgesBySeries = seriesOrder.map((series) => {
-    const badges = BADGE_DEFINITIONS.filter((b) => b.series === series).sort((a, b) => {
-      const tierOrder = { bronze: 0, silver: 1, gold: 2 }
-      return tierOrder[a.tier] - tierOrder[b.tier]
+    // Get badges for this series from loaded data or use local definitions
+    let seriesBadges = badges.filter((b) => b.series === series)
+    
+    // If no badges from Supabase, use local definitions
+    if (seriesBadges.length === 0) {
+      seriesBadges = BADGE_DEFINITIONS
+        .filter((b) => b.series === series)
+        .map((b) => ({
+          id: b.id,
+          series: b.series,
+          tier: b.tier,
+          name: b.name,
+          description: b.description,
+          requirement_type: getRequirementType(b.series),
+          requirement_value: b.requirement,
+          xp_reward: b.xp,
+          image_url: b.image,
+          earned: false,
+          current_progress: 0,
+        }))
+    }
+    
+    // Sort by tier
+    seriesBadges.sort((a, b) => {
+      const tierOrder: Record<string, number> = { bronze: 0, silver: 1, gold: 2 }
+      return (tierOrder[a.tier] || 0) - (tierOrder[b.tier] || 0)
     })
+    
     return {
       series,
-      seriesName: badges[0]?.seriesName || "",
-      badges,
+      badges: seriesBadges,
     }
   })
 
-  // Calculate stats
+  // Calculate total badges
   const totalBadges = BADGE_DEFINITIONS.length
-  const earnedBadges = userProgress.earnedBadges.length
-  const totalXP = userProgress.earnedBadges.reduce((sum, badgeId) => {
-    const badge = BADGE_DEFINITIONS.find((b) => b.id === badgeId)
-    return sum + (badge?.xp || 0)
-  }, 0)
+
+  if (loading || userLoading) {
+    return (
+      <div className="min-h-screen manor-bg">
+        <Navigation />
+        <main className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="h-12 w-12 animate-spin text-accent-gold" />
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen manor-bg">
@@ -51,7 +160,7 @@ export default function TrophiesPage() {
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2 mb-1">
                   <Trophy className="h-5 w-5 text-accent-gold" />
-                  <span className="text-3xl font-cinzel text-accent-gold">{earnedBadges}</span>
+                  <span className="text-3xl font-cinzel text-accent-gold">{earnedCount}</span>
                   <span className="text-xl font-merriweather text-muted-foreground">/ {totalBadges}</span>
                 </div>
                 <p className="text-sm font-merriweather text-muted-foreground">{t("trophies.badgesEarned")}</p>
@@ -69,8 +178,8 @@ export default function TrophiesPage() {
 
         {/* Badge Series Grid */}
         <div className="space-y-6">
-          {badgesBySeries.map(({ series, badges }) => {
-            const earnedInSeries = badges.filter((b) => userProgress.earnedBadges.includes(b.id)).length
+          {badgesBySeries.map(({ series, badges: seriesBadges }) => {
+            const earnedInSeries = seriesBadges.filter((b) => b.earned).length
             const seriesNameTranslated = t(`trophies.series.${series}`)
 
             return (
@@ -80,7 +189,7 @@ export default function TrophiesPage() {
                   <div>
                     <h2 className="text-2xl text-accent-gold mb-1">{seriesNameTranslated}</h2>
                     <p className="text-sm font-merriweather text-muted-foreground">
-                      {earnedInSeries} / {badges.length} {t("trophies.tiersEarned")}
+                      {earnedInSeries} / {seriesBadges.length} {t("trophies.tiersEarned")}
                     </p>
                   </div>
                   <BadgeIcon className="h-6 w-6 text-accent-gold/60" />
@@ -88,8 +197,15 @@ export default function TrophiesPage() {
 
                 {/* Badge Tiers */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {badges.map((badge) => {
-                    const isEarned = userProgress.earnedBadges.includes(badge.id)
+                  {seriesBadges.map((badge) => {
+                    const isEarned = badge.earned
+                    const progress = badge.current_progress
+                    const required = badge.requirement_value || 0
+                    const progressPercent = required > 0 ? Math.min(100, (progress / required) * 100) : 0
+                    
+                    // Get badge info from local definitions for translations
+                    const localBadge = BADGE_DEFINITIONS.find((b) => b.id === badge.id)
+                    const imageUrl = badge.image_url || localBadge?.image || "/placeholder.svg"
 
                     return (
                       <div
@@ -108,7 +224,7 @@ export default function TrophiesPage() {
                           {/* Badge Image */}
                           <div className="relative w-32 h-32 mx-auto mb-4">
                             <Image
-                              src={badge.image || "/placeholder.svg"}
+                              src={imageUrl}
                               alt={badge.name}
                               fill
                               className={`object-contain transition-all duration-300 ${
@@ -141,9 +257,33 @@ export default function TrophiesPage() {
                               </span>
                             </div>
                             <p className="text-sm font-merriweather text-muted-foreground">{t(`trophies.badges.${badge.id}.description`)}</p>
+                            
+                            {/* Progress bar for unearned badges */}
+                            {!isEarned && required > 0 && (
+                              <div className="pt-2">
+                                <div className="flex justify-between text-xs font-merriweather text-muted-foreground mb-1">
+                                  <span>{t("trophies.progress")}</span>
+                                  <span>{progress} / {required}</span>
+                                </div>
+                                <div className="h-2 bg-background/50 rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-accent-gold/60 rounded-full transition-all duration-500"
+                                    style={{ width: `${progressPercent}%` }}
+                                  />
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Earned date for earned badges */}
+                            {isEarned && badge.earned_at && (
+                              <p className="text-xs font-merriweather text-accent-gold/80 pt-2">
+                                {t("trophies.earnedAt")} {formatDistanceToNow(new Date(badge.earned_at), { addSuffix: true })}
+                              </p>
+                            )}
+                            
                             <div className="pt-2 space-y-1">
                               <p className="text-xs font-merriweather text-foreground">{t(`trophies.badges.${badge.id}.requirement`)}</p>
-                              <p className="text-xs font-merriweather text-accent-gold">{t("trophies.reward")}: +{badge.xp} XP</p>
+                              <p className="text-xs font-merriweather text-accent-gold">{t("trophies.reward")}: +{badge.xp_reward || localBadge?.xp || 100} XP</p>
                             </div>
                           </div>
 
