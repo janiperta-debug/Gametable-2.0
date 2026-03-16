@@ -23,7 +23,6 @@ export interface MarketplaceListing {
     id: string
     name: string
     thumbnail_url: string | null
-    year_published: number | null
   }
   seller?: {
     id: string
@@ -45,7 +44,6 @@ export interface WishlistItem {
     id: string
     name: string
     thumbnail_url: string | null
-    year_published: number | null
   }
   user?: {
     id: string
@@ -77,7 +75,7 @@ export async function getMarketplaceListings(filters?: {
     .from("marketplace_listings")
     .select(`
       *,
-      game:games(id, name, thumbnail_url, year_published),
+      game:games(id, name, thumbnail_url),
       seller:profiles(id, display_name, username, avatar_url, location)
     `)
     .eq("status", "active")
@@ -123,7 +121,7 @@ export async function getMyListings() {
     .from("marketplace_listings")
     .select(`
       *,
-      game:games(id, name, thumbnail_url, year_published),
+      game:games(id, name, thumbnail_url),
       seller:profiles(id, display_name, username, avatar_url, location)
     `)
     .eq("seller_id", user.id)
@@ -267,10 +265,10 @@ export async function getWishlists() {
 
   const { data, error } = await supabase
     .from("wishlists")
-    .select(`
+.select(`
       *,
-      game:games(id, name, thumbnail_url, year_published),
-      user:profiles(id, display_name, username, avatar_url, location)
+      game:games(id, name, thumbnail_url),
+      seller:profiles(id, display_name, username, avatar_url, location)
     `)
     .order("priority", { ascending: true })
     .order("created_at", { ascending: false })

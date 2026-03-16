@@ -167,7 +167,20 @@
     "myGames": "My Games",
     "findGames": "Find Games",
     "myCollection": "My Collection",
-    "games": "Games",
+    "games": {
+      "title": "Games",
+      "categories": {
+        "strategy": "Strategy",
+        "cooperative": "Cooperative",
+        "family": "Family",
+        "thematic": "Thematic",
+        "abstract": "Abstract",
+        "party": "Party",
+        "rpg": "RPGs",
+        "miniatures": "Miniatures",
+        "cardGames": "Card Games"
+      }
+    },
     "allGames": "All Games",
     "boardGames": "Board Games",
     "rpgs": "RPGs",

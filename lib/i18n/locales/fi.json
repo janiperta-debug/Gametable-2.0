@@ -323,7 +323,20 @@
     "searchPlayers": "Etsi pelaajia",
     "noPlayersFound": "Pelaajia ei löytynyt",
     "tryDifferentFilters": "Kokeile muuttaa hakusuodattimia löytääksesi pelaajia alueeltasi.",
-    "games": "peliä",
+    "games": {
+      "title": "Pelit",
+      "categories": {
+        "strategy": "Strategia",
+        "cooperative": "Yhteistyö",
+        "family": "Perhe",
+        "thematic": "Teema",
+        "abstract": "Abstrakti",
+        "party": "Juhla",
+        "rpg": "Roolipelit",
+        "miniatures": "Miniatyyrit",
+        "cardGames": "Korttipelit"
+      }
+    },
     "viewProfile": "Näytä profiili",
     "connect": "Yhdistä",
     "friends": "Ystävät",
