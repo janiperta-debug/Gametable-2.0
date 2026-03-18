@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+import { createNotification } from "./notifications"
 
 export interface BadgeDefinition {
   id: string
@@ -298,6 +299,15 @@ export async function checkAndAwardBadges(userId: string): Promise<{
       
       if (!insertError) {
         newBadges.push(badge.id)
+        
+        // Send notification for the new badge
+        await createNotification({
+          user_id: userId,
+          type: "badge_earned",
+          title: "Badge Earned!",
+          body: `You've unlocked the "${badge.name}" badge`,
+          data: { badge_id: badge.id, badge_name: badge.name }
+        })
         
         // Award XP for the badge (import awardXP inline to avoid circular dependency)
         if (badge.xp_reward) {

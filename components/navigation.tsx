@@ -9,55 +9,76 @@ import { LanguageSwitcher } from "@/components/language-switcher"
 import { useUser } from "@/hooks/useUser"
 import { createClient } from "@/lib/supabase/client"
 import { getUnreadCount } from "@/app/actions/messages"
+import { getUnreadNotificationCount } from "@/app/actions/notifications"
 
 export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
   const [unreadMessageCount, setUnreadMessageCount] = useState(0)
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
   const { currentAppTheme } = useAppTheme()
   const t = useTranslations()
   const { user, profile, loading } = useUser()
 
-  const hasUnreadNotifications = true
+  const hasUnreadNotifications = unreadNotificationCount > 0
 
-  // Fetch unread message count
+  // Fetch unread message and notification counts
   useEffect(() => {
-    async function fetchUnreadCount() {
+    async function fetchUnreadCounts() {
       if (!user) {
         setUnreadMessageCount(0)
+        setUnreadNotificationCount(0)
         return
       }
-      const result = await getUnreadCount()
-      setUnreadMessageCount(result.count)
+      const [messageResult, notificationResult] = await Promise.all([
+        getUnreadCount(),
+        getUnreadNotificationCount()
+      ])
+      setUnreadMessageCount(messageResult.count)
+      setUnreadNotificationCount(notificationResult.count)
     }
-    fetchUnreadCount()
+    fetchUnreadCounts()
 
-    // Subscribe to new messages for real-time badge updates
+    // Subscribe to new messages and notifications for real-time badge updates
     if (!user) return
     
     const supabase = createClient()
-    const channel = supabase
+    const messagesChannel = supabase
       .channel("nav-messages")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
-        () => {
-          // Refetch unread count when any new message arrives
-          fetchUnreadCount()
-        }
+        () => fetchUnreadCounts()
       )
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "messages" },
-        () => {
-          // Refetch when messages are marked as read
-          fetchUnreadCount()
-        }
+        () => fetchUnreadCounts()
+      )
+      .subscribe()
+
+    const notificationsChannel = supabase
+      .channel("nav-notifications")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
+        () => fetchUnreadCounts()
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
+        () => fetchUnreadCounts()
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
+        () => fetchUnreadCounts()
       )
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      supabase.removeChannel(messagesChannel)
+      supabase.removeChannel(notificationsChannel)
     }
   }, [user])
   

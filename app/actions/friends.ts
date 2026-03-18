@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import { checkAndAwardBadges } from "./badges"
+import { createNotification } from "./notifications"
 
 export type FriendshipStatus = "pending" | "accepted" | "rejected"
 
@@ -164,18 +165,38 @@ export async function sendFriendRequest(addresseeId: string): Promise<{ success:
     return { success: false, error: "Friend request already exists" }
   }
 
-  const { error } = await supabase
+  const { data: friendship, error } = await supabase
     .from("friendships")
     .insert({
       requester_id: user.id,
       addressee_id: addresseeId,
       status: "pending"
     })
+    .select("id")
+    .single()
 
   if (error) {
     console.error("Error sending friend request:", error)
     return { success: false, error: "Failed to send friend request" }
   }
+
+  // Get requester's profile for the notification
+  const { data: requesterProfile } = await supabase
+    .from("profiles")
+    .select("display_name, username")
+    .eq("id", user.id)
+    .single()
+
+  const requesterName = requesterProfile?.display_name || requesterProfile?.username || "Someone"
+
+  // Create notification for the addressee
+  await createNotification({
+    user_id: addresseeId,
+    type: "friend_request",
+    title: "New Friend Request",
+    body: `${requesterName} wants to connect with you`,
+    data: { requester_id: user.id, friendship_id: friendship?.id }
+  })
 
   revalidatePath("/discover")
   revalidatePath("/profile")
@@ -194,6 +215,18 @@ export async function acceptFriendRequest(friendshipId: string): Promise<{ succe
     return { success: false, error: "Unauthorized" }
   }
 
+  // Get the friendship to find the requester
+  const { data: friendship } = await supabase
+    .from("friendships")
+    .select("requester_id")
+    .eq("id", friendshipId)
+    .eq("addressee_id", user.id)
+    .single()
+
+  if (!friendship) {
+    return { success: false, error: "Friend request not found" }
+  }
+
   // Only the addressee can accept
   const { error } = await supabase
     .from("friendships")
@@ -206,8 +239,27 @@ export async function acceptFriendRequest(friendshipId: string): Promise<{ succe
     return { success: false, error: "Failed to accept friend request" }
   }
 
+  // Get accepter's profile for the notification
+  const { data: accepterProfile } = await supabase
+    .from("profiles")
+    .select("display_name, username")
+    .eq("id", user.id)
+    .single()
+
+  const accepterName = accepterProfile?.display_name || accepterProfile?.username || "Someone"
+
+  // Notify the original requester that their request was accepted
+  await createNotification({
+    user_id: friendship.requester_id,
+    type: "friend_accepted",
+    title: "Friend Request Accepted",
+    body: `${accepterName} accepted your friend request`,
+    data: { friend_id: user.id }
+  })
+
   // Check and award badges for both users
   await checkAndAwardBadges(user.id)
+  await checkAndAwardBadges(friendship.requester_id)
 
   revalidatePath("/discover")
   revalidatePath("/profile")
