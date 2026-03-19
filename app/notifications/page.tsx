@@ -10,8 +10,8 @@ import { useTranslations } from "@/lib/i18n"
 import { useUser } from "@/hooks/useUser"
 import { 
   getNotifications, 
-  markAsRead, 
-  markAllAsRead, 
+  markNotificationAsRead, 
+  markAllNotificationsAsRead, 
   deleteNotification,
   type Notification 
 } from "@/app/actions/notifications"
@@ -100,7 +100,7 @@ export default function NotificationsPage() {
   }, [user])
 
   async function handleMarkAllRead() {
-    const result = await markAllAsRead()
+    const result = await markAllNotificationsAsRead()
     if (!result.error) {
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))
       toast({ title: t("common.success"), description: t("notifications.allMarkedRead") })
@@ -119,7 +119,7 @@ export default function NotificationsPage() {
   async function handleNotificationClick(notification: Notification) {
     // Mark as read
     if (!notification.read) {
-      await markAsRead(notification.id)
+      await markNotificationAsRead(notification.id)
       setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, read: true } : n))
     }
 

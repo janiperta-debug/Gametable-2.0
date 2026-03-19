@@ -134,23 +134,23 @@ export async function deleteNotification(notificationId: string): Promise<{ succ
 }
 
 // Create a notification (called from other server actions)
-export async function createNotification(
-  userId: string,
-  type: Notification["type"],
-  title: string,
-  body?: string,
+export async function createNotification(params: {
+  user_id: string
+  type: Notification["type"]
+  title: string
+  body?: string
   data?: Record<string, any>
-): Promise<{ success: boolean; error?: string }> {
+}): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
 
   const { error } = await supabase
     .from("notifications")
     .insert({
-      user_id: userId,
-      type,
-      title,
-      body: body || null,
-      data: data || {},
+      user_id: params.user_id,
+      type: params.type,
+      title: params.title,
+      body: params.body || null,
+      data: params.data || {},
       read: false,
     })
 
