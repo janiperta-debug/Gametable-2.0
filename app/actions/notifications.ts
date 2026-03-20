@@ -2,6 +2,15 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+import { 
+  sendEmail, 
+  getFriendRequestEmailTemplate, 
+  getBadgeEarnedEmailTemplate,
+  getEventRsvpEmailTemplate,
+  getNewMessageEmailTemplate,
+  getAdminBroadcastEmailTemplate,
+  type EmailNotificationType 
+} from "@/lib/email"
 
 export interface Notification {
   id: string
@@ -159,5 +168,71 @@ export async function createNotification(params: {
     return { success: false, error: error.message }
   }
 
+  // Check if user wants email for this notification type
+  const emailType = mapNotificationTypeToEmailType(params.type)
+  if (emailType) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("email_notification_types")
+      .eq("id", params.user_id)
+      .single()
+
+    const emailPrefs = profile?.email_notification_types as Record<string, boolean> | null
+    if (emailPrefs?.[emailType]) {
+      // Get user's email from auth
+      const { data: authData } = await supabase.auth.admin.getUserById(params.user_id)
+      const userEmail = authData?.user?.email
+
+      if (userEmail) {
+        const emailTemplate = getEmailTemplate(emailType, params)
+        if (emailTemplate) {
+          await sendEmail({
+            to: userEmail,
+            subject: emailTemplate.subject,
+            html: emailTemplate.html,
+          })
+        }
+      }
+    }
+  }
+
   return { success: true }
+}
+
+// Map notification type to email type
+function mapNotificationTypeToEmailType(type: Notification["type"]): EmailNotificationType | null {
+  const mapping: Record<string, EmailNotificationType> = {
+    friend_request: "friend_request",
+    friend_accepted: "friend_request",
+    badge_earned: "badge_earned",
+    event_invite: "event_rsvp",
+    event_reminder: "event_rsvp",
+    message: "new_message",
+    system: "admin_broadcast",
+  }
+  return mapping[type] || null
+}
+
+// Get email template based on type
+function getEmailTemplate(
+  type: EmailNotificationType, 
+  params: { title: string; body?: string; data?: Record<string, any> }
+) {
+  switch (type) {
+    case "friend_request":
+      return getFriendRequestEmailTemplate(params.data?.sender_name || "Someone")
+    case "badge_earned":
+      return getBadgeEarnedEmailTemplate(params.data?.badge_name || "a new badge")
+    case "event_rsvp":
+      return getEventRsvpEmailTemplate(
+        params.data?.event_name || "your event",
+        params.data?.attendee_name || "Someone"
+      )
+    case "new_message":
+      return getNewMessageEmailTemplate(params.data?.sender_name || "Someone")
+    case "admin_broadcast":
+      return getAdminBroadcastEmailTemplate(params.title, params.body || "")
+    default:
+      return null
+  }
 }
