@@ -201,7 +201,7 @@ export function DiscoverPlayers() {
 
                     <div className="flex gap-2">
                       <Button asChild variant="outline" className="flex-1 font-cinzel bg-transparent">
-                        <Link href={"/profile/" + player.id}>{t("community.viewProfile")}</Link>
+                        <Link href={`/users/${player.username}`}>{t("community.viewProfile")}</Link>
                       </Button>
                       
                       {player.friendship_status === "accepted" ? (

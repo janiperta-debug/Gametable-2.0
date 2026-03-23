@@ -188,7 +188,7 @@ export function FriendsList() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Link href={"/profile/" + friend.id} className="flex-1">
+                    <Link href={`/users/${friend.username}`} className="flex-1">
                       <Button
                         variant="outline"
                         size="sm"

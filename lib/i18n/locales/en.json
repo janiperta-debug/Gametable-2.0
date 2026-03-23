@@ -760,5 +760,26 @@
     "dontHaveAccount": "Don't have an account?",
     "loginWithGoogle": "Log in with Google",
     "loginWithFacebook": "Log in with Facebook"
+  },
+  "users": {
+    "notFound": "User Not Found",
+    "notFoundDescription": "The user you're looking for doesn't exist or their profile is private.",
+    "backToDiscover": "Back to Discover",
+    "memberSince": "Member since",
+    "friends": "Friends",
+    "requestSent": "Request Sent",
+    "requestReceived": "Request Pending",
+    "addFriend": "Add Friend",
+    "sendMessage": "Message",
+    "editProfile": "Edit Profile",
+    "gamesOwned": "Games",
+    "friendsCount": "Friends",
+    "currentLevel": "Level",
+    "totalXP": "Total XP",
+    "collection": "Collection",
+    "friendsList": "Friends",
+    "noGamesYet": "This user hasn't added any games to their collection yet.",
+    "noFriendsYet": "This user hasn't connected with any friends yet.",
+    "plays": "plays"
   }
 }

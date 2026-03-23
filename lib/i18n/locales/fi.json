@@ -760,5 +760,26 @@
     "dontHaveAccount": "Eikö sinulla ole tiliä?",
     "loginWithGoogle": "Kirjaudu Googlella",
     "loginWithFacebook": "Kirjaudu Facebookilla"
+  },
+  "users": {
+    "notFound": "Käyttäjää ei löytynyt",
+    "notFoundDescription": "Etsimääsi käyttäjää ei ole olemassa tai hänen profiilinsa on yksityinen.",
+    "backToDiscover": "Takaisin löytöön",
+    "memberSince": "Jäsen alkaen",
+    "friends": "Kaverit",
+    "requestSent": "Pyyntö lähetetty",
+    "requestReceived": "Pyyntö odottaa",
+    "addFriend": "Lisää kaveri",
+    "sendMessage": "Viesti",
+    "editProfile": "Muokkaa profiilia",
+    "gamesOwned": "Pelit",
+    "friendsCount": "Kaverit",
+    "currentLevel": "Taso",
+    "totalXP": "XP yhteensä",
+    "collection": "Kokoelma",
+    "friendsList": "Kaverit",
+    "noGamesYet": "Tällä käyttäjällä ei ole vielä pelejä kokoelmassaan.",
+    "noFriendsYet": "Tällä käyttäjällä ei ole vielä kavereita.",
+    "plays": "pelikertaa"
   }
 }
