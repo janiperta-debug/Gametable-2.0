@@ -19,16 +19,16 @@ export function GamingProgress() {
   const xpInCurrentLevel = totalXP - currentLevelXP
   const xpNeededForLevel = nextLevelXP - currentLevelXP
   
-  // Stats - some will be connected to real data later
+  // Stats - showing current counts and recent changes
   const stats = {
     level,
     totalXP,
     currentXP: xpInCurrentLevel,
     xpToNextLevel: xpNeededForLevel,
-    gamesOwned: { current: 0, goal: 300, percentComplete: 0, recentChange: "+0" },
-    gamingFriends: { current: 0, goal: 50, percentComplete: 0, recentChange: "+0" },
-    eventsHosted: { current: 0, goal: 25, percentComplete: 0, recentChange: "+0" },
-    trophiesEarned: { current: 0, goal: 50, percentComplete: 0, recentChange: "+0" },
+    gamesOwned: { current: 0, recentChange: "+0" },
+    gamingFriends: { current: 0, recentChange: "+0" },
+    eventsHosted: { current: 0, recentChange: "+0" },
+    trophiesEarned: { current: 0, recentChange: "+0" },
   }
 
   if (loading) {
@@ -76,80 +76,50 @@ export function GamingProgress() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Games Owned */}
-        <div className="space-y-3">
+        <div className="space-y-3 p-4 rounded-lg bg-card/30 border border-accent-gold/10">
           <div className="flex items-center gap-3">
             <BookOpen className="w-5 h-5 text-blue-400" />
             <span className="text-sm font-cinzel text-muted-foreground uppercase tracking-wide">{t("profile.gamesOwned")}</span>
           </div>
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-center justify-between">
             <span className="text-4xl font-cinzel text-accent-gold">{stats.gamesOwned.current}</span>
-            <span className="text-lg font-merriweather text-muted-foreground">/ {stats.gamesOwned.goal} {t("profile.goal")}</span>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-merriweather text-foreground">{stats.gamesOwned.percentComplete}% {t("profile.complete")}</span>
-              <span className="font-merriweather text-green-400">{stats.gamesOwned.recentChange} {t("profile.thisMonth")}</span>
-            </div>
-            <Progress value={stats.gamesOwned.percentComplete} className="h-2" />
+            <span className="text-sm font-merriweather text-green-400">{stats.gamesOwned.recentChange} {t("profile.thisMonth")}</span>
           </div>
         </div>
 
         {/* Gaming Friends */}
-        <div className="space-y-3">
+        <div className="space-y-3 p-4 rounded-lg bg-card/30 border border-accent-gold/10">
           <div className="flex items-center gap-3">
             <Users className="w-5 h-5 text-green-400" />
             <span className="text-sm font-cinzel text-muted-foreground uppercase tracking-wide">{t("profile.gamingFriends")}</span>
           </div>
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-center justify-between">
             <span className="text-4xl font-cinzel text-accent-gold">{stats.gamingFriends.current}</span>
-            <span className="text-lg font-merriweather text-muted-foreground">/ {stats.gamingFriends.goal} {t("profile.goal")}</span>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-merriweather text-foreground">{stats.gamingFriends.percentComplete}% {t("profile.complete")}</span>
-              <span className="font-merriweather text-green-400">{stats.gamingFriends.recentChange} {t("profile.newFriends")}</span>
-            </div>
-            <Progress value={stats.gamingFriends.percentComplete} className="h-2" />
+            <span className="text-sm font-merriweather text-green-400">{stats.gamingFriends.recentChange} {t("profile.newFriends")}</span>
           </div>
         </div>
 
         {/* Events Hosted */}
-        <div className="space-y-3">
+        <div className="space-y-3 p-4 rounded-lg bg-card/30 border border-accent-gold/10">
           <div className="flex items-center gap-3">
             <Calendar className="w-5 h-5 text-purple-400" />
             <span className="text-sm font-cinzel text-muted-foreground uppercase tracking-wide">{t("profile.eventsHosted")}</span>
           </div>
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-center justify-between">
             <span className="text-4xl font-cinzel text-accent-gold">{stats.eventsHosted.current}</span>
-            <span className="text-lg font-merriweather text-muted-foreground">/ {stats.eventsHosted.goal} {t("profile.goal")}</span>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-merriweather text-foreground">{stats.eventsHosted.percentComplete}% {t("profile.complete")}</span>
-              <span className="font-merriweather text-green-400">{stats.eventsHosted.recentChange} {t("profile.thisMonth")}</span>
-            </div>
-            <Progress value={stats.eventsHosted.percentComplete} className="h-2" />
+            <span className="text-sm font-merriweather text-green-400">{stats.eventsHosted.recentChange} {t("profile.thisMonth")}</span>
           </div>
         </div>
 
         {/* Trophies Earned */}
-        <div className="space-y-3">
+        <div className="space-y-3 p-4 rounded-lg bg-card/30 border border-accent-gold/10">
           <div className="flex items-center gap-3">
             <Trophy className="w-5 h-5 text-yellow-400" />
             <span className="text-sm font-cinzel text-muted-foreground uppercase tracking-wide">{t("profile.trophiesEarned")}</span>
           </div>
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-center justify-between">
             <span className="text-4xl font-cinzel text-accent-gold">{stats.trophiesEarned.current}</span>
-            <span className="text-lg font-merriweather text-muted-foreground">/ {stats.trophiesEarned.goal} {t("profile.goal")}</span>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-merriweather text-foreground">
-                {stats.trophiesEarned.percentComplete}% {t("profile.complete")}
-              </span>
-              <span className="font-merriweather text-green-400">{stats.trophiesEarned.recentChange} {t("profile.thisWeek")}</span>
-            </div>
-            <Progress value={stats.trophiesEarned.percentComplete} className="h-2" />
+            <span className="text-sm font-merriweather text-green-400">{stats.trophiesEarned.recentChange} {t("profile.thisWeek")}</span>
           </div>
         </div>
       </div>
