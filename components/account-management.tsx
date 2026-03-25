@@ -2,8 +2,11 @@
 
 import { Button } from "@/components/ui/button"
 import { AlertTriangle } from "lucide-react"
+import { useTranslations } from "@/lib/i18n"
 
 export function AccountManagement() {
+  const t = useTranslations()
+
   const handleExportData = () => {
     // TODO: Implement data export
     console.log("Exporting user data...")
@@ -17,9 +20,9 @@ export function AccountManagement() {
   return (
     <div className="room-furniture p-6 space-y-6">
       <div>
-        <h2 className="text-2xl text-accent-gold mb-2">Account Management</h2>
+        <h2 className="text-2xl text-accent-gold mb-2">{t("profile.accountManagement")}</h2>
         <p className="text-sm font-merriweather text-accent-gold/60">
-          Manage your account data and deletion. These actions cannot be undone.
+          {t("profile.accountManagementDesc")}
         </p>
       </div>
 
@@ -27,9 +30,9 @@ export function AccountManagement() {
         <div className="flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-red-400 mt-1" />
           <div className="space-y-2">
-            <h3 className="text-lg font-cinzel text-red-400">Delete Account</h3>
+            <h3 className="text-lg font-cinzel text-red-400">{t("profile.deleteAccount")}</h3>
             <p className="text-sm font-merriweather text-red-300/80">
-              Permanently delete your account and all associated data. This action cannot be undone.
+              {t("profile.deleteAccountWarning")}
             </p>
           </div>
         </div>
@@ -40,10 +43,10 @@ export function AccountManagement() {
             onClick={handleExportData}
             className="border-accent-gold/40 text-accent-gold hover:bg-accent-gold hover:text-background bg-transparent"
           >
-            Export My Data
+            {t("profile.exportData")}
           </Button>
           <Button variant="destructive" onClick={handleDeleteAccount} className="bg-red-600 hover:bg-red-700">
-            Delete Account
+            {t("profile.deleteAccount")}
           </Button>
         </div>
       </div>

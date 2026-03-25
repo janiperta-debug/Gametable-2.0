@@ -2,13 +2,16 @@
 
 import Link from "next/link"
 import { useAppTheme } from "@/components/app-theme-provider"
+import { useTranslations } from "@/lib/i18n"
 
 export default function HomePage() {
   const { currentAppTheme } = useAppTheme()
+  const t = useTranslations()
 
-  const getCrestImage = (theme: string) => {
-    const crestMap: { [key: string]: string } = {
-      "main-hall": "/images/mainhall-crest-original.png",
+  const getHomeCrestImage = (theme: string) => {
+    // Larger decorative crests for homepage hero
+    const homeCrestMap: { [key: string]: string } = {
+      "main-hall": "/crests/main-hall-home.png",
       library: "/images/library-crest.png",
       bar: "/images/bar-crest.png",
       "fireside-lounge": "/images/fireside-lounge-crest.png",
@@ -28,23 +31,21 @@ export default function HomePage() {
       "crystal-cavern": "/crests/crystal-crest.png",
       "treasure-vault": "/crests/treasure-crest.png",
     }
-    return crestMap[theme] || crestMap["main-hall"]
+    // For now, only main-hall has a dedicated home crest, others fall back to nav crest
+    return homeCrestMap[theme] || "/crests/main-hall-home.png"
   }
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 py-8 room-environment">
       <div className="max-w-4xl mx-auto text-center space-y-6 md:space-y-8">
-        {/* Manor Crest */}
-        <div className="mb-4 md:mb-6">
+        {/* Manor Crest - Full decorative crest with GameTable text included */}
+        <div className="mb-6 md:mb-8">
           <img
-            src={getCrestImage(currentAppTheme) || "/placeholder.svg"}
+            src={getHomeCrestImage(currentAppTheme) || "/placeholder.svg"}
             alt="GameTable Manor Crest"
-            className="w-20 h-20 md:w-32 md:h-32 mx-auto"
+            className="w-64 h-auto md:w-80 lg:w-96 mx-auto"
           />
         </div>
-
-        {/* Main title */}
-        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl logo-text ornate-text mb-4">GameTable</h1>
 
         {/* Decorative line with diamond */}
         <div className="flex items-center justify-center space-x-2 md:space-x-4 mb-4 md:mb-6">
@@ -57,13 +58,12 @@ export default function HomePage() {
 
         {/* Subtitle */}
         <h2 className="text-xl sm:text-2xl md:text-3xl mb-6 md:mb-8 px-4" style={{ color: "hsl(var(--accent-gold))" }}>
-          Welcome to Your Exclusive Gaming Manor
+          {t("home.welcome")}
         </h2>
 
         {/* Description */}
         <p className="text-base sm:text-lg md:text-xl text-foreground max-w-3xl mx-auto leading-relaxed mb-6 md:mb-8 px-4">
-          Step into an elegant sanctuary where tabletop enthusiasts gather to discover remarkable games, forge lasting
-          friendships, and create unforgettable gaming experiences.
+          {t("home.description")}
         </p>
 
         {/* Establishment line */}
@@ -73,7 +73,7 @@ export default function HomePage() {
             className="uppercase tracking-wider text-xs sm:text-sm text-center"
             style={{ color: "hsl(var(--accent-gold))" }}
           >
-            Est. for Distinguished Gaming Society
+            {t("home.established")}
           </span>
           <span style={{ color: "hsl(var(--accent-gold))" }}>&#9670;</span>
         </div>
@@ -93,7 +93,7 @@ export default function HomePage() {
             e.currentTarget.style.backgroundColor = "transparent"
           }}
         >
-          Enter the Manor
+          {t("home.enterManor")}
         </Link>
 
         {/* Bottom ornamental elements */}

@@ -1,127 +1,194 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { useTranslations } from "@/lib/i18n"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Store, Heart, Search, MessageCircle, User, Star, Users, Clock } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Store, Heart, Search, MessageCircle, User, Star, Users, Clock, Plus, Loader2, Trash2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-
-// Mock data for marketplace listings
-const MOCK_MARKETPLACE_LISTINGS = [
-  {
-    id: 1,
-    gameTitle: "Wingspan",
-    gameImage: "/wingspan-board-game-box.png",
-    rating: 4.8,
-    playerCount: "1-5",
-    playTime: "40-70",
-    category: "Strategy",
-    condition: "Like New",
-    seller: { id: "user1", name: "Sarah Chen", avatar: "/placeholder.svg?height=40&width=40" },
-    tradeNotes: "Played twice, all components included. Looking to trade for engine-building games.",
-    listedDate: "2 days ago",
-  },
-  {
-    id: 2,
-    gameTitle: "Scythe",
-    gameImage: "/scythe-board-game-box.png",
-    rating: 4.7,
-    playerCount: "1-5",
-    playTime: "90-115",
-    category: "Strategy",
-    condition: "Good",
-    seller: { id: "user2", name: "Mike Johnson", avatar: "/placeholder.svg?height=40&width=40" },
-    tradeNotes: "Great condition, minor box wear. Open to trades or sale.",
-    listedDate: "5 days ago",
-  },
-  {
-    id: 3,
-    gameTitle: "Pandemic",
-    gameImage: "/pandemic-board-game-box.png",
-    rating: 4.5,
-    playerCount: "2-4",
-    playTime: "45-60",
-    category: "Cooperative",
-    condition: "Very Good",
-    seller: { id: "user3", name: "Alex Rivera", avatar: "/placeholder.svg?height=40&width=40" },
-    tradeNotes: "Complete set with expansion. Prefer local trades.",
-    listedDate: "1 week ago",
-  },
-]
-
-// Mock data for user wishlists
-const MOCK_WISHLISTS = [
-  {
-    userId: "user4",
-    userName: "Emma Wilson",
-    userAvatar: "/placeholder.svg?height=40&width=40",
-    wishlistGames: [
-      { title: "Ticket to Ride", category: "Family" },
-      { title: "Terraforming Mars", category: "Strategy" },
-      { title: "Azul", category: "Abstract" },
-    ],
-    location: "Seattle, WA",
-  },
-  {
-    userId: "user5",
-    userName: "David Park",
-    userAvatar: "/placeholder.svg?height=40&width=40",
-    wishlistGames: [
-      { title: "Gloomhaven", category: "Thematic" },
-      { title: "Spirit Island", category: "Cooperative" },
-    ],
-    location: "Portland, OR",
-  },
-  {
-    userId: "user6",
-    userName: "Lisa Martinez",
-    userAvatar: "/placeholder.svg?height=40&width=40",
-    wishlistGames: [
-      { title: "Wingspan", category: "Strategy" },
-      { title: "Everdell", category: "Strategy" },
-      { title: "Cascadia", category: "Family" },
-    ],
-    location: "San Francisco, CA",
-  },
-]
+import { useRouter } from "next/navigation"
+import { useUser } from "@/hooks/useUser"
+import { useToast } from "@/hooks/use-toast"
+import { 
+  getMarketplaceListings, 
+  getWishlists, 
+  createListing, 
+  deleteListing,
+  contactSeller,
+  getUserGamesForListing,
+  type MarketplaceListing,
+  type WishlistEntry,
+  type ListingType,
+  type ListingCondition
+} from "@/app/actions/marketplace"
 
 export default function Marketplace() {
   const [activeTab, setActiveTab] = useState<"listings" | "wishlists">("listings")
   const [searchQuery, setSearchQuery] = useState("")
   const [conditionFilter, setConditionFilter] = useState<string>("all")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
+  const [listings, setListings] = useState<MarketplaceListing[]>([])
+  const [wishlists, setWishlists] = useState<WishlistEntry[]>([])
+  const [loading, setLoading] = useState(true)
+  const [createModalOpen, setCreateModalOpen] = useState(false)
+  const [userGames, setUserGames] = useState<any[]>([])
+  const [loadingUserGames, setLoadingUserGames] = useState(false)
+  const [creating, setCreating] = useState(false)
+  const [contacting, setContacting] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState<string | null>(null)
+  
+  // Form state
+  const [selectedGameId, setSelectedGameId] = useState("")
+  const [listingType, setListingType] = useState<ListingType>("trade")
+  const [condition, setCondition] = useState<ListingCondition>("good")
+  const [price, setPrice] = useState("")
+  const [description, setDescription] = useState("")
+  
+  const t = useTranslations()
+  const { user } = useUser()
+  const { toast } = useToast()
+  const router = useRouter()
 
-  const filteredListings = useMemo(() => {
-    let filtered = [...MOCK_MARKETPLACE_LISTINGS]
+  // Load listings and wishlists
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true)
+      const [listingsResult, wishlistsResult] = await Promise.all([
+        getMarketplaceListings(),
+        getWishlists()
+      ])
+      if (!listingsResult.error) setListings(listingsResult.data)
+      if (!wishlistsResult.error) setWishlists(wishlistsResult.data)
+      setLoading(false)
+    }
+    loadData()
+  }, [])
 
+  // Load user's games when modal opens
+  useEffect(() => {
+    async function loadUserGames() {
+      if (!createModalOpen || !user) return
+      setLoadingUserGames(true)
+      const result = await getUserGamesForListing()
+      if (!result.error) setUserGames(result.data)
+      setLoadingUserGames(false)
+    }
+    loadUserGames()
+  }, [createModalOpen, user])
+
+  // Filter listings
+  const filteredListings = listings.filter(listing => {
     if (searchQuery) {
-      filtered = filtered.filter((listing) => listing.gameTitle.toLowerCase().includes(searchQuery.toLowerCase()))
+      const query = searchQuery.toLowerCase()
+      const matchesGame = listing.game?.name?.toLowerCase().includes(query)
+      const matchesSeller = listing.seller?.display_name?.toLowerCase().includes(query)
+      if (!matchesGame && !matchesSeller) return false
+    }
+    if (conditionFilter !== "all" && listing.condition !== conditionFilter) return false
+    return true
+  })
+
+  // Filter wishlists
+  const filteredWishlists = wishlists.filter(entry => {
+    if (!searchQuery) return true
+    const query = searchQuery.toLowerCase()
+    return entry.game?.name?.toLowerCase().includes(query) ||
+           entry.user?.display_name?.toLowerCase().includes(query)
+  })
+
+  // Group wishlists by user
+  const groupedWishlists = filteredWishlists.reduce((acc, entry) => {
+    const userId = entry.user_id
+    if (!acc[userId]) {
+      acc[userId] = {
+        user: entry.user,
+        games: []
+      }
+    }
+    acc[userId].games.push(entry)
+    return acc
+  }, {} as Record<string, { user: any; games: WishlistEntry[] }>)
+
+  async function handleCreateListing() {
+    if (!selectedGameId) {
+      toast({ title: t("common.error"), description: t("marketplace.selectGame"), variant: "destructive" })
+      return
     }
 
-    if (conditionFilter !== "all") {
-      filtered = filtered.filter((listing) => listing.condition === conditionFilter)
+    setCreating(true)
+    const result = await createListing({
+      user_game_id: selectedGameId,
+      listing_type: listingType,
+      condition: condition,
+      price: listingType === "sell" && price ? parseFloat(price) : undefined,
+      description: description || undefined
+    })
+
+    if (result.error) {
+      toast({ title: t("common.error"), description: result.error, variant: "destructive" })
+    } else {
+      toast({ title: t("common.success"), description: t("marketplace.listingCreated") })
+      setCreateModalOpen(false)
+      // Reset form
+      setSelectedGameId("")
+      setListingType("trade")
+      setCondition("good")
+      setPrice("")
+      setDescription("")
+      // Reload listings
+      const listingsResult = await getMarketplaceListings()
+      if (!listingsResult.error) setListings(listingsResult.data)
     }
+    setCreating(false)
+  }
 
-    if (categoryFilter !== "all") {
-      filtered = filtered.filter((listing) => listing.category === categoryFilter)
+  async function handleContactSeller(sellerId: string) {
+    if (!user) {
+      toast({ title: t("common.error"), description: t("marketplace.loginToContact"), variant: "destructive" })
+      return
     }
+    setContacting(sellerId)
+    const result = await contactSeller(sellerId)
+    if (result.error) {
+      toast({ title: t("common.error"), description: result.error, variant: "destructive" })
+    } else {
+      router.push("/messages")
+    }
+    setContacting(null)
+  }
 
-    return filtered
-  }, [searchQuery, conditionFilter, categoryFilter])
+  async function handleDeleteListing(listingId: string) {
+    setDeleting(listingId)
+    const result = await deleteListing(listingId)
+    if (result.error) {
+      toast({ title: t("common.error"), description: result.error, variant: "destructive" })
+    } else {
+      toast({ title: t("common.success"), description: t("marketplace.listingDeleted") })
+      setListings(prev => prev.filter(l => l.id !== listingId))
+    }
+    setDeleting(null)
+  }
 
-  const filteredWishlists = useMemo(() => {
-    if (!searchQuery) return MOCK_WISHLISTS
+  const conditionLabels: Record<string, string> = {
+    new: t("marketplace.conditionNew"),
+    like_new: t("marketplace.likeNew"),
+    good: t("marketplace.good"),
+    fair: t("marketplace.fair"),
+    poor: t("marketplace.poor")
+  }
 
-    return MOCK_WISHLISTS.filter(
-      (wishlist) =>
-        wishlist.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        wishlist.wishlistGames.some((game) => game.title.toLowerCase().includes(searchQuery.toLowerCase())),
-    )
-  }, [searchQuery])
+  const listingTypeLabels: Record<string, string> = {
+    sell: t("marketplace.forSale"),
+    trade: t("marketplace.forTrade"),
+    give: t("marketplace.freeToGive")
+  }
 
   return (
     <div className="min-h-screen room-environment">
@@ -129,24 +196,129 @@ export default function Marketplace() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <Store className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="logo-text text-5xl font-bold">Marketplace</h1>
+            <h1 className="logo-text text-5xl font-bold">{t("marketplace.title")}</h1>
           </div>
           <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
-            Trade games with other players or find someone who has what you're looking for
+            {t("marketplace.subtitle")}
           </p>
         </div>
 
-        <div className="flex justify-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "listings" | "wishlists")}>
-            <TabsList className="grid w-full grid-cols-2 mb-6 md:mb-8 max-w-md mx-auto">
+            <TabsList className="grid w-full grid-cols-2 mb-6 md:mb-0 max-w-md mx-auto">
               <TabsTrigger value="listings" className="font-cinzel text-xs sm:text-sm">
-                Available Games
+                {t("marketplace.availableGames")}
               </TabsTrigger>
               <TabsTrigger value="wishlists" className="font-cinzel text-xs sm:text-sm">
-                User Wishlists
+                {t("marketplace.userWishlists")}
               </TabsTrigger>
             </TabsList>
           </Tabs>
+
+          {user && (
+            <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-accent-gold hover:bg-accent-copper">
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t("marketplace.createListing")}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="room-furniture max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="font-heading text-2xl">{t("marketplace.createListing")}</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 mt-4">
+                  <div className="space-y-2">
+                    <Label className="font-body">{t("marketplace.selectGameFromCollection")}</Label>
+                    {loadingUserGames ? (
+                      <div className="flex items-center justify-center py-4">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                      </div>
+                    ) : userGames.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">{t("marketplace.noGamesInCollection")}</p>
+                    ) : (
+                      <Select value={selectedGameId} onValueChange={setSelectedGameId}>
+                        <SelectTrigger className="bg-surface/50">
+                          <SelectValue placeholder={t("marketplace.selectGame")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {userGames.map(ug => (
+                            <SelectItem key={ug.id} value={ug.id}>
+                              {ug.game?.name || "Unknown Game"}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="font-body">{t("marketplace.listingType")}</Label>
+                    <Select value={listingType} onValueChange={(v) => setListingType(v as ListingType)}>
+                      <SelectTrigger className="bg-surface/50">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sell">{t("marketplace.forSale")}</SelectItem>
+                        <SelectItem value="trade">{t("marketplace.forTrade")}</SelectItem>
+                        <SelectItem value="give">{t("marketplace.freeToGive")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="font-body">{t("marketplace.condition")}</Label>
+                    <Select value={condition} onValueChange={(v) => setCondition(v as ListingCondition)}>
+                      <SelectTrigger className="bg-surface/50">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="new">{t("marketplace.conditionNew")}</SelectItem>
+                        <SelectItem value="like_new">{t("marketplace.likeNew")}</SelectItem>
+                        <SelectItem value="good">{t("marketplace.good")}</SelectItem>
+                        <SelectItem value="fair">{t("marketplace.fair")}</SelectItem>
+                        <SelectItem value="poor">{t("marketplace.poor")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {listingType === "sell" && (
+                    <div className="space-y-2">
+                      <Label className="font-body">{t("marketplace.price")}</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        className="bg-surface/50"
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label className="font-body">{t("marketplace.descriptionOptional")}</Label>
+                    <Textarea
+                      placeholder={t("marketplace.descriptionPlaceholder")}
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="bg-surface/50 min-h-[80px]"
+                    />
+                  </div>
+
+                  <Button 
+                    onClick={handleCreateListing} 
+                    className="w-full bg-accent-gold hover:bg-accent-copper"
+                    disabled={creating || !selectedGameId}
+                  >
+                    {creating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                    {t("marketplace.createListing")}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
         {/* Search and Filters */}
@@ -155,7 +327,7 @@ export default function Marketplace() {
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={activeTab === "listings" ? "Search games..." : "Search users or games..."}
+                placeholder={activeTab === "listings" ? t("marketplace.searchGames") : t("marketplace.searchUsersOrGames")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 font-body bg-surface/50 border-accent-gold/20 focus:border-accent-gold"
@@ -163,225 +335,259 @@ export default function Marketplace() {
             </div>
 
             {activeTab === "listings" && (
-              <>
-                <Select value={conditionFilter} onValueChange={setConditionFilter}>
-                  <SelectTrigger className="w-full md:w-[180px] bg-surface/50 border-accent-gold/20 font-body">
-                    <SelectValue placeholder="Condition" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all" className="font-body">
-                      All Conditions
-                    </SelectItem>
-                    <SelectItem value="Like New" className="font-body">
-                      Like New
-                    </SelectItem>
-                    <SelectItem value="Very Good" className="font-body">
-                      Very Good
-                    </SelectItem>
-                    <SelectItem value="Good" className="font-body">
-                      Good
-                    </SelectItem>
-                    <SelectItem value="Fair" className="font-body">
-                      Fair
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="w-full md:w-[180px] bg-surface/50 border-accent-gold/20 font-body">
-                    <SelectValue placeholder="Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all" className="font-body">
-                      All Categories
-                    </SelectItem>
-                    <SelectItem value="Strategy" className="font-body">
-                      Strategy
-                    </SelectItem>
-                    <SelectItem value="Cooperative" className="font-body">
-                      Cooperative
-                    </SelectItem>
-                    <SelectItem value="Family" className="font-body">
-                      Family
-                    </SelectItem>
-                    <SelectItem value="Thematic" className="font-body">
-                      Thematic
-                    </SelectItem>
-                    <SelectItem value="Abstract" className="font-body">
-                      Abstract
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </>
+              <Select value={conditionFilter} onValueChange={setConditionFilter}>
+                <SelectTrigger className="w-full md:w-[180px] bg-surface/50 border-accent-gold/20 font-body">
+                  <SelectValue placeholder={t("marketplace.condition")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all" className="font-body">{t("marketplace.allConditions")}</SelectItem>
+                  <SelectItem value="new" className="font-body">{t("marketplace.conditionNew")}</SelectItem>
+                  <SelectItem value="like_new" className="font-body">{t("marketplace.likeNew")}</SelectItem>
+                  <SelectItem value="good" className="font-body">{t("marketplace.good")}</SelectItem>
+                  <SelectItem value="fair" className="font-body">{t("marketplace.fair")}</SelectItem>
+                  <SelectItem value="poor" className="font-body">{t("marketplace.poor")}</SelectItem>
+                </SelectContent>
+              </Select>
             )}
           </div>
         </div>
 
         {/* Content */}
-        {activeTab === "listings" ? (
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
+          </div>
+        ) : activeTab === "listings" ? (
           <div className="space-y-6">
             {filteredListings.length === 0 ? (
               <div className="text-center py-12 manor-card">
                 <Store className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground font-body text-lg">No listings found matching your criteria.</p>
+                <p className="text-muted-foreground font-body text-lg">{t("marketplace.noListings")}</p>
+                {user && (
+                  <Button 
+                    onClick={() => setCreateModalOpen(true)}
+                    className="mt-4 bg-accent-gold hover:bg-accent-copper"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t("marketplace.createFirstListing")}
+                  </Button>
+                )}
               </div>
             ) : (
-              filteredListings.map((listing) => (
-                <div key={listing.id} className="manor-card p-6 hover:shadow-lg transition-all duration-300">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    {/* Game Image */}
-                    <div className="relative w-full md:w-32 h-48 md:h-44 flex-shrink-0">
-                      <Image
-                        src={listing.gameImage || "/placeholder.svg"}
-                        alt={listing.gameTitle}
-                        fill
-                        className="object-cover rounded-lg"
-                      />
-                    </div>
+              filteredListings.map((listing) => {
+                const isOwner = user?.id === listing.seller_id
+                const sellerName = listing.seller?.display_name || listing.seller?.username || "Unknown"
+                
+                return (
+                  <div key={listing.id} className="manor-card p-6 hover:shadow-lg transition-all duration-300">
+                    <div className="flex flex-col md:flex-row gap-6">
+                      {/* Game Image */}
+                      <div className="relative w-full md:w-32 h-48 md:h-44 flex-shrink-0">
+                        <Image
+                          src={listing.game?.thumbnail_url || listing.game?.image_url || "/placeholder.svg"}
+                          alt={listing.game?.name || "Game"}
+                          fill
+                          className="object-cover rounded-lg"
+                        />
+                      </div>
 
-                    {/* Game Details */}
-                    <div className="flex-1 space-y-4">
-                      <div>
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <h3 className="font-heading font-semibold text-2xl mb-2">{listing.gameTitle}</h3>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <Badge variant="outline" className="border-accent-gold/20 text-accent-gold">
-                                {listing.category}
-                              </Badge>
-                              <Badge variant="secondary" className="bg-surface">
-                                {listing.condition}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 fill-accent-gold text-accent-gold" />
-                            <span className="font-medium">{listing.rating}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Users className="h-4 w-4" />
-                            <span>{listing.playerCount} players</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            <span>{listing.playTime} min</span>
-                          </div>
-                        </div>
-
-                        <p className="font-body text-muted-foreground mb-4">{listing.tradeNotes}</p>
-
-                        {/* Seller Info */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="relative w-10 h-10">
-                              <Image
-                                src={listing.seller.avatar || "/placeholder.svg"}
-                                alt={listing.seller.name}
-                                fill
-                                className="object-cover rounded-full"
-                              />
-                            </div>
+                      {/* Game Details */}
+                      <div className="flex-1 space-y-4">
+                        <div>
+                          <div className="flex items-start justify-between mb-2">
                             <div>
-                              <p className="font-heading font-medium text-sm">{listing.seller.name}</p>
-                              <p className="text-xs text-muted-foreground">Listed {listing.listedDate}</p>
+                              <h3 className="font-heading font-semibold text-2xl mb-2">{listing.game?.name}</h3>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <Badge variant="outline" className="border-accent-gold/20 text-accent-gold">
+                                  {listingTypeLabels[listing.listing_type]}
+                                </Badge>
+                                <Badge variant="secondary" className="bg-surface">
+                                  {conditionLabels[listing.condition]}
+                                </Badge>
+                                {listing.listing_type === "sell" && listing.price && (
+                                  <Badge className="bg-green-600">${listing.price}</Badge>
+                                )}
+                              </div>
                             </div>
                           </div>
 
-                          <div className="flex gap-2">
-                            <Link href={`/profile/${listing.seller.id}`}>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="border-accent-gold/20 hover:border-accent-gold bg-transparent"
-                              >
-                                <User className="h-4 w-4 mr-2" />
-                                View Profile
-                              </Button>
-                            </Link>
-                            <Link href={`/messages?user=${listing.seller.id}`}>
-                              <Button size="sm" className="bg-accent-gold hover:bg-accent-gold/90 text-background">
-                                <MessageCircle className="h-4 w-4 mr-2" />
-                                Contact Seller
-                              </Button>
-                            </Link>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                            {listing.game?.min_players && (
+                              <div className="flex items-center gap-1">
+                                <Users className="h-4 w-4" />
+                                <span>{listing.game.min_players}-{listing.game.max_players} players</span>
+                              </div>
+                            )}
+                            {listing.game?.playing_time && (
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                <span>{listing.game.playing_time} min</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {listing.description && (
+                            <p className="font-body text-muted-foreground mb-4">{listing.description}</p>
+                          )}
+
+                          {/* Seller Info */}
+                          <div className="flex items-center justify-between flex-wrap gap-4">
+                            <div className="flex items-center gap-3">
+                              <div className="relative w-10 h-10">
+                                <Image
+                                  src={listing.seller?.avatar_url || "/placeholder.svg"}
+                                  alt={sellerName}
+                                  fill
+                                  className="object-cover rounded-full"
+                                />
+                              </div>
+                              <div>
+                                <p className="font-heading font-medium text-sm">{sellerName}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {t("marketplace.listed")} {new Date(listing.created_at).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex gap-2">
+                              {isOwner ? (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="border-red-400/40 text-red-400 hover:bg-red-400/10 bg-transparent"
+                                  onClick={() => handleDeleteListing(listing.id)}
+                                  disabled={deleting === listing.id}
+                                >
+                                  {deleting === listing.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <>
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      {t("common.delete")}
+                                    </>
+                                  )}
+                                </Button>
+                              ) : (
+                                <>
+                                  <Link href={"/profile/" + listing.seller_id}>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="border-accent-gold/20 hover:border-accent-gold bg-transparent"
+                                    >
+                                      <User className="h-4 w-4 mr-2" />
+                                      {t("profile.viewProfile")}
+                                    </Button>
+                                  </Link>
+                                  <Button 
+                                    size="sm" 
+                                    className="bg-accent-gold hover:bg-accent-gold/90 text-background"
+                                    onClick={() => handleContactSeller(listing.seller_id)}
+                                    disabled={contacting === listing.seller_id}
+                                  >
+                                    {contacting === listing.seller_id ? (
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <>
+                                        <MessageCircle className="h-4 w-4 mr-2" />
+                                        {t("marketplace.contactSeller")}
+                                      </>
+                                    )}
+                                  </Button>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))
+                )
+              })
             )}
           </div>
         ) : (
           <div className="space-y-6">
-            {filteredWishlists.length === 0 ? (
+            {Object.keys(groupedWishlists).length === 0 ? (
               <div className="text-center py-12 manor-card">
                 <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground font-body text-lg">No wishlists found matching your search.</p>
+                <p className="text-muted-foreground font-body text-lg">{t("marketplace.noWishlists")}</p>
               </div>
             ) : (
-              filteredWishlists.map((wishlist) => (
-                <div key={wishlist.userId} className="manor-card p-6 hover:shadow-lg transition-all duration-300">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-4">
-                      <div className="relative w-16 h-16">
-                        <Image
-                          src={wishlist.userAvatar || "/placeholder.svg"}
-                          alt={wishlist.userName}
-                          fill
-                          className="object-cover rounded-full"
-                        />
+              Object.values(groupedWishlists).map((wishlist) => {
+                const userName = wishlist.user?.display_name || wishlist.user?.username || "Unknown"
+                
+                return (
+                  <div key={wishlist.user?.id} className="manor-card p-6 hover:shadow-lg transition-all duration-300">
+                    <div className="flex items-start justify-between mb-4 flex-wrap gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="relative w-16 h-16">
+                          <Image
+                            src={wishlist.user?.avatar_url || "/placeholder.svg"}
+                            alt={userName}
+                            fill
+                            className="object-cover rounded-full"
+                          />
+                        </div>
+                        <div>
+                          <h3 className="font-heading font-semibold text-xl mb-1">{userName}</h3>
+                          {wishlist.user?.location && (
+                            <p className="text-sm text-muted-foreground">{wishlist.user.location}</p>
+                          )}
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-heading font-semibold text-xl mb-1">{wishlist.userName}</h3>
-                        <p className="text-sm text-muted-foreground">{wishlist.location}</p>
+
+                      <div className="flex gap-2">
+                        <Link href={"/profile/" + wishlist.user?.id}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-accent-gold/20 hover:border-accent-gold bg-transparent"
+                          >
+                            <User className="h-4 w-4 mr-2" />
+                            {t("profile.viewProfile")}
+                          </Button>
+                        </Link>
+                        <Button 
+                          size="sm" 
+                          className="bg-accent-gold hover:bg-accent-gold/90 text-background"
+                          onClick={() => handleContactSeller(wishlist.user?.id)}
+                          disabled={contacting === wishlist.user?.id}
+                        >
+                          {contacting === wishlist.user?.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <>
+                              <MessageCircle className="h-4 w-4 mr-2" />
+                              {t("marketplace.offerTrade")}
+                            </>
+                          )}
+                        </Button>
                       </div>
                     </div>
 
-                    <div className="flex gap-2">
-                      <Link href={`/profile/${wishlist.userId}`}>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="border-accent-gold/20 hover:border-accent-gold bg-transparent"
-                        >
-                          <User className="h-4 w-4 mr-2" />
-                          View Profile
-                        </Button>
-                      </Link>
-                      <Link href={`/messages?user=${wishlist.userId}`}>
-                        <Button size="sm" className="bg-accent-gold hover:bg-accent-gold/90 text-background">
-                          <MessageCircle className="h-4 w-4 mr-2" />
-                          Offer Trade
-                        </Button>
-                      </Link>
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Heart className="h-4 w-4 text-accent-gold" />
+                        <h4 className="font-heading font-medium">
+                          {t("marketplace.wishlist")} ({wishlist.games.length} {t("marketplace.games")})
+                        </h4>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {wishlist.games.map((entry) => (
+                          <Badge
+                            key={entry.id}
+                            variant="outline"
+                            className="border-accent-gold/20 text-foreground font-body"
+                          >
+                            {entry.game?.name}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
                   </div>
-
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Heart className="h-4 w-4 text-accent-gold" />
-                      <h4 className="font-heading font-medium">Wishlist ({wishlist.wishlistGames.length} games)</h4>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {wishlist.wishlistGames.map((game, index) => (
-                        <Badge
-                          key={index}
-                          variant="outline"
-                          className="border-accent-gold/20 text-foreground font-body"
-                        >
-                          {game.title}
-                          <span className="ml-2 text-xs text-muted-foreground">({game.category})</span>
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))
+                )
+              })
             )}
           </div>
         )}

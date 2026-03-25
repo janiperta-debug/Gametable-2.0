@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Plus, Search, SortAsc, Grid, List } from "lucide-react"
-import Link from "next/link"
+import { useTranslations } from "@/lib/i18n"
 
 type CategoryType = "all" | "board-games" | "rpgs" | "miniatures" | "trading-cards"
 export type SortOption = "name-asc" | "name-desc" | "rating-high" | "rating-low" | "year" | "playtime"
@@ -22,6 +22,13 @@ interface CollectionHeaderProps {
   setSortBy: (sort: SortOption) => void
   onAddGame: () => void
   onImport: () => void
+  categoryCounts?: {
+    all: number
+    "board-games": number
+    rpgs: number
+    miniatures: number
+    "trading-cards": number
+  }
 }
 
 export function CollectionHeader({
@@ -33,22 +40,26 @@ export function CollectionHeader({
   setSelectedCategory,
   sortBy,
   setSortBy,
+  onAddGame,
+  categoryCounts,
 }: CollectionHeaderProps) {
+  const t = useTranslations()
+  
   const categories = [
-    { id: "all" as CategoryType, label: "247 Games", count: 247, importSource: "BGG" },
-    { id: "board-games" as CategoryType, label: "Board Games", count: 189, importSource: "BGG" },
-    { id: "rpgs" as CategoryType, label: "RPGs", count: 34, importSource: "RPGG" },
-    { id: "miniatures" as CategoryType, label: "Miniatures", count: 24, importSource: "Miniature Market" },
-    { id: "trading-cards" as CategoryType, label: "Trading Cards", count: 12, importSource: "TCGPlayer" },
+    { id: "all" as CategoryType, labelKey: "collection.allGames", count: categoryCounts?.all ?? 0, importSource: "BGG" },
+    { id: "board-games" as CategoryType, labelKey: "collection.boardGames", count: categoryCounts?.["board-games"] ?? 0, importSource: "BGG" },
+    { id: "rpgs" as CategoryType, labelKey: "collection.rpgs", count: categoryCounts?.rpgs ?? 0, importSource: "RPGG" },
+    { id: "miniatures" as CategoryType, labelKey: "collection.miniatures", count: categoryCounts?.miniatures ?? 0, importSource: "Miniature Market" },
+    { id: "trading-cards" as CategoryType, labelKey: "collection.tradingCards", count: categoryCounts?.["trading-cards"] ?? 0, importSource: "TCGPlayer" },
   ]
 
   const sortOptions = [
-    { value: "name-asc" as SortOption, label: "Name (A-Z)" },
-    { value: "name-desc" as SortOption, label: "Name (Z-A)" },
-    { value: "rating-high" as SortOption, label: "Rating (High to Low)" },
-    { value: "rating-low" as SortOption, label: "Rating (Low to High)" },
-    { value: "year" as SortOption, label: "Year Published" },
-    { value: "playtime" as SortOption, label: "Play Time" },
+    { value: "name-asc" as SortOption, labelKey: "collection.sortNameAZ" },
+    { value: "name-desc" as SortOption, labelKey: "collection.sortNameZA" },
+    { value: "rating-high" as SortOption, labelKey: "collection.sortRatingHigh" },
+    { value: "rating-low" as SortOption, labelKey: "collection.sortRatingLow" },
+    { value: "year" as SortOption, labelKey: "collection.sortYear" },
+    { value: "playtime" as SortOption, labelKey: "collection.sortPlaytime" },
   ]
 
   const currentSort = sortOptions.find((opt) => opt.value === sortBy) || sortOptions[0]
@@ -57,7 +68,7 @@ export function CollectionHeader({
     <div className="mb-8 space-y-4">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div className="flex-1">
-          <h2 className="ornate-text font-heading text-3xl font-bold mb-2">My Collection</h2>
+          <h2 className="ornate-text font-heading text-3xl font-bold mb-2">{t("collection.myCollection")}</h2>
           <div className="flex flex-wrap gap-2 mt-2 max-w-full">
             {categories.map((category) => (
               <Badge
@@ -66,18 +77,16 @@ export function CollectionHeader({
                 className="font-body cursor-pointer hover:bg-accent-gold/20 transition-colors border-accent-gold whitespace-nowrap"
                 onClick={() => setSelectedCategory(category.id)}
               >
-                {category.id === "all" ? category.label : `${category.label}: ${category.count}`}
+                {category.id === "all" ? `${category.count} ${t("collection.games")}` : `${t(category.labelKey)}: ${category.count}`}
               </Badge>
             ))}
           </div>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-          <Link href="/game/new">
-            <Button className="theme-accent-gold w-full sm:w-auto">
-              <Plus className="h-4 w-4 mr-2" />
-              <span className="font-body">Add Game</span>
-            </Button>
-          </Link>
+          <Button onClick={onAddGame} className="theme-accent-gold w-full sm:w-auto">
+            <Plus className="h-4 w-4 mr-2" />
+            <span className="font-body">{t("collection.addGame")}</span>
+          </Button>
         </div>
       </div>
 
@@ -85,7 +94,7 @@ export function CollectionHeader({
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search your collection..."
+            placeholder={t("collection.searchCollection")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 font-body"
@@ -97,13 +106,13 @@ export function CollectionHeader({
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="flex-1 sm:flex-none bg-transparent min-w-0 flex-shrink">
                 <SortAsc className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span className="font-body truncate">{currentSort.label}</span>
+                <span className="font-body truncate">{t(currentSort.labelKey)}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {sortOptions.map((option) => (
                 <DropdownMenuItem key={option.value} className="font-body" onClick={() => setSortBy(option.value)}>
-                  {option.label}
+                  {t(option.labelKey)}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>

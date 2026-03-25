@@ -1,8 +1,9 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter, Charm, Cinzel, Marcellus, Merriweather, Cormorant_Garamond, DM_Sans } from "next/font/google"
+import { Inter, Charm, Cinzel, Marcellus, Merriweather, Cormorant_Garamond, DM_Sans, Crimson_Pro } from "next/font/google"
 import "./globals.css"
 import { AppShell } from "@/components/app-shell"
+import { I18nProvider } from "@/lib/i18n"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -62,7 +63,9 @@ export default function RootLayout({
       className={`${inter.variable} ${charm.variable} ${cinzel.variable} ${marcellus.variable} ${merriweather.variable} ${cormorantGaramond.variable} ${dmSans.variable}`}
     >
       <body className={merriweather.className}>
-        <AppShell>{children}</AppShell>
+        <I18nProvider>
+          <AppShell>{children}</AppShell>
+        </I18nProvider>
       </body>
     </html>
   )

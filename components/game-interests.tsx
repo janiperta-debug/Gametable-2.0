@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useTranslations } from "@/lib/i18n"
 
 export function GameInterests() {
   const [interests, setInterests] = useState({
@@ -10,6 +11,7 @@ export function GameInterests() {
     miniatures: true,
     rpg: true,
   })
+  const t = useTranslations()
 
   const handleToggle = (key: keyof typeof interests) => {
     setInterests((prev) => ({ ...prev, [key]: !prev[key] }))
@@ -18,9 +20,9 @@ export function GameInterests() {
   return (
     <div className="room-furniture p-8 space-y-6">
       <div>
-        <h2 className="text-2xl mb-2">My Game Interests</h2>
+        <h2 className="text-2xl mb-2">{t("profile.gameInterests")}</h2>
         <p className="text-sm font-merriweather text-muted-foreground">
-          Select the types of games you play or are interested in finding partners for.
+          {t("profile.gameInterestsDesc")}
         </p>
       </div>
 
@@ -33,7 +35,7 @@ export function GameInterests() {
             className="border-accent-gold data-[state=checked]:bg-accent-gold data-[state=checked]:border-accent-gold"
           />
           <label htmlFor="board-games" className="text-base font-merriweather cursor-pointer">
-            Board & Card Games
+            {t("profile.boardAndCardGames")}
           </label>
         </div>
 
@@ -45,7 +47,7 @@ export function GameInterests() {
             className="border-accent-gold data-[state=checked]:bg-accent-gold data-[state=checked]:border-accent-gold"
           />
           <label htmlFor="warhammer" className="text-base font-merriweather cursor-pointer">
-            Warhammer
+            {t("profile.warhammer")}
           </label>
         </div>
 
@@ -57,7 +59,7 @@ export function GameInterests() {
             className="border-accent-gold data-[state=checked]:bg-accent-gold data-[state=checked]:border-accent-gold"
           />
           <label htmlFor="miniatures" className="text-base font-merriweather cursor-pointer">
-            Other Miniature Games
+            {t("profile.otherMiniatureGames")}
           </label>
         </div>
 
@@ -69,7 +71,7 @@ export function GameInterests() {
             className="border-accent-gold data-[state=checked]:bg-accent-gold data-[state=checked]:border-accent-gold"
           />
           <label htmlFor="rpg" className="text-base font-merriweather cursor-pointer">
-            Roleplaying Games (RPGs)
+            {t("profile.roleplayingGames")}
           </label>
         </div>
       </div>
