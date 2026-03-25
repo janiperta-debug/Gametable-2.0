@@ -72,7 +72,7 @@ export function LandingPage() {
     <div
       ref={wrapperRef}
       className="min-h-screen font-dm-sans text-[#f0e6d0] overflow-x-hidden"
-      style={{ background: "#1a1008" }}
+      style={{ background: "linear-gradient(180deg, #3d1515 0%, #2a0f0f 50%, #1a0808 100%)" }}
     >
       {/* Grain overlay */}
       <div className="fixed inset-0 pointer-events-none z-[9999] opacity-40" style={{
@@ -99,7 +99,7 @@ export function LandingPage() {
 function LandingNav({ opened }: { opened: boolean }) {
   return (
     <nav className="fixed top-0 left-0 right-0 z-[500] flex items-center justify-between px-6 lg:px-12 py-4 border-b border-[#c9a84c]/20"
-      style={{ background: "rgba(26,16,8,0.92)", backdropFilter: "blur(20px)" }}
+      style={{ background: "rgba(61,21,21,0.92)", backdropFilter: "blur(20px)" }}
     >
       <a href="/" className="flex items-center gap-2.5 no-underline">
         <Image
@@ -109,7 +109,7 @@ function LandingNav({ opened }: { opened: boolean }) {
           height={36}
           className="shrink-0"
         />
-        <span className="font-cinzel text-xl text-[#c9a84c] tracking-wide leading-none">
+        <span className="font-charm text-2xl text-[#c9a84c] leading-none">
           GameTable
         </span>
       </a>
@@ -241,7 +241,7 @@ function CountdownSection() {
   }, [])
 
   return (
-    <section className="py-12 px-5 border-t border-b border-[#c9a84c]/20" style={{ background: "#1a1008" }}>
+    <section className="py-12 px-5 border-t border-b border-[#c9a84c]/20" style={{ background: "rgba(42,15,15,0.8)" }}>
       <div className="max-w-4xl mx-auto text-center">
         {/* Countdown label */}
         <p className="font-cinzel text-xs uppercase tracking-[0.3em] text-[#c9a84c]/60 mb-6">
@@ -326,7 +326,7 @@ function StatItem({ value, label }: { value: string; label: string }) {
    ──────────────────────────────────────────── */
 function StatementSection() {
   return (
-    <section className="py-16 lg:py-20 px-5 lg:px-12" style={{ background: "#1a1008" }}>
+    <section className="py-16 lg:py-20 px-5 lg:px-12" style={{ background: "transparent" }}>
       <StatsRow />
     </section>
   )
@@ -383,7 +383,7 @@ function PlayersSection() {
             <div 
               key={p.key} 
               className="p-6 rounded-lg transition-all hover:border-[#c9a84c]/40"
-              style={{ background: "#241a0f", border: "1px solid rgba(201,168,76,0.15)" }}
+              style={{ background: "rgba(61,21,21,0.6)", border: "1px solid rgba(201,168,76,0.15)" }}
             >
               <span className="text-3xl block mb-4">{p.icon}</span>
               <div className="font-cinzel text-lg font-semibold text-[#f0e6d0] mb-2">{p.type}</div>
@@ -422,7 +422,7 @@ const features = [
 
 function FeaturesSection() {
   return (
-    <section id="ominaisuudet" className="py-16 lg:py-24 px-5 lg:px-12 border-t border-[#c9a84c]/10" style={{ background: "#1f150c" }}>
+    <section id="ominaisuudet" className="py-16 lg:py-24 px-5 lg:px-12 border-t border-[#c9a84c]/10" style={{ background: "rgba(42,15,15,0.5)" }}>
       <div className="max-w-6xl mx-auto">
         <div className="reveal text-center mb-12">
           <div className="font-cinzel text-xs font-medium uppercase tracking-[0.3em] text-[#c9a84c] mb-4">
@@ -480,7 +480,7 @@ function ToolsSection() {
             <div 
               key={t.name} 
               className="p-6 rounded-lg text-center"
-              style={{ background: "#241a0f", border: "1px solid rgba(201,168,76,0.15)" }}
+              style={{ background: "rgba(61,21,21,0.6)", border: "1px solid rgba(201,168,76,0.15)" }}
             >
               <div className="font-cinzel text-lg font-semibold text-[#f0e6d0] mb-2">{t.name}</div>
               <p className="text-xs text-[#f0e6d0]/50 mb-3">{t.desc}</p>
@@ -506,7 +506,7 @@ function ToolsSection() {
    ──────────────────────────────────────────── */
 function ManifestoSection() {
   return (
-    <section className="py-16 lg:py-24 px-5 lg:px-12 border-t border-[#c9a84c]/10" style={{ background: "#1f150c" }}>
+    <section className="py-16 lg:py-24 px-5 lg:px-12 border-t border-[#c9a84c]/10" style={{ background: "rgba(42,15,15,0.5)" }}>
       <div className="max-w-3xl mx-auto text-center reveal">
         <span className="font-cinzel text-4xl text-[#c9a84c]/30 block mb-6">❧</span>
         <blockquote 
@@ -558,7 +558,7 @@ function CtaSection({ opened }: { opened: boolean }) {
    ──────────────────────────────────────────── */
 function LandingFooter() {
   return (
-    <footer className="py-12 px-5 lg:px-12 border-t border-[#c9a84c]/10" style={{ background: "#1a1008" }}>
+    <footer className="py-12 px-5 lg:px-12 border-t border-[#c9a84c]/10" style={{ background: "rgba(26,8,8,0.9)" }}>
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Logo */}
@@ -570,7 +570,7 @@ function LandingFooter() {
               height={28}
               className="shrink-0 opacity-60"
             />
-            <span className="font-cinzel text-lg text-[#c9a84c]/60">GameTable</span>
+            <span className="font-charm text-xl text-[#c9a84c]/60">GameTable</span>
           </div>
 
           {/* Links */}
