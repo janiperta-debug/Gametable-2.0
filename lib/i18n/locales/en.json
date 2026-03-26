@@ -781,5 +781,97 @@
     "noGamesYet": "This user hasn't added any games to their collection yet.",
     "noFriendsYet": "This user hasn't connected with any friends yet.",
     "plays": "plays"
+  },
+  "landing": {
+    "nav": {
+      "forWhom": "For Whom",
+      "features": "Features",
+      "tools": "Tools",
+      "enterManor": "Enter the Manor"
+    },
+    "hero": {
+      "title1": "The home",
+      "title2": "for all",
+      "title3": "tabletop gamers.",
+      "subtitle": "The Manor opens its doors",
+      "description": "From board gamers to roleplayers, miniature painters to card collectors — one manor for the entire hobby."
+    },
+    "countdown": {
+      "label": "Doors open",
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "seconds": "Seconds",
+      "visitors": "players waiting for the doors to open",
+      "enterManor": "Enter the Manor",
+      "openingDate": "The Manor opens on April 1, 2026"
+    },
+    "stats": {
+      "players": "players in the manor",
+      "games": "games in collections",
+      "membership": "membership, always"
+    },
+    "forWhom": {
+      "label": "For Whom",
+      "title": "For you — regardless of genre.",
+      "boardGamer": {
+        "type": "Board Gamer",
+        "desc": "Catalog your collection, find gaming friends, and track every game night."
+      },
+      "roleplayer": {
+        "type": "Roleplayer",
+        "desc": "Find game masters and players, manage campaigns, and keep your character histories safe."
+      },
+      "miniatures": {
+        "type": "Miniature Hobbyist",
+        "desc": "Save your army lists, share your painted miniatures, and find other wargame enthusiasts."
+      },
+      "cardCollector": {
+        "type": "Card Collector",
+        "desc": "Manage your collection, build decks, and trade within the card community."
+      }
+    },
+    "features": {
+      "label": "Features",
+      "title": "Three pillars for your hobby.",
+      "collection": {
+        "number": "01",
+        "title": "Collection",
+        "subtitle": "All your games in one place.",
+        "desc": "Board games, RPG books, miniatures, trading cards — all genres under one collection."
+      },
+      "community": {
+        "number": "02",
+        "title": "Community",
+        "subtitle": "Find players of your genre.",
+        "desc": "Search players by genre and location. Private messages, community profiles, and marketplace."
+      },
+      "events": {
+        "number": "03",
+        "title": "Events",
+        "subtitle": "Game nights. Tournaments. Campaigns.",
+        "desc": "Create events or join them — built-in registration and game list management."
+      }
+    },
+    "tools": {
+      "label": "Tools",
+      "title": "Your growing arsenal.",
+      "armyBuilder": { "name": "Army Builder", "status": "Coming Soon", "desc": "For miniature hobbyists" },
+      "characterBuilder": { "name": "Character Builder", "status": "Coming Soon", "desc": "For RPG players" },
+      "deckBuilder": { "name": "Deck Builder", "status": "Planned", "desc": "For card collectors" },
+      "campaignDiary": { "name": "Campaign Diary", "status": "Planned", "desc": "For adventures" }
+    },
+    "manifesto": {
+      "quote": "Tabletop gaming is one hobby — not four separate communities that don't talk to each other."
+    },
+    "cta": {
+      "welcome": "Welcome",
+      "soon": "Soon"
+    },
+    "footer": {
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "contact": "Contact"
+    }
   }
 }

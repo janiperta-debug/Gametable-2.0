@@ -781,5 +781,97 @@
     "noGamesYet": "Tällä käyttäjällä ei ole vielä pelejä kokoelmassaan.",
     "noFriendsYet": "Tällä käyttäjällä ei ole vielä kavereita.",
     "plays": "pelikertaa"
+  },
+  "landing": {
+    "nav": {
+      "forWhom": "Kenelle",
+      "features": "Ominaisuudet",
+      "tools": "Työkalut",
+      "enterManor": "Astu Kartanoon"
+    },
+    "hero": {
+      "title1": "Kaikkien",
+      "title2": "pöytäpelaajien",
+      "title3": "koti.",
+      "subtitle": "Kartano avaa ovensa",
+      "description": "Lautapelaajasta roolipelaajaan, miniatyyrimaalarista kortinkerääjään — yksi kartano koko harrastukselle."
+    },
+    "countdown": {
+      "label": "Ovet avautuvat",
+      "days": "Päivää",
+      "hours": "Tuntia",
+      "minutes": "Minuuttia",
+      "seconds": "Sekuntia",
+      "visitors": "pelaajaa odottaa ovien avautumista",
+      "enterManor": "Astu Kartanoon",
+      "openingDate": "Kartano avaa ovensa 1.4.2026"
+    },
+    "stats": {
+      "players": "pelaajaa kartanossa",
+      "games": "peliä kokoelmissa",
+      "membership": "jäsenyys, aina"
+    },
+    "forWhom": {
+      "label": "Kenelle",
+      "title": "Sinulle — lajityypistä riippumatta.",
+      "boardGamer": {
+        "type": "Lautapelaaja",
+        "desc": "Luetteloi kokoelmasi, löydä pelikavereita ja seuraa jokaista peli-iltaa."
+      },
+      "roleplayer": {
+        "type": "Roolipelaaja",
+        "desc": "Löydä pelinjohtajia ja pelaajia, hallinnoi kampanjoita ja pidä hahmohistoriasi tallessa."
+      },
+      "miniatures": {
+        "type": "Miniatyyriharrastaja",
+        "desc": "Tallenna armeijasilistasi, jaa maalaamasi miniatyyrit ja löydä muita wargame-harrastajia."
+      },
+      "cardCollector": {
+        "type": "Kortinkerääjä",
+        "desc": "Hallinnoi kokoelmaasi, rakenna pakkoja ja kauppaa korttiyhteisön sisällä."
+      }
+    },
+    "features": {
+      "label": "Ominaisuudet",
+      "title": "Kolme pilaria harrastuksellesi.",
+      "collection": {
+        "number": "01",
+        "title": "Kokoelma",
+        "subtitle": "Kaikki pelisi yhdessä paikassa.",
+        "desc": "Lautapelit, RPG-kirjat, miniatyyrit, keräilykortit — kaikki lajityypit saman kokoelman alla."
+      },
+      "community": {
+        "number": "02",
+        "title": "Yhteisö",
+        "subtitle": "Löydä oman lajisi pelaajat.",
+        "desc": "Etsi pelaajia lajityypin ja sijainnin mukaan. Yksityisviestit, yhteisöprofiilit ja kauppapaikka."
+      },
+      "events": {
+        "number": "03",
+        "title": "Tapahtumat",
+        "subtitle": "Peli-illat. Turnaukset. Kampanjat.",
+        "desc": "Luo tapahtumia tai liity niihin — sisäänrakennettu ilmoittautuminen ja pelilistan hallinta."
+      }
+    },
+    "tools": {
+      "label": "Työkalut",
+      "title": "Kasvava arsenaalisi.",
+      "armyBuilder": { "name": "Armeijanrakentaja", "status": "Tulossa", "desc": "Miniatyyriharrastajille" },
+      "characterBuilder": { "name": "Hahmonrakentaja", "status": "Tulossa", "desc": "RPG-pelaajille" },
+      "deckBuilder": { "name": "Pakkainrakentaja", "status": "Suunnitteilla", "desc": "Kortinkerääjille" },
+      "campaignDiary": { "name": "Kampanjapäiväkirja", "status": "Suunnitteilla", "desc": "Seikkailuille" }
+    },
+    "manifesto": {
+      "quote": "Pöytäpelaaminen on yksi harrastus — ei neljää erillistä yhteisöä jotka eivät puhu toisilleen."
+    },
+    "cta": {
+      "welcome": "Tervetuloa",
+      "soon": "Pian"
+    },
+    "footer": {
+      "terms": "Ehdot",
+      "privacy": "Tietosuoja",
+      "contact": "Yhteystiedot"
+    }
   }
 }

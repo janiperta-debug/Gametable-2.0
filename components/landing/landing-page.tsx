@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useRef, useState, useCallback } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { useTranslations, useI18n } from "@/lib/i18n"
 
 /* ────────────────────────────────────────────
    Constants
@@ -80,7 +81,7 @@ export function LandingPage() {
       }} />
 
       <LandingNav opened={opened} />
-      <HeroSection opened={opened} />
+      <HeroSection />
       {!opened && <CountdownSection />}
       <StatementSection />
       <PlayersSection />
@@ -94,9 +95,43 @@ export function LandingPage() {
 }
 
 /* ────────────────────────────────────────────
+   LANGUAGE SWITCHER (Landing-specific styling)
+   ──────────────────────────────────────────── */
+function LandingLanguageSwitcher() {
+  const { locale, setLocale } = useI18n()
+  
+  return (
+    <div className="flex items-center gap-1 rounded bg-[#1a0808]/50 p-0.5">
+      <button
+        onClick={() => setLocale("fi")}
+        className={`px-2 py-1 rounded text-xs font-medium tracking-wide transition-all ${
+          locale === "fi" 
+            ? "bg-[#c9a84c] text-[#1a0808]" 
+            : "text-[#f0e6d0]/60 hover:text-[#c9a84c]"
+        }`}
+      >
+        FI
+      </button>
+      <button
+        onClick={() => setLocale("en")}
+        className={`px-2 py-1 rounded text-xs font-medium tracking-wide transition-all ${
+          locale === "en" 
+            ? "bg-[#c9a84c] text-[#1a0808]" 
+            : "text-[#f0e6d0]/60 hover:text-[#c9a84c]"
+        }`}
+      >
+        EN
+      </button>
+    </div>
+  )
+}
+
+/* ────────────────────────────────────────────
    NAV
    ──────────────────────────────────────────── */
 function LandingNav({ opened }: { opened: boolean }) {
+  const t = useTranslations()
+  
   return (
     <nav className="fixed top-0 left-0 right-0 z-[500] flex items-center justify-between px-6 lg:px-12 py-4 border-b border-[#c9a84c]/20"
       style={{ background: "rgba(61,21,21,0.92)", backdropFilter: "blur(20px)" }}
@@ -117,18 +152,21 @@ function LandingNav({ opened }: { opened: boolean }) {
       <ul className="hidden md:flex items-center gap-8 list-none">
         <li>
           <button onClick={() => scrollTo("kenelle")} className="font-cinzel text-xs font-medium text-[#f0e6d0]/60 hover:text-[#c9a84c] tracking-wide transition-colors bg-transparent border-none cursor-pointer">
-            Kenelle
+            {t("landing.nav.forWhom")}
           </button>
         </li>
         <li>
           <button onClick={() => scrollTo("ominaisuudet")} className="font-cinzel text-xs font-medium text-[#f0e6d0]/60 hover:text-[#c9a84c] tracking-wide transition-colors bg-transparent border-none cursor-pointer">
-            Ominaisuudet
+            {t("landing.nav.features")}
           </button>
         </li>
         <li>
           <button onClick={() => scrollTo("tyokalut")} className="font-cinzel text-xs font-medium text-[#f0e6d0]/60 hover:text-[#c9a84c] tracking-wide transition-colors bg-transparent border-none cursor-pointer">
-            Työkalut
+            {t("landing.nav.tools")}
           </button>
+        </li>
+        <li>
+          <LandingLanguageSwitcher />
         </li>
         <li>
           {opened ? (
@@ -137,18 +175,23 @@ function LandingNav({ opened }: { opened: boolean }) {
               className="font-cinzel text-xs font-bold tracking-wide px-5 py-2 rounded-sm no-underline transition-all hover:opacity-90"
               style={{ background: "#c9a84c", color: "#1a1008" }}
             >
-              Astu Kartanoon →
+              {t("landing.nav.enterManor")} →
             </Link>
           ) : (
             <span
               className="font-cinzel text-xs font-bold tracking-wide px-5 py-2 rounded-sm opacity-50 cursor-not-allowed"
               style={{ border: "1px solid #c9a84c", color: "#c9a84c" }}
             >
-              Astu Kartanoon →
+              {t("landing.nav.enterManor")} →
             </span>
           )}
         </li>
       </ul>
+
+      {/* Mobile language switcher */}
+      <div className="md:hidden">
+        <LandingLanguageSwitcher />
+      </div>
     </nav>
   )
 }
@@ -156,7 +199,9 @@ function LandingNav({ opened }: { opened: boolean }) {
 /* ────────────────────────────────────────────
    HERO
    ──────────────────────────────────────────── */
-function HeroSection({ opened }: { opened: boolean }) {
+function HeroSection() {
+  const t = useTranslations()
+  
   return (
     <section className="min-h-screen relative flex flex-col items-center justify-center text-center px-5 pt-24 pb-16">
       {/* Decorative elements */}
@@ -170,9 +215,9 @@ function HeroSection({ opened }: { opened: boolean }) {
           className="font-cinzel font-semibold leading-tight tracking-tight text-[#f0e6d0] mb-8"
           style={{ fontSize: "clamp(2.5rem, 8vw, 5.5rem)", letterSpacing: "-0.02em" }}
         >
-          Kaikkien<br />
-          pöytäpelaajien<br />
-          <span className="text-[#c9a84c]">koti.</span>
+          {t("landing.hero.title1")}<br />
+          {t("landing.hero.title2")}<br />
+          <span className="text-[#c9a84c]">{t("landing.hero.title3")}</span>
         </h1>
 
         {/* Decorative divider */}
@@ -184,11 +229,11 @@ function HeroSection({ opened }: { opened: boolean }) {
 
         {/* Subtitle */}
         <p className="font-cormorant text-lg md:text-xl text-[#f0e6d0]/70 max-w-2xl mx-auto mb-4 uppercase tracking-widest">
-          Kartano avaa ovensa
+          {t("landing.hero.subtitle")}
         </p>
 
         <p className="text-base text-[#f0e6d0]/60 max-w-xl mx-auto mb-10 leading-relaxed">
-          Lautapelaajasta roolipelaajaan, miniatyyrimaalarista kortinkerääjään — yksi kartano koko harrastukselle.
+          {t("landing.hero.description")}
         </p>
       </div>
     </section>
@@ -199,6 +244,7 @@ function HeroSection({ opened }: { opened: boolean }) {
    COUNTDOWN SECTION
    ──────────────────────────────────────────── */
 function CountdownSection() {
+  const t = useTranslations()
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
   const [visitorCount, setVisitorCount] = useState(146)
 
@@ -245,23 +291,23 @@ function CountdownSection() {
       <div className="max-w-4xl mx-auto text-center">
         {/* Countdown label */}
         <p className="font-cinzel text-xs uppercase tracking-[0.3em] text-[#c9a84c]/60 mb-6">
-          Ovet avautuvat
+          {t("landing.countdown.label")}
         </p>
 
         {/* Countdown timer */}
         <div className="flex items-center justify-center gap-4 md:gap-8 mb-8">
-          <CountdownUnit value={timeLeft.days} label="Päivää" />
+          <CountdownUnit value={timeLeft.days} label={t("landing.countdown.days")} />
           <span className="font-cinzel text-3xl text-[#c9a84c]/40">:</span>
-          <CountdownUnit value={timeLeft.hours} label="Tuntia" />
+          <CountdownUnit value={timeLeft.hours} label={t("landing.countdown.hours")} />
           <span className="font-cinzel text-3xl text-[#c9a84c]/40">:</span>
-          <CountdownUnit value={timeLeft.minutes} label="Minuuttia" />
+          <CountdownUnit value={timeLeft.minutes} label={t("landing.countdown.minutes")} />
           <span className="font-cinzel text-3xl text-[#c9a84c]/40">:</span>
-          <CountdownUnit value={timeLeft.seconds} label="Sekuntia" />
+          <CountdownUnit value={timeLeft.seconds} label={t("landing.countdown.seconds")} />
         </div>
 
         {/* Visitor counter */}
         <p className="text-sm text-[#f0e6d0]/50 mb-8">
-          <span className="text-[#c9a84c] font-semibold">{visitorCount}</span> pelaajaa odottaa ovien avautumista
+          <span className="text-[#c9a84c] font-semibold">{visitorCount}</span> {t("landing.countdown.visitors")}
         </p>
 
         {/* Locked button */}
@@ -270,11 +316,11 @@ function CountdownSection() {
           className="font-cinzel text-sm font-bold tracking-wide px-8 py-4 rounded-sm cursor-not-allowed opacity-60 transition-all"
           style={{ border: "2px solid #c9a84c", color: "#c9a84c", background: "transparent" }}
         >
-          Astu Kartanoon →
+          {t("landing.countdown.enterManor")} →
         </button>
 
         <p className="text-xs text-[#f0e6d0]/40 mt-4">
-          Kartano avaa ovensa 1.4.2026
+          {t("landing.countdown.openingDate")}
         </p>
       </div>
     </section>
@@ -301,13 +347,15 @@ function CountdownUnit({ value, label }: { value: number; label: string }) {
    STATS SECTION (below countdown)
    ──────────────────────────────────────────── */
 function StatsRow() {
+  const t = useTranslations()
+  
   return (
     <div className="flex items-center justify-center gap-8 md:gap-16 py-8 border-t border-[#c9a84c]/10">
-      <StatItem value="50+" label="pelaajaa kartanossa" />
+      <StatItem value="50+" label={t("landing.stats.players")} />
       <div className="w-px h-8 bg-[#c9a84c]/20" />
-      <StatItem value="1 000+" label="peliä kokoelmissa" />
+      <StatItem value="1 000+" label={t("landing.stats.games")} />
       <div className="w-px h-8 bg-[#c9a84c]/20" />
-      <StatItem value="0 €" label="jäsenyys, aina" />
+      <StatItem value="0 €" label={t("landing.stats.membership")} />
     </div>
   )
 }
@@ -335,45 +383,39 @@ function StatementSection() {
 /* ────────────────────────────────────────────
    PLAYERS (Kenelle)
    ──────────────────────────────────────────── */
-const playerTypes = [
-  {
-    key: "lautapelit",
-    type: "Lautapelaaja",
-    icon: "♟️",
-    desc: "Luetteloi kokoelmasi, löydä pelikavereita ja seuraa jokaista peli-iltaa.",
-  },
-  {
-    key: "roolipelit",
-    type: "Roolipelaaja",
-    icon: "🎲",
-    desc: "Löydä pelinjohtajia ja pelaajia, hallinnoi kampanjoita ja pidä hahmohistoriasi tallessa.",
-  },
-  {
-    key: "miniatyyrit",
-    type: "Miniatyyriharrastaja",
-    icon: "⚔️",
-    desc: "Tallenna armeijasilistasi, jaa maalaamasi miniatyyrit ja löydä muita wargame-harrastajia.",
-  },
-  {
-    key: "kortit",
-    type: "Kortinkerääjä",
-    icon: "🃏",
-    desc: "Hallinnoi kokoelmaasi, rakenna pakkoja ja kauppaa korttiyhteisön sisällä.",
-  },
-]
-
 function PlayersSection() {
+  const t = useTranslations()
+  
+  const playerTypes = [
+    {
+      key: "boardGamer",
+      icon: "♟️",
+    },
+    {
+      key: "roleplayer",
+      icon: "🎲",
+    },
+    {
+      key: "miniatures",
+      icon: "⚔️",
+    },
+    {
+      key: "cardCollector",
+      icon: "🃏",
+    },
+  ]
+  
   return (
     <section id="kenelle" className="py-16 lg:py-24 px-5 lg:px-12 border-t border-[#c9a84c]/10">
       <div className="max-w-6xl mx-auto">
         <div className="reveal text-center mb-12">
           <div className="font-cinzel text-xs font-medium uppercase tracking-[0.3em] text-[#c9a84c] mb-4">
-            Kenelle
+            {t("landing.forWhom.label")}
           </div>
           <h2 className="font-cinzel font-semibold tracking-tight text-[#f0e6d0] leading-tight"
             style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)" }}
           >
-            Sinulle — lajityypistä riippumatta.
+            {t("landing.forWhom.title")}
           </h2>
         </div>
 
@@ -386,8 +428,12 @@ function PlayersSection() {
               style={{ background: "rgba(61,21,21,0.6)", border: "1px solid rgba(201,168,76,0.15)" }}
             >
               <span className="text-3xl block mb-4">{p.icon}</span>
-              <div className="font-cinzel text-lg font-semibold text-[#f0e6d0] mb-2">{p.type}</div>
-              <p className="text-sm text-[#f0e6d0]/60 leading-relaxed">{p.desc}</p>
+              <div className="font-cinzel text-lg font-semibold text-[#f0e6d0] mb-2">
+                {t(`landing.forWhom.${p.key}.type`)}
+              </div>
+              <p className="text-sm text-[#f0e6d0]/60 leading-relaxed">
+                {t(`landing.forWhom.${p.key}.desc`)}
+              </p>
             </div>
           ))}
         </div>
@@ -399,49 +445,40 @@ function PlayersSection() {
 /* ────────────────────────────────────────────
    FEATURES (Ominaisuudet)
    ──────────────────────────────────────────── */
-const features = [
-  {
-    number: "01",
-    title: "Kokoelma",
-    subtitle: "Kaikki pelisi yhdessä paikassa.",
-    desc: "Lautapelit, RPG-kirjat, miniatyyrit, keräilykortit — kaikki lajityypit saman kokoelman alla.",
-  },
-  {
-    number: "02",
-    title: "Yhteisö",
-    subtitle: "Löydä oman lajisi pelaajat.",
-    desc: "Etsi pelaajia lajityypin ja sijainnin mukaan. Yksityisviestit, yhteisöprofiilit ja kauppapaikka.",
-  },
-  {
-    number: "03",
-    title: "Tapahtumat",
-    subtitle: "Peli-illat. Turnaukset. Kampanjat.",
-    desc: "Luo tapahtumia tai liity niihin — sisäänrakennettu ilmoittautuminen ja pelilistan hallinta.",
-  },
-]
-
 function FeaturesSection() {
+  const t = useTranslations()
+  
+  const features = ["collection", "community", "events"]
+  
   return (
     <section id="ominaisuudet" className="py-16 lg:py-24 px-5 lg:px-12 border-t border-[#c9a84c]/10" style={{ background: "rgba(42,15,15,0.5)" }}>
       <div className="max-w-6xl mx-auto">
         <div className="reveal text-center mb-12">
           <div className="font-cinzel text-xs font-medium uppercase tracking-[0.3em] text-[#c9a84c] mb-4">
-            Ominaisuudet
+            {t("landing.features.label")}
           </div>
           <h2 className="font-cinzel font-semibold tracking-tight text-[#f0e6d0] leading-tight"
             style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)" }}
           >
-            Kolme pilaria harrastuksellesi.
+            {t("landing.features.title")}
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 reveal">
           {features.map((f) => (
-            <div key={f.number} className="text-center">
-              <div className="font-cinzel text-6xl font-light text-[#c9a84c]/20 mb-4">{f.number}</div>
-              <div className="font-cinzel text-xl font-semibold text-[#c9a84c] mb-2">{f.title}</div>
-              <div className="font-cormorant text-lg italic text-[#f0e6d0]/80 mb-3">{f.subtitle}</div>
-              <p className="text-sm text-[#f0e6d0]/50 leading-relaxed">{f.desc}</p>
+            <div key={f} className="text-center">
+              <div className="font-cinzel text-6xl font-light text-[#c9a84c]/20 mb-4">
+                {t(`landing.features.${f}.number`)}
+              </div>
+              <div className="font-cinzel text-xl font-semibold text-[#c9a84c] mb-2">
+                {t(`landing.features.${f}.title`)}
+              </div>
+              <div className="font-cormorant text-lg italic text-[#f0e6d0]/80 mb-3">
+                {t(`landing.features.${f}.subtitle`)}
+              </div>
+              <p className="text-sm text-[#f0e6d0]/50 leading-relaxed">
+                {t(`landing.features.${f}.desc`)}
+              </p>
             </div>
           ))}
         </div>
@@ -453,48 +490,54 @@ function FeaturesSection() {
 /* ────────────────────────────────────────────
    TOOLS (Työkalut)
    ──────────────────────────────────────────── */
-const tools = [
-  { name: "Armeijanrakentaja", status: "Tulossa", desc: "Miniatyyriharrastajille" },
-  { name: "Hahmonrakentaja", status: "Tulossa", desc: "RPG-pelaajille" },
-  { name: "Pakkainrakentaja", status: "Suunnitteilla", desc: "Kortinkerääjille" },
-  { name: "Kampanjapäiväkirja", status: "Suunnitteilla", desc: "Seikkailuille" },
-]
-
 function ToolsSection() {
+  const t = useTranslations()
+  
+  const tools = ["armyBuilder", "characterBuilder", "deckBuilder", "campaignDiary"]
+  
   return (
     <section id="tyokalut" className="py-16 lg:py-24 px-5 lg:px-12 border-t border-[#c9a84c]/10">
       <div className="max-w-6xl mx-auto">
         <div className="reveal text-center mb-12">
           <div className="font-cinzel text-xs font-medium uppercase tracking-[0.3em] text-[#c9a84c] mb-4">
-            Työkalut
+            {t("landing.tools.label")}
           </div>
           <h2 className="font-cinzel font-semibold tracking-tight text-[#f0e6d0] leading-tight"
             style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)" }}
           >
-            Kasvava arsenaalisi.
+            {t("landing.tools.title")}
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 reveal">
-          {tools.map((t) => (
-            <div 
-              key={t.name} 
-              className="p-6 rounded-lg text-center"
-              style={{ background: "rgba(61,21,21,0.6)", border: "1px solid rgba(201,168,76,0.15)" }}
-            >
-              <div className="font-cinzel text-lg font-semibold text-[#f0e6d0] mb-2">{t.name}</div>
-              <p className="text-xs text-[#f0e6d0]/50 mb-3">{t.desc}</p>
-              <span 
-                className="inline-block px-3 py-1 rounded-full text-xs font-medium"
-                style={{ 
-                  background: t.status === "Tulossa" ? "rgba(201,168,76,0.2)" : "rgba(201,168,76,0.1)",
-                  color: "#c9a84c"
-                }}
+          {tools.map((tool) => {
+            const status = t(`landing.tools.${tool}.status`)
+            const isComingSoon = status === "Tulossa" || status === "Coming Soon"
+            
+            return (
+              <div 
+                key={tool} 
+                className="p-6 rounded-lg text-center"
+                style={{ background: "rgba(61,21,21,0.6)", border: "1px solid rgba(201,168,76,0.15)" }}
               >
-                {t.status}
-              </span>
-            </div>
-          ))}
+                <div className="font-cinzel text-lg font-semibold text-[#f0e6d0] mb-2">
+                  {t(`landing.tools.${tool}.name`)}
+                </div>
+                <p className="text-xs text-[#f0e6d0]/50 mb-3">
+                  {t(`landing.tools.${tool}.desc`)}
+                </p>
+                <span 
+                  className="inline-block px-3 py-1 rounded-full text-xs font-medium"
+                  style={{ 
+                    background: isComingSoon ? "rgba(201,168,76,0.2)" : "rgba(201,168,76,0.1)",
+                    color: "#c9a84c"
+                  }}
+                >
+                  {status}
+                </span>
+              </div>
+            )
+          })}
         </div>
       </div>
     </section>
@@ -505,6 +548,8 @@ function ToolsSection() {
    MANIFESTO (Pull quote)
    ──────────────────────────────────────────── */
 function ManifestoSection() {
+  const t = useTranslations()
+  
   return (
     <section className="py-16 lg:py-24 px-5 lg:px-12 border-t border-[#c9a84c]/10" style={{ background: "rgba(42,15,15,0.5)" }}>
       <div className="max-w-3xl mx-auto text-center reveal">
@@ -513,7 +558,7 @@ function ManifestoSection() {
           className="font-cormorant italic text-[#f0e6d0]/80 leading-relaxed"
           style={{ fontSize: "clamp(1.4rem, 3vw, 2rem)" }}
         >
-          "Pöytäpelaaminen on yksi harrastus — ei neljää erillistä yhteisöä jotka eivät puhu toisilleen."
+          &ldquo;{t("landing.manifesto.quote")}&rdquo;
         </blockquote>
       </div>
     </section>
@@ -524,11 +569,13 @@ function ManifestoSection() {
    CTA BOTTOM
    ──────────────────────────────────────────── */
 function CtaSection({ opened }: { opened: boolean }) {
+  const t = useTranslations()
+  
   return (
     <section className="py-16 lg:py-24 px-5 lg:px-12 border-t border-[#c9a84c]/10">
       <div className="max-w-2xl mx-auto text-center reveal">
         <div className="font-cinzel text-xs font-medium uppercase tracking-[0.3em] text-[#c9a84c] mb-6">
-          {opened ? "Tervetuloa" : "Pian"}
+          {opened ? t("landing.cta.welcome") : t("landing.cta.soon")}
         </div>
         
         {opened ? (
@@ -537,7 +584,7 @@ function CtaSection({ opened }: { opened: boolean }) {
             className="inline-block font-cinzel text-sm font-bold tracking-wide px-10 py-4 rounded-sm no-underline transition-all hover:opacity-90"
             style={{ background: "#c9a84c", color: "#1a1008", boxShadow: "0 8px 32px rgba(201,168,76,0.3)" }}
           >
-            Astu Kartanoon →
+            {t("landing.nav.enterManor")} →
           </Link>
         ) : (
           <button
@@ -545,7 +592,7 @@ function CtaSection({ opened }: { opened: boolean }) {
             className="font-cinzel text-sm font-bold tracking-wide px-10 py-4 rounded-sm cursor-not-allowed opacity-60"
             style={{ border: "2px solid #c9a84c", color: "#c9a84c", background: "transparent" }}
           >
-            Astu Kartanoon →
+            {t("landing.nav.enterManor")} →
           </button>
         )}
       </div>
@@ -557,6 +604,8 @@ function CtaSection({ opened }: { opened: boolean }) {
    FOOTER
    ──────────────────────────────────────────── */
 function LandingFooter() {
+  const t = useTranslations()
+  
   return (
     <footer className="py-12 px-5 lg:px-12 border-t border-[#c9a84c]/10" style={{ background: "rgba(26,8,8,0.9)" }}>
       <div className="max-w-6xl mx-auto">
@@ -576,13 +625,13 @@ function LandingFooter() {
           {/* Links */}
           <div className="flex items-center gap-6 text-sm">
             <Link href="/terms-page" className="text-[#f0e6d0]/40 hover:text-[#c9a84c] transition-colors no-underline font-cinzel text-xs uppercase tracking-wider">
-              Ehdot
+              {t("landing.footer.terms")}
             </Link>
             <Link href="/privacy-page" className="text-[#f0e6d0]/40 hover:text-[#c9a84c] transition-colors no-underline font-cinzel text-xs uppercase tracking-wider">
-              Tietosuoja
+              {t("landing.footer.privacy")}
             </Link>
             <Link href="/contact" className="text-[#f0e6d0]/40 hover:text-[#c9a84c] transition-colors no-underline font-cinzel text-xs uppercase tracking-wider">
-              Yhteystiedot
+              {t("landing.footer.contact")}
             </Link>
           </div>
         </div>
