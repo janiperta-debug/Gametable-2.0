@@ -830,7 +830,7 @@
     "backToDiscover": "Takaisin löytöön",
     "memberSince": "Jäsen alkaen",
     "friends": "Kaverit",
-    "requestSent": "Pyyntö lähetetty",
+    "requestSent": "Pyynt�� lähetetty",
     "requestReceived": "Pyyntö odottaa",
     "addFriend": "Lisää kaveri",
     "sendMessage": "Viesti",
@@ -974,7 +974,12 @@
       "passwordTooShort": "Salasanan täytyy olla vähintään 8 merkkiä",
       "usernameTaken": "Tämä käyttäjänimi on jo käytössä",
       "emailTaken": "Tällä sähköpostilla on jo tili",
-      "errorOccurred": "Tapahtui virhe. Yritä uudelleen."
+      "errorOccurred": "Tapahtui virhe. Yritä uudelleen.",
+      "termsNotice": "Luomalla tilin hyväksyt",
+      "terms": "Käyttöehdot",
+      "and": "ja",
+      "privacy": "Tietosuojakäytännön",
+      "backToLanding": "Takaisin etusivulle"
     },
     "verifyEmail": {
       "title": "Tarkista sähköpostisi",

@@ -29,13 +29,13 @@ export default function SignupPage() {
     setError(null)
 
     if (password !== confirmPassword) {
-      setError(t("auth.passwordsMismatch"))
+      setError(t("auth.signup.passwordMismatch"))
       setIsLoading(false)
       return
     }
 
     if (password.length < 6) {
-      setError(t("auth.passwordTooShort"))
+      setError(t("auth.signup.passwordTooShort"))
       setIsLoading(false)
       return
     }
@@ -55,13 +55,13 @@ export default function SignupPage() {
       if (error) throw error
       router.push("/auth/verify-email")
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t("auth.error"))
+      setError(error instanceof Error ? error.message : t("auth.signup.errorOccurred"))
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleOAuthSignup = async (provider: "google" | "facebook") => {
+  const handleOAuthSignup = async (provider: "google") => {
     const supabase = createClient()
     setIsOAuthLoading(provider)
     setError(null)
@@ -75,7 +75,7 @@ export default function SignupPage() {
       })
       if (error) throw error
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t("auth.error"))
+      setError(error instanceof Error ? error.message : t("auth.signup.errorOccurred"))
       setIsOAuthLoading(null)
     }
   }
@@ -94,12 +94,12 @@ export default function SignupPage() {
               className="mb-4"
             />
           </Link>
-          <h1 className="font-charm text-3xl text-primary">{t("auth.createAccount")}</h1>
-          <p className="text-muted-foreground mt-2">{t("auth.signupSubtitle")}</p>
+          <h1 className="font-charm text-3xl text-accent-gold">{t("auth.signup.title")}</h1>
+          <p className="text-muted-foreground mt-2">{t("auth.signup.subtitle")}</p>
         </div>
 
         {/* Signup Card */}
-        <div className="bg-card border border-border rounded-lg p-6 shadow-lg">
+        <div className="bg-card room-furniture rounded-lg p-6 shadow-lg">
           {/* OAuth Buttons */}
           <div className="space-y-3 mb-6">
             <Button
@@ -131,24 +131,7 @@ export default function SignupPage() {
                   />
                 </svg>
               )}
-              {t("auth.signupWithGoogle")}
-            </Button>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full h-12 text-base"
-              onClick={() => handleOAuthSignup("facebook")}
-              disabled={isOAuthLoading !== null || isLoading}
-            >
-              {isOAuthLoading === "facebook" ? (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              ) : (
-                <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                </svg>
-              )}
-              {t("auth.signupWithFacebook")}
+              {t("auth.signup.google")}
             </Button>
           </div>
 
@@ -158,14 +141,16 @@ export default function SignupPage() {
               <div className="w-full border-t border-border"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-card px-4 text-muted-foreground">{t("auth.orContinueWith")}</span>
+              <span className="bg-card px-4 text-muted-foreground">{t("auth.signup.orContinueWith")}</span>
             </div>
           </div>
 
           {/* Email/Password Form */}
           <form onSubmit={handleSignup} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">{t("auth.username")} <span className="text-muted-foreground">({t("auth.optional")})</span></Label>
+              <Label htmlFor="username" className="text-accent-gold font-cinzel text-sm uppercase tracking-wider">
+                {t("auth.signup.username")} <span className="text-muted-foreground normal-case">({t("common.optional")})</span>
+              </Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -181,7 +166,9 @@ export default function SignupPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">{t("auth.email")}</Label>
+              <Label htmlFor="email" className="text-accent-gold font-cinzel text-sm uppercase tracking-wider">
+                {t("auth.signup.email")}
+              </Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -198,7 +185,9 @@ export default function SignupPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">{t("auth.password")}</Label>
+              <Label htmlFor="password" className="text-accent-gold font-cinzel text-sm uppercase tracking-wider">
+                {t("auth.signup.password")}
+              </Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -214,7 +203,9 @@ export default function SignupPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">{t("auth.confirmPassword")}</Label>
+              <Label htmlFor="confirmPassword" className="text-accent-gold font-cinzel text-sm uppercase tracking-wider">
+                {t("auth.signup.confirmPassword")}
+              </Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -237,37 +228,37 @@ export default function SignupPage() {
 
             <Button
               type="submit"
-              className="w-full h-12 text-base"
+              className="w-full h-12 text-base theme-accent-gold"
               disabled={isLoading || isOAuthLoading !== null}
             >
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t("auth.creatingAccount")}
+                  {t("auth.signup.creatingAccount")}
                 </>
               ) : (
-                t("auth.signUp")
+                t("auth.signup.submit")
               )}
             </Button>
           </form>
 
           {/* Terms notice */}
           <p className="mt-4 text-xs text-center text-muted-foreground">
-            {t("auth.termsNotice")}{" "}
-            <Link href="/terms-page" className="underline hover:text-foreground">
-              {t("auth.terms")}
+            {t("auth.signup.termsNotice")}{" "}
+            <Link href="/terms-page" className="underline hover:text-accent-gold">
+              {t("auth.signup.terms")}
             </Link>{" "}
-            {t("auth.and")}{" "}
-            <Link href="/privacy-page" className="underline hover:text-foreground">
-              {t("auth.privacy")}
+            {t("auth.signup.and")}{" "}
+            <Link href="/privacy-page" className="underline hover:text-accent-gold">
+              {t("auth.signup.privacy")}
             </Link>
           </p>
 
           {/* Login link */}
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            {t("auth.haveAccount")}{" "}
-            <Link href="/auth/login" className="text-primary hover:underline font-medium">
-              {t("auth.login")}
+            {t("auth.signup.hasAccount")}{" "}
+            <Link href="/auth/login" className="text-accent-gold hover:underline font-medium">
+              {t("auth.signup.signIn")}
             </Link>
           </p>
         </div>
@@ -275,7 +266,7 @@ export default function SignupPage() {
         {/* Back to landing */}
         <p className="mt-6 text-center text-sm text-muted-foreground">
           <Link href="/" className="hover:underline">
-            {t("auth.backToLanding")}
+            {t("auth.signup.backToLanding")}
           </Link>
         </p>
       </div>

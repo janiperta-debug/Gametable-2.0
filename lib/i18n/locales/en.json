@@ -974,7 +974,12 @@
       "passwordTooShort": "Password must be at least 8 characters",
       "usernameTaken": "This username is already taken",
       "emailTaken": "An account with this email already exists",
-      "errorOccurred": "An error occurred. Please try again."
+      "errorOccurred": "An error occurred. Please try again.",
+      "termsNotice": "By creating an account, you agree to our",
+      "terms": "Terms of Service",
+      "and": "and",
+      "privacy": "Privacy Policy",
+      "backToLanding": "Back to landing page"
     },
     "verifyEmail": {
       "title": "Check Your Email",
