@@ -75,12 +75,12 @@ function LoginForm() {
               className="mb-4"
             />
           </Link>
-          <h1 className="font-charm text-3xl text-primary">{t("auth.login.title")}</h1>
+          <h1 className="font-charm text-3xl text-accent-gold">{t("auth.login.title")}</h1>
           <p className="text-muted-foreground mt-2">{t("auth.login.subtitle")}</p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-card border border-border rounded-lg p-6 shadow-lg">
+        <div className="bg-card room-furniture rounded-lg p-6 shadow-lg">
           {/* OAuth Buttons */}
           <div className="space-y-3 mb-6">
             <Button
@@ -129,7 +129,7 @@ function LoginForm() {
           {/* Email/Password Form */}
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">{t("auth.login.email")}</Label>
+              <Label htmlFor="email" className="text-accent-gold font-cinzel text-sm uppercase tracking-wider">{t("auth.login.email")}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -147,10 +147,10 @@ function LoginForm() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">{t("auth.login.password")}</Label>
+                <Label htmlFor="password" className="text-accent-gold font-cinzel text-sm uppercase tracking-wider">{t("auth.login.password")}</Label>
                 <Link
                   href="/auth/forgot-password"
-                  className="text-sm text-primary hover:underline"
+                  className="text-sm text-accent-gold hover:underline"
                 >
                   {t("auth.login.forgotPassword")}
                 </Link>
@@ -177,7 +177,7 @@ function LoginForm() {
 
             <Button
               type="submit"
-              className="w-full h-12 text-base"
+              className="w-full h-12 text-base theme-accent-gold"
               disabled={isLoading || isOAuthLoading !== null}
             >
               {isLoading ? (
@@ -194,7 +194,7 @@ function LoginForm() {
           {/* Sign up link */}
           <p className="mt-6 text-center text-sm text-muted-foreground">
             {t("auth.login.noAccount")}{" "}
-            <Link href="/auth/signup" className="text-primary hover:underline font-medium">
+            <Link href="/auth/signup" className="text-accent-gold hover:underline font-medium">
               {t("auth.login.createAccount")}
             </Link>
           </p>
