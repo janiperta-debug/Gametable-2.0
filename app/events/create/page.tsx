@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,16 +13,38 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ArrowLeft, Globe, UserCheck, Lock, Loader2, Calendar } from "lucide-react"
 import { createEvent, type EventType, type EventPrivacy } from "@/app/actions/events"
+import { getUserGames } from "@/app/actions/games"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "@/lib/i18n"
+
+interface UserGame {
+  id: string
+  game: {
+    id: string
+    name: string
+    image_url?: string
+  }
+}
 
 export default function CreateEventPage() {
   const router = useRouter()
   const [gameSelection, setGameSelection] = useState("collection")
   const [privacy, setPrivacy] = useState<EventPrivacy>("public")
   const [saving, setSaving] = useState(false)
+  const [userGames, setUserGames] = useState<UserGame[]>([])
+  const [loadingGames, setLoadingGames] = useState(true)
   const { toast } = useToast()
   const t = useTranslations()
+  
+  // Fetch user's collection
+  useEffect(() => {
+    async function fetchGames() {
+      const { games } = await getUserGames()
+      setUserGames(games as UserGame[])
+      setLoadingGames(false)
+    }
+    fetchGames()
+  }, [])
   const [formData, setFormData] = useState({
     title: "",
     game: "",
@@ -135,19 +157,33 @@ export default function CreateEventPage() {
                   </div>
 
                   {gameSelection === "collection" ? (
-                    <Select>
+                    <Select 
+                      value={formData.game} 
+                      onValueChange={(value) => setFormData({ ...formData, game: value })}
+                    >
                       <SelectTrigger>
-                        <SelectValue placeholder={t("events.selectGame")} />
+                        <SelectValue placeholder={loadingGames ? t("common.loading") : t("events.selectGame")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="wingspan">Wingspan</SelectItem>
-                        <SelectItem value="azul">Azul</SelectItem>
-                        <SelectItem value="gloomhaven">Gloomhaven</SelectItem>
-                        <SelectItem value="pandemic">Pandemic</SelectItem>
+                        {userGames.length === 0 && !loadingGames ? (
+                          <SelectItem value="no-games" disabled>
+                            {t("events.noGamesInCollection")}
+                          </SelectItem>
+                        ) : (
+                          userGames.map((userGame) => (
+                            <SelectItem key={userGame.game.id} value={userGame.game.name}>
+                              {userGame.game.name}
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Input placeholder={t("events.enterGameName")} />
+                    <Input 
+                      placeholder={t("events.enterGameName")} 
+                      value={formData.game}
+                      onChange={(e) => setFormData({ ...formData, game: e.target.value })}
+                    />
                   )}
                 </div>
 

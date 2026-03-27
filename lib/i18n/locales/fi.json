@@ -309,6 +309,7 @@
     "friendsOnlyDesc": "Vain ystäväsi voivat nähdä ja liittyä",
     "privateInviteOnly": "Yksityinen (vain kutsulla)",
     "privateDesc": "Vain kutsutut pelaajat voivat nähdä tämän tapahtuman",
+    "noGamesInCollection": "Kokoelmassasi ei ole pelejä",
     "quickActions": "Pikatoiminnot",
     "boardGameNight": "Lautapeli-ilta",
     "boardGameNightDesc": "Järjestä rento lautapeli-ilta",
