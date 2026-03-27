@@ -1,0 +1,29 @@
+{
+  "name": "GameTable - Your Exclusive Gaming Manor",
+  "short_name": "GameTable",
+  "description": "Step into an elegant sanctuary where tabletop enthusiasts gather to discover remarkable games, forge lasting friendships, and create unforgettable gaming experiences.",
+  "start_url": "/home",
+  "display": "standalone",
+  "background_color": "#3d1515",
+  "theme_color": "#3d1515",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/images/gametable-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/gametable-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "social", "entertainment"],
+  "lang": "en",
+  "dir": "ltr",
+  "prefer_related_applications": false
+}
