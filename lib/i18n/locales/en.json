@@ -873,5 +873,78 @@
       "privacy": "Privacy",
       "contact": "Contact"
     }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to continue your gaming journey",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign In",
+      "signingIn": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create one",
+      "orContinueWith": "Or continue with",
+      "google": "Google",
+      "facebook": "Facebook",
+      "invalidCredentials": "Invalid email or password",
+      "errorOccurred": "An error occurred. Please try again."
+    },
+    "signup": {
+      "title": "Join the Manor",
+      "subtitle": "Create your account and start your gaming journey",
+      "displayName": "Display Name",
+      "username": "Username",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Create Account",
+      "creatingAccount": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "orContinueWith": "Or continue with",
+      "google": "Google",
+      "facebook": "Facebook",
+      "passwordMismatch": "Passwords do not match",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "usernameTaken": "This username is already taken",
+      "emailTaken": "An account with this email already exists",
+      "errorOccurred": "An error occurred. Please try again."
+    },
+    "verifyEmail": {
+      "title": "Check Your Email",
+      "subtitle": "We've sent you a verification link",
+      "message": "Please check your email and click the verification link to activate your account.",
+      "backToLogin": "Back to login"
+    },
+    "forgotPassword": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email to receive a reset link",
+      "email": "Email",
+      "submit": "Send Reset Link",
+      "sending": "Sending...",
+      "success": "Check your email for the reset link",
+      "backToLogin": "Back to login",
+      "errorOccurred": "An error occurred. Please try again."
+    },
+    "resetPassword": {
+      "title": "Set New Password",
+      "subtitle": "Enter your new password",
+      "password": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "submit": "Update Password",
+      "updating": "Updating...",
+      "success": "Password updated successfully",
+      "passwordMismatch": "Passwords do not match",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "errorOccurred": "An error occurred. Please try again."
+    },
+    "error": {
+      "title": "Authentication Error",
+      "message": "Something went wrong during authentication.",
+      "tryAgain": "Try Again",
+      "backToHome": "Back to Home"
+    }
   }
 }

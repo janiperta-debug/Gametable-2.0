@@ -873,5 +873,78 @@
       "privacy": "Tietosuoja",
       "contact": "Yhteystiedot"
     }
+  },
+  "auth": {
+    "login": {
+      "title": "Tervetuloa takaisin",
+      "subtitle": "Kirjaudu jatkaaksesi pelimatkaa",
+      "email": "Sähköposti",
+      "password": "Salasana",
+      "forgotPassword": "Unohtuiko salasana?",
+      "submit": "Kirjaudu",
+      "signingIn": "Kirjaudutaan...",
+      "noAccount": "Eikö sinulla ole tiliä?",
+      "createAccount": "Luo tili",
+      "orContinueWith": "Tai jatka käyttäen",
+      "google": "Google",
+      "facebook": "Facebook",
+      "invalidCredentials": "Virheellinen sähköposti tai salasana",
+      "errorOccurred": "Tapahtui virhe. Yritä uudelleen."
+    },
+    "signup": {
+      "title": "Liity Kartanoon",
+      "subtitle": "Luo tilisi ja aloita pelimatkasi",
+      "displayName": "Näyttönimi",
+      "username": "Käyttäjänimi",
+      "email": "Sähköposti",
+      "password": "Salasana",
+      "confirmPassword": "Vahvista salasana",
+      "submit": "Luo tili",
+      "creatingAccount": "Luodaan tiliä...",
+      "hasAccount": "Onko sinulla jo tili?",
+      "signIn": "Kirjaudu",
+      "orContinueWith": "Tai jatka käyttäen",
+      "google": "Google",
+      "facebook": "Facebook",
+      "passwordMismatch": "Salasanat eivät täsmää",
+      "passwordTooShort": "Salasanan täytyy olla vähintään 8 merkkiä",
+      "usernameTaken": "Tämä käyttäjänimi on jo käytössä",
+      "emailTaken": "Tällä sähköpostilla on jo tili",
+      "errorOccurred": "Tapahtui virhe. Yritä uudelleen."
+    },
+    "verifyEmail": {
+      "title": "Tarkista sähköpostisi",
+      "subtitle": "Lähetimme sinulle vahvistuslinkin",
+      "message": "Tarkista sähköpostisi ja klikkaa vahvistuslinkkiä aktivoidaksesi tilisi.",
+      "backToLogin": "Takaisin kirjautumiseen"
+    },
+    "forgotPassword": {
+      "title": "Nollaa salasana",
+      "subtitle": "Syötä sähköpostisi saadaksesi nollauslinkin",
+      "email": "Sähköposti",
+      "submit": "Lähetä nollauslinkki",
+      "sending": "Lähetetään...",
+      "success": "Tarkista sähköpostisi nollauslinkin saamiseksi",
+      "backToLogin": "Takaisin kirjautumiseen",
+      "errorOccurred": "Tapahtui virhe. Yritä uudelleen."
+    },
+    "resetPassword": {
+      "title": "Aseta uusi salasana",
+      "subtitle": "Syötä uusi salasanasi",
+      "password": "Uusi salasana",
+      "confirmPassword": "Vahvista uusi salasana",
+      "submit": "Päivitä salasana",
+      "updating": "Päivitetään...",
+      "success": "Salasana päivitetty onnistuneesti",
+      "passwordMismatch": "Salasanat eivät täsmää",
+      "passwordTooShort": "Salasanan täytyy olla vähintään 8 merkkiä",
+      "errorOccurred": "Tapahtui virhe. Yritä uudelleen."
+    },
+    "error": {
+      "title": "Todennusvirhe",
+      "message": "Jokin meni vikaan todennuksen aikana.",
+      "tryAgain": "Yritä uudelleen",
+      "backToHome": "Takaisin etusivulle"
+    }
   }
 }

@@ -2,6 +2,8 @@
 
 import type React from "react"
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
+import { createClient } from "@/lib/supabase/client"
+import { useUser } from "@/hooks/useUser"
 
 // Define all 20 manor theme names
 export type AppThemeName =
@@ -302,25 +304,63 @@ interface AppThemeProviderProps {
 
 export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) => {
   const [currentAppTheme, setCurrentAppTheme] = useState<AppThemeName>(DEFAULT_THEME)
+  const [isLoadedFromDB, setIsLoadedFromDB] = useState(false)
+  const { user, profile } = useUser()
 
-  const setAppTheme = (theme: AppThemeName) => {
+  // Load theme from database when user logs in
+  useEffect(() => {
+    if (user && profile?.preferred_theme && !isLoadedFromDB) {
+      const dbTheme = profile.preferred_theme as AppThemeName
+      if (MANOR_THEMES.some((theme) => theme.id === dbTheme)) {
+        setCurrentAppTheme(dbTheme)
+        setIsLoadedFromDB(true)
+        // Also update localStorage
+        try {
+          localStorage.setItem(APP_THEME_STORAGE_KEY, dbTheme)
+        } catch (error) {
+          console.warn("Failed to save theme to localStorage", error)
+        }
+      }
+    }
+  }, [user, profile, isLoadedFromDB])
+
+  // Load theme from localStorage on initial mount (for non-logged in users)
+  useEffect(() => {
+    if (!user) {
+      try {
+        const saved = localStorage.getItem(APP_THEME_STORAGE_KEY)
+        if (saved && MANOR_THEMES.some((theme) => theme.id === saved)) {
+          setCurrentAppTheme(saved as AppThemeName)
+        }
+      } catch (error) {
+        console.warn("Failed to load theme from localStorage", error)
+      }
+    }
+  }, [user])
+
+  const setAppTheme = async (theme: AppThemeName) => {
     setCurrentAppTheme(theme)
+    
+    // Save to localStorage
+    try {
+      localStorage.setItem(APP_THEME_STORAGE_KEY, theme)
+    } catch (error) {
+      console.warn("Failed to save theme to localStorage", error)
+    }
+    
+    // Save to database if user is logged in
+    if (user) {
+      const supabase = createClient()
+      await supabase
+        .from("profiles")
+        .update({ preferred_theme: theme })
+        .eq("id", user.id)
+    }
   }
 
   const getThemeData = (themeId: AppThemeName) => {
     return MANOR_THEMES.find((theme) => theme.id === themeId)
   }
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(APP_THEME_STORAGE_KEY)
-      if (saved && MANOR_THEMES.some((theme) => theme.id === saved)) {
-        setCurrentAppTheme(saved as AppThemeName)
-      }
-    } catch (error) {
-      console.warn("Failed to load theme from localStorage", error)
-    }
-  }, [])
 
   useEffect(() => {
     // Apply the theme to the document's data-theme attribute
@@ -331,13 +371,6 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
       document.body.classList.add("manor-bg-pattern")
     } else {
       document.body.classList.remove("manor-bg-pattern")
-    }
-
-    // Save the theme to localStorage
-    try {
-      localStorage.setItem(APP_THEME_STORAGE_KEY, currentAppTheme)
-    } catch (error) {
-      console.warn("Failed to save theme to localStorage", error)
     }
   }, [currentAppTheme])
 
