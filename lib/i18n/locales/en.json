@@ -693,7 +693,19 @@
     "announcementsDesc": "The manor staff may occasionally send important updates about new features, events, or significant announcements. All correspondence maintains the manor's elegant and respectful tone.",
     "emailNotifications": "Email Notifications",
     "emailNotificationsDesc": "Forward in-app notifications (messages, session suggestions, event invitations) to your email address with elegant manor-themed formatting.",
-    "savePreferences": "Save Correspondence Preferences"
+    "savePreferences": "Save Correspondence Preferences",
+    "saveFailed": "Failed to save preferences. Please try again.",
+    "saveSuccess": "Correspondence preferences saved successfully.",
+    "eventDigest": {
+      "title": "Weekly Event Digest",
+      "enable": "Send me a weekly event digest",
+      "enableDesc": "Receive a curated list of upcoming events in your area every Monday morning.",
+      "categories": "Event Categories",
+      "categoriesDesc": "Select which event types to include. Leave empty to receive all categories.",
+      "distance": "Location Filter",
+      "distanceDesc": "Only show events within this distance from your location.",
+      "noLimit": "No distance limit"
+    }
   },
   "contact": {
     "title": "Contact Us",

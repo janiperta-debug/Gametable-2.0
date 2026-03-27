@@ -693,7 +693,19 @@
     "announcementsDesc": "Kartanon henkilökunta saattaa ajoittain lähettää tärkeitä päivityksiä uusista ominaisuuksista, tapahtumista tai merkittävistä ilmoituksista. Kaikki viestintä noudattaa kartanon eleganttia ja kunnioittavaa tyyliä.",
     "emailNotifications": "Sähköposti-ilmoitukset",
     "emailNotificationsDesc": "Välitä sovelluksen sisäiset ilmoitukset (viestit, peliehdotukset, tapahtumakutsut) sähköpostiisi elegantilla kartano-teemaisella muotoilulla.",
-    "savePreferences": "Tallenna viestiasetukset"
+    "savePreferences": "Tallenna viestiasetukset",
+    "saveFailed": "Asetusten tallentaminen epäonnistui. Yritä uudelleen.",
+    "saveSuccess": "Viestiasetukset tallennettu onnistuneesti.",
+    "eventDigest": {
+      "title": "Viikoittainen tapahtumayhteenveto",
+      "enable": "Lähetä minulle viikoittainen tapahtumayhteenveto",
+      "enableDesc": "Vastaanota kuratoitu lista tulevista tapahtumista alueellasi joka maanantaiaamu.",
+      "categories": "Tapahtumaluokat",
+      "categoriesDesc": "Valitse mitkä tapahtumatyypit sisällytetään. Jätä tyhjäksi saadaksesi kaikki luokat.",
+      "distance": "Sijaintisuodatin",
+      "distanceDesc": "Näytä vain tapahtumat tämän etäisyyden sisällä sijainnistasi.",
+      "noLimit": "Ei etäisyysrajoitusta"
+    }
   },
   "contact": {
     "title": "Ota yhteyttä",
