@@ -66,15 +66,20 @@ export default function SignupPage() {
     setIsOAuthLoading(provider)
     setError(null)
 
+    console.log("[v0] Starting OAuth signup with provider:", provider)
+    console.log("[v0] Redirect URL:", `${window.location.origin}/auth/callback?next=/home`)
+
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/auth/callback?next=/home`,
         },
       })
+      console.log("[v0] OAuth response - data:", data, "error:", error)
       if (error) throw error
     } catch (error: unknown) {
+      console.error("[v0] OAuth error:", error)
       setError(error instanceof Error ? error.message : t("auth.signup.errorOccurred"))
       setIsOAuthLoading(null)
     }

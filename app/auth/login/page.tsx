@@ -42,20 +42,25 @@ function LoginForm() {
     }
   }
 
-  const handleOAuthLogin = async (provider: "google" | "facebook") => {
+  const handleOAuthLogin = async (provider: "google") => {
     const supabase = createClient()
     setIsOAuthLoading(provider)
     setError(null)
 
+    console.log("[v0] Starting OAuth login with provider:", provider)
+    console.log("[v0] Redirect URL:", `${window.location.origin}/auth/callback?next=${redirect}`)
+
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/auth/callback?next=${redirect}`,
         },
       })
+      console.log("[v0] OAuth response - data:", data, "error:", error)
       if (error) throw error
     } catch (error: unknown) {
+      console.error("[v0] OAuth error:", error)
       setError(error instanceof Error ? error.message : t("auth.login.errorOccurred"))
       setIsOAuthLoading(null)
     }
