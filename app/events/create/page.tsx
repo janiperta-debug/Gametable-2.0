@@ -85,15 +85,15 @@ export default function CreateEventPage() {
           <div className="flex items-center mb-8">
             <Button variant="ghost" onClick={() => router.back()} className="mr-4">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
+              {t("events.back")}
             </Button>
-            <h1 className="ornate-text font-heading text-3xl font-bold">Create Event</h1>
+            <h1 className="ornate-text font-heading text-3xl font-bold">{t("events.createEvent")}</h1>
           </div>
 
           {/* Form */}
           <Card className="room-furniture">
             <CardHeader>
-              <CardTitle className="font-heading text-xl">Event Details</CardTitle>
+              <CardTitle className="font-heading text-xl">{t("events.eventDetails")}</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -114,7 +114,7 @@ export default function CreateEventPage() {
 
                 {/* Game Selection */}
                 <div className="space-y-4">
-                  <Label className="font-body text-accent-gold">Game</Label>
+                  <Label className="font-body text-accent-gold">{t("events.game")}</Label>
                   <div className="flex space-x-2">
                     <Button
                       type="button"
@@ -122,7 +122,7 @@ export default function CreateEventPage() {
                       className={gameSelection === "collection" ? "theme-accent-gold" : "bg-transparent"}
                       onClick={() => setGameSelection("collection")}
                     >
-                      From Collection
+                      {t("events.fromCollection")}
                     </Button>
                     <Button
                       type="button"
@@ -130,14 +130,14 @@ export default function CreateEventPage() {
                       className={gameSelection === "manual" ? "theme-accent-gold" : "bg-transparent"}
                       onClick={() => setGameSelection("manual")}
                     >
-                      Manual Entry
+                      {t("events.manualEntry")}
                     </Button>
                   </div>
 
                   {gameSelection === "collection" ? (
                     <Select>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a game..." />
+                        <SelectValue placeholder={t("events.selectGame")} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="wingspan">Wingspan</SelectItem>
@@ -147,7 +147,7 @@ export default function CreateEventPage() {
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Input placeholder="Enter game name manually" />
+                    <Input placeholder={t("events.enterGameName")} />
                   )}
                 </div>
 
@@ -227,7 +227,7 @@ export default function CreateEventPage() {
 
                 {/* Privacy Settings */}
                 <div className="space-y-4">
-                  <Label className="font-body text-accent-gold">Event Privacy</Label>
+                  <Label className="font-body text-accent-gold">{t("events.eventPrivacy")}</Label>
                   <RadioGroup value={privacy} onValueChange={setPrivacy} className="space-y-3">
                     <div className="flex items-center space-x-3">
                       <RadioGroupItem value="public" id="public" />
@@ -235,9 +235,9 @@ export default function CreateEventPage() {
                         <Globe className="h-4 w-4 text-accent-gold" />
                         <div>
                           <Label htmlFor="public" className="font-body font-medium text-accent-gold">
-                            Public
+                            {t("events.public")}
                           </Label>
-                          <p className="font-body text-sm text-muted-foreground">Anyone can see and join this event</p>
+                          <p className="font-body text-sm text-muted-foreground">{t("events.publicDesc")}</p>
                         </div>
                       </div>
                     </div>
@@ -248,9 +248,9 @@ export default function CreateEventPage() {
                         <UserCheck className="h-4 w-4 text-accent-gold" />
                         <div>
                           <Label htmlFor="friends" className="font-body font-medium text-accent-gold">
-                            Friends Only
+                            {t("events.friendsOnly")}
                           </Label>
-                          <p className="font-body text-sm text-muted-foreground">Only your friends can see and join</p>
+                          <p className="font-body text-sm text-muted-foreground">{t("events.friendsOnlyDesc")}</p>
                         </div>
                       </div>
                     </div>
@@ -261,10 +261,10 @@ export default function CreateEventPage() {
                         <Lock className="h-4 w-4 text-accent-gold" />
                         <div>
                           <Label htmlFor="private" className="font-body font-medium text-accent-gold">
-                            Private (Invite Only)
+                            {t("events.privateInviteOnly")}
                           </Label>
                           <p className="font-body text-sm text-muted-foreground">
-                            Only invited players can see this event
+                            {t("events.privateDesc")}
                           </p>
                         </div>
                       </div>
