@@ -170,14 +170,30 @@ function EventCard({ event, onViewDetails, onRSVP, t, isLoggedIn, currentUserId 
   )
 }
 
+const eventTypes = ["board_game_night", "rpg_session", "tournament", "custom"] as const
+
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState("upcoming")
   const [searchQuery, setSearchQuery] = useState("")
+  const [showFilters, setShowFilters] = useState(false)
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const router = useRouter()
   const t = useTranslations()
   const { toast } = useToast()
   const { user } = useUser()
   const { publicEvents, myEvents, loading, refetch } = useEvents()
+
+  const toggleEventType = (type: string) => {
+    setSelectedTypes(prev => 
+      prev.includes(type) 
+        ? prev.filter(t => t !== type)
+        : [...prev, type]
+    )
+  }
+
+  const clearFilters = () => {
+    setSelectedTypes([])
+  }
 
   function handleViewDetails(event: Event) {
     router.push("/events/" + event.id)
@@ -200,14 +216,18 @@ export default function EventsPage() {
     }
   }
 
-  // Filter events by search query
+  // Filter events by search query and event type
   const query = searchQuery.toLowerCase()
   const filteredPublicEvents = publicEvents.filter(function(event) {
-    return event.title.toLowerCase().includes(query) || (event.description ? event.description.toLowerCase().includes(query) : false)
+    const matchesSearch = event.title.toLowerCase().includes(query) || (event.description ? event.description.toLowerCase().includes(query) : false)
+    const matchesType = selectedTypes.length === 0 || (event.event_type && selectedTypes.includes(event.event_type))
+    return matchesSearch && matchesType
   })
 
   const filteredMyEvents = myEvents.filter(function(event) {
-    return event.title.toLowerCase().includes(query) || (event.description ? event.description.toLowerCase().includes(query) : false)
+    const matchesSearch = event.title.toLowerCase().includes(query) || (event.description ? event.description.toLowerCase().includes(query) : false)
+    const matchesType = selectedTypes.length === 0 || (event.event_type && selectedTypes.includes(event.event_type))
+    return matchesSearch && matchesType
   })
 
   return (
@@ -236,15 +256,51 @@ export default function EventsPage() {
                 className="pl-10 font-body w-full"
               />
             </div>
-            <Button variant="outline" className="bg-transparent">
+            <Button 
+              variant="outline" 
+              className={showFilters ? "theme-accent-gold" : "bg-transparent"}
+              onClick={() => setShowFilters(!showFilters)}
+            >
               <Filter className="h-4 w-4 mr-2" />
-              <span className="font-body">{t("common.filters")}</span>
+              <span className="font-body">{showFilters ? t("common.hideFilters") : t("common.filters")}</span>
+              {selectedTypes.length > 0 && (
+                <Badge className="ml-2 bg-accent-gold text-background">{selectedTypes.length}</Badge>
+              )}
             </Button>
           </div>
           <Button size="lg" className="theme-accent-gold w-full" onClick={() => router.push("/events/create")}>
             <Plus className="h-4 w-4 mr-2" />
             <span className="font-body">{t("events.createEvent")}</span>
           </Button>
+
+          {/* Filter Panel */}
+          {showFilters && (
+            <Card className="room-furniture">
+              <CardContent className="pt-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-heading text-lg text-accent-gold">{t("events.eventType")}</h3>
+                  {selectedTypes.length > 0 && (
+                    <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground">
+                      {t("common.clearFilters")}
+                    </Button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {eventTypes.map((type) => (
+                    <Button
+                      key={type}
+                      variant={selectedTypes.includes(type) ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => toggleEventType(type)}
+                      className={selectedTypes.includes(type) ? "theme-accent-gold" : "bg-transparent"}
+                    >
+                      {t(`events.types.${type}`)}
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Tabs */}

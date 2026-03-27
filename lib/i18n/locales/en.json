@@ -34,7 +34,9 @@
     "justNow": "Just now",
     "new": "new",
     "loading": "Loading...",
-    "filters": "Filters"
+    "filters": "Filters",
+    "hideFilters": "Hide Filters",
+    "clearFilters": "Clear Filters"
   },
   "nav": {
     "home": "Home",
@@ -334,6 +336,13 @@
     "tournamentDesc": "Organize a competitive event",
     "customEvent": "Custom Event",
     "customEventDesc": "Create your own unique gathering",
+    "eventType": "Event Type",
+    "types": {
+      "board_game_night": "Board Games",
+      "rpg_session": "RPG Sessions",
+      "tournament": "Tournaments",
+      "custom": "Custom"
+    },
     "managementHub": "Event Management Hub",
     "managementHubDesc": "Comprehensive tools for organizing and managing your gaming events",
     "eventsThisMonth": "Events This Month",

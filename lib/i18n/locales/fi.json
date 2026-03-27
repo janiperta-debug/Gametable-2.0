@@ -34,7 +34,9 @@
     "justNow": "Juuri nyt",
     "new": "uutta",
     "loading": "Ladataan...",
-    "filters": "Suodattimet"
+    "filters": "Suodattimet",
+    "hideFilters": "Piilota suodattimet",
+    "clearFilters": "Tyhjennä suodattimet"
   },
   "nav": {
     "home": "Koti",
@@ -321,6 +323,13 @@
     "tournamentDesc": "Järjestä kilpailutapahtuma",
     "customEvent": "Mukautettu tapahtuma",
     "customEventDesc": "Luo oma ainutlaatuinen kokoontuminen",
+    "eventType": "Tapahtumatyyppi",
+    "types": {
+      "board_game_night": "Lautapelit",
+      "rpg_session": "Roolipelisessiot",
+      "tournament": "Turnaukset",
+      "custom": "Mukautettu"
+    },
     "managementHub": "Tapahtumien hallintakeskus",
     "managementHubDesc": "Kattavat työkalut pelitapahtumien järjestämiseen ja hallintaan",
     "eventsThisMonth": "Tapahtumia tässä kuussa",
