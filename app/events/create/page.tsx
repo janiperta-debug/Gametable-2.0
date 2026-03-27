@@ -11,8 +11,15 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { ArrowLeft, Globe, UserCheck, Lock, Loader2, Calendar, Search, X } from "lucide-react"
+import { ArrowLeft, Globe, UserCheck, Lock, Loader2, Calendar, Search, X, Dices, Swords, Trophy, Sparkles } from "lucide-react"
 import { createEvent, type EventType, type EventPrivacy } from "@/app/actions/events"
+
+const eventTypes: { value: EventType; icon: React.ElementType }[] = [
+  { value: "board_game_night", icon: Dices },
+  { value: "rpg_session", icon: Swords },
+  { value: "tournament", icon: Trophy },
+  { value: "custom", icon: Sparkles },
+]
 import { getUserGames } from "@/app/actions/games"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "@/lib/i18n"
@@ -29,6 +36,7 @@ interface UserGame {
 export default function CreateEventPage() {
   const router = useRouter()
   const [gameSelection, setGameSelection] = useState("collection")
+  const [eventType, setEventType] = useState<EventType>("board_game_night")
   const [privacy, setPrivacy] = useState<EventPrivacy>("public")
   const [saving, setSaving] = useState(false)
   const [userGames, setUserGames] = useState<UserGame[]>([])
@@ -74,7 +82,7 @@ export default function CreateEventPage() {
       const result = await createEvent({
         title: formData.title.trim(),
         description: formData.description.trim() || undefined,
-        event_type: "board_game_night" as EventType,
+        event_type: eventType,
         privacy: privacy,
         location: formData.location.trim() || undefined,
         starts_at: startsAt.toISOString(),
@@ -234,6 +242,28 @@ export default function CreateEventPage() {
                       onChange={(e) => setFormData({ ...formData, game: e.target.value })}
                     />
                   )}
+                </div>
+
+                {/* Event Type Selection */}
+                <div className="space-y-4">
+                  <Label className="font-body text-accent-gold">{t("events.eventType")}</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {eventTypes.map(({ value, icon: Icon }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setEventType(value)}
+                        className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${
+                          eventType === value
+                            ? "border-accent-gold bg-accent-gold/10 text-accent-gold"
+                            : "border-border bg-transparent hover:border-accent-gold/50"
+                        }`}
+                      >
+                        <Icon className="h-6 w-6" />
+                        <span className="text-sm font-body text-center">{t(`events.types.${value}`)}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Date & Time */}
