@@ -351,7 +351,21 @@
     "pending": "Pending",
     "loginToConnect": "Please log in to connect with other players",
     "requestSent": "Friend request sent!",
-    "requestCancelled": "Friend request cancelled"
+    "requestCancelled": "Friend request cancelled",
+    "refineSearch": "Refine Your Search",
+    "refineSearchDescription": "Connect with fellow gamers in your area and expand your gaming circle.",
+    "location": "Location",
+    "locationPlaceholder": "e.g., Mystic Valley or postal code",
+    "searchByGameTitle": "Search by Game Title",
+    "gameTitlePlaceholder": "e.g., Gloomhaven, Dungeons & Dragons",
+    "preferredGameType": "Preferred Game Type",
+    "anyGameType": "Any Game Type",
+    "boardGames": "Board Games",
+    "rpgs": "RPGs",
+    "miniatures": "Miniatures",
+    "tradingCards": "Trading Cards",
+    "partyGames": "Party Games",
+    "strategyGames": "Strategy Games"
   },
   "discover": {
     "title": "Discover",

@@ -351,7 +351,21 @@
     "pending": "Odottaa",
     "loginToConnect": "Kirjaudu sisään yhdistääksesi muihin pelaajiin",
     "requestSent": "Kaveripyyntö lähetetty!",
-    "requestCancelled": "Kaveripyyntö peruutettu"
+    "requestCancelled": "Kaveripyyntö peruutettu",
+    "refineSearch": "Tarkenna hakua",
+    "refineSearchDescription": "Yhdistä alueen pelaajiin ja laajenna pelipiiriäsi.",
+    "location": "Sijainti",
+    "locationPlaceholder": "esim. Mystic Valley tai postinumero",
+    "searchByGameTitle": "Etsi pelin nimellä",
+    "gameTitlePlaceholder": "esim. Gloomhaven, Dungeons & Dragons",
+    "preferredGameType": "Suosikkipelityyppi",
+    "anyGameType": "Mikä tahansa pelityyppi",
+    "boardGames": "Lautapelit",
+    "rpgs": "Roolipelit",
+    "miniatures": "Miniatyyrit",
+    "tradingCards": "Keräilykortit",
+    "partyGames": "Juhlapelit",
+    "strategyGames": "Strategiapelit"
   },
   "discover": {
     "title": "Löydä",
