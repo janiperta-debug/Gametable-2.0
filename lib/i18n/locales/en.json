@@ -323,6 +323,8 @@
     "privateInviteOnly": "Private (Invite Only)",
     "privateDesc": "Only invited players can see this event",
     "noGamesInCollection": "No games in your collection",
+    "searchCollection": "Search your collection...",
+    "noMatchingGames": "No matching games found",
     "quickActions": "Quick Actions",
     "boardGameNight": "Board Game Night",
     "boardGameNightDesc": "Host a casual board game evening",

@@ -310,6 +310,8 @@
     "privateInviteOnly": "Yksityinen (vain kutsulla)",
     "privateDesc": "Vain kutsutut pelaajat voivat nähdä tämän tapahtuman",
     "noGamesInCollection": "Kokoelmassasi ei ole pelejä",
+    "searchCollection": "Etsi kokoelmastasi...",
+    "noMatchingGames": "Vastaavia pelejä ei löytynyt",
     "quickActions": "Pikatoiminnot",
     "boardGameNight": "Lautapeli-ilta",
     "boardGameNightDesc": "Järjestä rento lautapeli-ilta",

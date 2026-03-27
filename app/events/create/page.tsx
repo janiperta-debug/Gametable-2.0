@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { ArrowLeft, Globe, UserCheck, Lock, Loader2, Calendar } from "lucide-react"
+import { ArrowLeft, Globe, UserCheck, Lock, Loader2, Calendar, Search, X } from "lucide-react"
 import { createEvent, type EventType, type EventPrivacy } from "@/app/actions/events"
 import { getUserGames } from "@/app/actions/games"
 import { useToast } from "@/hooks/use-toast"
@@ -33,8 +33,15 @@ export default function CreateEventPage() {
   const [saving, setSaving] = useState(false)
   const [userGames, setUserGames] = useState<UserGame[]>([])
   const [loadingGames, setLoadingGames] = useState(true)
+  const [gameSearchQuery, setGameSearchQuery] = useState("")
+  const [showGameResults, setShowGameResults] = useState(false)
   const { toast } = useToast()
   const t = useTranslations()
+  
+  // Filter games based on search query
+  const filteredGames = userGames.filter(userGame => 
+    userGame.game.name.toLowerCase().includes(gameSearchQuery.toLowerCase())
+  )
   
   // Fetch user's collection
   useEffect(() => {
@@ -157,27 +164,69 @@ export default function CreateEventPage() {
                   </div>
 
                   {gameSelection === "collection" ? (
-                    <Select 
-                      value={formData.game} 
-                      onValueChange={(value) => setFormData({ ...formData, game: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={loadingGames ? t("common.loading") : t("events.selectGame")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {userGames.length === 0 && !loadingGames ? (
-                          <SelectItem value="no-games" disabled>
-                            {t("events.noGamesInCollection")}
-                          </SelectItem>
-                        ) : (
-                          userGames.map((userGame) => (
-                            <SelectItem key={userGame.game.id} value={userGame.game.name}>
-                              {userGame.game.name}
-                            </SelectItem>
-                          ))
+                    <div className="relative">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder={loadingGames ? t("common.loading") : t("events.searchCollection")}
+                          value={formData.game || gameSearchQuery}
+                          onChange={(e) => {
+                            setGameSearchQuery(e.target.value)
+                            setFormData({ ...formData, game: "" })
+                            setShowGameResults(true)
+                          }}
+                          onFocus={() => setShowGameResults(true)}
+                          className="pl-10 pr-10"
+                          disabled={loadingGames}
+                        />
+                        {(formData.game || gameSearchQuery) && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setGameSearchQuery("")
+                              setFormData({ ...formData, game: "" })
+                            }}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
                         )}
-                      </SelectContent>
-                    </Select>
+                      </div>
+                      {showGameResults && !formData.game && (
+                        <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
+                          {filteredGames.length === 0 ? (
+                            <div className="p-3 text-sm text-muted-foreground text-center">
+                              {userGames.length === 0 
+                                ? t("events.noGamesInCollection")
+                                : t("events.noMatchingGames")
+                              }
+                            </div>
+                          ) : (
+                            filteredGames.map((userGame) => (
+                              <button
+                                key={userGame.game.id}
+                                type="button"
+                                onClick={() => {
+                                  setFormData({ ...formData, game: userGame.game.name })
+                                  setGameSearchQuery("")
+                                  setShowGameResults(false)
+                                }}
+                                className="w-full px-3 py-2 text-left text-sm hover:bg-accent transition-colors flex items-center gap-2"
+                              >
+                                {userGame.game.image_url && (
+                                  <img 
+                                    src={userGame.game.image_url} 
+                                    alt="" 
+                                    className="w-8 h-8 object-cover rounded"
+                                  />
+                                )}
+                                <span>{userGame.game.name}</span>
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <Input 
                       placeholder={t("events.enterGameName")} 
