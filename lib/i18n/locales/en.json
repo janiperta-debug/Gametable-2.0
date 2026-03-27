@@ -248,7 +248,19 @@
     "addedToCollection": "has been added to your collection! (+10 XP)",
     "addToCollection": "Add to Collection",
     "noResults": "No games found. Try a different search term.",
-    "searchPrompt": "Search for a game to add to your collection."
+    "searchPrompt": "Search for a game to add to your collection.",
+    "filters": {
+      "playerCount": "Player Count",
+      "upToPlayers": "Up to {count} players",
+      "playTime": "Play Time",
+      "upToMinutes": "Up to {count}+ minutes",
+      "mechanics": "Mechanics",
+      "workerPlacement": "Worker Placement",
+      "deckBuilding": "Deck Building",
+      "areaControl": "Area Control",
+      "cooperative": "Cooperative",
+      "engineBuilding": "Engine Building"
+    }
   },
   "events": {
     "title": "Events",

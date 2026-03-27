@@ -193,7 +193,7 @@
     "sortBy": "Järjestä",
     "gridView": "Ruudukkonäkymä",
     "listView": "Listanäkymä",
-    "showFilters": "N��ytä suodattimet",
+    "showFilters": "Näytä suodattimet",
     "hideFilters": "Piilota suodattimet",
     "gamesInCollection": "peliä kokoelmassa",
     "noGamesYet": "Ei vielä pelejä",
@@ -235,7 +235,19 @@
     "addedToCollection": "on lisätty kokoelmaasi! (+10 XP)",
     "addToCollection": "Lisää kokoelmaan",
     "noResults": "Pelejä ei löytynyt. Kokeile toista hakutermiä.",
-    "searchPrompt": "Etsi peli lisätäksesi sen kokoelmaasi."
+    "searchPrompt": "Etsi peli lisätäksesi sen kokoelmaasi.",
+    "filters": {
+      "playerCount": "Pelaajamäärä",
+      "upToPlayers": "Enintään {count} pelaajaa",
+      "playTime": "Peliaika",
+      "upToMinutes": "Enintään {count}+ minuuttia",
+      "mechanics": "Mekaniikka",
+      "workerPlacement": "Työntekijän sijoitus",
+      "deckBuilding": "Pakkojen rakentaminen",
+      "areaControl": "Alueen hallinta",
+      "cooperative": "Yhteistyö",
+      "engineBuilding": "Moottorin rakentaminen"
+    }
   },
   "events": {
     "title": "Tapahtumat",
