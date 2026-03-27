@@ -92,6 +92,10 @@ export function Navigation() {
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
+    // Clear theme cache on logout so next user gets default
+    try {
+      localStorage.removeItem("gametable-app-theme")
+    } catch (e) {}
     setIsUserDropdownOpen(false)
     router.push("/")
     router.refresh()

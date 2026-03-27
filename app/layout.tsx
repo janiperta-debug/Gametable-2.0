@@ -80,10 +80,26 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${inter.variable} ${charm.variable} ${cinzel.variable} ${marcellus.variable} ${merriweather.variable} ${cormorantGaramond.variable} ${dmSans.variable}`}
     >
       <head>
         <link rel="apple-touch-icon" href="/images/gametable-logo.png" />
+        {/* Inline script to apply theme from localStorage before React hydrates - prevents flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('gametable-app-theme');
+                  if (theme) {
+                    document.documentElement.dataset.theme = theme;
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
       </head>
       <body className={merriweather.className}>
         <I18nProvider>
