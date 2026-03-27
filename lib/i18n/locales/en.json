@@ -940,7 +940,8 @@
       "google": "Google",
       "facebook": "Facebook",
       "invalidCredentials": "Invalid email or password",
-      "errorOccurred": "An error occurred. Please try again."
+      "errorOccurred": "An error occurred. Please try again.",
+      "backToLanding": "Back to landing page"
     },
     "signup": {
       "title": "Join the Manor",

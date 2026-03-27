@@ -940,7 +940,8 @@
       "google": "Google",
       "facebook": "Facebook",
       "invalidCredentials": "Virheellinen sähköposti tai salasana",
-      "errorOccurred": "Tapahtui virhe. Yritä uudelleen."
+      "errorOccurred": "Tapahtui virhe. Yritä uudelleen.",
+      "backToLanding": "Takaisin etusivulle"
     },
     "signup": {
       "title": "Liity Kartanoon",

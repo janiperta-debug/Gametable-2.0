@@ -36,7 +36,7 @@ function LoginForm() {
       if (error) throw error
       router.push(redirect)
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t("auth.error"))
+      setError(error instanceof Error ? error.message : t("auth.login.errorOccurred"))
     } finally {
       setIsLoading(false)
     }
@@ -56,7 +56,7 @@ function LoginForm() {
       })
       if (error) throw error
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t("auth.error"))
+      setError(error instanceof Error ? error.message : t("auth.login.errorOccurred"))
       setIsOAuthLoading(null)
     }
   }
@@ -75,8 +75,8 @@ function LoginForm() {
               className="mb-4"
             />
           </Link>
-          <h1 className="font-charm text-3xl text-primary">{t("auth.welcomeBack")}</h1>
-          <p className="text-muted-foreground mt-2">{t("auth.loginSubtitle")}</p>
+          <h1 className="font-charm text-3xl text-primary">{t("auth.login.title")}</h1>
+          <p className="text-muted-foreground mt-2">{t("auth.login.subtitle")}</p>
         </div>
 
         {/* Login Card */}
@@ -112,24 +112,7 @@ function LoginForm() {
                   />
                 </svg>
               )}
-              {t("auth.loginWithGoogle")}
-            </Button>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full h-12 text-base"
-              onClick={() => handleOAuthLogin("facebook")}
-              disabled={isOAuthLoading !== null || isLoading}
-            >
-              {isOAuthLoading === "facebook" ? (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              ) : (
-                <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                </svg>
-              )}
-              {t("auth.loginWithFacebook")}
+              {t("auth.login.google")}
             </Button>
           </div>
 
@@ -139,14 +122,14 @@ function LoginForm() {
               <div className="w-full border-t border-border"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-card px-4 text-muted-foreground">{t("auth.orContinueWith")}</span>
+              <span className="bg-card px-4 text-muted-foreground">{t("auth.login.orContinueWith")}</span>
             </div>
           </div>
 
           {/* Email/Password Form */}
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">{t("auth.email")}</Label>
+              <Label htmlFor="email">{t("auth.login.email")}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -164,12 +147,12 @@ function LoginForm() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">{t("auth.password")}</Label>
+                <Label htmlFor="password">{t("auth.login.password")}</Label>
                 <Link
                   href="/auth/forgot-password"
                   className="text-sm text-primary hover:underline"
                 >
-                  {t("auth.forgotPassword")}
+                  {t("auth.login.forgotPassword")}
                 </Link>
               </div>
               <div className="relative">
@@ -200,19 +183,19 @@ function LoginForm() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t("auth.loggingIn")}
+                  {t("auth.login.signingIn")}
                 </>
               ) : (
-                t("auth.login")
+                t("auth.login.submit")
               )}
             </Button>
           </form>
 
           {/* Sign up link */}
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            {t("auth.noAccount")}{" "}
+            {t("auth.login.noAccount")}{" "}
             <Link href="/auth/signup" className="text-primary hover:underline font-medium">
-              {t("auth.signUp")}
+              {t("auth.login.createAccount")}
             </Link>
           </p>
         </div>
@@ -220,7 +203,7 @@ function LoginForm() {
         {/* Back to landing */}
         <p className="mt-6 text-center text-sm text-muted-foreground">
           <Link href="/" className="hover:underline">
-            {t("auth.backToLanding")}
+            {t("auth.login.backToLanding")}
           </Link>
         </p>
       </div>
