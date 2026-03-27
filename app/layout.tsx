@@ -82,6 +82,9 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${charm.variable} ${cinzel.variable} ${marcellus.variable} ${merriweather.variable} ${cormorantGaramond.variable} ${dmSans.variable}`}
     >
+      <head>
+        <link rel="apple-touch-icon" href="/images/gametable-logo.png" />
+      </head>
       <body className={merriweather.className}>
         <I18nProvider>
           <AppShell>{children}</AppShell>
