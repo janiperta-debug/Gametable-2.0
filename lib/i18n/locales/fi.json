@@ -265,6 +265,13 @@
     "importAll": "Tuo kaikki",
     "parsedItems": "Jäsennetyt kohteet",
     "noParsedItems": "Kohteita ei jäsennetty. Tarkista muoto.",
+    "paintStatus": "Maalauksen tila",
+    "unpainted": "Maalaamaton",
+    "primed": "Pohjustettu",
+    "inProgress": "Kesken",
+    "painted": "Maalattu",
+    "based": "Pohjustettu",
+    "searchMiniDescription": "Etsi miniatyyrejä BattleScribe-tietokannasta.",
     "noResults": "Pelejä ei löytynyt. Kokeile toista hakutermiä.",
     "searchPrompt": "Etsi peli lisätäksesi sen kokoelmaasi.",
     "filters": {

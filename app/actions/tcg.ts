@@ -139,7 +139,7 @@ export async function bulkAddCards(
 // "4 Lightning Bolt"
 // "4x Lightning Bolt"
 // "4 Lightning Bolt (M20) 160"
-export function parseDeckList(text: string): Array<{ name: string; quantity: number; setCode?: string }> {
+export async function parseDeckList(text: string): Promise<Array<{ name: string; quantity: number; setCode?: string }>> {
   const lines = text.split("\n").filter((line) => line.trim())
   const parsed: Array<{ name: string; quantity: number; setCode?: string }> = []
 

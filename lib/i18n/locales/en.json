@@ -278,6 +278,13 @@
     "importAll": "Import All",
     "parsedItems": "Parsed Items",
     "noParsedItems": "No items parsed. Check your format.",
+    "paintStatus": "Paint Status",
+    "unpainted": "Unpainted",
+    "primed": "Primed",
+    "inProgress": "In Progress",
+    "painted": "Painted",
+    "based": "Based",
+    "searchMiniDescription": "Search the BattleScribe database to add miniatures to your collection.",
     "noResults": "No games found. Try a different search term.",
     "searchPrompt": "Search for a game to add to your collection.",
     "filters": {

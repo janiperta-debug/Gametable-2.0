@@ -12,15 +12,17 @@ import { ArrowLeft, Search, Loader2, Plus, Star, Users, Clock, Dices, Swords, Cr
 import { useToast } from "@/hooks/use-toast"
 import { addGameToCollection } from "@/app/actions/games"
 import { addCardToCollection } from "@/app/actions/tcg"
+import { addMiniatureToCollection, type PaintStatus } from "@/app/actions/miniatures"
 import { useTranslations } from "@/lib/i18n"
 import type { BGGSearchResult, BGGGameDetails } from "@/lib/types/database"
 import type { TCGSearchResult } from "@/app/api/tcg/search/route"
+import type { MiniatureSearchResult } from "@/app/api/miniatures/search/route"
 
 type GameCategory = "board_game" | "rpg" | "trading_card" | "miniature"
 
 // Union type for search results from different APIs
-type SearchResult = BGGSearchResult | TCGSearchResult
-type GameDetails = BGGGameDetails | TCGSearchResult
+type SearchResult = BGGSearchResult | TCGSearchResult | MiniatureSearchResult
+type GameDetails = BGGGameDetails | TCGSearchResult | MiniatureSearchResult
 
 interface CategoryConfig {
   id: GameCategory
@@ -46,6 +48,8 @@ export default function AddGamePage() {
   const [addingGameId, setAddingGameId] = useState<number | string | null>(null)
   const [selectedGame, setSelectedGame] = useState<GameDetails | null>(null)
   const [tcgQuantity, setTcgQuantity] = useState(1)
+  const [miniQuantity, setMiniQuantity] = useState(1)
+  const [miniPaintStatus, setMiniPaintStatus] = useState<PaintStatus>("unpainted")
   const [loadingDetails, setLoadingDetails] = useState(false)
   const { toast } = useToast()
   const t = useTranslations()
@@ -97,6 +101,8 @@ export default function AddGamePage() {
   const handleSelectGame = async (gameId: number | string) => {
     setLoadingDetails(true)
     setTcgQuantity(1) // Reset quantity for new selection
+    setMiniQuantity(1)
+    setMiniPaintStatus("unpainted")
     try {
       // For TCG, also pass game type
       const gameParam = selectedCategory === "trading_card" ? `&game=mtg` : ""
@@ -130,6 +136,10 @@ export default function AddGamePage() {
         // Use TCG-specific action
         const tcgResult = await addCardToCollection(selectedGame as TCGSearchResult, tcgQuantity, "owned")
         result = tcgResult.success ? {} : { error: tcgResult.error }
+      } else if (selectedCategory === "miniature") {
+        // Use miniatures-specific action
+        const miniResult = await addMiniatureToCollection(selectedGame as MiniatureSearchResult, miniQuantity, miniPaintStatus, "owned")
+        result = miniResult.success ? {} : { error: miniResult.error }
       } else {
         // Use general game action
         result = await addGameToCollection(selectedGame as BGGGameDetails, "owned", selectedCategory)
@@ -357,6 +367,27 @@ export default function AddGamePage() {
                                 ${(selectedGame as TCGSearchResult).price?.toFixed(2)}
                               </Badge>
                             )}
+                            {/* Miniature specific badges */}
+                            {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).faction && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30">
+                                {(selectedGame as MiniatureSearchResult).faction}
+                              </Badge>
+                            )}
+                            {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).systemName && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30">
+                                {(selectedGame as MiniatureSearchResult).systemName}
+                              </Badge>
+                            )}
+                            {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).points && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30">
+                                {(selectedGame as MiniatureSearchResult).points} pts
+                              </Badge>
+                            )}
+                            {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).models && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30">
+                                {(selectedGame as MiniatureSearchResult).models} models
+                              </Badge>
+                            )}
                           </div>
                           {selectedGame.description && (
                             <p className="mt-3 text-sm text-muted-foreground line-clamp-3 font-body">
@@ -398,7 +429,56 @@ export default function AddGamePage() {
                           </div>
                         </div>
                       )}
-                      <div className={`flex justify-end gap-3 mt-4 ${selectedCategory !== "trading_card" ? "pt-4 border-t border-accent-gold/20" : ""}`}>
+                      {/* Miniature quantity and paint status */}
+                      {selectedCategory === "miniature" && (
+                        <div className="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-accent-gold/20">
+                          <div className="flex items-center gap-2">
+                            <Label className="text-accent-gold font-cinzel text-sm">{t("collection.quantity") || "Quantity"}:</Label>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setMiniQuantity(Math.max(1, miniQuantity - 1))}
+                                className="h-8 w-8 p-0"
+                              >
+                                -
+                              </Button>
+                              <Input
+                                type="number"
+                                min="1"
+                                value={miniQuantity}
+                                onChange={(e) => setMiniQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                                className="w-16 h-8 text-center"
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setMiniQuantity(miniQuantity + 1)}
+                                className="h-8 w-8 p-0"
+                              >
+                                +
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Label className="text-accent-gold font-cinzel text-sm">{t("collection.paintStatus") || "Paint Status"}:</Label>
+                            <select
+                              value={miniPaintStatus}
+                              onChange={(e) => setMiniPaintStatus(e.target.value as PaintStatus)}
+                              className="h-8 rounded-md border border-input bg-background px-2 text-sm font-body"
+                            >
+                              <option value="unpainted">{t("collection.unpainted") || "Unpainted"}</option>
+                              <option value="primed">{t("collection.primed") || "Primed"}</option>
+                              <option value="in_progress">{t("collection.inProgress") || "In Progress"}</option>
+                              <option value="painted">{t("collection.painted") || "Painted"}</option>
+                              <option value="based">{t("collection.based") || "Based"}</option>
+                            </select>
+                          </div>
+                        </div>
+                      )}
+                      <div className={`flex justify-end gap-3 mt-4 ${selectedCategory !== "trading_card" && selectedCategory !== "miniature" ? "pt-4 border-t border-accent-gold/20" : ""}`}>
                         <Button variant="outline" onClick={() => setSelectedGame(null)} className="font-body bg-transparent">
                           {t("common.cancel")}
                         </Button>
