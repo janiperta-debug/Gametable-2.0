@@ -15,14 +15,17 @@ export async function GET(request: NextRequest) {
       `https://rpggeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=rpgitem`,
       { 
         headers: { 
-          'Accept': 'application/xml',
-          'User-Agent': 'GameTable/1.0 (Board Game Collection App)'
+          'Accept': 'application/xml, text/xml, */*',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Cache-Control': 'no-cache',
         },
-        next: { revalidate: 3600 } // Cache for 1 hour
+        cache: 'no-store',
       }
     )
 
     if (!searchResponse.ok) {
+      console.error(`RPGGeek API error: ${searchResponse.status}`)
       throw new Error(`RPGGeek API error: ${searchResponse.status}`)
     }
 

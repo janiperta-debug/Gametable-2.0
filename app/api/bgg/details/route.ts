@@ -10,16 +10,21 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Fetch game details from BGG API
+    // Fetch game details from BGG API - requires browser-like headers
     const response = await fetch(
       `https://boardgamegeek.com/xmlapi2/thing?id=${id}&stats=1`,
       { 
-        headers: { 'Accept': 'application/xml' },
-        next: { revalidate: 86400 } // Cache for 24 hours
+        headers: { 
+          'Accept': 'application/xml, text/xml, */*',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        },
+        cache: 'no-store',
       }
     )
 
     if (!response.ok) {
+      console.error(`BGG API details error: ${response.status}`)
       throw new Error(`BGG API error: ${response.status}`)
     }
 
