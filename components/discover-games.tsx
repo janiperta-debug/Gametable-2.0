@@ -8,8 +8,15 @@ import { Badge } from "@/components/ui/badge"
 import { Search, ExternalLink, Heart, Plus, Loader2, Star, Users, Clock } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { addGameToCollection, type GameCategory } from "@/app/actions/games"
+import { addCardToCollection } from "@/app/actions/tcg"
+import { addMiniatureToCollection, type PaintStatus } from "@/app/actions/miniatures"
 import { useToast } from "@/hooks/use-toast"
 import type { BGGSearchResult, BGGGameDetails } from "@/lib/types/database"
+import type { TCGSearchResult } from "@/app/api/tcg/search/route"
+import type { MiniatureSearchResult } from "@/app/api/miniatures/search/route"
+
+type SearchResult = BGGSearchResult | TCGSearchResult | MiniatureSearchResult
+type GameDetails = BGGGameDetails | TCGSearchResult | MiniatureSearchResult
 
 interface CategoryConfig {
   id: GameCategory
@@ -61,10 +68,13 @@ export function DiscoverGames() {
   const [selectedCategory, setSelectedCategory] = useState<GameCategory>("board_game")
   const [searchQuery, setSearchQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
-  const [searchResults, setSearchResults] = useState<BGGSearchResult[]>([])
-  const [selectedGame, setSelectedGame] = useState<BGGGameDetails | null>(null)
-  const [loadingDetails, setLoadingDetails] = useState<number | null>(null)
-  const [addingGame, setAddingGame] = useState<{ id: number; type: 'collection' | 'wishlist' } | null>(null)
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [selectedGame, setSelectedGame] = useState<GameDetails | null>(null)
+  const [loadingDetails, setLoadingDetails] = useState<number | string | null>(null)
+  const [addingGame, setAddingGame] = useState<{ id: number | string; type: 'collection' | 'wishlist' } | null>(null)
+  const [tcgQuantity, setTcgQuantity] = useState(1)
+  const [miniQuantity, setMiniQuantity] = useState(1)
+  const [miniPaintStatus, setMiniPaintStatus] = useState<PaintStatus>("unpainted")
 
   const categoryConfig = categories.find(c => c.id === selectedCategory)!
 
@@ -76,7 +86,9 @@ export function DiscoverGames() {
     setSelectedGame(null)
 
     try {
-      const response = await fetch(`${categoryConfig.searchEndpoint}?query=${encodeURIComponent(searchQuery)}`)
+      // TCG API uses 'q' parameter, others use 'query'
+      const queryParam = selectedCategory === "trading_card" ? "q" : "query"
+      const response = await fetch(`${categoryConfig.searchEndpoint}?${queryParam}=${encodeURIComponent(searchQuery)}`)
       const data = await response.json()
 
       if (data.error) {
@@ -96,13 +108,18 @@ export function DiscoverGames() {
     }
   }
 
-  const handleSelectGame = async (gameId: number) => {
+  const handleSelectGame = async (gameId: number | string) => {
     setLoadingDetails(gameId)
+    setTcgQuantity(1)
+    setMiniQuantity(1)
+    setMiniPaintStatus("unpainted")
     try {
-      const response = await fetch(`${categoryConfig.detailsEndpoint}?id=${gameId}`)
-      const details: BGGGameDetails = await response.json()
+      // For TCG, also pass game type
+      const gameParam = selectedCategory === "trading_card" ? "&game=mtg" : ""
+      const response = await fetch(`${categoryConfig.detailsEndpoint}?id=${gameId}${gameParam}`)
+      const details = await response.json()
       
-      if (details && details.id !== undefined) {
+      if (details && (details.id !== undefined || details.name)) {
         setSelectedGame(details)
       }
     } catch (error) {
@@ -123,7 +140,17 @@ export function DiscoverGames() {
     setAddingGame({ id: selectedGame.id, type: status === 'owned' ? 'collection' : 'wishlist' })
 
     try {
-      const result = await addGameToCollection(selectedGame, status, selectedCategory)
+      let result: { error?: string }
+
+      if (selectedCategory === "trading_card") {
+        const tcgResult = await addCardToCollection(selectedGame as TCGSearchResult, tcgQuantity, status)
+        result = tcgResult.success ? {} : { error: tcgResult.error }
+      } else if (selectedCategory === "miniature") {
+        const miniResult = await addMiniatureToCollection(selectedGame as MiniatureSearchResult, miniQuantity, miniPaintStatus, status)
+        result = miniResult.success ? {} : { error: miniResult.error }
+      } else {
+        result = await addGameToCollection(selectedGame as BGGGameDetails, status, selectedCategory)
+      }
 
       if (result.error) {
         toast({
@@ -221,9 +248,9 @@ export function DiscoverGames() {
         <Card className="room-furniture">
           <CardContent className="pt-6">
             <div className="flex gap-4">
-              {selectedGame.thumbnail && (
+              {((selectedGame as BGGGameDetails).thumbnail || (selectedGame as TCGSearchResult).thumbnailUrl) && (
                 <img
-                  src={selectedGame.thumbnail}
+                  src={(selectedGame as BGGGameDetails).thumbnail || (selectedGame as TCGSearchResult).thumbnailUrl || ""}
                   alt={selectedGame.name}
                   className="w-32 h-32 object-cover rounded"
                 />
@@ -231,27 +258,60 @@ export function DiscoverGames() {
               <div className="flex-1 min-w-0">
                 <h3 className="font-heading font-semibold text-2xl text-accent-gold">{selectedGame.name}</h3>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {selectedGame.yearPublished && (
+                  {/* Board game / RPG badges */}
+                  {(selectedCategory === "board_game" || selectedCategory === "rpg") && (selectedGame as BGGGameDetails).yearPublished && (
                     <Badge variant="outline" className="text-xs border-accent-gold/30">
-                      {selectedGame.yearPublished}
+                      {(selectedGame as BGGGameDetails).yearPublished}
                     </Badge>
                   )}
-                  {selectedGame.rating && (
+                  {(selectedCategory === "board_game" || selectedCategory === "rpg") && (selectedGame as BGGGameDetails).rating && (
                     <Badge variant="outline" className="text-xs border-accent-gold/30">
                       <Star className="h-3 w-3 mr-1 fill-accent-gold text-accent-gold" />
-                      {selectedGame.rating}
+                      {(selectedGame as BGGGameDetails).rating}
                     </Badge>
                   )}
-                  {selectedGame.minPlayers && selectedGame.maxPlayers && (
+                  {(selectedCategory === "board_game" || selectedCategory === "rpg") && (selectedGame as BGGGameDetails).minPlayers && (
                     <Badge variant="outline" className="text-xs border-accent-gold/30">
                       <Users className="h-3 w-3 mr-1" />
-                      {selectedGame.minPlayers}-{selectedGame.maxPlayers}
+                      {(selectedGame as BGGGameDetails).minPlayers}-{(selectedGame as BGGGameDetails).maxPlayers}
                     </Badge>
                   )}
-                  {selectedGame.minPlaytime && (
+                  {(selectedCategory === "board_game" || selectedCategory === "rpg") && (selectedGame as BGGGameDetails).minPlaytime && (
                     <Badge variant="outline" className="text-xs border-accent-gold/30">
                       <Clock className="h-3 w-3 mr-1" />
-                      {selectedGame.minPlaytime}-{selectedGame.maxPlaytime || selectedGame.minPlaytime}m
+                      {(selectedGame as BGGGameDetails).minPlaytime}-{(selectedGame as BGGGameDetails).maxPlaytime || (selectedGame as BGGGameDetails).minPlaytime}m
+                    </Badge>
+                  )}
+                  {/* TCG badges */}
+                  {selectedCategory === "trading_card" && (selectedGame as TCGSearchResult).set && (
+                    <Badge variant="outline" className="text-xs border-accent-gold/30">
+                      {(selectedGame as TCGSearchResult).set}
+                    </Badge>
+                  )}
+                  {selectedCategory === "trading_card" && (selectedGame as TCGSearchResult).rarity && (
+                    <Badge variant="outline" className="text-xs border-accent-gold/30">
+                      {(selectedGame as TCGSearchResult).rarity}
+                    </Badge>
+                  )}
+                  {selectedCategory === "trading_card" && (selectedGame as TCGSearchResult).price && (
+                    <Badge variant="outline" className="text-xs border-accent-gold/30 text-green-500">
+                      ${(selectedGame as TCGSearchResult).price?.toFixed(2)}
+                    </Badge>
+                  )}
+                  {/* Miniature badges */}
+                  {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).faction && (
+                    <Badge variant="outline" className="text-xs border-accent-gold/30">
+                      {(selectedGame as MiniatureSearchResult).faction}
+                    </Badge>
+                  )}
+                  {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).systemName && (
+                    <Badge variant="outline" className="text-xs border-accent-gold/30">
+                      {(selectedGame as MiniatureSearchResult).systemName}
+                    </Badge>
+                  )}
+                  {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).points && (
+                    <Badge variant="outline" className="text-xs border-accent-gold/30">
+                      {(selectedGame as MiniatureSearchResult).points} pts
                     </Badge>
                   )}
                 </div>
@@ -262,7 +322,44 @@ export function DiscoverGames() {
                 )}
               </div>
             </div>
-            <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-accent-gold/20">
+            
+            {/* TCG quantity selector */}
+            {selectedCategory === "trading_card" && (
+              <div className="flex items-center gap-3 mt-4 pt-4 border-t border-accent-gold/20">
+                <span className="text-accent-gold font-cinzel text-sm">{t("collection.quantity") || "Quantity"}:</span>
+                <div className="flex items-center gap-1">
+                  <Button type="button" variant="outline" size="sm" onClick={() => setTcgQuantity(Math.max(1, tcgQuantity - 1))} className="h-8 w-8 p-0">-</Button>
+                  <Input type="number" min="1" value={tcgQuantity} onChange={(e) => setTcgQuantity(Math.max(1, parseInt(e.target.value) || 1))} className="w-16 h-8 text-center" />
+                  <Button type="button" variant="outline" size="sm" onClick={() => setTcgQuantity(tcgQuantity + 1)} className="h-8 w-8 p-0">+</Button>
+                </div>
+              </div>
+            )}
+            
+            {/* Miniature quantity and paint status */}
+            {selectedCategory === "miniature" && (
+              <div className="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-accent-gold/20">
+                <div className="flex items-center gap-2">
+                  <span className="text-accent-gold font-cinzel text-sm">{t("collection.quantity") || "Quantity"}:</span>
+                  <div className="flex items-center gap-1">
+                    <Button type="button" variant="outline" size="sm" onClick={() => setMiniQuantity(Math.max(1, miniQuantity - 1))} className="h-8 w-8 p-0">-</Button>
+                    <Input type="number" min="1" value={miniQuantity} onChange={(e) => setMiniQuantity(Math.max(1, parseInt(e.target.value) || 1))} className="w-16 h-8 text-center" />
+                    <Button type="button" variant="outline" size="sm" onClick={() => setMiniQuantity(miniQuantity + 1)} className="h-8 w-8 p-0">+</Button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-accent-gold font-cinzel text-sm">{t("collection.paintStatus") || "Paint Status"}:</span>
+                  <select value={miniPaintStatus} onChange={(e) => setMiniPaintStatus(e.target.value as PaintStatus)} className="h-8 rounded-md border border-input bg-background px-2 text-sm font-body">
+                    <option value="unpainted">{t("collection.unpainted") || "Unpainted"}</option>
+                    <option value="primed">{t("collection.primed") || "Primed"}</option>
+                    <option value="in_progress">{t("collection.inProgress") || "In Progress"}</option>
+                    <option value="painted">{t("collection.painted") || "Painted"}</option>
+                    <option value="based">{t("collection.based") || "Based"}</option>
+                  </select>
+                </div>
+              </div>
+            )}
+            
+            <div className={`flex justify-end gap-3 mt-4 ${selectedCategory !== "trading_card" && selectedCategory !== "miniature" ? "pt-4 border-t border-accent-gold/20" : ""}`}>
               <Button variant="outline" onClick={() => setSelectedGame(null)} className="font-body bg-transparent">
                 {t("common.cancel")}
               </Button>
@@ -315,11 +412,23 @@ export function DiscoverGames() {
                     <div className="flex items-center justify-between">
                       <div className="flex-1 min-w-0">
                         <h4 className="font-heading font-medium text-lg truncate">{game.name}</h4>
-                        {game.yearPublished && (
-                          <Badge variant="outline" className="mt-1 text-xs border-accent-gold/30 text-accent-gold">
-                            {game.yearPublished}
-                          </Badge>
-                        )}
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {(game as BGGSearchResult).yearPublished && (
+                            <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
+                              {(game as BGGSearchResult).yearPublished}
+                            </Badge>
+                          )}
+                          {(game as TCGSearchResult).set && (
+                            <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
+                              {(game as TCGSearchResult).set}
+                            </Badge>
+                          )}
+                          {(game as MiniatureSearchResult).faction && (
+                            <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
+                              {(game as MiniatureSearchResult).faction}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                       {loadingDetails === game.id ? (
                         <Loader2 className="h-5 w-5 animate-spin text-accent-gold ml-4 flex-shrink-0" />
