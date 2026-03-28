@@ -11,10 +11,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft, Search, Loader2, Plus, Star, Users, Clock, Dices, Swords, CreditCard, Puzzle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { addGameToCollection } from "@/app/actions/games"
+import { addCardToCollection } from "@/app/actions/tcg"
 import { useTranslations } from "@/lib/i18n"
 import type { BGGSearchResult, BGGGameDetails } from "@/lib/types/database"
+import type { TCGSearchResult } from "@/app/api/tcg/search/route"
 
 type GameCategory = "board_game" | "rpg" | "trading_card" | "miniature"
+
+// Union type for search results from different APIs
+type SearchResult = BGGSearchResult | TCGSearchResult
+type GameDetails = BGGGameDetails | TCGSearchResult
 
 interface CategoryConfig {
   id: GameCategory
@@ -36,9 +42,10 @@ export default function AddGamePage() {
   const [selectedCategory, setSelectedCategory] = useState<GameCategory>("board_game")
   const [searchQuery, setSearchQuery] = useState("")
   const [searching, setSearching] = useState(false)
-  const [searchResults, setSearchResults] = useState<BGGSearchResult[]>([])
-  const [addingGameId, setAddingGameId] = useState<number | null>(null)
-  const [selectedGame, setSelectedGame] = useState<BGGGameDetails | null>(null)
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [addingGameId, setAddingGameId] = useState<number | string | null>(null)
+  const [selectedGame, setSelectedGame] = useState<GameDetails | null>(null)
+  const [tcgQuantity, setTcgQuantity] = useState(1)
   const [loadingDetails, setLoadingDetails] = useState(false)
   const { toast } = useToast()
   const t = useTranslations()
@@ -65,7 +72,9 @@ export default function AddGamePage() {
     setSelectedGame(null)
 
     try {
-      const response = await fetch(`${categoryConfig.searchEndpoint}?query=${encodeURIComponent(searchQuery)}`)
+      // TCG API uses 'q' parameter, BGG/RPGG use 'query'
+      const queryParam = selectedCategory === "trading_card" ? "q" : "query"
+      const response = await fetch(`${categoryConfig.searchEndpoint}?${queryParam}=${encodeURIComponent(searchQuery)}`)
       const data = await response.json()
 
       if (data.error) {
@@ -85,13 +94,16 @@ export default function AddGamePage() {
     }
   }
 
-  const handleSelectGame = async (gameId: number) => {
+  const handleSelectGame = async (gameId: number | string) => {
     setLoadingDetails(true)
+    setTcgQuantity(1) // Reset quantity for new selection
     try {
-      const response = await fetch(`${categoryConfig.detailsEndpoint}?id=${gameId}`)
-      const details: BGGGameDetails = await response.json()
+      // For TCG, also pass game type
+      const gameParam = selectedCategory === "trading_card" ? `&game=mtg` : ""
+      const response = await fetch(`${categoryConfig.detailsEndpoint}?id=${gameId}${gameParam}`)
+      const details = await response.json()
       
-      if (details && details.id !== undefined) {
+      if (details && (details.id !== undefined || details.name)) {
         setSelectedGame(details)
       }
     } catch (error) {
@@ -112,7 +124,16 @@ export default function AddGamePage() {
     setAddingGameId(selectedGame.id)
 
     try {
-      const result = await addGameToCollection(selectedGame, "owned", selectedCategory)
+      let result: { error?: string }
+
+      if (selectedCategory === "trading_card") {
+        // Use TCG-specific action
+        const tcgResult = await addCardToCollection(selectedGame as TCGSearchResult, tcgQuantity, "owned")
+        result = tcgResult.success ? {} : { error: tcgResult.error }
+      } else {
+        // Use general game action
+        result = await addGameToCollection(selectedGame as BGGGameDetails, "owned", selectedCategory)
+      }
 
       if (result.error) {
         toast({
@@ -281,37 +302,59 @@ export default function AddGamePage() {
                   {selectedGame && (
                     <div className="p-4 rounded-lg border border-accent-gold/30 bg-accent-gold/5">
                       <div className="flex gap-4">
-                        {selectedGame.thumbnail && (
+                        {(selectedGame as BGGGameDetails).thumbnail || (selectedGame as TCGSearchResult).thumbnailUrl ? (
                           <img
-                            src={selectedGame.thumbnail}
+                            src={(selectedGame as BGGGameDetails).thumbnail || (selectedGame as TCGSearchResult).thumbnailUrl || ""}
                             alt={selectedGame.name}
                             className="w-24 h-24 object-cover rounded"
                           />
-                        )}
+                        ) : null}
                         <div className="flex-1 min-w-0">
                           <h3 className="font-heading font-semibold text-xl text-accent-gold">{selectedGame.name}</h3>
                           <div className="flex flex-wrap gap-2 mt-2">
-                            {selectedGame.yearPublished && (
+                            {/* Board game / RPG specific badges */}
+                            {selectedCategory !== "trading_card" && (selectedGame as BGGGameDetails).yearPublished && (
                               <Badge variant="outline" className="text-xs border-accent-gold/30">
-                                {selectedGame.yearPublished}
+                                {(selectedGame as BGGGameDetails).yearPublished}
                               </Badge>
                             )}
-                            {selectedGame.rating && (
+                            {selectedCategory !== "trading_card" && (selectedGame as BGGGameDetails).rating && (
                               <Badge variant="outline" className="text-xs border-accent-gold/30">
                                 <Star className="h-3 w-3 mr-1 fill-accent-gold text-accent-gold" />
-                                {selectedGame.rating}
+                                {(selectedGame as BGGGameDetails).rating}
                               </Badge>
                             )}
-                            {selectedGame.minPlayers && selectedGame.maxPlayers && (
+                            {selectedCategory !== "trading_card" && (selectedGame as BGGGameDetails).minPlayers && (selectedGame as BGGGameDetails).maxPlayers && (
                               <Badge variant="outline" className="text-xs border-accent-gold/30">
                                 <Users className="h-3 w-3 mr-1" />
-                                {selectedGame.minPlayers}-{selectedGame.maxPlayers}
+                                {(selectedGame as BGGGameDetails).minPlayers}-{(selectedGame as BGGGameDetails).maxPlayers}
                               </Badge>
                             )}
-                            {selectedGame.minPlaytime && (
+                            {selectedCategory !== "trading_card" && (selectedGame as BGGGameDetails).minPlaytime && (
                               <Badge variant="outline" className="text-xs border-accent-gold/30">
                                 <Clock className="h-3 w-3 mr-1" />
-                                {selectedGame.minPlaytime}-{selectedGame.maxPlaytime || selectedGame.minPlaytime}m
+                                {(selectedGame as BGGGameDetails).minPlaytime}-{(selectedGame as BGGGameDetails).maxPlaytime || (selectedGame as BGGGameDetails).minPlaytime}m
+                              </Badge>
+                            )}
+                            {/* TCG specific badges */}
+                            {selectedCategory === "trading_card" && (selectedGame as TCGSearchResult).set && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30">
+                                {(selectedGame as TCGSearchResult).set}
+                              </Badge>
+                            )}
+                            {selectedCategory === "trading_card" && (selectedGame as TCGSearchResult).rarity && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30">
+                                {(selectedGame as TCGSearchResult).rarity}
+                              </Badge>
+                            )}
+                            {selectedCategory === "trading_card" && (selectedGame as TCGSearchResult).type && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30">
+                                {(selectedGame as TCGSearchResult).type}
+                              </Badge>
+                            )}
+                            {selectedCategory === "trading_card" && (selectedGame as TCGSearchResult).price && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30 text-green-500">
+                                ${(selectedGame as TCGSearchResult).price?.toFixed(2)}
                               </Badge>
                             )}
                           </div>
@@ -322,7 +365,40 @@ export default function AddGamePage() {
                           )}
                         </div>
                       </div>
-                      <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-accent-gold/20">
+                      {/* Quantity selector for TCG */}
+                      {selectedCategory === "trading_card" && (
+                        <div className="flex items-center gap-3 mt-4 pt-4 border-t border-accent-gold/20">
+                          <Label className="text-accent-gold font-cinzel text-sm">{t("collection.quantity") || "Quantity"}:</Label>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setTcgQuantity(Math.max(1, tcgQuantity - 1))}
+                              className="h-8 w-8 p-0"
+                            >
+                              -
+                            </Button>
+                            <Input
+                              type="number"
+                              min="1"
+                              value={tcgQuantity}
+                              onChange={(e) => setTcgQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                              className="w-16 h-8 text-center"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setTcgQuantity(tcgQuantity + 1)}
+                              className="h-8 w-8 p-0"
+                            >
+                              +
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      <div className={`flex justify-end gap-3 mt-4 ${selectedCategory !== "trading_card" ? "pt-4 border-t border-accent-gold/20" : ""}`}>
                         <Button variant="outline" onClick={() => setSelectedGame(null)} className="font-body bg-transparent">
                           {t("common.cancel")}
                         </Button>
