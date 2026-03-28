@@ -10,9 +10,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Search BGG API - requires browser-like headers to avoid 401
+    // Search RPGGeek API (uses same XML API as BGG with type=rpgitem)
     const searchResponse = await fetch(
-      `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame`,
+      `https://rpggeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=rpgitem`,
       { 
         headers: { 
           'Accept': 'application/xml, text/xml, */*',
@@ -20,13 +20,13 @@ export async function GET(request: NextRequest) {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           'Cache-Control': 'no-cache',
         },
-        cache: 'no-store', // Don't cache to avoid stale responses
+        cache: 'no-store',
       }
     )
 
     if (!searchResponse.ok) {
-      console.error(`BGG API error: ${searchResponse.status}, ${await searchResponse.text()}`)
-      throw new Error(`BGG API error: ${searchResponse.status}`)
+      console.error(`RPGGeek API error: ${searchResponse.status}`)
+      throw new Error(`RPGGeek API error: ${searchResponse.status}`)
     }
 
     const xmlText = await searchResponse.text()
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ results: [] })
     }
 
-    // Normalize to array (BGG returns object if single result)
+    // Normalize to array (API returns object if single result)
     const items = Array.isArray(result.items.item) 
       ? result.items.item 
       : [result.items.item]
@@ -52,7 +52,6 @@ export async function GET(request: NextRequest) {
       const nameData = item.name
       let name = ''
       if (Array.isArray(nameData)) {
-        // Find primary name or use first
         const primary = nameData.find((n: Record<string, unknown>) => n['@_type'] === 'primary')
         name = primary ? String(primary['@_value'] || '') : String(nameData[0]?.['@_value'] || '')
       } else if (nameData && typeof nameData === 'object') {
@@ -72,9 +71,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ results })
   } catch (error) {
-    console.error('BGG search error:', error)
+    console.error('RPGGeek search error:', error)
     return NextResponse.json(
-      { error: 'Failed to search BoardGameGeek' },
+      { error: 'Failed to search RPGGeek' },
       { status: 500 }
     )
   }

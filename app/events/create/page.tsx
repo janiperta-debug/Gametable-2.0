@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -11,18 +11,55 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { ArrowLeft, Globe, UserCheck, Lock, Loader2, Calendar } from "lucide-react"
+import { ArrowLeft, Globe, UserCheck, Lock, Loader2, Calendar, Search, X, Dices, Swords, Trophy, Sparkles } from "lucide-react"
 import { createEvent, type EventType, type EventPrivacy } from "@/app/actions/events"
+
+const eventTypes: { value: EventType; icon: React.ElementType }[] = [
+  { value: "board_game_night", icon: Dices },
+  { value: "rpg_session", icon: Swords },
+  { value: "tournament", icon: Trophy },
+  { value: "custom", icon: Sparkles },
+]
+import { getUserGames } from "@/app/actions/games"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "@/lib/i18n"
+
+interface UserGame {
+  id: string
+  game: {
+    id: string
+    name: string
+    image_url?: string
+  }
+}
 
 export default function CreateEventPage() {
   const router = useRouter()
   const [gameSelection, setGameSelection] = useState("collection")
+  const [eventType, setEventType] = useState<EventType>("board_game_night")
   const [privacy, setPrivacy] = useState<EventPrivacy>("public")
   const [saving, setSaving] = useState(false)
+  const [userGames, setUserGames] = useState<UserGame[]>([])
+  const [loadingGames, setLoadingGames] = useState(true)
+  const [gameSearchQuery, setGameSearchQuery] = useState("")
+  const [showGameResults, setShowGameResults] = useState(false)
   const { toast } = useToast()
   const t = useTranslations()
+  
+  // Filter games based on search query
+  const filteredGames = userGames.filter(userGame => 
+    userGame.game.name.toLowerCase().includes(gameSearchQuery.toLowerCase())
+  )
+  
+  // Fetch user's collection
+  useEffect(() => {
+    async function fetchGames() {
+      const { games } = await getUserGames()
+      setUserGames(games as UserGame[])
+      setLoadingGames(false)
+    }
+    fetchGames()
+  }, [])
   const [formData, setFormData] = useState({
     title: "",
     game: "",
@@ -45,7 +82,7 @@ export default function CreateEventPage() {
       const result = await createEvent({
         title: formData.title.trim(),
         description: formData.description.trim() || undefined,
-        event_type: "board_game_night" as EventType,
+        event_type: eventType,
         privacy: privacy,
         location: formData.location.trim() || undefined,
         starts_at: startsAt.toISOString(),
@@ -85,15 +122,15 @@ export default function CreateEventPage() {
           <div className="flex items-center mb-8">
             <Button variant="ghost" onClick={() => router.back()} className="mr-4">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
+              {t("events.back")}
             </Button>
-            <h1 className="ornate-text font-heading text-3xl font-bold">Create Event</h1>
+            <h1 className="ornate-text font-heading text-3xl font-bold">{t("events.createEvent")}</h1>
           </div>
 
           {/* Form */}
           <Card className="room-furniture">
             <CardHeader>
-              <CardTitle className="font-heading text-xl">Event Details</CardTitle>
+              <CardTitle className="font-heading text-xl">{t("events.eventDetails")}</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -114,7 +151,7 @@ export default function CreateEventPage() {
 
                 {/* Game Selection */}
                 <div className="space-y-4">
-                  <Label className="font-body text-accent-gold">Game</Label>
+                  <Label className="font-body text-accent-gold">{t("events.game")}</Label>
                   <div className="flex space-x-2">
                     <Button
                       type="button"
@@ -122,7 +159,7 @@ export default function CreateEventPage() {
                       className={gameSelection === "collection" ? "theme-accent-gold" : "bg-transparent"}
                       onClick={() => setGameSelection("collection")}
                     >
-                      From Collection
+                      {t("events.fromCollection")}
                     </Button>
                     <Button
                       type="button"
@@ -130,25 +167,103 @@ export default function CreateEventPage() {
                       className={gameSelection === "manual" ? "theme-accent-gold" : "bg-transparent"}
                       onClick={() => setGameSelection("manual")}
                     >
-                      Manual Entry
+                      {t("events.manualEntry")}
                     </Button>
                   </div>
 
                   {gameSelection === "collection" ? (
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a game..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="wingspan">Wingspan</SelectItem>
-                        <SelectItem value="azul">Azul</SelectItem>
-                        <SelectItem value="gloomhaven">Gloomhaven</SelectItem>
-                        <SelectItem value="pandemic">Pandemic</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="relative">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder={loadingGames ? t("common.loading") : t("events.searchCollection")}
+                          value={formData.game || gameSearchQuery}
+                          onChange={(e) => {
+                            setGameSearchQuery(e.target.value)
+                            setFormData({ ...formData, game: "" })
+                            setShowGameResults(true)
+                          }}
+                          onFocus={() => setShowGameResults(true)}
+                          className="pl-10 pr-10"
+                          disabled={loadingGames}
+                        />
+                        {(formData.game || gameSearchQuery) && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setGameSearchQuery("")
+                              setFormData({ ...formData, game: "" })
+                            }}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+                      {showGameResults && !formData.game && (
+                        <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
+                          {filteredGames.length === 0 ? (
+                            <div className="p-3 text-sm text-muted-foreground text-center">
+                              {userGames.length === 0 
+                                ? t("events.noGamesInCollection")
+                                : t("events.noMatchingGames")
+                              }
+                            </div>
+                          ) : (
+                            filteredGames.map((userGame) => (
+                              <button
+                                key={userGame.game.id}
+                                type="button"
+                                onClick={() => {
+                                  setFormData({ ...formData, game: userGame.game.name })
+                                  setGameSearchQuery("")
+                                  setShowGameResults(false)
+                                }}
+                                className="w-full px-3 py-2 text-left text-sm hover:bg-accent transition-colors flex items-center gap-2"
+                              >
+                                {userGame.game.image_url && (
+                                  <img 
+                                    src={userGame.game.image_url} 
+                                    alt="" 
+                                    className="w-8 h-8 object-cover rounded"
+                                  />
+                                )}
+                                <span>{userGame.game.name}</span>
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
                   ) : (
-                    <Input placeholder="Enter game name manually" />
+                    <Input 
+                      placeholder={t("events.enterGameName")} 
+                      value={formData.game}
+                      onChange={(e) => setFormData({ ...formData, game: e.target.value })}
+                    />
                   )}
+                </div>
+
+                {/* Event Type Selection */}
+                <div className="space-y-4">
+                  <Label className="font-body text-accent-gold">{t("events.eventType")}</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {eventTypes.map(({ value, icon: Icon }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setEventType(value)}
+                        className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${
+                          eventType === value
+                            ? "border-accent-gold bg-accent-gold/10 text-accent-gold"
+                            : "border-border bg-transparent hover:border-accent-gold/50"
+                        }`}
+                      >
+                        <Icon className="h-6 w-6" />
+                        <span className="text-sm font-body text-center">{t(`events.types.${value}`)}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Date & Time */}
@@ -227,7 +342,7 @@ export default function CreateEventPage() {
 
                 {/* Privacy Settings */}
                 <div className="space-y-4">
-                  <Label className="font-body text-accent-gold">Event Privacy</Label>
+                  <Label className="font-body text-accent-gold">{t("events.eventPrivacy")}</Label>
                   <RadioGroup value={privacy} onValueChange={setPrivacy} className="space-y-3">
                     <div className="flex items-center space-x-3">
                       <RadioGroupItem value="public" id="public" />
@@ -235,9 +350,9 @@ export default function CreateEventPage() {
                         <Globe className="h-4 w-4 text-accent-gold" />
                         <div>
                           <Label htmlFor="public" className="font-body font-medium text-accent-gold">
-                            Public
+                            {t("events.public")}
                           </Label>
-                          <p className="font-body text-sm text-muted-foreground">Anyone can see and join this event</p>
+                          <p className="font-body text-sm text-muted-foreground">{t("events.publicDesc")}</p>
                         </div>
                       </div>
                     </div>
@@ -248,9 +363,9 @@ export default function CreateEventPage() {
                         <UserCheck className="h-4 w-4 text-accent-gold" />
                         <div>
                           <Label htmlFor="friends" className="font-body font-medium text-accent-gold">
-                            Friends Only
+                            {t("events.friendsOnly")}
                           </Label>
-                          <p className="font-body text-sm text-muted-foreground">Only your friends can see and join</p>
+                          <p className="font-body text-sm text-muted-foreground">{t("events.friendsOnlyDesc")}</p>
                         </div>
                       </div>
                     </div>
@@ -261,10 +376,10 @@ export default function CreateEventPage() {
                         <Lock className="h-4 w-4 text-accent-gold" />
                         <div>
                           <Label htmlFor="private" className="font-body font-medium text-accent-gold">
-                            Private (Invite Only)
+                            {t("events.privateInviteOnly")}
                           </Label>
                           <p className="font-body text-sm text-muted-foreground">
-                            Only invited players can see this event
+                            {t("events.privateDesc")}
                           </p>
                         </div>
                       </div>

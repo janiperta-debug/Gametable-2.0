@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { User, Menu, X, Zap, LogOut, Bell, Loader2, MessageCircle } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useAppTheme } from "@/components/app-theme-provider"
@@ -18,6 +19,7 @@ export function Navigation() {
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
   const { currentAppTheme } = useAppTheme()
   const t = useTranslations()
+  const router = useRouter()
   const { user, profile, loading } = useUser()
 
   const hasUnreadNotifications = unreadNotificationCount > 0
@@ -90,7 +92,13 @@ export function Navigation() {
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
+    // Clear theme cache on logout so next user gets default
+    try {
+      localStorage.removeItem("gametable-app-theme")
+    } catch (e) {}
     setIsUserDropdownOpen(false)
+    router.push("/")
+    router.refresh()
   }
 
   const navItems = [

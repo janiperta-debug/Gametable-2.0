@@ -10,9 +10,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Fetch game details from BGG API - requires browser-like headers
+    // Fetch RPG details from RPGGeek API - requires browser-like headers
     const response = await fetch(
-      `https://boardgamegeek.com/xmlapi2/thing?id=${id}&stats=1`,
+      `https://rpggeek.com/xmlapi2/thing?id=${id}&stats=1`,
       { 
         headers: { 
           'Accept': 'application/xml, text/xml, */*',
@@ -24,8 +24,8 @@ export async function GET(request: NextRequest) {
     )
 
     if (!response.ok) {
-      console.error(`BGG API details error: ${response.status}`)
-      throw new Error(`BGG API error: ${response.status}`)
+      console.error(`RPGGeek API details error: ${response.status}`)
+      throw new Error(`RPGGeek API error: ${response.status}`)
     }
 
     const xmlText = await response.text()
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     const result = parser.parse(xmlText)
 
     if (!result.items || !result.items.item) {
-      return NextResponse.json({ error: 'Game not found' }, { status: 404 })
+      return NextResponse.json({ error: 'RPG not found' }, { status: 404 })
     }
 
     const item = result.items.item
@@ -63,6 +63,7 @@ export async function GET(request: NextRequest) {
       yearPublished: item.yearpublished?.['@_value'] 
         ? parseInt(String(item.yearpublished['@_value']), 10) 
         : null,
+      // RPGs typically don't have player counts, but some do
       minPlayers: item.minplayers?.['@_value'] 
         ? parseInt(String(item.minplayers['@_value']), 10) 
         : null,
@@ -85,9 +86,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(gameDetails)
   } catch (error) {
-    console.error('BGG details error:', error)
+    console.error('RPGGeek details error:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch game details' },
+      { error: 'Failed to fetch RPG details' },
       { status: 500 }
     )
   }

@@ -85,20 +85,20 @@ export function DiscoverPlayers() {
     <div className="space-y-8">
       <Card className="room-furniture">
         <CardHeader>
-          <CardTitle className="text-2xl">Refine Your Search</CardTitle>
+          <CardTitle className="text-2xl">{t("community.refineSearch")}</CardTitle>
           <p className="font-merriweather text-muted-foreground">
-            Connect with fellow gamers in your area and expand your gaming circle.
+            {t("community.refineSearchDescription")}
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Location Filter */}
             <div className="space-y-2">
-              <label className="text-sm font-cinzel text-accent-gold">Location</label>
+              <label className="text-sm font-cinzel text-accent-gold">{t("community.location")}</label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="e.g., Mystic Valley or postal code"
+                  placeholder={t("community.locationPlaceholder")}
                   className="pl-10 font-merriweather"
                   value={locationFilter}
                   onChange={(e) => setLocationFilter(e.target.value)}
@@ -108,11 +108,11 @@ export function DiscoverPlayers() {
 
             {/* Game Title Filter */}
             <div className="space-y-2">
-              <label className="text-sm font-cinzel text-accent-gold">Search by Game Title</label>
+              <label className="text-sm font-cinzel text-accent-gold">{t("community.searchByGameTitle")}</label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="e.g., Gloomhaven, Dungeons & Dragons"
+                  placeholder={t("community.gameTitlePlaceholder")}
                   className="pl-10 font-merriweather"
                   value={gameFilter}
                   onChange={(e) => setGameFilter(e.target.value)}
@@ -122,18 +122,18 @@ export function DiscoverPlayers() {
 
             {/* Game Type Filter */}
             <div className="space-y-2">
-              <label className="text-sm font-cinzel text-accent-gold">Preferred Game Type</label>
+              <label className="text-sm font-cinzel text-accent-gold">{t("community.preferredGameType")}</label>
               <Select value={gameTypeFilter} onValueChange={setGameTypeFilter}>
                 <SelectTrigger className="font-merriweather">
-                  <SelectValue placeholder="Any Game Type" />
+                  <SelectValue placeholder={t("community.anyGameType")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="board-games">Board Games</SelectItem>
-                  <SelectItem value="rpgs">RPGs</SelectItem>
-                  <SelectItem value="miniatures">Miniatures</SelectItem>
-                  <SelectItem value="trading-cards">Trading Cards</SelectItem>
-                  <SelectItem value="party-games">Party Games</SelectItem>
-                  <SelectItem value="strategy">Strategy Games</SelectItem>
+                  <SelectItem value="board-games">{t("community.boardGames")}</SelectItem>
+                  <SelectItem value="rpgs">{t("community.rpgs")}</SelectItem>
+                  <SelectItem value="miniatures">{t("community.miniatures")}</SelectItem>
+                  <SelectItem value="trading-cards">{t("community.tradingCards")}</SelectItem>
+                  <SelectItem value="party-games">{t("community.partyGames")}</SelectItem>
+                  <SelectItem value="strategy">{t("community.strategyGames")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

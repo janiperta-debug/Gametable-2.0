@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import { useRouter } from "next/navigation"
 import { CollectionHeader, type SortOption, type ViewMode } from "@/components/collection-header"
 import { CollectionFilters } from "@/components/collection-filters"
 import { GameGrid } from "@/components/game-grid"
 import { GameList } from "@/components/game-list"
 import { DiscoverGames } from "@/components/discover-games"
 import { ImportSection } from "@/components/import-section"
-import { AddGameDialog } from "@/components/add-game-dialog"
 import { BookOpen, Filter, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -19,9 +19,9 @@ import type { Game } from "@/lib/mock-games"
 type CategoryType = "all" | "board-games" | "rpgs" | "miniatures" | "trading-cards"
 
 export default function Collection() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<"my-games" | "find-games">("my-games")
   const [showFilters, setShowFilters] = useState(false)
-  const [addGameOpen, setAddGameOpen] = useState(false)
   const { toast } = useToast()
   const t = useTranslations()
   const { games: userGames, loading, refetch } = useCollection()
@@ -169,7 +169,7 @@ export default function Collection() {
               setSelectedCategory={setSelectedCategory}
               sortBy={sortBy}
               setSortBy={setSortBy}
-              onAddGame={() => setAddGameOpen(true)}
+              onAddGame={() => router.push("/collection/add")}
               onImport={() => {}}
               categoryCounts={categoryCounts}
             />
@@ -211,11 +211,7 @@ export default function Collection() {
               </div>
             </div>
 
-            <AddGameDialog 
-              open={addGameOpen} 
-              onOpenChange={setAddGameOpen} 
-              onGameAdded={refetch}
-            />
+            
           </>
         ) : (
           <DiscoverGames onToggleWishlist={handleToggleWishlist} />
