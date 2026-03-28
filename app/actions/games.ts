@@ -32,9 +32,13 @@ export async function getUserGames() {
   return { games: data || [], error: null }
 }
 
+export type GameCategory = 'board_game' | 'rpg' | 'trading_card' | 'miniature'
+
 export async function addGameToCollection(
   bggDetails: BGGGameDetails,
-  status: 'owned' | 'wishlist' = 'owned'
+  status: 'owned' | 'wishlist' = 'owned',
+  category: GameCategory = 'board_game',
+  isManualEntry: boolean = false
 ) {
   const supabase = await createClient()
   
@@ -43,42 +47,81 @@ export async function addGameToCollection(
     return { error: 'Not authenticated' }
   }
 
-  // Check if game already exists by bgg_id
+  // For manual entries, we don't have a bgg_id
   let gameId: string
-  const { data: existingGame } = await supabase
-    .from('games')
-    .select('id')
-    .eq('bgg_id', bggDetails.id)
-    .single()
 
-  if (existingGame) {
-    gameId = existingGame.id
-  } else {
-    // Insert the game
-    const { data: newGame, error: gameError } = await supabase
+  if (isManualEntry) {
+    // For manual entries, check by name to avoid duplicates
+    const { data: existingGame } = await supabase
       .from('games')
-      .insert({
-        bgg_id: bggDetails.id,
-        name: bggDetails.name,
-        year: bggDetails.yearPublished,
-        min_players: bggDetails.minPlayers,
-        max_players: bggDetails.maxPlayers,
-        min_playtime: bggDetails.minPlaytime,
-        max_playtime: bggDetails.maxPlaytime,
-        bgg_rating: bggDetails.rating,
-        image_url: bggDetails.image,
-        thumbnail_url: bggDetails.thumbnail,
-        description: bggDetails.description,
-        category: 'board-games', // Default category
-      })
       .select('id')
+      .eq('name', bggDetails.name)
+      .eq('category', category)
+      .is('bgg_id', null)
       .single()
 
-    if (gameError) {
-      console.error('Error inserting game:', gameError)
-      return { error: gameError.message }
+    if (existingGame) {
+      gameId = existingGame.id
+    } else {
+      // Insert manual game entry
+      const { data: newGame, error: gameError } = await supabase
+        .from('games')
+        .insert({
+          name: bggDetails.name,
+          year: bggDetails.yearPublished,
+          min_players: bggDetails.minPlayers,
+          max_players: bggDetails.maxPlayers,
+          min_playtime: bggDetails.minPlaytime,
+          max_playtime: bggDetails.maxPlaytime,
+          description: bggDetails.description,
+          category,
+        })
+        .select('id')
+        .single()
+
+      if (gameError) {
+        console.error('Error inserting manual game:', gameError)
+        return { error: gameError.message }
+      }
+      gameId = newGame.id
     }
-    gameId = newGame.id
+  } else {
+    // Check if game already exists by bgg_id
+    const { data: existingGame } = await supabase
+      .from('games')
+      .select('id')
+      .eq('bgg_id', bggDetails.id)
+      .single()
+
+    if (existingGame) {
+      gameId = existingGame.id
+    } else {
+      // Insert the game from API
+      const { data: newGame, error: gameError } = await supabase
+        .from('games')
+        .insert({
+          bgg_id: bggDetails.id,
+          name: bggDetails.name,
+          year: bggDetails.yearPublished,
+          min_players: bggDetails.minPlayers,
+          max_players: bggDetails.maxPlayers,
+          min_playtime: bggDetails.minPlaytime,
+          max_playtime: bggDetails.maxPlaytime,
+          bgg_rating: bggDetails.rating,
+          image_url: bggDetails.image,
+          thumbnail_url: bggDetails.thumbnail,
+          description: bggDetails.description,
+          category,
+        })
+        .select('id')
+        .single()
+
+      if (gameError) {
+        console.error('Error inserting game:', gameError)
+        return { error: gameError.message }
+      }
+      gameId = newGame.id
+    }
   }
 
   // Check if user already has this game

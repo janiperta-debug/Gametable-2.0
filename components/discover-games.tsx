@@ -5,50 +5,158 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Search, Filter, ExternalLink, Heart } from "lucide-react"
-import Link from "next/link"
-import { DISCOVER_GAMES } from "@/lib/discover-games"
+import { Search, ExternalLink, Heart, Plus, Loader2, Star, Users, Clock } from "lucide-react"
+import { useTranslations } from "@/lib/i18n"
+import { addGameToCollection, type GameCategory } from "@/app/actions/games"
+import { useToast } from "@/hooks/use-toast"
+import type { BGGSearchResult, BGGGameDetails } from "@/lib/types/database"
 
-const categories = ["Board Games", "RPGs", "Miniatures", "Trading Cards"]
-
-const gamesByCategory = {
-  "Board Games": DISCOVER_GAMES.filter((g) => [101, 102, 103].includes(g.id)),
-  RPGs: DISCOVER_GAMES.filter((g) => [104, 105].includes(g.id)),
-  Miniatures: DISCOVER_GAMES.filter((g) => [106, 107].includes(g.id)),
-  "Trading Cards": DISCOVER_GAMES.filter((g) => [108, 109].includes(g.id)),
+interface CategoryConfig {
+  id: GameCategory
+  labelKey: string
+  searchEndpoint: string
+  detailsEndpoint: string
+  sourceName: string
+  sourceUrl: string
 }
 
-const databaseSources = {
-  "Board Games": { name: "BoardGameGeek", url: "https://boardgamegeek.com/xmlapi2/search?query=" },
-  RPGs: { name: "RPGGeek", url: "https://rpggeek.com/xmlapi2/search?query=" },
-  Miniatures: { name: "Miniature Market", url: "https://www.miniaturemarket.com/search?q=" },
-  "Trading Cards": { name: "TCGPlayer", url: "https://www.tcgplayer.com/search/all/product?q=" },
-}
+const categories: CategoryConfig[] = [
+  { 
+    id: "board_game", 
+    labelKey: "boardGames", 
+    searchEndpoint: "/api/bgg/search", 
+    detailsEndpoint: "/api/bgg/details",
+    sourceName: "BoardGameGeek",
+    sourceUrl: "https://boardgamegeek.com"
+  },
+  { 
+    id: "rpg", 
+    labelKey: "rpgs", 
+    searchEndpoint: "/api/rpgg/search", 
+    detailsEndpoint: "/api/rpgg/details",
+    sourceName: "RPGGeek",
+    sourceUrl: "https://rpggeek.com"
+  },
+  { 
+    id: "miniature", 
+    labelKey: "miniatures", 
+    searchEndpoint: "/api/miniatures/search", 
+    detailsEndpoint: "/api/miniatures/details",
+    sourceName: "Miniatures DB",
+    sourceUrl: "#"
+  },
+  { 
+    id: "trading_card", 
+    labelKey: "tradingCards", 
+    searchEndpoint: "/api/tcg/search", 
+    detailsEndpoint: "/api/tcg/details",
+    sourceName: "TCG Database",
+    sourceUrl: "#"
+  },
+]
 
-interface DiscoverGamesProps {
-  onToggleWishlist?: (gameId: string) => void
-}
-
-export function DiscoverGames({ onToggleWishlist }: DiscoverGamesProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string>("Board Games")
+export function DiscoverGames() {
+  const t = useTranslations()
+  const { toast } = useToast()
+  const [selectedCategory, setSelectedCategory] = useState<GameCategory>("board_game")
   const [searchQuery, setSearchQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
+  const [searchResults, setSearchResults] = useState<BGGSearchResult[]>([])
+  const [selectedGame, setSelectedGame] = useState<BGGGameDetails | null>(null)
+  const [loadingDetails, setLoadingDetails] = useState<number | null>(null)
+  const [addingGame, setAddingGame] = useState<{ id: number; type: 'collection' | 'wishlist' } | null>(null)
 
-  const currentGames = gamesByCategory[selectedCategory as keyof typeof gamesByCategory] || []
-  const currentSource = databaseSources[selectedCategory as keyof typeof databaseSources]
+  const categoryConfig = categories.find(c => c.id === selectedCategory)!
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return
 
     setIsSearching(true)
-    console.log(`[v0] Searching ${currentSource.name} for: ${searchQuery}`)
+    setSearchResults([])
+    setSelectedGame(null)
 
-    // Simulate API call to external database
-    setTimeout(() => {
-      console.log(`[v0] Search completed for ${selectedCategory} on ${currentSource.name}`)
+    try {
+      const response = await fetch(`${categoryConfig.searchEndpoint}?query=${encodeURIComponent(searchQuery)}`)
+      const data = await response.json()
+
+      if (data.error) {
+        throw new Error(data.error)
+      }
+
+      setSearchResults(data.results || [])
+    } catch (error) {
+      console.error("Search error:", error)
+      toast({
+        title: t("common.error"),
+        description: t("collection.searchFailed"),
+        variant: "destructive",
+      })
+    } finally {
       setIsSearching(false)
-      // In a real implementation, this would fetch from the actual API
-    }, 1500)
+    }
+  }
+
+  const handleSelectGame = async (gameId: number) => {
+    setLoadingDetails(gameId)
+    try {
+      const response = await fetch(`${categoryConfig.detailsEndpoint}?id=${gameId}`)
+      const details: BGGGameDetails = await response.json()
+      
+      if (details && details.id !== undefined) {
+        setSelectedGame(details)
+      }
+    } catch (error) {
+      console.error("Details error:", error)
+      toast({
+        title: t("common.error"),
+        description: t("collection.detailsFailed"),
+        variant: "destructive",
+      })
+    } finally {
+      setLoadingDetails(null)
+    }
+  }
+
+  const handleAddGame = async (status: 'owned' | 'wishlist') => {
+    if (!selectedGame) return
+    
+    setAddingGame({ id: selectedGame.id, type: status === 'owned' ? 'collection' : 'wishlist' })
+
+    try {
+      const result = await addGameToCollection(selectedGame, status, selectedCategory)
+
+      if (result.error) {
+        toast({
+          title: t("common.error"),
+          description: result.error,
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: t("common.success"),
+          description: status === 'owned' 
+            ? `${selectedGame.name} ${t("collection.addedToCollection")}`
+            : `${selectedGame.name} ${t("discover.addedToWishlist")}`,
+        })
+        setSelectedGame(null)
+      }
+    } catch (error) {
+      console.error("Add game error:", error)
+      toast({
+        title: t("common.error"),
+        description: t("collection.addFailed"),
+        variant: "destructive",
+      })
+    } finally {
+      setAddingGame(null)
+    }
+  }
+
+  const handleCategoryChange = (category: GameCategory) => {
+    setSelectedCategory(category)
+    setSearchResults([])
+    setSelectedGame(null)
+    setSearchQuery("")
   }
 
   return (
@@ -56,9 +164,9 @@ export function DiscoverGames({ onToggleWishlist }: DiscoverGamesProps) {
       {/* Search and Filters */}
       <Card className="room-furniture">
         <CardHeader>
-          <CardTitle className="text-2xl">Discover New Games</CardTitle>
-          <p className="font-merriweather text-muted-foreground">
-            Search the vast library to find and add games to your personal collection.
+          <CardTitle className="text-2xl font-heading text-accent-gold">{t("discover.title")}</CardTitle>
+          <p className="font-body text-muted-foreground">
+            {t("discover.subtitle")}
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -66,100 +174,166 @@ export function DiscoverGames({ onToggleWishlist }: DiscoverGamesProps) {
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={`Search ${currentSource.name}...`}
-                className="pl-10 font-merriweather"
+                placeholder={`${t("discover.searchIn")} ${categoryConfig.sourceName}...`}
+                className="pl-10 font-body"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               />
             </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={handleSearch}
-                disabled={isSearching || !searchQuery.trim()}
-                className="font-cinzel theme-accent-gold flex-1 sm:flex-none"
-              >
+            <Button
+              onClick={handleSearch}
+              disabled={isSearching || !searchQuery.trim()}
+              className="font-body theme-accent-gold"
+            >
+              {isSearching ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
                 <ExternalLink className="h-4 w-4 mr-2" />
-                <span className="hidden md:inline">
-                  {isSearching ? "Searching..." : `Search ${currentSource.name}`}
-                </span>
-                <span className="md:hidden">{isSearching ? "Searching..." : "Search"}</span>
-              </Button>
-              <Button variant="outline" className="theme-accent-gold bg-transparent flex-shrink-0">
-                <Filter className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline font-cinzel">Filters</span>
-              </Button>
-            </div>
+              )}
+              {isSearching ? t("common.searching") : t("common.search")}
+            </Button>
           </div>
 
           {/* Category Tabs */}
           <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
+            {categories.map((cat) => (
               <Button
-                key={category}
-                variant={category === selectedCategory ? "default" : "outline"}
+                key={cat.id}
+                variant={cat.id === selectedCategory ? "default" : "outline"}
                 size="sm"
-                className="font-cinzel transition-all duration-200 hover:scale-105 theme-accent-gold"
-                onClick={() => setSelectedCategory(category)}
+                className={`font-body transition-all ${cat.id === selectedCategory ? "theme-accent-gold" : "bg-transparent hover:border-accent-gold/50"}`}
+                onClick={() => handleCategoryChange(cat.id)}
               >
-                {category}
+                {t(`collection.${cat.labelKey}`)}
               </Button>
             ))}
           </div>
 
-          <div className="text-sm text-muted-foreground font-merriweather">
-            Searching in: <span className="text-accent-gold font-medium">{currentSource.name}</span>
+          <div className="text-sm text-muted-foreground font-body">
+            {t("discover.searchingIn")}: <span className="text-accent-gold font-medium">{categoryConfig.sourceName}</span>
           </div>
         </CardContent>
       </Card>
 
-      {/* Games Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {currentGames.map((game) => (
-          <Card key={game.id} className="picture-frame overflow-hidden">
-            <div className="aspect-[3/4] bg-muted">
-              <img src={game.image || "/placeholder.svg"} alt={game.title} className="w-full h-full object-cover" />
-            </div>
-            <CardContent className="p-4">
-              <div className="space-y-2">
-                <h3 className="font-cinzel font-semibold">{game.title}</h3>
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span className="font-merriweather">{game.players} players</span>
-                  <span className="font-merriweather">{game.time}</span>
+      {/* Selected Game Detail */}
+      {selectedGame && (
+        <Card className="room-furniture">
+          <CardContent className="pt-6">
+            <div className="flex gap-4">
+              {selectedGame.thumbnail && (
+                <img
+                  src={selectedGame.thumbnail}
+                  alt={selectedGame.name}
+                  className="w-32 h-32 object-cover rounded"
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <h3 className="font-heading font-semibold text-2xl text-accent-gold">{selectedGame.name}</h3>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {selectedGame.yearPublished && (
+                    <Badge variant="outline" className="text-xs border-accent-gold/30">
+                      {selectedGame.yearPublished}
+                    </Badge>
+                  )}
+                  {selectedGame.rating && (
+                    <Badge variant="outline" className="text-xs border-accent-gold/30">
+                      <Star className="h-3 w-3 mr-1 fill-accent-gold text-accent-gold" />
+                      {selectedGame.rating}
+                    </Badge>
+                  )}
+                  {selectedGame.minPlayers && selectedGame.maxPlayers && (
+                    <Badge variant="outline" className="text-xs border-accent-gold/30">
+                      <Users className="h-3 w-3 mr-1" />
+                      {selectedGame.minPlayers}-{selectedGame.maxPlayers}
+                    </Badge>
+                  )}
+                  {selectedGame.minPlaytime && (
+                    <Badge variant="outline" className="text-xs border-accent-gold/30">
+                      <Clock className="h-3 w-3 mr-1" />
+                      {selectedGame.minPlaytime}-{selectedGame.maxPlaytime || selectedGame.minPlaytime}m
+                    </Badge>
+                  )}
                 </div>
-                <div className="flex items-center justify-between">
-                  <Badge variant="outline" className="font-cinzel">
-                    {game.category}
-                  </Badge>
-                  <div className="flex items-center space-x-1">
-                    <span className="text-sm font-medium">⭐ {game.rating}</span>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Link href={`/game/${game.id}`} className="flex-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full font-cinzel border-accent-gold/20 hover:border-accent-gold bg-transparent"
-                    >
-                      View Details
-                    </Button>
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onToggleWishlist?.(game.id.toString())}
-                    className="text-muted-foreground hover:text-accent-gold"
-                  >
-                    <Heart className="h-4 w-4" />
-                  </Button>
-                </div>
-                <Button className="w-full font-cinzel theme-accent-gold">Add to Collection</Button>
+                {selectedGame.description && (
+                  <p className="mt-3 text-sm text-muted-foreground line-clamp-3 font-body">
+                    {selectedGame.description.replace(/<[^>]*>/g, '')}
+                  </p>
+                )}
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-accent-gold/20">
+              <Button variant="outline" onClick={() => setSelectedGame(null)} className="font-body bg-transparent">
+                {t("common.cancel")}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleAddGame('wishlist')}
+                disabled={addingGame !== null}
+                className="font-body bg-transparent border-accent-gold/30 hover:bg-accent-gold/10"
+              >
+                {addingGame?.type === 'wishlist' ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Heart className="h-4 w-4 mr-2" />
+                )}
+                {t("collection.addToWishlist")}
+              </Button>
+              <Button
+                onClick={() => handleAddGame('owned')}
+                disabled={addingGame !== null}
+                className="theme-accent-gold font-body"
+              >
+                {addingGame?.type === 'collection' ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Plus className="h-4 w-4 mr-2" />
+                )}
+                {t("collection.addToCollection")}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Search Results */}
+      {!selectedGame && (
+        <div className="space-y-2">
+          {isSearching ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
+            </div>
+          ) : searchResults.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground font-body">
+              {searchQuery ? t("collection.noResults") : t("discover.searchToStart")}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {searchResults.map((game) => (
+                <Card key={game.id} className="room-furniture overflow-hidden hover:border-accent-gold/50 transition-colors cursor-pointer" onClick={() => handleSelectGame(game.id)}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-heading font-medium text-lg truncate">{game.name}</h4>
+                        {game.yearPublished && (
+                          <Badge variant="outline" className="mt-1 text-xs border-accent-gold/30 text-accent-gold">
+                            {game.yearPublished}
+                          </Badge>
+                        )}
+                      </div>
+                      {loadingDetails === game.id ? (
+                        <Loader2 className="h-5 w-5 animate-spin text-accent-gold ml-4 flex-shrink-0" />
+                      ) : (
+                        <Plus className="h-5 w-5 text-accent-gold ml-4 flex-shrink-0" />
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
