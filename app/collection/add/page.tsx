@@ -242,7 +242,7 @@ export default function AddGamePage() {
           {/* Search/Manual Tabs */}
           <Card className="room-furniture">
             <CardContent className="pt-6">
-              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "search" | "manual")}>
+              <Tabs defaultValue="search" value={activeTab} onValueChange={(v) => setActiveTab(v as "search" | "manual")}>
                 <TabsList className="grid w-full grid-cols-2 mb-6">
                   <TabsTrigger value="search" className="font-body">{t("collection.searchDatabase")}</TabsTrigger>
                   <TabsTrigger value="manual" className="font-body">{t("collection.manualEntry")}</TabsTrigger>
