@@ -10,11 +10,14 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Search BGG API
+    // Search BGG API - requires User-Agent header
     const searchResponse = await fetch(
       `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame`,
       { 
-        headers: { 'Accept': 'application/xml' },
+        headers: { 
+          'Accept': 'application/xml',
+          'User-Agent': 'GameTable/1.0 (Board Game Collection App)'
+        },
         next: { revalidate: 3600 } // Cache for 1 hour
       }
     )

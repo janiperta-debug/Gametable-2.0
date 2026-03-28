@@ -14,7 +14,10 @@ export async function GET(request: NextRequest) {
     const searchResponse = await fetch(
       `https://rpggeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=rpgitem`,
       { 
-        headers: { 'Accept': 'application/xml' },
+        headers: { 
+          'Accept': 'application/xml',
+          'User-Agent': 'GameTable/1.0 (Board Game Collection App)'
+        },
         next: { revalidate: 3600 } // Cache for 1 hour
       }
     )

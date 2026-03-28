@@ -40,7 +40,7 @@ const categories: CategoryConfig[] = [
 
 export default function AddGamePage() {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<"search" | "manual">("search")
+  const [activeTab, setActiveTab] = useState<"search" | "manual" | "bulk">("search")
   const [selectedCategory, setSelectedCategory] = useState<GameCategory>("board_game")
   const [searchQuery, setSearchQuery] = useState("")
   const [searching, setSearching] = useState(false)
@@ -65,6 +65,11 @@ export default function AddGamePage() {
     description: "",
   })
   const [savingManual, setSavingManual] = useState(false)
+  
+  // Bulk import state
+  const [bulkText, setBulkText] = useState("")
+  const [parsedItems, setParsedItems] = useState<Array<{ name: string; quantity: number; setCode?: string }>>([])
+  const [importingBulk, setImportingBulk] = useState(false)
 
   const categoryConfig = categories.find(c => c.id === selectedCategory)!
 
@@ -229,6 +234,92 @@ export default function AddGamePage() {
     setSearchResults([])
     setSelectedGame(null)
     setSearchQuery("")
+    setParsedItems([])
+    setBulkText("")
+  }
+
+  const handleParseBulk = () => {
+    const lines = bulkText.split("\n").filter((line) => line.trim())
+    const parsed: Array<{ name: string; quantity: number; setCode?: string }> = []
+
+    for (const line of lines) {
+      // Skip comments and section headers
+      if (line.startsWith("//") || line.startsWith("#") || line.endsWith(":")) continue
+
+      // Match patterns like "4 Lightning Bolt", "4x Lightning Bolt", "4 Lightning Bolt (M20) 160"
+      const match = line.match(/^(\d+)x?\s+(.+?)(?:\s+\(([A-Z0-9]+)\))?(?:\s+\d+)?$/i)
+
+      if (match) {
+        parsed.push({
+          quantity: parseInt(match[1], 10),
+          name: match[2].trim(),
+          setCode: match[3] || undefined,
+        })
+      }
+    }
+
+    setParsedItems(parsed)
+    
+    if (parsed.length === 0 && bulkText.trim()) {
+      toast({
+        title: t("common.error"),
+        description: t("collection.noParsedItems"),
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleBulkImport = async () => {
+    if (parsedItems.length === 0) return
+    
+    setImportingBulk(true)
+    let successCount = 0
+    let errorCount = 0
+
+    for (const item of parsedItems) {
+      try {
+        // For TCG, search for the card and add it
+        if (selectedCategory === "trading_card") {
+          const response = await fetch(`/api/tcg/search?q=${encodeURIComponent(item.name)}&game=mtg`)
+          const data = await response.json()
+          
+          if (data.results && data.results.length > 0) {
+            const card = data.results[0] as TCGSearchResult
+            const result = await addCardToCollection(card, item.quantity, "owned")
+            if (result.success) successCount++
+            else errorCount++
+          } else {
+            errorCount++
+          }
+        } else if (selectedCategory === "miniature") {
+          // For miniatures, search and add
+          const response = await fetch(`/api/miniatures/search?query=${encodeURIComponent(item.name)}`)
+          const data = await response.json()
+          
+          if (data.results && data.results.length > 0) {
+            const mini = data.results[0] as MiniatureSearchResult
+            const result = await addMiniatureToCollection(mini, item.quantity, "unpainted", "owned")
+            if (result.success) successCount++
+            else errorCount++
+          } else {
+            errorCount++
+          }
+        }
+      } catch {
+        errorCount++
+      }
+    }
+
+    setImportingBulk(false)
+    
+    toast({
+      title: t("common.success"),
+      description: `Imported ${successCount} items${errorCount > 0 ? `, ${errorCount} failed` : ""}`,
+    })
+
+    if (successCount > 0) {
+      router.push("/collection")
+    }
   }
 
   return (
@@ -273,10 +364,13 @@ export default function AddGamePage() {
           {/* Search/Manual Tabs */}
           <Card className="room-furniture">
             <CardContent className="pt-6">
-              <Tabs defaultValue="search" value={activeTab} onValueChange={(v) => setActiveTab(v as "search" | "manual")}>
-                <TabsList className="grid w-full grid-cols-2 mb-6">
+              <Tabs defaultValue="search" value={activeTab} onValueChange={(v) => setActiveTab(v as "search" | "manual" | "bulk")}>
+                <TabsList className={`grid w-full mb-6 ${selectedCategory === "trading_card" || selectedCategory === "miniature" ? "grid-cols-3" : "grid-cols-2"}`}>
                   <TabsTrigger value="search" className="font-body">{t("collection.searchDatabase")}</TabsTrigger>
                   <TabsTrigger value="manual" className="font-body">{t("collection.manualEntry")}</TabsTrigger>
+                  {(selectedCategory === "trading_card" || selectedCategory === "miniature") && (
+                    <TabsTrigger value="bulk" className="font-body">{t("collection.bulkImport")}</TabsTrigger>
+                  )}
                 </TabsList>
 
                 {/* Search Tab */}
@@ -660,6 +754,75 @@ export default function AddGamePage() {
                     </div>
                   </div>
                 </TabsContent>
+
+                {/* Bulk Import Tab (only for TCG and Miniatures) */}
+                {(selectedCategory === "trading_card" || selectedCategory === "miniature") && (
+                  <TabsContent value="bulk" className="space-y-6">
+                    <p className="font-body text-muted-foreground text-sm">
+                      {t("collection.bulkImportDescription")}
+                    </p>
+
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="bulkText" className="text-accent-gold font-cinzel text-sm uppercase tracking-wider">
+                          {selectedCategory === "trading_card" ? "Deck List" : "Army List"}
+                        </Label>
+                        <textarea
+                          id="bulkText"
+                          value={bulkText}
+                          onChange={(e) => setBulkText(e.target.value)}
+                          placeholder={selectedCategory === "trading_card" 
+                            ? "4 Lightning Bolt\n2x Dark Ritual\n1 Black Lotus (LEA)"
+                            : "10 Intercessors\n5x Hellblasters\n1 Captain in Gravis Armour"
+                          }
+                          className="mt-1 w-full min-h-[150px] rounded-md border border-input bg-background px-3 py-2 text-sm font-body placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring font-mono"
+                        />
+                      </div>
+
+                      <Button
+                        onClick={handleParseBulk}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        {t("collection.parseList")}
+                      </Button>
+
+                      {parsedItems.length > 0 && (
+                        <div className="space-y-3">
+                          <h4 className="font-heading text-accent-gold">{t("collection.parsedItems")} ({parsedItems.length})</h4>
+                          <div className="max-h-48 overflow-y-auto space-y-2 border border-accent-gold/20 rounded-lg p-3">
+                            {parsedItems.map((item, idx) => (
+                              <div key={idx} className="flex justify-between items-center text-sm font-body">
+                                <span>{item.name}</span>
+                                <Badge variant="outline" className="border-accent-gold/30">
+                                  x{item.quantity}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+
+                          <Button
+                            onClick={handleBulkImport}
+                            disabled={importingBulk}
+                            className="w-full theme-accent-gold font-body"
+                          >
+                            {importingBulk ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                Importing...
+                              </>
+                            ) : (
+                              <>
+                                <Plus className="h-4 w-4 mr-2" />
+                                {t("collection.importAll")} ({parsedItems.length})
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+                )}
               </Tabs>
             </CardContent>
           </Card>

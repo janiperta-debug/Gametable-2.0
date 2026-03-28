@@ -16,23 +16,53 @@ export interface TCGSearchResult {
   description?: string
 }
 
-// APITCG.com - supports MTG, Pokémon, Lorcana, Flesh & Blood, One Piece
-async function searchAPITCG(query: string, game: string): Promise<TCGSearchResult[]> {
-  // Map our game codes to APITCG game codes
-  const gameMap: Record<string, string> = {
-    mtg: "magic",
-    pokemon: "pokemon",
-    lorcana: "lorcana",
-    fab: "flesh-and-blood",
-    onepiece: "one-piece",
-  }
-
-  const apiGame = gameMap[game]
-  if (!apiGame) return []
-
+// Scryfall API for Magic: The Gathering (more reliable)
+async function searchScryfall(query: string): Promise<TCGSearchResult[]> {
   try {
     const response = await fetch(
-      `https://apitcg.com/api/${apiGame}/cards?name=${encodeURIComponent(query)}&limit=20`,
+      `https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}&unique=cards&order=name`,
+      {
+        headers: {
+          Accept: "application/json",
+          "User-Agent": "GameTable/1.0",
+        },
+      }
+    )
+
+    if (!response.ok) {
+      // Scryfall returns 404 for no results
+      if (response.status === 404) return []
+      console.error(`Scryfall error: ${response.status}`)
+      return []
+    }
+
+    const data = await response.json()
+    const cards = data.data || []
+
+    return cards.slice(0, 20).map((card: Record<string, unknown>) => ({
+      id: String(card.id),
+      name: String(card.name || ""),
+      game: "mtg" as TCGGame,
+      set: String(card.set_name || "Unknown Set"),
+      setCode: String(card.set || ""),
+      rarity: String(card.rarity || ""),
+      imageUrl: String((card.image_uris as Record<string, string>)?.normal || (card.image_uris as Record<string, string>)?.large || ""),
+      thumbnailUrl: String((card.image_uris as Record<string, string>)?.small || ""),
+      price: card.prices && (card.prices as Record<string, string>).usd ? parseFloat((card.prices as Record<string, string>).usd) : undefined,
+      type: String(card.type_line || ""),
+      description: String(card.oracle_text || ""),
+    }))
+  } catch (error) {
+    console.error("Scryfall search error:", error)
+    return []
+  }
+}
+
+// Pokemon TCG API
+async function searchPokemonTCG(query: string): Promise<TCGSearchResult[]> {
+  try {
+    const response = await fetch(
+      `https://api.pokemontcg.io/v2/cards?q=name:${encodeURIComponent(query)}*&pageSize=20`,
       {
         headers: {
           Accept: "application/json",
@@ -41,28 +71,28 @@ async function searchAPITCG(query: string, game: string): Promise<TCGSearchResul
     )
 
     if (!response.ok) {
-      console.error(`APITCG error: ${response.status}`)
+      console.error(`Pokemon TCG error: ${response.status}`)
       return []
     }
 
     const data = await response.json()
-    const cards = data.data || data.cards || data || []
+    const cards = data.data || []
 
     return cards.slice(0, 20).map((card: Record<string, unknown>) => ({
-      id: String(card.id || card.cardId || `${game}-${card.name}`),
+      id: String(card.id),
       name: String(card.name || ""),
-      game: game as TCGGame,
-      set: String(card.set?.name || card.setName || card.set || "Unknown Set"),
-      setCode: String(card.set?.code || card.setCode || ""),
+      game: "pokemon" as TCGGame,
+      set: String((card.set as Record<string, string>)?.name || "Unknown Set"),
+      setCode: String((card.set as Record<string, string>)?.id || ""),
       rarity: String(card.rarity || ""),
-      imageUrl: String(card.images?.large || card.images?.normal || card.image || card.imageUrl || ""),
-      thumbnailUrl: String(card.images?.small || card.images?.thumbnail || card.thumbnail || card.imageUrl || ""),
-      price: card.prices?.usd ? parseFloat(String(card.prices.usd)) : undefined,
-      type: String(card.type || card.supertype || ""),
-      description: String(card.text || card.description || card.abilities?.[0]?.text || ""),
+      imageUrl: String((card.images as Record<string, string>)?.large || ""),
+      thumbnailUrl: String((card.images as Record<string, string>)?.small || ""),
+      price: (card.tcgplayer as Record<string, Record<string, Record<string, number>>>)?.prices?.normal?.market || undefined,
+      type: String((card.types as string[])?.[0] || card.supertype || ""),
+      description: String((card.abilities as Array<Record<string, string>>)?.[0]?.text || ""),
     }))
   } catch (error) {
-    console.error("APITCG search error:", error)
+    console.error("Pokemon TCG search error:", error)
     return []
   }
 }
@@ -121,10 +151,20 @@ export async function GET(request: NextRequest) {
 
   let results: TCGSearchResult[] = []
 
-  if (game === "yugioh") {
-    results = await searchYGOProDeck(query)
-  } else {
-    results = await searchAPITCG(query, game)
+  switch (game) {
+    case "yugioh":
+      results = await searchYGOProDeck(query)
+      break
+    case "mtg":
+      results = await searchScryfall(query)
+      break
+    case "pokemon":
+      results = await searchPokemonTCG(query)
+      break
+    default:
+      // For other games, return empty for now with a note
+      console.log(`TCG game ${game} not yet implemented`)
+      results = []
   }
 
   return NextResponse.json({ results })
