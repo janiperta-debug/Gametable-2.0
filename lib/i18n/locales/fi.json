@@ -872,7 +872,17 @@
     "alreadyHaveAccount": "Onko sinulla jo tili?",
     "dontHaveAccount": "Eikö sinulla ole tiliä?",
     "loginWithGoogle": "Kirjaudu Googlella",
-    "loginWithFacebook": "Kirjaudu Facebookilla"
+    "loginWithFacebook": "Kirjaudu Facebookilla",
+    "checkYourEmail": "Tarkista sähköpostisi",
+    "verifyEmailSent": "Vahvistussähköposti lähetetty",
+    "verifyEmailInstructions": "Olemme lähettäneet vahvistuslinkin sähköpostiisi. Tarkista postilaatikkosi ja napsauta linkkiä vahvistaaksesi tilisi.",
+    "backToLogin": "Takaisin kirjautumiseen",
+    "emailNotReceived": "Etkö saanut sähköpostia?",
+    "resendEmail": "Lähetä vahvistussähköposti uudelleen",
+    "emailVerified": "Sähköposti vahvistettu onnistuneesti",
+    "verificationFailed": "Vahvistus epäonnistui",
+    "invalidCredentials": "Virheellinen sähköposti tai salasana",
+    "accountCreated": "Tili luotu onnistuneesti"
   },
   "users": {
     "notFound": "Käyttäjää ei löytynyt",
