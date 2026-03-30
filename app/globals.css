@@ -2,21 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  /* Layered background for premium feel - works with all themes */
-  .app-background {
-    background:
-      radial-gradient(circle at 50% 0%, hsl(var(--accent-gold) / 0.15), transparent 60%),
-      radial-gradient(circle at 50% 20%, hsl(var(--background)), hsl(var(--surface-dark)) 80%),
-      repeating-linear-gradient(
-        45deg,
-        hsl(var(--accent-gold) / 0.03),
-        hsl(var(--accent-gold) / 0.03) 2px,
-        transparent 2px,
-        transparent 10px
-      );
-  }
+/* Layered background for premium feel - outside @layer for higher specificity */
+.app-background {
+  background:
+    radial-gradient(circle at 50% 0%, hsl(var(--accent-gold) / 0.15), transparent 60%),
+    radial-gradient(circle at 50% 20%, hsl(var(--background)), hsl(var(--surface-dark)) 80%),
+    repeating-linear-gradient(
+      45deg,
+      hsl(var(--accent-gold) / 0.03),
+      hsl(var(--accent-gold) / 0.03) 2px,
+      transparent 2px,
+      transparent 10px
+    ) !important;
+  background-color: hsl(var(--background)) !important;
+}
 
+@layer base {
   /* Default to main-hall theme to prevent flash of white content */
   :root {
     --background: 345 80% 10%; /* Deep burgundy base */
