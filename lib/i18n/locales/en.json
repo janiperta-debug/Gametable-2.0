@@ -872,7 +872,17 @@
     "alreadyHaveAccount": "Already have an account?",
     "dontHaveAccount": "Don't have an account?",
     "loginWithGoogle": "Log in with Google",
-    "loginWithFacebook": "Log in with Facebook"
+    "loginWithFacebook": "Log in with Facebook",
+    "checkYourEmail": "Check Your Email",
+    "verifyEmailSent": "Verification email sent",
+    "verifyEmailInstructions": "We've sent a verification link to your email address. Please check your inbox and click the link to verify your account.",
+    "backToLogin": "Back to Login",
+    "emailNotReceived": "Didn't receive the email?",
+    "resendEmail": "Resend verification email",
+    "emailVerified": "Email verified successfully",
+    "verificationFailed": "Verification failed",
+    "invalidCredentials": "Invalid email or password",
+    "accountCreated": "Account created successfully"
   },
   "users": {
     "notFound": "User Not Found",
