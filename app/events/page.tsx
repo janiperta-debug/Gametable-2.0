@@ -159,11 +159,10 @@ function EventCard({ event, onViewDetails, onRSVP, t, isLoggedIn, currentUserId 
             </div>
           )}
           
-          {isHost && (
-            <Button size="sm" variant="outline" className="bg-transparent" onClick={() => onViewDetails(event)}>
-              {t("events.manage")}
-            </Button>
-          )}
+          {/* View Details - always visible */}
+          <Button size="sm" variant="outline" className="bg-transparent" onClick={() => onViewDetails(event)}>
+            {isHost ? t("events.manage") : t("events.viewDetails") || "View Details"}
+          </Button>
         </div>
       </CardContent>
     </Card>

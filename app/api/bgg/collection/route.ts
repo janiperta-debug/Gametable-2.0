@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { XMLParser } from 'fast-xml-parser'
 
+const BGG_API_TOKEN = process.env.BGG_API_TOKEN
+
 export interface BGGCollectionItem {
   id: number
   name: string
@@ -25,10 +27,16 @@ export async function GET(request: NextRequest) {
   try {
     const collectionUrl = `https://boardgamegeek.com/xmlapi2/collection?username=${encodeURIComponent(username)}&stats=1&own=1`
     
+    const headers: Record<string, string> = {
+      'Accept': 'application/xml, text/xml, */*',
+    }
+    
+    if (BGG_API_TOKEN) {
+      headers['Authorization'] = `Bearer ${BGG_API_TOKEN}`
+    }
+    
     let response = await fetch(collectionUrl, {
-      headers: {
-        'Accept': 'application/xml, text/xml, */*',
-      },
+      headers,
       cache: 'no-store',
     })
 
@@ -37,7 +45,7 @@ export async function GET(request: NextRequest) {
     while (response.status === 202 && retries < 5) {
       await new Promise(resolve => setTimeout(resolve, 2000))
       response = await fetch(collectionUrl, {
-        headers: { 'Accept': 'application/xml, text/xml, */*' },
+        headers,
         cache: 'no-store',
       })
       retries++

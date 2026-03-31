@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { XMLParser } from 'fast-xml-parser'
 
+const BGG_API_TOKEN = process.env.BGG_API_TOKEN
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const query = searchParams.get('query')
@@ -12,10 +14,16 @@ export async function GET(request: NextRequest) {
   try {
     const bggUrl = `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame`
     
+    const headers: Record<string, string> = {
+      'Accept': 'application/xml, text/xml, */*',
+    }
+    
+    if (BGG_API_TOKEN) {
+      headers['Authorization'] = `Bearer ${BGG_API_TOKEN}`
+    }
+    
     const searchResponse = await fetch(bggUrl, {
-      headers: {
-        'Accept': 'application/xml, text/xml, */*',
-      },
+      headers,
       cache: 'no-store',
     })
 

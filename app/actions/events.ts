@@ -342,8 +342,10 @@ export async function getEventById(
     .eq("id", eventId)
     .single()
 
+  console.log("[v0] getEventById:", { eventId, userId: user?.id, event: event?.id, error: error?.message })
+
   if (error) {
-    console.error("Error fetching event:", error)
+    console.error("[v0] Error fetching event:", error)
     return { error: error.message }
   }
 
