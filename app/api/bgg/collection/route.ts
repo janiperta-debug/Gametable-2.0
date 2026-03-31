@@ -26,20 +26,16 @@ export async function GET(request: NextRequest) {
 
   try {
     // Fetch user's collection from BGG API
-    // Note: BGG collection API can be slow and may require retries
     const collectionUrl = `https://boardgamegeek.com/xmlapi2/collection?username=${encodeURIComponent(username)}&stats=1&own=1`
     
     console.log("[v0] Fetching BGG collection from:", collectionUrl)
     
-    let response = await fetch(collectionUrl, {
-      headers: {
-        'Accept': 'application/xml, text/xml, */*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      },
-      cache: 'no-store',
-    })
-
+    const headers = {
+      'Accept': 'application/xml, text/xml, */*',
+      'User-Agent': 'GameTable/1.0 (https://gametable.fi)',
+    }
+    
+    let response = await fetch(collectionUrl, { headers, cache: 'no-store' })
     console.log("[v0] BGG collection response status:", response.status)
 
     // BGG returns 202 when collection is being prepared - need to retry
@@ -47,14 +43,7 @@ export async function GET(request: NextRequest) {
     while (response.status === 202 && retries < 5) {
       console.log("[v0] BGG collection not ready, retrying in 2s...")
       await new Promise(resolve => setTimeout(resolve, 2000))
-      response = await fetch(collectionUrl, {
-        headers: {
-          'Accept': 'application/xml, text/xml, */*',
-          'Accept-Language': 'en-US,en;q=0.9',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        },
-        cache: 'no-store',
-      })
+      response = await fetch(collectionUrl, { headers, cache: 'no-store' })
       retries++
       console.log("[v0] Retry", retries, "status:", response.status)
     }

@@ -1,6 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { XMLParser } from 'fast-xml-parser'
 
+// Try multiple approaches to fetch from BGG
+async function fetchFromBGG(url: string): Promise<Response> {
+  // Try direct fetch first
+  const directResponse = await fetch(url, {
+    headers: {
+      'Accept': 'application/xml, text/xml, */*',
+      'User-Agent': 'GameTable/1.0 (https://gametable.fi)',
+    },
+    cache: 'no-store',
+  })
+  
+  if (directResponse.ok) {
+    return directResponse
+  }
+  
+  console.log("[v0] Direct BGG fetch failed with status:", directResponse.status)
+  
+  // If direct fails, try with different user agent
+  const retryResponse = await fetch(url, {
+    headers: {
+      'Accept': '*/*',
+      'User-Agent': 'Mozilla/5.0 (compatible; GameTableBot/1.0)',
+    },
+    cache: 'no-store',
+  })
+  
+  return retryResponse
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const query = searchParams.get('query')
@@ -8,36 +37,30 @@ export async function GET(request: NextRequest) {
   console.log("[v0] BGG search called with query:", query)
 
   if (!query) {
-    console.log("[v0] BGG search: No query provided")
     return NextResponse.json({ error: 'Query parameter is required' }, { status: 400 })
   }
 
   try {
-    console.log("[v0] BGG search: Fetching from BGG API...")
-    // Search BGG API - requires browser-like headers to avoid 401
-    const searchResponse = await fetch(
-      `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame`,
-      { 
-        headers: { 
-          'Accept': 'application/xml, text/xml, */*',
-          'Accept-Language': 'en-US,en;q=0.9',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Cache-Control': 'no-cache',
-        },
-        cache: 'no-store', // Don't cache to avoid stale responses
-      }
-    )
-
-    console.log("[v0] BGG API response status:", searchResponse.status)
+    const bggUrl = `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame`
+    console.log("[v0] Fetching from BGG:", bggUrl)
     
+    const searchResponse = await fetchFromBGG(bggUrl)
+    console.log("[v0] BGG response status:", searchResponse.status)
+
     if (!searchResponse.ok) {
-      const errorText = await searchResponse.text()
-      console.error(`[v0] BGG API error: ${searchResponse.status}, ${errorText}`)
-      throw new Error(`BGG API error: ${searchResponse.status}`)
+      // Return empty results instead of error for blocked requests
+      console.log("[v0] BGG API blocked or error, returning empty results")
+      return NextResponse.json({ results: [], note: 'BGG API temporarily unavailable' })
     }
 
     const xmlText = await searchResponse.text()
-    console.log("[v0] BGG API response length:", xmlText.length)
+    console.log("[v0] BGG response length:", xmlText.length, "chars")
+    
+    if (!xmlText || xmlText.length < 50) {
+      console.log("[v0] BGG returned empty or minimal response")
+      return NextResponse.json({ results: [] })
+    }
+
     const parser = new XMLParser({
       ignoreAttributes: false,
       attributeNamePrefix: '@_',
@@ -60,14 +83,12 @@ export async function GET(request: NextRequest) {
       const nameData = item.name
       let name = ''
       if (Array.isArray(nameData)) {
-        // Find primary name or use first
         const primary = nameData.find((n: Record<string, unknown>) => n['@_type'] === 'primary')
         name = primary ? String(primary['@_value'] || '') : String(nameData[0]?.['@_value'] || '')
       } else if (nameData && typeof nameData === 'object') {
         name = String((nameData as Record<string, unknown>)['@_value'] || '')
       }
 
-      // Handle year published
       const yearData = item.yearpublished as Record<string, unknown> | undefined
       const yearPublished = yearData ? parseInt(String(yearData['@_value']), 10) || null : null
 
@@ -78,12 +99,14 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    console.log("[v0] BGG search returning", results.length, "results")
     return NextResponse.json({ results })
   } catch (error) {
-    console.error('BGG search error:', error)
-    return NextResponse.json(
-      { error: 'Failed to search BoardGameGeek' },
-      { status: 500 }
-    )
+    console.error('[v0] BGG search error:', error)
+    // Return empty results with error note rather than failing
+    return NextResponse.json({ 
+      results: [], 
+      error: 'BoardGameGeek search temporarily unavailable' 
+    })
   }
 }
