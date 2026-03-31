@@ -381,15 +381,15 @@ export function DiscoverGames() {
               </div>
             )}
             
-            <div className={`flex justify-end gap-3 mt-4 ${selectedCategory !== "trading_card" && selectedCategory !== "miniature" ? "pt-4 border-t border-accent-gold/20" : ""}`}>
-              <Button variant="outline" onClick={() => setSelectedGame(null)} className="font-body bg-transparent">
+            <div className={`flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 mt-4 ${selectedCategory !== "trading_card" && selectedCategory !== "miniature" ? "pt-4 border-t border-accent-gold/20" : ""}`}>
+              <Button variant="outline" onClick={() => setSelectedGame(null)} className="font-body bg-transparent w-full sm:w-auto">
                 {t("common.cancel")}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => handleAddGame('wishlist')}
                 disabled={addingGame !== null}
-                className="font-body bg-transparent border-accent-gold/30 hover:bg-accent-gold/10"
+                className="font-body bg-transparent border-accent-gold/30 hover:bg-accent-gold/10 w-full sm:w-auto"
               >
                 {addingGame?.type === 'wishlist' ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -401,7 +401,7 @@ export function DiscoverGames() {
               <Button
                 onClick={() => handleAddGame('owned')}
                 disabled={addingGame !== null}
-                className="theme-accent-gold font-body"
+                className="theme-accent-gold font-body w-full sm:w-auto"
               >
                 {addingGame?.type === 'collection' ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />

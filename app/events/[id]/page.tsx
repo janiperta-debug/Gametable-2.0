@@ -386,9 +386,9 @@ export default function EventDetailsPage() {
 
                 {!currentUserId && event.status !== "cancelled" && (
                   <div className="pt-4 border-t border-border">
-                    <Link href="/auth">
-                      <Button className="theme-accent-gold">
-                        {t("auth.loginToRsvp") || "Log in to RSVP"}
+                    <Link href="/auth/login">
+                      <Button className="theme-accent-gold w-full">
+                        {t("events.loginToRsvp") || t("auth.loginToRsvp") || "Log in to RSVP"}
                       </Button>
                     </Link>
                   </div>
