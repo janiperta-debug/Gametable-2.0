@@ -1,25 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { XMLParser } from 'fast-xml-parser'
 
+const BGG_API_TOKEN = process.env.BGG_API_TOKEN
+
+// Fetch from BGG with API token
 async function fetchFromBGG(url: string): Promise<Response> {
-  const response = await fetch(url, {
-    headers: {
-      'Accept': 'application/xml, text/xml, */*',
-      'User-Agent': 'GameTable/1.0 (https://gametable.fi)',
-    },
-    cache: 'no-store',
-  })
+  const headers: Record<string, string> = {
+    'Accept': 'application/xml, text/xml, */*',
+    'User-Agent': 'GameTable/1.0 (https://gametable.fi)',
+  }
   
-  if (response.ok) return response
+  if (BGG_API_TOKEN) {
+    headers['Authorization'] = `Bearer ${BGG_API_TOKEN}`
+  }
   
-  // Retry with different user agent
-  return fetch(url, {
-    headers: {
-      'Accept': '*/*',
-      'User-Agent': 'Mozilla/5.0 (compatible; GameTableBot/1.0)',
-    },
-    cache: 'no-store',
-  })
+  return fetch(url, { headers, cache: 'no-store' })
 }
 
 export async function GET(request: NextRequest) {
@@ -32,13 +27,9 @@ export async function GET(request: NextRequest) {
 
   try {
     const bggUrl = `https://boardgamegeek.com/xmlapi2/thing?id=${id}&stats=1`
-    console.log("[v0] BGG details fetching:", bggUrl)
-    
     const response = await fetchFromBGG(bggUrl)
-    console.log("[v0] BGG details response:", response.status)
 
     if (!response.ok) {
-      console.log("[v0] BGG details API blocked")
       return NextResponse.json({ error: 'Game details temporarily unavailable' }, { status: 503 })
     }
 
