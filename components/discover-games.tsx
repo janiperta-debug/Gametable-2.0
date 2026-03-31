@@ -81,6 +81,8 @@ export function DiscoverGames() {
   const handleSearch = async () => {
     if (!searchQuery.trim()) return
 
+    console.log("[v0] handleSearch called with:", searchQuery, "category:", selectedCategory)
+    
     setIsSearching(true)
     setSearchResults([])
     setSelectedGame(null)
@@ -88,16 +90,23 @@ export function DiscoverGames() {
     try {
       // TCG API uses 'q' parameter, others use 'query'
       const queryParam = selectedCategory === "trading_card" ? "q" : "query"
-      const response = await fetch(`${categoryConfig.searchEndpoint}?${queryParam}=${encodeURIComponent(searchQuery)}`)
+      const url = `${categoryConfig.searchEndpoint}?${queryParam}=${encodeURIComponent(searchQuery)}`
+      console.log("[v0] Fetching from:", url)
+      
+      const response = await fetch(url)
+      console.log("[v0] Response status:", response.status)
+      
       const data = await response.json()
+      console.log("[v0] Response data:", data)
 
       if (data.error) {
         throw new Error(data.error)
       }
 
       setSearchResults(data.results || [])
+      console.log("[v0] Set search results:", data.results?.length || 0, "items")
     } catch (error) {
-      console.error("Search error:", error)
+      console.error("[v0] Search error:", error)
       toast({
         title: t("common.error"),
         description: t("collection.searchFailed"),

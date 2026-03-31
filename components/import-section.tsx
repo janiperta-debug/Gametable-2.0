@@ -9,8 +9,10 @@ import { Download, Loader2, Plus, FileText } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { addCardToCollection } from "@/app/actions/tcg"
 import { addMiniatureToCollection } from "@/app/actions/miniatures"
+import { addGameToCollection } from "@/app/actions/games"
 import type { TCGSearchResult } from "@/app/api/tcg/search/route"
 import type { MiniatureSearchResult } from "@/app/api/miniatures/search/route"
+import type { BGGCollectionItem } from "@/app/api/bgg/collection/route"
 import { useToast } from "@/hooks/use-toast"
 
 type CategoryType = "board-games" | "rpgs" | "miniatures" | "trading-cards"
@@ -62,17 +64,79 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
     
     setImporting(true)
     try {
-      // TODO: Implement BGG/RPGG username import
       console.log("[v0] Importing from", getSourceName(), "for user:", username)
+      
+      // Determine the API endpoint based on category
+      const apiUrl = selectedCategory === "board-games" 
+        ? `/api/bgg/collection?username=${encodeURIComponent(username)}`
+        : `/api/rpgg/collection?username=${encodeURIComponent(username)}`
+      
+      const response = await fetch(apiUrl)
+      const data = await response.json()
+      
+      console.log("[v0] Collection API response:", data)
+      
+      if (data.error) {
+        throw new Error(data.error)
+      }
+      
+      const items: BGGCollectionItem[] = data.items || []
+      
+      if (items.length === 0) {
+        toast({
+          title: t("common.info") || "Info",
+          description: t("collection.noItemsToImport") || "No items found in your collection to import",
+        })
+        return
+      }
+      
+      // Import each game
+      let successCount = 0
+      let errorCount = 0
+      
+      for (const item of items) {
+        try {
+          // Fetch full details for each game
+          const detailsUrl = selectedCategory === "board-games"
+            ? `/api/bgg/details?id=${item.id}`
+            : `/api/rpgg/details?id=${item.id}`
+          
+          const detailsResponse = await fetch(detailsUrl)
+          const details = await detailsResponse.json()
+          
+          if (details && details.id) {
+            const status = item.status.own ? 'owned' : 'wishlist'
+            const category = selectedCategory === "board-games" ? 'board_game' : 'rpg'
+            
+            const result = await addGameToCollection(details, status, category)
+            
+            if (result.error && result.error !== 'Game already in your collection') {
+              errorCount++
+            } else {
+              successCount++
+            }
+          } else {
+            errorCount++
+          }
+        } catch (e) {
+          console.error("[v0] Error importing game:", item.name, e)
+          errorCount++
+        }
+      }
+      
       toast({
-        title: t("common.info") || "Info",
-        description: `Username import from ${getSourceName()} coming soon!`,
+        title: t("common.success"),
+        description: `${t("collection.imported") || "Imported"} ${successCount} ${t("collection.items") || "games"}${errorCount > 0 ? `, ${errorCount} ${t("collection.failed") || "failed"}` : ""}`,
       })
+      
+      if (successCount > 0 && onImportComplete) {
+        onImportComplete()
+      }
     } catch (error) {
-      console.error("Import error:", error)
+      console.error("[v0] Import error:", error)
       toast({
         title: t("common.error"),
-        description: t("collection.importFailed") || "Import failed",
+        description: error instanceof Error ? error.message : (t("collection.importFailed") || "Import failed"),
         variant: "destructive",
       })
     } finally {

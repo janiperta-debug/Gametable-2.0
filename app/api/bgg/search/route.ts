@@ -5,11 +5,15 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const query = searchParams.get('query')
 
+  console.log("[v0] BGG search called with query:", query)
+
   if (!query) {
+    console.log("[v0] BGG search: No query provided")
     return NextResponse.json({ error: 'Query parameter is required' }, { status: 400 })
   }
 
   try {
+    console.log("[v0] BGG search: Fetching from BGG API...")
     // Search BGG API - requires browser-like headers to avoid 401
     const searchResponse = await fetch(
       `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame`,
@@ -24,12 +28,16 @@ export async function GET(request: NextRequest) {
       }
     )
 
+    console.log("[v0] BGG API response status:", searchResponse.status)
+    
     if (!searchResponse.ok) {
-      console.error(`BGG API error: ${searchResponse.status}, ${await searchResponse.text()}`)
+      const errorText = await searchResponse.text()
+      console.error(`[v0] BGG API error: ${searchResponse.status}, ${errorText}`)
       throw new Error(`BGG API error: ${searchResponse.status}`)
     }
 
     const xmlText = await searchResponse.text()
+    console.log("[v0] BGG API response length:", xmlText.length)
     const parser = new XMLParser({
       ignoreAttributes: false,
       attributeNamePrefix: '@_',
