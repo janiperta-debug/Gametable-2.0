@@ -326,6 +326,254 @@ export async function getEventParticipants(
 }
 
 /**
+ * Get a single event by ID with full details
+ */
+export async function getEventById(
+  eventId: string
+): Promise<{ event?: Event & { participants?: EventParticipant[] }; error?: string }> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const { data: event, error } = await supabase
+    .from("events")
+    .select(`
+      *,
+      host:profiles!events_host_id_fkey(id, display_name, avatar_url)
+    `)
+    .eq("id", eventId)
+    .single()
+
+  if (error) {
+    console.error("Error fetching event:", error)
+    return { error: error.message }
+  }
+
+  if (!event) {
+    return { error: "Event not found" }
+  }
+
+  // Check access for private events
+  if (event.privacy === "private" && event.host_id !== user?.id) {
+    // Check if user is a participant
+    if (user) {
+      const { data: participation } = await supabase
+        .from("event_participants")
+        .select("status")
+        .eq("event_id", eventId)
+        .eq("user_id", user.id)
+        .single()
+
+      if (!participation) {
+        return { error: "You don't have access to this event" }
+      }
+    } else {
+      return { error: "You don't have access to this event" }
+    }
+  }
+
+  // Get participant count
+  const { count } = await supabase
+    .from("event_participants")
+    .select("*", { count: "exact", head: true })
+    .eq("event_id", eventId)
+    .eq("status", "attending")
+
+  // Get participants list
+  const { data: participants } = await supabase
+    .from("event_participants")
+    .select(`
+      *,
+      user:profiles!event_participants_user_id_fkey(id, display_name, avatar_url)
+    `)
+    .eq("event_id", eventId)
+    .in("status", ["attending", "maybe"])
+    .order("joined_at", { ascending: true })
+
+  // Get user's RSVP status
+  let userRsvp = null
+  if (user) {
+    const { data: rsvpData } = await supabase
+      .from("event_participants")
+      .select("status")
+      .eq("event_id", eventId)
+      .eq("user_id", user.id)
+      .single()
+    userRsvp = rsvpData?.status || null
+  }
+
+  return {
+    event: {
+      ...event,
+      participant_count: count || 0,
+      user_rsvp: userRsvp,
+      participants: participants || [],
+    },
+  }
+}
+
+/**
+ * Update an event (host only)
+ */
+export async function updateEvent(
+  eventId: string,
+  data: {
+    title?: string
+    description?: string
+    event_type?: EventType
+    privacy?: EventPrivacy
+    location?: string
+    starts_at?: string
+    max_players?: number
+    status?: EventStatus
+  }
+): Promise<{ event?: Event; error?: string }> {
+  const supabase = await createClient()
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: "Unauthorized" }
+  }
+
+  // Verify user is the host
+  const { data: existingEvent } = await supabase
+    .from("events")
+    .select("host_id")
+    .eq("id", eventId)
+    .single()
+
+  if (!existingEvent || existingEvent.host_id !== user.id) {
+    return { error: "Only the host can edit this event" }
+  }
+
+  const { data: event, error } = await supabase
+    .from("events")
+    .update({
+      title: data.title,
+      description: data.description,
+      event_type: data.event_type,
+      privacy: data.privacy,
+      location: data.location,
+      starts_at: data.starts_at,
+      max_players: data.max_players,
+      status: data.status,
+    })
+    .eq("id", eventId)
+    .select()
+    .single()
+
+  if (error) {
+    console.error("Error updating event:", error)
+    return { error: error.message }
+  }
+
+  revalidatePath("/events")
+  revalidatePath(`/events/${eventId}`)
+
+  return { event }
+}
+
+/**
+ * Get messages for an event
+ */
+export async function getEventMessages(
+  eventId: string
+): Promise<{ messages: EventMessage[]; error?: string }> {
+  const supabase = await createClient()
+
+  const { data: messages, error } = await supabase
+    .from("event_messages")
+    .select(`
+      *,
+      sender:profiles!event_messages_sender_id_fkey(id, display_name, avatar_url)
+    `)
+    .eq("event_id", eventId)
+    .order("created_at", { ascending: true })
+
+  if (error) {
+    console.error("Error fetching event messages:", error)
+    return { messages: [], error: error.message }
+  }
+
+  return { messages: messages || [] }
+}
+
+/**
+ * Send a message in an event chat
+ */
+export async function sendEventMessage(
+  eventId: string,
+  content: string
+): Promise<{ message?: EventMessage; error?: string }> {
+  const supabase = await createClient()
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: "Unauthorized" }
+  }
+
+  // Verify user is a participant or host
+  const { data: event } = await supabase
+    .from("events")
+    .select("host_id")
+    .eq("id", eventId)
+    .single()
+
+  if (!event) {
+    return { error: "Event not found" }
+  }
+
+  if (event.host_id !== user.id) {
+    const { data: participation } = await supabase
+      .from("event_participants")
+      .select("status")
+      .eq("event_id", eventId)
+      .eq("user_id", user.id)
+      .eq("status", "attending")
+      .single()
+
+    if (!participation) {
+      return { error: "Only participants can send messages" }
+    }
+  }
+
+  const { data: message, error } = await supabase
+    .from("event_messages")
+    .insert({
+      event_id: eventId,
+      sender_id: user.id,
+      content: content.trim(),
+    })
+    .select(`
+      *,
+      sender:profiles!event_messages_sender_id_fkey(id, display_name, avatar_url)
+    `)
+    .single()
+
+  if (error) {
+    console.error("Error sending message:", error)
+    return { error: error.message }
+  }
+
+  return { message }
+}
+
+export interface EventMessage {
+  id: string
+  event_id: string
+  sender_id: string
+  content: string
+  created_at: string
+  sender?: {
+    id: string
+    display_name: string | null
+    avatar_url: string | null
+  }
+}
+
+/**
  * Cancel an event (host only)
  */
 export async function cancelEvent(
