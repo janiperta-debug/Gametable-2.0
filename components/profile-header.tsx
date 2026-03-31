@@ -9,6 +9,7 @@ import { Edit, X, Check, Loader2 } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { useUser } from "@/hooks/useUser"
 import { updateProfile } from "@/app/actions/xp"
+import { getRoomTheme } from "@/lib/room-themes"
 
 export function ProfileHeader() {
   const [isEditing, setIsEditing] = useState(false)
@@ -52,10 +53,24 @@ export function ProfileHeader() {
     )
   }
 
+  // Get theme preview image
+  const userTheme = profile?.preferred_theme ? getRoomTheme(profile.preferred_theme) : null
+  const themeImageUrl = userTheme?.image
+
   return (
     <div className="room-furniture relative overflow-hidden">
-      {/* Cover Photo Area */}
-      <div className="h-48 relative bg-gradient-to-br from-accent-gold/20 to-accent-copper/20 manor-texture">
+      {/* Cover Photo Area - displays user's selected theme preview */}
+      <div className="h-48 relative">
+        {themeImageUrl ? (
+          <img 
+            src={themeImageUrl} 
+            alt={userTheme?.name || "Theme preview"}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-accent-gold/20 to-accent-copper/20 manor-texture" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
         <div className="absolute top-4 left-4 text-accent-gold text-lg opacity-60">♠</div>
         <div className="absolute top-4 right-4 text-accent-gold text-lg opacity-60">♦</div>
       </div>

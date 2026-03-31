@@ -18,7 +18,7 @@ interface EventChatProps {
 }
 
 export function EventChat({ eventId, eventTitle }: EventChatProps) {
-  const { t } = useTranslations()
+  const t = useTranslations()
   const { toast } = useToast()
   
   const [messages, setMessages] = useState<EventMessage[]>([])

@@ -159,11 +159,10 @@ function EventCard({ event, onViewDetails, onRSVP, t, isLoggedIn, currentUserId 
             </div>
           )}
           
-          {isHost && (
-            <Button size="sm" variant="outline" className="bg-transparent" onClick={() => onViewDetails(event)}>
-              {t("events.manage")}
-            </Button>
-          )}
+          {/* View Details - always visible */}
+          <Button size="sm" variant="outline" className="bg-transparent" onClick={() => onViewDetails(event)}>
+            {isHost ? t("events.manage") : t("events.viewDetails") || "View Details"}
+          </Button>
         </div>
       </CardContent>
     </Card>
@@ -305,17 +304,19 @@ export default function EventsPage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6 md:mb-8 max-w-2xl mx-auto">
-            <TabsTrigger value="upcoming" className="font-body text-xs sm:text-sm">
-              {t("events.upcomingEvents")}
-            </TabsTrigger>
-            <TabsTrigger value="my-events" className="font-body text-xs sm:text-sm">
-              {t("events.myEvents")}
-            </TabsTrigger>
-            <TabsTrigger value="past" className="font-body text-xs sm:text-sm">
-              {t("events.pastEvents")}
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 mb-6 md:mb-8">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-3 sm:max-w-2xl sm:mx-auto">
+              <TabsTrigger value="upcoming" className="font-body text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">
+                {t("events.upcomingEvents")}
+              </TabsTrigger>
+              <TabsTrigger value="my-events" className="font-body text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">
+                {t("events.myEvents")}
+              </TabsTrigger>
+              <TabsTrigger value="past" className="font-body text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">
+                {t("events.pastEvents")}
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="upcoming">
             {loading ? (

@@ -148,29 +148,29 @@ export default function TrophiesPage() {
       <Navigation />
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
-        <div className="room-furniture p-8 mb-8">
-          <div className="flex items-center justify-between flex-wrap gap-6">
+        <div className="room-furniture p-4 sm:p-8 mb-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 text-center sm:text-left">
             <div>
-              <h1 className="text-5xl logo-text mb-2">{t("trophies.title")}</h1>
-              <p className="text-lg font-merriweather text-muted-foreground">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl logo-text mb-2">{t("trophies.title")}</h1>
+              <p className="text-sm sm:text-lg font-merriweather text-muted-foreground">
                 {t("trophies.subtitle")}
               </p>
             </div>
-            <div className="flex gap-6">
+            <div className="flex gap-4 sm:gap-6">
               <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <Trophy className="h-5 w-5 text-accent-gold" />
-                  <span className="text-3xl font-cinzel text-accent-gold">{earnedCount}</span>
-                  <span className="text-xl font-merriweather text-muted-foreground">/ {totalBadges}</span>
+                <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
+                  <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-accent-gold" />
+                  <span className="text-xl sm:text-3xl font-cinzel text-accent-gold">{earnedCount}</span>
+                  <span className="text-sm sm:text-xl font-merriweather text-muted-foreground">/ {totalBadges}</span>
                 </div>
-                <p className="text-sm font-merriweather text-muted-foreground">{t("trophies.badgesEarned")}</p>
+                <p className="text-xs sm:text-sm font-merriweather text-muted-foreground">{t("trophies.badgesEarned")}</p>
               </div>
               <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <Award className="h-5 w-5 text-accent-gold" />
-                  <span className="text-3xl font-cinzel text-accent-gold">{totalXP}</span>
+                <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
+                  <Award className="h-4 w-4 sm:h-5 sm:w-5 text-accent-gold" />
+                  <span className="text-xl sm:text-3xl font-cinzel text-accent-gold">{totalXP}</span>
                 </div>
-                <p className="text-sm font-merriweather text-muted-foreground">{t("trophies.totalXP")}</p>
+                <p className="text-xs sm:text-sm font-merriweather text-muted-foreground">{t("trophies.totalXP")}</p>
               </div>
             </div>
           </div>

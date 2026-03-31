@@ -40,22 +40,22 @@ export function GamingProgress() {
   }
 
   return (
-    <div className="room-furniture p-8 space-y-6">
+    <div className="room-furniture p-4 sm:p-8 space-y-4 sm:space-y-6">
       {/* Header with Level and XP */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-6">
-          <h2 className="text-3xl text-accent-gold">{t("profile.myProgress")}</h2>
-          <div className="flex items-center gap-4">
-            <div className="px-5 py-2 bg-accent-gold/20 border border-accent-gold/40 rounded-lg">
-              <span className="text-xl font-cinzel text-accent-gold">{t("profile.level")} {stats.level}</span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+          <h2 className="text-xl sm:text-3xl text-accent-gold">{t("profile.myProgress")}</h2>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className="px-3 sm:px-5 py-1.5 sm:py-2 bg-accent-gold/20 border border-accent-gold/40 rounded-lg">
+              <span className="text-sm sm:text-xl font-cinzel text-accent-gold">{t("profile.level")} {stats.level}</span>
             </div>
-            <span className="text-lg font-merriweather text-accent-gold/80">{stats.totalXP} {t("profile.totalXP")}</span>
+            <span className="text-sm sm:text-lg font-merriweather text-accent-gold/80">{stats.totalXP} {t("profile.totalXP")}</span>
           </div>
         </div>
         <Button
           variant="outline"
           size="sm"
-          className="border-accent-gold/40 text-accent-gold hover:bg-accent-gold hover:text-background bg-transparent"
+          className="border-accent-gold/40 text-accent-gold hover:bg-accent-gold hover:text-background bg-transparent w-full sm:w-auto"
         >
           <RefreshCw className="w-4 h-4 mr-2" />
           {t("common.refresh")}
