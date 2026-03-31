@@ -334,6 +334,7 @@ export async function getEventById(
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
+  console.log("[v0] getEventById - user:", user?.id, "eventId:", eventId)
 
   const { data: event, error } = await supabase
     .from("events")
@@ -344,8 +345,10 @@ export async function getEventById(
     .eq("id", eventId)
     .single()
 
+  console.log("[v0] getEventById - event:", event?.id, "privacy:", event?.privacy, "error:", error?.message)
+
   if (error) {
-    console.error("Error fetching event:", error)
+    console.error("[v0] Error fetching event:", error)
     return { error: error.message }
   }
 
@@ -353,7 +356,7 @@ export async function getEventById(
     return { error: "Event not found" }
   }
 
-  // Check access for private events
+  // Check access for private events only - public and friends events are visible
   if (event.privacy === "private" && event.host_id !== user?.id) {
     // Check if user is a participant
     if (user) {

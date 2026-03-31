@@ -3,19 +3,20 @@ import { XMLParser } from 'fast-xml-parser'
 
 const BGG_API_TOKEN = process.env.BGG_API_TOKEN
 
-// Fetch from BGG with API token
-async function fetchFromBGG(url: string): Promise<Response> {
-  const headers: Record<string, string> = {
-    'Accept': 'application/xml, text/xml, */*',
-    'User-Agent': 'GameTable/1.0 (https://gametable.fi)',
-  }
+// Fetch from BGG with API token as query parameter
+async function fetchFromBGG(baseUrl: string): Promise<Response> {
+  // BGG API uses access_token as a query parameter, not a header
+  const url = BGG_API_TOKEN 
+    ? `${baseUrl}&access_token=${encodeURIComponent(BGG_API_TOKEN)}`
+    : baseUrl
   
-  // Add API token if available
-  if (BGG_API_TOKEN) {
-    headers['Authorization'] = `Bearer ${BGG_API_TOKEN}`
-  }
-  
-  return fetch(url, { headers, cache: 'no-store' })
+  return fetch(url, { 
+    headers: {
+      'Accept': 'application/xml, text/xml, */*',
+      'User-Agent': 'GameTable/1.0 (https://gametable.fi)',
+    },
+    cache: 'no-store' 
+  })
 }
 
 export async function GET(request: NextRequest) {
