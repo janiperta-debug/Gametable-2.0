@@ -11,15 +11,21 @@ export interface PublicUserProfile {
   bio: string | null
   xp: number
   level: number
+  current_xp?: number
   active_room: string | null
+  preferred_theme: string | null
   game_interests: string[]
   show_collection: boolean
   created_at: string
 }
 
+// Alias for backwards compatibility
+export type PublicProfile = PublicUserProfile
+
 export interface UserGame {
   id: string
   added_at: string
+  play_count?: number
   game: {
     id: string
     name: string
@@ -31,6 +37,57 @@ export interface UserGame {
 export interface FriendshipInfo {
   status: "none" | "pending_sent" | "pending_received" | "accepted"
   friendship_id: string | null
+}
+
+export interface UserFriend {
+  id: string
+  username: string | null
+  display_name: string | null
+  avatar_url: string | null
+}
+
+/**
+ * Get a public user profile by username
+ */
+export async function getUserByUsername(username: string): Promise<{
+  profile: PublicUserProfile | null
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select(`
+      id,
+      display_name,
+      username,
+      avatar_url,
+      location,
+      bio,
+      xp,
+      level,
+      current_xp,
+      active_room,
+      preferred_theme,
+      game_interests,
+      show_collection,
+      created_at
+    `)
+    .eq("username", username)
+    .single()
+
+  if (error) {
+    console.error("Error fetching profile by username:", error)
+    return { profile: null, error: "User not found" }
+  }
+
+  return {
+    profile: {
+      ...profile,
+      game_interests: profile.game_interests || [],
+      show_collection: profile.show_collection ?? true,
+    }
+  }
 }
 
 /**
@@ -53,7 +110,9 @@ export async function getPublicUserProfile(userId: string): Promise<{
       bio,
       xp,
       level,
+      current_xp,
       active_room,
+      preferred_theme,
       game_interests,
       show_collection,
       created_at
@@ -213,4 +272,101 @@ export async function getFriendshipStatus(targetUserId: string): Promise<Friends
   }
 
   return { status: "none", friendship_id: null }
+}
+
+/**
+ * Get friends list for a user (public profiles only)
+ */
+export async function getUserFriends(username: string): Promise<{
+  friends: UserFriend[]
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  // First get the user ID from username
+  const { data: targetUser } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("username", username)
+    .single()
+
+  if (!targetUser) {
+    return { friends: [], error: "User not found" }
+  }
+
+  // Get accepted friendships where user is either requester or addressee
+  const { data: friendships, error } = await supabase
+    .from("friendships")
+    .select(`
+      requester:profiles!friendships_requester_id_fkey(id, username, display_name, avatar_url),
+      addressee:profiles!friendships_addressee_id_fkey(id, username, display_name, avatar_url)
+    `)
+    .eq("status", "accepted")
+    .or(`requester_id.eq.${targetUser.id},addressee_id.eq.${targetUser.id}`)
+
+  if (error) {
+    console.error("Error fetching friends:", error)
+    return { friends: [], error: "Failed to fetch friends" }
+  }
+
+  // Extract the friend profiles (the one that's not the target user)
+  const friends: UserFriend[] = (friendships || []).map(f => {
+    const requester = f.requester as unknown as UserFriend
+    const addressee = f.addressee as unknown as UserFriend
+    return requester.id === targetUser.id ? addressee : requester
+  })
+
+  return { friends }
+}
+
+/**
+ * Get user's collection by username
+ */
+export async function getUserCollectionByUsername(username: string): Promise<{
+  games: UserGame[]
+  error?: string
+}> {
+  const supabase = await createClient()
+
+  // First get the user profile
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, show_collection")
+    .eq("username", username)
+    .single()
+
+  if (!profile) {
+    return { games: [], error: "User not found" }
+  }
+
+  if (!profile.show_collection) {
+    return { games: [], error: "Collection is private" }
+  }
+
+  const { data: userGames, error } = await supabase
+    .from("user_games")
+    .select(`
+      id,
+      added_at,
+      play_count,
+      game:games(id, name, thumbnail_url, category)
+    `)
+    .eq("user_id", profile.id)
+    .order("added_at", { ascending: false })
+
+  if (error) {
+    console.error("Error fetching user collection:", error)
+    return { games: [], error: "Failed to fetch collection" }
+  }
+
+  const games: UserGame[] = (userGames || [])
+    .filter(ug => ug.game)
+    .map(ug => ({
+      id: ug.id,
+      added_at: ug.added_at,
+      play_count: (ug as { play_count?: number }).play_count,
+      game: ug.game as { id: string; name: string; thumbnail_url: string | null; category: string | null }
+    }))
+
+  return { games }
 }

@@ -7,12 +7,13 @@ import { useAppTheme } from "@/components/app-theme-provider"
 import { useUser } from "@/hooks/useUser"
 import { 
   getUserByUsername, 
-  getUserCollection, 
+  getUserCollectionByUsername, 
   getUserFriends,
   type PublicProfile,
   type UserGame,
   type UserFriend
 } from "@/app/actions/users"
+import { getRoomTheme } from "@/lib/room-themes"
 import { sendFriendRequest, getFriendshipStatus } from "@/app/actions/friends"
 import { getOrCreateConversation } from "@/app/actions/marketplace"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -58,7 +59,7 @@ export default function UserProfilePage() {
       
       const [profileResult, collectionResult, friendsResult] = await Promise.all([
         getUserByUsername(username),
-        getUserCollection(username),
+        getUserCollectionByUsername(username),
         getUserFriends(username)
       ])
 
@@ -134,16 +135,29 @@ export default function UserProfilePage() {
 
   const isOwnProfile = currentUser?.id === profile.id
   const levelProgress = profile.current_xp ? (profile.current_xp % 1000) / 10 : 0
+  
+  // Get the user's theme preview image
+  const userTheme = profile.preferred_theme ? getRoomTheme(profile.preferred_theme as string) : null
+  const themeImageUrl = userTheme?.image
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div 
-        className="relative h-48 md:h-64"
-        style={{
-          background: `linear-gradient(135deg, ${currentAppTheme.colors.primary}20, ${currentAppTheme.colors.secondary}20)`
-        }}
-      >
+      {/* Hero Section - displays user's selected theme preview */}
+      <div className="relative h-48 md:h-64">
+        {themeImageUrl ? (
+          <img 
+            src={themeImageUrl} 
+            alt={userTheme?.name || "Theme preview"}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div 
+            className="w-full h-full"
+            style={{
+              background: `linear-gradient(135deg, ${currentAppTheme.colors.primary}20, ${currentAppTheme.colors.secondary}20)`
+            }}
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background" />
       </div>
 
