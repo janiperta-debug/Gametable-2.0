@@ -79,13 +79,8 @@ export function DiscoverGames() {
   const categoryConfig = categories.find(c => c.id === selectedCategory)!
 
   const handleSearch = async () => {
-    if (!searchQuery.trim()) {
-      console.log("[v0] handleSearch: Empty search query, returning")
-      return
-    }
+    if (!searchQuery.trim()) return
 
-    console.log("[v0] handleSearch called with:", searchQuery, "category:", selectedCategory)
-    
     setIsSearching(true)
     setSearchResults([])
     setSelectedGame(null)
@@ -94,39 +89,40 @@ export function DiscoverGames() {
       // TCG API uses 'q' parameter, others use 'query'
       const queryParam = selectedCategory === "trading_card" ? "q" : "query"
       const url = `${categoryConfig.searchEndpoint}?${queryParam}=${encodeURIComponent(searchQuery)}`
-      console.log("[v0] Fetching from:", url)
       
       const response = await fetch(url)
-      console.log("[v0] Response status:", response.status, response.ok)
       
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error("[v0] Response not ok:", errorText)
         throw new Error(`API error: ${response.status}`)
       }
       
       const data = await response.json()
-      console.log("[v0] Response data:", JSON.stringify(data).slice(0, 500))
 
+      // Handle API-level errors (like BGG registration required)
       if (data.error) {
-        throw new Error(data.error)
+        toast({
+          title: t("common.error"),
+          description: data.error,
+          variant: "destructive",
+        })
+        setSearchResults([])
+        return
       }
 
       const results = data.results || []
-      console.log("[v0] Setting search results:", results.length, "items")
       setSearchResults(results)
       
-      if (results.length === 0) {
+      if (results.length === 0 && !data.note) {
         toast({
           title: t("common.info") || "Info",
-          description: t("collection.noResults") || "No results found",
+          description: t("collection.noResults") || "No results found. Try manual entry.",
         })
       }
     } catch (error) {
-      console.error("[v0] Search error:", error)
+      console.error("Search error:", error)
       toast({
         title: t("common.error"),
-        description: error instanceof Error ? error.message : (t("collection.searchFailed") || "Search failed"),
+        description: t("collection.searchFailed") || "Search failed. Please try manual entry.",
         variant: "destructive",
       })
     } finally {

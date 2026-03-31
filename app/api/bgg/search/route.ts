@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { XMLParser } from 'fast-xml-parser'
 
-// Try multiple approaches to fetch from BGG
+// Fetch from BGG with retry
 async function fetchFromBGG(url: string): Promise<Response> {
-  // Try direct fetch first
-  const directResponse = await fetch(url, {
+  const response = await fetch(url, {
     headers: {
       'Accept': 'application/xml, text/xml, */*',
       'User-Agent': 'GameTable/1.0 (https://gametable.fi)',
@@ -12,29 +11,21 @@ async function fetchFromBGG(url: string): Promise<Response> {
     cache: 'no-store',
   })
   
-  if (directResponse.ok) {
-    return directResponse
-  }
+  if (response.ok) return response
   
-  console.log("[v0] Direct BGG fetch failed with status:", directResponse.status)
-  
-  // If direct fails, try with different user agent
-  const retryResponse = await fetch(url, {
+  // Retry with different user agent
+  return fetch(url, {
     headers: {
       'Accept': '*/*',
       'User-Agent': 'Mozilla/5.0 (compatible; GameTableBot/1.0)',
     },
     cache: 'no-store',
   })
-  
-  return retryResponse
 }
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const query = searchParams.get('query')
-
-  console.log("[v0] BGG search called with query:", query)
 
   if (!query) {
     return NextResponse.json({ error: 'Query parameter is required' }, { status: 400 })
@@ -42,22 +33,24 @@ export async function GET(request: NextRequest) {
 
   try {
     const bggUrl = `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame`
-    console.log("[v0] Fetching from BGG:", bggUrl)
     
     const searchResponse = await fetchFromBGG(bggUrl)
-    console.log("[v0] BGG response status:", searchResponse.status)
 
     if (!searchResponse.ok) {
-      // Return empty results instead of error for blocked requests
-      console.log("[v0] BGG API blocked or error, returning empty results")
+      // BGG API requires registration - return helpful message
+      if (searchResponse.status === 401) {
+        return NextResponse.json({ 
+          results: [], 
+          error: 'BGG API requires domain registration. Please use manual entry for now.',
+          needsRegistration: true
+        })
+      }
       return NextResponse.json({ results: [], note: 'BGG API temporarily unavailable' })
     }
 
     const xmlText = await searchResponse.text()
-    console.log("[v0] BGG response length:", xmlText.length, "chars")
     
     if (!xmlText || xmlText.length < 50) {
-      console.log("[v0] BGG returned empty or minimal response")
       return NextResponse.json({ results: [] })
     }
 
@@ -99,10 +92,9 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    console.log("[v0] BGG search returning", results.length, "results")
     return NextResponse.json({ results })
   } catch (error) {
-    console.error('[v0] BGG search error:', error)
+    console.error('BGG search error:', error)
     // Return empty results with error note rather than failing
     return NextResponse.json({ 
       results: [], 
