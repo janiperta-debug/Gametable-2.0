@@ -101,10 +101,12 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${merriweather.className} app-background`}>
-        <I18nProvider>
-          <AppShell>{children}</AppShell>
-        </I18nProvider>
+      <body className={merriweather.className}>
+        <div className="app-background min-h-screen">
+          <I18nProvider>
+            <AppShell>{children}</AppShell>
+          </I18nProvider>
+        </div>
       </body>
     </html>
   )
