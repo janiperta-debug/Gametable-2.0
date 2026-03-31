@@ -17,7 +17,7 @@ import { createClient } from "@/lib/supabase/client"
 export default function EditEventPage() {
   const params = useParams()
   const router = useRouter()
-  const { t } = useTranslations()
+  const t = useTranslations()
   const { toast } = useToast()
   const eventId = params.id as string
 

@@ -77,7 +77,7 @@ const formatEventTime = (startDate: string, endDate?: string | null) => {
 export default function EventDetailsPage() {
   const params = useParams()
   const router = useRouter()
-  const { t } = useTranslations()
+  const t = useTranslations()
   const { toast } = useToast()
   const eventId = params.id as string
 
