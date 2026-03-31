@@ -284,29 +284,27 @@ export default function EventDetailsPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Host */}
-                {event.host && (
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-accent-gold/20 flex items-center justify-center">
-                      {event.host.avatar_url ? (
-                        <img 
-                          src={event.host.avatar_url} 
-                          alt={event.host.display_name || "Host"} 
-                          className="w-10 h-10 rounded-full object-cover"
-                        />
-                      ) : (
-                        <User className="w-5 h-5 text-accent-gold" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        {t("events.hostedBy") || "Hosted by"}
-                      </p>
-                      <p className="font-medium text-accent-gold">
-                        {event.host.display_name || t("profile.anonymous") || "Anonymous"}
-                      </p>
-                    </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-accent-gold/20 flex items-center justify-center">
+                    {event.host?.avatar_url ? (
+                      <img 
+                        src={event.host.avatar_url} 
+                        alt={event.host?.display_name || "Host"} 
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="w-5 h-5 text-accent-gold" />
+                    )}
                   </div>
-                )}
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      {t("events.hostedBy") || "Hosted by"}
+                    </p>
+                    <p className="font-medium text-accent-gold">
+                      {event.host?.display_name || t("profile.anonymous") || "Anonymous"}
+                    </p>
+                  </div>
+                </div>
 
                 {/* Date & Time */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -452,7 +450,7 @@ export default function EventDetailsPage() {
           {/* Event Chat - only show for participants/host */}
           <div className="lg:col-span-1">
             {(isHost || userRsvp === "attending") ? (
-              <EventChat eventId={eventId} eventTitle={event.title} />
+              <EventChat eventId={eventId} eventTitle={event.title || ""} />
             ) : (
               <Card className="room-furniture">
                 <CardHeader>

@@ -26,6 +26,7 @@ export function EventChat({ eventId, eventTitle }: EventChatProps) {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -39,14 +40,23 @@ export function EventChat({ eventId, eventTitle }: EventChatProps) {
     const supabase = createClient()
     
     const loadMessages = async () => {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser()
-      setCurrentUserId(user?.id || null)
+      try {
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser()
+        setCurrentUserId(user?.id || null)
 
-      // Load existing messages
-      const result = await getEventMessages(eventId)
-      if (result.messages) {
-        setMessages(result.messages)
+        // Load existing messages
+        const result = await getEventMessages(eventId)
+        if (result.error) {
+          // Table might not exist yet - gracefully handle
+          console.log("Event messages not available:", result.error)
+          setError(result.error)
+        } else if (result.messages) {
+          setMessages(result.messages)
+        }
+      } catch (err) {
+        console.error("Error loading messages:", err)
+        setError("Chat unavailable")
       }
       setLoading(false)
     }
@@ -144,6 +154,24 @@ export function EventChat({ eventId, eventTitle }: EventChatProps) {
       <Card className="room-furniture h-[600px] flex flex-col items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-accent-gold" />
         <p className="mt-2 text-muted-foreground">{t("common.loading") || "Loading..."}</p>
+      </Card>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card className="room-furniture h-[600px] flex flex-col">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-cinzel text-accent-gold flex items-center gap-2">
+            <MessageCircle className="w-5 h-5" />
+            {t("events.eventChat") || "Event Chat"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex-1 flex items-center justify-center">
+          <p className="text-muted-foreground text-center">
+            {t("events.chatUnavailable") || "Chat is temporarily unavailable"}
+          </p>
+        </CardContent>
       </Card>
     )
   }
