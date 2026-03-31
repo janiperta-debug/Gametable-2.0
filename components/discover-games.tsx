@@ -88,19 +88,41 @@ export function DiscoverGames() {
     try {
       // TCG API uses 'q' parameter, others use 'query'
       const queryParam = selectedCategory === "trading_card" ? "q" : "query"
-      const response = await fetch(`${categoryConfig.searchEndpoint}?${queryParam}=${encodeURIComponent(searchQuery)}`)
+      const url = `${categoryConfig.searchEndpoint}?${queryParam}=${encodeURIComponent(searchQuery)}`
+      
+      const response = await fetch(url)
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
+      
       const data = await response.json()
 
+      // Handle API-level errors (like BGG registration required)
       if (data.error) {
-        throw new Error(data.error)
+        toast({
+          title: t("common.error"),
+          description: data.error,
+          variant: "destructive",
+        })
+        setSearchResults([])
+        return
       }
 
-      setSearchResults(data.results || [])
+      const results = data.results || []
+      setSearchResults(results)
+      
+      if (results.length === 0 && !data.note) {
+        toast({
+          title: t("common.info") || "Info",
+          description: t("collection.noResults") || "No results found. Try manual entry.",
+        })
+      }
     } catch (error) {
       console.error("Search error:", error)
       toast({
         title: t("common.error"),
-        description: t("collection.searchFailed"),
+        description: t("collection.searchFailed") || "Search failed. Please try manual entry.",
         variant: "destructive",
       })
     } finally {

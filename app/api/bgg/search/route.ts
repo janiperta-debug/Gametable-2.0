@@ -1,6 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { XMLParser } from 'fast-xml-parser'
 
+const BGG_API_TOKEN = process.env.BGG_API_TOKEN
+
+// Fetch from BGG with API token
+async function fetchFromBGG(url: string): Promise<Response> {
+  const headers: Record<string, string> = {
+    'Accept': 'application/xml, text/xml, */*',
+    'User-Agent': 'GameTable/1.0 (https://gametable.fi)',
+  }
+  
+  // Add API token if available
+  if (BGG_API_TOKEN) {
+    headers['Authorization'] = `Bearer ${BGG_API_TOKEN}`
+  }
+  
+  return fetch(url, { headers, cache: 'no-store' })
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const query = searchParams.get('query')
@@ -10,26 +27,28 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Search BGG API - requires browser-like headers to avoid 401
-    const searchResponse = await fetch(
-      `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame`,
-      { 
-        headers: { 
-          'Accept': 'application/xml, text/xml, */*',
-          'Accept-Language': 'en-US,en;q=0.9',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Cache-Control': 'no-cache',
-        },
-        cache: 'no-store', // Don't cache to avoid stale responses
-      }
-    )
+    const bggUrl = `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame`
+    
+    const searchResponse = await fetchFromBGG(bggUrl)
 
     if (!searchResponse.ok) {
-      console.error(`BGG API error: ${searchResponse.status}, ${await searchResponse.text()}`)
-      throw new Error(`BGG API error: ${searchResponse.status}`)
+      // BGG API requires registration - return helpful message
+      if (searchResponse.status === 401) {
+        return NextResponse.json({ 
+          results: [], 
+          error: 'BGG API requires domain registration. Please use manual entry for now.',
+          needsRegistration: true
+        })
+      }
+      return NextResponse.json({ results: [], note: 'BGG API temporarily unavailable' })
     }
 
     const xmlText = await searchResponse.text()
+    
+    if (!xmlText || xmlText.length < 50) {
+      return NextResponse.json({ results: [] })
+    }
+
     const parser = new XMLParser({
       ignoreAttributes: false,
       attributeNamePrefix: '@_',
@@ -52,14 +71,12 @@ export async function GET(request: NextRequest) {
       const nameData = item.name
       let name = ''
       if (Array.isArray(nameData)) {
-        // Find primary name or use first
         const primary = nameData.find((n: Record<string, unknown>) => n['@_type'] === 'primary')
         name = primary ? String(primary['@_value'] || '') : String(nameData[0]?.['@_value'] || '')
       } else if (nameData && typeof nameData === 'object') {
         name = String((nameData as Record<string, unknown>)['@_value'] || '')
       }
 
-      // Handle year published
       const yearData = item.yearpublished as Record<string, unknown> | undefined
       const yearPublished = yearData ? parseInt(String(yearData['@_value']), 10) || null : null
 
@@ -73,9 +90,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ results })
   } catch (error) {
     console.error('BGG search error:', error)
-    return NextResponse.json(
-      { error: 'Failed to search BoardGameGeek' },
-      { status: 500 }
-    )
+    // Return empty results with error note rather than failing
+    return NextResponse.json({ 
+      results: [], 
+      error: 'BoardGameGeek search temporarily unavailable' 
+    })
   }
 }

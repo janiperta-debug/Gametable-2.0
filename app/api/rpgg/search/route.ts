@@ -1,6 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { XMLParser } from 'fast-xml-parser'
 
+// Try multiple approaches to fetch from RPGGeek
+async function fetchFromRPGG(url: string): Promise<Response> {
+  const response = await fetch(url, {
+    headers: {
+      'Accept': 'application/xml, text/xml, */*',
+      'User-Agent': 'GameTable/1.0 (https://gametable.fi)',
+    },
+    cache: 'no-store',
+  })
+  
+  if (response.ok) {
+    return response
+  }
+  
+  // Retry with different user agent
+  return fetch(url, {
+    headers: {
+      'Accept': '*/*',
+      'User-Agent': 'Mozilla/5.0 (compatible; GameTableBot/1.0)',
+    },
+    cache: 'no-store',
+  })
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const query = searchParams.get('query')
@@ -10,23 +34,15 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Search RPGGeek API (uses same XML API as BGG with type=rpgitem)
-    const searchResponse = await fetch(
-      `https://rpggeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=rpgitem`,
-      { 
-        headers: { 
-          'Accept': 'application/xml, text/xml, */*',
-          'Accept-Language': 'en-US,en;q=0.9',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Cache-Control': 'no-cache',
-        },
-        cache: 'no-store',
-      }
-    )
+    const rpggUrl = `https://rpggeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=rpgitem`
+    console.log("[v0] RPGG search:", rpggUrl)
+    
+    const searchResponse = await fetchFromRPGG(rpggUrl)
+    console.log("[v0] RPGG response status:", searchResponse.status)
 
     if (!searchResponse.ok) {
-      console.error(`RPGGeek API error: ${searchResponse.status}`)
-      throw new Error(`RPGGeek API error: ${searchResponse.status}`)
+      console.log("[v0] RPGG API blocked, returning empty results")
+      return NextResponse.json({ results: [], note: 'RPGGeek API temporarily unavailable' })
     }
 
     const xmlText = await searchResponse.text()
@@ -69,12 +85,13 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    console.log("[v0] RPGG search returning", results.length, "results")
     return NextResponse.json({ results })
   } catch (error) {
-    console.error('RPGGeek search error:', error)
-    return NextResponse.json(
-      { error: 'Failed to search RPGGeek' },
-      { status: 500 }
-    )
+    console.error('[v0] RPGGeek search error:', error)
+    return NextResponse.json({ 
+      results: [], 
+      error: 'RPGGeek search temporarily unavailable' 
+    })
   }
 }

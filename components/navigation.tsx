@@ -175,80 +175,91 @@ export function Navigation() {
             {/* Language Switcher */}
             <LanguageSwitcher />
 
-            <div className="relative">
-              <button
-                onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                className="flex items-center gap-1.5 lg:gap-2 bg-card/50 backdrop-blur-sm px-2 py-1 rounded-lg hover:bg-card transition-colors border border-accent-gold/20"
+            {/* Show Login button if not logged in, otherwise show user dropdown */}
+            {!user && !loading ? (
+              <Link
+                href="/auth"
+                className="flex items-center gap-1.5 lg:gap-2 bg-accent-gold text-background px-3 py-1.5 rounded-lg hover:bg-accent-gold/90 transition-colors font-cinzel text-xs uppercase tracking-wide"
               >
-                {/* Notification indicator */}
-                {hasUnreadNotifications ? (
-                  <Zap className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-red-500 fill-red-500" />
-                ) : (
-                  <Zap className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-accent-gold" />
-                )}
-
-                {/* User avatar */}
-                <div className="w-5 h-5 lg:w-6 lg:h-6 bg-accent-gold rounded-full flex items-center justify-center flex-shrink-0">
-                  <User className="w-2.5 h-2.5 lg:w-3 lg:h-3 text-background" />
-                </div>
-
-                {/* User info - stacked on medium, inline on large */}
-                <div className="hidden md:flex flex-col lg:flex-row lg:items-center lg:gap-2">
-                  {loading ? (
-                    <Loader2 className="w-3 h-3 animate-spin text-accent-gold" />
-                  ) : (
-                    <>
-                      <span className="text-foreground font-cinzel text-[10px] lg:text-xs font-medium whitespace-nowrap leading-tight uppercase">
-                        {displayName}
-                      </span>
-                      <span className="text-accent-gold text-[9px] lg:text-xs whitespace-nowrap leading-tight">
-                        LVL {userLevel} ♦ {userXp} XP
-                      </span>
-                    </>
-                  )}
-                </div>
-
-                {/* Dropdown arrow */}
-                <svg
-                  className={`w-2.5 h-2.5 lg:w-3 lg:h-3 text-accent-gold transition-transform ${isUserDropdownOpen ? "rotate-180" : ""}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                <User className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{t("nav.login")}</span>
+              </Link>
+            ) : (
+              <div className="relative">
+                <button
+                  onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                  className="flex items-center gap-1.5 lg:gap-2 bg-card/50 backdrop-blur-sm px-2 py-1 rounded-lg hover:bg-card transition-colors border border-accent-gold/20"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+                  {/* Notification indicator */}
+                  {hasUnreadNotifications ? (
+                    <Zap className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-red-500 fill-red-500" />
+                  ) : (
+                    <Zap className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-accent-gold" />
+                  )}
 
-              {/* Dropdown menu */}
-              {isUserDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-card backdrop-blur-sm rounded-lg shadow-lg border border-accent-gold/20 overflow-hidden">
-                  <Link
-                    href="/profile"
-                    className="flex items-center space-x-3 px-4 py-3 hover:bg-accent-gold/10 transition-colors"
-                    onClick={() => setIsUserDropdownOpen(false)}
+                  {/* User avatar */}
+                  <div className="w-5 h-5 lg:w-6 lg:h-6 bg-accent-gold rounded-full flex items-center justify-center flex-shrink-0">
+                    <User className="w-2.5 h-2.5 lg:w-3 lg:h-3 text-background" />
+                  </div>
+
+                  {/* User info - stacked on medium, inline on large */}
+                  <div className="hidden md:flex flex-col lg:flex-row lg:items-center lg:gap-2">
+                    {loading ? (
+                      <Loader2 className="w-3 h-3 animate-spin text-accent-gold" />
+                    ) : (
+                      <>
+                        <span className="text-foreground font-cinzel text-[10px] lg:text-xs font-medium whitespace-nowrap leading-tight uppercase">
+                          {displayName}
+                        </span>
+                        <span className="text-accent-gold text-[9px] lg:text-xs whitespace-nowrap leading-tight">
+                          LVL {userLevel} ♦ {userXp} XP
+                        </span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Dropdown arrow */}
+                  <svg
+                    className={`w-2.5 h-2.5 lg:w-3 lg:h-3 text-accent-gold transition-transform ${isUserDropdownOpen ? "rotate-180" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <User className="w-4 h-4 text-accent-gold" />
-                    <span className="text-foreground font-cinzel text-sm">{t("nav.profile")}</span>
-                  </Link>
-                  <Link
-                    href="/notifications"
-                    className="flex items-center space-x-3 px-4 py-3 hover:bg-accent-gold/10 transition-colors"
-                    onClick={() => setIsUserDropdownOpen(false)}
-                  >
-                    <Bell className="w-4 h-4 text-accent-gold" />
-                    <span className="text-foreground font-cinzel text-sm">{t("nav.notifications")}</span>
-                    {hasUnreadNotifications && <span className="ml-auto w-2 h-2 bg-red-500 rounded-full"></span>}
-                  </Link>
-                  <button
-                    className="flex items-center space-x-3 px-4 py-3 hover:bg-accent-gold/10 transition-colors w-full text-left border-t border-accent-gold/20"
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="w-4 h-4 text-accent-gold" />
-                    <span className="text-foreground font-cinzel text-sm">{t("nav.logout")}</span>
-                  </button>
-                </div>
-              )}
-            </div>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {/* Dropdown menu */}
+                {isUserDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-card backdrop-blur-sm rounded-lg shadow-lg border border-accent-gold/20 overflow-hidden">
+                    <Link
+                      href="/profile"
+                      className="flex items-center space-x-3 px-4 py-3 hover:bg-accent-gold/10 transition-colors"
+                      onClick={() => setIsUserDropdownOpen(false)}
+                    >
+                      <User className="w-4 h-4 text-accent-gold" />
+                      <span className="text-foreground font-cinzel text-sm">{t("nav.profile")}</span>
+                    </Link>
+                    <Link
+                      href="/notifications"
+                      className="flex items-center space-x-3 px-4 py-3 hover:bg-accent-gold/10 transition-colors"
+                      onClick={() => setIsUserDropdownOpen(false)}
+                    >
+                      <Bell className="w-4 h-4 text-accent-gold" />
+                      <span className="text-foreground font-cinzel text-sm">{t("nav.notifications")}</span>
+                      {hasUnreadNotifications && <span className="ml-auto w-2 h-2 bg-red-500 rounded-full"></span>}
+                    </Link>
+                    <button
+                      className="flex items-center space-x-3 px-4 py-3 hover:bg-accent-gold/10 transition-colors w-full text-left border-t border-accent-gold/20"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="w-4 h-4 text-accent-gold" />
+                      <span className="text-foreground font-cinzel text-sm">{t("nav.logout")}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
             <button
               className="md:hidden text-accent-gold hover:text-foreground transition-colors p-1"
