@@ -60,9 +60,15 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
   }
 
   const handleImport = async () => {
-    if (!username.trim()) return
+    console.log("[v0] handleImport CLICKED - username:", username, "category:", selectedCategory)
+    
+    if (!username.trim()) {
+      console.log("[v0] handleImport: Empty username, returning")
+      return
+    }
     
     setImporting(true)
+    console.log("[v0] handleImport: Starting import for user:", username)
     try {
       console.log("[v0] Importing from", getSourceName(), "for user:", username)
       

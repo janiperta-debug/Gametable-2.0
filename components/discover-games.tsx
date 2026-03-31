@@ -79,7 +79,10 @@ export function DiscoverGames() {
   const categoryConfig = categories.find(c => c.id === selectedCategory)!
 
   const handleSearch = async () => {
-    if (!searchQuery.trim()) return
+    if (!searchQuery.trim()) {
+      console.log("[v0] handleSearch: Empty search query, returning")
+      return
+    }
 
     console.log("[v0] handleSearch called with:", searchQuery, "category:", selectedCategory)
     
@@ -94,22 +97,36 @@ export function DiscoverGames() {
       console.log("[v0] Fetching from:", url)
       
       const response = await fetch(url)
-      console.log("[v0] Response status:", response.status)
+      console.log("[v0] Response status:", response.status, response.ok)
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("[v0] Response not ok:", errorText)
+        throw new Error(`API error: ${response.status}`)
+      }
       
       const data = await response.json()
-      console.log("[v0] Response data:", data)
+      console.log("[v0] Response data:", JSON.stringify(data).slice(0, 500))
 
       if (data.error) {
         throw new Error(data.error)
       }
 
-      setSearchResults(data.results || [])
-      console.log("[v0] Set search results:", data.results?.length || 0, "items")
+      const results = data.results || []
+      console.log("[v0] Setting search results:", results.length, "items")
+      setSearchResults(results)
+      
+      if (results.length === 0) {
+        toast({
+          title: t("common.info") || "Info",
+          description: t("collection.noResults") || "No results found",
+        })
+      }
     } catch (error) {
       console.error("[v0] Search error:", error)
       toast({
         title: t("common.error"),
-        description: t("collection.searchFailed"),
+        description: error instanceof Error ? error.message : (t("collection.searchFailed") || "Search failed"),
         variant: "destructive",
       })
     } finally {
