@@ -182,7 +182,7 @@ export function Navigation() {
                 className="flex items-center gap-1.5 lg:gap-2 bg-accent-gold text-background px-3 py-1.5 rounded-lg hover:bg-accent-gold/90 transition-colors font-cinzel text-xs uppercase tracking-wide"
               >
                 <User className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{t("auth.login")}</span>
+                <span className="hidden sm:inline">{t("nav.login")}</span>
               </Link>
             ) : (
               <div className="relative">
