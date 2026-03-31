@@ -244,6 +244,8 @@
     "maxPlaytime": "Max peliaika",
     "description": "Kuvaus",
     "descriptionPlaceholder": "Valinnainen kuvaus pelistä...",
+    "imageUrl": "Kuvan URL",
+    "imageUrlHelp": "Valinnainen: Liitä URL pelin kuvaan",
     "nameRequired": "Pelin nimi vaaditaan",
     "searchBGG": "Etsi BoardGameGeekistä",
     "searchBGGDescription": "Etsi lautapelejä BoardGameGeekin tietokannasta.",

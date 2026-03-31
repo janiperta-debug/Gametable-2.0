@@ -257,6 +257,8 @@
     "maxPlaytime": "Max Playtime",
     "description": "Description",
     "descriptionPlaceholder": "Optional description of the game...",
+    "imageUrl": "Image URL",
+    "imageUrlHelp": "Optional: Paste a URL to an image of the game",
     "nameRequired": "Game name is required",
     "searchBGG": "Search BoardGameGeek",
     "searchBGGDescription": "Search the BoardGameGeek database to add board games to your collection.",

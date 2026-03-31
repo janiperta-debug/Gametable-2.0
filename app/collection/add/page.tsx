@@ -63,6 +63,7 @@ export default function AddGamePage() {
     minPlaytime: "",
     maxPlaytime: "",
     description: "",
+    imageUrl: "",
   })
   const [savingManual, setSavingManual] = useState(false)
   
@@ -176,6 +177,8 @@ export default function AddGamePage() {
   }
 
   const handleManualSubmit = async () => {
+    console.log("[v0] handleManualSubmit called with:", manualForm, "category:", selectedCategory)
+    
     if (!manualForm.name.trim()) {
       toast({
         title: t("common.error"),
@@ -198,11 +201,13 @@ export default function AddGamePage() {
         maxPlaytime: manualForm.maxPlaytime ? parseInt(manualForm.maxPlaytime, 10) : null,
         description: manualForm.description || null,
         rating: null,
-        image: null,
-        thumbnail: null,
+        image: manualForm.imageUrl || null,
+        thumbnail: manualForm.imageUrl || null,
       }
 
+      console.log("[v0] Calling addGameToCollection with:", gameDetails)
       const result = await addGameToCollection(gameDetails, "owned", selectedCategory, true)
+      console.log("[v0] addGameToCollection result:", result)
 
       if (result.error) {
         toast({
@@ -723,6 +728,23 @@ export default function AddGamePage() {
                           className="mt-1 font-body"
                         />
                       </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="imageUrl" className="text-accent-gold font-cinzel text-sm uppercase tracking-wider">
+                        {t("collection.imageUrl") || "Image URL"}
+                      </Label>
+                      <Input
+                        id="imageUrl"
+                        type="url"
+                        value={manualForm.imageUrl}
+                        onChange={(e) => setManualForm({ ...manualForm, imageUrl: e.target.value })}
+                        placeholder="https://example.com/game-image.jpg"
+                        className="mt-1 font-body"
+                      />
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {t("collection.imageUrlHelp") || "Optional: Paste a URL to an image of the game"}
+                      </p>
                     </div>
 
                     <div>
