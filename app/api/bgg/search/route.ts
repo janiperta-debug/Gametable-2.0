@@ -1,24 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { XMLParser } from 'fast-xml-parser'
 
-const BGG_API_TOKEN = process.env.BGG_API_TOKEN
-
-// Fetch from BGG with API token as query parameter
-async function fetchFromBGG(baseUrl: string): Promise<Response> {
-  // BGG API uses access_token as a query parameter, not a header
-  const url = BGG_API_TOKEN 
-    ? `${baseUrl}&access_token=${encodeURIComponent(BGG_API_TOKEN)}`
-    : baseUrl
-  
-  return fetch(url, { 
-    headers: {
-      'Accept': 'application/xml, text/xml, */*',
-      'User-Agent': 'GameTable/1.0 (https://gametable.fi)',
-    },
-    cache: 'no-store' 
-  })
-}
-
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const query = searchParams.get('query')
@@ -30,17 +12,14 @@ export async function GET(request: NextRequest) {
   try {
     const bggUrl = `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame`
     
-    const searchResponse = await fetchFromBGG(bggUrl)
+    const searchResponse = await fetch(bggUrl, {
+      headers: {
+        'Accept': 'application/xml, text/xml, */*',
+      },
+      cache: 'no-store',
+    })
 
     if (!searchResponse.ok) {
-      // BGG API requires registration - return helpful message
-      if (searchResponse.status === 401) {
-        return NextResponse.json({ 
-          results: [], 
-          error: 'BGG API requires domain registration. Please use manual entry for now.',
-          needsRegistration: true
-        })
-      }
       return NextResponse.json({ results: [], note: 'BGG API temporarily unavailable' })
     }
 

@@ -178,7 +178,7 @@ export function Navigation() {
             {/* Show Login button if not logged in, otherwise show user dropdown */}
             {!user && !loading ? (
               <Link
-                href="/auth"
+                href="/auth/login"
                 className="flex items-center gap-1.5 lg:gap-2 bg-accent-gold text-background px-3 py-1.5 rounded-lg hover:bg-accent-gold/90 transition-colors font-cinzel text-xs uppercase tracking-wide"
               >
                 <User className="w-3.5 h-3.5" />

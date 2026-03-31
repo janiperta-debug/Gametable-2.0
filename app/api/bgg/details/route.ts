@@ -1,23 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { XMLParser } from 'fast-xml-parser'
 
-const BGG_API_TOKEN = process.env.BGG_API_TOKEN
-
-// Fetch from BGG with API token as query parameter
-async function fetchFromBGG(baseUrl: string): Promise<Response> {
-  const url = BGG_API_TOKEN 
-    ? `${baseUrl}&access_token=${encodeURIComponent(BGG_API_TOKEN)}`
-    : baseUrl
-  
-  return fetch(url, { 
-    headers: {
-      'Accept': 'application/xml, text/xml, */*',
-      'User-Agent': 'GameTable/1.0 (https://gametable.fi)',
-    },
-    cache: 'no-store' 
-  })
-}
-
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const id = searchParams.get('id')
@@ -28,7 +11,12 @@ export async function GET(request: NextRequest) {
 
   try {
     const bggUrl = `https://boardgamegeek.com/xmlapi2/thing?id=${id}&stats=1`
-    const response = await fetchFromBGG(bggUrl)
+    const response = await fetch(bggUrl, {
+      headers: {
+        'Accept': 'application/xml, text/xml, */*',
+      },
+      cache: 'no-store',
+    })
 
     if (!response.ok) {
       return NextResponse.json({ error: 'Game details temporarily unavailable' }, { status: 503 })

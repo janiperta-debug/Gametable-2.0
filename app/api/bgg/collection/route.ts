@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { XMLParser } from 'fast-xml-parser'
 
-const BGG_API_TOKEN = process.env.BGG_API_TOKEN
-
 export interface BGGCollectionItem {
   id: number
   name: string
@@ -25,25 +23,23 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Fetch user's collection from BGG API - use access_token as query parameter
-    let collectionUrl = `https://boardgamegeek.com/xmlapi2/collection?username=${encodeURIComponent(username)}&stats=1&own=1`
+    const collectionUrl = `https://boardgamegeek.com/xmlapi2/collection?username=${encodeURIComponent(username)}&stats=1&own=1`
     
-    if (BGG_API_TOKEN) {
-      collectionUrl += `&access_token=${encodeURIComponent(BGG_API_TOKEN)}`
-    }
-    
-    const headers: Record<string, string> = {
-      'Accept': 'application/xml, text/xml, */*',
-      'User-Agent': 'GameTable/1.0 (https://gametable.fi)',
-    }
-    
-    let response = await fetch(collectionUrl, { headers, cache: 'no-store' })
+    let response = await fetch(collectionUrl, {
+      headers: {
+        'Accept': 'application/xml, text/xml, */*',
+      },
+      cache: 'no-store',
+    })
 
     // BGG returns 202 when collection is being prepared - need to retry
     let retries = 0
     while (response.status === 202 && retries < 5) {
       await new Promise(resolve => setTimeout(resolve, 2000))
-      response = await fetch(collectionUrl, { headers, cache: 'no-store' })
+      response = await fetch(collectionUrl, {
+        headers: { 'Accept': 'application/xml, text/xml, */*' },
+        cache: 'no-store',
+      })
       retries++
     }
 

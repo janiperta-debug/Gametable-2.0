@@ -334,26 +334,32 @@ export async function getEventById(
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  console.log("[v0] getEventById - user:", user?.id, "eventId:", eventId)
 
+  // First get the event
   const { data: event, error } = await supabase
     .from("events")
-    .select(`
-      *,
-      host:profiles!events_host_id_fkey(id, display_name, avatar_url)
-    `)
+    .select("*")
     .eq("id", eventId)
     .single()
 
-  console.log("[v0] getEventById - event:", event?.id, "privacy:", event?.privacy, "error:", error?.message)
-
   if (error) {
-    console.error("[v0] Error fetching event:", error)
+    console.error("Error fetching event:", error)
     return { error: error.message }
   }
 
   if (!event) {
     return { error: "Event not found" }
+  }
+
+  // Get host profile separately
+  let host = null
+  if (event.host_id) {
+    const { data: hostProfile } = await supabase
+      .from("profiles")
+      .select("id, display_name, avatar_url")
+      .eq("id", event.host_id)
+      .single()
+    host = hostProfile
   }
 
   // Check access for private events only - public and friends events are visible
@@ -385,10 +391,7 @@ export async function getEventById(
   // Get participants list
   const { data: participants } = await supabase
     .from("event_participants")
-    .select(`
-      *,
-      user:profiles!event_participants_user_id_fkey(id, display_name, avatar_url)
-    `)
+    .select("*")
     .eq("event_id", eventId)
     .in("status", ["attending", "maybe"])
     .order("joined_at", { ascending: true })
@@ -408,6 +411,7 @@ export async function getEventById(
   return {
     event: {
       ...event,
+      host,
       participant_count: count || 0,
       user_rsvp: userRsvp,
       participants: participants || [],
