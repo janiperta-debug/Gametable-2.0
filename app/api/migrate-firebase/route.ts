@@ -48,6 +48,8 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const dryRun = searchParams.get("dry_run") !== "false"
   const secret = searchParams.get("secret")
+  const batchSize = Math.min(parseInt(searchParams.get("batch") || "5"), 10) // Max 10 per batch
+  const offset = parseInt(searchParams.get("offset") || "0")
   
   // Simple security check - require a secret parameter
   if (secret !== process.env.MIGRATION_SECRET && secret !== "gametable-migrate-2024") {
@@ -61,7 +63,7 @@ export async function GET(request: NextRequest) {
   }
   
   try {
-    addLog(`Starting migration (DRY_RUN: ${dryRun})`)
+    addLog(`Starting migration (DRY_RUN: ${dryRun}, batch: ${batchSize}, offset: ${offset})`)
     
     // Initialize Firebase
     const { admin } = await getFirebaseAdmin()
@@ -93,10 +95,17 @@ export async function GET(request: NextRequest) {
     } while (nextPageToken)
     
     stats.usersFound = firebaseUsers.length
-    addLog(`Found ${firebaseUsers.length} Firebase users`)
+    addLog(`Found ${firebaseUsers.length} Firebase users total`)
     
-    // Step 2: Process each user
-    for (const fbUser of firebaseUsers) {
+    // Get the batch of users to process
+    const usersToProcess = firebaseUsers.slice(offset, offset + batchSize)
+    const hasMore = offset + batchSize < firebaseUsers.length
+    const nextOffset = hasMore ? offset + batchSize : null
+    
+    addLog(`Processing users ${offset + 1} to ${offset + usersToProcess.length} of ${firebaseUsers.length}`)
+    
+    // Step 2: Process batch of users
+    for (const fbUser of usersToProcess) {
       try {
         addLog(`Processing user: ${fbUser.email || fbUser.uid}`)
         
@@ -265,19 +274,35 @@ export async function GET(request: NextRequest) {
     }
     
     addLog("")
-    addLog("=== Migration Complete ===")
-    addLog(`Users found: ${stats.usersFound}`)
-    addLog(`Users created: ${stats.usersCreated}`)
+    addLog(`=== Batch Complete (${offset + 1}-${offset + usersToProcess.length} of ${stats.usersFound}) ===`)
+    addLog(`Users created in this batch: ${stats.usersCreated}`)
     addLog(`Profiles created: ${stats.profilesCreated}`)
     addLog(`Games created: ${stats.gamesCreated}`)
     addLog(`User-game links: ${stats.userGamesCreated}`)
     addLog(`Errors: ${stats.errors.length}`)
     
+    if (hasMore) {
+      addLog("")
+      addLog(`>>> More users remaining. Next batch: offset=${nextOffset}`)
+    } else {
+      addLog("")
+      addLog("=== ALL USERS PROCESSED ===")
+    }
+    
     return NextResponse.json({
       success: true,
       dryRun,
       stats,
-      log
+      log,
+      pagination: {
+        total: stats.usersFound,
+        processed: offset + usersToProcess.length,
+        hasMore,
+        nextOffset,
+        nextUrl: hasMore 
+          ? `/api/migrate-firebase?secret=gametable-migrate-2024&dry_run=${dryRun}&offset=${nextOffset}&batch=${batchSize}`
+          : null
+      }
     })
     
   } catch (error) {
