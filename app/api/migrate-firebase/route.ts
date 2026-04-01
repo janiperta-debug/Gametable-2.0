@@ -240,46 +240,14 @@ export async function GET(request: NextRequest) {
           .replace(/[^a-z0-9_]/g, "_")
           .slice(0, 30)
         
-        // Check if user already exists in Supabase auth by email
-        if (fbUser.email) {
-          const { data: existingAuthUsers } = await supabase.auth.admin.listUsers()
-          const existingUser = existingAuthUsers?.users?.find(u => u.email === fbUser.email)
-          
-          if (existingUser) {
-            addLog(`  User ${fbUser.email} already exists in auth, updating profile...`)
-            
-            // Update profile for existing user with correct data
-            if (!dryRun) {
-              const { error: updateError } = await supabase
-                .from("profiles")
-                .update({
-                  display_name: profileData?.displayName || fbUser.displayName || null,
-                  username: username,
-                  avatar_url: profileData?.photoURL || fbUser.photoURL || null,
-                  xp: profileData?.totalXP || 0,
-                  level: profileData?.currentLevel || 1,
-                  current_xp: profileData?.totalXP || 0,
-                })
-                .eq("id", existingUser.id)
-              
-              if (updateError) {
-                addLog(`    Error updating profile: ${updateError.message}`)
-              } else {
-                addLog(`    Updated profile with XP: ${profileData?.totalXP || 0}, username: ${username}`)
-                stats.profilesCreated++
-              }
-              
-              // Still migrate games for existing users
-              await migrateUserGames(firestore, supabase, fbUser.uid, existingUser.id, profileData, addLog, stats, dryRun)
-            }
-            continue
-          }
-        }
+        // Try to find existing user - first by getting user by email from auth
+        let supabaseUserId: string | null = null
+        let isExistingUser = false
         
-        if (!dryRun) {
-          // Create Supabase auth user
+        if (!dryRun && fbUser.email) {
+          // Try to create the user first - if it fails with "already registered", we'll look them up
           const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-            email: fbUser.email || `${fbUser.uid}@migrated.local`,
+            email: fbUser.email,
             email_confirm: true,
             user_metadata: {
               firebase_uid: fbUser.uid,
@@ -287,65 +255,96 @@ export async function GET(request: NextRequest) {
             }
           })
           
-          if (authError) {
+          if (authError && authError.message.includes("already been registered")) {
+            // User exists - find them by looking up all users with pagination
+            addLog(`  User ${fbUser.email} already exists, looking up...`)
+            
+            let page = 1
+            let foundUser = null
+            while (!foundUser) {
+              const { data: listData } = await supabase.auth.admin.listUsers({ page, perPage: 100 })
+              if (!listData?.users || listData.users.length === 0) break
+              foundUser = listData.users.find(u => u.email === fbUser.email)
+              if (foundUser) break
+              page++
+              if (page > 10) break // Safety limit
+            }
+            
+            if (foundUser) {
+              supabaseUserId = foundUser.id
+              isExistingUser = true
+              addLog(`  Found existing user with ID: ${supabaseUserId}`)
+            } else {
+              stats.errors.push(`Could not find existing user: ${fbUser.email}`)
+              addLog(`  ERROR: Could not find existing user ${fbUser.email}`)
+              continue
+            }
+          } else if (authError) {
             stats.errors.push(`Auth error for ${fbUser.email}: ${authError.message}`)
             addLog(`  Error creating auth user: ${authError.message}`)
             continue
+          } else if (authData?.user) {
+            supabaseUserId = authData.user.id
+            stats.usersCreated++
+            addLog(`  Created new auth user: ${supabaseUserId}`)
           }
-          
-          const supabaseUserId = authData.user.id
-          stats.usersCreated++
-          
-          // Map Firebase preferences to game_interests array
-          const gameInterests: string[] = []
-          if (profileData?.prefersBoardGames) gameInterests.push("board_game")
-          if (profileData?.prefersWarhammer) gameInterests.push("miniature")
-          if (profileData?.prefersOtherMiniatures) gameInterests.push("miniature")
-          if (profileData?.prefersRPGs) gameInterests.push("rpg")
-          
-          // Map Firebase themePreference to Supabase preferred_theme
-          const themeMap: Record<string, string> = {
-            "dark-fantasy": "vintage_burgundy",
-            "light": "forest_green", 
-            "steampunk": "midnight_blue",
-            "cyberpunk": "warm_mahogany",
-          }
-          const preferredTheme = themeMap[profileData?.themePreference] || "vintage_burgundy"
-          
-          // Create profile with correct Firebase field names
-          const { error: profileError } = await supabase
-            .from("profiles")
-            .upsert({
-              id: supabaseUserId,
-              display_name: profileData?.displayName || fbUser.displayName || null,
-              username: username,
-              avatar_url: profileData?.photoURL || fbUser.photoURL || null,
-              bio: profileData?.bio || null,
-              location: profileData?.location || null,
-              game_interests: gameInterests.length > 0 ? gameInterests : ["board_game"],
-              xp: profileData?.totalXP || 0,
-              level: profileData?.currentLevel || 1,
-              current_xp: profileData?.totalXP || 0,
-              active_room: "grand_hall",
-              preferred_theme: preferredTheme,
-              show_collection: true,
-            })
-          
-          if (profileError) {
-            stats.errors.push(`Profile error for ${fbUser.email}: ${profileError.message}`)
-            addLog(`  Error creating profile: ${profileError.message}`)
-          } else {
-            stats.profilesCreated++
-            addLog(`  Created profile for ${fbUser.email}`)
-          }
-          
-          // Migrate games from subcollection
-          await migrateUserGames(firestore, supabase, fbUser.uid, supabaseUserId, profileData, addLog, stats, dryRun)
-        } else {
-          addLog(`  [DRY RUN] Would create user and profile`)
-          stats.usersCreated++
-          stats.profilesCreated++
         }
+        
+        if (dryRun) {
+          addLog(`  [DRY RUN] Would create/update user and migrate games`)
+          continue
+        }
+        
+        if (!supabaseUserId) {
+          addLog(`  ERROR: No Supabase user ID available`)
+          continue
+        }
+        
+        // Map Firebase preferences to game_interests array
+        const gameInterests: string[] = []
+        if (profileData?.prefersBoardGames) gameInterests.push("board_game")
+        if (profileData?.prefersWarhammer) gameInterests.push("miniature")
+        if (profileData?.prefersOtherMiniatures) gameInterests.push("miniature")
+        if (profileData?.prefersRPGs) gameInterests.push("rpg")
+        
+        // Map Firebase themePreference to Supabase preferred_theme
+        const themeMap: Record<string, string> = {
+          "dark-fantasy": "vintage_burgundy",
+          "light": "forest_green", 
+          "steampunk": "midnight_blue",
+          "cyberpunk": "warm_mahogany",
+        }
+        const preferredTheme = themeMap[profileData?.themePreference as string] || "vintage_burgundy"
+        
+        // Create or update profile
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .upsert({
+            id: supabaseUserId,
+            display_name: profileData?.displayName || fbUser.displayName || null,
+            username: username,
+            avatar_url: profileData?.photoURL || fbUser.photoURL || null,
+            bio: profileData?.bio || null,
+            location: profileData?.location || null,
+            game_interests: gameInterests.length > 0 ? gameInterests : ["board_game"],
+            xp: profileData?.totalXP || 0,
+            level: profileData?.currentLevel || 1,
+            current_xp: profileData?.totalXP || 0,
+            active_room: "grand_hall",
+            preferred_theme: preferredTheme,
+            show_collection: true,
+          })
+        
+        if (profileError) {
+          stats.errors.push(`Profile error for ${fbUser.email}: ${profileError.message}`)
+          addLog(`  Error ${isExistingUser ? 'updating' : 'creating'} profile: ${profileError.message}`)
+        } else {
+          stats.profilesCreated++
+          addLog(`  ${isExistingUser ? 'Updated' : 'Created'} profile for ${fbUser.email} (XP: ${profileData?.totalXP || 0}, username: ${username})`)
+        }
+        
+        // Migrate games from subcollection
+        await migrateUserGames(firestore, supabase, fbUser.uid, supabaseUserId, profileData, addLog, stats, dryRun)
         
       } catch (userError) {
         const errorMsg = userError instanceof Error ? userError.message : String(userError)
