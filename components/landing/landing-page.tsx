@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useTranslations, useI18n } from "@/lib/i18n"
+import { CookieConsent } from "@/components/cookie-consent"
 
 /* ────────────────────────────────────────────
    Constants
@@ -90,6 +91,7 @@ export function LandingPage() {
       <ManifestoSection />
       <CtaSection opened={opened} />
       <LandingFooter />
+      <CookieConsent />
     </div>
   )
 }
@@ -188,9 +190,18 @@ function LandingNav({ opened }: { opened: boolean }) {
         </li>
       </ul>
 
-      {/* Mobile language switcher */}
-      <div className="md:hidden">
+      {/* Mobile: language switcher + CTA button */}
+      <div className="md:hidden flex items-center gap-3">
         <LandingLanguageSwitcher />
+        {opened && (
+          <Link
+            href={APP_URL}
+            className="font-cinzel text-[10px] font-bold tracking-wide px-3 py-1.5 rounded-sm no-underline transition-all hover:opacity-90"
+            style={{ background: "#c9a84c", color: "#1a1008" }}
+          >
+            {t("landing.nav.enterManor")} →
+          </Link>
+        )}
       </div>
     </nav>
   )
@@ -201,6 +212,18 @@ function LandingNav({ opened }: { opened: boolean }) {
    ──────────────────────────────────────────── */
 function HeroSection() {
   const t = useTranslations()
+  const [opened, setOpened] = useState<boolean>(isOpened())
+  
+  useEffect(() => {
+    if (opened) return
+    const interval = setInterval(() => {
+      if (isOpened()) {
+        setOpened(true)
+        clearInterval(interval)
+      }
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [opened])
   
   return (
     <section className="min-h-screen relative flex flex-col items-center justify-center text-center px-5 pt-24 pb-16">
@@ -227,10 +250,19 @@ function HeroSection() {
           <div className="w-16 h-px bg-[#c9a84c]" />
         </div>
 
-        {/* Subtitle */}
-        <p className="font-cormorant text-lg md:text-xl text-[#f0e6d0]/70 max-w-2xl mx-auto mb-4 uppercase tracking-widest">
-          {t("landing.hero.subtitle")}
-        </p>
+        {/* Subtitle - becomes a link when manor is open */}
+        {opened ? (
+          <Link 
+            href={APP_URL}
+            className="font-cormorant text-lg md:text-xl text-[#c9a84c] hover:text-[#c9a84c]/80 max-w-2xl mx-auto mb-4 uppercase tracking-widest block transition-colors no-underline hover:underline"
+          >
+            {t("landing.hero.subtitleOpen")} →
+          </Link>
+        ) : (
+          <p className="font-cormorant text-lg md:text-xl text-[#f0e6d0]/70 max-w-2xl mx-auto mb-4 uppercase tracking-widest">
+            {t("landing.hero.subtitle")}
+          </p>
+        )}
 
         <p className="text-base text-[#f0e6d0]/60 max-w-xl mx-auto mb-10 leading-relaxed">
           {t("landing.hero.description")}

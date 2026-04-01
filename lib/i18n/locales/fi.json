@@ -1,4 +1,11 @@
 {
+  "cookies": {
+    "title": "Evästeet",
+    "description": "Käytämme evästeitä parantaaksemme käyttökokemustasi ja analysoidaksemme sivuston käyttöä. Voit lukea lisää evästekäytännöistämme",
+    "privacyPolicy": "tietosuojaselosteestamme",
+    "acceptAll": "Hyväksy kaikki",
+    "essentialOnly": "Vain välttämättömät"
+  },
   "common": {
     "loading": "Ladataan...",
     "save": "Tallenna",
@@ -723,7 +730,7 @@
     "wishlist": "Toivelista",
     "games": "peliä",
     "createListing": "Luo ilmoitus",
-    "createFirstListing": "Luo ensimmäinen ilmoitus",
+    "createFirstListing": "Luo ensimm��inen ilmoitus",
     "selectGameFromCollection": "Valitse peli kokoelmastasi",
     "selectGame": "Valitse peli",
     "noGamesInCollection": "Tarvitset pelejä kokoelmassasi luodaksesi ilmoituksen.",
@@ -932,13 +939,14 @@
       "tools": "Työkalut",
       "enterManor": "Astu Kartanoon"
     },
-    "hero": {
-      "title1": "Kaikkien",
-      "title2": "pöytäpelaajien",
-      "title3": "koti.",
-      "subtitle": "Kartano avaa ovensa",
-      "description": "Lautapelaajasta roolipelaajaan, miniatyyrimaalarista kortinkerääjään — yksi kartano koko harrastukselle."
-    },
+"hero": {
+  "title1": "Kaikkien",
+  "title2": "pöytäpelaajien",
+  "title3": "koti.",
+  "subtitle": "Kartano avaa ovensa",
+  "subtitleOpen": "Kartano on avoinna",
+  "description": "Lautapelaajasta roolipelaajaan, miniatyyrimaalarista kortinkerääjään — yksi kartano koko harrastukselle."
+  },
     "countdown": {
       "label": "Ovet avautuvat",
       "days": "Päivää",
@@ -1005,7 +1013,7 @@
       "campaignDiary": { "name": "Kampanjapäiväkirja", "status": "Suunnitteilla", "desc": "Seikkailuille" }
     },
     "manifesto": {
-      "quote": "Pöytäpelaaminen on yksi harrastus — ei neljää erillistä yhteisöä jotka eivät puhu toisilleen."
+      "quote": "Pöytäpelaaminen on yksi harrastus �� ei neljää erillistä yhteisöä jotka eivät puhu toisilleen."
     },
     "cta": {
       "welcome": "Tervetuloa",
