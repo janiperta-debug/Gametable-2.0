@@ -44,6 +44,127 @@ function getSupabaseAdmin() {
   })
 }
 
+// Helper to migrate games for a user
+async function migrateUserGames(
+  firestore: FirebaseFirestore.Firestore,
+  supabase: ReturnType<typeof createClient>,
+  firebaseUid: string,
+  supabaseUserId: string,
+  profileData: Record<string, unknown> | undefined,
+  addLog: (msg: string) => void,
+  stats: { gamesCreated: number; userGamesCreated: number; errors: string[] },
+  dryRun: boolean
+) {
+  const gamesSnapshot = await firestore
+    .collection("userProfiles")
+    .doc(firebaseUid)
+    .collection("games")
+    .get()
+  
+  addLog(`    Found ${gamesSnapshot.size} games in collection`)
+  
+  if (dryRun) {
+    addLog(`    [DRY RUN] Would migrate ${gamesSnapshot.size} games`)
+    return
+  }
+  
+  for (const gameDoc of gamesSnapshot.docs) {
+    const gameData = gameDoc.data()
+    
+    // Check if game exists or create it
+    let gameId: string | null = null
+    
+    // Try to find by bggId first
+    if (gameData.bggId) {
+      const { data: existingGame } = await supabase
+        .from("games")
+        .select("id")
+        .eq("bgg_id", String(gameData.bggId))
+        .single()
+      
+      if (existingGame) {
+        gameId = existingGame.id
+        addLog(`    Found existing game for bggId ${gameData.bggId}`)
+      }
+    }
+    
+    // Get game name - could be in name, title, or we need to use bggId as fallback
+    const gameName = gameData.name || gameData.title || `BGG Game ${gameData.bggId}` || "Unknown Game"
+    
+    if (!gameId) {
+      // Create new game
+      const { data: newGame, error: gameError } = await supabase
+        .from("games")
+        .insert({
+          bgg_id: gameData.bggId ? String(gameData.bggId) : null,
+          name: gameName,
+          year_published: gameData.yearPublished || gameData.year || null,
+          description: gameData.description || null,
+          thumbnail_url: gameData.thumbnailUrl || gameData.imageUrl || null,
+          image_url: gameData.imageUrl || null,
+          min_players: gameData.minPlayers || null,
+          max_players: gameData.maxPlayers || null,
+          playing_time: gameData.playingTime || null,
+          category: gameData.category || "board_game",
+          bgg_rating: gameData.averageRating || gameData.bggRating || null,
+        })
+        .select("id")
+        .single()
+      
+      if (gameError) {
+        stats.errors.push(`Game error for ${gameName}: ${gameError.message}`)
+        addLog(`    Error creating game ${gameName}: ${gameError.message}`)
+        continue
+      }
+      
+      gameId = newGame.id
+      stats.gamesCreated++
+      addLog(`    Created game: ${gameName}`)
+    }
+    
+    // Check if user_game link already exists
+    const { data: existingUserGame } = await supabase
+      .from("user_games")
+      .select("id")
+      .eq("user_id", supabaseUserId)
+      .eq("game_id", gameId)
+      .single()
+    
+    if (existingUserGame) {
+      addLog(`    User already has game ${gameName}`)
+      continue
+    }
+    
+    // Create user_game link
+    const addedAt = gameData.addedDate?._seconds 
+      ? new Date(gameData.addedDate._seconds * 1000).toISOString()
+      : new Date().toISOString()
+    
+    const { error: userGameError } = await supabase
+      .from("user_games")
+      .insert({
+        user_id: supabaseUserId,
+        game_id: gameId,
+        status: gameData.status || "owned",
+        condition: gameData.condition || null,
+        personal_rating: gameData.personalRating || gameData.userRating || null,
+        play_count: gameData.playCount || gameData.numPlays || 0,
+        notes: gameData.notes || null,
+        quantity: gameData.quantity || 1,
+        paint_status: gameData.paintStatus || null,
+        added_at: addedAt,
+      })
+    
+    if (userGameError) {
+      stats.errors.push(`User game error: ${userGameError.message}`)
+      addLog(`    Error linking game: ${userGameError.message}`)
+    } else {
+      stats.userGamesCreated++
+      addLog(`    Linked game: ${gameName}`)
+    }
+  }
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const dryRun = searchParams.get("dry_run") !== "false"
@@ -109,23 +230,51 @@ export async function GET(request: NextRequest) {
       try {
         addLog(`Processing user: ${fbUser.email || fbUser.uid}`)
         
-        // Check if user already exists in Supabase by email
+        // Get Firestore profile first to check displayName
+        const profileDoc = await firestore.collection("userProfiles").doc(fbUser.uid).get()
+        const profileData = profileDoc.exists ? profileDoc.data() : {}
+        
+        // Use displayName as username (sanitized)
+        const username = (profileData?.displayName || fbUser.displayName || fbUser.email?.split("@")[0] || fbUser.uid.slice(0, 20))
+          .toLowerCase()
+          .replace(/[^a-z0-9_]/g, "_")
+          .slice(0, 30)
+        
+        // Check if user already exists in Supabase auth by email
         if (fbUser.email) {
-          const { data: existingUsers } = await supabase
-            .from("profiles")
-            .select("id")
-            .ilike("username", fbUser.email.split("@")[0])
-            .limit(1)
+          const { data: existingAuthUsers } = await supabase.auth.admin.listUsers()
+          const existingUser = existingAuthUsers?.users?.find(u => u.email === fbUser.email)
           
-          if (existingUsers && existingUsers.length > 0) {
-            addLog(`  User already exists, skipping`)
+          if (existingUser) {
+            addLog(`  User ${fbUser.email} already exists in auth, updating profile...`)
+            
+            // Update profile for existing user with correct data
+            if (!dryRun) {
+              const { error: updateError } = await supabase
+                .from("profiles")
+                .update({
+                  display_name: profileData?.displayName || fbUser.displayName || null,
+                  username: username,
+                  avatar_url: profileData?.photoURL || fbUser.photoURL || null,
+                  xp: profileData?.totalXP || 0,
+                  level: profileData?.currentLevel || 1,
+                  current_xp: profileData?.totalXP || 0,
+                })
+                .eq("id", existingUser.id)
+              
+              if (updateError) {
+                addLog(`    Error updating profile: ${updateError.message}`)
+              } else {
+                addLog(`    Updated profile with XP: ${profileData?.totalXP || 0}, username: ${username}`)
+                stats.profilesCreated++
+              }
+              
+              // Still migrate games for existing users
+              await migrateUserGames(firestore, supabase, fbUser.uid, existingUser.id, profileData, addLog, stats, dryRun)
+            }
             continue
           }
         }
-        
-        // Get Firestore profile
-        const profileDoc = await firestore.collection("userProfiles").doc(fbUser.uid).get()
-        const profileData = profileDoc.exists ? profileDoc.data() : {}
         
         if (!dryRun) {
           // Create Supabase auth user
@@ -169,7 +318,7 @@ export async function GET(request: NextRequest) {
             .upsert({
               id: supabaseUserId,
               display_name: profileData?.displayName || fbUser.displayName || null,
-              username: fbUser.email?.split("@")[0] || fbUser.uid.slice(0, 20),
+              username: username,
               avatar_url: profileData?.photoURL || fbUser.photoURL || null,
               bio: profileData?.bio || null,
               location: profileData?.location || null,
@@ -191,96 +340,7 @@ export async function GET(request: NextRequest) {
           }
           
           // Migrate games from subcollection
-          const gamesSnapshot = await firestore
-            .collection("userProfiles")
-            .doc(fbUser.uid)
-            .collection("games")
-            .get()
-          
-          for (const gameDoc of gamesSnapshot.docs) {
-            const gameData = gameDoc.data()
-            
-            // Check if game exists or create it
-            let gameId: string | null = null
-            
-            if (gameData.bggId) {
-              const { data: existingGame } = await supabase
-                .from("games")
-                .select("id")
-                .eq("bgg_id", gameData.bggId)
-                .single()
-              
-              if (existingGame) {
-                gameId = existingGame.id
-              }
-            }
-            
-            if (!gameId && gameData.name) {
-              const { data: existingByName } = await supabase
-                .from("games")
-                .select("id")
-                .eq("name", gameData.name)
-                .eq("category", gameData.category || "board_game")
-                .single()
-              
-              if (existingByName) {
-                gameId = existingByName.id
-              }
-            }
-            
-            if (!gameId) {
-              // Create new game - use correct Firebase field names
-              const { data: newGame, error: gameError } = await supabase
-                .from("games")
-                .insert({
-                  bgg_id: gameData.bggId || null,
-                  name: gameData.name || gameData.title || "Unknown Game",
-                  year_published: gameData.yearPublished || gameData.year || null,
-                  description: gameData.description || null,
-                  thumbnail_url: gameData.thumbnailUrl || gameData.imageUrl || null,
-                  image_url: gameData.imageUrl || null,
-                  min_players: gameData.minPlayers || null,
-                  max_players: gameData.maxPlayers || null,
-                  playing_time: gameData.playingTime || null,
-                  category: gameData.category || gameData.source === "bgg" ? "board_game" : "board_game",
-                  bgg_rating: gameData.averageRating || gameData.bggRating || null,
-                })
-                .select("id")
-                .single()
-              
-              if (gameError) {
-                stats.errors.push(`Game error: ${gameError.message}`)
-                continue
-              }
-              
-              gameId = newGame.id
-              stats.gamesCreated++
-            }
-            
-            // Create user_game link - Firebase uses addedDate timestamp
-            const addedAt = gameData.addedDate?._seconds 
-              ? new Date(gameData.addedDate._seconds * 1000).toISOString()
-              : new Date().toISOString()
-            
-            const { error: userGameError } = await supabase
-              .from("user_games")
-              .insert({
-                user_id: supabaseUserId,
-                game_id: gameId,
-                status: gameData.status || "owned",
-                condition: gameData.condition || null,
-                personal_rating: gameData.personalRating || gameData.userRating || null,
-                play_count: gameData.playCount || gameData.numPlays || 0,
-                notes: gameData.notes || null,
-                quantity: gameData.quantity || 1,
-                paint_status: gameData.paintStatus || null,
-                added_at: addedAt,
-              })
-            
-            if (!userGameError) {
-              stats.userGamesCreated++
-            }
-          }
+          await migrateUserGames(firestore, supabase, fbUser.uid, supabaseUserId, profileData, addLog, stats, dryRun)
         } else {
           addLog(`  [DRY RUN] Would create user and profile`)
           stats.usersCreated++
