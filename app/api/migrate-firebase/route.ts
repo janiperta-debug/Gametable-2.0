@@ -147,23 +147,39 @@ export async function GET(request: NextRequest) {
           const supabaseUserId = authData.user.id
           stats.usersCreated++
           
-          // Create profile
+          // Map Firebase preferences to game_interests array
+          const gameInterests: string[] = []
+          if (profileData?.prefersBoardGames) gameInterests.push("board_game")
+          if (profileData?.prefersWarhammer) gameInterests.push("miniature")
+          if (profileData?.prefersOtherMiniatures) gameInterests.push("miniature")
+          if (profileData?.prefersRPGs) gameInterests.push("rpg")
+          
+          // Map Firebase themePreference to Supabase preferred_theme
+          const themeMap: Record<string, string> = {
+            "dark-fantasy": "vintage_burgundy",
+            "light": "forest_green", 
+            "steampunk": "midnight_blue",
+            "cyberpunk": "warm_mahogany",
+          }
+          const preferredTheme = themeMap[profileData?.themePreference] || "vintage_burgundy"
+          
+          // Create profile with correct Firebase field names
           const { error: profileError } = await supabase
             .from("profiles")
             .upsert({
               id: supabaseUserId,
               display_name: profileData?.displayName || fbUser.displayName || null,
               username: fbUser.email?.split("@")[0] || fbUser.uid.slice(0, 20),
-              avatar_url: profileData?.avatarUrl || fbUser.photoURL || null,
+              avatar_url: profileData?.photoURL || fbUser.photoURL || null,
               bio: profileData?.bio || null,
               location: profileData?.location || null,
-              game_interests: profileData?.gameInterests || [],
-              xp: profileData?.xp || 0,
-              level: profileData?.level || 1,
-              current_xp: profileData?.currentXp || 0,
-              active_room: profileData?.activeRoom || "grand_hall",
-              preferred_theme: profileData?.preferredTheme || "vintage_burgundy",
-              show_collection: profileData?.showCollection !== false,
+              game_interests: gameInterests.length > 0 ? gameInterests : ["board_game"],
+              xp: profileData?.totalXP || 0,
+              level: profileData?.currentLevel || 1,
+              current_xp: profileData?.totalXP || 0,
+              active_room: "grand_hall",
+              preferred_theme: preferredTheme,
+              show_collection: true,
             })
           
           if (profileError) {
@@ -213,21 +229,21 @@ export async function GET(request: NextRequest) {
             }
             
             if (!gameId) {
-              // Create new game
+              // Create new game - use correct Firebase field names
               const { data: newGame, error: gameError } = await supabase
                 .from("games")
                 .insert({
                   bgg_id: gameData.bggId || null,
-                  name: gameData.name || "Unknown Game",
-                  year_published: gameData.yearPublished || null,
+                  name: gameData.name || gameData.title || "Unknown Game",
+                  year_published: gameData.yearPublished || gameData.year || null,
                   description: gameData.description || null,
                   thumbnail_url: gameData.thumbnailUrl || gameData.imageUrl || null,
                   image_url: gameData.imageUrl || null,
                   min_players: gameData.minPlayers || null,
                   max_players: gameData.maxPlayers || null,
                   playing_time: gameData.playingTime || null,
-                  category: gameData.category || "board_game",
-                  bgg_rating: gameData.bggRating || null,
+                  category: gameData.category || gameData.source === "bgg" ? "board_game" : "board_game",
+                  bgg_rating: gameData.averageRating || gameData.bggRating || null,
                 })
                 .select("id")
                 .single()
@@ -241,7 +257,11 @@ export async function GET(request: NextRequest) {
               stats.gamesCreated++
             }
             
-            // Create user_game link
+            // Create user_game link - Firebase uses addedDate timestamp
+            const addedAt = gameData.addedDate?._seconds 
+              ? new Date(gameData.addedDate._seconds * 1000).toISOString()
+              : new Date().toISOString()
+            
             const { error: userGameError } = await supabase
               .from("user_games")
               .insert({
@@ -249,11 +269,12 @@ export async function GET(request: NextRequest) {
                 game_id: gameId,
                 status: gameData.status || "owned",
                 condition: gameData.condition || null,
-                personal_rating: gameData.personalRating || null,
-                play_count: gameData.playCount || 0,
+                personal_rating: gameData.personalRating || gameData.userRating || null,
+                play_count: gameData.playCount || gameData.numPlays || 0,
                 notes: gameData.notes || null,
                 quantity: gameData.quantity || 1,
                 paint_status: gameData.paintStatus || null,
+                added_at: addedAt,
               })
             
             if (!userGameError) {
