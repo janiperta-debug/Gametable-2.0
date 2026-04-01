@@ -1,4 +1,11 @@
 {
+  "cookies": {
+    "title": "Cookies",
+    "description": "We use cookies to improve your experience and analyze site usage. You can read more in our",
+    "privacyPolicy": "privacy policy",
+    "acceptAll": "Accept All",
+    "essentialOnly": "Essential Only"
+  },
   "common": {
     "loading": "Loading...",
     "save": "Save",
@@ -937,6 +944,7 @@
       "title2": "for all",
       "title3": "tabletop gamers.",
       "subtitle": "The Manor opens its doors",
+      "subtitleOpen": "The Manor is open",
       "description": "From board gamers to roleplayers, miniature painters to card collectors — one manor for the entire hobby."
     },
     "countdown": {
