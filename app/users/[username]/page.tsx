@@ -134,7 +134,7 @@ export default function UserProfilePage() {
   }
 
   const isOwnProfile = currentUser?.id === profile.id
-  const levelProgress = profile.current_xp ? (profile.current_xp % 1000) / 10 : 0
+  const levelProgress = profile.xp ? (profile.xp % 1000) / 10 : 0
   
   // Get the user's theme preview image
   const userTheme = profile.preferred_theme ? getRoomTheme(profile.preferred_theme as string) : null
@@ -299,7 +299,7 @@ export default function UserProfilePage() {
           <Card className="bg-card/50 border-border/50">
             <CardContent className="p-4 text-center">
               <div className="h-6 w-6 mx-auto mb-2 text-accent-gold font-bold">XP</div>
-              <div className="text-2xl font-bold text-foreground">{profile.current_xp || 0}</div>
+              <div className="text-2xl font-bold text-foreground">{profile.xp || 0}</div>
               <div className="text-xs text-muted-foreground">{t("users.totalXP")}</div>
             </CardContent>
           </Card>
