@@ -76,10 +76,7 @@ export function DiscoverPlayers() {
     setActionLoading(null)
   }
 
-  // Load initial users on mount
-  useEffect(() => {
-    handleSearch()
-  }, [])
+  // Don't load users until search is initiated - users should search first
 
   return (
     <div className="space-y-8">
@@ -201,7 +198,7 @@ export function DiscoverPlayers() {
 
                     <div className="flex gap-2">
                       <Button asChild variant="outline" className="flex-1 font-cinzel bg-transparent">
-                        <Link href={`/users/${player.username}`}>{t("community.viewProfile")}</Link>
+                        <Link href={`/users/${player.username || player.id}`}>{t("community.viewProfile")}</Link>
                       </Button>
                       
                       {player.friendship_status === "accepted" ? (
