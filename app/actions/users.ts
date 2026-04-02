@@ -11,7 +11,6 @@ export interface PublicUserProfile {
   bio: string | null
   xp: number
   level: number
-  current_xp?: number
   active_room: string | null
   preferred_theme: string | null
   game_interests: string[]
@@ -135,7 +134,7 @@ export async function getUserByUsername(usernameOrId: string): Promise<{
         show_collection,
         created_at
       `)
-      .ilike("username", username)
+      .ilike("username", usernameOrId)
       .single()
     
     if (profileLower) {
@@ -160,7 +159,7 @@ export async function getUserByUsername(usernameOrId: string): Promise<{
           show_collection,
           created_at
         `)
-        .ilike("display_name", username)
+        .ilike("display_name", usernameOrId)
         .single()
       
       if (profileByName) {
