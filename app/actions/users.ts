@@ -47,17 +47,55 @@ export interface UserFriend {
 }
 
 /**
- * Get a public user profile by username
+ * Get a public user profile by username or ID
  */
-export async function getUserByUsername(username: string): Promise<{
+export async function getUserByUsername(usernameOrId: string): Promise<{
   profile: PublicUserProfile | null
   error?: string
 }> {
   const supabase = await createClient()
   
-  console.log("[v0] getUserByUsername called with:", username)
+  if (!usernameOrId) {
+    return { profile: null, error: "No username or ID provided" }
+  }
 
-  // Try exact match first
+  // Check if it's a UUID (ID) format
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(usernameOrId)
+  
+  if (isUuid) {
+    // Try ID lookup first
+    const { data: profileById, error: errorById } = await supabase
+      .from("profiles")
+      .select(`
+        id,
+        display_name,
+        username,
+        avatar_url,
+        location,
+        bio,
+        xp,
+        level,
+        active_room,
+        preferred_theme,
+        game_interests,
+        show_collection,
+        created_at
+      `)
+      .eq("id", usernameOrId)
+      .single()
+    
+    if (profileById) {
+      return {
+        profile: {
+          ...profileById,
+          game_interests: profileById.game_interests || [],
+          show_collection: profileById.show_collection ?? true,
+        }
+      }
+    }
+  }
+
+// Try exact username match
   let { data: profile, error } = await supabase
     .from("profiles")
     .select(`
@@ -69,19 +107,17 @@ export async function getUserByUsername(username: string): Promise<{
       bio,
       xp,
       level,
-      current_xp,
       active_room,
       preferred_theme,
       game_interests,
       show_collection,
       created_at
     `)
-    .eq("username", username)
+    .eq("username", usernameOrId)
     .single()
 
   // If not found, try case-insensitive match
   if (error || !profile) {
-    console.log("[v0] Exact match failed, trying case-insensitive match")
     const { data: profileLower, error: errorLower } = await supabase
       .from("profiles")
       .select(`
@@ -93,7 +129,6 @@ export async function getUserByUsername(username: string): Promise<{
         bio,
         xp,
         level,
-        current_xp,
         active_room,
         preferred_theme,
         game_interests,
@@ -108,7 +143,6 @@ export async function getUserByUsername(username: string): Promise<{
       error = null
     } else {
       // Try matching by display_name as fallback
-      console.log("[v0] Username match failed, trying display_name match")
       const { data: profileByName, error: errorByName } = await supabase
         .from("profiles")
         .select(`
@@ -120,7 +154,6 @@ export async function getUserByUsername(username: string): Promise<{
           bio,
           xp,
           level,
-          current_xp,
           active_room,
           preferred_theme,
           game_interests,
@@ -138,11 +171,8 @@ export async function getUserByUsername(username: string): Promise<{
   }
 
   if (error || !profile) {
-    console.error("[v0] Error fetching profile by username:", error)
     return { profile: null, error: "User not found" }
   }
-  
-  console.log("[v0] Found profile:", profile.display_name, "username:", profile.username)
 
   return {
     profile: {
@@ -173,7 +203,6 @@ export async function getPublicUserProfile(userId: string): Promise<{
       bio,
       xp,
       level,
-      current_xp,
       active_room,
       preferred_theme,
       game_interests,
