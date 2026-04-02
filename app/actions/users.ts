@@ -54,8 +54,11 @@ export async function getUserByUsername(username: string): Promise<{
   error?: string
 }> {
   const supabase = await createClient()
+  
+  console.log("[v0] getUserByUsername called with:", username)
 
-  const { data: profile, error } = await supabase
+  // Try exact match first
+  let { data: profile, error } = await supabase
     .from("profiles")
     .select(`
       id,
@@ -76,10 +79,70 @@ export async function getUserByUsername(username: string): Promise<{
     .eq("username", username)
     .single()
 
-  if (error) {
-    console.error("Error fetching profile by username:", error)
+  // If not found, try case-insensitive match
+  if (error || !profile) {
+    console.log("[v0] Exact match failed, trying case-insensitive match")
+    const { data: profileLower, error: errorLower } = await supabase
+      .from("profiles")
+      .select(`
+        id,
+        display_name,
+        username,
+        avatar_url,
+        location,
+        bio,
+        xp,
+        level,
+        current_xp,
+        active_room,
+        preferred_theme,
+        game_interests,
+        show_collection,
+        created_at
+      `)
+      .ilike("username", username)
+      .single()
+    
+    if (profileLower) {
+      profile = profileLower
+      error = null
+    } else {
+      // Try matching by display_name as fallback
+      console.log("[v0] Username match failed, trying display_name match")
+      const { data: profileByName, error: errorByName } = await supabase
+        .from("profiles")
+        .select(`
+          id,
+          display_name,
+          username,
+          avatar_url,
+          location,
+          bio,
+          xp,
+          level,
+          current_xp,
+          active_room,
+          preferred_theme,
+          game_interests,
+          show_collection,
+          created_at
+        `)
+        .ilike("display_name", username)
+        .single()
+      
+      if (profileByName) {
+        profile = profileByName
+        error = null
+      }
+    }
+  }
+
+  if (error || !profile) {
+    console.error("[v0] Error fetching profile by username:", error)
     return { profile: null, error: "User not found" }
   }
+  
+  console.log("[v0] Found profile:", profile.display_name, "username:", profile.username)
 
   return {
     profile: {
