@@ -82,21 +82,16 @@ export async function searchUsers(params: {
   // Get game counts for each user
   const userIds = profiles.map(p => p.id)
   
-  const { data: gameCounts, error: gameCountError } = await supabase
+  const { data: gameCounts } = await supabase
     .from("user_games")
     .select("user_id")
     .in("user_id", userIds)
-
-  console.log("[v0] userIds:", userIds)
-  console.log("[v0] gameCounts result:", gameCounts?.length, "error:", gameCountError)
 
   // Count games per user
   const gameCountMap: Record<string, number> = {}
   gameCounts?.forEach(g => {
     gameCountMap[g.user_id] = (gameCountMap[g.user_id] || 0) + 1
   })
-  
-  console.log("[v0] gameCountMap:", gameCountMap)
 
   // Get friendship status for logged-in user
   let friendshipMap: Record<string, { status: FriendshipStatus; id: string }> = {}
