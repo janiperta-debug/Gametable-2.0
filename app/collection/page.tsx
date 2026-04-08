@@ -85,9 +85,21 @@ export default function Collection() {
 
     // Filter by category
     if (selectedCategory !== "all") {
-      filtered = filtered.filter((game) => 
-        game.category?.toLowerCase().includes(selectedCategory.replace("-", " "))
-      )
+      filtered = filtered.filter((game) => {
+        const cat = game.category?.toLowerCase() || ""
+        switch (selectedCategory) {
+          case "board-games":
+            return cat.includes("board") || cat === "board_game"
+          case "rpgs":
+            return cat.includes("rpg") || cat.includes("role")
+          case "miniatures":
+            return cat.includes("miniature") || cat.includes("wargame")
+          case "trading-cards":
+            return cat.includes("trading") || cat.includes("tcg") || cat === "trading_card"
+          default:
+            return true
+        }
+      })
     }
 
     // Sort games
