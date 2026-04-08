@@ -368,17 +368,17 @@ export async function getFriendshipStatus(targetUserId: string): Promise<Friends
 /**
  * Get friends list for a user (public profiles only)
  */
-export async function getUserFriends(username: string): Promise<{
+export async function getUserFriends(usernameOrId: string): Promise<{
   friends: UserFriend[]
   error?: string
 }> {
   const supabase = await createClient()
 
-  // First get the user ID from username
+  // First get the user ID from username or ID
   const { data: targetUser } = await supabase
     .from("profiles")
     .select("id")
-    .eq("username", username)
+    .or(`id.eq.${usernameOrId},username.eq.${usernameOrId}`)
     .single()
 
   if (!targetUser) {
@@ -411,19 +411,22 @@ export async function getUserFriends(username: string): Promise<{
 }
 
 /**
- * Get user's collection by username
+ * Get user's collection by username or ID
  */
-export async function getUserCollectionByUsername(username: string): Promise<{
+export async function getUserCollectionByUsername(usernameOrId: string): Promise<{
   games: UserGame[]
   error?: string
 }> {
   const supabase = await createClient()
 
-  // First get the user profile
+  // Check if it's a UUID
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(usernameOrId)
+
+  // First get the user profile by ID or username
   const { data: profile } = await supabase
     .from("profiles")
     .select("id, show_collection")
-    .eq("username", username)
+    .or(`id.eq.${usernameOrId},username.eq.${usernameOrId}`)
     .single()
 
   if (!profile) {
