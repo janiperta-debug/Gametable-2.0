@@ -6,6 +6,24 @@
     "acceptAll": "Accept All",
     "essentialOnly": "Essential Only"
   },
+  "game": {
+    "notFound": "Game not found",
+    "backToCollection": "Back to collection",
+    "edit": "Edit",
+    "name": "Name",
+    "category": "Category",
+    "yearPublished": "Year published",
+    "minPlayers": "Min players",
+    "maxPlayers": "Max players",
+    "minPlaytime": "Min playtime",
+    "maxPlaytime": "Max playtime",
+    "description": "Description",
+    "players": "players",
+    "published": "Published",
+    "viewOnBGG": "View on BoardGameGeek",
+    "deleteTitle": "Remove from collection?",
+    "deleteDescription": "Are you sure you want to remove this game from your collection? This action cannot be undone."
+  },
   "common": {
     "loading": "Loading...",
     "save": "Save",
