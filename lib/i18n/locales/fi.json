@@ -6,6 +6,24 @@
     "acceptAll": "Hyväksy kaikki",
     "essentialOnly": "Vain välttämättömät"
   },
+  "game": {
+    "notFound": "Peliä ei löytynyt",
+    "backToCollection": "Takaisin kokoelmaan",
+    "edit": "Muokkaa",
+    "name": "Nimi",
+    "category": "Kategoria",
+    "yearPublished": "Julkaisuvuosi",
+    "minPlayers": "Min. pelaajat",
+    "maxPlayers": "Max. pelaajat",
+    "minPlaytime": "Min. peliaika",
+    "maxPlaytime": "Max. peliaika",
+    "description": "Kuvaus",
+    "players": "pelaajaa",
+    "published": "Julkaistu",
+    "viewOnBGG": "Katso BoardGameGeekissä",
+    "deleteTitle": "Poista kokoelmasta?",
+    "deleteDescription": "Haluatko varmasti poistaa tämän pelin kokoelmastasi? Tätä toimintoa ei voi perua."
+  },
   "common": {
     "loading": "Ladataan...",
     "save": "Tallenna",
