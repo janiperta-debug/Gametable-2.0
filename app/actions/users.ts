@@ -81,7 +81,11 @@ export async function getUserByUsername(usernameOrId: string): Promise<{
         created_at
       `)
       .eq("id", usernameOrId)
-      .single()
+      .maybeSingle()
+    
+    if (errorById) {
+      console.error("[v0] Error fetching profile by ID:", errorById)
+    }
     
     if (profileById) {
       return {
@@ -113,7 +117,7 @@ export async function getUserByUsername(usernameOrId: string): Promise<{
       created_at
     `)
     .eq("username", usernameOrId)
-    .single()
+    .maybeSingle()
 
   // If not found, try case-insensitive match
   if (error || !profile) {
@@ -135,7 +139,7 @@ export async function getUserByUsername(usernameOrId: string): Promise<{
         created_at
       `)
       .ilike("username", usernameOrId)
-      .single()
+      .maybeSingle()
     
     if (profileLower) {
       profile = profileLower
@@ -160,7 +164,7 @@ export async function getUserByUsername(usernameOrId: string): Promise<{
           created_at
         `)
         .ilike("display_name", usernameOrId)
-        .single()
+        .maybeSingle()
       
       if (profileByName) {
         profile = profileByName
