@@ -228,4 +228,86 @@ export async function updateUserGame(
   return { success: true }
 }
 
+export async function updateGame(
+  gameId: string,
+  updates: {
+    name?: string
+    category?: GameCategory
+    year?: number | null
+    min_players?: number | null
+    max_players?: number | null
+    min_playtime?: number | null
+    max_playtime?: number | null
+    description?: string | null
+  }
+) {
+  const supabase = await createClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return { error: 'Not authenticated' }
+  }
+
+  // Verify user owns this game before allowing edit
+  const { data: userGame } = await supabase
+    .from('user_games')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('game_id', gameId)
+    .maybeSingle()
+
+  if (!userGame) {
+    return { error: 'You can only edit games in your collection' }
+  }
+
+  const { error } = await supabase
+    .from('games')
+    .update(updates)
+    .eq('id', gameId)
+
+  if (error) {
+    console.error('Error updating game:', error)
+    return { error: error.message }
+  }
+
+  revalidatePath('/collection')
+  revalidatePath(`/game/${gameId}`)
+  return { success: true }
+}
+
+export async function getGameById(gameId: string) {
+  const supabase = await createClient()
+  
+  const { data: game, error } = await supabase
+    .from('games')
+    .select('*')
+    .eq('id', gameId)
+    .maybeSingle()
+
+  if (error) {
+    console.error('Error fetching game:', error)
+    return { error: error.message, game: null, userGame: null }
+  }
+
+  if (!game) {
+    return { error: 'Game not found', game: null, userGame: null }
+  }
+
+  // Check if current user owns this game
+  const { data: { user } } = await supabase.auth.getUser()
+  let userGame = null
+  
+  if (user) {
+    const { data } = await supabase
+      .from('user_games')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('game_id', gameId)
+      .maybeSingle()
+    userGame = data
+  }
+
+  return { game, userGame, error: null }
+}
+
 
