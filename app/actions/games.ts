@@ -275,6 +275,7 @@ export async function updateGame(
   return { success: true }
 }
 
+// Fetch a game by its UUID for the game detail page
 export async function getGameById(gameId: string) {
   const supabase = await createClient()
   
