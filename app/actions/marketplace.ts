@@ -336,6 +336,38 @@ export async function removeFromWishlist(wishlistId: string) {
   return { success: true }
 }
 
+/**
+ * Get or create a conversation with another user
+ */
+export async function getOrCreateConversation(otherUserId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data: existing } = await supabase
+    .from('conversations')
+    .select('id, participants')
+    .contains('participants', [user.id])
+
+  // Find conversation with exactly these two participants
+  const existingConvo = existing?.find(conv => {
+    const participants = conv.participants as string[]
+    return participants.length === 2 && 
+           participants.includes(user.id) && 
+           participants.includes(otherUserId)
+  })
+
+  if (existingConvo) return existingConvo.id
+
+  const { data: created } = await supabase
+    .from('conversations')
+    .insert({ participants: [user.id, otherUserId] })
+    .select('id')
+    .single()
+
+  return created?.id
+}
+
 // Contact seller - creates or finds existing conversation
 export async function contactSeller(sellerId: string) {
   const supabase = await createClient()

@@ -34,6 +34,23 @@ export interface DiscoverUser extends UserProfile {
 }
 
 /**
+ * Get friendship status between current user and target user
+ */
+export async function getFriendshipStatus(targetUserId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data } = await supabase
+    .from('friendships')
+    .select('id, status, requester_id, addressee_id')
+    .or(`and(requester_id.eq.${user.id},addressee_id.eq.${targetUserId}),and(requester_id.eq.${targetUserId},addressee_id.eq.${user.id})`)
+    .maybeSingle()
+
+  return data
+}
+
+/**
  * Search users by location and/or game interest
  */
 export async function searchUsers(params: {
