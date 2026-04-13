@@ -56,26 +56,33 @@ export default function UserProfilePage() {
   useEffect(() => {
     async function loadProfile() {
       setLoading(true)
-      
-      const [profileResult, collectionResult, friendsResult] = await Promise.all([
-        getUserByUsername(username),
-        getUserCollectionByUsername(username),
-        getUserFriends(username)
-      ])
+      try {
+        const [profileResult, collectionResult, friendsResult] = await Promise.all([
+          getUserByUsername(username),
+          getUserCollectionByUsername(username),
+          getUserFriends(username)
+        ])
 
-      if (profileResult.profile) {
-        setProfile(profileResult.profile)
-        setCollection(collectionResult.games || [])
-        setFriends(friendsResult.friends || [])
+        if (profileResult.profile) {
+          setProfile(profileResult.profile)
+          setCollection(collectionResult.games || [])
+          setFriends(friendsResult.friends || [])
 
-        // Check friendship status if logged in
-        if (currentUser && profileResult.profile.id !== currentUser.id) {
-          const status = await getFriendshipStatus(profileResult.profile.id)
-          setFriendshipStatus(status.status)
+          // Check friendship status if logged in
+          if (currentUser && profileResult.profile.id !== currentUser.id) {
+            try {
+              const status = await getFriendshipStatus(profileResult.profile.id)
+              setFriendshipStatus(status?.status ?? null)
+            } catch {
+              setFriendshipStatus(null)
+            }
+          }
         }
+      } catch (err) {
+        console.error('loadProfile error:', err)
+      } finally {
+        setLoading(false)
       }
-
-      setLoading(false)
     }
 
     if (username) {
