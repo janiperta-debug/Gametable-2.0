@@ -54,15 +54,20 @@ export async function getUserByUsername(usernameOrId: string): Promise<{
 }> {
   const supabase = await createClient()
   
+  console.log("[v0] getUserByUsername called with:", usernameOrId)
+  
   if (!usernameOrId) {
+    console.log("[v0] No usernameOrId provided")
     return { profile: null, error: "No username or ID provided" }
   }
 
   // Check if it's a UUID (ID) format
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(usernameOrId)
+  console.log("[v0] isUuid:", isUuid)
   
   if (isUuid) {
     // Try ID lookup first
+    console.log("[v0] Trying ID lookup for:", usernameOrId)
     const { data: profileById, error: errorById } = await supabase
       .from("profiles")
       .select(`
@@ -83,11 +88,14 @@ export async function getUserByUsername(usernameOrId: string): Promise<{
       .eq("id", usernameOrId)
       .maybeSingle()
     
+    console.log("[v0] ID lookup result:", { profileById: profileById?.id, errorById })
+    
     if (errorById) {
       console.error("[v0] Error fetching profile by ID:", errorById)
     }
     
     if (profileById) {
+      console.log("[v0] Found profile by ID:", profileById.display_name)
       return {
         profile: {
           ...profileById,
@@ -96,6 +104,7 @@ export async function getUserByUsername(usernameOrId: string): Promise<{
         }
       }
     }
+    console.log("[v0] No profile found by ID, trying username lookup")
   }
 
 // Try exact username match
