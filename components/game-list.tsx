@@ -7,6 +7,13 @@ import Image from "next/image"
 import Link from "next/link"
 import type { Game } from "@/lib/mock-games"
 
+const CATEGORY_LABELS: Record<string, string> = {
+  board_game: "Lautapeli",
+  rpg: "Roolipeli",
+  trading_card: "Keräilykortti",
+  miniature: "Miniatyyri",
+}
+
 interface GameListProps {
   games: Game[]
 }
@@ -43,7 +50,7 @@ export function GameList({ games }: GameListProps) {
                     <h3 className="font-heading font-semibold text-xl mb-1">{game.title}</h3>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold">
-                        {game.category}
+                        {CATEGORY_LABELS[game.category] || game.category}
                       </Badge>
                       {game.wishlist && (
                         <Badge variant="secondary" className="bg-accent-gold/90 text-background text-xs">
