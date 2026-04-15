@@ -112,7 +112,7 @@ export function CollectionHeader({
                 className="font-body cursor-pointer hover:bg-accent-gold/20 transition-colors border-accent-gold whitespace-nowrap"
                 onClick={() => setSelectedCategory(category.id)}
               >
-                {category.id === "all" ? t("collection.allCategories") : t(category.labelKey)}
+                {category.id === "all" ? t("collection.allCategories") : t(category.labelKey)}: {category.count}
               </Badge>
             ))}
           </div>
