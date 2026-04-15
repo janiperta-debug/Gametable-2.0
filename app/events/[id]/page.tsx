@@ -9,12 +9,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EventChat } from "@/components/event-chat"
 import { 
   ArrowLeft, Calendar, Clock, MapPin, Users, Globe, UserCheck, Lock, 
-  Edit, Loader2, User, XCircle 
+  Edit, Loader2, User, XCircle, UserPlus, X
 } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
-import { getEventById, updateRSVP, cancelEvent, type Event, type EventParticipant, type RSVPStatus } from "@/app/actions/events"
+import { getEventById, updateRSVP, cancelEvent, getInvitableUsers, inviteToEvent, uninviteFromEvent, type Event, type EventParticipant, type RSVPStatus } from "@/app/actions/events"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
+
+const EVENT_TYPE_LABELS: Record<string, string> = {
+  board_game_night: "Lautapeli-ilta",
+  rpg_session: "Roolipeli",
+  tournament: "Turnaus",
+  trading: "Vaihtokauppa",
+  meetup: "Tapaaminen",
+  other: "Muu",
+}
 
 const getPrivacyIcon = (privacy: string | null) => {
   switch (privacy) {
@@ -87,6 +96,9 @@ export default function EventDetailsPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [updatingRsvp, setUpdatingRsvp] = useState(false)
   const [cancelling, setCancelling] = useState(false)
+  const [invitableUsers, setInvitableUsers] = useState<Array<{ id: string; display_name: string | null; avatar_url: string | null }>>([])
+  const [inviting, setInviting] = useState<string | null>(null)
+  const [showInviteSection, setShowInviteSection] = useState(false)
 
   useEffect(() => {
     const loadEvent = async () => {
@@ -170,6 +182,63 @@ export default function EventDetailsPage() {
     setCancelling(false)
   }
 
+  const loadInvitableUsers = async () => {
+    const result = await getInvitableUsers(eventId)
+    if (!result.error) {
+      setInvitableUsers(result.users)
+    }
+    setShowInviteSection(true)
+  }
+
+  const handleInvite = async (userId: string) => {
+    setInviting(userId)
+    const result = await inviteToEvent(eventId, userId)
+    
+    if (result.error) {
+      toast({
+        title: t("common.error"),
+        description: result.error,
+        variant: "destructive",
+      })
+    } else {
+      toast({
+        title: t("common.success"),
+        description: t("events.inviteSent") || "Invitation sent",
+      })
+      // Remove from invitable list
+      setInvitableUsers(prev => prev.filter(u => u.id !== userId))
+      // Refresh event to show new participant
+      const eventResult = await getEventById(eventId)
+      if (eventResult.event) {
+        setEvent(eventResult.event)
+      }
+    }
+    
+    setInviting(null)
+  }
+
+  const handleUninvite = async (participantId: string) => {
+    const result = await uninviteFromEvent(eventId, participantId)
+    
+    if (result.error) {
+      toast({
+        title: t("common.error"),
+        description: result.error,
+        variant: "destructive",
+      })
+    } else {
+      toast({
+        title: t("common.success"),
+        description: t("events.inviteRemoved") || "Participant removed",
+      })
+      // Refresh event
+      const eventResult = await getEventById(eventId)
+      if (eventResult.event) {
+        setEvent(eventResult.event)
+      }
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-surface-dark to-background flex items-center justify-center">
@@ -206,37 +275,39 @@ export default function EventDetailsPage() {
     <div className="min-h-screen bg-gradient-to-b from-surface-dark to-background">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between gap-4 mb-8">
+        <div className="flex flex-wrap items-center gap-2 mb-8">
           <Button
             variant="ghost"
+            size="sm"
             onClick={() => router.push("/events")}
-            className="text-accent-gold hover:text-accent-gold/80"
+            className="text-accent-gold hover:text-accent-gold/80 mr-auto"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {t("events.backToEvents") || "Back to Events"}
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            <span className="hidden sm:inline">{t("events.backToEvents") || "Back to Events"}</span>
           </Button>
 
           {isHost && (
-            <div className="flex gap-2">
+            <>
               <Link href={`/events/${eventId}/edit`}>
-                <Button variant="outline" className="border-accent-gold/30">
-                  <Edit className="w-4 h-4 mr-2" />
-                  {t("common.edit") || "Edit"}
+                <Button variant="outline" size="sm" className="border-accent-gold/30">
+                  <Edit className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">{t("common.edit") || "Edit"}</span>
                 </Button>
               </Link>
               <Button 
-                variant="destructive" 
+                variant="destructive"
+                size="sm"
                 onClick={handleCancel}
                 disabled={cancelling}
               >
                 {cancelling ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-4 h-4 sm:mr-2 animate-spin" />
                 ) : (
-                  <XCircle className="w-4 h-4 mr-2" />
+                  <XCircle className="w-4 h-4 sm:mr-2" />
                 )}
-                {t("events.cancel") || "Cancel Event"}
+                <span className="hidden sm:inline">{t("events.cancel") || "Cancel"}</span>
               </Button>
-            </div>
+            </>
           )}
         </div>
 
@@ -276,7 +347,7 @@ export default function EventDetailsPage() {
                     )}
                     {event.event_type && (
                       <Badge variant="outline" className="border-accent-gold/30 text-accent-gold">
-                        {event.event_type.replace("_", " ")}
+                        {EVENT_TYPE_LABELS[event.event_type] || event.event_type.replace(/_/g, " ")}
                       </Badge>
                     )}
                   </div>
@@ -429,12 +500,28 @@ export default function EventDetailsPage() {
                             </Badge>
                           )}
                         </div>
-                        <Badge
-                          variant={participant.status === "attending" ? "default" : "secondary"}
-                          className={participant.status === "attending" ? "bg-green-600" : "bg-yellow-600"}
-                        >
-                          {participant.status === "attending" ? (t("events.attending") || "Attending") : (t("events.maybe") || "Maybe")}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant={participant.status === "attending" ? "default" : "secondary"}
+                            className={participant.status === "attending" ? "bg-green-600" : participant.status === "invited" ? "bg-blue-600" : "bg-yellow-600"}
+                          >
+                            {participant.status === "attending" 
+                              ? (t("events.attending") || "Attending") 
+                              : participant.status === "invited" 
+                                ? (t("events.invited") || "Invited")
+                                : (t("events.maybe") || "Maybe")}
+                          </Badge>
+                          {isHost && participant.user_id !== event.host_id && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                              onClick={() => handleUninvite(participant.id)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -442,6 +529,64 @@ export default function EventDetailsPage() {
                   <p className="text-muted-foreground text-center py-4">
                     {t("events.noAttendees") || "No attendees yet. Be the first to RSVP!"}
                   </p>
+                )}
+
+                {/* Invite Section - Host Only */}
+                {isHost && (
+                  <div className="mt-6 pt-4 border-t border-border">
+                    {!showInviteSection ? (
+                      <Button
+                        variant="outline"
+                        className="w-full border-accent-gold/30"
+                        onClick={loadInvitableUsers}
+                      >
+                        <UserPlus className="w-4 h-4 mr-2" />
+                        {t("events.inviteFriends") || "Invite Friends"}
+                      </Button>
+                    ) : (
+                      <div className="space-y-3">
+                        <h4 className="font-medium text-accent-gold">
+                          {t("events.inviteFriends") || "Invite Friends"}
+                        </h4>
+                        {invitableUsers.length > 0 ? (
+                          <div className="space-y-2">
+                            {invitableUsers.map((user) => (
+                              <div key={user.id} className="flex items-center justify-between p-2 rounded-lg bg-background/50">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-accent-gold/20 flex items-center justify-center">
+                                    {user.avatar_url ? (
+                                      <img src={user.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
+                                    ) : (
+                                      <span className="text-sm font-medium text-accent-gold">
+                                        {(user.display_name || "?").charAt(0).toUpperCase()}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span className="text-sm">{user.display_name || "Anonymous"}</span>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  className="theme-accent-gold"
+                                  onClick={() => handleInvite(user.id)}
+                                  disabled={inviting === user.id}
+                                >
+                                  {inviting === user.id ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <UserPlus className="w-4 h-4" />
+                                  )}
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-muted-foreground text-sm text-center py-2">
+                            {t("events.noFriendsToInvite") || "No friends available to invite. Add some friends first!"}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 )}
               </CardContent>
             </Card>

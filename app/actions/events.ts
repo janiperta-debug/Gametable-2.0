@@ -583,6 +583,151 @@ export interface EventMessage {
 }
 
 /**
+ * Invite a user to an event (host only)
+ */
+export async function inviteToEvent(
+  eventId: string,
+  userId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  // Verify user is the host
+  const { data: event } = await supabase
+    .from("events")
+    .select("host_id")
+    .eq("id", eventId)
+    .single()
+
+  if (!event || event.host_id !== user.id) {
+    return { success: false, error: "Only the host can invite users" }
+  }
+
+  // Check if already a participant
+  const { data: existing } = await supabase
+    .from("event_participants")
+    .select("id")
+    .eq("event_id", eventId)
+    .eq("user_id", userId)
+    .maybeSingle()
+
+  if (existing) {
+    return { success: false, error: "User is already invited" }
+  }
+
+  const { error } = await supabase
+    .from("event_participants")
+    .insert({
+      event_id: eventId,
+      user_id: userId,
+      status: "invited",
+    })
+
+  if (error) {
+    console.error("Error inviting user:", error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath(`/events/${eventId}`)
+  return { success: true }
+}
+
+/**
+ * Remove invitation / uninvite a user (host only)
+ */
+export async function uninviteFromEvent(
+  eventId: string,
+  participantId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  // Verify user is the host
+  const { data: event } = await supabase
+    .from("events")
+    .select("host_id")
+    .eq("id", eventId)
+    .single()
+
+  if (!event || event.host_id !== user.id) {
+    return { success: false, error: "Only the host can manage invitations" }
+  }
+
+  const { error } = await supabase
+    .from("event_participants")
+    .delete()
+    .eq("id", participantId)
+
+  if (error) {
+    console.error("Error removing participant:", error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath(`/events/${eventId}`)
+  return { success: true }
+}
+
+/**
+ * Get users that can be invited (friends or all users depending on privacy)
+ */
+export async function getInvitableUsers(
+  eventId: string
+): Promise<{ users: Array<{ id: string; display_name: string | null; avatar_url: string | null }>; error?: string }> {
+  const supabase = await createClient()
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { users: [], error: "Unauthorized" }
+  }
+
+  // Get current participants to exclude
+  const { data: participants } = await supabase
+    .from("event_participants")
+    .select("user_id")
+    .eq("event_id", eventId)
+
+  const excludeIds = [user.id, ...(participants || []).map(p => p.user_id)]
+
+  // Get friends of the host
+  const { data: friendships } = await supabase
+    .from("friendships")
+    .select("requester_id, addressee_id")
+    .eq("status", "accepted")
+    .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+
+  const friendIds = (friendships || []).map(f => 
+    f.requester_id === user.id ? f.addressee_id : f.requester_id
+  ).filter(id => !excludeIds.includes(id))
+
+  if (friendIds.length === 0) {
+    return { users: [] }
+  }
+
+  const { data: friends, error } = await supabase
+    .from("profiles")
+    .select("id, display_name, avatar_url")
+    .in("id", friendIds)
+
+  if (error) {
+    console.error("Error fetching invitable users:", error)
+    return { users: [], error: error.message }
+  }
+
+  return { users: friends || [] }
+}
+
+/**
  * Cancel an event (host only)
  */
 export async function cancelEvent(

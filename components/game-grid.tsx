@@ -6,6 +6,7 @@ import { Star, Users, Clock, Heart, ShoppingBag } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import type { Game } from "@/lib/mock-games"
+import { useTranslations } from "@/lib/i18n"
 
 interface GameGridProps {
   games: Game[]
@@ -22,6 +23,8 @@ export function GameGrid({
   showMarketplaceButton = false,
   showWishlistButton = false,
 }: GameGridProps) {
+  const t = useTranslations()
+  
   if (games.length === 0) {
     return (
       <div className="text-center py-12">
@@ -50,11 +53,11 @@ export function GameGrid({
                   </Badge>
                 </div>
               )}
-              {game.wishlist && (
+              {game.wishlist && !game.owned && (
                 <div className="absolute top-2 right-2">
                   <Badge variant="secondary" className="bg-accent-gold/90 text-background font-body">
                     <Heart className="h-3 w-3 mr-1 fill-current" />
-                    Wishlist
+                    {t("collection.wishlist")}
                   </Badge>
                 </div>
               )}
@@ -87,19 +90,19 @@ export function GameGrid({
             </div>
 
             <div className="flex gap-2 pt-2">
-              {game.owned ? (
+              {(game.owned || game.wishlist) ? (
                 <Link href={`/game/${game.id}`} className="flex-1">
                   <Button
                     variant="outline"
                     size="sm"
                     className="w-full border-accent-gold/20 hover:border-accent-gold bg-transparent font-body"
                   >
-                    View Details
+                    {t("collection.viewDetails")}
                   </Button>
                 </Link>
               ) : (
                 <Button size="sm" className="flex-1 bg-accent-gold hover:bg-accent-gold/90 text-background font-body">
-                  Add to Collection
+                  {t("collection.addToCollection")}
                 </Button>
               )}
               {showMarketplaceButton && (

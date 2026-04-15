@@ -159,27 +159,28 @@ export default function GameDetailPage() {
     <div className="min-h-screen pb-8">
       <div className="container max-w-4xl mx-auto px-4 py-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <Link href="/collection">
-            <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              {t("game.backToCollection")}
+        <div className="flex flex-wrap items-center gap-2 mb-6">
+          <Link href="/collection" className="mr-auto">
+            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">{t("game.backToCollection")}</span>
             </Button>
           </Link>
 
           {canEdit && !isEditing && (
-            <div className="flex gap-2">
+            <>
               <Button
                 variant="outline"
+                size="sm"
                 className="theme-accent-gold"
                 onClick={() => setIsEditing(true)}
               >
-                <Edit className="h-4 w-4 mr-2" />
-                {t("game.edit")}
+                <Edit className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">{t("game.edit")}</span>
               </Button>
               <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="text-destructive border-destructive hover:bg-destructive/10">
+                  <Button variant="outline" size="sm" className="text-destructive border-destructive hover:bg-destructive/10">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </DialogTrigger>
@@ -204,32 +205,34 @@ export default function GameDetailPage() {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-            </div>
+            </>
           )}
 
           {isEditing && (
-            <div className="flex gap-2">
+            <>
               <Button
                 variant="outline"
+                size="sm"
                 onClick={handleCancel}
                 disabled={saving}
               >
-                <X className="h-4 w-4 mr-2" />
-                {t("common.cancel")}
+                <X className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">{t("common.cancel")}</span>
               </Button>
               <Button
+                size="sm"
                 className="bg-accent-gold hover:bg-accent-gold/90 text-background"
                 onClick={handleSave}
                 disabled={saving}
               >
                 {saving ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <Loader2 className="h-4 w-4 animate-spin sm:mr-1" />
                 ) : (
-                  <Save className="h-4 w-4 mr-2" />
+                  <Save className="h-4 w-4 sm:mr-1" />
                 )}
-                {t("common.save")}
+                <span className="hidden sm:inline">{t("common.save")}</span>
               </Button>
-            </div>
+            </>
           )}
         </div>
 

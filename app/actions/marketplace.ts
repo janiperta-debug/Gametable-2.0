@@ -44,6 +44,7 @@ export interface WishlistItem {
     id: string
     name: string
     thumbnail_url: string | null
+    image_url?: string | null
   }
   user?: {
     id: string
@@ -53,6 +54,9 @@ export interface WishlistItem {
     location: string | null
   }
 }
+
+// Alias for backwards compatibility
+export type WishlistEntry = WishlistItem
 
 export interface UserGameForListing {
   id: string
@@ -262,23 +266,39 @@ export async function deleteListing(listingId: string) {
 // Get all wishlists (for matching)
 export async function getWishlists() {
   const supabase = await createClient()
-
+  
+  // Get wishlist items from user_games where status is 'wishlist'
   const { data, error } = await supabase
-    .from("wishlists")
-.select(`
-      *,
-      game:games(id, name, thumbnail_url),
-      seller:profiles(id, display_name, username, avatar_url, location)
+    .from("user_games")
+    .select(`
+      id,
+      user_id,
+      game_id,
+      created_at,
+      game:games(id, name, thumbnail_url, image_url),
+      user:profiles(id, display_name, username, avatar_url, location)
     `)
-    .order("priority", { ascending: true })
+    .eq("status", "wishlist")
     .order("created_at", { ascending: false })
-
+  
   if (error) {
     console.error("Error fetching wishlists:", error)
     return { data: [], error: error.message }
   }
-
-  return { data: data as WishlistItem[], error: null }
+  
+  // Transform to WishlistEntry format
+  const wishlists = (data || []).map(item => ({
+    id: item.id,
+    user_id: item.user_id,
+    game_id: item.game_id,
+    priority: 3, // Default priority since user_games doesn't have this
+    notes: null,
+    created_at: item.created_at,
+    game: item.game,
+    user: item.user
+  }))
+  
+  return { data: wishlists as WishlistEntry[], error: null }
 }
 
 // Add to wishlist

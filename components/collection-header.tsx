@@ -8,6 +8,7 @@ import { Plus, Search, SortAsc, Grid, List } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 
 type CategoryType = "all" | "board-games" | "rpgs" | "miniatures" | "trading-cards"
+export type StatusFilter = "all" | "owned" | "wishlist"
 export type SortOption = "name-asc" | "name-desc" | "rating-high" | "rating-low" | "year" | "playtime"
 export type ViewMode = "grid" | "list"
 
@@ -18,6 +19,8 @@ interface CollectionHeaderProps {
   setSearchQuery: (query: string) => void
   selectedCategory: CategoryType
   setSelectedCategory: (category: CategoryType) => void
+  statusFilter: StatusFilter
+  setStatusFilter: (status: StatusFilter) => void
   sortBy: SortOption
   setSortBy: (sort: SortOption) => void
   onAddGame: () => void
@@ -29,6 +32,11 @@ interface CollectionHeaderProps {
     miniatures: number
     "trading-cards": number
   }
+  statusCounts?: {
+    all: number
+    owned: number
+    wishlist: number
+  }
 }
 
 export function CollectionHeader({
@@ -38,10 +46,13 @@ export function CollectionHeader({
   setSearchQuery,
   selectedCategory,
   setSelectedCategory,
+  statusFilter,
+  setStatusFilter,
   sortBy,
   setSortBy,
   onAddGame,
   categoryCounts,
+  statusCounts,
 }: CollectionHeaderProps) {
   const t = useTranslations()
   
@@ -70,6 +81,30 @@ export function CollectionHeader({
         <div className="flex-1">
           <h2 className="ornate-text font-heading text-3xl font-bold mb-2">{t("collection.myCollection")}</h2>
           <div className="flex flex-wrap gap-2 mt-2 max-w-full">
+            {/* Status filters */}
+            <Badge
+              variant={statusFilter === "all" ? "secondary" : "outline"}
+              className="font-body cursor-pointer hover:bg-accent-gold/20 transition-colors border-accent-gold whitespace-nowrap"
+              onClick={() => setStatusFilter("all")}
+            >
+              {t("collection.allItems")}: {statusCounts?.all ?? 0}
+            </Badge>
+            <Badge
+              variant={statusFilter === "owned" ? "secondary" : "outline"}
+              className="font-body cursor-pointer hover:bg-accent-gold/20 transition-colors border-accent-gold whitespace-nowrap"
+              onClick={() => setStatusFilter("owned")}
+            >
+              {t("collection.owned")}: {statusCounts?.owned ?? 0}
+            </Badge>
+            <Badge
+              variant={statusFilter === "wishlist" ? "secondary" : "outline"}
+              className="font-body cursor-pointer hover:bg-accent-gold/20 transition-colors border-accent-gold whitespace-nowrap"
+              onClick={() => setStatusFilter("wishlist")}
+            >
+              {t("collection.wishlist")}: {statusCounts?.wishlist ?? 0}
+            </Badge>
+            <span className="text-muted-foreground mx-1">|</span>
+            {/* Category filters */}
             {categories.map((category) => (
               <Badge
                 key={category.id}
@@ -77,7 +112,7 @@ export function CollectionHeader({
                 className="font-body cursor-pointer hover:bg-accent-gold/20 transition-colors border-accent-gold whitespace-nowrap"
                 onClick={() => setSelectedCategory(category.id)}
               >
-                {category.id === "all" ? `${category.count} ${t("collection.games")}` : `${t(category.labelKey)}: ${category.count}`}
+                {category.id === "all" ? t("collection.allCategories") : t(category.labelKey)}
               </Badge>
             ))}
           </div>
