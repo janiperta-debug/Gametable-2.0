@@ -108,6 +108,7 @@ export async function getUserByUsername(usernameOrId: string): Promise<{
   }
 
 // Try exact username match
+  console.log("[v0] Trying exact username match for:", usernameOrId)
   let { data: profile, error } = await supabase
     .from("profiles")
     .select(`
@@ -128,8 +129,11 @@ export async function getUserByUsername(usernameOrId: string): Promise<{
     .eq("username", usernameOrId)
     .maybeSingle()
 
+  console.log("[v0] Exact username match result:", { found: !!profile, error: error?.message })
+
   // If not found, try case-insensitive match
   if (error || !profile) {
+    console.log("[v0] Trying case-insensitive username match")
     const { data: profileLower, error: errorLower } = await supabase
       .from("profiles")
       .select(`
@@ -150,11 +154,13 @@ export async function getUserByUsername(usernameOrId: string): Promise<{
       .ilike("username", usernameOrId)
       .maybeSingle()
     
+    console.log("[v0] Case-insensitive result:", { found: !!profileLower })
     if (profileLower) {
       profile = profileLower
       error = null
     } else {
       // Try matching by display_name as fallback
+      console.log("[v0] Trying display_name match")
       const { data: profileByName, error: errorByName } = await supabase
         .from("profiles")
         .select(`
@@ -175,6 +181,7 @@ export async function getUserByUsername(usernameOrId: string): Promise<{
         .ilike("display_name", usernameOrId)
         .maybeSingle()
       
+      console.log("[v0] Display_name match result:", { found: !!profileByName })
       if (profileByName) {
         profile = profileByName
         error = null
@@ -183,8 +190,11 @@ export async function getUserByUsername(usernameOrId: string): Promise<{
   }
 
   if (error || !profile) {
+    console.log("[v0] No profile found, returning error")
     return { profile: null, error: "User not found" }
   }
+  
+  console.log("[v0] Profile found:", profile.display_name, "username:", profile.username)
 
   return {
     profile: {
