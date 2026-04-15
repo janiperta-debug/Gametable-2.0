@@ -56,12 +56,15 @@ export default function UserProfilePage() {
   useEffect(() => {
     async function loadProfile() {
       setLoading(true)
+      console.log("[v0] loadProfile called with username:", username)
       try {
         const [profileResult, collectionResult, friendsResult] = await Promise.all([
           getUserByUsername(username),
           getUserCollectionByUsername(username),
           getUserFriends(username)
         ])
+
+        console.log("[v0] profileResult:", profileResult)
 
         if (profileResult.profile) {
           setProfile(profileResult.profile)
