@@ -48,7 +48,7 @@ export default function Collection() {
   // Transform database games to the format expected by GameGrid
   const transformedGames: Game[] = useMemo(() => {
     return userGames.map((ug) => ({
-      id: parseInt(ug.game.bgg_id?.toString() || "0", 10) || Math.random(),
+      id: ug.game.id,  // Use actual game UUID for routing to detail page
       title: ug.game.name,
       image: ug.game.image_url || ug.game.thumbnail_url || "/placeholder.svg",
       rating: ug.personal_rating || ug.game.bgg_rating || 0,
