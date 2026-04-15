@@ -16,6 +16,15 @@ import { getEventById, updateRSVP, cancelEvent, type Event, type EventParticipan
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
 
+const EVENT_TYPE_LABELS: Record<string, string> = {
+  board_game_night: "Lautapeli-ilta",
+  rpg_session: "Roolipeli",
+  tournament: "Turnaus",
+  trading: "Vaihtokauppa",
+  meetup: "Tapaaminen",
+  other: "Muu",
+}
+
 const getPrivacyIcon = (privacy: string | null) => {
   switch (privacy) {
     case "public":
@@ -206,37 +215,39 @@ export default function EventDetailsPage() {
     <div className="min-h-screen bg-gradient-to-b from-surface-dark to-background">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between gap-4 mb-8">
+        <div className="flex flex-wrap items-center gap-2 mb-8">
           <Button
             variant="ghost"
+            size="sm"
             onClick={() => router.push("/events")}
-            className="text-accent-gold hover:text-accent-gold/80"
+            className="text-accent-gold hover:text-accent-gold/80 mr-auto"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {t("events.backToEvents") || "Back to Events"}
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            <span className="hidden sm:inline">{t("events.backToEvents") || "Back to Events"}</span>
           </Button>
 
           {isHost && (
-            <div className="flex gap-2">
+            <>
               <Link href={`/events/${eventId}/edit`}>
-                <Button variant="outline" className="border-accent-gold/30">
-                  <Edit className="w-4 h-4 mr-2" />
-                  {t("common.edit") || "Edit"}
+                <Button variant="outline" size="sm" className="border-accent-gold/30">
+                  <Edit className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">{t("common.edit") || "Edit"}</span>
                 </Button>
               </Link>
               <Button 
-                variant="destructive" 
+                variant="destructive"
+                size="sm"
                 onClick={handleCancel}
                 disabled={cancelling}
               >
                 {cancelling ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-4 h-4 sm:mr-2 animate-spin" />
                 ) : (
-                  <XCircle className="w-4 h-4 mr-2" />
+                  <XCircle className="w-4 h-4 sm:mr-2" />
                 )}
-                {t("events.cancel") || "Cancel Event"}
+                <span className="hidden sm:inline">{t("events.cancel") || "Cancel"}</span>
               </Button>
-            </div>
+            </>
           )}
         </div>
 
@@ -276,7 +287,7 @@ export default function EventDetailsPage() {
                     )}
                     {event.event_type && (
                       <Badge variant="outline" className="border-accent-gold/30 text-accent-gold">
-                        {event.event_type.replace("_", " ")}
+                        {EVENT_TYPE_LABELS[event.event_type] || event.event_type.replace(/_/g, " ")}
                       </Badge>
                     )}
                   </div>
