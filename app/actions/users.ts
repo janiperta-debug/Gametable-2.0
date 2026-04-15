@@ -52,63 +52,17 @@ export async function getUserByUsername(usernameOrId: string): Promise<{
   profile: PublicUserProfile | null
   error?: string
 }> {
-  const supabase = await createClient()
-  
-  console.log("[v0] getUserByUsername called with:", usernameOrId)
-  
   if (!usernameOrId) {
-    console.log("[v0] No usernameOrId provided")
     return { profile: null, error: "No username or ID provided" }
   }
 
+  const supabase = await createClient()
+  
   // Check if it's a UUID (ID) format
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(usernameOrId)
-  console.log("[v0] isUuid:", isUuid)
   
-  if (isUuid) {
-    // Try ID lookup first
-    console.log("[v0] Trying ID lookup for:", usernameOrId)
-    const { data: profileById, error: errorById } = await supabase
-      .from("profiles")
-      .select(`
-        id,
-        display_name,
-        username,
-        avatar_url,
-        location,
-        bio,
-        xp,
-        level,
-        active_room,
-        preferred_theme,
-        game_interests,
-        show_collection,
-        created_at
-      `)
-      .eq("id", usernameOrId)
-      .maybeSingle()
-    
-    console.log("[v0] ID lookup result:", { profileById: profileById?.id, errorById })
-    
-    if (errorById) {
-      console.error("[v0] Error fetching profile by ID:", errorById)
-    }
-    
-    if (profileById) {
-      console.log("[v0] Found profile by ID:", profileById.display_name)
-      return {
-        profile: {
-          ...profileById,
-          game_interests: profileById.game_interests || [],
-          show_collection: profileById.show_collection ?? true,
-        }
-      }
-    }
-    console.log("[v0] No profile found by ID, trying username lookup")
-  }
-
-// Try exact username match
-  let { data: profile, error } = await supabase
+  // Use .or() to check both id and username in a single query
+  const { data: profile, error } = await supabase
     .from("profiles")
     .select(`
       id,
@@ -125,62 +79,9 @@ export async function getUserByUsername(usernameOrId: string): Promise<{
       show_collection,
       created_at
     `)
-    .eq("username", usernameOrId)
+    .or(isUuid ? `id.eq.${usernameOrId},username.eq.${usernameOrId}` : `username.ilike.${usernameOrId},display_name.ilike.${usernameOrId}`)
+    .limit(1)
     .maybeSingle()
-
-  // If not found, try case-insensitive match
-  if (error || !profile) {
-    const { data: profileLower, error: errorLower } = await supabase
-      .from("profiles")
-      .select(`
-        id,
-        display_name,
-        username,
-        avatar_url,
-        location,
-        bio,
-        xp,
-        level,
-        active_room,
-        preferred_theme,
-        game_interests,
-        show_collection,
-        created_at
-      `)
-      .ilike("username", usernameOrId)
-      .maybeSingle()
-    
-    if (profileLower) {
-      profile = profileLower
-      error = null
-    } else {
-      // Try matching by display_name as fallback
-      const { data: profileByName, error: errorByName } = await supabase
-        .from("profiles")
-        .select(`
-          id,
-          display_name,
-          username,
-          avatar_url,
-          location,
-          bio,
-          xp,
-          level,
-          active_room,
-          preferred_theme,
-          game_interests,
-          show_collection,
-          created_at
-        `)
-        .ilike("display_name", usernameOrId)
-        .maybeSingle()
-      
-      if (profileByName) {
-        profile = profileByName
-        error = null
-      }
-    }
-  }
 
   if (error || !profile) {
     return { profile: null, error: "User not found" }
