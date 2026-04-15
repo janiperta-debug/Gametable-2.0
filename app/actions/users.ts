@@ -72,30 +72,23 @@ export async function getUserByUsername(usernameOrId: string): Promise<{
   
   if (!profile) {
     // Try exact username match
-    console.log("[v0] Trying exact username match for:", usernameOrId)
-    const { data, error } = await supabase.from("profiles").select(selectFields).eq("username", usernameOrId).maybeSingle()
-    console.log("[v0] Exact username result:", { data: data?.id, error: error?.message })
+    const { data } = await supabase.from("profiles").select(selectFields).eq("username", usernameOrId).maybeSingle()
     profile = data
   }
   
   if (!profile) {
     // Try case-insensitive username match
-    console.log("[v0] Trying ilike username match")
-    const { data, error } = await supabase.from("profiles").select(selectFields).ilike("username", usernameOrId).maybeSingle()
-    console.log("[v0] ilike username result:", { data: data?.id, error: error?.message })
+    const { data } = await supabase.from("profiles").select(selectFields).ilike("username", usernameOrId).maybeSingle()
     profile = data
   }
   
   if (!profile) {
     // Try display_name match
-    console.log("[v0] Trying display_name match")
-    const { data, error } = await supabase.from("profiles").select(selectFields).ilike("display_name", usernameOrId).maybeSingle()
-    console.log("[v0] display_name result:", { data: data?.id, error: error?.message })
+    const { data } = await supabase.from("profiles").select(selectFields).ilike("display_name", usernameOrId).maybeSingle()
     profile = data
   }
 
   if (!profile) {
-    console.log("[v0] No profile found for:", usernameOrId)
     return { profile: null, error: "User not found" }
   }
 
