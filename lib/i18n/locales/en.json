@@ -219,6 +219,10 @@
         "cardGames": "Card Games"
       }
     },
+    "allItems": "All",
+    "allCategories": "All Categories",
+    "viewDetails": "View Details",
+    "addToCollection": "Add to Collection",
     "allGames": "All Games",
     "boardGames": "Board Games",
     "rpgs": "RPGs",

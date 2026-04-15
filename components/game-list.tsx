@@ -6,6 +6,7 @@ import { Star, Users, Clock, Heart, MoreVertical } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import type { Game } from "@/lib/mock-games"
+import { useTranslations } from "@/lib/i18n"
 
 const CATEGORY_LABELS: Record<string, string> = {
   board_game: "Lautapeli",
@@ -19,6 +20,8 @@ interface GameListProps {
 }
 
 export function GameList({ games }: GameListProps) {
+  const t = useTranslations()
+  
   if (games.length === 0) {
     return (
       <div className="text-center py-12">
@@ -52,10 +55,10 @@ export function GameList({ games }: GameListProps) {
                       <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold">
                         {CATEGORY_LABELS[game.category] || game.category}
                       </Badge>
-                      {game.wishlist && (
+                      {game.wishlist && !game.owned && (
                         <Badge variant="secondary" className="bg-accent-gold/90 text-background text-xs">
                           <Heart className="h-3 w-3 mr-1 fill-current" />
-                          Wishlist
+                          {t("collection.wishlist")}
                         </Badge>
                       )}
                     </div>
@@ -83,19 +86,19 @@ export function GameList({ games }: GameListProps) {
               </div>
 
               <div className="flex gap-2">
-                {game.owned ? (
+                {(game.owned || game.wishlist) ? (
                   <Link href={`/game/${game.id}`} className="flex-1">
                     <Button
                       variant="outline"
                       size="sm"
                       className="w-full border-accent-gold/20 hover:border-accent-gold bg-transparent"
                     >
-                      View Details
+                      {t("collection.viewDetails")}
                     </Button>
                   </Link>
                 ) : (
                   <Button size="sm" className="flex-1 bg-accent-gold hover:bg-accent-gold/90 text-background">
-                    Add to Collection
+                    {t("collection.addToCollection")}
                   </Button>
                 )}
                 <Button

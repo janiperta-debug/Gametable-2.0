@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { CollectionHeader, type SortOption, type ViewMode } from "@/components/collection-header"
+import { CollectionHeader, type SortOption, type ViewMode, type StatusFilter } from "@/components/collection-header"
 import { CollectionFilters } from "@/components/collection-filters"
 import { GameGrid } from "@/components/game-grid"
 import { GameList } from "@/components/game-list"
@@ -29,6 +29,7 @@ export default function Collection() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>("all")
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
   const [sortBy, setSortBy] = useState<SortOption>("name-asc")
 
   const handleToggleForTrade = (gameId: string) => {
@@ -75,6 +76,13 @@ export default function Collection() {
 
   const filteredAndSortedGames = useMemo(() => {
     let filtered = [...transformedGames]
+
+    // Filter by status (owned/wishlist)
+    if (statusFilter === "owned") {
+      filtered = filtered.filter((game) => game.owned)
+    } else if (statusFilter === "wishlist") {
+      filtered = filtered.filter((game) => game.wishlist)
+    }
 
     // Filter by search query
     if (searchQuery) {
@@ -123,7 +131,16 @@ export default function Collection() {
     })
 
     return filtered
-  }, [transformedGames, searchQuery, selectedCategory, sortBy])
+  }, [transformedGames, searchQuery, selectedCategory, statusFilter, sortBy])
+
+  // Calculate status counts
+  const statusCounts = useMemo(() => {
+    return {
+      all: transformedGames.length,
+      owned: transformedGames.filter(g => g.owned).length,
+      wishlist: transformedGames.filter(g => g.wishlist).length,
+    }
+  }, [transformedGames])
 
   // Calculate category counts
   const categoryCounts = useMemo(() => {
@@ -179,11 +196,14 @@ export default function Collection() {
               setSearchQuery={setSearchQuery}
               selectedCategory={selectedCategory}
               setSelectedCategory={setSelectedCategory}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
               sortBy={sortBy}
               setSortBy={setSortBy}
               onAddGame={() => router.push("/collection/add")}
               onImport={() => {}}
               categoryCounts={categoryCounts}
+              statusCounts={statusCounts}
             />
 
             {selectedCategory !== "all" && (
