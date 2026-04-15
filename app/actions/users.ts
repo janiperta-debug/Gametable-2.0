@@ -57,33 +57,38 @@ export async function getUserByUsername(usernameOrId: string): Promise<{
   }
 
   const supabase = await createClient()
+  const selectFields = `id, display_name, username, avatar_url, location, bio, xp, level, active_room, preferred_theme, game_interests, show_collection, created_at`
   
-  // Check if it's a UUID (ID) format
+  // Check if it's a UUID format
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(usernameOrId)
   
-  // Use .or() to check both id and username in a single query
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .select(`
-      id,
-      display_name,
-      username,
-      avatar_url,
-      location,
-      bio,
-      xp,
-      level,
-      active_room,
-      preferred_theme,
-      game_interests,
-      show_collection,
-      created_at
-    `)
-    .or(isUuid ? `id.eq.${usernameOrId},username.eq.${usernameOrId}` : `username.ilike.${usernameOrId},display_name.ilike.${usernameOrId}`)
-    .limit(1)
-    .maybeSingle()
+  let profile = null
+  
+  if (isUuid) {
+    // Try by ID first
+    const { data } = await supabase.from("profiles").select(selectFields).eq("id", usernameOrId).maybeSingle()
+    profile = data
+  }
+  
+  if (!profile) {
+    // Try exact username match
+    const { data } = await supabase.from("profiles").select(selectFields).eq("username", usernameOrId).maybeSingle()
+    profile = data
+  }
+  
+  if (!profile) {
+    // Try case-insensitive username match
+    const { data } = await supabase.from("profiles").select(selectFields).ilike("username", usernameOrId).maybeSingle()
+    profile = data
+  }
+  
+  if (!profile) {
+    // Try display_name match
+    const { data } = await supabase.from("profiles").select(selectFields).ilike("display_name", usernameOrId).maybeSingle()
+    profile = data
+  }
 
-  if (error || !profile) {
+  if (!profile) {
     return { profile: null, error: "User not found" }
   }
 
