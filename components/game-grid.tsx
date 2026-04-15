@@ -8,6 +8,13 @@ import Link from "next/link"
 import type { Game } from "@/lib/mock-games"
 import { useTranslations } from "@/lib/i18n"
 
+const CATEGORY_LABELS: Record<string, string> = {
+  board_game: "Lautapeli",
+  rpg: "Roolipeli",
+  trading_card: "Keräilykortti",
+  miniature: "Miniatyyri",
+}
+
 interface GameGridProps {
   games: Game[]
   onToggleForTrade?: (gameId: string) => void
@@ -68,7 +75,7 @@ export function GameGrid({
             <div>
               <h3 className="font-heading font-semibold text-lg mb-1">{game.title}</h3>
               <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">
-                {game.category}
+                {CATEGORY_LABELS[game.category] || game.category}
               </Badge>
             </div>
 
