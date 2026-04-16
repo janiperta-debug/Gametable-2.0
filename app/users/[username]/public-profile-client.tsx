@@ -11,6 +11,7 @@ import { MapPin, Gamepad2, Star, UserPlus, UserCheck, Clock, Loader2, ArrowLeft 
 import Link from "next/link"
 import Image from "next/image"
 import { useToast } from "@/hooks/use-toast"
+import { sendFriendRequest as sendFriendRequestServer, acceptFriendRequest as acceptFriendRequestServer } from "@/app/actions/friends"
 
 interface Profile {
   id: string
@@ -37,6 +38,7 @@ interface PublicProfileClientProps {
   games: Game[]
   currentUserId: string | null
   initialFriendshipStatus: "none" | "pending" | "accepted" | "incoming"
+  initialFriendshipId: string | null
 }
 
 export function PublicProfileClient({
@@ -46,31 +48,27 @@ export function PublicProfileClient({
   games,
   currentUserId,
   initialFriendshipStatus,
+  initialFriendshipId,
 }: PublicProfileClientProps) {
   const t = useTranslations()
   const { toast } = useToast()
   const [friendshipStatus, setFriendshipStatus] = useState(initialFriendshipStatus)
+  const [friendshipId] = useState(initialFriendshipId)
   const [loading, setLoading] = useState(false)
 
   const isOwnProfile = currentUserId === profile.id
   const displayName = profile.display_name || profile.username || "Anonymous"
 
-  async function sendFriendRequest() {
+  async function handleSendFriendRequest() {
     if (!currentUserId) return
     
     setLoading(true)
-    const supabase = createClient()
+    const result = await sendFriendRequestServer(profile.id)
     
-    const { error } = await supabase.from("friendships").insert({
-      requester_id: currentUserId,
-      addressee_id: profile.id,
-      status: "pending"
-    })
-    
-    if (error) {
+    if (result.error) {
       toast({
         title: t("common.error"),
-        description: error.message,
+        description: result.error,
         variant: "destructive",
       })
     } else {
@@ -83,22 +81,16 @@ export function PublicProfileClient({
     setLoading(false)
   }
 
-  async function acceptFriendRequest() {
-    if (!currentUserId) return
+  async function handleAcceptFriendRequest() {
+    if (!currentUserId || !friendshipId) return
     
     setLoading(true)
-    const supabase = createClient()
+    const result = await acceptFriendRequestServer(friendshipId)
     
-    const { error } = await supabase
-      .from("friendships")
-      .update({ status: "accepted" })
-      .eq("requester_id", profile.id)
-      .eq("addressee_id", currentUserId)
-    
-    if (error) {
+    if (result.error) {
       toast({
         title: t("common.error"),
-        description: error.message,
+        description: result.error,
         variant: "destructive",
       })
     } else {
@@ -180,7 +172,7 @@ export function PublicProfileClient({
                   <div className="mt-4">
                     {friendshipStatus === "none" && (
                       <Button
-                        onClick={sendFriendRequest}
+                        onClick={handleSendFriendRequest}
                         disabled={loading}
                         className="bg-accent-gold hover:bg-accent-gold/90 text-background"
                       >
@@ -200,7 +192,7 @@ export function PublicProfileClient({
                     )}
                     {friendshipStatus === "incoming" && (
                       <Button
-                        onClick={acceptFriendRequest}
+                        onClick={handleAcceptFriendRequest}
                         disabled={loading}
                         className="bg-accent-gold hover:bg-accent-gold/90 text-background"
                       >

@@ -61,14 +61,16 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
   // Check friendship status if logged in
   let friendshipStatus: "none" | "pending" | "accepted" | "incoming" = "none"
+  let friendshipId: string | null = null
   if (user && user.id !== profile.id) {
     const { data: friendship } = await supabase
       .from("friendships")
-      .select("status, requester_id")
+      .select("id, status, requester_id")
       .or(`and(requester_id.eq.${user.id},addressee_id.eq.${profile.id}),and(requester_id.eq.${profile.id},addressee_id.eq.${user.id})`)
       .maybeSingle()
     
     if (friendship) {
+      friendshipId = friendship.id
       if (friendship.status === "accepted") {
         friendshipStatus = "accepted"
       } else if (friendship.status === "pending") {
@@ -85,6 +87,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
       games={games}
       currentUserId={user?.id ?? null}
       initialFriendshipStatus={friendshipStatus}
+      initialFriendshipId={friendshipId}
     />
   )
 }
