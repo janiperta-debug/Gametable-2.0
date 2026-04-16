@@ -65,6 +65,14 @@
     "hideFilters": "Hide Filters",
     "clearFilters": "Clear Filters"
   },
+  "friends": {
+    "sendRequest": "Send Friend Request",
+    "requestPending": "Request Pending",
+    "acceptRequest": "Accept Request",
+    "alreadyFriends": "Friends",
+    "requestSent": "Friend request sent!",
+    "requestAccepted": "Friend request accepted!"
+  },
   "nav": {
     "home": "Home",
     "collection": "Collection",

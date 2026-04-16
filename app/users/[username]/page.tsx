@@ -49,7 +49,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
       .from("user_games")
       .select("game:games(id, name, thumbnail_url)")
       .eq("user_id", profile.id)
-      .limit(12)
+      .eq("status", "owned")
     
     games = (userGames || [])
       .map(ug => ug.game)
