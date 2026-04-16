@@ -398,8 +398,6 @@ export async function getPendingRequests(): Promise<{ data: FriendRequest[]; err
     return { data: [], error: "Unauthorized" }
   }
 
-  console.log("[v0] getPendingRequests for user:", user.id)
-  
   const { data, error } = await supabase
     .from("friendships")
     .select(`
@@ -413,8 +411,6 @@ export async function getPendingRequests(): Promise<{ data: FriendRequest[]; err
     .eq("addressee_id", user.id)
     .eq("status", "pending")
     .order("created_at", { ascending: false })
-
-  console.log("[v0] getPendingRequests result:", { count: data?.length, error: error?.message })
 
   if (error) {
     console.error("Error fetching pending requests:", error)

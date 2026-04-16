@@ -65,14 +65,18 @@ export async function getUserBadges(userId?: string): Promise<{ data: UserBadge[
     return { data: [], error: "Not authenticated" }
   }
   
+console.log("[v0] getUserBadges querying for user:", targetUserId)
+  
   const { data, error } = await supabase
-    .from("user_badges")
-    .select("*")
-    .eq("user_id", targetUserId)
+  .from("user_badges")
+  .select("*")
+  .eq("user_id", targetUserId)
+  
+  console.log("[v0] getUserBadges result:", { count: data?.length, error: error?.message, badges: data?.map(b => b.badge_id) })
   
   if (error) {
-    console.error("Error fetching user badges:", error)
-    return { data: [], error: error.message }
+  console.error("Error fetching user badges:", error)
+  return { data: [], error: error.message }
   }
   
   return { data: data || [] }
