@@ -253,15 +253,13 @@ export async function sendFriendRequest(addresseeId: string): Promise<{ success:
   const requesterName = requesterProfile?.display_name || requesterProfile?.username || "Someone"
 
   // Create notification for the addressee
-  console.log("[v0] Creating friend request notification for:", addresseeId, "from:", requesterName)
-  const notifResult = await createNotification({
+  await createNotification({
     user_id: addresseeId,
     type: "friend_request",
     title: "New Friend Request",
     body: `${requesterName} wants to connect with you`,
     data: { requester_id: user.id, friendship_id: friendship?.id }
   })
-  console.log("[v0] Friend request notification result:", notifResult)
 
   revalidatePath("/discover")
   revalidatePath("/profile")
