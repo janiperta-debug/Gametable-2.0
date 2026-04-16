@@ -20,6 +20,7 @@ export default function TrophiesPage() {
 
   useEffect(() => {
     async function loadBadges() {
+      console.log("[v0] loadBadges called, user:", user?.id)
       if (!user) {
         // Use local badge definitions with no progress for non-logged in users
         const localBadges: BadgeWithProgress[] = BADGE_DEFINITIONS.map((b) => ({
@@ -42,7 +43,14 @@ export default function TrophiesPage() {
         return
       }
 
+      console.log("[v0] Calling getBadgesWithProgress for user:", user.id)
       const result = await getBadgesWithProgress(user.id)
+      console.log("[v0] getBadgesWithProgress result:", { 
+        badgeCount: result.badges.length, 
+        earnedCount: result.earnedCount, 
+        error: result.error,
+        earnedBadges: result.badges.filter(b => b.earned).map(b => b.id)
+      })
       if (!result.error) {
         // If we got data from Supabase, use it; otherwise fall back to local definitions
         if (result.badges.length > 0) {
