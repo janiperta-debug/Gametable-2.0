@@ -180,7 +180,7 @@
     "thisWeek": "tällä viikolla",
     "newFriends": "uutta kaveria",
     "noFriendsYet": "Ei vielä kavereita. Yhdistä muihin pelaajiin!",
-    "friendsNote": "Sijaintisi ja pelikiinnostuksesi näkyvät muille auttamaan peliseuran löytämisessä. Suoraviestit ja tapahtumien järjestäminen on rajoitettu kavereihin.",
+    "friendsNote": "Sijaintisi ja pelikiinnostuksesi näkyvät muille auttamaan peliseuran löyt��misessä. Suoraviestit ja tapahtumien järjestäminen on rajoitettu kavereihin.",
     "viewProfile": "Näytä profiili",
     "remove": "Poista",
     "pendingRequests": "Odottavat kaveripyynnöt",
@@ -615,7 +615,14 @@
       "hosting": "Kokoontumisten mestari",
       "attendance": "Vakaa kumppani",
       "manor": "Kartanon nousija",
-      "portal": "Portaalin vartija"
+      "portal": "Portaalin vartija",
+      "curator-of-wonders": "Ihmeiden kuraattori",
+      "dimensional-wanderer": "Ulottuvuuksien kulkija",
+      "fellowship-weaver": "Toverikunnan kutoja",
+      "gathering-master": "Kokoontumisten mestari",
+      "stalwart-companion": "Vakaa kumppani",
+      "manor-ascendant": "Kartanon nousija",
+      "portal-keeper": "Portaalin vartija"
     },
     "badges": {
       "collection-bronze": {
@@ -719,6 +726,111 @@
         "requirement": "Osallistu 10 tapahtumaan"
       },
       "attendance-gold": {
+        "name": "Legendaarinen kumppani",
+        "description": "Legendaarinen läsnäolo jokaisessa kokoontumisessa",
+        "requirement": "Osallistu 25 tapahtumaan"
+      },
+      "apprentice-curator": {
+        "name": "Aloitteleva kuraattori",
+        "description": "Aloita matkasi kerääjänä",
+        "requirement": "Lisää 5 peliä kokoelmaasi"
+      },
+      "master-curator": {
+        "name": "Mestarikuraattori",
+        "description": "Kokoelmasi kasvaa vaikuttavaksi",
+        "requirement": "Lisää 25 peliä kokoelmaasi"
+      },
+      "grand-curator": {
+        "name": "Suurkuraattori",
+        "description": "Legendaarinen kokoelma kartanon arvoisena",
+        "requirement": "Lisää 100 peliä kokoelmaasi"
+      },
+      "curious-explorer": {
+        "name": "Utelias tutkija",
+        "description": "Aloita eri pelimaailmojen tutkiminen",
+        "requirement": "Omista pelejä 2 eri kategoriasta"
+      },
+      "realm-walker": {
+        "name": "Maailmojen kulkija",
+        "description": "Matkasi ulottuu useisiin ulottuvuuksiin",
+        "requirement": "Omista pelejä 3 eri kategoriasta"
+      },
+      "dimensional-master": {
+        "name": "Ulottuvuuksien mestari",
+        "description": "Kaikkien peliulottuvuuksien mestari",
+        "requirement": "Omista pelejä kaikista 4 kategoriasta"
+      },
+      "bond-forger": {
+        "name": "Siteen luoja",
+        "description": "Aloita toverikuntasi rakentaminen",
+        "requirement": "Yhdistä 3 ystävän kanssa"
+      },
+      "circle-builder": {
+        "name": "Piirin rakentaja",
+        "description": "Ystäväpiirisi kasvaa vahvaksi",
+        "requirement": "Yhdistä 10 ystävän kanssa"
+      },
+      "fellowship-master": {
+        "name": "Toverikunnan mestari",
+        "description": "Todellinen toverikunnan ja yhteisön mestari",
+        "requirement": "Yhdistä 25 ystävän kanssa"
+      },
+      "first-gathering": {
+        "name": "Ensimmäinen kokoontuminen",
+        "description": "Järjestä ensimmäinen pelitapahtumasi",
+        "requirement": "Järjestä 1 tapahtuma"
+      },
+      "regular-host": {
+        "name": "Vakituinen isäntä",
+        "description": "Tule säännölliseksi tapahtumajärjestäjäksi",
+        "requirement": "Järjestä 5 tapahtumaa"
+      },
+      "grand-orchestrator": {
+        "name": "Suuri orkestroija",
+        "description": "Hallitse suurten kokoontumisten taide",
+        "requirement": "Järjestä 20 tapahtumaa"
+      },
+      "ground-floor-master": {
+        "name": "Ensimmäisen kerroksen mestari",
+        "description": "Hallitse kartanon ensimmäinen kerros",
+        "requirement": "Saavuta taso 5"
+      },
+      "second-floor-master": {
+        "name": "Toisen kerroksen mestari",
+        "description": "Nouse toiseen kerrokseen",
+        "requirement": "Saavuta taso 10"
+      },
+      "basement-lord": {
+        "name": "Kellarin herra",
+        "description": "Avaa kellarin salaisuudet",
+        "requirement": "Saavuta taso 15"
+      },
+      "portal-novice": {
+        "name": "Portaalin noviisi",
+        "description": "Avaa ensimmäinen portaalisi BoardGameGeekiin",
+        "requirement": "Tuo 1 peli BGG:stä"
+      },
+      "portal-adept": {
+        "name": "Portaalin taitaja",
+        "description": "Valjasta BGG-portaalin voima",
+        "requirement": "Tuo 10 peliä BGG:stä"
+      },
+      "portal-master": {
+        "name": "Portaalin mestari",
+        "description": "Ulottuvuuksien välisen pelikeräilyn mestari",
+        "requirement": "Tuo 50 peliä BGG:stä"
+      },
+      "eager-newcomer": {
+        "name": "Innokas tulokas",
+        "description": "Liity ensimmäisiin pelikokoontumisiin",
+        "requirement": "Osallistu 3 tapahtumaan"
+      },
+      "reliable-ally": {
+        "name": "Luotettava liittolainen",
+        "description": "Tule luotettavaksi kumppaniksi",
+        "requirement": "Osallistu 10 tapahtumaan"
+      },
+      "legendary-companion": {
         "name": "Legendaarinen kumppani",
         "description": "Legendaarinen läsnäolo jokaisessa kokoontumisessa",
         "requirement": "Osallistu 25 tapahtumaan"
