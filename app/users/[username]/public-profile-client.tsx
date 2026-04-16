@@ -21,7 +21,6 @@ interface Profile {
   location: string | null
   xp: number | null
   level: number | null
-  game_interests: string[] | null
   show_collection: boolean | null
 }
 
@@ -33,6 +32,7 @@ interface Game {
 
 interface PublicProfileClientProps {
   profile: Profile
+  gameInterests: string[] | null
   gameCount: number
   games: Game[]
   currentUserId: string | null
@@ -41,6 +41,7 @@ interface PublicProfileClientProps {
 
 export function PublicProfileClient({
   profile,
+  gameInterests,
   gameCount,
   games,
   currentUserId,
@@ -154,9 +155,9 @@ export function PublicProfileClient({
                 )}
 
                 {/* Game Interests */}
-                {profile.game_interests && profile.game_interests.length > 0 && (
+                {gameInterests && gameInterests.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {profile.game_interests.map((interest) => (
+                    {gameInterests.map((interest) => (
                       <Badge key={interest} variant="outline" className="border-accent-gold/30">
                         {interest}
                       </Badge>

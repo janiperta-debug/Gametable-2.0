@@ -17,26 +17,24 @@ export default async function PublicProfilePage({ params }: PageProps) {
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(username)
 
   // Query profile directly
-  console.log("[v0] Querying profile for:", username, "isUuid:", isUuid)
-  
-  const { data: profile, error: profileError } = isUuid
+  const { data: profile } = isUuid
     ? await supabase
         .from("profiles")
-        .select("id, display_name, username, avatar_url, bio, location, xp, level, game_interests, show_collection")
+        .select("id, display_name, username, avatar_url, bio, location, xp, level, show_collection, preferences")
         .eq("id", username)
         .maybeSingle()
     : await supabase
         .from("profiles")
-        .select("id, display_name, username, avatar_url, bio, location, xp, level, game_interests, show_collection")
+        .select("id, display_name, username, avatar_url, bio, location, xp, level, show_collection, preferences")
         .eq("username", username)
         .maybeSingle()
 
-  console.log("[v0] Profile query result:", { profile: profile?.id, error: profileError?.message })
-
   if (!profile) {
-    console.log("[v0] Profile not found, calling notFound()")
     notFound()
   }
+
+  // Extract game_interests from preferences JSON
+  const gameInterests = (profile.preferences as Record<string, unknown>)?.game_interests as string[] | null
 
   // Get game count
   const { count: gameCount } = await supabase
@@ -82,6 +80,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
   return (
     <PublicProfileClient 
       profile={profile}
+      gameInterests={gameInterests}
       gameCount={gameCount ?? 0}
       games={games}
       currentUserId={user?.id ?? null}
