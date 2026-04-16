@@ -17,24 +17,19 @@ export default async function PublicProfilePage({ params }: PageProps) {
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(username)
 
   // Query profile directly
-  console.log("[v0] Querying profile for:", username, "isUuid:", isUuid)
-  
-  const { data: profile, error: profileError } = isUuid
+  const { data: profile } = isUuid
     ? await supabase
         .from("profiles")
-        .select("id, display_name, username, avatar_url, bio, location, xp, level, game_interests, show_collection")
+        .select("id, display_name, username, avatar_url, bio, location, xp, level, show_collection")
         .eq("id", username)
         .maybeSingle()
     : await supabase
         .from("profiles")
-        .select("id, display_name, username, avatar_url, bio, location, xp, level, game_interests, show_collection")
+        .select("id, display_name, username, avatar_url, bio, location, xp, level, show_collection")
         .eq("username", username)
         .maybeSingle()
 
-  console.log("[v0] Profile query result:", { profile: profile?.id, error: profileError?.message })
-
   if (!profile) {
-    console.log("[v0] Profile not found, calling notFound()")
     notFound()
   }
 
