@@ -50,6 +50,8 @@
     "viewProfile": "View Profile",
     "more": "More",
     "less": "Less",
+    "showAll": "Show All",
+    "showLess": "Show Less",
     "online": "Online",
     "offline": "Offline",
     "lastSeen": "Last seen",
@@ -203,7 +205,8 @@
     "boardAndCardGames": "Board & Card Games",
     "warhammer": "Warhammer",
     "otherMiniatureGames": "Other Miniature Games",
-    "roleplayingGames": "Roleplaying Games (RPGs)"
+    "roleplayingGames": "Roleplaying Games (RPGs)",
+    "tradingCards": "Trading Cards"
   },
   "collection": {
     "title": "Game Collection",
@@ -213,6 +216,7 @@
     "myGames": "My Games",
     "findGames": "Find Games",
     "myCollection": "My Collection",
+    "moreGames": "more games",
     "games": {
       "title": "Games",
       "categories": {

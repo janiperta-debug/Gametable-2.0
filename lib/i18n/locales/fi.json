@@ -13,8 +13,9 @@
     "name": "Nimi",
     "category": "Kategoria",
     "yearPublished": "Julkaisuvuosi",
-    "minPlayers": "Min. pelaajat",
-    "maxPlayers": "Max. pelaajat",
+"minPlayers": "Min. pelaajat",
+  "maxPlayers": "Max. pelaajat",
+  "players": "pelaajaa",
     "minPlaytime": "Min. peliaika",
     "maxPlaytime": "Max. peliaika",
     "description": "Kuvaus",
@@ -50,6 +51,8 @@
     "viewProfile": "Näytä profiili",
     "more": "Lisää",
     "less": "Vähemmän",
+    "showAll": "Näytä kaikki",
+    "showLess": "Näytä vähemmän",
     "online": "Paikalla",
     "offline": "Poissa",
     "lastSeen": "Nähty viimeksi",
@@ -203,7 +206,8 @@
     "boardAndCardGames": "Lauta- ja korttipelit",
     "warhammer": "Warhammer",
     "otherMiniatureGames": "Muut miniatyyrit",
-    "roleplayingGames": "Roolipelit (RPG)"
+    "roleplayingGames": "Roolipelit (RPG)",
+    "tradingCards": "Keräilykortit"
   },
   "collection": {
     "title": "Pelikokoelma",
@@ -214,6 +218,7 @@
     "findGames": "Etsi pelejä",
     "myCollection": "Kokoelmani",
     "games": "peliä",
+    "moreGames": "peliä lisää",
     "allItems": "Kaikki",
     "allCategories": "Kaikki kategoriat",
     "viewDetails": "Näytä tiedot",
