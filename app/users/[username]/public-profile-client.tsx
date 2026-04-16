@@ -82,9 +82,28 @@ export function PublicProfileClient({
   const [friendshipStatus, setFriendshipStatus] = useState(initialFriendshipStatus)
   const [friendshipId] = useState(initialFriendshipId)
   const [loading, setLoading] = useState(false)
+  const [showAllGames, setShowAllGames] = useState(false)
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null)
 
   const isOwnProfile = currentUserId === profile.id
   const displayName = profile.display_name || profile.username || "Anonymous"
+
+  // Helper to categorize a game
+  function getGameCategory(game: Game): string {
+    const cat = game.category?.toLowerCase() || ""
+    if (cat.includes("rpg") || cat.includes("role")) return "rpg"
+    if (cat.includes("miniature") || cat.includes("wargame")) return "miniatures"
+    if (cat.includes("trading") || cat.includes("tcg") || cat.includes("card game")) return "tradingCards"
+    return "boardGames"
+  }
+
+  // Filter games by category
+  const filteredGames = categoryFilter 
+    ? games.filter(game => getGameCategory(game) === categoryFilter)
+    : games
+  
+  // Show limited or all games
+  const displayedGames = showAllGames ? filteredGames : filteredGames.slice(0, 20)
 
   async function handleSendFriendRequest() {
     if (!currentUserId) return
@@ -262,33 +281,71 @@ export function PublicProfileClient({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Category badges */}
-              <div className="flex flex-wrap gap-3 mb-6">
+              {/* Category filter badges */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                <button
+                  onClick={() => { setCategoryFilter(null); setShowAllGames(false); }}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    categoryFilter === null 
+                      ? "bg-accent-gold text-background" 
+                      : "bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20"
+                  }`}
+                >
+                  {t("collection.allItems")} ({games.length})
+                </button>
                 {categoryCounts.boardGames > 0 && (
-                  <Badge variant="outline" className="border-accent-gold/30 px-3 py-1">
-                    {t("profile.boardAndCardGames")}: {categoryCounts.boardGames}
-                  </Badge>
+                  <button
+                    onClick={() => { setCategoryFilter("boardGames"); setShowAllGames(false); }}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                      categoryFilter === "boardGames" 
+                        ? "bg-accent-gold text-background" 
+                        : "bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20"
+                    }`}
+                  >
+                    {t("profile.boardAndCardGames")} ({categoryCounts.boardGames})
+                  </button>
                 )}
                 {categoryCounts.rpg > 0 && (
-                  <Badge variant="outline" className="border-accent-gold/30 px-3 py-1">
-                    {t("profile.roleplayingGames")}: {categoryCounts.rpg}
-                  </Badge>
+                  <button
+                    onClick={() => { setCategoryFilter("rpg"); setShowAllGames(false); }}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                      categoryFilter === "rpg" 
+                        ? "bg-accent-gold text-background" 
+                        : "bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20"
+                    }`}
+                  >
+                    {t("profile.roleplayingGames")} ({categoryCounts.rpg})
+                  </button>
                 )}
                 {categoryCounts.miniatures > 0 && (
-                  <Badge variant="outline" className="border-accent-gold/30 px-3 py-1">
-                    {t("profile.otherMiniatureGames")}: {categoryCounts.miniatures}
-                  </Badge>
+                  <button
+                    onClick={() => { setCategoryFilter("miniatures"); setShowAllGames(false); }}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                      categoryFilter === "miniatures" 
+                        ? "bg-accent-gold text-background" 
+                        : "bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20"
+                    }`}
+                  >
+                    {t("profile.otherMiniatureGames")} ({categoryCounts.miniatures})
+                  </button>
                 )}
                 {categoryCounts.tradingCards > 0 && (
-                  <Badge variant="outline" className="border-accent-gold/30 px-3 py-1">
-                    {t("profile.tradingCards")}: {categoryCounts.tradingCards}
-                  </Badge>
+                  <button
+                    onClick={() => { setCategoryFilter("tradingCards"); setShowAllGames(false); }}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                      categoryFilter === "tradingCards" 
+                        ? "bg-accent-gold text-background" 
+                        : "bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20"
+                    }`}
+                  >
+                    {t("profile.tradingCards")} ({categoryCounts.tradingCards})
+                  </button>
                 )}
               </div>
 
               {/* Game list view */}
-              <div className="space-y-3 max-h-[500px] overflow-y-auto">
-                {games.slice(0, 20).map((game) => (
+              <div className={`space-y-2 ${showAllGames ? "max-h-[70vh]" : "max-h-[400px]"} overflow-y-auto`}>
+                {displayedGames.map((game) => (
                   <div key={game.id} className="flex items-center gap-3 p-2 rounded-lg bg-background/30 hover:bg-background/50 transition-colors">
                     <div className="relative w-12 h-12 flex-shrink-0 rounded overflow-hidden bg-accent-gold/10">
                       {game.thumbnail_url ? (
@@ -317,12 +374,23 @@ export function PublicProfileClient({
                     </div>
                   </div>
                 ))}
-                {games.length > 20 && (
-                  <p className="text-center text-muted-foreground text-sm py-2">
-                    +{games.length - 20} {t("collection.moreGames")}
-                  </p>
-                )}
               </div>
+              
+              {/* Show more/less button */}
+              {filteredGames.length > 20 && (
+                <div className="mt-4 text-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowAllGames(!showAllGames)}
+                    className="border-accent-gold/30 text-accent-gold hover:bg-accent-gold/10"
+                  >
+                    {showAllGames 
+                      ? t("common.showLess")
+                      : `${t("common.showAll")} (+${filteredGames.length - 20} ${t("collection.moreGames")})`
+                    }
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
