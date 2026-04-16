@@ -31,20 +31,13 @@ export function GameInterests() {
   // Load interests from database
   useEffect(() => {
     async function loadInterests() {
-      if (!user) {
-        console.log("[v0] loadInterests: no user")
-        return
-      }
+      if (!user) return
       
-      console.log("[v0] Loading game_interests for user:", user.id)
-      
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("profiles")
         .select("game_interests")
         .eq("id", user.id)
         .single()
-      
-      console.log("[v0] Loaded game_interests:", data?.game_interests, "error:", error?.message)
       
       if (data?.game_interests) {
         const loaded: Record<InterestKey, boolean> = {
@@ -66,10 +59,7 @@ export function GameInterests() {
   }, [user, supabase])
 
   const handleToggle = async (key: InterestKey) => {
-    if (!user) {
-      console.log("[v0] handleToggle: no user")
-      return
-    }
+    if (!user) return
     
     const newInterests = { ...interests, [key]: !interests[key] }
     setInterests(newInterests)
@@ -77,18 +67,10 @@ export function GameInterests() {
     // Convert to array of selected keys
     const selectedInterests = INTEREST_KEYS.filter(k => newInterests[k])
     
-    console.log("[v0] Saving game_interests:", selectedInterests, "for user:", user.id)
-    
-    const { error } = await supabase
+    await supabase
       .from("profiles")
       .update({ game_interests: selectedInterests })
       .eq("id", user.id)
-    
-    if (error) {
-      console.error("[v0] Error saving game_interests:", error)
-    } else {
-      console.log("[v0] game_interests saved successfully")
-    }
   }
 
   if (loading) {
