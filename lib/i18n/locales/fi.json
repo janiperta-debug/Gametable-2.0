@@ -398,6 +398,16 @@
     "chatForAttendees": "Vastaa osallistuaksesi chattiin",
     "chatUnavailable": "Chat ei ole käytettävissä",
     "noAttendees": "Ei vielä osallistujia",
+    "inviteFriends": "Kutsu ystäviä",
+    "selected": "valittu",
+    "noFriendsToInvite": "Ei kutsuttavia ystäviä. Lisää ensin ystäviä!",
+    "inviteSent": "Kutsu lähetetty",
+    "inviteRemoved": "Osallistuja poistettu",
+    "invited": "Kutsuttu",
+    "confirmCancel": "Haluatko varmasti peruuttaa tämän tapahtuman?",
+    "chatDescription": "Keskustele tapahtumasta osallistujien kanssa",
+    "backToEvents": "Takaisin tapahtumiin",
+    "cancel": "Peruuta tapahtuma",
     "loginToRsvp": "Kirjaudu vastataksesi",
     "participants": "Osallistujat",
     "rsvpAttending": "Osallistun",
@@ -1011,7 +1021,7 @@
         "number": "01",
         "title": "Kokoelma",
         "subtitle": "Kaikki pelisi yhdessä paikassa.",
-        "desc": "Lautapelit, RPG-kirjat, miniatyyrit, keräilykortit — kaikki lajityypit saman kokoelman alla."
+        "desc": "Lautapelit, RPG-kirjat, miniatyyrit, keräilykortit ��� kaikki lajityypit saman kokoelman alla."
       },
       "community": {
         "number": "02",

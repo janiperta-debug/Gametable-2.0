@@ -51,6 +51,52 @@ export async function getFriendshipStatus(targetUserId: string) {
 }
 
 /**
+ * Get current user's accepted friends list (simple format for invites)
+ */
+export async function getUserFriendsList(): Promise<{
+  friends: Array<{ id: string; display_name: string | null; avatar_url: string | null }>
+  error?: string
+}> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) {
+    return { friends: [], error: "Not authenticated" }
+  }
+
+  const { data: friendships, error } = await supabase
+    .from('friendships')
+    .select('requester_id, addressee_id')
+    .eq('status', 'accepted')
+    .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+
+  if (error) {
+    return { friends: [], error: error.message }
+  }
+
+  // Get friend IDs
+  const friendIds = (friendships || []).map(f => 
+    f.requester_id === user.id ? f.addressee_id : f.requester_id
+  )
+
+  if (friendIds.length === 0) {
+    return { friends: [] }
+  }
+
+  // Fetch friend profiles
+  const { data: profiles, error: profileError } = await supabase
+    .from('profiles')
+    .select('id, display_name, avatar_url')
+    .in('id', friendIds)
+
+  if (profileError) {
+    return { friends: [], error: profileError.message }
+  }
+
+  return { friends: profiles || [] }
+}
+
+/**
  * Search users by location and/or game interest
  */
 export async function searchUsers(params: {
