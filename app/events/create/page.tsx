@@ -11,8 +11,11 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { ArrowLeft, Globe, UserCheck, Lock, Loader2, Calendar, Search, X, Dices, Swords, Trophy, Sparkles } from "lucide-react"
-import { createEvent, type EventType, type EventPrivacy } from "@/app/actions/events"
+import { ArrowLeft, Globe, UserCheck, Lock, Loader2, Calendar, Search, X, Dices, Swords, Trophy, Sparkles, UserPlus, Check } from "lucide-react"
+import { createEvent, inviteToEvent, type EventType, type EventPrivacy } from "@/app/actions/events"
+import { getUserFriendsList } from "@/app/actions/friends"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 
 const eventTypes: { value: EventType; icon: React.ElementType }[] = [
   { value: "board_game_night", icon: Dices },
@@ -43,6 +46,9 @@ export default function CreateEventPage() {
   const [loadingGames, setLoadingGames] = useState(true)
   const [gameSearchQuery, setGameSearchQuery] = useState("")
   const [showGameResults, setShowGameResults] = useState(false)
+  const [friends, setFriends] = useState<Array<{ id: string; display_name: string | null; avatar_url: string | null }>>([])
+  const [selectedFriends, setSelectedFriends] = useState<string[]>([])
+  const [loadingFriends, setLoadingFriends] = useState(true)
   const { toast } = useToast()
   const t = useTranslations()
   
@@ -51,14 +57,22 @@ export default function CreateEventPage() {
     userGame.game.name.toLowerCase().includes(gameSearchQuery.toLowerCase())
   )
   
-  // Fetch user's collection
+  // Fetch user's collection and friends
   useEffect(() => {
     async function fetchGames() {
       const { games } = await getUserGames()
       setUserGames(games as UserGame[])
       setLoadingGames(false)
     }
+    async function fetchFriends() {
+      const result = await getUserFriendsList()
+      if (result.friends) {
+        setFriends(result.friends)
+      }
+      setLoadingFriends(false)
+    }
     fetchGames()
+    fetchFriends()
   }, [])
   const [formData, setFormData] = useState({
     title: "",
@@ -69,6 +83,14 @@ export default function CreateEventPage() {
     maxPlayers: "",
     description: "",
   })
+
+  const toggleFriendSelection = (friendId: string) => {
+    setSelectedFriends(prev => 
+      prev.includes(friendId) 
+        ? prev.filter(id => id !== friendId)
+        : [...prev, friendId]
+    )
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -95,7 +117,14 @@ export default function CreateEventPage() {
           description: result.error,
           variant: "destructive",
         })
-      } else {
+      } else if (result.event) {
+        // Invite selected friends if any
+        if (selectedFriends.length > 0 && (privacy === "private" || privacy === "friends")) {
+          for (const friendId of selectedFriends) {
+            await inviteToEvent(result.event.id, friendId)
+          }
+        }
+        
         toast({
           title: t("common.success"),
           description: t("events.eventCreated"),
@@ -386,6 +415,64 @@ export default function CreateEventPage() {
                     </div>
                   </RadioGroup>
                 </div>
+
+                {/* Invite Friends Section - Show for private/friends events */}
+                {(privacy === "private" || privacy === "friends") && (
+                  <div className="space-y-4 p-4 border border-accent-gold/30 rounded-lg bg-accent-gold/5">
+                    <div className="flex items-center gap-2">
+                      <UserPlus className="h-5 w-5 text-accent-gold" />
+                      <Label className="font-body text-accent-gold font-medium">
+                        {t("events.inviteFriends")}
+                      </Label>
+                      {selectedFriends.length > 0 && (
+                        <Badge variant="secondary" className="bg-accent-gold/20 text-accent-gold">
+                          {selectedFriends.length} {t("events.selected")}
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    {loadingFriends ? (
+                      <div className="flex items-center justify-center py-4">
+                        <Loader2 className="h-5 w-5 animate-spin text-accent-gold" />
+                      </div>
+                    ) : friends.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        {t("events.noFriendsToInvite")}
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                        {friends.map((friend) => {
+                          const isSelected = selectedFriends.includes(friend.id)
+                          return (
+                            <button
+                              key={friend.id}
+                              type="button"
+                              onClick={() => toggleFriendSelection(friend.id)}
+                              className={`flex items-center gap-3 p-2 rounded-lg transition-all ${
+                                isSelected 
+                                  ? "bg-accent-gold/20 border border-accent-gold" 
+                                  : "bg-background/50 border border-transparent hover:border-accent-gold/30"
+                              }`}
+                            >
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={friend.avatar_url || undefined} />
+                                <AvatarFallback className="bg-accent-gold/20 text-accent-gold text-sm">
+                                  {(friend.display_name || "?").charAt(0).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="text-sm flex-1 text-left truncate">
+                                {friend.display_name || "Anonymous"}
+                              </span>
+                              {isSelected && (
+                                <Check className="h-4 w-4 text-accent-gold" />
+                              )}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Actions */}
                 <div className="flex justify-end space-x-4 pt-6">

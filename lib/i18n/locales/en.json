@@ -412,6 +412,7 @@
     "chatUnavailable": "Chat is temporarily unavailable",
     "noAttendees": "No attendees yet",
     "inviteFriends": "Invite Friends",
+    "selected": "selected",
     "noFriendsToInvite": "No friends available to invite. Add some friends first!",
     "inviteSent": "Invitation sent",
     "inviteRemoved": "Participant removed",
