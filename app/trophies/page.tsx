@@ -80,19 +80,19 @@ export default function TrophiesPage() {
   // Helper to map series to requirement type
   function getRequirementType(series: string): string {
     switch (series) {
-      case "collection": return "game_count"
-      case "explorer": return "category_count"
-      case "social": return "friend_count"
-      case "hosting": return "events_hosted"
-      case "attendance": return "events_attended"
-      case "manor": return "level"
-      case "portal": return "bgg_imports"
+      case "curator-of-wonders": return "game_count"
+      case "dimensional-wanderer": return "category_count"
+      case "fellowship-weaver": return "friend_count"
+      case "gathering-master": return "events_hosted"
+      case "stalwart-companion": return "events_attended"
+      case "manor-ascendant": return "level"
+      case "portal-keeper": return "bgg_imports"
       default: return "game_count"
     }
   }
 
   // Group badges by series using local definitions as fallback
-  const seriesOrder: BadgeSeries[] = ["collection", "explorer", "social", "hosting", "attendance", "manor", "portal"]
+  const seriesOrder: BadgeSeries[] = ["curator-of-wonders", "dimensional-wanderer", "fellowship-weaver", "gathering-master", "stalwart-companion", "manor-ascendant", "portal-keeper"]
   
   const badgesBySeries = seriesOrder.map((series) => {
     // Get badges for this series from loaded data or use local definitions
