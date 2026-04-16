@@ -6,12 +6,12 @@ import { useTranslations } from "@/lib/i18n"
 import { createClient } from "@/lib/supabase/client"
 import { useUser } from "@/hooks/useUser"
 
-const INTEREST_KEYS = ["boardGames", "warhammer", "miniatures", "rpg"] as const
+const INTEREST_KEYS = ["boardGames", "tradingCards", "miniatures", "rpg"] as const
 type InterestKey = typeof INTEREST_KEYS[number]
 
 const INTEREST_LABELS: Record<InterestKey, string> = {
   boardGames: "profile.boardAndCardGames",
-  warhammer: "profile.warhammer",
+  tradingCards: "profile.tradingCards",
   miniatures: "profile.otherMiniatureGames",
   rpg: "profile.roleplayingGames",
 }
@@ -19,7 +19,7 @@ const INTEREST_LABELS: Record<InterestKey, string> = {
 export function GameInterests() {
   const [interests, setInterests] = useState<Record<InterestKey, boolean>>({
     boardGames: false,
-    warhammer: false,
+    tradingCards: false,
     miniatures: false,
     rpg: false,
   })
@@ -49,7 +49,7 @@ export function GameInterests() {
       if (data?.game_interests) {
         const loaded: Record<InterestKey, boolean> = {
           boardGames: false,
-          warhammer: false,
+          tradingCards: false,
           miniatures: false,
           rpg: false,
         }

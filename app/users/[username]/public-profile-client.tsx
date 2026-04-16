@@ -29,6 +29,31 @@ interface Game {
   id: string
   name: string
   thumbnail_url: string | null
+  category: string | null
+  min_players: number | null
+  max_players: number | null
+  year: number | null
+}
+
+interface CategoryCounts {
+  boardGames: number
+  rpg: number
+  miniatures: number
+  tradingCards: number
+}
+
+const INTEREST_LABELS: Record<string, string> = {
+  boardGames: "profile.boardAndCardGames",
+  tradingCards: "profile.tradingCards",
+  miniatures: "profile.otherMiniatureGames",
+  rpg: "profile.roleplayingGames",
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  board_game: "Lautapeli",
+  rpg: "Roolipeli",
+  trading_card: "Keräilykortti",
+  miniature: "Miniatyyri",
 }
 
 interface PublicProfileClientProps {
@@ -36,6 +61,7 @@ interface PublicProfileClientProps {
   gameInterests: string[] | null
   gameCount: number
   games: Game[]
+  categoryCounts: CategoryCounts
   currentUserId: string | null
   initialFriendshipStatus: "none" | "pending" | "accepted" | "incoming"
   initialFriendshipId: string | null
@@ -46,6 +72,7 @@ export function PublicProfileClient({
   gameInterests,
   gameCount,
   games,
+  categoryCounts,
   currentUserId,
   initialFriendshipStatus,
   initialFriendshipId,
@@ -160,8 +187,8 @@ export function PublicProfileClient({
                 {gameInterests && gameInterests.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-4">
                     {gameInterests.map((interest) => (
-                      <Badge key={interest} variant="outline" className="border-accent-gold/30">
-                        {interest}
+                      <Badge key={interest} variant="outline" className="border-accent-gold/50 bg-accent-gold/10 text-accent-gold">
+                        {INTEREST_LABELS[interest] ? t(INTEREST_LABELS[interest]) : interest}
                       </Badge>
                     ))}
                   </div>
@@ -225,9 +252,9 @@ export function PublicProfileClient({
           </CardContent>
         </Card>
 
-        {/* Game Collection Preview */}
+        {/* Category Breakdown */}
         {profile.show_collection !== false && games.length > 0 && (
-          <Card className="border-accent-gold/30 bg-card/50">
+          <Card className="border-accent-gold/30 bg-card/50 mb-6">
             <CardHeader>
               <CardTitle className="text-accent-gold font-heading flex items-center gap-2">
                 <Gamepad2 className="h-5 w-5" />
@@ -235,23 +262,66 @@ export function PublicProfileClient({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-                {games.map((game) => (
-                  <div key={game.id} className="aspect-square relative rounded-lg overflow-hidden bg-accent-gold/10">
-                    {game.thumbnail_url ? (
-                      <Image
-                        src={game.thumbnail_url}
-                        alt={game.name}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Gamepad2 className="h-8 w-8 text-accent-gold/50" />
+              {/* Category badges */}
+              <div className="flex flex-wrap gap-3 mb-6">
+                {categoryCounts.boardGames > 0 && (
+                  <Badge variant="outline" className="border-accent-gold/30 px-3 py-1">
+                    {t("profile.boardAndCardGames")}: {categoryCounts.boardGames}
+                  </Badge>
+                )}
+                {categoryCounts.rpg > 0 && (
+                  <Badge variant="outline" className="border-accent-gold/30 px-3 py-1">
+                    {t("profile.roleplayingGames")}: {categoryCounts.rpg}
+                  </Badge>
+                )}
+                {categoryCounts.miniatures > 0 && (
+                  <Badge variant="outline" className="border-accent-gold/30 px-3 py-1">
+                    {t("profile.otherMiniatureGames")}: {categoryCounts.miniatures}
+                  </Badge>
+                )}
+                {categoryCounts.tradingCards > 0 && (
+                  <Badge variant="outline" className="border-accent-gold/30 px-3 py-1">
+                    {t("profile.tradingCards")}: {categoryCounts.tradingCards}
+                  </Badge>
+                )}
+              </div>
+
+              {/* Game list view */}
+              <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                {games.slice(0, 20).map((game) => (
+                  <div key={game.id} className="flex items-center gap-3 p-2 rounded-lg bg-background/30 hover:bg-background/50 transition-colors">
+                    <div className="relative w-12 h-12 flex-shrink-0 rounded overflow-hidden bg-accent-gold/10">
+                      {game.thumbnail_url ? (
+                        <Image
+                          src={game.thumbnail_url}
+                          alt={game.name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Gamepad2 className="h-5 w-5 text-accent-gold/50" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{game.name}</p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        {game.min_players && game.max_players && (
+                          <span>{game.min_players}-{game.max_players} {t("game.players")}</span>
+                        )}
+                        {game.year && (
+                          <span>{game.year}</span>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
                 ))}
+                {games.length > 20 && (
+                  <p className="text-center text-muted-foreground text-sm py-2">
+                    +{games.length - 20} {t("collection.moreGames")}
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>

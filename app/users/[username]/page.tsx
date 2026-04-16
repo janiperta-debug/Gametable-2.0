@@ -43,18 +43,49 @@ export default async function PublicProfilePage({ params }: PageProps) {
     .eq("user_id", profile.id)
 
   // Get user's games if show_collection is true
-  let games: Array<{ id: string; name: string; thumbnail_url: string | null }> = []
+  let games: Array<{ 
+    id: string
+    name: string
+    thumbnail_url: string | null
+    category: string | null
+    min_players: number | null
+    max_players: number | null
+    year: number | null
+  }> = []
   if (profile.show_collection !== false) {
     const { data: userGames } = await supabase
       .from("user_games")
-      .select("game:games(id, name, thumbnail_url)")
+      .select("game:games(id, name, thumbnail_url, category, min_players, max_players, year)")
       .eq("user_id", profile.id)
       .eq("status", "owned")
     
     games = (userGames || [])
       .map(ug => ug.game)
-      .filter((g): g is { id: string; name: string; thumbnail_url: string | null } => g !== null)
+      .filter((g): g is { 
+        id: string
+        name: string
+        thumbnail_url: string | null
+        category: string | null
+        min_players: number | null
+        max_players: number | null
+        year: number | null
+      } => g !== null)
   }
+
+  // Calculate category counts
+  const categoryCounts = {
+    boardGames: 0,
+    rpg: 0,
+    miniatures: 0,
+    tradingCards: 0,
+  }
+  games.forEach(game => {
+    const cat = game.category?.toLowerCase() || ""
+    if (cat.includes("rpg") || cat.includes("role")) categoryCounts.rpg++
+    else if (cat.includes("miniature") || cat.includes("wargame")) categoryCounts.miniatures++
+    else if (cat.includes("trading") || cat.includes("tcg") || cat.includes("card game")) categoryCounts.tradingCards++
+    else categoryCounts.boardGames++
+  })
 
   // Get current user for friend button
   const { data: { user } } = await supabase.auth.getUser()
@@ -85,6 +116,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
       gameInterests={gameInterests}
       gameCount={gameCount ?? 0}
       games={games}
+      categoryCounts={categoryCounts}
       currentUserId={user?.id ?? null}
       initialFriendshipStatus={friendshipStatus}
       initialFriendshipId={friendshipId}
