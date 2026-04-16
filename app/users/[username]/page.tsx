@@ -20,18 +20,21 @@ export default async function PublicProfilePage({ params }: PageProps) {
   const { data: profile } = isUuid
     ? await supabase
         .from("profiles")
-        .select("id, display_name, username, avatar_url, bio, location, xp, level, show_collection")
+        .select("id, display_name, username, avatar_url, bio, location, xp, level, show_collection, preferences")
         .eq("id", username)
         .maybeSingle()
     : await supabase
         .from("profiles")
-        .select("id, display_name, username, avatar_url, bio, location, xp, level, show_collection")
+        .select("id, display_name, username, avatar_url, bio, location, xp, level, show_collection, preferences")
         .eq("username", username)
         .maybeSingle()
 
   if (!profile) {
     notFound()
   }
+
+  // Extract game_interests from preferences JSON
+  const gameInterests = (profile.preferences as Record<string, unknown>)?.game_interests as string[] | null
 
   // Get game count
   const { count: gameCount } = await supabase
@@ -77,6 +80,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
   return (
     <PublicProfileClient 
       profile={profile}
+      gameInterests={gameInterests}
       gameCount={gameCount ?? 0}
       games={games}
       currentUserId={user?.id ?? null}
