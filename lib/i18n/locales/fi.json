@@ -65,6 +65,14 @@
     "hideFilters": "Piilota suodattimet",
     "clearFilters": "Tyhjennä suodattimet"
   },
+  "friends": {
+    "sendRequest": "Lähetä kaveripyyntö",
+    "requestPending": "Pyyntö lähetetty",
+    "acceptRequest": "Hyväksy pyyntö",
+    "alreadyFriends": "Kavereita",
+    "requestSent": "Kaveripyyntö lähetetty!",
+    "requestAccepted": "Kaveripyyntö hyväksytty!"
+  },
   "nav": {
     "home": "Koti",
     "collection": "Kokoelma",
