@@ -152,7 +152,9 @@ export async function createNotification(params: {
 }): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
 
-  const { error } = await supabase
+  console.log("[v0] createNotification called with:", params)
+
+  const { data, error } = await supabase
     .from("notifications")
     .insert({
       user_id: params.user_id,
@@ -162,6 +164,9 @@ export async function createNotification(params: {
       data: params.data || {},
       read: false,
     })
+    .select()
+
+  console.log("[v0] createNotification insert result:", { data, error: error?.message })
 
   if (error) {
     console.error("Error creating notification:", error)
