@@ -22,9 +22,12 @@ export async function sendEmail({ to, subject, html, text }: SendEmailParams) {
     return { success: false, error: "Email not configured" }
   }
 
+  const fromAddress = process.env.EMAIL_FROM || "Gametable <noreply@resend.dev>"
+  console.log("[Email] Sending email to:", to, "from:", fromAddress, "subject:", subject)
+
   try {
     const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || "Gametable <noreply@resend.dev>",
+      from: fromAddress,
       to,
       subject,
       html,
@@ -36,6 +39,7 @@ export async function sendEmail({ to, subject, html, text }: SendEmailParams) {
       return { success: false, error: error.message }
     }
 
+    console.log("[Email] Sent successfully, id:", data?.id)
     return { success: true, id: data?.id }
   } catch (err) {
     console.error("[Email] Error:", err)
