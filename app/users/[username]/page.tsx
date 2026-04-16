@@ -2,6 +2,9 @@ import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { PublicProfileClient } from "./public-profile-client"
 
+// Disable caching - always fetch fresh data
+export const dynamic = 'force-dynamic'
+
 interface PageProps {
   params: Promise<{ username: string }>
 }
