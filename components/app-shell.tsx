@@ -42,9 +42,24 @@ export function AppShell({ children }: { children: ReactNode }) {
   
   // For PWA, skip landing page and go directly to home
   const isLandingPage = pathname === "/" && !isPWA
+  
+  // Home page has its own full background, no room-environment needed
+  const isHomePage = pathname === "/home"
 
   if (isLandingPage) {
     return <>{children}</>
+  }
+  
+  // Home page - no room-environment background, content extends behind nav
+  if (isHomePage) {
+    return (
+      <AppThemeProvider>
+        <div className="min-h-screen">
+          <Navigation />
+          <main>{children}</main>
+        </div>
+      </AppThemeProvider>
+    )
   }
   
   // If on landing page but running as PWA, redirect to home
