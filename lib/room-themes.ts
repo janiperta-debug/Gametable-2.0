@@ -23,8 +23,7 @@ export const roomThemes: RoomTheme[] = [
   {
     id: "main-hall",
     name: "Main Hall",
-    image:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Main%20hall%2001.jpg-DpsYcUHFaTwvTp9wXy5kieQgoDHKMM.jpeg",
+    image: "/themes/main-hall-preview.png",
     colors: {
       primary: "#8B1538", // Deep burgundy
       secondary: "#8B4513", // Rich mahogany
