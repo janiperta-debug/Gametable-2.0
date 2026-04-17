@@ -229,7 +229,7 @@ function HeroSection() {
     <section className="min-h-screen relative flex flex-col items-center justify-center text-center px-5 pt-24 pb-16">
       {/* Decorative elements */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 opacity-10">
-        <div className="text-[#c9a84c] text-9xl font-cinzel">✦</div>
+        <div className="text-[#c9a84c] text-9xl font-cinzel">&#10022;</div>
       </div>
 
       {/* Main heading */}
