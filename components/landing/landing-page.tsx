@@ -227,22 +227,9 @@ function HeroSection() {
   
   return (
     <section className="min-h-screen relative flex flex-col items-center justify-center text-center px-5 pt-24 pb-16">
-      {/* Theme background image */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/themes/main-hall-preview.png"
-          alt=""
-          fill
-          className="object-cover"
-          priority
-        />
-        {/* Dark overlay gradient for text readability */}
-        <div 
-          className="absolute inset-0" 
-          style={{ 
-            background: "linear-gradient(180deg, rgba(61,21,21,0.7) 0%, rgba(42,15,15,0.85) 50%, rgba(26,8,8,0.95) 100%)" 
-          }} 
-        />
+      {/* Decorative elements */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 opacity-10">
+        <div className="text-[#c9a84c] text-9xl font-cinzel">&#10022;</div>
       </div>
 
       {/* Main heading */}

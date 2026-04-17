@@ -1,8 +1,10 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useAppTheme } from "@/components/app-theme-provider"
 import { useTranslations } from "@/lib/i18n"
+import { getRoomTheme } from "@/lib/room-themes"
 
 export default function HomePage() {
   const { currentAppTheme } = useAppTheme()
@@ -35,9 +37,31 @@ export default function HomePage() {
     return homeCrestMap[theme] || "/crests/main-hall-home.png"
   }
 
+  // Get theme background image
+  const themeData = getRoomTheme(currentAppTheme)
+  const backgroundImage = themeData?.image || "/themes/main-hall-preview.png"
+
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 py-8 room-environment">
-      <div className="max-w-4xl mx-auto text-center space-y-6 md:space-y-8">
+    <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden">
+      {/* Theme background image */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src={backgroundImage}
+          alt=""
+          fill
+          className="object-cover"
+          priority
+        />
+        {/* Dark overlay gradient for text readability */}
+        <div 
+          className="absolute inset-0" 
+          style={{ 
+            background: "linear-gradient(180deg, rgba(61,21,21,0.6) 0%, rgba(42,15,15,0.75) 50%, rgba(26,8,8,0.9) 100%)" 
+          }} 
+        />
+      </div>
+
+      <div className="max-w-4xl mx-auto text-center space-y-6 md:space-y-8 relative z-10">
         {/* Manor Crest - Full decorative crest with GameTable text included */}
         <div className="mb-6 md:mb-8">
           <img
