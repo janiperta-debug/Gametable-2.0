@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { User, Menu, X, Zap, LogOut, Bell, Loader2, MessageCircle } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useAppTheme } from "@/components/app-theme-provider"
@@ -13,6 +13,8 @@ import { getUnreadCount } from "@/app/actions/messages"
 import { getUnreadNotificationCount } from "@/app/actions/notifications"
 
 export function Navigation() {
+  const pathname = usePathname()
+  const isHomePage = pathname === "/home"
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
   const [unreadMessageCount, setUnreadMessageCount] = useState(0)
@@ -137,8 +139,13 @@ export function Navigation() {
     return crestMap[theme] || crestMap["main-hall"]
   }
 
+  // Transparent glass effect for home page, solid for other pages
+  const navClasses = isHomePage
+    ? "fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-md border-b border-white/10"
+    : "fixed top-0 left-0 right-0 z-50 navbar-bg backdrop-blur-sm"
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 navbar-bg backdrop-blur-sm">
+    <nav className={navClasses}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 h-16">
           {/* Crest - Left Side */}
@@ -272,7 +279,7 @@ export function Navigation() {
         </div>
 
         {isMobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 navbar-bg backdrop-blur-sm border-t border-accent-gold/20">
+          <div className={`md:hidden absolute top-full left-0 right-0 backdrop-blur-sm border-t border-accent-gold/20 ${isHomePage ? "bg-black/40" : "navbar-bg"}`}>
             <div className="px-4 py-6 space-y-4">
               {navItems.map((item) => (
                 <Link
