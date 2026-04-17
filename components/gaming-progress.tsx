@@ -6,10 +6,108 @@ import { RefreshCw, BookOpen, Users, Calendar, Trophy, Loader2 } from "lucide-re
 import { useTranslations } from "@/lib/i18n"
 import { useUser } from "@/hooks/useUser"
 import { xpForNextLevel, xpForCurrentLevel } from "@/lib/xp-utils"
+import { createClient } from "@/lib/supabase/client"
+import { useState, useEffect, useCallback } from "react"
 
 export function GamingProgress() {
   const t = useTranslations()
-  const { profile, loading } = useUser()
+  const { user, profile, loading } = useUser()
+  const [statsLoading, setStatsLoading] = useState(true)
+  const [statsData, setStatsData] = useState({
+    gamesOwned: 0,
+    gamesThisMonth: 0,
+    friendsCount: 0,
+    newFriendsThisMonth: 0,
+    eventsHosted: 0,
+    eventsThisMonth: 0,
+    badgesEarned: 0,
+    badgesThisWeek: 0,
+  })
+  
+  const fetchStats = useCallback(async () => {
+    if (!user?.id) return
+    
+    setStatsLoading(true)
+    const supabase = createClient()
+    const now = new Date()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay())).toISOString()
+    
+    try {
+      // Fetch games owned count
+      const { count: gamesCount } = await supabase
+        .from("user_games")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+      
+      // Fetch games added this month
+      const { count: gamesThisMonth } = await supabase
+        .from("user_games")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .gte("created_at", startOfMonth)
+      
+      // Fetch friends count (accepted friendships)
+      const { count: friendsCount } = await supabase
+        .from("friendships")
+        .select("*", { count: "exact", head: true })
+        .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+        .eq("status", "accepted")
+      
+      // Fetch new friends this month
+      const { count: newFriendsThisMonth } = await supabase
+        .from("friendships")
+        .select("*", { count: "exact", head: true })
+        .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+        .eq("status", "accepted")
+        .gte("updated_at", startOfMonth)
+      
+      // Fetch events hosted
+      const { count: eventsCount } = await supabase
+        .from("events")
+        .select("*", { count: "exact", head: true })
+        .eq("host_id", user.id)
+      
+      // Fetch events hosted this month
+      const { count: eventsThisMonth } = await supabase
+        .from("events")
+        .select("*", { count: "exact", head: true })
+        .eq("host_id", user.id)
+        .gte("created_at", startOfMonth)
+      
+      // Fetch badges earned
+      const { count: badgesCount } = await supabase
+        .from("user_badges")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+      
+      // Fetch badges earned this week
+      const { count: badgesThisWeek } = await supabase
+        .from("user_badges")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .gte("earned_at", startOfWeek)
+      
+      setStatsData({
+        gamesOwned: gamesCount ?? 0,
+        gamesThisMonth: gamesThisMonth ?? 0,
+        friendsCount: friendsCount ?? 0,
+        newFriendsThisMonth: newFriendsThisMonth ?? 0,
+        eventsHosted: eventsCount ?? 0,
+        eventsThisMonth: eventsThisMonth ?? 0,
+        badgesEarned: badgesCount ?? 0,
+        badgesThisWeek: badgesThisWeek ?? 0,
+      })
+    } catch (error) {
+      console.error("Error fetching stats:", error)
+    } finally {
+      setStatsLoading(false)
+    }
+  }, [user?.id])
+  
+  useEffect(() => {
+    fetchStats()
+  }, [fetchStats])
   
   // Calculate XP progress from profile data
   const level = profile?.level ?? 1
@@ -25,13 +123,13 @@ export function GamingProgress() {
     totalXP,
     currentXP: xpInCurrentLevel,
     xpToNextLevel: xpNeededForLevel,
-    gamesOwned: { current: 0, recentChange: "+0" },
-    gamingFriends: { current: 0, recentChange: "+0" },
-    eventsHosted: { current: 0, recentChange: "+0" },
-    trophiesEarned: { current: 0, recentChange: "+0" },
+    gamesOwned: { current: statsData.gamesOwned, recentChange: `+${statsData.gamesThisMonth}` },
+    gamingFriends: { current: statsData.friendsCount, recentChange: `+${statsData.newFriendsThisMonth}` },
+    eventsHosted: { current: statsData.eventsHosted, recentChange: `+${statsData.eventsThisMonth}` },
+    trophiesEarned: { current: statsData.badgesEarned, recentChange: `+${statsData.badgesThisWeek}` },
   }
 
-  if (loading) {
+  if (loading || statsLoading) {
     return (
       <div className="room-furniture p-8 flex items-center justify-center min-h-[200px]">
         <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
@@ -56,6 +154,7 @@ export function GamingProgress() {
           variant="outline"
           size="sm"
           className="border-accent-gold/40 text-accent-gold hover:bg-accent-gold hover:text-background bg-transparent w-full sm:w-auto"
+          onClick={() => fetchStats()}
         >
           <RefreshCw className="w-4 h-4 mr-2" />
           {t("common.refresh")}
