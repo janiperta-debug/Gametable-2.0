@@ -42,9 +42,9 @@ export default function HomePage() {
   const backgroundImage = themeData?.image || "/themes/main-hall-preview.png"
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden">
-      {/* Theme background image */}
-      <div className="absolute inset-0 z-0">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 pt-20 pb-8 relative overflow-hidden">
+      {/* Theme background image - extends behind navigation */}
+      <div className="fixed inset-0 z-0">
         <Image
           src={backgroundImage}
           alt=""
