@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Store, Heart, Search, MessageCircle, User, Star, Users, Clock, Plus, Loader2, Trash2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useUser } from "@/hooks/useUser"
 import { useToast } from "@/hooks/use-toast"
 import { 
@@ -55,6 +55,18 @@ export default function Marketplace() {
   const { user } = useUser()
   const { toast } = useToast()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const listGameParam = searchParams.get("listGame")
+
+  // Open modal if listGame param is present
+  useEffect(() => {
+    if (listGameParam && user) {
+      setCreateModalOpen(true)
+      setSelectedGameId(listGameParam)
+      // Clear the URL param
+      router.replace("/marketplace", { scroll: false })
+    }
+  }, [listGameParam, user, router])
 
   // Load listings and wishlists
   useEffect(() => {

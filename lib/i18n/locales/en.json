@@ -899,7 +899,8 @@
     "descriptionPlaceholder": "Any additional details about the game or trade preferences...",
     "listingCreated": "Listing created successfully!",
     "listingDeleted": "Listing deleted successfully",
-    "loginToContact": "Please log in to contact sellers"
+    "loginToContact": "Please log in to contact sellers",
+    "listOnMarketplace": "List on Marketplace"
   },
   "notifications": {
     "title": "Notifications",

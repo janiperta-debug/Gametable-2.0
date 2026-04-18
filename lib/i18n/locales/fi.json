@@ -900,7 +900,8 @@
     "descriptionPlaceholder": "Lisätietoja pelistä tai vaihtotoiveista...",
     "listingCreated": "Ilmoitus luotu onnistuneesti!",
     "listingDeleted": "Ilmoitus poistettu",
-    "loginToContact": "Kirjaudu sisään ottaaksesi yhteyttä myyjiin"
+    "loginToContact": "Kirjaudu sisään ottaaksesi yhteyttä myyjiin",
+    "listOnMarketplace": "Listaa Kauppapaikalle"
   },
   "notifications": {
     "title": "Ilmoitukset",
