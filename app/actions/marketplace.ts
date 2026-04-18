@@ -156,6 +156,7 @@ export async function getMyGamesForListing() {
       game:games(id, name, thumbnail_url)
     `)
     .eq("user_id", user.id)
+    .eq("status", "owned") // Only get owned games, not wishlist items
     .order("created_at", { ascending: false })
 
   if (error) {
@@ -166,10 +167,12 @@ export async function getMyGamesForListing() {
   return { data: data as UserGameForListing[], error: null }
 }
 
+// Alias for backwards compatibility
+export const getUserGamesForListing = getMyGamesForListing
+
 // Create a new listing
 export async function createListing(input: {
-  user_game_id?: string
-  game_id: string
+  user_game_id: string
   listing_type: ListingType
   condition: ListingCondition
   price?: number
@@ -182,12 +185,25 @@ export async function createListing(input: {
     return { success: false, error: "Not authenticated" }
   }
 
+  // Get the game_id from the user_game
+  const { data: userGame, error: userGameError } = await supabase
+    .from("user_games")
+    .select("game_id")
+    .eq("id", input.user_game_id)
+    .eq("user_id", user.id)
+    .single()
+
+  if (userGameError || !userGame) {
+    console.error("Error fetching user game:", userGameError)
+    return { success: false, error: "Game not found in your collection" }
+  }
+
   const { data, error } = await supabase
     .from("marketplace_listings")
     .insert({
       seller_id: user.id,
-      user_game_id: input.user_game_id || null,
-      game_id: input.game_id,
+      user_game_id: input.user_game_id,
+      game_id: userGame.game_id,
       listing_type: input.listing_type,
       condition: input.condition,
       price: input.price || null,
@@ -281,6 +297,8 @@ export async function getWishlists() {
     .eq("status", "wishlist")
     .order("created_at", { ascending: false })
   
+  console.log("[v0] getWishlists query result:", { count: data?.length, error, data })
+  
   if (error) {
     console.error("Error fetching wishlists:", error)
     return { data: [], error: error.message }
@@ -297,6 +315,8 @@ export async function getWishlists() {
     game: item.game,
     user: item.user
   }))
+  
+  console.log("[v0] Transformed wishlists:", wishlists.length)
   
   return { data: wishlists as WishlistEntry[], error: null }
 }

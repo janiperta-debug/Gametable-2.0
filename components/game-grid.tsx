@@ -2,9 +2,10 @@
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Star, Users, Clock, Heart, ShoppingBag } from "lucide-react"
+import { Star, Users, Clock, Heart, ShoppingBag, Store } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import type { Game } from "@/lib/mock-games"
 import { useTranslations } from "@/lib/i18n"
 
@@ -31,6 +32,7 @@ export function GameGrid({
   showWishlistButton = false,
 }: GameGridProps) {
   const t = useTranslations()
+  const router = useRouter()
   
   if (games.length === 0) {
     return (
@@ -112,14 +114,15 @@ export function GameGrid({
                   {t("collection.addToCollection")}
                 </Button>
               )}
-              {showMarketplaceButton && (
+              {showMarketplaceButton && game.owned && (
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onToggleForTrade?.(game.id)}
-                  className={`${game.forTrade ? "border-green-600 text-green-600 hover:bg-green-600/10" : "border-accent-gold/20 hover:border-accent-gold"} bg-transparent font-body`}
+                  onClick={() => router.push(`/marketplace?listGame=${game.userGameId || game.id}`)}
+                  className="border-accent-gold/20 hover:border-accent-gold hover:bg-accent-gold/10 bg-transparent font-body"
+                  title={t("marketplace.listOnMarketplace")}
                 >
-                  <ShoppingBag className="h-4 w-4" />
+                  <Store className="h-4 w-4" />
                 </Button>
               )}
               {showWishlistButton && (
