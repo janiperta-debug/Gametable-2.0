@@ -297,8 +297,6 @@ export async function getWishlists() {
     .eq("status", "wishlist")
     .order("created_at", { ascending: false })
   
-  console.log("[v0] getWishlists query result:", { count: data?.length, error, data })
-  
   if (error) {
     console.error("Error fetching wishlists:", error)
     return { data: [], error: error.message }
@@ -315,8 +313,6 @@ export async function getWishlists() {
     game: item.game,
     user: item.user
   }))
-  
-  console.log("[v0] Transformed wishlists:", wishlists.length)
   
   return { data: wishlists as WishlistEntry[], error: null }
 }

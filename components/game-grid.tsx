@@ -118,7 +118,7 @@ export function GameGrid({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => router.push(`/marketplace?listGame=${game.userGameId || game.id}`)}
+                  onClick={() => router.push(`/marketplace/create?gameId=${game.userGameId || game.id}`)}
                   className="border-accent-gold/20 hover:border-accent-gold hover:bg-accent-gold/10 bg-transparent font-body"
                   title={t("marketplace.listOnMarketplace")}
                 >

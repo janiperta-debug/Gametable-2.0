@@ -7,10 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Store, Heart, Search, MessageCircle, User, Star, Users, Clock, Plus, Loader2, Trash2 } from "lucide-react"
+import { Store, Heart, Search, MessageCircle, User, Plus, Loader2, Trash2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -19,14 +16,10 @@ import { useToast } from "@/hooks/use-toast"
 import { 
   getMarketplaceListings, 
   getWishlists, 
-  createListing, 
   deleteListing,
   contactSeller,
-  getUserGamesForListing,
   type MarketplaceListing,
-  type WishlistEntry,
-  type ListingType,
-  type ListingCondition
+  type WishlistEntry
 } from "@/app/actions/marketplace"
 
 export default function Marketplace() {
@@ -37,19 +30,8 @@ export default function Marketplace() {
   const [listings, setListings] = useState<MarketplaceListing[]>([])
   const [wishlists, setWishlists] = useState<WishlistEntry[]>([])
   const [loading, setLoading] = useState(true)
-  const [createModalOpen, setCreateModalOpen] = useState(false)
-  const [userGames, setUserGames] = useState<any[]>([])
-  const [loadingUserGames, setLoadingUserGames] = useState(false)
-  const [creating, setCreating] = useState(false)
   const [contacting, setContacting] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
-  
-  // Form state
-  const [selectedGameId, setSelectedGameId] = useState("")
-  const [listingType, setListingType] = useState<ListingType>("trade")
-  const [condition, setCondition] = useState<ListingCondition>("good")
-  const [price, setPrice] = useState("")
-  const [description, setDescription] = useState("")
   
   const t = useTranslations()
   const { user } = useUser()
@@ -58,13 +40,10 @@ export default function Marketplace() {
   const searchParams = useSearchParams()
   const listGameParam = searchParams.get("listGame")
 
-  // Open modal if listGame param is present
+  // Redirect to create page if listGame param is present
   useEffect(() => {
     if (listGameParam && user) {
-      setCreateModalOpen(true)
-      setSelectedGameId(listGameParam)
-      // Clear the URL param
-      router.replace("/marketplace", { scroll: false })
+      router.replace(`/marketplace/create?gameId=${listGameParam}`)
     }
   }, [listGameParam, user, router])
 
@@ -82,18 +61,6 @@ export default function Marketplace() {
     }
     loadData()
   }, [])
-
-  // Load user's games when modal opens
-  useEffect(() => {
-    async function loadUserGames() {
-      if (!createModalOpen || !user) return
-      setLoadingUserGames(true)
-      const result = await getUserGamesForListing()
-      if (!result.error) setUserGames(result.data)
-      setLoadingUserGames(false)
-    }
-    loadUserGames()
-  }, [createModalOpen, user])
 
   // Filter listings
   const filteredListings = listings.filter(listing => {
@@ -127,39 +94,6 @@ export default function Marketplace() {
     acc[userId].games.push(entry)
     return acc
   }, {} as Record<string, { user: any; games: WishlistEntry[] }>)
-
-  async function handleCreateListing() {
-    if (!selectedGameId) {
-      toast({ title: t("common.error"), description: t("marketplace.selectGame"), variant: "destructive" })
-      return
-    }
-
-    setCreating(true)
-    const result = await createListing({
-      user_game_id: selectedGameId,
-      listing_type: listingType,
-      condition: condition,
-      price: listingType === "sell" && price ? parseFloat(price) : undefined,
-      description: description || undefined
-    })
-
-    if (result.error) {
-      toast({ title: t("common.error"), description: result.error, variant: "destructive" })
-    } else {
-      toast({ title: t("common.success"), description: t("marketplace.listingCreated") })
-      setCreateModalOpen(false)
-      // Reset form
-      setSelectedGameId("")
-      setListingType("trade")
-      setCondition("good")
-      setPrice("")
-      setDescription("")
-      // Reload listings
-      const listingsResult = await getMarketplaceListings()
-      if (!listingsResult.error) setListings(listingsResult.data)
-    }
-    setCreating(false)
-  }
 
   async function handleContactSeller(sellerId: string) {
     if (!user) {
@@ -228,108 +162,12 @@ export default function Marketplace() {
           </Tabs>
 
           {user && (
-            <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-accent-gold hover:bg-accent-copper">
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t("marketplace.createListing")}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="room-furniture max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="font-heading text-2xl">{t("marketplace.createListing")}</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 mt-4">
-                  <div className="space-y-2">
-                    <Label className="font-body">{t("marketplace.selectGameFromCollection")}</Label>
-                    {loadingUserGames ? (
-                      <div className="flex items-center justify-center py-4">
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                      </div>
-                    ) : userGames.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">{t("marketplace.noGamesInCollection")}</p>
-                    ) : (
-                      <Select value={selectedGameId} onValueChange={setSelectedGameId}>
-                        <SelectTrigger className="bg-surface/50">
-                          <SelectValue placeholder={t("marketplace.selectGame")} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {userGames.map(ug => (
-                            <SelectItem key={ug.id} value={ug.id}>
-                              {ug.game?.name || "Unknown Game"}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="font-body">{t("marketplace.listingType")}</Label>
-                    <Select value={listingType} onValueChange={(v) => setListingType(v as ListingType)}>
-                      <SelectTrigger className="bg-surface/50">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="sell">{t("marketplace.forSale")}</SelectItem>
-                        <SelectItem value="trade">{t("marketplace.forTrade")}</SelectItem>
-                        <SelectItem value="give">{t("marketplace.freeToGive")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="font-body">{t("marketplace.condition")}</Label>
-                    <Select value={condition} onValueChange={(v) => setCondition(v as ListingCondition)}>
-                      <SelectTrigger className="bg-surface/50">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="new">{t("marketplace.conditionNew")}</SelectItem>
-                        <SelectItem value="like_new">{t("marketplace.likeNew")}</SelectItem>
-                        <SelectItem value="good">{t("marketplace.good")}</SelectItem>
-                        <SelectItem value="fair">{t("marketplace.fair")}</SelectItem>
-                        <SelectItem value="poor">{t("marketplace.poor")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {listingType === "sell" && (
-                    <div className="space-y-2">
-                      <Label className="font-body">{t("marketplace.price")}</Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={price}
-                        onChange={(e) => setPrice(e.target.value)}
-                        className="bg-surface/50"
-                      />
-                    </div>
-                  )}
-
-                  <div className="space-y-2">
-                    <Label className="font-body">{t("marketplace.descriptionOptional")}</Label>
-                    <Textarea
-                      placeholder={t("marketplace.descriptionPlaceholder")}
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      className="bg-surface/50 min-h-[80px]"
-                    />
-                  </div>
-
-                  <Button 
-                    onClick={handleCreateListing} 
-                    className="w-full bg-accent-gold hover:bg-accent-copper"
-                    disabled={creating || !selectedGameId}
-                  >
-                    {creating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-                    {t("marketplace.createListing")}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <Link href="/marketplace/create">
+              <Button className="bg-accent-gold hover:bg-accent-copper">
+                <Plus className="h-4 w-4 mr-2" />
+                {t("marketplace.createListing")}
+              </Button>
+            </Link>
           )}
         </div>
 
