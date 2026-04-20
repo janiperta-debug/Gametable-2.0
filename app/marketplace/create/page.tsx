@@ -67,27 +67,49 @@ export default function CreateListingPage() {
   const selectedGame = userGames.find(g => g.id === selectedGameId)
 
   async function handleCreateListing() {
-    if (!selectedGameId) return
+    if (!selectedGameId) {
+      console.log("[v0] handleCreateListing: No game selected")
+      return
+    }
+    
+    console.log("[v0] handleCreateListing called with:", {
+      selectedGameId,
+      listingType,
+      condition,
+      price,
+      description
+    })
     
     setCreating(true)
-    const result = await createListing({
-      user_game_id: selectedGameId,
-      listing_type: listingType,
-      condition: condition,
-      price: listingType === "sell" ? parseFloat(price) || undefined : undefined,
-      description: description || undefined,
-    })
-
-    if (result.success) {
-      toast({
-        title: t("marketplace.listingCreated"),
-        description: t("marketplace.listingCreatedDescription") || "Your game is now listed on the marketplace.",
+    try {
+      const result = await createListing({
+        user_game_id: selectedGameId,
+        listing_type: listingType,
+        condition: condition,
+        price: listingType === "sell" ? parseFloat(price) || undefined : undefined,
+        description: description || undefined,
       })
-      router.push("/marketplace")
-    } else {
+
+      console.log("[v0] createListing result:", result)
+
+      if (result.success) {
+        toast({
+          title: t("marketplace.listingCreated"),
+          description: t("marketplace.listingCreatedDescription") || "Your game is now listed on the marketplace.",
+        })
+        router.push("/marketplace")
+      } else {
+        toast({
+          title: t("common.error"),
+          description: result.error || "Failed to create listing",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("[v0] handleCreateListing error:", error)
       toast({
         title: t("common.error"),
-        description: result.error,
+        description: "An unexpected error occurred",
         variant: "destructive",
       })
     }
