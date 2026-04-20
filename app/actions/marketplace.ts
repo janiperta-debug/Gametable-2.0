@@ -10,15 +10,14 @@ export type ListingStatus = "active" | "sold" | "reserved" | "cancelled"
 export interface MarketplaceListing {
   id: string
   seller_id: string
-  user_game_id: string | null
   game_id: string
   listing_type: ListingType
   condition: ListingCondition
   price: number | null
   description: string | null
   status: ListingStatus
+  is_active: boolean
   created_at: string
-  updated_at: string
   game?: {
     id: string
     name: string
@@ -82,6 +81,7 @@ export async function getMarketplaceListings(filters?: {
       game:games(id, name, thumbnail_url),
       seller:profiles(id, display_name, username, avatar_url, location)
     `)
+    .eq("is_active", true)
     .eq("status", "active")
     .order("created_at", { ascending: false })
 
@@ -198,14 +198,26 @@ export async function createListing(input: {
     return { success: false, error: "Game not found in your collection" }
   }
 
+  // Map condition values to match database check constraint
+  // DB allows: 'mint', 'like_new', 'good', 'fair'
+  // Code uses: 'new', 'like_new', 'good', 'fair', 'poor'
+  const conditionMap: Record<string, string> = {
+    "new": "mint",
+    "like_new": "like_new",
+    "good": "good",
+    "fair": "fair",
+    "poor": "fair", // Map 'poor' to 'fair' as fallback
+  }
+  
+  const mappedCondition = conditionMap[input.condition] || "good"
+
   const { data, error } = await supabase
     .from("marketplace_listings")
     .insert({
       seller_id: user.id,
-      user_game_id: input.user_game_id,
       game_id: userGame.game_id,
       listing_type: input.listing_type,
-      condition: input.condition,
+      condition: mappedCondition,
       price: input.price || null,
       description: input.description || null,
       status: "active",
