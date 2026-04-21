@@ -67,18 +67,7 @@ export default function CreateListingPage() {
   const selectedGame = userGames.find(g => g.id === selectedGameId)
 
   async function handleCreateListing() {
-    if (!selectedGameId) {
-      console.log("[v0] handleCreateListing: No game selected")
-      return
-    }
-    
-    console.log("[v0] handleCreateListing called with:", {
-      selectedGameId,
-      listingType,
-      condition,
-      price,
-      description
-    })
+    if (!selectedGameId) return
     
     setCreating(true)
     try {
@@ -89,8 +78,6 @@ export default function CreateListingPage() {
         price: listingType === "sell" ? parseFloat(price) || undefined : undefined,
         description: description || undefined,
       })
-
-      console.log("[v0] createListing result:", result)
 
       if (result.success) {
         toast({
@@ -105,8 +92,7 @@ export default function CreateListingPage() {
           variant: "destructive",
         })
       }
-    } catch (error) {
-      console.error("[v0] handleCreateListing error:", error)
+    } catch {
       toast({
         title: t("common.error"),
         description: "An unexpected error occurred",

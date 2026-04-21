@@ -212,6 +212,7 @@
     "title": "Game Collection",
     "subtitle": "Manage your library and discover new games to add to your collection",
     "addGame": "Add Game",
+    "addGames": "Add Games",
     "back": "Back",
     "myGames": "My Games",
     "findGames": "Find Games",
@@ -898,9 +899,13 @@
     "descriptionOptional": "Description (optional)",
     "descriptionPlaceholder": "Any additional details about the game or trade preferences...",
     "listingCreated": "Listing created successfully!",
+    "listingCreatedDescription": "Your game is now listed on the marketplace.",
     "listingDeleted": "Listing deleted successfully",
     "loginToContact": "Please log in to contact sellers",
-    "listOnMarketplace": "List on Marketplace"
+    "loginToCreateListing": "Please log in to create a listing",
+    "listOnMarketplace": "List on Marketplace",
+    "createListingDescription": "List a game from your collection on the marketplace",
+    "selectedGame": "Selected game"
   },
   "notifications": {
     "title": "Notifications",
