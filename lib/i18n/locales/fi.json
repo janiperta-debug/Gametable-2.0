@@ -213,6 +213,7 @@
     "title": "Pelikokoelma",
     "subtitle": "Hallitse kirjastoasi ja löydä uusia pelejä kokoelmaasi",
     "addGame": "Lisää peli",
+    "addGames": "Lisää pelejä",
     "back": "Takaisin",
     "myGames": "Omat pelit",
     "findGames": "Etsi pelejä",
@@ -899,9 +900,13 @@
     "descriptionOptional": "Kuvaus (valinnainen)",
     "descriptionPlaceholder": "Lisätietoja pelistä tai vaihtotoiveista...",
     "listingCreated": "Ilmoitus luotu onnistuneesti!",
+    "listingCreatedDescription": "Pelisi on nyt listattuna kauppapaikalla.",
     "listingDeleted": "Ilmoitus poistettu",
     "loginToContact": "Kirjaudu sisään ottaaksesi yhteyttä myyjiin",
-    "listOnMarketplace": "Listaa Kauppapaikalle"
+    "loginToCreateListing": "Kirjaudu sisään luodaksesi ilmoituksen",
+    "listOnMarketplace": "Listaa Kauppapaikalle",
+    "createListingDescription": "Listaa peli kokoelmastasi kauppapaikalle",
+    "selectedGame": "Valittu peli"
   },
   "notifications": {
     "title": "Ilmoitukset",

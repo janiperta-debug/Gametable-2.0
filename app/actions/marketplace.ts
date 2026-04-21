@@ -148,23 +148,30 @@ export async function getMyGamesForListing() {
     return { data: [], error: "Not authenticated" }
   }
 
-  const { data, error } = await supabase
+  // First try with status filter
+  let { data, error } = await supabase
     .from("user_games")
     .select(`
       id,
       game_id,
+      status,
       game:games(id, name, thumbnail_url)
     `)
     .eq("user_id", user.id)
-    .eq("status", "owned") // Only get owned games, not wishlist items
     .order("created_at", { ascending: false })
+
+  console.log("[v0] getUserGamesForListing raw result:", { count: data?.length, error, data })
 
   if (error) {
     console.error("Error fetching user games:", error)
     return { data: [], error: error.message }
   }
 
-  return { data: data as UserGameForListing[], error: null }
+  // Filter to only owned games (not wishlist) if status column exists
+  const ownedGames = data?.filter(g => !g.status || g.status === "owned") || []
+  console.log("[v0] getUserGamesForListing filtered owned games:", ownedGames.length)
+
+  return { data: ownedGames as UserGameForListing[], error: null }
 }
 
 // Alias for backwards compatibility
