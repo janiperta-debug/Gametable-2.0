@@ -364,11 +364,11 @@ export default function Marketplace() {
                 <p className="text-muted-foreground font-body text-lg">{t("marketplace.noWishlists")}</p>
               </div>
             ) : (
-              Object.values(groupedWishlists).map((wishlist) => {
+              Object.entries(groupedWishlists).map(([userId, wishlist]) => {
                 const userName = wishlist.user?.display_name || wishlist.user?.username || "Unknown"
                 
                 return (
-                  <div key={wishlist.user?.id} className="manor-card p-6 hover:shadow-lg transition-all duration-300">
+                  <div key={userId} className="manor-card p-6 hover:shadow-lg transition-all duration-300">
                     <div className="flex items-start justify-between mb-4 flex-wrap gap-4">
                       <div className="flex items-center gap-4">
                         <div className="relative w-16 h-16">
@@ -388,7 +388,7 @@ export default function Marketplace() {
                       </div>
 
                       <div className="flex gap-2">
-                        <Link href={"/profile/" + wishlist.user?.id}>
+                        <Link href={"/profile/" + userId}>
                           <Button
                             variant="outline"
                             size="sm"
@@ -401,10 +401,10 @@ export default function Marketplace() {
                         <Button 
                           size="sm" 
                           className="bg-accent-gold hover:bg-accent-gold/90 text-background"
-                          onClick={() => handleContactSeller(wishlist.user?.id)}
-                          disabled={contacting === wishlist.user?.id}
+                          onClick={() => handleContactSeller(userId)}
+                          disabled={contacting === userId}
                         >
-                          {contacting === wishlist.user?.id ? (
+                          {contacting === userId ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
                             <>
@@ -425,7 +425,7 @@ export default function Marketplace() {
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {wishlist.games.map((entry) => (
-                          <Link key={entry.id} href={`/games/${entry.game_id}`}>
+                          <Link key={entry.id} href={`/game/${entry.game_id}`}>
                             <Badge
                               variant="outline"
                               className="border-accent-gold/20 text-foreground font-body cursor-pointer hover:bg-accent-gold/10 hover:border-accent-gold transition-colors"
