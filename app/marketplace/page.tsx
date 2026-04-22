@@ -319,7 +319,7 @@ export default function Marketplace() {
                                 </Button>
                               ) : (
                                 <>
-                                  <Link href={"/profile/" + listing.seller_id}>
+                                  <Link href={"/profile/" + (listing.seller?.id || listing.seller_id)}>
                                     <Button
                                       variant="outline"
                                       size="sm"
@@ -425,13 +425,14 @@ export default function Marketplace() {
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {wishlist.games.map((entry) => (
-                          <Badge
-                            key={entry.id}
-                            variant="outline"
-                            className="border-accent-gold/20 text-foreground font-body"
-                          >
-                            {entry.game?.name}
-                          </Badge>
+                          <Link key={entry.id} href={`/games/${entry.game_id}`}>
+                            <Badge
+                              variant="outline"
+                              className="border-accent-gold/20 text-foreground font-body cursor-pointer hover:bg-accent-gold/10 hover:border-accent-gold transition-colors"
+                            >
+                              {entry.game?.name}
+                            </Badge>
+                          </Link>
                         ))}
                       </div>
                     </div>
