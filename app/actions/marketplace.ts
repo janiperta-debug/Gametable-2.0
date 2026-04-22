@@ -160,8 +160,6 @@ export async function getMyGamesForListing() {
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
 
-  console.log("[v0] getUserGamesForListing raw result:", { count: data?.length, error, data })
-
   if (error) {
     console.error("Error fetching user games:", error)
     return { data: [], error: error.message }
@@ -169,7 +167,6 @@ export async function getMyGamesForListing() {
 
   // Filter to only owned games (not wishlist) if status column exists
   const ownedGames = data?.filter(g => !g.status || g.status === "owned") || []
-  console.log("[v0] getUserGamesForListing filtered owned games:", ownedGames.length)
 
   return { data: ownedGames as UserGameForListing[], error: null }
 }
