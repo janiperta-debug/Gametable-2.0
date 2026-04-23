@@ -104,6 +104,8 @@ export default function Marketplace() {
     const result = await contactSeller(sellerId)
     if (result.error) {
       toast({ title: t("common.error"), description: result.error, variant: "destructive" })
+    } else if (result.conversationId) {
+      router.push(`/messages?conversation=${result.conversationId}`)
     } else {
       router.push("/messages")
     }
@@ -319,7 +321,7 @@ export default function Marketplace() {
                                 </Button>
                               ) : (
                                 <>
-                                  <Link href={"/profile/" + (listing.seller?.id || listing.seller_id)}>
+                                  <Link href={"/users/" + (listing.seller?.id || listing.seller_id)}>
                                     <Button
                                       variant="outline"
                                       size="sm"
@@ -388,7 +390,7 @@ export default function Marketplace() {
                       </div>
 
                       <div className="flex gap-2">
-                        <Link href={"/profile/" + userId}>
+                        <Link href={"/users/" + userId}>
                           <Button
                             variant="outline"
                             size="sm"

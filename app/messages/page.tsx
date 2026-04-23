@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -35,6 +36,8 @@ export default function MessagingPage() {
   const t = useTranslations()
   const { user } = useUser()
   const { toast } = useToast()
+  const searchParams = useSearchParams()
+  const conversationParam = searchParams.get("conversation")
 
   // Load conversations
   useEffect(() => {
@@ -46,15 +49,20 @@ export default function MessagingPage() {
       const result = await getConversations()
       if (!result.error) {
         setConversations(result.data)
-        // Auto-select first conversation
+        // Auto-select conversation from URL param or first conversation
         if (result.data.length > 0 && !selectedConversation) {
-          setSelectedConversation(result.data[0])
+          if (conversationParam) {
+            const targetConvo = result.data.find(c => c.id === conversationParam)
+            setSelectedConversation(targetConvo || result.data[0])
+          } else {
+            setSelectedConversation(result.data[0])
+          }
         }
       }
       setLoadingConversations(false)
     }
     loadConversations()
-  }, [user])
+  }, [user, conversationParam])
 
   // Load messages when conversation is selected
   useEffect(() => {
