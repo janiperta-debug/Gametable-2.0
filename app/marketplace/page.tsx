@@ -101,21 +101,16 @@ export default function Marketplace() {
       return
     }
     setContacting(sellerId)
-    console.log("[v0] handleContactSeller called with sellerId:", sellerId)
     try {
       const result = await contactSeller(sellerId)
-      console.log("[v0] contactSeller result:", result)
       if (result.error) {
         toast({ title: t("common.error"), description: result.error, variant: "destructive" })
       } else if (result.conversationId) {
-        console.log("[v0] Navigating to conversation:", result.conversationId)
         router.push(`/messages?conversation=${result.conversationId}`)
       } else {
-        console.log("[v0] No conversationId, navigating to /messages")
         router.push("/messages")
       }
-    } catch (error) {
-      console.error("[v0] handleContactSeller error:", error)
+    } catch {
       toast({ title: t("common.error"), description: "Failed to contact seller", variant: "destructive" })
     }
     setContacting(null)
