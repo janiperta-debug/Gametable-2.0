@@ -48,6 +48,7 @@ export default function AddGamePage() {
   const [addingGameId, setAddingGameId] = useState<number | string | null>(null)
   const [selectedGame, setSelectedGame] = useState<GameDetails | null>(null)
   const [tcgQuantity, setTcgQuantity] = useState(1)
+  const [tcgGame, setTcgGame] = useState<"magic" | "pokemon" | "yugioh" | "lorcana" | "flesh-and-blood" | "one-piece">("magic")
   const [miniQuantity, setMiniQuantity] = useState(1)
   const [miniPaintStatus, setMiniPaintStatus] = useState<PaintStatus>("unpainted")
   const [loadingDetails, setLoadingDetails] = useState(false)
@@ -82,9 +83,14 @@ export default function AddGamePage() {
     setSelectedGame(null)
 
     try {
-      // TCG API uses 'q' parameter, BGG/RPGG use 'query'
-      const queryParam = selectedCategory === "trading_card" ? "q" : "query"
-      const response = await fetch(`${categoryConfig.searchEndpoint}?${queryParam}=${encodeURIComponent(searchQuery)}`)
+      // TCG API uses 'q' parameter and needs 'game', BGG/RPGG use 'query'
+      let url = ""
+      if (selectedCategory === "trading_card") {
+        url = `${categoryConfig.searchEndpoint}?q=${encodeURIComponent(searchQuery)}&game=${tcgGame}`
+      } else {
+        url = `${categoryConfig.searchEndpoint}?query=${encodeURIComponent(searchQuery)}`
+      }
+      const response = await fetch(url)
       const data = await response.json()
 
       if (data.error) {
@@ -285,7 +291,7 @@ export default function AddGamePage() {
       try {
         // For TCG, search for the card and add it
         if (selectedCategory === "trading_card") {
-          const response = await fetch(`/api/tcg/search?q=${encodeURIComponent(item.name)}&game=mtg`)
+          const response = await fetch(`/api/tcg/search?q=${encodeURIComponent(item.name)}&game=${tcgGame}`)
           const data = await response.json()
           
           if (data.results && data.results.length > 0) {
@@ -384,6 +390,33 @@ export default function AddGamePage() {
                     <p className="font-body text-muted-foreground text-sm mb-4">
                       {t(`collection.search${selectedCategory === "board_game" ? "BGG" : selectedCategory === "rpg" ? "RPGG" : selectedCategory === "trading_card" ? "TCG" : "Mini"}Description`)}
                     </p>
+                    
+                    {/* TCG Game Selector */}
+                    {selectedCategory === "trading_card" && (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {[
+                          { id: "magic", label: "Magic: The Gathering" },
+                          { id: "pokemon", label: "Pokemon" },
+                          { id: "yugioh", label: "Yu-Gi-Oh!" },
+                          { id: "lorcana", label: "Lorcana" },
+                          { id: "flesh-and-blood", label: "Flesh & Blood" },
+                          { id: "one-piece", label: "One Piece" },
+                        ].map((game) => (
+                          <button
+                            key={game.id}
+                            type="button"
+                            onClick={() => setTcgGame(game.id as typeof tcgGame)}
+                            className={`px-3 py-1.5 rounded-full text-sm font-body transition-colors ${
+                              tcgGame === game.id
+                                ? "bg-accent-gold text-background"
+                                : "bg-surface/50 text-foreground hover:bg-accent-gold/20"
+                            }`}
+                          >
+                            {game.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     
                     {/* Search Input */}
                     <div className="flex gap-2">

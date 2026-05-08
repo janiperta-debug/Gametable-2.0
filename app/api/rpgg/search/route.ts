@@ -1,5 +1,74 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 import { XMLParser } from 'fast-xml-parser'
+
+interface RPGSearchResult {
+  id: number | string
+  name: string
+  yearPublished: number | null
+  thumbnailUrl?: string
+}
+
+// Query Supabase games table for RPGs first
+async function searchSupabase(query: string): Promise<RPGSearchResult[]> {
+  try {
+    const supabase = await createClient()
+    
+    const { data, error } = await supabase
+      .from("games")
+      .select("id, name, year_published, thumbnail_url")
+      .eq("category", "rpg")
+      .ilike("name", `%${query}%`)
+      .limit(20)
+    
+    if (error) {
+      console.error("Supabase RPG search error:", error)
+      return []
+    }
+    
+    return (data || []).map(game => ({
+      id: game.id,
+      name: game.name,
+      yearPublished: game.year_published,
+      thumbnailUrl: game.thumbnail_url,
+    }))
+  } catch (error) {
+    console.error("Supabase search error:", error)
+    return []
+  }
+}
+
+// Save external API results to Supabase
+async function saveToSupabase(results: RPGSearchResult[]): Promise<void> {
+  if (results.length === 0) return
+  
+  try {
+    const supabase = await createClient()
+    
+    for (const rpg of results) {
+      // Check if game already exists by external_id
+      const { data: existing } = await supabase
+        .from("games")
+        .select("id")
+        .eq("external_id", String(rpg.id))
+        .eq("external_source", "rpggeek")
+        .single()
+      
+      if (!existing) {
+        await supabase.from("games").insert({
+          name: rpg.name,
+          category: "rpg",
+          external_id: String(rpg.id),
+          external_source: "rpggeek",
+          year_published: rpg.yearPublished,
+          thumbnail_url: rpg.thumbnailUrl || null,
+        })
+      }
+    }
+  } catch (error) {
+    console.error("Error saving RPGs to Supabase:", error)
+  }
+}
 
 // Try multiple approaches to fetch from RPGGeek
 async function fetchFromRPGG(url: string): Promise<Response> {
@@ -25,24 +94,16 @@ async function fetchFromRPGG(url: string): Promise<Response> {
   })
 }
 
-export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams
-  const query = searchParams.get('query')
-
-  if (!query) {
-    return NextResponse.json({ error: 'Query parameter is required' }, { status: 400 })
-  }
-
+// Fetch from RPGGeek external API
+async function searchRPGGeek(query: string): Promise<RPGSearchResult[]> {
   try {
     const rpggUrl = `https://rpggeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=rpgitem`
-    console.log("[v0] RPGG search:", rpggUrl)
     
     const searchResponse = await fetchFromRPGG(rpggUrl)
-    console.log("[v0] RPGG response status:", searchResponse.status)
 
     if (!searchResponse.ok) {
-      console.log("[v0] RPGG API blocked, returning empty results")
-      return NextResponse.json({ results: [], note: 'RPGGeek API temporarily unavailable' })
+      console.log("RPGGeek API blocked or unavailable")
+      return []
     }
 
     const xmlText = await searchResponse.text()
@@ -54,7 +115,7 @@ export async function GET(request: NextRequest) {
 
     // Handle empty results
     if (!result.items || !result.items.item) {
-      return NextResponse.json({ results: [] })
+      return []
     }
 
     // Normalize to array (API returns object if single result)
@@ -63,7 +124,7 @@ export async function GET(request: NextRequest) {
       : [result.items.item]
 
     // Transform to our format
-    const results = items.slice(0, 20).map((item: Record<string, unknown>) => {
+    return items.slice(0, 20).map((item: Record<string, unknown>) => {
       // Handle name - can be array or object
       const nameData = item.name
       let name = ''
@@ -84,14 +145,44 @@ export async function GET(request: NextRequest) {
         yearPublished,
       }
     })
-
-    console.log("[v0] RPGG search returning", results.length, "results")
-    return NextResponse.json({ results })
   } catch (error) {
-    console.error('[v0] RPGGeek search error:', error)
+    console.error('RPGGeek search error:', error)
+    return []
+  }
+}
+
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams
+  const query = searchParams.get('query')
+
+  if (!query || query.trim().length < 2) {
+    return NextResponse.json({ error: 'Query must be at least 2 characters' }, { status: 400 })
+  }
+
+  // Step 1: Query Supabase first
+  let results = await searchSupabase(query)
+  
+  // Step 2: If no Supabase results, call RPGGeek API
+  if (results.length === 0) {
+    const externalResults = await searchRPGGeek(query)
+    
+    // Step 3: Save external results to Supabase for future searches
+    if (externalResults.length > 0) {
+      // Don't await - save in background
+      saveToSupabase(externalResults).catch(err => 
+        console.error("Background save failed:", err)
+      )
+      results = externalResults
+    }
+  }
+
+  // If still no results, return helpful message
+  if (results.length === 0) {
     return NextResponse.json({ 
-      results: [], 
-      error: 'RPGGeek search temporarily unavailable' 
+      results: [],
+      note: 'No RPGs found. RPGGeek API may be temporarily unavailable. Try adding manually.'
     })
   }
+
+  return NextResponse.json({ results })
 }
