@@ -187,8 +187,10 @@ async function searchScryfall(query: string): Promise<TCGSearchResult[]> {
 // Pokemon TCG API
 async function searchPokemonTCG(query: string): Promise<TCGSearchResult[]> {
   try {
+    // Use quotes for exact substring match, then wildcard
+    const searchQuery = `name:"*${query}*"`
     const response = await fetch(
-      `https://api.pokemontcg.io/v2/cards?q=name:${encodeURIComponent(query)}*&pageSize=20`,
+      `https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(searchQuery)}&pageSize=20`,
       {
         headers: {
           Accept: "application/json",
