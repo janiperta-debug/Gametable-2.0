@@ -405,7 +405,11 @@ export default function AddGamePage() {
                           <button
                             key={game.id}
                             type="button"
-                            onClick={() => setTcgGame(game.id as typeof tcgGame)}
+                            onClick={() => {
+                              setTcgGame(game.id as typeof tcgGame)
+                              setSearchResults([])
+                              setSelectedGame(null)
+                            }}
                             className={`px-3 py-1.5 rounded-full text-sm font-body transition-colors ${
                               tcgGame === game.id
                                 ? "bg-accent-gold text-background"
