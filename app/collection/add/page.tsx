@@ -645,6 +645,53 @@ export default function AddGamePage() {
                         <div className="text-center py-12 text-muted-foreground font-body">
                           {searchQuery ? t("collection.noResults") : t("collection.searchPrompt")}
                         </div>
+                      ) : selectedCategory === "trading_card" ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[500px] overflow-y-auto p-1">
+                          {searchResults.map((game) => {
+                            const card = game as TCGSearchResult
+                            return (
+                              <button
+                                key={game.id}
+                                onClick={() => handleSelectGame(game.id)}
+                                className="group relative rounded-lg border border-accent-gold/20 hover:border-accent-gold/50 transition-colors overflow-hidden bg-surface/30 text-left"
+                              >
+                                <div className="relative aspect-[2.5/3.5] bg-surface/50">
+                                  {card.imageUrl ? (
+                                    <img 
+                                      src={card.imageUrl} 
+                                      alt={card.name}
+                                      className="w-full h-full object-contain"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                                      <span className="text-xs text-center p-2">{t("common.noImage")}</span>
+                                    </div>
+                                  )}
+                                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                  <Plus className="absolute bottom-2 right-2 h-5 w-5 text-accent-gold opacity-0 group-hover:opacity-100 transition-opacity" />
+                                </div>
+                                <div className="p-2">
+                                  <h4 className="font-body font-medium text-sm truncate">{card.name}</h4>
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {card.set && (
+                                      <Badge variant="outline" className="text-[10px] border-accent-gold/30 text-accent-gold px-1 py-0">
+                                        {card.set}
+                                      </Badge>
+                                    )}
+                                    {card.rarity && (
+                                      <Badge variant="outline" className="text-[10px] border-purple-500/30 text-purple-400 px-1 py-0">
+                                        {card.rarity}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  {card.price && (
+                                    <p className="text-xs text-green-500 mt-1 font-body">${card.price.toFixed(2)}</p>
+                                  )}
+                                </div>
+                              </button>
+                            )
+                          })}
+                        </div>
                       ) : (
                         <div className="space-y-2 max-h-[400px] overflow-y-auto">
                           {searchResults.map((game) => (
@@ -655,9 +702,9 @@ export default function AddGamePage() {
                             >
                               <div className="flex-1 min-w-0">
                                 <h4 className="font-heading font-medium text-lg">{game.name}</h4>
-                                {game.yearPublished && (
+                                {(game as BGGSearchResult).yearPublished && (
                                   <Badge variant="outline" className="mt-1 text-xs border-accent-gold/30 text-accent-gold">
-                                    {game.yearPublished}
+                                    {(game as BGGSearchResult).yearPublished}
                                   </Badge>
                                 )}
                               </div>

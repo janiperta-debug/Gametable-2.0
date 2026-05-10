@@ -464,20 +464,83 @@ export function DiscoverGames() {
             <div className="text-center py-12 text-muted-foreground font-body">
               {searchQuery ? t("collection.noResults") : t("discover.searchToStart")}
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {searchResults.map((game) => (
-                <Card key={game.id} className="room-furniture overflow-hidden hover:border-accent-gold/50 transition-colors cursor-pointer" onClick={() => handleSelectGame(game.id)}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-heading font-medium text-lg truncate">{game.name}</h4>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {(game as BGGSearchResult).yearPublished && (
-                            <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
-                              {(game as BGGSearchResult).yearPublished}
-                            </Badge>
-                          )}
+) : (
+  <div className={`grid gap-4 ${selectedCategory === "trading_card" ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"}`}>
+    {searchResults.map((game) => (
+      selectedCategory === "trading_card" ? (
+        // TCG Card display with image
+        <Card key={game.id} className="room-furniture overflow-hidden hover:border-accent-gold/50 transition-colors cursor-pointer group" onClick={() => handleSelectGame(game.id)}>
+          <div className="relative aspect-[2.5/3.5] bg-surface/50">
+            {(game as TCGSearchResult).imageUrl ? (
+              <img 
+                src={(game as TCGSearchResult).imageUrl} 
+                alt={game.name}
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                <span className="text-xs text-center p-2">{t("common.noImage")}</span>
+              </div>
+            )}
+            {loadingDetails === game.id && (
+              <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                <Loader2 className="h-6 w-6 animate-spin text-accent-gold" />
+              </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <Plus className="absolute bottom-2 right-2 h-6 w-6 text-accent-gold opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+          <CardContent className="p-2">
+            <h4 className="font-body font-medium text-sm truncate">{game.name}</h4>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {(game as TCGSearchResult).set && (
+                <Badge variant="outline" className="text-[10px] border-accent-gold/30 text-accent-gold px-1 py-0">
+                  {(game as TCGSearchResult).set}
+                </Badge>
+              )}
+              {(game as TCGSearchResult).rarity && (
+                <Badge variant="outline" className="text-[10px] border-purple-500/30 text-purple-400 px-1 py-0">
+                  {(game as TCGSearchResult).rarity}
+                </Badge>
+              )}
+            </div>
+            {(game as TCGSearchResult).price && (
+              <p className="text-xs text-green-500 mt-1 font-body">${(game as TCGSearchResult).price?.toFixed(2)}</p>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        // Board game, RPG, Miniature display
+        <Card key={game.id} className="room-furniture overflow-hidden hover:border-accent-gold/50 transition-colors cursor-pointer" onClick={() => handleSelectGame(game.id)}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex-1 min-w-0">
+                <h4 className="font-heading font-medium text-lg truncate">{game.name}</h4>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {(game as BGGSearchResult).yearPublished && (
+                    <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
+                      {(game as BGGSearchResult).yearPublished}
+                    </Badge>
+                  )}
+                  {(game as MiniatureSearchResult).faction && (
+                    <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
+                      {(game as MiniatureSearchResult).faction}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              {loadingDetails === game.id ? (
+                <Loader2 className="h-5 w-5 animate-spin text-accent-gold ml-4 flex-shrink-0" />
+              ) : (
+                <Plus className="h-5 w-5 text-accent-gold ml-4 flex-shrink-0" />
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )
+    ))}
+  </div>
+  )}
                           {(game as TCGSearchResult).set && (
                             <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
                               {(game as TCGSearchResult).set}
