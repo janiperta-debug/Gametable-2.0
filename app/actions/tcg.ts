@@ -31,28 +31,29 @@ export async function addCardToCollection(
     const { data: existingCard } = await supabase
       .from("tcg_cards")
       .select("id")
-      .eq("external_id", card.id)
-      .eq("game", card.game)
+      .eq("external_id", String(card.id))
+      .eq("tcg_system", card.game)
       .single()
 
     if (existingCard) {
       cardId = existingCard.id
     } else {
-      // Insert the card
+      // Insert the card into tcg_cards table
       const { data: newCard, error: cardError } = await supabase
         .from("tcg_cards")
         .insert({
-          external_id: card.id,
+          external_id: String(card.id),
           name: card.name,
-          game: card.game,
+          tcg_system: card.game,
           set_name: card.set,
           set_code: card.setCode || null,
           rarity: card.rarity || null,
           image_url: card.imageUrl || null,
-          thumbnail_url: card.thumbnailUrl || null,
-          card_type: card.type || null,
-          description: card.description || null,
+          mana_cost: card.manaCost || null,
+          type_line: card.type || null,
+          cmc: card.cmc || null,
           price_usd: card.price || null,
+          price_updated: card.price ? new Date().toISOString() : null,
         })
         .select("id")
         .single()
@@ -181,13 +182,15 @@ export async function getUserTCGCollection(game?: TCGGame) {
         id,
         external_id,
         name,
-        game,
+        tcg_system,
         set_name,
         set_code,
         rarity,
         image_url,
-        thumbnail_url,
+        mana_cost,
+        type_line,
         card_type,
+        cmc,
         price_usd
       )
     `)
@@ -195,7 +198,7 @@ export async function getUserTCGCollection(game?: TCGGame) {
     .eq("status", "owned")
 
   if (game) {
-    query = query.eq("tcg_cards.game", game)
+    query = query.eq("tcg_cards.tcg_system", game)
   }
 
   const { data, error } = await query.order("added_at", { ascending: false })
@@ -227,13 +230,15 @@ export async function getUserTCGWishlist(game?: TCGGame) {
         id,
         external_id,
         name,
-        game,
+        tcg_system,
         set_name,
         set_code,
         rarity,
         image_url,
-        thumbnail_url,
+        mana_cost,
+        type_line,
         card_type,
+        cmc,
         price_usd
       )
     `)
@@ -241,7 +246,7 @@ export async function getUserTCGWishlist(game?: TCGGame) {
     .eq("status", "wishlist")
 
   if (game) {
-    query = query.eq("tcg_cards.game", game)
+    query = query.eq("tcg_cards.tcg_system", game)
   }
 
   const { data, error } = await query.order("added_at", { ascending: false })
