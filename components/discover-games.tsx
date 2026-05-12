@@ -140,10 +140,24 @@ export function DiscoverGames() {
     setTcgQuantity(1)
     setMiniQuantity(1)
     setMiniPaintStatus("unpainted")
+    
     try {
-      // For TCG, also pass game type
-      const gameParam = selectedCategory === "trading_card" ? "&game=mtg" : ""
-      const response = await fetch(`${categoryConfig.detailsEndpoint}?id=${gameId}${gameParam}`)
+      // For TCG and miniatures, use the search result directly (already has all data)
+      if (selectedCategory === "trading_card" || selectedCategory === "miniature") {
+        const searchResult = searchResults.find(r => r.id === gameId)
+        if (searchResult) {
+          // Ensure the game field is set for TCG cards
+          if (selectedCategory === "trading_card") {
+            (searchResult as TCGSearchResult).game = tcgGame
+          }
+          setSelectedGame(searchResult as GameDetails)
+        }
+        setLoadingDetails(null)
+        return
+      }
+      
+      // For board games and RPGs, fetch details from API
+      const response = await fetch(`${categoryConfig.detailsEndpoint}?id=${gameId}`)
       const details = await response.json()
       
       if (details && (details.id !== undefined || details.name)) {
@@ -164,16 +178,21 @@ export function DiscoverGames() {
   const handleAddGame = async (status: 'owned' | 'wishlist') => {
     if (!selectedGame) return
     
+    console.log("[v0] handleAddGame called with:", { selectedGame, status, selectedCategory })
     setAddingGame({ id: selectedGame.id, type: status === 'owned' ? 'collection' : 'wishlist' })
 
     try {
       let result: { error?: string }
 
       if (selectedCategory === "trading_card") {
+        console.log("[v0] Adding TCG card:", selectedGame)
         const tcgResult = await addCardToCollection(selectedGame as TCGSearchResult, tcgQuantity, status)
+        console.log("[v0] TCG result:", tcgResult)
         result = tcgResult.success ? {} : { error: tcgResult.error }
       } else if (selectedCategory === "miniature") {
+        console.log("[v0] Adding miniature:", selectedGame)
         const miniResult = await addMiniatureToCollection(selectedGame as MiniatureSearchResult, miniQuantity, miniPaintStatus, status)
+        console.log("[v0] Miniature result:", miniResult)
         result = miniResult.success ? {} : { error: miniResult.error }
       } else {
         result = await addGameToCollection(selectedGame as BGGGameDetails, status, selectedCategory)
@@ -308,11 +327,11 @@ export function DiscoverGames() {
         <Card className="room-furniture">
           <CardContent className="pt-6">
             <div className="flex gap-4">
-              {((selectedGame as BGGGameDetails).thumbnail || (selectedGame as TCGSearchResult).thumbnailUrl) && (
+              {((selectedGame as BGGGameDetails).thumbnail || (selectedGame as TCGSearchResult).imageUrl || (selectedGame as TCGSearchResult).thumbnailUrl) && (
                 <img
-                  src={(selectedGame as BGGGameDetails).thumbnail || (selectedGame as TCGSearchResult).thumbnailUrl || ""}
+                  src={(selectedGame as BGGGameDetails).thumbnail || (selectedGame as TCGSearchResult).imageUrl || (selectedGame as TCGSearchResult).thumbnailUrl || ""}
                   alt={selectedGame.name}
-                  className="w-32 h-32 object-cover rounded"
+                  className="w-32 h-32 object-contain rounded"
                 />
               )}
               <div className="flex-1 min-w-0">
@@ -539,30 +558,7 @@ export function DiscoverGames() {
         </Card>
       )
     ))}
-  </div>
-  )}
-                          {(game as TCGSearchResult).set && (
-                            <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
-                              {(game as TCGSearchResult).set}
-                            </Badge>
-                          )}
-                          {(game as MiniatureSearchResult).faction && (
-                            <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
-                              {(game as MiniatureSearchResult).faction}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      {loadingDetails === game.id ? (
-                        <Loader2 className="h-5 w-5 animate-spin text-accent-gold ml-4 flex-shrink-0" />
-                      ) : (
-                        <Plus className="h-5 w-5 text-accent-gold ml-4 flex-shrink-0" />
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+          </div>
           )}
         </div>
       )}

@@ -117,8 +117,22 @@ export default function AddGamePage() {
     setMiniPaintStatus("unpainted")
     try {
       // For TCG, also pass game type
-      const gameParam = selectedCategory === "trading_card" ? `&game=mtg` : ""
-      const response = await fetch(`${categoryConfig.detailsEndpoint}?id=${gameId}${gameParam}`)
+      // For TCG and miniatures, use the search result directly (already has all data)
+      if (selectedCategory === "trading_card" || selectedCategory === "miniature") {
+        const searchResult = searchResults.find(r => r.id === gameId)
+        if (searchResult) {
+          // Ensure the game field is set for TCG cards
+          if (selectedCategory === "trading_card") {
+            (searchResult as TCGSearchResult).game = tcgGame
+          }
+          setSelectedGame(searchResult as GameDetails)
+        }
+        setLoadingDetails(false)
+        return
+      }
+      
+      // For board games and RPGs, fetch details from API
+      const response = await fetch(`${categoryConfig.detailsEndpoint}?id=${gameId}`)
       const details = await response.json()
       
       if (details && (details.id !== undefined || details.name)) {
