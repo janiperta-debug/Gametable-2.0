@@ -9,7 +9,7 @@ interface RPGSearchResult {
   thumbnailUrl?: string
 }
 
-// Query Supabase games table for RPGs first
+// Query Supabase games table for RPGs
 async function searchSupabase(query: string): Promise<RPGSearchResult[]> {
   try {
     const supabase = await createClient()
@@ -38,8 +38,8 @@ async function searchSupabase(query: string): Promise<RPGSearchResult[]> {
   }
 }
 
-// Save external API results to Supabase
-async function saveToSupabase(results: RPGSearchResult[]): Promise<void> {
+// Save RPG results to Supabase
+async function saveToSupabase(results: RPGSearchResult[], source: string): Promise<void> {
   if (results.length === 0) return
   
   try {
@@ -51,7 +51,7 @@ async function saveToSupabase(results: RPGSearchResult[]): Promise<void> {
         .from("games")
         .select("id")
         .eq("external_id", String(rpg.id))
-        .eq("external_source", "rpggeek")
+        .eq("external_source", source)
         .single()
       
       if (!existing) {
@@ -59,7 +59,7 @@ async function saveToSupabase(results: RPGSearchResult[]): Promise<void> {
           name: rpg.name,
           category: "rpg",
           external_id: String(rpg.id),
-          external_source: "rpggeek",
+          external_source: source,
           year_published: rpg.yearPublished,
           thumbnail_url: rpg.thumbnailUrl || null,
         })
@@ -70,62 +70,47 @@ async function saveToSupabase(results: RPGSearchResult[]): Promise<void> {
   }
 }
 
-// Try multiple approaches to fetch from RPGGeek
-async function fetchFromRPGG(url: string): Promise<Response> {
-  const response = await fetch(url, {
-    headers: {
-      'Accept': 'application/xml, text/xml, */*',
-      'User-Agent': 'GameTable/1.0 (https://gametable.fi)',
-    },
-    cache: 'no-store',
-  })
-  
-  if (response.ok) {
-    return response
-  }
-  
-  // Retry with different user agent
-  return fetch(url, {
-    headers: {
-      'Accept': '*/*',
-      'User-Agent': 'Mozilla/5.0 (compatible; GameTableBot/1.0)',
-    },
-    cache: 'no-store',
-  })
-}
-
-// Fetch from RPGGeek external API
-async function searchRPGGeek(query: string): Promise<RPGSearchResult[]> {
+// Try BoardGameGeek API as fallback (many RPGs are listed there too)
+async function searchBGGForRPGs(query: string): Promise<RPGSearchResult[]> {
   try {
-    const rpggUrl = `https://rpggeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=rpgitem`
+    // Search BGG with type=rpgitem for RPGs specifically
+    const bggUrl = `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=rpgitem`
     
-    const searchResponse = await fetchFromRPGG(rpggUrl)
+    const response = await fetch(bggUrl, {
+      headers: {
+        'Accept': 'application/xml, text/xml, */*',
+        'User-Agent': 'GameTable/1.0',
+      },
+    })
 
-    if (!searchResponse.ok) {
-      console.log("RPGGeek API blocked or unavailable")
+    if (!response.ok) {
+      console.log("BGG RPG search failed with status:", response.status)
       return []
     }
 
-    const xmlText = await searchResponse.text()
+    const xmlText = await response.text()
+    
+    // Check if it's a Cloudflare challenge page
+    if (xmlText.includes('Just a moment') || xmlText.includes('cloudflare')) {
+      console.log("BGG returned Cloudflare challenge")
+      return []
+    }
+    
     const parser = new XMLParser({
       ignoreAttributes: false,
       attributeNamePrefix: '@_',
     })
     const result = parser.parse(xmlText)
 
-    // Handle empty results
     if (!result.items || !result.items.item) {
       return []
     }
 
-    // Normalize to array (API returns object if single result)
     const items = Array.isArray(result.items.item) 
       ? result.items.item 
       : [result.items.item]
 
-    // Transform to our format
     return items.slice(0, 20).map((item: Record<string, unknown>) => {
-      // Handle name - can be array or object
       const nameData = item.name
       let name = ''
       if (Array.isArray(nameData)) {
@@ -135,7 +120,6 @@ async function searchRPGGeek(query: string): Promise<RPGSearchResult[]> {
         name = String((nameData as Record<string, unknown>)['@_value'] || '')
       }
 
-      // Handle year published
       const yearData = item.yearpublished as Record<string, unknown> | undefined
       const yearPublished = yearData ? parseInt(String(yearData['@_value']), 10) || null : null
 
@@ -146,7 +130,7 @@ async function searchRPGGeek(query: string): Promise<RPGSearchResult[]> {
       }
     })
   } catch (error) {
-    console.error('RPGGeek search error:', error)
+    console.error('BGG RPG search error:', error)
     return []
   }
 }
@@ -162,14 +146,13 @@ export async function GET(request: NextRequest) {
   // Step 1: Query Supabase first
   let results = await searchSupabase(query)
   
-  // Step 2: If no Supabase results, call RPGGeek API
+  // Step 2: If no Supabase results, try BGG with rpgitem type
   if (results.length === 0) {
-    const externalResults = await searchRPGGeek(query)
+    const externalResults = await searchBGGForRPGs(query)
     
-    // Step 3: Save external results to Supabase for future searches
+    // Save external results to Supabase for future searches
     if (externalResults.length > 0) {
-      // Don't await - save in background
-      saveToSupabase(externalResults).catch(err => 
+      saveToSupabase(externalResults, "bgg-rpg").catch(err => 
         console.error("Background save failed:", err)
       )
       results = externalResults
@@ -180,7 +163,7 @@ export async function GET(request: NextRequest) {
   if (results.length === 0) {
     return NextResponse.json({ 
       results: [],
-      note: 'No RPGs found. RPGGeek API may be temporarily unavailable. Try adding manually.'
+      note: 'No RPGs found. Try a different search term or add the RPG manually.'
     })
   }
 
