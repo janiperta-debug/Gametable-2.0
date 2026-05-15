@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { XMLParser } from 'fast-xml-parser'
 
+const BGG_API_TOKEN = process.env.BGG_API_TOKEN
+
 export interface RPGGCollectionItem {
   id: number
   name: string
@@ -30,12 +32,16 @@ export async function GET(request: NextRequest) {
     
     console.log("[v0] Fetching RPGG collection from:", collectionUrl)
     
+    const headers: Record<string, string> = {
+      'Accept': 'application/xml, text/xml, */*',
+    }
+    
+    if (BGG_API_TOKEN) {
+      headers['Authorization'] = `Bearer ${BGG_API_TOKEN}`
+    }
+    
     let response = await fetch(collectionUrl, {
-      headers: {
-        'Accept': 'application/xml, text/xml, */*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      },
+      headers,
       cache: 'no-store',
     })
 
@@ -47,11 +53,7 @@ export async function GET(request: NextRequest) {
       console.log("[v0] RPGG collection not ready, retrying in 2s...")
       await new Promise(resolve => setTimeout(resolve, 2000))
       response = await fetch(collectionUrl, {
-        headers: {
-          'Accept': 'application/xml, text/xml, */*',
-          'Accept-Language': 'en-US,en;q=0.9',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        },
+        headers,
         cache: 'no-store',
       })
       retries++

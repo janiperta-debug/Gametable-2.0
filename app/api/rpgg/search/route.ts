@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { XMLParser } from 'fast-xml-parser'
 
+const BGG_API_TOKEN = process.env.BGG_API_TOKEN
+
 interface RPGSearchResult {
   id: number | string
   name: string
@@ -70,29 +72,35 @@ async function saveToSupabase(results: RPGSearchResult[], source: string): Promi
   }
 }
 
-// Try BoardGameGeek API as fallback (many RPGs are listed there too)
-async function searchBGGForRPGs(query: string): Promise<RPGSearchResult[]> {
+// Search RPGGeek API directly
+async function searchRPGGeek(query: string): Promise<RPGSearchResult[]> {
   try {
-    // Search BGG with type=rpgitem for RPGs specifically
-    const bggUrl = `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=rpgitem`
+    // Use rpggeek.com with type=rpgitem
+    const rpggUrl = `https://rpggeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=rpgitem`
     
-    const response = await fetch(bggUrl, {
-      headers: {
-        'Accept': 'application/xml, text/xml, */*',
-        'User-Agent': 'GameTable/1.0',
-      },
+    const headers: Record<string, string> = {
+      'Accept': 'application/xml, text/xml, */*',
+    }
+    
+    if (BGG_API_TOKEN) {
+      headers['Authorization'] = `Bearer ${BGG_API_TOKEN}`
+    }
+    
+    const response = await fetch(rpggUrl, {
+      headers,
+      cache: 'no-store',
     })
 
     if (!response.ok) {
-      console.log("BGG RPG search failed with status:", response.status)
+      console.log("RPGGeek search failed with status:", response.status)
       return []
     }
 
     const xmlText = await response.text()
     
-    // Check if it's a Cloudflare challenge page
-    if (xmlText.includes('Just a moment') || xmlText.includes('cloudflare')) {
-      console.log("BGG returned Cloudflare challenge")
+    // Check if response is valid XML
+    if (!xmlText || xmlText.length < 50 || xmlText.includes('Just a moment')) {
+      console.log("RPGGeek returned invalid response")
       return []
     }
     
@@ -130,7 +138,7 @@ async function searchBGGForRPGs(query: string): Promise<RPGSearchResult[]> {
       }
     })
   } catch (error) {
-    console.error('BGG RPG search error:', error)
+    console.error('RPGGeek search error:', error)
     return []
   }
 }
@@ -146,13 +154,13 @@ export async function GET(request: NextRequest) {
   // Step 1: Query Supabase first
   let results = await searchSupabase(query)
   
-  // Step 2: If no Supabase results, try BGG with rpgitem type
+  // Step 2: If no Supabase results, try RPGGeek API
   if (results.length === 0) {
-    const externalResults = await searchBGGForRPGs(query)
+    const externalResults = await searchRPGGeek(query)
     
     // Save external results to Supabase for future searches
     if (externalResults.length > 0) {
-      saveToSupabase(externalResults, "bgg-rpg").catch(err => 
+      saveToSupabase(externalResults, "rpggeek").catch(err => 
         console.error("Background save failed:", err)
       )
       results = externalResults
