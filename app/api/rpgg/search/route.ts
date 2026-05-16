@@ -3,6 +3,51 @@ import { XMLParser } from 'fast-xml-parser'
 
 const BGG_API_TOKEN = process.env.BGG_API_TOKEN
 
+function parseXMLResults(xmlText: string) {
+  if (!xmlText || xmlText.length < 50) {
+    return { results: [] }
+  }
+
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+    attributeNamePrefix: '@_',
+  })
+  const result = parser.parse(xmlText)
+
+  // Handle empty results
+  if (!result.items || !result.items.item) {
+    return { results: [] }
+  }
+
+  // Normalize to array (BGG returns object if single result)
+  const items = Array.isArray(result.items.item) 
+    ? result.items.item 
+    : [result.items.item]
+
+  // Transform to our format
+  const results = items.slice(0, 20).map((item: Record<string, unknown>) => {
+    const nameData = item.name
+    let name = ''
+    if (Array.isArray(nameData)) {
+      const primary = nameData.find((n: Record<string, unknown>) => n['@_type'] === 'primary')
+      name = primary ? String(primary['@_value'] || '') : String(nameData[0]?.['@_value'] || '')
+    } else if (nameData && typeof nameData === 'object') {
+      name = String((nameData as Record<string, unknown>)['@_value'] || '')
+    }
+
+    const yearData = item.yearpublished as Record<string, unknown> | undefined
+    const yearPublished = yearData ? parseInt(String(yearData['@_value']), 10) || null : null
+
+    return {
+      id: parseInt(String(item['@_id']), 10),
+      name,
+      yearPublished,
+    }
+  })
+
+  return { results }
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const query = searchParams.get('query')
@@ -11,76 +56,52 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Query must be at least 2 characters' }, { status: 400 })
   }
 
+  const headers: Record<string, string> = {
+    'Accept': 'application/xml, text/xml, */*',
+  }
+
+  if (BGG_API_TOKEN) {
+    headers['Authorization'] = `Bearer ${BGG_API_TOKEN}`
+    console.log("[v0] RPG search: Using BGG_API_TOKEN for auth")
+  } else {
+    console.log("[v0] RPG search: WARNING - No BGG_API_TOKEN found!")
+  }
+
   try {
-    // Use boardgamegeek.com with type=rpgitem (same API, different type)
-    // rpggeek.com returns 403 but boardgamegeek.com works for rpgitem type
+    // Attempt 1: rpggeek.com (per BGG API docs, all domains are interchangeable)
+    const rpggUrl = `https://rpggeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=rpgitem`
+    console.log("[v0] RPG search attempt 1:", rpggUrl)
+    
+    const rpggResponse = await fetch(rpggUrl, { headers, cache: 'no-store' })
+    console.log("[v0] RPG search attempt 1 status:", rpggResponse.status, rpggResponse.statusText)
+
+    if (rpggResponse.ok) {
+      const xmlText = await rpggResponse.text()
+      console.log("[v0] RPG XML length:", xmlText.length, "preview:", xmlText.substring(0, 200))
+      const parsed = parseXMLResults(xmlText)
+      console.log("[v0] RPG parsed results count:", parsed.results.length)
+      return NextResponse.json(parsed)
+    }
+
+    // Attempt 2: boardgamegeek.com with type=rpgitem as fallback
+    console.log("[v0] rpggeek.com failed, trying boardgamegeek.com with type=rpgitem")
     const bggUrl = `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=rpgitem`
     
-    const headers: Record<string, string> = {
-      'Accept': 'application/xml, text/xml, */*',
-    }
-    
-    if (BGG_API_TOKEN) {
-      headers['Authorization'] = `Bearer ${BGG_API_TOKEN}`
-    }
-    
-    const searchResponse = await fetch(bggUrl, {
-      headers,
-      cache: 'no-store',
-    })
+    const bggResponse = await fetch(bggUrl, { headers, cache: 'no-store' })
+    console.log("[v0] RPG search attempt 2 status:", bggResponse.status, bggResponse.statusText)
 
-    if (!searchResponse.ok) {
-      console.log("BGG RPG search failed with status:", searchResponse.status)
-      return NextResponse.json({ results: [], note: 'RPG search temporarily unavailable' })
+    if (bggResponse.ok) {
+      const xmlText = await bggResponse.text()
+      console.log("[v0] Fallback XML length:", xmlText.length, "preview:", xmlText.substring(0, 200))
+      const parsed = parseXMLResults(xmlText)
+      console.log("[v0] Fallback parsed results count:", parsed.results.length)
+      return NextResponse.json(parsed)
     }
 
-    const xmlText = await searchResponse.text()
-    
-    if (!xmlText || xmlText.length < 50) {
-      return NextResponse.json({ results: [] })
-    }
-
-    const parser = new XMLParser({
-      ignoreAttributes: false,
-      attributeNamePrefix: '@_',
-    })
-    const result = parser.parse(xmlText)
-
-    // Handle empty results
-    if (!result.items || !result.items.item) {
-      return NextResponse.json({ results: [] })
-    }
-
-    // Normalize to array (BGG returns object if single result)
-    const items = Array.isArray(result.items.item) 
-      ? result.items.item 
-      : [result.items.item]
-
-    // Transform to our format
-    const results = items.slice(0, 20).map((item: Record<string, unknown>) => {
-      // Handle name - can be array or object
-      const nameData = item.name
-      let name = ''
-      if (Array.isArray(nameData)) {
-        const primary = nameData.find((n: Record<string, unknown>) => n['@_type'] === 'primary')
-        name = primary ? String(primary['@_value'] || '') : String(nameData[0]?.['@_value'] || '')
-      } else if (nameData && typeof nameData === 'object') {
-        name = String((nameData as Record<string, unknown>)['@_value'] || '')
-      }
-
-      const yearData = item.yearpublished as Record<string, unknown> | undefined
-      const yearPublished = yearData ? parseInt(String(yearData['@_value']), 10) || null : null
-
-      return {
-        id: parseInt(String(item['@_id']), 10),
-        name,
-        yearPublished,
-      }
-    })
-
-    return NextResponse.json({ results })
+    console.log("[v0] Both RPG search endpoints failed")
+    return NextResponse.json({ results: [], note: 'RPG search temporarily unavailable' })
   } catch (error) {
-    console.error('RPG search error:', error)
+    console.error('[v0] RPG search error:', error)
     return NextResponse.json({ 
       results: [], 
       error: 'RPG search temporarily unavailable' 
