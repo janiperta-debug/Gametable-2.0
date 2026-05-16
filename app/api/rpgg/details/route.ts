@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { XMLParser } from 'fast-xml-parser'
 
+const BGG_API_TOKEN = process.env.BGG_API_TOKEN
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const id = searchParams.get('id')
@@ -10,15 +12,19 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Fetch RPG details from RPGGeek API - requires browser-like headers
+    const headers: Record<string, string> = {
+      'Accept': 'application/xml, text/xml, */*',
+    }
+    
+    if (BGG_API_TOKEN) {
+      headers['Authorization'] = `Bearer ${BGG_API_TOKEN}`
+    }
+    
+    // Fetch RPG details from RPGGeek API
     const response = await fetch(
       `https://rpggeek.com/xmlapi2/thing?id=${id}&stats=1`,
       { 
-        headers: { 
-          'Accept': 'application/xml, text/xml, */*',
-          'Accept-Language': 'en-US,en;q=0.9',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        },
+        headers,
         cache: 'no-store',
       }
     )
