@@ -55,6 +55,7 @@ export interface BGGSearchResult {
   id: number
   name: string
   yearPublished: number | null
+  thumbnail?: string | null
 }
 
 export interface BGGGameDetails {

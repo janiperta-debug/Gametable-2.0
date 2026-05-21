@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Search, ExternalLink, Heart, Plus, Loader2, Star, Users, Clock } from "lucide-react"
+import { Search, ExternalLink, Heart, Plus, Loader2, Star, Users, Clock, Dices, Swords, BookOpen } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { addGameToCollection, type GameCategory } from "@/app/actions/games"
 import { addCardToCollection } from "@/app/actions/tcg"
@@ -529,30 +529,47 @@ export function DiscoverGames() {
           </CardContent>
         </Card>
       ) : (
-        // Board game, RPG, Miniature display
-        <Card key={game.id} className="room-furniture overflow-hidden hover:border-accent-gold/50 transition-colors cursor-pointer" onClick={() => handleSelectGame(game.id)}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex-1 min-w-0">
-                <h4 className="font-heading font-medium text-lg truncate">{game.name}</h4>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {(game as BGGSearchResult).yearPublished && (
-                    <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
-                      {(game as BGGSearchResult).yearPublished}
-                    </Badge>
-                  )}
-                  {(game as MiniatureSearchResult).faction && (
-                    <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
-                      {(game as MiniatureSearchResult).faction}
-                    </Badge>
-                  )}
-                </div>
+        // Board game, RPG, Miniature display - with thumbnail or placeholder icon
+        <Card key={game.id} className="room-furniture overflow-hidden hover:border-accent-gold/50 transition-colors cursor-pointer group" onClick={() => handleSelectGame(game.id)}>
+          <CardContent className="p-0">
+            <div className="flex">
+              {/* Thumbnail or category icon placeholder */}
+              <div className="w-24 h-24 flex-shrink-0 bg-surface/30 flex items-center justify-center border-r border-accent-gold/10 overflow-hidden">
+                {loadingDetails === game.id ? (
+                  <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
+                ) : (game as BGGSearchResult).thumbnail ? (
+                  <img 
+                    src={(game as BGGSearchResult).thumbnail} 
+                    alt={game.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : selectedCategory === "rpg" ? (
+                  <BookOpen className="h-10 w-10 text-accent-gold/40 group-hover:text-accent-gold/60 transition-colors" />
+                ) : selectedCategory === "miniature" ? (
+                  <Swords className="h-10 w-10 text-accent-gold/40 group-hover:text-accent-gold/60 transition-colors" />
+                ) : (
+                  <Dices className="h-10 w-10 text-accent-gold/40 group-hover:text-accent-gold/60 transition-colors" />
+                )}
               </div>
-              {loadingDetails === game.id ? (
-                <Loader2 className="h-5 w-5 animate-spin text-accent-gold ml-4 flex-shrink-0" />
-              ) : (
-                <Plus className="h-5 w-5 text-accent-gold ml-4 flex-shrink-0" />
-              )}
+              {/* Content */}
+              <div className="flex-1 p-4 flex items-center justify-between min-w-0">
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-heading font-medium text-lg truncate">{game.name}</h4>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {(game as BGGSearchResult).yearPublished && (
+                      <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
+                        {(game as BGGSearchResult).yearPublished}
+                      </Badge>
+                    )}
+                    {(game as MiniatureSearchResult).faction && (
+                      <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
+                        {(game as MiniatureSearchResult).faction}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                <Plus className="h-5 w-5 text-accent-gold ml-4 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
             </div>
           </CardContent>
         </Card>
