@@ -26,6 +26,7 @@
   },
   "common": {
     "loading": "Loading...",
+    "info": "Info",
     "save": "Save",
     "cancel": "Cancel",
     "success": "Success",

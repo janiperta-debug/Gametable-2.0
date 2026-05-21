@@ -27,6 +27,7 @@
   },
   "common": {
     "loading": "Ladataan...",
+    "info": "Tiedot",
     "save": "Tallenna",
     "cancel": "Peruuta",
     "success": "Onnistui",

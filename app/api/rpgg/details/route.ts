@@ -20,8 +20,8 @@ export async function GET(request: NextRequest) {
       headers['Authorization'] = `Bearer ${BGG_API_TOKEN}`
     }
     
-    // Fetch RPG details from RPGGeek API
-    const response = await fetch(
+    // Try rpggeek.com first, fall back to boardgamegeek.com
+    let response = await fetch(
       `https://rpggeek.com/xmlapi2/thing?id=${id}&stats=1`,
       { 
         headers,
@@ -30,8 +30,19 @@ export async function GET(request: NextRequest) {
     )
 
     if (!response.ok) {
-      console.error(`RPGGeek API details error: ${response.status}`)
-      throw new Error(`RPGGeek API error: ${response.status}`)
+      console.log(`[v0] rpggeek.com details failed with ${response.status}, trying boardgamegeek.com`)
+      response = await fetch(
+        `https://boardgamegeek.com/xmlapi2/thing?id=${id}&stats=1`,
+        { 
+          headers,
+          cache: 'no-store',
+        }
+      )
+    }
+
+    if (!response.ok) {
+      console.error(`[v0] Both RPG details endpoints failed: ${response.status}`)
+      throw new Error(`RPG API error: ${response.status}`)
     }
 
     const xmlText = await response.text()
