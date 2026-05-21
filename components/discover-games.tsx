@@ -529,14 +529,20 @@ export function DiscoverGames() {
           </CardContent>
         </Card>
       ) : (
-        // Board game, RPG, Miniature display - with placeholder icon
+        // Board game, RPG, Miniature display - with thumbnail or placeholder icon
         <Card key={game.id} className="room-furniture overflow-hidden hover:border-accent-gold/50 transition-colors cursor-pointer group" onClick={() => handleSelectGame(game.id)}>
           <CardContent className="p-0">
             <div className="flex">
-              {/* Category icon placeholder */}
-              <div className="w-24 h-24 flex-shrink-0 bg-surface/30 flex items-center justify-center border-r border-accent-gold/10">
+              {/* Thumbnail or category icon placeholder */}
+              <div className="w-24 h-24 flex-shrink-0 bg-surface/30 flex items-center justify-center border-r border-accent-gold/10 overflow-hidden">
                 {loadingDetails === game.id ? (
                   <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
+                ) : (game as BGGSearchResult).thumbnail ? (
+                  <img 
+                    src={(game as BGGSearchResult).thumbnail} 
+                    alt={game.name}
+                    className="w-full h-full object-cover"
+                  />
                 ) : selectedCategory === "rpg" ? (
                   <BookOpen className="h-10 w-10 text-accent-gold/40 group-hover:text-accent-gold/60 transition-colors" />
                 ) : selectedCategory === "miniature" ? (
