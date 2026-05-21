@@ -46,6 +46,8 @@ export async function GET(request: NextRequest) {
     }
 
     const xmlText = await response.text()
+    console.log("[v0] RPG details XML length:", xmlText.length, "preview:", xmlText.substring(0, 300))
+    
     const parser = new XMLParser({
       ignoreAttributes: false,
       attributeNamePrefix: '@_',
@@ -100,6 +102,13 @@ export async function GET(request: NextRequest) {
         ? String(item.description).replace(/&#10;/g, '\n').substring(0, 2000) 
         : null,
     }
+
+    console.log("[v0] RPG details parsed:", {
+      id: gameDetails.id,
+      name: gameDetails.name,
+      thumbnail: gameDetails.thumbnail,
+      image: gameDetails.image
+    })
 
     return NextResponse.json(gameDetails)
   } catch (error) {
