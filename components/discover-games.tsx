@@ -195,7 +195,9 @@ export function DiscoverGames() {
         console.log("[v0] Miniature result:", miniResult)
         result = miniResult.success ? {} : { error: miniResult.error }
       } else {
+        console.log("[v0] Adding board game/RPG:", selectedGame)
         result = await addGameToCollection(selectedGame as BGGGameDetails, status, selectedCategory)
+        console.log("[v0] Board game/RPG result:", result)
       }
 
       if (result.error) {
