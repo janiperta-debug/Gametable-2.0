@@ -1179,11 +1179,10 @@
     "mansion": {
       "label": "Rakenna Kartanosi",
       "title": "Avaa uusia huoneita.",
-      "description": "Ansaitse Kartanopisteitä (CP) osallistumalla yhteisöön ja avaa uusia huoneita kartanoosi. Jokainen huone tuo mukanaan uusia ominaisuuksia.",
-      "comingSoon": "Tulossa pian"
+      "description": "Ansaitse kokemuspisteitä (XP) osallistumalla yhteisöön ja avaa uusia huoneita kartanoosi. Jokainen huone tuo mukanaan uusia ominaisuuksia."
     },
     "manifesto": {
-      "quote": "Pöytäpelaaminen on yksi harrastus �� ei neljää erillistä yhteisöä jotka eivät puhu toisilleen."
+      "quote": "Pöytäpelaaminen on yksi harrastus, ei neljää erillistä yhteisöä jotka eivät puhu toisilleen."
     },
     "cta": {
       "welcome": "Tervetuloa",
