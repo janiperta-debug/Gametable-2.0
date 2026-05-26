@@ -1175,6 +1175,11 @@
       "deckBuilder": { "name": "Deck Builder", "status": "Planned", "desc": "For card collectors" },
       "campaignDiary": { "name": "Campaign Diary", "status": "Planned", "desc": "For adventures" }
     },
+    "mansion": {
+      "label": "Build Your Manor",
+      "title": "Unlock new rooms.",
+      "description": "Earn experience points (XP) by participating in the community and unlock new rooms in your manor. Each room brings new features."
+    },
     "manifesto": {
       "quote": "Tabletop gaming is one hobby — not four separate communities that don't talk to each other."
     },

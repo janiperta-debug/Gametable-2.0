@@ -88,6 +88,7 @@ export function LandingPage() {
       <PlayersSection />
       <FeaturesSection />
       <ToolsSection />
+      <MansionSection />
       <ManifestoSection />
       <CtaSection opened={opened} />
       <LandingFooter />
@@ -227,13 +228,33 @@ function HeroSection() {
   
   return (
     <section className="min-h-screen relative flex flex-col items-center justify-center text-center px-5 pt-24 pb-16">
-      {/* Decorative elements */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 opacity-10">
-        <div className="text-[#c9a84c] text-9xl font-cinzel">&#10022;</div>
+      {/* Hero background image */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/images/landing/hero-bg.jpeg"
+          alt=""
+          fill
+          className="object-cover"
+          priority
+        />
+        {/* Dark gradient overlay for readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1a0808]/70 via-[#1a0808]/50 to-[#1a0808]/90" />
       </div>
 
-      {/* Main heading */}
+      {/* Main content */}
       <div className="relative z-10 max-w-4xl mx-auto opacity-0 animate-[fadeUp_0.8s_0.2s_forwards]">
+        {/* GameTable Crest */}
+        <div className="mb-8">
+          <Image
+            src="/images/landing/gametable-crest.jpeg"
+            alt="GameTable"
+            width={320}
+            height={240}
+            className="mx-auto rounded-lg"
+            priority
+          />
+        </div>
+
         <h1 
           className="font-cinzel font-semibold leading-tight tracking-tight text-[#f0e6d0] mb-8"
           style={{ fontSize: "clamp(2.5rem, 8vw, 5.5rem)", letterSpacing: "-0.02em" }}
@@ -421,19 +442,19 @@ function PlayersSection() {
   const playerTypes = [
     {
       key: "boardGamer",
-      icon: "♟️",
+      image: "/images/landing/collection-shelf.jpeg",
     },
     {
       key: "roleplayer",
-      icon: "🎲",
+      image: "/images/landing/rpg-screen.jpeg",
     },
     {
       key: "miniatures",
-      icon: "⚔️",
+      image: "/images/landing/miniatures.jpeg",
     },
     {
       key: "cardCollector",
-      icon: "🃏",
+      image: "/images/landing/trading-cards.jpeg",
     },
   ]
   
@@ -451,21 +472,33 @@ function PlayersSection() {
           </h2>
         </div>
 
-        {/* Player grid */}
+        {/* Player grid with images */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 reveal">
           {playerTypes.map((p) => (
             <div 
               key={p.key} 
-              className="p-6 rounded-lg transition-all hover:border-[#c9a84c]/40"
+              className="group rounded-lg overflow-hidden transition-all hover:border-[#c9a84c]/40"
               style={{ background: "rgba(61,21,21,0.6)", border: "1px solid rgba(201,168,76,0.15)" }}
             >
-              <span className="text-3xl block mb-4">{p.icon}</span>
-              <div className="font-cinzel text-lg font-semibold text-[#f0e6d0] mb-2">
-                {t(`landing.forWhom.${p.key}.type`)}
+              {/* Image */}
+              <div className="relative h-40 overflow-hidden">
+                <Image
+                  src={p.image}
+                  alt=""
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1a0808] to-transparent" />
               </div>
-              <p className="text-sm text-[#f0e6d0]/60 leading-relaxed">
-                {t(`landing.forWhom.${p.key}.desc`)}
-              </p>
+              {/* Content */}
+              <div className="p-5">
+                <div className="font-cinzel text-lg font-semibold text-[#f0e6d0] mb-2">
+                  {t(`landing.forWhom.${p.key}.type`)}
+                </div>
+                <p className="text-sm text-[#f0e6d0]/60 leading-relaxed">
+                  {t(`landing.forWhom.${p.key}.desc`)}
+                </p>
+              </div>
             </div>
           ))}
         </div>
@@ -480,7 +513,11 @@ function PlayersSection() {
 function FeaturesSection() {
   const t = useTranslations()
   
-  const features = ["collection", "community", "events"]
+  const features = [
+    { key: "collection", image: "/images/landing/board-games-shelf.jpeg" },
+    { key: "community", image: "/images/landing/game-night.jpeg" },
+    { key: "events", image: "/images/landing/invitation.jpeg" },
+  ]
   
   return (
     <section id="ominaisuudet" className="py-16 lg:py-24 px-5 lg:px-12 border-t border-[#c9a84c]/10" style={{ background: "rgba(42,15,15,0.5)" }}>
@@ -498,19 +535,35 @@ function FeaturesSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 reveal">
           {features.map((f) => (
-            <div key={f} className="text-center">
-              <div className="font-cinzel text-6xl font-light text-[#c9a84c]/20 mb-4">
-                {t(`landing.features.${f}.number`)}
+            <div key={f.key} className="group">
+              {/* Image card */}
+              <div 
+                className="relative h-48 rounded-lg overflow-hidden mb-4"
+                style={{ border: "1px solid rgba(201,168,76,0.2)" }}
+              >
+                <Image
+                  src={f.image}
+                  alt=""
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1a0808]/80 to-transparent" />
+                <div className="absolute bottom-4 left-4 font-cinzel text-5xl font-light text-[#c9a84c]/30">
+                  {t(`landing.features.${f.key}.number`)}
+                </div>
               </div>
-              <div className="font-cinzel text-xl font-semibold text-[#c9a84c] mb-2">
-                {t(`landing.features.${f}.title`)}
+              {/* Text content */}
+              <div className="text-center">
+                <div className="font-cinzel text-xl font-semibold text-[#c9a84c] mb-2">
+                  {t(`landing.features.${f.key}.title`)}
+                </div>
+                <div className="font-cormorant text-lg italic text-[#f0e6d0]/80 mb-3">
+                  {t(`landing.features.${f.key}.subtitle`)}
+                </div>
+                <p className="text-sm text-[#f0e6d0]/50 leading-relaxed">
+                  {t(`landing.features.${f.key}.desc`)}
+                </p>
               </div>
-              <div className="font-cormorant text-lg italic text-[#f0e6d0]/80 mb-3">
-                {t(`landing.features.${f}.subtitle`)}
-              </div>
-              <p className="text-sm text-[#f0e6d0]/50 leading-relaxed">
-                {t(`landing.features.${f}.desc`)}
-              </p>
             </div>
           ))}
         </div>
@@ -592,6 +645,61 @@ function ManifestoSection() {
         >
           &ldquo;{t("landing.manifesto.quote")}&rdquo;
         </blockquote>
+      </div>
+    </section>
+  )
+}
+
+/* ────────────────────────────────────────────
+   MANSION (XP/Rooms teaser)
+   ──────────────────────────────────────────── */
+function MansionSection() {
+  const t = useTranslations()
+  
+  return (
+    <section className="py-16 lg:py-24 px-5 lg:px-12 border-t border-[#c9a84c]/10">
+      <div className="max-w-6xl mx-auto">
+        <div className="reveal text-center mb-12">
+          <div className="font-cinzel text-xs font-medium uppercase tracking-[0.3em] text-[#c9a84c] mb-4">
+            {t("landing.mansion.label")}
+          </div>
+          <h2 className="font-cinzel font-semibold tracking-tight text-[#f0e6d0] leading-tight mb-4"
+            style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)" }}
+          >
+            {t("landing.mansion.title")}
+          </h2>
+          <p className="text-[#f0e6d0]/60 max-w-2xl mx-auto">
+            {t("landing.mansion.description")}
+          </p>
+        </div>
+
+        {/* Mansion image */}
+        <div className="reveal">
+          <div 
+            className="relative rounded-lg overflow-hidden mx-auto max-w-4xl"
+            style={{ border: "2px solid rgba(201,168,76,0.3)" }}
+          >
+            <Image
+              src="/images/landing/mansion-rooms.jpeg"
+              alt=""
+              width={1200}
+              height={800}
+              className="w-full h-auto"
+            />
+            {/* Subtle overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1a0808]/60 via-transparent to-[#1a0808]/30" />
+            
+            {/* Coming soon badge */}
+            <div className="absolute bottom-6 right-6">
+              <span 
+                className="inline-block px-4 py-2 rounded font-cinzel text-sm font-medium"
+                style={{ background: "rgba(201,168,76,0.2)", color: "#c9a84c", backdropFilter: "blur(8px)" }}
+              >
+                {t("landing.mansion.comingSoon")}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   )
