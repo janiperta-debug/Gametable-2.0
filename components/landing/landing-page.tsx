@@ -688,16 +688,6 @@ function MansionSection() {
             />
             {/* Subtle overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#1a0808]/60 via-transparent to-[#1a0808]/30" />
-            
-            {/* Coming soon badge */}
-            <div className="absolute bottom-6 right-6">
-              <span 
-                className="inline-block px-4 py-2 rounded font-cinzel text-sm font-medium"
-                style={{ background: "rgba(201,168,76,0.2)", color: "#c9a84c", backdropFilter: "blur(8px)" }}
-              >
-                {t("landing.mansion.comingSoon")}
-              </span>
-            </div>
           </div>
         </div>
       </div>
