@@ -825,6 +825,11 @@
 }
 
 @layer utilities {
+  /* Safe area padding for iOS devices with home indicator */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
   /* Added logo-text class for large titles with Charm font + outline/shadow */
   .logo-text {
     font-family: var(--font-charm);
