@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
-import { User, Menu, X, Zap, LogOut, Bell, Loader2, Award, MessageCircle, Settings, Bookmark } from "lucide-react"
+import { User, Menu, X, Zap, LogOut, Bell, Loader2, Award, MessageCircle, Settings, Bookmark, Home, ShoppingBag, Mail } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useAppTheme } from "@/components/app-theme-provider"
 import { useTranslations } from "@/lib/i18n"
@@ -138,11 +138,11 @@ export function Navigation() {
 
   // Crest menu items (shown when crest is tapped on mobile)
   const crestMenuItems = [
-    { href: "/profile", label: t("nav.profile"), icon: User },
-    { href: "/collection", label: t("nav.collections"), icon: Bookmark },
-    { href: "/trophies", label: t("nav.trophies"), icon: Award },
+    { href: "/home", label: t("nav.home"), icon: Home },
+    { href: "/marketplace", label: t("nav.marketplace"), icon: ShoppingBag },
     { href: "/messages", label: t("nav.messages"), icon: MessageCircle, badge: unreadMessageCount },
-    { href: "/settings", label: t("nav.settings"), icon: Settings },
+    { href: "/trophies", label: t("nav.trophies"), icon: Award },
+    { href: "/contact", label: t("nav.contact"), icon: Mail },
   ]
 
   const getCrestImage = (theme: string) => {
