@@ -307,36 +307,43 @@ export function Navigation() {
           MOBILE NAVIGATION - TOP BAR (Bell & Profile)
           ═══════════════════════════════════════════════════════ */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 px-4 pt-3 pb-2 flex items-center justify-between pointer-events-none">
-        {/* Notifications Bell */}
+        {/* Notifications Bell with decorative frame */}
         <Link
           href="/notifications"
           className="relative pointer-events-auto w-14 h-14 flex items-center justify-center"
         >
+          {/* Decorative frame */}
+          <img
+            src="/images/icons/avatar-frame.jpeg"
+            alt=""
+            className="absolute inset-0 w-14 h-14 object-contain"
+          />
+          {/* Bell icon */}
           <img
             src="/images/icons/bell.jpeg"
             alt=""
-            className="w-12 h-12 object-contain"
+            className="w-8 h-8 object-contain z-10"
           />
           {hasUnreadNotifications && (
-            <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold">
+            <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold z-20">
               {unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}
             </span>
           )}
         </Link>
 
-        {/* Profile Avatar */}
+        {/* Profile Avatar with decorative frame */}
         <Link
           href="/profile"
           className="relative pointer-events-auto w-14 h-14 flex items-center justify-center"
         >
-          {/* Avatar frame background */}
+          {/* Decorative frame */}
           <img
             src="/images/icons/avatar-frame.jpeg"
             alt=""
             className="absolute inset-0 w-14 h-14 object-contain"
           />
           {/* User avatar inside frame */}
-          <div className="w-10 h-10 rounded-full bg-accent-gold/20 flex items-center justify-center overflow-hidden z-10">
+          <div className="w-9 h-9 rounded-full bg-accent-gold/20 flex items-center justify-center overflow-hidden z-10">
             {profile?.avatar_url ? (
               <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
             ) : (
@@ -363,7 +370,7 @@ export function Navigation() {
               <img
                 src={item.icon}
                 alt=""
-                className="w-8 h-8 object-contain"
+                className="w-10 h-10 object-contain"
               />
               <span className={`font-cinzel text-[10px] uppercase tracking-wide ${
                 isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
@@ -373,30 +380,34 @@ export function Navigation() {
             </Link>
           ))}
 
-          {/* Center Crest - Opens Menu */}
+          {/* Center Crest with decorative frame - Opens Menu */}
           <div className="crest-menu-container relative flex flex-col items-center -mt-6">
             <button
               onClick={(e) => {
                 e.stopPropagation()
                 setIsCrestMenuOpen(!isCrestMenuOpen)
               }}
-              className="relative"
+              className="relative w-16 h-16 flex items-center justify-center"
             >
-              {/* Decorative ring behind crest */}
-              <div className="absolute inset-0 w-16 h-16 rounded-full border-2 border-accent-gold/40 -m-1" />
+              {/* Decorative frame around crest */}
+              <img
+                src="/images/icons/avatar-frame.jpeg"
+                alt=""
+                className="absolute inset-0 w-16 h-16 object-contain"
+              />
               <img
                 src={getCrestImage(currentAppTheme)}
                 alt="Menu"
-                className="w-14 h-14 object-contain relative z-10"
+                className="w-11 h-11 object-contain relative z-10"
               />
             </button>
 
-            {/* Crest popup menu */}
+            {/* Crest popup menu - more solid background */}
             {isCrestMenuOpen && (
               <div 
-                className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-64 bg-card/95 backdrop-blur-md rounded-xl shadow-2xl border border-accent-gold/30 overflow-hidden"
+                className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-64 rounded-xl shadow-2xl border border-accent-gold/30 overflow-hidden"
                 style={{ 
-                  background: "linear-gradient(to bottom, rgba(201,168,76,0.1), rgba(26,8,8,0.95))"
+                  background: "linear-gradient(to bottom, rgba(61,21,21,0.98), rgba(26,8,8,0.99))"
                 }}
               >
                 {crestMenuItems.map((item, index) => (
@@ -450,7 +461,7 @@ export function Navigation() {
               <img
                 src={item.icon}
                 alt=""
-                className="w-8 h-8 object-contain"
+                className="w-10 h-10 object-contain"
               />
               <span className={`font-cinzel text-[10px] uppercase tracking-wide ${
                 isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
