@@ -362,58 +362,9 @@ export function Navigation() {
       {/* ═══════════════════════════════════════════════════════
           MOBILE NAVIGATION - BOTTOM BAR
           ═══════════════════════════════════════════════════════ */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 navbar-bg backdrop-blur-sm border-t border-accent-gold/20 safe-area-bottom relative overflow-visible">
-        <div className="flex items-end justify-around px-2 pt-2 pb-3">
-          {/* First two nav items */}
-          {mobileNavItems.slice(0, 2).map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex flex-col items-center gap-1 min-w-[70px] py-1 ${
-                isActive(item.href) ? "opacity-100" : "opacity-70"
-              }`}
-            >
-              <img
-                src={item.icon}
-                alt=""
-                className="w-14 h-14 object-contain"
-              />
-              <span className={`font-cinzel text-[10px] uppercase tracking-wide ${
-                isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
-              }`}>
-                {item.label}
-              </span>
-            </Link>
-          ))}
-
-          {/* Spacer for floating crest */}
-          <div className="min-w-[80px]" />
-
-          {/* Last two nav items */}
-          {mobileNavItems.slice(2).map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex flex-col items-center gap-1 min-w-[70px] py-1 ${
-                isActive(item.href) ? "opacity-100" : "opacity-70"
-              }`}
-            >
-              <img
-                src={item.icon}
-                alt=""
-                className="w-14 h-14 object-contain"
-              />
-              <span className={`font-cinzel text-[10px] uppercase tracking-wide ${
-                isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
-              }`}>
-                {item.label}
-              </span>
-            </Link>
-          ))}
-        </div>
-
-        {/* Floating Center Crest - Opens Menu */}
-        <div className="crest-menu-container absolute -top-8 left-1/2 -translate-x-1/2 z-10">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
+        {/* Floating Center Crest - Opens Menu (positioned above the nav bar) */}
+        <div className="crest-menu-container absolute -top-8 left-1/2 -translate-x-1/2 z-20">
           <button
             onClick={(e) => {
               e.stopPropagation()
@@ -482,7 +433,59 @@ export function Navigation() {
             </div>
           )}
         </div>
-      </nav>
+
+        {/* The actual nav bar */}
+        <nav className="navbar-bg backdrop-blur-sm border-t border-accent-gold/20 safe-area-bottom">
+          <div className="flex items-end justify-around px-2 pt-2 pb-3">
+            {/* First two nav items */}
+            {mobileNavItems.slice(0, 2).map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex flex-col items-center gap-1 min-w-[70px] py-1 ${
+                  isActive(item.href) ? "opacity-100" : "opacity-70"
+                }`}
+              >
+                <img
+                  src={item.icon}
+                  alt=""
+                  className="w-14 h-14 object-contain"
+                />
+                <span className={`font-cinzel text-[10px] uppercase tracking-wide ${
+                  isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
+                }`}>
+                  {item.label}
+                </span>
+              </Link>
+            ))}
+
+            {/* Spacer for floating crest */}
+            <div className="min-w-[80px]" />
+
+            {/* Last two nav items */}
+            {mobileNavItems.slice(2).map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex flex-col items-center gap-1 min-w-[70px] py-1 ${
+                  isActive(item.href) ? "opacity-100" : "opacity-70"
+                }`}
+              >
+                <img
+                  src={item.icon}
+                  alt=""
+                  className="w-14 h-14 object-contain"
+                />
+                <span className={`font-cinzel text-[10px] uppercase tracking-wide ${
+                  isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
+                }`}>
+                  {item.label}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </nav>
+      </div>
 
       {/* Spacer for bottom nav on mobile */}
       <div className="md:hidden h-20" />
