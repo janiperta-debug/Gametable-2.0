@@ -331,46 +331,52 @@ export function Navigation() {
           )}
         </Link>
 
-        {/* Profile Avatar with decorative frame */}
-        <Link
-          href="/profile"
-          className="relative pointer-events-auto w-14 h-14 flex items-center justify-center"
-        >
-          {/* Decorative frame */}
-          <img
-            src="/images/icons/avatar-frame.jpeg"
-            alt=""
-            className="absolute inset-0 w-14 h-14 object-contain"
-          />
-          {/* User avatar inside frame */}
-          <div className="w-9 h-9 rounded-full bg-accent-gold/20 flex items-center justify-center overflow-hidden z-10">
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <User className="w-5 h-5 text-accent-gold" />
-            )}
-          </div>
-        </Link>
+        {/* Right side: Language Switcher + Profile Avatar */}
+        <div className="flex items-center gap-2 pointer-events-auto">
+          {/* Language Switcher */}
+          <LanguageSwitcher />
+          
+          {/* Profile Avatar with decorative frame */}
+          <Link
+            href="/profile"
+            className="relative w-14 h-14 flex items-center justify-center"
+          >
+            {/* Decorative frame */}
+            <img
+              src="/images/icons/avatar-frame.jpeg"
+              alt=""
+              className="absolute inset-0 w-14 h-14 object-contain"
+            />
+            {/* User avatar inside frame */}
+            <div className="w-9 h-9 rounded-full bg-accent-gold/20 flex items-center justify-center overflow-hidden z-10">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-5 h-5 text-accent-gold" />
+              )}
+            </div>
+          </Link>
+        </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════
           MOBILE NAVIGATION - BOTTOM BAR
           ═══════════════════════════════════════════════════════ */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 navbar-bg backdrop-blur-sm border-t border-accent-gold/20 safe-area-bottom">
-        <div className="flex items-end justify-around px-2 pt-2 pb-2">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 navbar-bg backdrop-blur-sm border-t border-accent-gold/20 safe-area-bottom relative overflow-visible">
+        <div className="flex items-end justify-around px-2 pt-2 pb-3">
           {/* First two nav items */}
           {mobileNavItems.slice(0, 2).map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center gap-1 min-w-[60px] py-1 ${
+              className={`flex flex-col items-center gap-1 min-w-[70px] py-1 ${
                 isActive(item.href) ? "opacity-100" : "opacity-70"
               }`}
             >
               <img
                 src={item.icon}
                 alt=""
-                className="w-10 h-10 object-contain"
+                className="w-14 h-14 object-contain"
               />
               <span className={`font-cinzel text-[10px] uppercase tracking-wide ${
                 isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
@@ -380,88 +386,22 @@ export function Navigation() {
             </Link>
           ))}
 
-          {/* Center Crest with decorative frame - Opens Menu */}
-          <div className="crest-menu-container relative flex flex-col items-center -mt-6">
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setIsCrestMenuOpen(!isCrestMenuOpen)
-              }}
-              className="relative w-16 h-16 flex items-center justify-center"
-            >
-              {/* Decorative frame around crest */}
-              <img
-                src="/images/icons/avatar-frame.jpeg"
-                alt=""
-                className="absolute inset-0 w-16 h-16 object-contain"
-              />
-              <img
-                src={getCrestImage(currentAppTheme)}
-                alt="Menu"
-                className="w-11 h-11 object-contain relative z-10"
-              />
-            </button>
-
-            {/* Crest popup menu - more solid background */}
-            {isCrestMenuOpen && (
-              <div 
-                className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-64 rounded-xl shadow-2xl border border-accent-gold/30 overflow-hidden"
-                style={{ 
-                  background: "linear-gradient(to bottom, rgba(61,21,21,0.98), rgba(26,8,8,0.99))"
-                }}
-              >
-                {crestMenuItems.map((item, index) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center gap-4 px-5 py-4 hover:bg-accent-gold/10 transition-colors ${
-                      index !== crestMenuItems.length - 1 ? "border-b border-accent-gold/10" : ""
-                    }`}
-                    onClick={() => setIsCrestMenuOpen(false)}
-                  >
-                    <item.icon className="w-5 h-5 text-accent-gold" />
-                    <div className="flex-1">
-                      <span className="text-foreground font-cinzel text-sm uppercase tracking-wide">
-                        {item.label}
-                      </span>
-                    </div>
-                    {item.badge && item.badge > 0 && (
-                      <span className="bg-red-500 text-white text-[10px] rounded-full h-5 min-w-[20px] flex items-center justify-center px-1.5">
-                        {item.badge > 99 ? "99+" : item.badge}
-                      </span>
-                    )}
-                  </Link>
-                ))}
-                
-                {/* Logout button */}
-                {user && (
-                  <button
-                    className="flex items-center gap-4 px-5 py-4 hover:bg-accent-gold/10 transition-colors w-full text-left border-t border-accent-gold/20"
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="w-5 h-5 text-accent-gold" />
-                    <span className="text-foreground font-cinzel text-sm uppercase tracking-wide">
-                      {t("nav.logout")}
-                    </span>
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+          {/* Spacer for floating crest */}
+          <div className="min-w-[80px]" />
 
           {/* Last two nav items */}
           {mobileNavItems.slice(2).map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center gap-1 min-w-[60px] py-1 ${
+              className={`flex flex-col items-center gap-1 min-w-[70px] py-1 ${
                 isActive(item.href) ? "opacity-100" : "opacity-70"
               }`}
             >
               <img
                 src={item.icon}
                 alt=""
-                className="w-10 h-10 object-contain"
+                className="w-14 h-14 object-contain"
               />
               <span className={`font-cinzel text-[10px] uppercase tracking-wide ${
                 isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
@@ -470,6 +410,77 @@ export function Navigation() {
               </span>
             </Link>
           ))}
+        </div>
+
+        {/* Floating Center Crest - Opens Menu */}
+        <div className="crest-menu-container absolute -top-8 left-1/2 -translate-x-1/2 z-10">
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsCrestMenuOpen(!isCrestMenuOpen)
+            }}
+            className={`relative w-16 h-16 rounded-full border-2 border-yellow-600 shadow-lg shadow-black/50 flex items-center justify-center bg-[#1a0808] ${
+              isCrestMenuOpen ? "ring-2 ring-yellow-400 ring-offset-1 ring-offset-[#1a0808]" : ""
+            }`}
+          >
+            {/* Decorative frame around crest */}
+            <img
+              src="/images/icons/avatar-frame.jpeg"
+              alt=""
+              className="absolute inset-0 w-16 h-16 object-contain"
+            />
+            <img
+              src={getCrestImage(currentAppTheme)}
+              alt="Menu"
+              className="w-11 h-11 object-contain relative z-10"
+            />
+          </button>
+
+          {/* Crest popup menu - more solid background */}
+          {isCrestMenuOpen && (
+            <div 
+              className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-64 rounded-xl shadow-2xl border border-accent-gold/30 overflow-hidden"
+              style={{ 
+                background: "linear-gradient(to bottom, rgba(61,21,21,0.98), rgba(26,8,8,0.99))"
+              }}
+            >
+              {crestMenuItems.map((item, index) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-4 px-5 py-4 hover:bg-accent-gold/10 transition-colors ${
+                    index !== crestMenuItems.length - 1 ? "border-b border-accent-gold/10" : ""
+                  }`}
+                  onClick={() => setIsCrestMenuOpen(false)}
+                >
+                  <item.icon className="w-5 h-5 text-accent-gold" />
+                  <div className="flex-1">
+                    <span className="text-foreground font-cinzel text-sm uppercase tracking-wide">
+                      {item.label}
+                    </span>
+                  </div>
+                  {item.badge && item.badge > 0 && (
+                    <span className="bg-red-500 text-white text-[10px] rounded-full h-5 min-w-[20px] flex items-center justify-center px-1.5">
+                      {item.badge > 99 ? "99+" : item.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+              
+              {/* Logout button */}
+              {user && (
+                <button
+                  className="flex items-center gap-4 px-5 py-4 hover:bg-accent-gold/10 transition-colors w-full text-left border-t border-accent-gold/20"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="w-5 h-5 text-accent-gold" />
+                  <span className="text-foreground font-cinzel text-sm uppercase tracking-wide">
+                    {t("nav.logout")}
+                  </span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </nav>
 
