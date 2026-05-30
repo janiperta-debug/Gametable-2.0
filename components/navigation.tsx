@@ -322,7 +322,7 @@ export function Navigation() {
           <img
             src="/images/icons/bell.jpeg"
             alt=""
-            className="w-8 h-8 object-contain z-10"
+            className="w-9 h-9 object-contain z-10"
           />
           {hasUnreadNotifications && (
             <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold z-20">
