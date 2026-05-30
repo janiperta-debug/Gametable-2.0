@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import Image from "next/image"
 import { useAppTheme } from "@/components/app-theme-provider"
 import { useTranslations } from "@/lib/i18n"
@@ -42,7 +41,7 @@ export default function HomePage() {
   const backgroundImage = themeData?.image || "/themes/main-hall-preview.png"
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 pt-20 pb-8 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 pt-4 pb-28 relative overflow-hidden">
       {/* Theme background image - extends behind navigation */}
       <div className="fixed inset-0 z-0">
         <Image
@@ -101,24 +100,6 @@ export default function HomePage() {
           </span>
           <span style={{ color: "hsl(var(--accent-gold))" }}>&#9670;</span>
         </div>
-
-        {/* Call to action */}
-        <Link
-          href="/profile"
-          className="inline-block px-6 py-3 md:px-8 md:py-4 text-base md:text-lg border-2 hover:text-background transition-all duration-300 rounded-lg"
-          style={{
-            color: "hsl(var(--accent-gold))",
-            borderColor: "hsl(var(--accent-gold))",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "hsl(var(--accent-gold))"
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent"
-          }}
-        >
-          {t("home.enterManor")}
-        </Link>
 
         {/* Bottom ornamental elements */}
         <div className="pt-8 md:pt-12 space-y-4">
