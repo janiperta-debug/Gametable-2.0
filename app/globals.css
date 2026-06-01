@@ -17,6 +17,22 @@
     );
 }
 
+/* 
+ * Mobile bottom navigation compensation
+ * The app uses a fixed bottom navbar on mobile (~140px including floating crest)
+ * This ensures all page content has enough bottom padding to not be hidden
+ */
+@media (max-width: 767px) {
+  /* Target common page wrapper patterns */
+  .app-background main > div.min-h-screen,
+  .app-background main .min-h-screen.room-environment,
+  .app-background main .min-h-screen.manor-bg,
+  .app-background main .min-h-screen.page-background {
+    padding-bottom: 160px !important;
+    min-height: calc(100vh - 160px) !important;
+  }
+}
+
 @layer base {
   /* Default to main-hall theme to prevent flash of white content */
   :root {
