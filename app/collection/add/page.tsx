@@ -348,7 +348,7 @@ export default function AddGamePage() {
   }
 
   return (
-    <div className="min-h-screen room-environment pb-36 md:pb-0">
+    <div className="min-h-screen room-environment">
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
@@ -628,8 +628,8 @@ export default function AddGamePage() {
                           </div>
                         </div>
                       )}
-                      {/* Action buttons - sticky above navbar on mobile */}
-                      <div className={`flex flex-col sm:flex-row justify-end gap-3 mt-4 ${selectedCategory !== "trading_card" && selectedCategory !== "miniature" ? "pt-4 border-t border-accent-gold/20" : ""} fixed bottom-36 left-0 right-0 md:static md:bottom-auto bg-card/95 backdrop-blur-sm p-4 md:p-0 md:bg-transparent md:backdrop-blur-none border-t border-accent-gold/20 md:border-t-0 z-40`}>
+                      {/* Action buttons */}
+                      <div className={`flex flex-col sm:flex-row justify-end gap-3 mt-4 ${selectedCategory !== "trading_card" && selectedCategory !== "miniature" ? "pt-4 border-t border-accent-gold/20" : ""}`}>
                         <Button variant="outline" onClick={() => setSelectedGame(null)} className="font-body bg-transparent">
                           {t("common.cancel")}
                         </Button>
