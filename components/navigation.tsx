@@ -292,28 +292,44 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-1 px-4 lg:px-5 py-3 rounded-xl transition-all bg-card/90 backdrop-blur-sm border border-accent-gold/30 hover:border-accent-gold hover:bg-card min-w-[90px] lg:min-w-[110px] ${
-                  isActive(item.href) ? "border-accent-gold bg-card" : ""
+                className={`relative flex flex-col items-center justify-center gap-1 w-[90px] h-[90px] lg:w-[110px] lg:h-[110px] transition-all hover:scale-105 ${
+                  isActive(item.href) ? "scale-105" : ""
                 }`}
               >
-                <item.icon className={`w-6 h-6 lg:w-7 lg:h-7 ${isActive(item.href) ? "text-accent-gold" : "text-foreground/70"}`} />
-                <span className={`font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center ${
-                  isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
-                }`}>
-                  {item.label}
-                </span>
+                {/* Gold frame background */}
+                <img
+                  src="/images/nav-frame-square.png"
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                />
+                {/* Content */}
+                <div className="relative z-10 flex flex-col items-center gap-1">
+                  <item.icon className={`w-6 h-6 lg:w-7 lg:h-7 ${isActive(item.href) ? "text-accent-gold" : "text-foreground/70"}`} />
+                  <span className={`font-cinzel text-[9px] lg:text-[10px] uppercase tracking-wide text-center ${
+                    isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
+                  }`}>
+                    {item.label}
+                  </span>
+                </div>
               </Link>
             ))}
 
             {/* Center crest button - home */}
             <Link
               href="/home"
-              className="flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-card/90 backdrop-blur-sm border-2 border-accent-gold hover:border-accent-gold/80 transition-all hover:scale-105"
+              className="relative flex items-center justify-center w-20 h-20 lg:w-24 lg:h-24 transition-all hover:scale-105"
             >
+              {/* Gold circle frame */}
+              <img
+                src="/images/nav-frame-circle.png"
+                alt=""
+                className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+              />
+              {/* Crest */}
               <img
                 src={getCrestImage(currentAppTheme)}
                 alt="Home"
-                className="w-12 h-12 lg:w-16 lg:h-16 object-contain"
+                className="relative z-10 w-14 h-14 lg:w-16 lg:h-16 object-contain"
               />
             </Link>
 
@@ -322,16 +338,25 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-1 px-4 lg:px-5 py-3 rounded-xl transition-all bg-card/90 backdrop-blur-sm border border-accent-gold/30 hover:border-accent-gold hover:bg-card min-w-[90px] lg:min-w-[110px] ${
-                  isActive(item.href) ? "border-accent-gold bg-card" : ""
+                className={`relative flex flex-col items-center justify-center gap-1 w-[90px] h-[90px] lg:w-[110px] lg:h-[110px] transition-all hover:scale-105 ${
+                  isActive(item.href) ? "scale-105" : ""
                 }`}
               >
-                <item.icon className={`w-6 h-6 lg:w-7 lg:h-7 ${isActive(item.href) ? "text-accent-gold" : "text-foreground/70"}`} />
-                <span className={`font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center ${
-                  isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
-                }`}>
-                  {item.label}
-                </span>
+                {/* Gold frame background */}
+                <img
+                  src="/images/nav-frame-square.png"
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                />
+                {/* Content */}
+                <div className="relative z-10 flex flex-col items-center gap-1">
+                  <item.icon className={`w-6 h-6 lg:w-7 lg:h-7 ${isActive(item.href) ? "text-accent-gold" : "text-foreground/70"}`} />
+                  <span className={`font-cinzel text-[9px] lg:text-[10px] uppercase tracking-wide text-center ${
+                    isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
+                  }`}>
+                    {item.label}
+                  </span>
+                </div>
               </Link>
             ))}
           </div>
