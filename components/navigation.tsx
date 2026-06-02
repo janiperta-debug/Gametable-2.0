@@ -279,17 +279,17 @@ export function Navigation() {
       </nav>
 
       {/* ═══════════════════════════════════════════════════════
-          DESKTOP NAVIGATION - BOTTOM BAR (PÄÄVALIKKO)
+          DESKTOP NAVIGATION - BOTTOM BAR (8 separate buttons)
           ═══════════════════════════════════════════════════════ */}
-      <nav className="hidden md:block fixed bottom-0 left-0 right-0 z-50 navbar-bg backdrop-blur-sm border-t border-accent-gold/20">
+      <nav className="hidden md:block fixed bottom-4 left-0 right-0 z-50 pointer-events-none">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-center gap-2 lg:gap-4 py-3">
+          <div className="flex items-center justify-center gap-3 lg:gap-4 pointer-events-auto">
             {desktopNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-1 px-3 lg:px-4 py-2 rounded-lg transition-all hover:bg-accent-gold/10 min-w-[80px] lg:min-w-[100px] ${
-                  isActive(item.href) ? "bg-accent-gold/10" : ""
+                className={`flex flex-col items-center gap-1 px-4 lg:px-5 py-3 rounded-xl transition-all bg-card/90 backdrop-blur-sm border border-accent-gold/30 hover:border-accent-gold hover:bg-card min-w-[90px] lg:min-w-[110px] ${
+                  isActive(item.href) ? "border-accent-gold bg-card" : ""
                 }`}
               >
                 <div className="relative">
