@@ -31,44 +31,38 @@ async function searchSupabase(query: string, system?: string): Promise<Miniature
   try {
     const supabase = await createClient()
     
-    const { data, error } = await supabase
+    let dbQuery = supabase
       .from("mini_units")
       .select(`
         id,
         name,
-        unit_type,
-        base_points,
-        model_count_min,
-        faction_id,
+        type,
+        points,
+        models,
         mini_factions!inner (
           id,
           name,
-          system_id
+          mini_systems!inner (
+            id,
+            name,
+            code
+          )
         )
       `)
       .ilike("name", `%${query}%`)
       .limit(20)
     
+    // Filter by system if provided
+    if (system) {
+      dbQuery = dbQuery.eq("mini_factions.mini_systems.code", system)
+    }
+    
+    const { data, error } = await dbQuery
+    
     if (error) {
       console.error("Supabase miniatures query error:", error)
       return []
     }
-    
-    return (data || []).map((unit: any) => ({
-      id: unit.id,
-      name: unit.name,
-      system: "wh40k",
-      systemName: "Warhammer 40,000",
-      faction: unit.mini_factions?.name,
-      type: "unit" as const,
-      points: unit.base_points || undefined,
-      models: unit.model_count_min || undefined,
-    }))
-  } catch (error) {
-    console.error("Supabase search error:", error)
-    return []
-  }
-}
     
     // Transform to MiniatureSearchResult format
     return (data || []).map((unit: any) => ({

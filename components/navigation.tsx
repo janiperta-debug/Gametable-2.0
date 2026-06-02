@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
-import { User, LogOut, Bell, Award, MessageCircle, Home, ShoppingBag, Mail, Archive, Users, Calendar, DoorOpen, Trophy, Phone } from "lucide-react"
+import { User, Menu, X, Zap, LogOut, Bell, Loader2, Award, MessageCircle, Settings, Bookmark, Home, ShoppingBag, Mail, Archive, Users, Calendar, DoorOpen, Trophy, Phone } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useAppTheme } from "@/components/app-theme-provider"
 import { useTranslations } from "@/lib/i18n"
@@ -117,7 +117,7 @@ export function Navigation() {
     router.refresh()
   }
 
-  // Desktop nav items (now in bottom nav)
+  // Desktop bottom nav items
   const desktopNavItems = [
     { href: "/collection", label: t("nav.collection"), subtitle: "Kokoelmasi", icon: Archive },
     { href: "/discover", label: t("nav.community"), subtitle: "Seura & pelaajat", icon: Users },
@@ -176,7 +176,7 @@ export function Navigation() {
   return (
     <>
       {/* ═══════════════════════════════════════════════════════
-          DESKTOP NAVIGATION - TOP BAR (right side only)
+          DESKTOP NAVIGATION - TOP BAR (right side only, left is EMPTY)
           ═══════════════════════════════════════════════════════ */}
       <nav className="hidden md:block fixed top-0 left-0 right-0 z-50 pointer-events-none">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -333,7 +333,7 @@ export function Navigation() {
           <img
             src="/images/icons/bell.jpeg"
             alt=""
-            className="w-12 h-12 object-contain z-10"
+            className="w-9 h-9 object-contain z-10"
           />
           {hasUnreadNotifications && (
             <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold z-20">

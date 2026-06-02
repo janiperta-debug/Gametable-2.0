@@ -628,19 +628,9 @@ export default function AddGamePage() {
                           </div>
                         </div>
                       )}
-                      {/* Action buttons */}
-                      <div className={`flex flex-col sm:flex-row justify-end gap-3 mt-4 ${selectedCategory !== "trading_card" && selectedCategory !== "miniature" ? "pt-4 border-t border-accent-gold/20" : ""}`}>
+                      <div className={`flex justify-end gap-3 mt-4 ${selectedCategory !== "trading_card" && selectedCategory !== "miniature" ? "pt-4 border-t border-accent-gold/20" : ""}`}>
                         <Button variant="outline" onClick={() => setSelectedGame(null)} className="font-body bg-transparent">
                           {t("common.cancel")}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => handleAddToWishlist(selectedGame)}
-                          disabled={addingGameId === selectedGame.id}
-                          className="font-body bg-transparent"
-                        >
-                          <Heart className="h-4 w-4 mr-2" />
-                          {t("collection.addToWishlist")}
                         </Button>
                         <Button
                           onClick={handleAddGame}
