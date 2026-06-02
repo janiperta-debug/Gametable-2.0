@@ -1,6 +1,5 @@
 "use client"
 
-import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -76,8 +75,7 @@ export default function UserProfilePage({ params }: { params: { userId: string }
   ]
 
   return (
-    <div className="min-h-screen manor-bg">
-      <Navigation />
+    <div className="min-h-screen">
       <main className="container mx-auto px-4 py-8 max-w-5xl">
         <Link
           href="/discover"

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, use } from "react"
-import { Navigation } from "@/components/navigation"
 import { CollectionFilters } from "@/components/collection-filters"
 import { GameGrid } from "@/components/game-grid"
 import { Filter, ArrowLeft } from "lucide-react"
@@ -23,8 +22,7 @@ export default function UserCollectionPage({ params }: { params: Promise<{ userI
   }
 
   return (
-    <div className="min-h-screen room-environment">
-      <Navigation />
+    <div className="min-h-screen">
       <main className="container mx-auto px-4 py-8">
         {/* Back Button */}
         <Link

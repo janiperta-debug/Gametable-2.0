@@ -1,6 +1,5 @@
 "use client"
 
-import { Navigation } from "@/components/navigation"
 import { BadgeIcon, Lock, Trophy, Award, ArrowLeft } from "lucide-react"
 import { BADGE_DEFINITIONS, type BadgeSeries } from "@/lib/badge-definitions"
 import { getUserBadgeProgress } from "@/lib/mock-user-progress"
@@ -36,8 +35,7 @@ export default function TrophiesPage({ params }: { params: { userId: string } })
   }, 0)
 
   return (
-    <div className="min-h-screen manor-bg">
-      <Navigation />
+    <div className="min-h-screen">
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         <Link
           href={`/profile/${userId}`}
