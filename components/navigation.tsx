@@ -286,50 +286,46 @@ export function Navigation() {
           ═══════════════════════════════════════════════════════ */}
       <nav className="hidden md:block fixed bottom-4 left-0 right-0 z-50 pointer-events-none">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-end justify-center gap-1 lg:gap-2 pointer-events-auto">
+          <div className="flex items-center justify-center gap-3 lg:gap-4 pointer-events-auto">
             {/* Left 4 buttons */}
             {desktopNavItemsLeft.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative flex flex-col items-center justify-center w-[70px] h-[70px] lg:w-[85px] lg:h-[85px] transition-all hover:scale-105 ${
+                className={`relative flex flex-col items-center gap-1 px-4 lg:px-5 py-3 min-w-[90px] lg:min-w-[110px] transition-all hover:scale-105 ${
                   isActive(item.href) ? "scale-105" : ""
                 }`}
               >
-                {/* Gold frame background - larger than button to show full frame */}
+                {/* Gold frame background - stretches to fit button */}
                 <img
                   src="/images/nav-frame-square.png"
                   alt=""
-                  className="absolute -inset-3 lg:-inset-4 w-[calc(100%+24px)] h-[calc(100%+24px)] lg:w-[calc(100%+32px)] lg:h-[calc(100%+32px)] object-contain pointer-events-none"
+                  className="absolute inset-0 w-full h-full object-fill pointer-events-none"
                 />
-                {/* Content */}
-                <div className="relative z-10 flex flex-col items-center gap-0.5">
-                  <item.icon className={`w-5 h-5 lg:w-6 lg:h-6 ${isActive(item.href) ? "text-accent-gold" : "text-foreground"}`} />
-                  <span className={`font-cinzel text-[8px] lg:text-[9px] uppercase tracking-wide text-center leading-tight ${
-                    isActive(item.href) ? "text-accent-gold" : "text-foreground"
-                  }`}>
-                    {item.label}
-                  </span>
-                </div>
+                <item.icon className={`relative z-10 w-6 h-6 lg:w-7 lg:h-7 ${isActive(item.href) ? "text-accent-gold" : "text-foreground/70"}`} />
+                <span className={`relative z-10 font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center ${
+                  isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
+                }`}>
+                  {item.label}
+                </span>
               </Link>
             ))}
 
             {/* Center crest button - home */}
             <Link
               href="/home"
-              className="relative flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 transition-all hover:scale-105 mx-1"
+              className="relative flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 transition-all hover:scale-105"
             >
-              {/* Gold circle frame - larger to show ornament */}
+              {/* Gold circle frame - stretches to fit button */}
               <img
                 src="/images/nav-frame-circle.png"
                 alt=""
-                className="absolute -inset-4 lg:-inset-5 w-[calc(100%+32px)] h-[calc(100%+32px)] lg:w-[calc(100%+40px)] lg:h-[calc(100%+40px)] object-contain pointer-events-none"
+                className="absolute inset-0 w-full h-full object-fill pointer-events-none"
               />
-              {/* Crest */}
               <img
                 src={getCrestImage(currentAppTheme)}
                 alt="Home"
-                className="relative z-10 w-12 h-12 lg:w-14 lg:h-14 object-contain"
+                className="relative z-10 w-12 h-12 lg:w-16 lg:h-16 object-contain"
               />
             </Link>
 
@@ -338,25 +334,22 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative flex flex-col items-center justify-center w-[70px] h-[70px] lg:w-[85px] lg:h-[85px] transition-all hover:scale-105 ${
+                className={`relative flex flex-col items-center gap-1 px-4 lg:px-5 py-3 min-w-[90px] lg:min-w-[110px] transition-all hover:scale-105 ${
                   isActive(item.href) ? "scale-105" : ""
                 }`}
               >
-                {/* Gold frame background */}
+                {/* Gold frame background - stretches to fit button */}
                 <img
                   src="/images/nav-frame-square.png"
                   alt=""
-                  className="absolute -inset-3 lg:-inset-4 w-[calc(100%+24px)] h-[calc(100%+24px)] lg:w-[calc(100%+32px)] lg:h-[calc(100%+32px)] object-contain pointer-events-none"
+                  className="absolute inset-0 w-full h-full object-fill pointer-events-none"
                 />
-                {/* Content */}
-                <div className="relative z-10 flex flex-col items-center gap-0.5">
-                  <item.icon className={`w-5 h-5 lg:w-6 lg:h-6 ${isActive(item.href) ? "text-accent-gold" : "text-foreground"}`} />
-                  <span className={`font-cinzel text-[8px] lg:text-[9px] uppercase tracking-wide text-center leading-tight ${
-                    isActive(item.href) ? "text-accent-gold" : "text-foreground"
-                  }`}>
-                    {item.label}
-                  </span>
-                </div>
+                <item.icon className={`relative z-10 w-6 h-6 lg:w-7 lg:h-7 ${isActive(item.href) ? "text-accent-gold" : "text-foreground/70"}`} />
+                <span className={`relative z-10 font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center ${
+                  isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
+                }`}>
+                  {item.label}
+                </span>
               </Link>
             ))}
           </div>
