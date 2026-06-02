@@ -117,16 +117,19 @@ export function Navigation() {
     router.refresh()
   }
 
-  // Desktop bottom nav items
-  const desktopNavItems = [
-    { href: "/collection", label: t("nav.collection"), subtitle: "Kokoelmasi", icon: Archive },
-    { href: "/discover", label: t("nav.community"), subtitle: "Seura & pelaajat", icon: Users },
-    { href: "/events", label: t("nav.events"), subtitle: "Kalenteri & kisat", icon: Calendar },
-    { href: "/marketplace", label: t("nav.marketplace"), subtitle: "Kauppa & tarjoukset", icon: ShoppingBag },
-    { href: "/themes", label: t("nav.themes"), subtitle: "Pelitilat & pöydät", icon: DoorOpen },
-    { href: "/messages", label: t("nav.messages"), subtitle: "Posti & viestit", icon: MessageCircle, badge: unreadMessageCount },
-    { href: "/trophies", label: t("nav.trophies"), subtitle: "Saavutukset", icon: Trophy },
-    { href: "/contact", label: t("nav.contact"), subtitle: "Lisätietoa", icon: Phone },
+  // Desktop bottom nav items (split into left and right groups, crest in middle)
+  const desktopNavItemsLeft = [
+    { href: "/collection", label: t("nav.collection"), icon: Archive },
+    { href: "/discover", label: t("nav.community"), icon: Users },
+    { href: "/events", label: t("nav.events"), icon: Calendar },
+    { href: "/marketplace", label: t("nav.marketplace"), icon: ShoppingBag },
+  ]
+  
+  const desktopNavItemsRight = [
+    { href: "/themes", label: t("nav.themes"), icon: DoorOpen },
+    { href: "/messages", label: t("nav.messages"), icon: MessageCircle },
+    { href: "/trophies", label: t("nav.trophies"), icon: Trophy },
+    { href: "/contact", label: t("nav.contact"), icon: Phone },
   ]
 
   // Mobile bottom nav items (4 main items)
@@ -279,12 +282,13 @@ export function Navigation() {
       </nav>
 
       {/* ═══════════════════════════════════════════════════════
-          DESKTOP NAVIGATION - BOTTOM BAR (8 separate buttons)
+          DESKTOP NAVIGATION - BOTTOM BAR (4 buttons + crest + 4 buttons)
           ═══════════════════════════════════════════════════════ */}
       <nav className="hidden md:block fixed bottom-4 left-0 right-0 z-50 pointer-events-none">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-center gap-3 lg:gap-4 pointer-events-auto">
-            {desktopNavItems.map((item) => (
+            {/* Left 4 buttons */}
+            {desktopNavItemsLeft.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -292,21 +296,41 @@ export function Navigation() {
                   isActive(item.href) ? "border-accent-gold bg-card" : ""
                 }`}
               >
-                <div className="relative">
-                  <item.icon className={`w-6 h-6 lg:w-7 lg:h-7 ${isActive(item.href) ? "text-accent-gold" : "text-foreground/70"}`} />
-                  {item.badge && item.badge > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full h-4 min-w-[16px] flex items-center justify-center px-1">
-                      {item.badge > 99 ? "99+" : item.badge}
-                    </span>
-                  )}
-                </div>
+                <item.icon className={`w-6 h-6 lg:w-7 lg:h-7 ${isActive(item.href) ? "text-accent-gold" : "text-foreground/70"}`} />
                 <span className={`font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center ${
                   isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
                 }`}>
                   {item.label}
                 </span>
-                <span className="text-[9px] lg:text-[10px] text-foreground/50 text-center hidden lg:block">
-                  {item.subtitle}
+              </Link>
+            ))}
+
+            {/* Center crest button - home */}
+            <Link
+              href="/home"
+              className="flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-card/90 backdrop-blur-sm border-2 border-accent-gold hover:border-accent-gold/80 transition-all hover:scale-105"
+            >
+              <img
+                src={getCrestImage(currentAppTheme)}
+                alt="Home"
+                className="w-12 h-12 lg:w-16 lg:h-16 object-contain"
+              />
+            </Link>
+
+            {/* Right 4 buttons */}
+            {desktopNavItemsRight.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex flex-col items-center gap-1 px-4 lg:px-5 py-3 rounded-xl transition-all bg-card/90 backdrop-blur-sm border border-accent-gold/30 hover:border-accent-gold hover:bg-card min-w-[90px] lg:min-w-[110px] ${
+                  isActive(item.href) ? "border-accent-gold bg-card" : ""
+                }`}
+              >
+                <item.icon className={`w-6 h-6 lg:w-7 lg:h-7 ${isActive(item.href) ? "text-accent-gold" : "text-foreground/70"}`} />
+                <span className={`font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center ${
+                  isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
+                }`}>
+                  {item.label}
                 </span>
               </Link>
             ))}
