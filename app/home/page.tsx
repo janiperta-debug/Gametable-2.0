@@ -18,7 +18,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col px-4 md:px-8 lg:px-16 pt-4 md:pt-6 pb-32 md:pb-36 relative overflow-hidden">
+    <div className="h-screen flex flex-col px-4 md:px-8 lg:px-16 pt-4 md:pt-6 pb-28 md:pb-32 relative overflow-hidden">
       {/* Full hero background image - no overlay, displayed in full glory */}
       <div className="fixed inset-0 z-0">
         <Image
@@ -41,13 +41,19 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Welcome title */}
-        <h2 className="text-2xl sm:text-3xl md:text-4xl mb-3 md:mb-4" style={{ color: "hsl(var(--accent-gold))" }}>
+        {/* Welcome title - white with shadow for visibility */}
+        <h2 
+          className="text-2xl sm:text-3xl md:text-4xl mb-3 md:mb-4 text-white drop-shadow-lg"
+          style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)" }}
+        >
           {t("home.welcome")}
         </h2>
 
-        {/* Description */}
-        <p className="text-base sm:text-lg md:text-xl text-foreground leading-relaxed">
+        {/* Description - with shadow for visibility */}
+        <p 
+          className="text-base sm:text-lg md:text-xl text-foreground leading-relaxed drop-shadow-lg"
+          style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5)" }}
+        >
           {t("home.description")}
         </p>
       </div>
