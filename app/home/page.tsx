@@ -18,7 +18,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center px-4 md:px-8 lg:px-16 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col px-4 md:px-8 lg:px-16 pt-4 md:pt-6 pb-32 md:pb-36 relative overflow-hidden">
       {/* Full hero background image - no overlay, displayed in full glory */}
       <div className="fixed inset-0 z-0">
         <Image
@@ -30,24 +30,24 @@ export default function HomePage() {
         />
       </div>
 
-      {/* Content - aligned to the left */}
-      <div className="relative z-10 max-w-md lg:max-w-lg">
-        {/* New GameTable crest logo */}
+      {/* Content - aligned to the left, starting from top */}
+      <div className="relative z-10 max-w-lg lg:max-w-xl">
+        {/* GameTable crest logo - larger and at top */}
         <div className="mb-4 md:mb-6">
           <img
             src="/images/gametable-crest-logo.png"
             alt="GameTable"
-            className="w-48 md:w-64 lg:w-72 h-auto"
+            className="w-56 md:w-72 lg:w-80 xl:w-96 h-auto"
           />
         </div>
 
         {/* Welcome title */}
-        <h2 className="text-xl sm:text-2xl md:text-3xl mb-3 md:mb-4" style={{ color: "hsl(var(--accent-gold))" }}>
+        <h2 className="text-2xl sm:text-3xl md:text-4xl mb-3 md:mb-4" style={{ color: "hsl(var(--accent-gold))" }}>
           {t("home.welcome")}
         </h2>
 
         {/* Description */}
-        <p className="text-sm sm:text-base md:text-lg text-foreground leading-relaxed">
+        <p className="text-base sm:text-lg md:text-xl text-foreground leading-relaxed">
           {t("home.description")}
         </p>
       </div>
