@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
-import { User, Menu, X, Zap, LogOut, Bell, Loader2, Award, MessageCircle, Settings, Bookmark, Home, ShoppingBag, Mail } from "lucide-react"
+import { User, LogOut, Bell, Award, MessageCircle, Home, ShoppingBag, Mail, Archive, Users, Calendar, DoorOpen, Trophy, Phone } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useAppTheme } from "@/components/app-theme-provider"
 import { useTranslations } from "@/lib/i18n"
@@ -12,6 +12,7 @@ import { useUser } from "@/hooks/useUser"
 import { createClient } from "@/lib/supabase/client"
 import { getUnreadCount } from "@/app/actions/messages"
 import { getUnreadNotificationCount } from "@/app/actions/notifications"
+import { xpProgressPercent } from "@/lib/xp-utils"
 
 export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -116,17 +117,17 @@ export function Navigation() {
     router.refresh()
   }
 
-  // Desktop nav items
-  const navItems = [
-    { href: "/collection", label: t("nav.collection") },
-    { href: "/discover", label: t("nav.community") },
-    { href: "/marketplace", label: t("nav.marketplace") },
-    { href: "/events", label: t("nav.events") },
-    { href: "/themes", label: t("nav.themes") },
-    { href: "/messages", label: t("nav.messages"), badge: unreadMessageCount },
-    { href: "/trophies", label: t("nav.trophies") },
-    { href: "/contact", label: t("nav.contact") },
-  ] as { href: string; label: string; badge?: number }[]
+  // Desktop nav items (now in bottom nav)
+  const desktopNavItems = [
+    { href: "/collection", label: t("nav.collection"), subtitle: "Kokoelmasi", icon: Archive },
+    { href: "/discover", label: t("nav.community"), subtitle: "Seura & pelaajat", icon: Users },
+    { href: "/events", label: t("nav.events"), subtitle: "Kalenteri & kisat", icon: Calendar },
+    { href: "/marketplace", label: t("nav.marketplace"), subtitle: "Kauppa & tarjoukset", icon: ShoppingBag },
+    { href: "/themes", label: t("nav.themes"), subtitle: "Pelitilat & pöydät", icon: DoorOpen },
+    { href: "/messages", label: t("nav.messages"), subtitle: "Posti & viestit", icon: MessageCircle, badge: unreadMessageCount },
+    { href: "/trophies", label: t("nav.trophies"), subtitle: "Saavutukset", icon: Trophy },
+    { href: "/contact", label: t("nav.contact"), subtitle: "Lisätietoa", icon: Phone },
+  ]
 
   // Mobile bottom nav items (4 main items)
   const mobileNavItems = [
@@ -175,45 +176,48 @@ export function Navigation() {
   return (
     <>
       {/* ═══════════════════════════════════════════════════════
-          DESKTOP NAVIGATION (unchanged - top bar)
+          DESKTOP NAVIGATION - TOP BAR (right side only)
           ═══════════════════════════════════════════════════════ */}
-      <nav className="hidden md:block fixed top-0 left-0 right-0 z-50 navbar-bg backdrop-blur-sm">
+      <nav className="hidden md:block fixed top-0 left-0 right-0 z-50 pointer-events-none">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 h-16">
-            {/* Crest - Left Side */}
-            <Link href="/home" className="hover:opacity-80 transition-opacity flex-shrink-0">
-              <img
-                src={getCrestImage(currentAppTheme)}
-                alt="GameTable Crest"
-                width={40}
-                height={40}
-                className="w-10 h-10 object-contain"
-              />
-            </Link>
+          <div className="flex items-center justify-end h-16 pointer-events-auto">
+            {/* Right side items: XP Progress, Notifications, Language, Profile */}
+            <div className="flex items-center gap-3 lg:gap-4">
+              {/* XP Progress Badge */}
+              {user && !loading && (
+                <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-accent-gold/20">
+                  <div className="w-8 h-8 rounded-full bg-accent-gold/20 border-2 border-accent-gold flex items-center justify-center">
+                    <span className="text-accent-gold font-cinzel text-sm font-bold">{userLevel}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-foreground text-xs font-cinzel uppercase tracking-wide">Lvl {userLevel}</span>
+                    <div className="w-20 h-1.5 bg-background/50 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-accent-gold rounded-full transition-all"
+                        style={{ width: `${xpProgressPercent(userXp, userLevel)}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
 
-            {/* Center - Desktop Navigation Links */}
-            <div className="flex items-center justify-center gap-3 lg:gap-5 xl:gap-6">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="relative text-foreground hover:text-accent-gold transition-colors font-cinzel text-[11px] lg:text-xs uppercase tracking-wide whitespace-nowrap"
-                >
-                  {item.label}
-                  {item.badge && item.badge > 0 && (
-                    <span className="absolute -top-2 -right-3 bg-red-500 text-white text-[10px] rounded-full h-4 min-w-[16px] flex items-center justify-center px-1">
-                      {item.badge > 99 ? "99+" : item.badge}
-                    </span>
-                  )}
-                </Link>
-              ))}
-            </div>
+              {/* Notifications Bell */}
+              <Link
+                href="/notifications"
+                className="relative p-2 hover:bg-card/50 rounded-lg transition-colors"
+              >
+                <Bell className="w-5 h-5 text-accent-gold" />
+                {hasUnreadNotifications && (
+                  <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold">
+                    {unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}
+                  </span>
+                )}
+              </Link>
 
-            <div className="flex items-center gap-2 lg:gap-3">
               {/* Language Switcher */}
               <LanguageSwitcher />
 
-              {/* Show Login button if not logged in, otherwise show user dropdown */}
+              {/* Profile Avatar with Dropdown */}
               {!user && !loading ? (
                 <Link
                   href="/auth/login"
@@ -226,39 +230,19 @@ export function Navigation() {
                 <div className="relative">
                   <button
                     onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                    className="flex items-center gap-1.5 lg:gap-2 bg-card/50 backdrop-blur-sm px-2 py-1 rounded-lg hover:bg-card transition-colors border border-accent-gold/20"
+                    className="flex items-center gap-2 p-1 rounded-lg hover:bg-card/50 transition-colors"
                   >
-                    {/* Notification indicator */}
-                    {hasUnreadNotifications ? (
-                      <Zap className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-red-500 fill-red-500" />
-                    ) : (
-                      <Zap className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-accent-gold" />
-                    )}
-
                     {/* User avatar */}
-                    <div className="w-5 h-5 lg:w-6 lg:h-6 bg-accent-gold rounded-full flex items-center justify-center flex-shrink-0">
-                      <User className="w-2.5 h-2.5 lg:w-3 lg:h-3 text-background" />
-                    </div>
-
-                    {/* User info - stacked on medium, inline on large */}
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:gap-2">
-                      {loading ? (
-                        <Loader2 className="w-3 h-3 animate-spin text-accent-gold" />
+                    <div className="w-10 h-10 bg-accent-gold/20 border-2 border-accent-gold rounded-full flex items-center justify-center overflow-hidden">
+                      {profile?.avatar_url ? (
+                        <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
                       ) : (
-                        <>
-                          <span className="text-foreground font-cinzel text-[10px] lg:text-xs font-medium whitespace-nowrap leading-tight uppercase">
-                            {displayName}
-                          </span>
-                          <span className="text-accent-gold text-[9px] lg:text-xs whitespace-nowrap leading-tight">
-                            LVL {userLevel} ♦ {userXp} XP
-                          </span>
-                        </>
+                        <User className="w-5 h-5 text-accent-gold" />
                       )}
                     </div>
-
                     {/* Dropdown arrow */}
                     <svg
-                      className={`w-2.5 h-2.5 lg:w-3 lg:h-3 text-accent-gold transition-transform ${isUserDropdownOpen ? "rotate-180" : ""}`}
+                      className={`w-3 h-3 text-accent-gold transition-transform ${isUserDropdownOpen ? "rotate-180" : ""}`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -278,15 +262,6 @@ export function Navigation() {
                         <User className="w-4 h-4 text-accent-gold" />
                         <span className="text-foreground font-cinzel text-sm">{t("nav.profile")}</span>
                       </Link>
-                      <Link
-                        href="/notifications"
-                        className="flex items-center space-x-3 px-4 py-3 hover:bg-accent-gold/10 transition-colors"
-                        onClick={() => setIsUserDropdownOpen(false)}
-                      >
-                        <Bell className="w-4 h-4 text-accent-gold" />
-                        <span className="text-foreground font-cinzel text-sm">{t("nav.notifications")}</span>
-                        {hasUnreadNotifications && <span className="ml-auto w-2 h-2 bg-red-500 rounded-full"></span>}
-                      </Link>
                       <button
                         className="flex items-center space-x-3 px-4 py-3 hover:bg-accent-gold/10 transition-colors w-full text-left border-t border-accent-gold/20"
                         onClick={handleLogout}
@@ -299,6 +274,42 @@ export function Navigation() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* ═══════════════════════════════════════════════════════
+          DESKTOP NAVIGATION - BOTTOM BAR (PÄÄVALIKKO)
+          ═══════════════════════════════════════════════════════ */}
+      <nav className="hidden md:block fixed bottom-0 left-0 right-0 z-50 navbar-bg backdrop-blur-sm border-t border-accent-gold/20">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-center gap-2 lg:gap-4 py-3">
+            {desktopNavItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex flex-col items-center gap-1 px-3 lg:px-4 py-2 rounded-lg transition-all hover:bg-accent-gold/10 min-w-[80px] lg:min-w-[100px] ${
+                  isActive(item.href) ? "bg-accent-gold/10" : ""
+                }`}
+              >
+                <div className="relative">
+                  <item.icon className={`w-6 h-6 lg:w-7 lg:h-7 ${isActive(item.href) ? "text-accent-gold" : "text-foreground/70"}`} />
+                  {item.badge && item.badge > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full h-4 min-w-[16px] flex items-center justify-center px-1">
+                      {item.badge > 99 ? "99+" : item.badge}
+                    </span>
+                  )}
+                </div>
+                <span className={`font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center ${
+                  isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
+                }`}>
+                  {item.label}
+                </span>
+                <span className="text-[9px] lg:text-[10px] text-foreground/50 text-center hidden lg:block">
+                  {item.subtitle}
+                </span>
+              </Link>
+            ))}
           </div>
         </div>
       </nav>
@@ -489,6 +500,9 @@ export function Navigation() {
 
       {/* Spacer for bottom nav on mobile */}
       <div className="md:hidden h-20" />
+      
+      {/* Spacer for bottom nav on desktop */}
+      <div className="hidden md:block h-24 lg:h-28" />
     </>
   )
 }

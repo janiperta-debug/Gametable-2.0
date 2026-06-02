@@ -56,7 +56,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <AppThemeProvider>
         <div className="min-h-screen">
           <Navigation />
-          <main className="md:pt-16">{children}</main>
+          <main>{children}</main>
         </div>
       </AppThemeProvider>
     )
@@ -68,7 +68,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <AppThemeProvider>
         <div className="min-h-screen room-environment">
           <Navigation />
-          <main className="md:pt-16">{children}</main>
+          <main>{children}</main>
         </div>
       </AppThemeProvider>
     )
@@ -78,7 +78,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <AppThemeProvider>
       <div className="min-h-screen room-environment">
         <Navigation />
-        <main className="md:pt-16">{children}</main>
+        <main>{children}</main>
       </div>
     </AppThemeProvider>
   )
