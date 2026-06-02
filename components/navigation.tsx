@@ -118,18 +118,19 @@ export function Navigation() {
   }
 
   // Desktop bottom nav items (split into left and right groups, crest in middle)
+  // iconSize: "normal" for square-ish icons, "wide" for wider/horizontal icons
   const desktopNavItemsLeft = [
-    { href: "/collection", label: t("nav.collection"), iconImg: "/images/nav-icons/collection.png" },
-    { href: "/discover", label: t("nav.community"), iconImg: "/images/nav-icons/community.png" },
-    { href: "/events", label: t("nav.events"), iconImg: "/images/nav-icons/events.png" },
-    { href: "/marketplace", label: t("nav.marketplace"), iconImg: "/images/nav-icons/marketplace.png" },
+    { href: "/collection", label: t("nav.collection"), iconImg: "/images/nav-icons/collection.png", iconSize: "normal" },
+    { href: "/discover", label: t("nav.community"), iconImg: "/images/nav-icons/community.png", iconSize: "normal" },
+    { href: "/events", label: t("nav.events"), iconImg: "/images/nav-icons/events.png", iconSize: "normal" },
+    { href: "/marketplace", label: t("nav.marketplace"), iconImg: "/images/nav-icons/marketplace.png", iconSize: "wide" },
   ]
   
   const desktopNavItemsRight = [
-    { href: "/themes", label: t("nav.themes"), iconImg: "/images/nav-icons/themes.png" },
-    { href: "/messages", label: t("nav.messages"), iconImg: "/images/nav-icons/messages.png" },
-    { href: "/trophies", label: t("nav.trophies"), iconImg: "/images/nav-icons/trophies.png" },
-    { href: "/contact", label: t("nav.contact"), iconImg: "/images/nav-icons/contact.png" },
+    { href: "/themes", label: t("nav.manor"), iconImg: "/images/nav-icons/themes.png", iconSize: "normal" },
+    { href: "/messages", label: t("nav.messages"), iconImg: "/images/nav-icons/messages.png", iconSize: "wide" },
+    { href: "/trophies", label: t("nav.trophies"), iconImg: "/images/nav-icons/trophies.png", iconSize: "wide" },
+    { href: "/contact", label: t("nav.contact"), iconImg: "/images/nav-icons/contact.png", iconSize: "wide" },
   ]
 
   // Mobile bottom nav items (4 main items)
@@ -301,11 +302,9 @@ export function Navigation() {
                 <img 
                   src={item.iconImg} 
                   alt="" 
-                  className="w-8 h-8 lg:w-10 lg:h-10 object-contain"
+                  className={item.iconSize === "wide" ? "w-14 h-10 lg:w-16 lg:h-12 object-contain" : "w-12 h-12 lg:w-16 lg:h-16 object-contain"}
                 />
-                <span className={`font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center ${
-                  isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
-                }`}>
+                <span className="font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center text-accent-gold">
                   {item.label}
                 </span>
               </Link>
@@ -337,11 +336,9 @@ export function Navigation() {
                 <img 
                   src={item.iconImg} 
                   alt="" 
-                  className="w-8 h-8 lg:w-10 lg:h-10 object-contain"
+                  className={item.iconSize === "wide" ? "w-14 h-10 lg:w-16 lg:h-12 object-contain" : "w-12 h-12 lg:w-16 lg:h-16 object-contain"}
                 />
-                <span className={`font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center ${
-                  isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
-                }`}>
+                <span className="font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center text-accent-gold">
                   {item.label}
                 </span>
               </Link>
