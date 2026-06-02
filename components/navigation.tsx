@@ -118,19 +118,18 @@ export function Navigation() {
   }
 
   // Desktop bottom nav items (split into left and right groups, crest in middle)
-  // iconSize: "normal" for square-ish icons, "wide" for wider/horizontal icons
   const desktopNavItemsLeft = [
-    { href: "/collection", label: t("nav.collection"), iconImg: "/images/nav-icons/collection.png", iconSize: "normal" },
-    { href: "/discover", label: t("nav.community"), iconImg: "/images/nav-icons/community.png", iconSize: "normal" },
-    { href: "/events", label: t("nav.events"), iconImg: "/images/nav-icons/events.png", iconSize: "normal" },
-    { href: "/marketplace", label: t("nav.marketplace"), iconImg: "/images/nav-icons/marketplace.png", iconSize: "wide" },
+    { href: "/collection", label: t("nav.collection"), iconImg: "/images/nav-icons/collection.png" },
+    { href: "/discover", label: t("nav.community"), iconImg: "/images/nav-icons/community.png" },
+    { href: "/events", label: t("nav.events"), iconImg: "/images/nav-icons/events.png" },
+    { href: "/marketplace", label: t("nav.marketplace"), iconImg: "/images/nav-icons/marketplace.png" },
   ]
   
   const desktopNavItemsRight = [
-    { href: "/themes", label: t("nav.manor"), iconImg: "/images/nav-icons/themes.png", iconSize: "normal" },
-    { href: "/messages", label: t("nav.messages"), iconImg: "/images/nav-icons/messages.png", iconSize: "wide" },
-    { href: "/trophies", label: t("nav.trophies"), iconImg: "/images/nav-icons/trophies.png", iconSize: "wide" },
-    { href: "/contact", label: t("nav.contact"), iconImg: "/images/nav-icons/contact.png", iconSize: "wide" },
+    { href: "/themes", label: t("nav.manor"), iconImg: "/images/nav-icons/manor.png" },
+    { href: "/messages", label: t("nav.messages"), iconImg: "/images/nav-icons/messages.png" },
+    { href: "/trophies", label: t("nav.trophies"), iconImg: "/images/nav-icons/trophies.png" },
+    { href: "/contact", label: t("nav.contact"), iconImg: "/images/nav-icons/contact.png" },
   ]
 
   // Mobile bottom nav items (4 main items)
@@ -287,24 +286,26 @@ export function Navigation() {
           ═══════════════════════════════════════════════════════ */}
       <nav className="hidden md:block fixed bottom-4 left-0 right-0 z-50 pointer-events-none">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-center gap-3 lg:gap-4 pointer-events-auto">
+          <div className="flex items-center justify-center gap-2 lg:gap-3 pointer-events-auto">
             {/* Left 4 buttons */}
             {desktopNavItemsLeft.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-1 px-4 lg:px-5 py-3 rounded-xl transition-all bg-card/90 backdrop-blur-sm min-w-[90px] lg:min-w-[110px] ${
+                className={`flex flex-col items-center justify-center w-[100px] h-[90px] lg:w-[120px] lg:h-[100px] rounded-xl transition-all bg-card/90 backdrop-blur-sm ${
                   isActive(item.href) 
                     ? "shadow-[inset_0_0_0_2px_hsl(var(--accent-gold)),inset_0_0_0_4px_hsl(var(--card)),inset_0_0_0_5px_hsl(var(--accent-gold))]" 
                     : "shadow-[inset_0_0_0_1px_hsl(var(--accent-gold)/0.3),inset_0_0_0_3px_hsl(var(--card)),inset_0_0_0_4px_hsl(var(--accent-gold)/0.3)] hover:shadow-[inset_0_0_0_2px_hsl(var(--accent-gold)),inset_0_0_0_4px_hsl(var(--card)),inset_0_0_0_5px_hsl(var(--accent-gold))]"
                 }`}
               >
-                <img 
-                  src={item.iconImg} 
-                  alt="" 
-                  className={item.iconSize === "wide" ? "w-14 h-10 lg:w-16 lg:h-12 object-contain" : "w-12 h-12 lg:w-16 lg:h-16 object-contain"}
-                />
-                <span className="font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center text-accent-gold">
+                <div className="w-12 h-12 lg:w-14 lg:h-14 flex items-center justify-center">
+                  <img 
+                    src={item.iconImg} 
+                    alt="" 
+                    className="max-w-full max-h-full object-contain"
+                  />
+                </div>
+                <span className="font-cinzel text-[9px] lg:text-[10px] uppercase tracking-wide text-center text-accent-gold mt-1">
                   {item.label}
                 </span>
               </Link>
@@ -313,12 +314,12 @@ export function Navigation() {
             {/* Center crest button - home */}
             <Link
               href="/home"
-              className="flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-card/90 backdrop-blur-sm shadow-[inset_0_0_0_2px_hsl(var(--accent-gold)),inset_0_0_0_4px_hsl(var(--card)),inset_0_0_0_5px_hsl(var(--accent-gold))] transition-all hover:scale-105"
+              className="flex items-center justify-center w-[70px] h-[70px] lg:w-[80px] lg:h-[80px] rounded-full bg-card/90 backdrop-blur-sm shadow-[inset_0_0_0_2px_hsl(var(--accent-gold)),inset_0_0_0_4px_hsl(var(--card)),inset_0_0_0_5px_hsl(var(--accent-gold))] transition-all hover:scale-105"
             >
               <img
                 src={getCrestImage(currentAppTheme)}
                 alt="Home"
-                className="w-12 h-12 lg:w-16 lg:h-16 object-contain"
+                className="w-14 h-14 lg:w-16 lg:h-16 object-contain"
               />
             </Link>
 
@@ -327,18 +328,20 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-1 px-4 lg:px-5 py-3 rounded-xl transition-all bg-card/90 backdrop-blur-sm min-w-[90px] lg:min-w-[110px] ${
+                className={`flex flex-col items-center justify-center w-[100px] h-[90px] lg:w-[120px] lg:h-[100px] rounded-xl transition-all bg-card/90 backdrop-blur-sm ${
                   isActive(item.href) 
                     ? "shadow-[inset_0_0_0_2px_hsl(var(--accent-gold)),inset_0_0_0_4px_hsl(var(--card)),inset_0_0_0_5px_hsl(var(--accent-gold))]" 
                     : "shadow-[inset_0_0_0_1px_hsl(var(--accent-gold)/0.3),inset_0_0_0_3px_hsl(var(--card)),inset_0_0_0_4px_hsl(var(--accent-gold)/0.3)] hover:shadow-[inset_0_0_0_2px_hsl(var(--accent-gold)),inset_0_0_0_4px_hsl(var(--card)),inset_0_0_0_5px_hsl(var(--accent-gold))]"
                 }`}
               >
-                <img 
-                  src={item.iconImg} 
-                  alt="" 
-                  className={item.iconSize === "wide" ? "w-14 h-10 lg:w-16 lg:h-12 object-contain" : "w-12 h-12 lg:w-16 lg:h-16 object-contain"}
-                />
-                <span className="font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center text-accent-gold">
+                <div className="w-12 h-12 lg:w-14 lg:h-14 flex items-center justify-center">
+                  <img 
+                    src={item.iconImg} 
+                    alt="" 
+                    className="max-w-full max-h-full object-contain"
+                  />
+                </div>
+                <span className="font-cinzel text-[9px] lg:text-[10px] uppercase tracking-wide text-center text-accent-gold mt-1">
                   {item.label}
                 </span>
               </Link>
