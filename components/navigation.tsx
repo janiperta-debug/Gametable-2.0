@@ -119,17 +119,17 @@ export function Navigation() {
 
   // Desktop bottom nav items (split into left and right groups, crest in middle)
   const desktopNavItemsLeft = [
-    { href: "/collection", label: t("nav.collection"), icon: Archive },
-    { href: "/discover", label: t("nav.community"), icon: Users },
-    { href: "/events", label: t("nav.events"), icon: Calendar },
-    { href: "/marketplace", label: t("nav.marketplace"), icon: ShoppingBag },
+    { href: "/collection", label: t("nav.collection"), iconImg: "/images/nav-icons/collection.png" },
+    { href: "/discover", label: t("nav.community"), iconImg: "/images/nav-icons/community.png" },
+    { href: "/events", label: t("nav.events"), iconImg: "/images/nav-icons/events.png" },
+    { href: "/marketplace", label: t("nav.marketplace"), iconImg: "/images/nav-icons/marketplace.png" },
   ]
   
   const desktopNavItemsRight = [
-    { href: "/themes", label: t("nav.themes"), icon: DoorOpen },
-    { href: "/messages", label: t("nav.messages"), icon: MessageCircle },
-    { href: "/trophies", label: t("nav.trophies"), icon: Trophy },
-    { href: "/contact", label: t("nav.contact"), icon: Phone },
+    { href: "/themes", label: t("nav.themes"), iconImg: "/images/nav-icons/themes.png" },
+    { href: "/messages", label: t("nav.messages"), iconImg: "/images/nav-icons/messages.png" },
+    { href: "/trophies", label: t("nav.trophies"), iconImg: "/images/nav-icons/trophies.png" },
+    { href: "/contact", label: t("nav.contact"), iconImg: "/images/nav-icons/contact.png" },
   ]
 
   // Mobile bottom nav items (4 main items)
@@ -292,11 +292,17 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-1 px-4 lg:px-5 py-3 rounded-xl transition-all bg-card/90 backdrop-blur-sm border border-accent-gold/30 hover:border-accent-gold hover:bg-card min-w-[90px] lg:min-w-[110px] ${
-                  isActive(item.href) ? "border-accent-gold bg-card" : ""
+                className={`flex flex-col items-center gap-1 px-4 lg:px-5 py-3 rounded-xl transition-all bg-card/90 backdrop-blur-sm min-w-[90px] lg:min-w-[110px] ${
+                  isActive(item.href) 
+                    ? "shadow-[inset_0_0_0_2px_hsl(var(--accent-gold)),inset_0_0_0_4px_hsl(var(--card)),inset_0_0_0_5px_hsl(var(--accent-gold))]" 
+                    : "shadow-[inset_0_0_0_1px_hsl(var(--accent-gold)/0.3),inset_0_0_0_3px_hsl(var(--card)),inset_0_0_0_4px_hsl(var(--accent-gold)/0.3)] hover:shadow-[inset_0_0_0_2px_hsl(var(--accent-gold)),inset_0_0_0_4px_hsl(var(--card)),inset_0_0_0_5px_hsl(var(--accent-gold))]"
                 }`}
               >
-                <item.icon className={`w-6 h-6 lg:w-7 lg:h-7 ${isActive(item.href) ? "text-accent-gold" : "text-foreground/70"}`} />
+                <img 
+                  src={item.iconImg} 
+                  alt="" 
+                  className="w-8 h-8 lg:w-10 lg:h-10 object-contain"
+                />
                 <span className={`font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center ${
                   isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
                 }`}>
@@ -308,7 +314,7 @@ export function Navigation() {
             {/* Center crest button - home */}
             <Link
               href="/home"
-              className="flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-card/90 backdrop-blur-sm border-2 border-accent-gold hover:border-accent-gold/80 transition-all hover:scale-105"
+              className="flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-card/90 backdrop-blur-sm shadow-[inset_0_0_0_2px_hsl(var(--accent-gold)),inset_0_0_0_4px_hsl(var(--card)),inset_0_0_0_5px_hsl(var(--accent-gold))] transition-all hover:scale-105"
             >
               <img
                 src={getCrestImage(currentAppTheme)}
@@ -322,11 +328,17 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-1 px-4 lg:px-5 py-3 rounded-xl transition-all bg-card/90 backdrop-blur-sm border border-accent-gold/30 hover:border-accent-gold hover:bg-card min-w-[90px] lg:min-w-[110px] ${
-                  isActive(item.href) ? "border-accent-gold bg-card" : ""
+                className={`flex flex-col items-center gap-1 px-4 lg:px-5 py-3 rounded-xl transition-all bg-card/90 backdrop-blur-sm min-w-[90px] lg:min-w-[110px] ${
+                  isActive(item.href) 
+                    ? "shadow-[inset_0_0_0_2px_hsl(var(--accent-gold)),inset_0_0_0_4px_hsl(var(--card)),inset_0_0_0_5px_hsl(var(--accent-gold))]" 
+                    : "shadow-[inset_0_0_0_1px_hsl(var(--accent-gold)/0.3),inset_0_0_0_3px_hsl(var(--card)),inset_0_0_0_4px_hsl(var(--accent-gold)/0.3)] hover:shadow-[inset_0_0_0_2px_hsl(var(--accent-gold)),inset_0_0_0_4px_hsl(var(--card)),inset_0_0_0_5px_hsl(var(--accent-gold))]"
                 }`}
               >
-                <item.icon className={`w-6 h-6 lg:w-7 lg:h-7 ${isActive(item.href) ? "text-accent-gold" : "text-foreground/70"}`} />
+                <img 
+                  src={item.iconImg} 
+                  alt="" 
+                  className="w-8 h-8 lg:w-10 lg:h-10 object-contain"
+                />
                 <span className={`font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center ${
                   isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
                 }`}>
