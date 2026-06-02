@@ -1,6 +1,5 @@
 "use client"
 
-import { Navigation } from "@/components/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { useTranslations } from "@/lib/i18n"
 import { Input } from "@/components/ui/input"
@@ -43,8 +42,7 @@ export default function FindPlayersPage() {
   ]
 
   return (
-    <div className="min-h-screen manor-bg">
-      <Navigation />
+    <div className="min-h-screen">
       <main className="container mx-auto px-4 py-8">
         <Card className="decorative-border mb-8">
           <CardContent className="pt-6">

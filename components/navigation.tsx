@@ -497,12 +497,6 @@ export function Navigation() {
           </div>
         </nav>
       </div>
-
-      {/* Spacer for bottom nav on mobile */}
-      <div className="md:hidden h-20" />
-      
-      {/* Spacer for bottom nav on desktop */}
-      <div className="hidden md:block h-24 lg:h-28" />
     </>
   )
 }

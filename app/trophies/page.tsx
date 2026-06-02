@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Navigation } from "@/components/navigation"
 import { BadgeIcon, Lock, Trophy, Award, Loader2 } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { BADGE_DEFINITIONS, type BadgeSeries } from "@/lib/badge-definitions"
@@ -134,18 +133,14 @@ export default function TrophiesPage() {
 
   if (loading || userLoading) {
     return (
-      <div className="min-h-screen manor-bg">
-        <Navigation />
-        <main className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="h-12 w-12 animate-spin text-accent-gold" />
-        </main>
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-accent-gold" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen manor-bg">
-      <Navigation />
+    <div className="min-h-screen">
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="room-furniture p-4 sm:p-8 mb-8">
