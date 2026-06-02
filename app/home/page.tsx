@@ -3,7 +3,6 @@
 import Image from "next/image"
 import { useAppTheme } from "@/components/app-theme-provider"
 import { useTranslations } from "@/lib/i18n"
-import { getRoomTheme } from "@/lib/room-themes"
 
 export default function HomePage() {
   const { currentAppTheme } = useAppTheme()
@@ -36,27 +35,25 @@ export default function HomePage() {
     return homeCrestMap[theme] || "/crests/main-hall-home.png"
   }
 
-  // Get theme background image
-  const themeData = getRoomTheme(currentAppTheme)
-  const backgroundImage = themeData?.image || "/themes/main-hall-preview.png"
+  // Get hero image for current theme (default to main-hall)
+  const getHeroImage = (theme: string) => {
+    const heroMap: { [key: string]: string } = {
+      "main-hall": "/images/themes/main-hall-hero.jpg",
+      // Add more theme heroes here as they become available
+    }
+    return heroMap[theme] || "/images/themes/main-hall-hero.jpg"
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center px-4 pt-16 pb-32 relative overflow-hidden">
-      {/* Theme background image - extends behind navigation */}
+      {/* Full hero background image - no overlay, displayed in full glory */}
       <div className="fixed inset-0 z-0">
         <Image
-          src={backgroundImage}
+          src={getHeroImage(currentAppTheme)}
           alt=""
           fill
           className="object-cover"
           priority
-        />
-        {/* Dark overlay gradient for text readability */}
-        <div 
-          className="absolute inset-0" 
-          style={{ 
-            background: "linear-gradient(180deg, rgba(61,21,21,0.6) 0%, rgba(42,15,15,0.75) 50%, rgba(26,8,8,0.9) 100%)" 
-          }} 
         />
       </div>
 
