@@ -292,18 +292,12 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative flex flex-col items-center gap-1 px-4 lg:px-5 py-3 min-w-[90px] lg:min-w-[110px] transition-all hover:scale-105 ${
-                  isActive(item.href) ? "scale-105" : ""
+                className={`flex flex-col items-center gap-1 px-4 lg:px-5 py-3 rounded-xl transition-all bg-card/90 backdrop-blur-sm border border-accent-gold/30 hover:border-accent-gold hover:bg-card min-w-[90px] lg:min-w-[110px] ${
+                  isActive(item.href) ? "border-accent-gold bg-card" : ""
                 }`}
               >
-                {/* Gold frame background - stretches to fit button */}
-                <img
-                  src="/images/nav-frame-square.png"
-                  alt=""
-                  className="absolute inset-0 w-full h-full object-fill pointer-events-none"
-                />
-                <item.icon className={`relative z-10 w-6 h-6 lg:w-7 lg:h-7 ${isActive(item.href) ? "text-accent-gold" : "text-foreground/70"}`} />
-                <span className={`relative z-10 font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center ${
+                <item.icon className={`w-6 h-6 lg:w-7 lg:h-7 ${isActive(item.href) ? "text-accent-gold" : "text-foreground/70"}`} />
+                <span className={`font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center ${
                   isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
                 }`}>
                   {item.label}
@@ -314,18 +308,12 @@ export function Navigation() {
             {/* Center crest button - home */}
             <Link
               href="/home"
-              className="relative flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 transition-all hover:scale-105"
+              className="flex items-center justify-center w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-card/90 backdrop-blur-sm border-2 border-accent-gold hover:border-accent-gold/80 transition-all hover:scale-105"
             >
-              {/* Gold circle frame - stretches to fit button */}
-              <img
-                src="/images/nav-frame-circle.png"
-                alt=""
-                className="absolute inset-0 w-full h-full object-fill pointer-events-none"
-              />
               <img
                 src={getCrestImage(currentAppTheme)}
                 alt="Home"
-                className="relative z-10 w-12 h-12 lg:w-16 lg:h-16 object-contain"
+                className="w-12 h-12 lg:w-16 lg:h-16 object-contain"
               />
             </Link>
 
@@ -334,18 +322,12 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative flex flex-col items-center gap-1 px-4 lg:px-5 py-3 min-w-[90px] lg:min-w-[110px] transition-all hover:scale-105 ${
-                  isActive(item.href) ? "scale-105" : ""
+                className={`flex flex-col items-center gap-1 px-4 lg:px-5 py-3 rounded-xl transition-all bg-card/90 backdrop-blur-sm border border-accent-gold/30 hover:border-accent-gold hover:bg-card min-w-[90px] lg:min-w-[110px] ${
+                  isActive(item.href) ? "border-accent-gold bg-card" : ""
                 }`}
               >
-                {/* Gold frame background - stretches to fit button */}
-                <img
-                  src="/images/nav-frame-square.png"
-                  alt=""
-                  className="absolute inset-0 w-full h-full object-fill pointer-events-none"
-                />
-                <item.icon className={`relative z-10 w-6 h-6 lg:w-7 lg:h-7 ${isActive(item.href) ? "text-accent-gold" : "text-foreground/70"}`} />
-                <span className={`relative z-10 font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center ${
+                <item.icon className={`w-6 h-6 lg:w-7 lg:h-7 ${isActive(item.href) ? "text-accent-gold" : "text-foreground/70"}`} />
+                <span className={`font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center ${
                   isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
                 }`}>
                   {item.label}
