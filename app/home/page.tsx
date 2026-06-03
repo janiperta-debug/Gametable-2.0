@@ -16,6 +16,7 @@ export default function HomePage() {
       "conservatory": "/images/heroes/conservatory-hero.jpg",
       "fireside-lounge": "/images/heroes/fireside-lounge-hero.jpg",
       "spa": "/images/heroes/spa-hero.jpg",
+      "bar": "/images/heroes/bar-hero.jpg",
       // Add more theme heroes here as they become available
     }
     return heroMap[theme] || "/images/themes/main-hall-hero.jpg"
@@ -29,6 +30,7 @@ export default function HomePage() {
       "conservatory": "/images/logos/conservatory-logo.png",
       "fireside-lounge": "/images/logos/fireside-lounge-logo.png",
       "spa": "/images/logos/spa-logo.png",
+      "bar": "/images/logos/bar-logo.png",
       // Add more theme crests here as they become available
     }
     return crestMap[theme] || "/images/gametable-crest-logo.png"
