@@ -302,14 +302,14 @@ export function Navigation() {
           DESKTOP NAVIGATION - BOTTOM BAR (4 buttons + crest + 4 buttons)
           ═══════════════════════════════════════════════════════ */}
       <nav className="hidden md:block fixed bottom-2 left-0 right-0 z-50 pointer-events-none">
-        <div className="max-w-7xl mx-auto px-1">
+        <div className="max-w-[1920px] mx-auto px-0">
           <div className="flex items-center justify-center gap-0 pointer-events-auto">
             {/* Left 4 buttons */}
             {desktopNavItemsLeft.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative flex items-center justify-center w-[195px] h-[80px] lg:w-[220px] lg:h-[90px] transition-all hover:scale-105 ${
+                className={`relative flex items-center justify-center w-[230px] h-[95px] lg:w-[260px] lg:h-[106px] transition-all hover:scale-105 ${
                   isActive(item.href) ? "brightness-125" : ""
                 }`}
               >
@@ -327,7 +327,7 @@ export function Navigation() {
             {/* Center crest button - home */}
             <Link
               href="/home"
-              className="relative flex items-center justify-center w-[120px] h-[120px] lg:w-[140px] lg:h-[140px] transition-all hover:scale-105"
+              className="relative flex items-center justify-center w-[142px] h-[142px] lg:w-[165px] lg:h-[165px] transition-all hover:scale-105"
             >
               <img 
                 src={getNavButtonRoundFrame(currentAppTheme)} 
@@ -337,7 +337,7 @@ export function Navigation() {
               <img
                 src={getCrestImage(currentAppTheme)}
                 alt="Home"
-                className="relative z-10 w-16 h-16 lg:w-20 lg:h-20 object-contain"
+                className="relative z-10 w-20 h-20 lg:w-24 lg:h-24 object-contain"
               />
             </Link>
 
@@ -346,7 +346,7 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative flex items-center justify-center w-[195px] h-[80px] lg:w-[220px] lg:h-[90px] transition-all hover:scale-105 ${
+                className={`relative flex items-center justify-center w-[230px] h-[95px] lg:w-[260px] lg:h-[106px] transition-all hover:scale-105 ${
                   isActive(item.href) ? "brightness-125" : ""
                 }`}
               >
