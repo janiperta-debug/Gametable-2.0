@@ -309,7 +309,7 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative flex items-center justify-center w-[120px] h-[50px] lg:w-[140px] lg:h-[58px] transition-all hover:scale-105 ${
+                className={`relative flex items-center justify-center w-[140px] h-[55px] lg:w-[160px] lg:h-[65px] transition-all hover:scale-105 ${
                   isActive(item.href) ? "brightness-125" : ""
                 }`}
               >
@@ -327,7 +327,7 @@ export function Navigation() {
             {/* Center crest button - home */}
             <Link
               href="/home"
-              className="relative flex items-center justify-center w-[70px] h-[70px] lg:w-[80px] lg:h-[80px] transition-all hover:scale-105"
+              className="relative flex items-center justify-center w-[85px] h-[85px] lg:w-[95px] lg:h-[95px] transition-all hover:scale-105"
             >
               <img 
                 src={getNavButtonRoundFrame(currentAppTheme)} 
@@ -346,7 +346,7 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative flex items-center justify-center w-[120px] h-[50px] lg:w-[140px] lg:h-[58px] transition-all hover:scale-105 ${
+                className={`relative flex items-center justify-center w-[140px] h-[55px] lg:w-[160px] lg:h-[65px] transition-all hover:scale-105 ${
                   isActive(item.href) ? "brightness-125" : ""
                 }`}
               >
