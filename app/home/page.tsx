@@ -41,10 +41,10 @@ export default function HomePage() {
         />
       </div>
 
-      {/* Content - aligned to the left, starting from top */}
-      <div className="relative z-10 max-w-lg lg:max-w-xl">
+      {/* Content - centered on mobile, left-aligned on tablet/desktop */}
+      <div className="relative z-10 max-w-lg lg:max-w-xl mx-auto md:mx-0 text-center md:text-left">
         {/* GameTable crest logo - larger and at top */}
-        <div className="mb-4 md:mb-6">
+        <div className="mb-4 md:mb-6 flex justify-center md:justify-start">
           <img
             src={getCrestImage(currentAppTheme)}
             alt="GameTable"
