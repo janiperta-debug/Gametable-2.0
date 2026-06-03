@@ -174,6 +174,23 @@ export function Navigation() {
     return crestMap[theme] || crestMap["main-hall"]
   }
 
+  // Get nav button frame images for current theme
+  const getNavButtonFrame = (theme: string) => {
+    const frameMap: { [key: string]: string } = {
+      "main-hall": "/images/nav-frames/main-hall-button.png",
+      // Add more themes here as they become available
+    }
+    return frameMap[theme] || frameMap["main-hall"]
+  }
+
+  const getNavButtonRoundFrame = (theme: string) => {
+    const frameMap: { [key: string]: string } = {
+      "main-hall": "/images/nav-frames/main-hall-button-round.png",
+      // Add more themes here as they become available
+    }
+    return frameMap[theme] || frameMap["main-hall"]
+  }
+
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
 
   return (
@@ -286,26 +303,22 @@ export function Navigation() {
           ═══════════════════════════════════════════════════════ */}
       <nav className="hidden md:block fixed bottom-4 left-0 right-0 z-50 pointer-events-none">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-center gap-2 lg:gap-3 pointer-events-auto">
+          <div className="flex items-center justify-center gap-1 lg:gap-2 pointer-events-auto">
             {/* Left 4 buttons */}
             {desktopNavItemsLeft.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center justify-center w-[100px] h-[90px] lg:w-[120px] lg:h-[100px] rounded-xl transition-all bg-card/90 backdrop-blur-sm ${
-                  isActive(item.href) 
-                    ? "shadow-[inset_0_0_0_2px_hsl(var(--accent-gold)),inset_0_0_0_4px_hsl(var(--card)),inset_0_0_0_5px_hsl(var(--accent-gold))]" 
-                    : "shadow-[inset_0_0_0_1px_hsl(var(--accent-gold)/0.3),inset_0_0_0_3px_hsl(var(--card)),inset_0_0_0_4px_hsl(var(--accent-gold)/0.3)] hover:shadow-[inset_0_0_0_2px_hsl(var(--accent-gold)),inset_0_0_0_4px_hsl(var(--card)),inset_0_0_0_5px_hsl(var(--accent-gold))]"
+                className={`relative flex items-center justify-center w-[120px] h-[50px] lg:w-[140px] lg:h-[58px] transition-all hover:scale-105 ${
+                  isActive(item.href) ? "brightness-125" : ""
                 }`}
               >
-                <div className="w-12 h-12 lg:w-14 lg:h-14 flex items-center justify-center">
-                  <img 
-                    src={item.iconImg} 
-                    alt="" 
-                    className="max-w-full max-h-full object-contain"
-                  />
-                </div>
-                <span className="font-cinzel text-[9px] lg:text-[10px] uppercase tracking-wide text-center text-accent-gold mt-1">
+                <img 
+                  src={getNavButtonFrame(currentAppTheme)} 
+                  alt="" 
+                  className="absolute inset-0 w-full h-full object-contain"
+                />
+                <span className="relative z-10 font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                   {item.label}
                 </span>
               </Link>
@@ -314,12 +327,17 @@ export function Navigation() {
             {/* Center crest button - home */}
             <Link
               href="/home"
-              className="flex items-center justify-center w-[70px] h-[70px] lg:w-[80px] lg:h-[80px] rounded-full bg-card/90 backdrop-blur-sm shadow-[inset_0_0_0_2px_hsl(var(--accent-gold)),inset_0_0_0_4px_hsl(var(--card)),inset_0_0_0_5px_hsl(var(--accent-gold))] transition-all hover:scale-105"
+              className="relative flex items-center justify-center w-[70px] h-[70px] lg:w-[80px] lg:h-[80px] transition-all hover:scale-105"
             >
+              <img 
+                src={getNavButtonRoundFrame(currentAppTheme)} 
+                alt="" 
+                className="absolute inset-0 w-full h-full object-contain"
+              />
               <img
                 src={getCrestImage(currentAppTheme)}
                 alt="Home"
-                className="w-14 h-14 lg:w-16 lg:h-16 object-contain"
+                className="relative z-10 w-12 h-12 lg:w-14 lg:h-14 object-contain"
               />
             </Link>
 
@@ -328,20 +346,16 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center justify-center w-[100px] h-[90px] lg:w-[120px] lg:h-[100px] rounded-xl transition-all bg-card/90 backdrop-blur-sm ${
-                  isActive(item.href) 
-                    ? "shadow-[inset_0_0_0_2px_hsl(var(--accent-gold)),inset_0_0_0_4px_hsl(var(--card)),inset_0_0_0_5px_hsl(var(--accent-gold))]" 
-                    : "shadow-[inset_0_0_0_1px_hsl(var(--accent-gold)/0.3),inset_0_0_0_3px_hsl(var(--card)),inset_0_0_0_4px_hsl(var(--accent-gold)/0.3)] hover:shadow-[inset_0_0_0_2px_hsl(var(--accent-gold)),inset_0_0_0_4px_hsl(var(--card)),inset_0_0_0_5px_hsl(var(--accent-gold))]"
+                className={`relative flex items-center justify-center w-[120px] h-[50px] lg:w-[140px] lg:h-[58px] transition-all hover:scale-105 ${
+                  isActive(item.href) ? "brightness-125" : ""
                 }`}
               >
-                <div className="w-12 h-12 lg:w-14 lg:h-14 flex items-center justify-center">
-                  <img 
-                    src={item.iconImg} 
-                    alt="" 
-                    className="max-w-full max-h-full object-contain"
-                  />
-                </div>
-                <span className="font-cinzel text-[9px] lg:text-[10px] uppercase tracking-wide text-center text-accent-gold mt-1">
+                <img 
+                  src={getNavButtonFrame(currentAppTheme)} 
+                  alt="" 
+                  className="absolute inset-0 w-full h-full object-contain"
+                />
+                <span className="relative z-10 font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                   {item.label}
                 </span>
               </Link>
