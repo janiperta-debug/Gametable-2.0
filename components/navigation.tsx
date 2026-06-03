@@ -303,7 +303,7 @@ export function Navigation() {
           ═══════════════════════════════════════════════════════ */}
       <nav className="hidden md:block fixed bottom-2 left-0 right-0 z-50 pointer-events-none">
         <div className="max-w-[1920px] mx-auto px-0">
-          <div className="flex items-center justify-center gap-0 pointer-events-auto">
+          <div className="flex items-center justify-center gap-0 -space-x-6 lg:-space-x-8 pointer-events-auto">
             {/* Left 4 buttons */}
             {desktopNavItemsLeft.map((item) => (
               <Link
