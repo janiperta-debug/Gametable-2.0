@@ -301,15 +301,15 @@ export function Navigation() {
       {/* ═══════════════════════════════════════════════════════
           DESKTOP NAVIGATION - BOTTOM BAR (4 buttons + crest + 4 buttons)
           ═══════════════════════════════════════════════════════ */}
-      <nav className="hidden md:block fixed bottom-4 left-0 right-0 z-50 pointer-events-none">
-        <div className="max-w-7xl mx-auto px-2">
+      <nav className="hidden md:block fixed bottom-2 left-0 right-0 z-50 pointer-events-none">
+        <div className="max-w-7xl mx-auto px-1">
           <div className="flex items-center justify-center gap-0 pointer-events-auto">
             {/* Left 4 buttons */}
             {desktopNavItemsLeft.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative flex items-center justify-center w-[160px] h-[65px] lg:w-[180px] lg:h-[75px] transition-all hover:scale-105 ${
+                className={`relative flex items-center justify-center w-[195px] h-[80px] lg:w-[220px] lg:h-[90px] transition-all hover:scale-105 ${
                   isActive(item.href) ? "brightness-125" : ""
                 }`}
               >
@@ -318,7 +318,7 @@ export function Navigation() {
                   alt="" 
                   className="absolute inset-0 w-full h-full object-contain"
                 />
-                <span className="relative z-10 font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                <span className="relative z-10 font-cinzel text-[11px] lg:text-sm uppercase tracking-wide text-center text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                   {item.label}
                 </span>
               </Link>
@@ -327,7 +327,7 @@ export function Navigation() {
             {/* Center crest button - home */}
             <Link
               href="/home"
-              className="relative flex items-center justify-center w-[100px] h-[100px] lg:w-[115px] lg:h-[115px] transition-all hover:scale-105"
+              className="relative flex items-center justify-center w-[120px] h-[120px] lg:w-[140px] lg:h-[140px] transition-all hover:scale-105"
             >
               <img 
                 src={getNavButtonRoundFrame(currentAppTheme)} 
@@ -337,7 +337,7 @@ export function Navigation() {
               <img
                 src={getCrestImage(currentAppTheme)}
                 alt="Home"
-                className="relative z-10 w-14 h-14 lg:w-16 lg:h-16 object-contain"
+                className="relative z-10 w-16 h-16 lg:w-20 lg:h-20 object-contain"
               />
             </Link>
 
@@ -346,7 +346,7 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative flex items-center justify-center w-[160px] h-[65px] lg:w-[180px] lg:h-[75px] transition-all hover:scale-105 ${
+                className={`relative flex items-center justify-center w-[195px] h-[80px] lg:w-[220px] lg:h-[90px] transition-all hover:scale-105 ${
                   isActive(item.href) ? "brightness-125" : ""
                 }`}
               >
@@ -355,7 +355,7 @@ export function Navigation() {
                   alt="" 
                   className="absolute inset-0 w-full h-full object-contain"
                 />
-                <span className="relative z-10 font-cinzel text-[10px] lg:text-xs uppercase tracking-wide text-center text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                <span className="relative z-10 font-cinzel text-[11px] lg:text-sm uppercase tracking-wide text-center text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                   {item.label}
                 </span>
               </Link>
