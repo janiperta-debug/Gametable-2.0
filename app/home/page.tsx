@@ -13,6 +13,7 @@ export default function HomePage() {
     const heroMap: { [key: string]: string } = {
       "main-hall": "/images/themes/main-hall-hero.jpg",
       "library": "/images/heroes/library-hero.jpg",
+      "conservatory": "/images/heroes/conservatory-hero.jpg",
       // Add more theme heroes here as they become available
     }
     return heroMap[theme] || "/images/themes/main-hall-hero.jpg"
@@ -23,6 +24,7 @@ export default function HomePage() {
     const crestMap: { [key: string]: string } = {
       "main-hall": "/images/gametable-crest-logo.png",
       "library": "/images/crests/library-crest.png",
+      "conservatory": "/images/logos/conservatory-logo.png",
       // Add more theme crests here as they become available
     }
     return crestMap[theme] || "/images/gametable-crest-logo.png"
