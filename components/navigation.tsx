@@ -152,7 +152,7 @@ export function Navigation() {
   const getCrestImage = (theme: string) => {
     const crestMap: { [key: string]: string } = {
       "main-hall": "/images/mainhall-crest-original.png",
-      library: "/images/library-crest.png",
+      library: "/images/crests/library-crest.png",
       bar: "/images/bar-crest.png",
       "fireside-lounge": "/images/fireside-lounge-crest.png",
       spa: "/crests/spa-crest.png",
