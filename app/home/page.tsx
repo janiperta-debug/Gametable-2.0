@@ -23,21 +23,6 @@ export default function HomePage() {
     return heroMap[theme] || "/images/themes/main-hall-hero.jpg"
   }
 
-  // Get crest/logo for current theme
-  const getCrestImage = (theme: string) => {
-    const crestMap: { [key: string]: string } = {
-      "main-hall": "/images/gametable-crest-logo.png",
-      "library": "/images/crests/library-crest.png",
-      "conservatory": "/images/logos/conservatory-logo.png",
-      "fireside-lounge": "/images/logos/fireside-lounge-logo.png",
-      "spa": "/images/logos/spa-logo.png",
-      "bar": "/images/logos/bar-logo.png",
-      "gallery": "/images/logos/gallery-logo.png",
-      // Add more theme crests here as they become available
-    }
-    return crestMap[theme] || "/images/gametable-crest-logo.png"
-  }
-
   return (
     <div className="h-screen flex flex-col px-4 md:px-8 lg:px-16 pt-4 md:pt-6 pb-28 md:pb-32 relative overflow-hidden">
       {/* Full hero background image - no overlay, displayed in full glory */}
@@ -53,10 +38,10 @@ export default function HomePage() {
 
       {/* Content - centered on mobile, left-aligned on tablet/desktop */}
       <div className="relative z-10 max-w-lg lg:max-w-xl mx-auto md:mx-0 text-center md:text-left">
-        {/* GameTable crest logo - larger and at top */}
+        {/* GameTable universal text logo */}
         <div className="mb-4 md:mb-6 flex justify-center md:justify-start">
           <img
-            src={getCrestImage(currentAppTheme)}
+            src="/images/gametable-text-logo.png"
             alt="GameTable"
             className="w-56 md:w-72 lg:w-80 xl:w-96 h-auto"
           />
