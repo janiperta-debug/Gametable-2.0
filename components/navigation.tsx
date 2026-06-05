@@ -488,7 +488,7 @@ export function Navigation() {
                 <img
                   src={item.icon}
                   alt={item.label}
-                  className="w-28 h-28 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+                  className="w-24 h-24 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
                 />
               </Link>
             ))}
@@ -508,7 +508,7 @@ export function Navigation() {
                 <img
                   src={item.icon}
                   alt={item.label}
-                  className="w-28 h-28 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+                  className="w-24 h-24 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
                 />
               </Link>
             ))}
