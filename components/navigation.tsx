@@ -196,12 +196,43 @@ export function Navigation() {
   return (
     <>
       {/* ═══════════════════════════════════════════════════════
-          DESKTOP NAVIGATION - TOP BAR (right side only, left is EMPTY)
+          DESKTOP NAVIGATION - TOP BAR (notifications, language | crest | xp, profile)
           ═══════════════════════════════════════════════════════ */}
       <nav className="hidden md:block fixed top-0 left-0 right-0 z-50 pointer-events-none">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-end h-16 pointer-events-auto">
-            {/* Right side items: XP Progress, Notifications, Language, Profile */}
+          <div className="flex items-center justify-between h-20 pointer-events-auto">
+            {/* Left side: Notifications, Language */}
+            <div className="flex items-center gap-3 lg:gap-4">
+              {/* Notifications Bell */}
+              <Link
+                href="/notifications"
+                className="relative p-2 hover:bg-card/50 rounded-lg transition-colors"
+              >
+                <Bell className="w-5 h-5 text-accent-gold" />
+                {hasUnreadNotifications && (
+                  <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold">
+                    {unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}
+                  </span>
+                )}
+              </Link>
+
+              {/* Language Switcher */}
+              <LanguageSwitcher />
+            </div>
+
+            {/* Center: Crest (Home link) */}
+            <Link
+              href="/home"
+              className="absolute left-1/2 -translate-x-1/2 transition-all hover:scale-105"
+            >
+              <img
+                src={getCrestImage(currentAppTheme)}
+                alt="Home"
+                className="w-16 h-16 lg:w-20 lg:h-20 object-contain"
+              />
+            </Link>
+
+            {/* Right side: XP Progress, Profile */}
             <div className="flex items-center gap-3 lg:gap-4">
               {/* XP Progress Badge */}
               {user && !loading && (
@@ -220,22 +251,6 @@ export function Navigation() {
                   </div>
                 </div>
               )}
-
-              {/* Notifications Bell */}
-              <Link
-                href="/notifications"
-                className="relative p-2 hover:bg-card/50 rounded-lg transition-colors"
-              >
-                <Bell className="w-5 h-5 text-accent-gold" />
-                {hasUnreadNotifications && (
-                  <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold">
-                    {unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}
-                  </span>
-                )}
-              </Link>
-
-              {/* Language Switcher */}
-              <LanguageSwitcher />
 
               {/* Profile Avatar with Dropdown */}
               {!user && !loading ? (
@@ -299,13 +314,13 @@ export function Navigation() {
       </nav>
 
       {/* ═══════════════════════════════════════════════════════
-          DESKTOP NAVIGATION - BOTTOM BAR (4 buttons + crest + 4 buttons)
+          DESKTOP NAVIGATION - BOTTOM BAR (8 buttons evenly spaced)
           ═══════════════════════════════════════════════════════ */}
       <nav className="hidden md:block fixed bottom-2 left-0 right-0 z-50 pointer-events-none">
         <div className="max-w-[1920px] mx-auto px-0">
           <div className="flex items-center justify-center gap-0 -space-x-6 lg:-space-x-8 pointer-events-auto">
-            {/* Left 4 buttons */}
-            {desktopNavItemsLeft.map((item) => (
+            {/* All 8 nav buttons */}
+            {[...desktopNavItemsLeft, ...desktopNavItemsRight].map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -318,44 +333,7 @@ export function Navigation() {
                   alt="" 
                   className="absolute inset-0 w-full h-full object-contain"
                 />
-                <span className="relative z-10 font-cinzel text-[11px] lg:text-sm uppercase tracking-wide text-center text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-                  {item.label}
-                </span>
-              </Link>
-            ))}
-
-            {/* Center crest button - home */}
-            <Link
-              href="/home"
-              className="relative flex items-center justify-center w-[142px] h-[142px] lg:w-[165px] lg:h-[165px] transition-all hover:scale-105"
-            >
-              <img 
-                src={getNavButtonRoundFrame(currentAppTheme)} 
-                alt="" 
-                className="absolute inset-0 w-full h-full object-contain"
-              />
-              <img
-                src={getCrestImage(currentAppTheme)}
-                alt="Home"
-                className="relative z-10 w-20 h-20 lg:w-24 lg:h-24 object-contain"
-              />
-            </Link>
-
-            {/* Right 4 buttons */}
-            {desktopNavItemsRight.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`relative flex items-center justify-center w-[230px] h-[95px] lg:w-[260px] lg:h-[106px] transition-all hover:scale-105 ${
-                  isActive(item.href) ? "brightness-125" : ""
-                }`}
-              >
-                <img 
-                  src={getNavButtonFrame(currentAppTheme)} 
-                  alt="" 
-                  className="absolute inset-0 w-full h-full object-contain"
-                />
-                <span className="relative z-10 font-cinzel text-[11px] lg:text-sm uppercase tracking-wide text-center text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                <span className="relative z-10 font-cinzel text-[9px] lg:text-[11px] uppercase tracking-wide text-center text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                   {item.label}
                 </span>
               </Link>

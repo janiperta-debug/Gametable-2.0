@@ -43,7 +43,7 @@ export default function HomePage() {
           <img
             src="/images/gametable-text-logo.png"
             alt="GameTable"
-            className="w-56 md:w-72 lg:w-80 xl:w-96 h-auto"
+            className="w-80 md:w-[28rem] lg:w-[30rem] xl:w-[36rem] h-auto"
           />
         </div>
 
