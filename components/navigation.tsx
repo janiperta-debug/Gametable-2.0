@@ -318,7 +318,7 @@ export function Navigation() {
                   alt="" 
                   className="absolute inset-0 w-full h-full object-contain"
                 />
-                <span className="relative z-10 font-cinzel text-[11px] lg:text-sm uppercase tracking-wide text-center text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                <span className="relative z-10 font-cinzel text-[9px] lg:text-[11px] uppercase tracking-wide text-center text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                   {item.label}
                 </span>
               </Link>
@@ -355,7 +355,7 @@ export function Navigation() {
                   alt="" 
                   className="absolute inset-0 w-full h-full object-contain"
                 />
-                <span className="relative z-10 font-cinzel text-[11px] lg:text-sm uppercase tracking-wide text-center text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                <span className="relative z-10 font-cinzel text-[9px] lg:text-[11px] uppercase tracking-wide text-center text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                   {item.label}
                 </span>
               </Link>
