@@ -132,12 +132,12 @@ export function Navigation() {
     { href: "/contact", label: t("nav.contact"), iconImg: "/images/nav-icons/contact.png" },
   ]
 
-  // Mobile bottom nav items (4 main items)
+  // Mobile bottom nav items (4 main items - icon buttons only, no text)
   const mobileNavItems = [
-    { href: "/collection", label: t("nav.collection"), icon: "/images/icons/chest.jpeg" },
-    { href: "/discover", label: t("nav.community"), icon: "/images/icons/community.jpeg" },
-    { href: "/events", label: t("nav.events"), icon: "/images/icons/calendar.jpeg" },
-    { href: "/themes", label: t("nav.themes"), icon: "/images/icons/door.jpeg" },
+    { href: "/collection", label: t("nav.collection"), icon: "/images/nav-icons/mobile-collection.png" },
+    { href: "/discover", label: t("nav.community"), icon: "/images/nav-icons/mobile-community.png" },
+    { href: "/events", label: t("nav.events"), icon: "/images/nav-icons/mobile-events.png" },
+    { href: "/themes", label: t("nav.themes"), icon: "/images/nav-icons/mobile-manor.png" },
   ]
 
   // Crest menu items (shown when crest is tapped on mobile)
@@ -481,20 +481,15 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-1 min-w-[70px] py-1 ${
-                  isActive(item.href) ? "opacity-100" : "opacity-70"
+                className={`flex items-center justify-center py-1 transition-all hover:scale-105 ${
+                  isActive(item.href) ? "brightness-125" : "opacity-80"
                 }`}
               >
                 <img
                   src={item.icon}
-                  alt=""
-                  className="w-14 h-14 object-contain"
+                  alt={item.label}
+                  className="w-16 h-16 object-contain"
                 />
-                <span className={`font-cinzel text-[10px] uppercase tracking-wide ${
-                  isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
-                }`}>
-                  {item.label}
-                </span>
               </Link>
             ))}
 
@@ -506,20 +501,15 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-1 min-w-[70px] py-1 ${
-                  isActive(item.href) ? "opacity-100" : "opacity-70"
+                className={`flex items-center justify-center py-1 transition-all hover:scale-105 ${
+                  isActive(item.href) ? "brightness-125" : "opacity-80"
                 }`}
               >
                 <img
                   src={item.icon}
-                  alt=""
-                  className="w-14 h-14 object-contain"
+                  alt={item.label}
+                  className="w-16 h-16 object-contain"
                 />
-                <span className={`font-cinzel text-[10px] uppercase tracking-wide ${
-                  isActive(item.href) ? "text-accent-gold" : "text-foreground/70"
-                }`}>
-                  {item.label}
-                </span>
               </Link>
             ))}
           </div>
