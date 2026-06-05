@@ -473,42 +473,42 @@ export function Navigation() {
           )}
         </div>
 
-        {/* The actual nav bar */}
-        <nav className="navbar-bg backdrop-blur-sm border-t border-accent-gold/20 safe-area-bottom">
-          <div className="flex items-end justify-around px-2 pt-2 pb-3">
+        {/* The actual nav bar - transparent, just floating icons */}
+        <nav className="safe-area-bottom">
+          <div className="flex items-end justify-around px-4 pt-2 pb-4">
             {/* First two nav items */}
             {mobileNavItems.slice(0, 2).map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center justify-center py-1 transition-all hover:scale-105 ${
-                  isActive(item.href) ? "brightness-125" : "opacity-80"
+                className={`flex items-center justify-center transition-all hover:scale-105 ${
+                  isActive(item.href) ? "brightness-125" : "opacity-90"
                 }`}
               >
                 <img
                   src={item.icon}
                   alt={item.label}
-                  className="w-16 h-16 object-contain"
+                  className="w-20 h-20 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
                 />
               </Link>
             ))}
 
             {/* Spacer for floating crest */}
-            <div className="min-w-[80px]" />
+            <div className="min-w-[90px]" />
 
             {/* Last two nav items */}
             {mobileNavItems.slice(2).map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center justify-center py-1 transition-all hover:scale-105 ${
-                  isActive(item.href) ? "brightness-125" : "opacity-80"
+                className={`flex items-center justify-center transition-all hover:scale-105 ${
+                  isActive(item.href) ? "brightness-125" : "opacity-90"
                 }`}
               >
                 <img
                   src={item.icon}
                   alt={item.label}
-                  className="w-16 h-16 object-contain"
+                  className="w-20 h-20 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
                 />
               </Link>
             ))}
