@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import { FrameButton } from "@/components/frame-button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -118,10 +118,9 @@ export function CollectionHeader({
           </div>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-          <Button onClick={onAddGame} className="theme-accent-gold w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
-            <span className="font-body">{t("collection.addGame")}</span>
-          </Button>
+          <FrameButton onClick={onAddGame} icon={<Plus className="h-4 w-4" />} className="w-full sm:w-auto">
+            {t("collection.addGame")}
+          </FrameButton>
         </div>
       </div>
 
@@ -139,10 +138,9 @@ export function CollectionHeader({
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex-1 sm:flex-none bg-transparent min-w-0 flex-shrink">
-                <SortAsc className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span className="font-body truncate">{t(currentSort.labelKey)}</span>
-              </Button>
+              <FrameButton icon={<SortAsc className="h-4 w-4 flex-shrink-0" />} className="flex-1 sm:flex-none min-w-0">
+                <span className="truncate">{t(currentSort.labelKey)}</span>
+              </FrameButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {sortOptions.map((option) => (
@@ -153,23 +151,25 @@ export function CollectionHeader({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div className="flex items-center border rounded-md flex-shrink-0">
-            <Button
-              variant={viewMode === "grid" ? "default" : "ghost"}
-              size="sm"
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <FrameButton
+              variant="icon"
+              active={viewMode === "grid"}
+              aria-pressed={viewMode === "grid"}
+              aria-label={t("collection.gridView")}
               onClick={() => setViewMode("grid")}
-              className={`rounded-r-none ${viewMode === "grid" ? "theme-accent-gold" : ""}`}
             >
               <Grid className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === "list" ? "default" : "ghost"}
-              size="sm"
+            </FrameButton>
+            <FrameButton
+              variant="icon"
+              active={viewMode === "list"}
+              aria-pressed={viewMode === "list"}
+              aria-label={t("collection.listView")}
               onClick={() => setViewMode("list")}
-              className={`rounded-l-none ${viewMode === "list" ? "theme-accent-gold" : ""}`}
             >
               <List className="h-4 w-4" />
-            </Button>
+            </FrameButton>
           </div>
         </div>
       </div>

@@ -1206,6 +1206,18 @@
     );
   }
 
+  /*
+    THEME RE-IMAGINE: the per-theme .room-environment flat fills above used to
+    paint a near-solid color on top of the .app-background radial gradient,
+    hiding it. We now let the .app-background gradient be the single page
+    background. This override neutralizes every .room-environment flat fill
+    (including the duplicated one) while keeping the data-theme color variables
+    that feed .app-background and component accents.
+  */
+  .room-environment {
+    background: transparent !important;
+  }
+
   /* Main HallNavbar */
   [data-theme="main-hall"] .navbar-bg {
     /* Changed from brown/mahogany gradient to burgundy gradient to match deployed version */

@@ -8,9 +8,9 @@ import { GameGrid } from "@/components/game-grid"
 import { GameList } from "@/components/game-list"
 import { DiscoverGames } from "@/components/discover-games"
 import { ImportSection } from "@/components/import-section"
-import { BookOpen, Filter, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ThemeHero } from "@/components/theme-hero"
+import { FrameButton } from "@/components/frame-button"
+import { Filter, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "@/lib/i18n"
 import { useCollection } from "@/hooks/useCollection"
@@ -162,30 +162,26 @@ export default function Collection() {
   }, [transformedGames])
 
   return (
-    <div className="min-h-screen room-environment">
+    <div className="min-h-screen">
       <main className="container mx-auto px-4 py-8">
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-4">
-            <BookOpen className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="logo-text text-5xl font-bold">{t("collection.title")}</h1>
+        <ThemeHero page="collection" title={t("collection.title")} subtitle={t("collection.subtitle")}>
+          <div className="flex justify-center gap-3">
+            <FrameButton
+              active={activeTab === "my-games"}
+              aria-pressed={activeTab === "my-games"}
+              onClick={() => setActiveTab("my-games")}
+            >
+              {t("collection.myGames")}
+            </FrameButton>
+            <FrameButton
+              active={activeTab === "find-games"}
+              aria-pressed={activeTab === "find-games"}
+              onClick={() => setActiveTab("find-games")}
+            >
+              {t("collection.findGames")}
+            </FrameButton>
           </div>
-          <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
-            {t("collection.subtitle")}
-          </p>
-        </div>
-
-        <div className="flex justify-center mb-8">
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "my-games" | "find-games")}>
-            <TabsList className="grid w-full grid-cols-2 mb-6 md:mb-8 max-w-md mx-auto">
-              <TabsTrigger value="my-games" className="font-cinzel text-xs sm:text-sm">
-                {t("collection.myGames")}
-              </TabsTrigger>
-              <TabsTrigger value="find-games" className="font-cinzel text-xs sm:text-sm">
-                {t("collection.findGames")}
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
+        </ThemeHero>
 
         {activeTab === "my-games" ? (
           <>
@@ -218,14 +214,12 @@ export default function Collection() {
               )}
               <div className={showFilters ? "lg:col-span-3" : "lg:col-span-4"}>
                 <div className="mb-4">
-                  <Button
+                  <FrameButton
                     onClick={() => setShowFilters(!showFilters)}
-                    variant="outline"
-                    className="theme-accent-gold bg-transparent"
+                    icon={<Filter className="h-4 w-4" />}
                   >
-                    <Filter className="h-4 w-4 mr-2" />
-                    <span className="font-cinzel">{showFilters ? t("collection.hideFilters") : t("collection.showFilters")}</span>
-                  </Button>
+                    {showFilters ? t("collection.hideFilters") : t("collection.showFilters")}
+                  </FrameButton>
                 </div>
                 {loading ? (
                   <div className="flex items-center justify-center py-16">
