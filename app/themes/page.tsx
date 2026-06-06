@@ -131,19 +131,14 @@ export default function ThemesPage() {
   const xpNeededForLevel = nextLevelXP - currentLevelXP
   const xpProgress = xpNeededForLevel > 0 ? (xpInCurrentLevel / xpNeededForLevel) * 100 : 0
 
-  // Get unlocked rooms from profile
-  const unlockedRooms = useMemo(() => {
-    // Main-hall is always unlocked by default
-    const defaultRooms = ["main-hall"]
-    const profileRooms = profile?.unlocked_themes ?? []
-    return [...new Set([...defaultRooms, ...profileRooms])]
-  }, [profile?.unlocked_themes])
+  // TEMPORARY: All themes locked except Main Hall (theme work in progress).
+  // Ignore profile/XP unlock data on purpose so only Main Hall is unlocked.
+  const unlockedRooms = useMemo(() => ["main-hall"], [])
 
-  const activeRoom = profile?.theme ?? "main-hall"
-  
-  // Calculate available unlocks based on level
-  // For now, simple logic: 1 unlock per 5 levels
-  const availableUnlocks = Math.max(0, Math.floor(level / 5) - (unlockedRooms.length - 1))
+  const activeRoom = "main-hall"
+
+  // No unlocks available during the demo lockdown.
+  const availableUnlocks = 0
 
   const groundFloorProgress = unlockedRooms.filter(r => 
     groundFloorRooms.some(gfr => gfr.id === r)

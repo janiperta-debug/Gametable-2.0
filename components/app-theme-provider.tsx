@@ -295,6 +295,12 @@ interface AppThemeContextType {
 const APP_THEME_STORAGE_KEY = "gametable-app-theme"
 const DEFAULT_THEME: AppThemeName = "main-hall"
 
+// TEMPORARY: theme work in progress — only Main Hall is available.
+// While locked, force every previously-saved theme back to Main Hall so no
+// locked room leaks from the database or localStorage during the demo.
+const THEMES_LOCKED = true
+const isThemeAllowed = (theme: AppThemeName) => !THEMES_LOCKED || theme === "main-hall"
+
 // Create the context with a default value
 const AppThemeContext = createContext<AppThemeContextType | undefined>(undefined)
 
@@ -311,7 +317,7 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
   useEffect(() => {
     if (user && profile?.preferred_theme && !isLoadedFromDB) {
       const dbTheme = profile.preferred_theme as AppThemeName
-      if (MANOR_THEMES.some((theme) => theme.id === dbTheme)) {
+      if (MANOR_THEMES.some((theme) => theme.id === dbTheme) && isThemeAllowed(dbTheme)) {
         setCurrentAppTheme(dbTheme)
         setIsLoadedFromDB(true)
         // Also update localStorage
@@ -329,7 +335,7 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
     if (!user) {
       try {
         const saved = localStorage.getItem(APP_THEME_STORAGE_KEY)
-        if (saved && MANOR_THEMES.some((theme) => theme.id === saved)) {
+        if (saved && MANOR_THEMES.some((theme) => theme.id === saved) && isThemeAllowed(saved as AppThemeName)) {
           setCurrentAppTheme(saved as AppThemeName)
         }
       } catch (error) {
@@ -339,6 +345,9 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
   }, [user])
 
   const setAppTheme = async (theme: AppThemeName) => {
+    // TEMPORARY: ignore attempts to switch to locked themes during the demo.
+    if (!isThemeAllowed(theme)) return
+
     setCurrentAppTheme(theme)
     
     // Save to localStorage
