@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { useAppTheme } from "@/components/app-theme-provider"
 import type { RoomTheme } from "@/lib/room-themes"
 import { updateActiveRoom } from "@/app/actions/xp"
-import { useUser } from "@/hooks/useUser"
 import { Loader2 } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 
@@ -15,16 +14,15 @@ interface ThemeSelectorProps {
 
 export function ThemeSelector({ room }: ThemeSelectorProps) {
   const { currentAppTheme, setAppTheme } = useAppTheme()
-  const { profile } = useUser()
   const [saving, setSaving] = useState(false)
   const t = useTranslations()
 
-  // Check if room is unlocked based on profile data
-  const unlockedRooms = profile?.unlocked_themes ?? []
-  const isRoomUnlocked = room.id === "main-hall" || unlockedRooms.includes(room.id)
-  
+  // TEMPORARY: All themes locked except Main Hall (theme work in progress).
+  // Ignores profile/XP unlock data on purpose so only Main Hall is usable.
+  const isRoomUnlocked = room.id === "main-hall"
+
   const isCurrentTheme = currentAppTheme === room.id
-  const canUseTheme = isRoomUnlocked || room.canUnlock
+  const canUseTheme = isRoomUnlocked
 
   const handleThemeChange = async () => {
     if (!canUseTheme || isCurrentTheme || saving) return
