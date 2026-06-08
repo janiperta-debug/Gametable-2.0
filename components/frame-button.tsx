@@ -35,18 +35,27 @@ interface FrameButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
   icon?: React.ReactNode
 }
 
-// Height drives overall scale; width follows the art's aspect ratio.
-const RECT_HEIGHT: Record<FrameButtonSize, string> = {
-  sm: "h-12",
-  md: "h-14",
-  lg: "h-16",
-  xl: "h-20",
+// Rect buttons are sized by PADDING (not a fixed height): the wood plate uses
+// object-fill so it stretches to whatever box the label needs — height grows
+// with content and the label is always centered on both axes with no distortion.
+const RECT_PADDING: Record<FrameButtonSize, string> = {
+  sm: "px-8 py-2.5",
+  md: "px-10 py-3",
+  lg: "px-12 py-3.5",
+  xl: "px-14 py-4",
 }
-const ICON_HEIGHT: Record<FrameButtonSize, string> = {
-  sm: "h-11",
-  md: "h-12",
-  lg: "h-14",
-  xl: "h-16",
+// Icon buttons keep the oval art's aspect ratio (a fixed square box reads well).
+const ICON_SIZE: Record<FrameButtonSize, string> = {
+  sm: "h-12 w-12",
+  md: "h-14 w-14",
+  lg: "h-16 w-16",
+  xl: "h-20 w-20",
+}
+const ICON_GLYPH: Record<FrameButtonSize, string> = {
+  sm: "[&_svg]:h-4 [&_svg]:w-4",
+  md: "[&_svg]:h-5 [&_svg]:w-5",
+  lg: "[&_svg]:h-6 [&_svg]:w-6",
+  xl: "[&_svg]:h-7 [&_svg]:w-7",
 }
 const RECT_TEXT: Record<FrameButtonSize, string> = {
   sm: "text-[11px]",
