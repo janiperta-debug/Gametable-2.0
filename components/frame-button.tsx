@@ -7,53 +7,116 @@ import { useAppTheme } from "@/components/app-theme-provider"
 import { getButtonFrame, getButtonRoundFrame } from "@/lib/theme-assets"
 
 /**
- * FrameButton — the gold image-frame button used in the desktop navigation,
- * extracted into a reusable component for the theme re-imagine.
+ * FrameButton — the gold image-frame button used across the themed UI.
  *
- * The visual is an <img> frame (per-theme, falls back to main-hall) layered
- * behind a label/icon. We keep a real <button> underneath so keyboard focus,
- * disabled state, and click semantics are preserved.
+ * KEY IDEA ("the image IS the button"): the frame <img> is rendered in normal
+ * flow so it dictates the button's exact size at the art's natural aspect
+ * ratio — no letterboxing/empty gold space. The label/icon is then absolutely
+ * overlaid and inset (percentage padding) so it always sits on the wood panel,
+ * never over the ornate gold border or corner flourishes.
+ *
+ * Size is controlled by CSS height only, so swapping the per-theme frame art
+ * keeps every button the SAME size — only the look changes.
  *
  * Variants:
- *  - "rect"  : rectangular label button (Lisää peli, Näytä suodattimet, sort)
- *  - "icon"  : square/round icon button (grid / list view toggle)
+ *  - "rect" : rectangular label button (Lisää peli, Suodattimet, sort)
+ *  - "icon" : round/oval icon button (grid / list view toggle)
  */
 
 type FrameButtonVariant = "rect" | "icon"
+type FrameButtonSize = "sm" | "md" | "lg" | "xl"
 
 interface FrameButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: FrameButtonVariant
+  size?: FrameButtonSize
   /** Renders brighter to indicate the selected/active state (like nav isActive). */
   active?: boolean
   /** Optional leading icon. */
   icon?: React.ReactNode
 }
 
+// Height drives overall scale; width follows the art's aspect ratio.
+const RECT_HEIGHT: Record<FrameButtonSize, string> = {
+  sm: "h-12",
+  md: "h-14",
+  lg: "h-16",
+  xl: "h-20",
+}
+const ICON_HEIGHT: Record<FrameButtonSize, string> = {
+  sm: "h-11",
+  md: "h-12",
+  lg: "h-14",
+  xl: "h-16",
+}
+const RECT_TEXT: Record<FrameButtonSize, string> = {
+  sm: "text-[11px]",
+  md: "text-xs",
+  lg: "text-sm",
+  xl: "text-base",
+}
+
 export const FrameButton = forwardRef<HTMLButtonElement, FrameButtonProps>(function FrameButton(
-  { variant = "rect", active = false, icon, children, className, ...props },
+  { variant = "rect", size = "lg", active = false, icon, children, className, ...props },
   ref,
 ) {
   const { currentAppTheme } = useAppTheme()
   const frameSrc = variant === "icon" ? getButtonRoundFrame(currentAppTheme) : getButtonFrame(currentAppTheme)
 
+  if (variant === "icon") {
+    return (
+      <button
+        ref={ref}
+        className={cn(
+          "relative inline-grid place-items-center transition-all hover:scale-105 active:scale-100 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed",
+          active && "brightness-125",
+          className,
+        )}
+        {...props}
+      >
+        {/* Frame art in normal flow → button size == image size */}
+        <img
+          src={frameSrc || "/placeholder.svg"}
+          alt=""
+          aria-hidden="true"
+          className={cn("block w-auto pointer-events-none select-none", ICON_HEIGHT[size])}
+        />
+        {/* Icon centered on the wood panel (oval inset ~ center) */}
+        <span className="absolute inset-0 grid place-items-center text-accent-gold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+          {icon}
+        </span>
+      </button>
+    )
+  }
+
   return (
     <button
       ref={ref}
       className={cn(
-        "relative inline-flex items-center justify-center transition-all hover:scale-105 active:scale-100 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed",
+        // Content drives width; the wood plate (object-fill) stretches to match
+        // exactly so the label always sits on the panel — no truncation, and a
+        // horizontal plate tolerates modest horizontal stretch cleanly.
+        "relative inline-flex items-center justify-center px-10 transition-all hover:scale-105 active:scale-100 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed",
         active && "brightness-125",
-        // Sizes chosen so the frame's natural aspect ratio (~2.4:1, matching the
-        // nav button) is preserved. `object-contain` keeps the art undistorted;
-        // generous px keeps the label inside the frame's wood panel.
-        variant === "icon" ? "h-20 w-20" : "h-24 px-14",
+        RECT_HEIGHT[size],
         className,
       )}
       {...props}
     >
-      {/* Gold frame art — object-contain so the plate is never squashed/stretched */}
-      <img src={frameSrc || "/placeholder.svg"} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-contain pointer-events-none select-none" />
-      {/* Label / icon */}
-      <span className="relative z-10 inline-flex items-center justify-center gap-2 font-cinzel text-sm sm:text-base uppercase tracking-wide text-center text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+      {/* Frame art fills the button box exactly (the image IS the button). */}
+      <img
+        src={frameSrc || "/placeholder.svg"}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-fill pointer-events-none select-none"
+      />
+      {/* Label centered on the wood panel. */}
+      <span
+        className={cn(
+          "relative z-10 inline-flex items-center justify-center gap-2 whitespace-nowrap",
+          "font-cinzel uppercase tracking-wide text-center leading-none text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]",
+          RECT_TEXT[size],
+        )}
+      >
         {icon}
         {children}
       </span>
@@ -62,9 +125,9 @@ export const FrameButton = forwardRef<HTMLButtonElement, FrameButtonProps>(funct
 })
 
 /**
- * FrameToggle — a single gold frame image acting as the decorative container,
- * with a CSS segmented two-option toggle sitting transparently inside it.
- * Matches the user's request: "css segmented toggle live inside one image".
+ * FrameToggle — a single gold frame image as the decorative container, with a
+ * CSS segmented two-option toggle sitting transparently on the wood panel.
+ * Width-driven (the art fills the given width) so two labels fit comfortably.
  */
 interface FrameToggleOption<T extends string> {
   value: T
@@ -83,38 +146,40 @@ export function FrameToggle<T extends string>({ options, value, onChange, classN
   const frameSrc = getButtonFrame(currentAppTheme)
 
   return (
-    <div className={cn("relative inline-flex h-28 items-center justify-center px-14", className)}>
-      {/* Decorative gold frame — object-contain keeps the plate undistorted */}
+    <div className={cn("relative inline-block w-[22rem] max-w-full", className)}>
+      {/* Frame art fills width → toggle size == image size */}
       <img
         src={frameSrc || "/placeholder.svg"}
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 h-full w-full object-contain pointer-events-none select-none"
+        className="block h-auto w-full pointer-events-none select-none"
       />
-      {/* Transparent segmented toggle */}
-      <div
-        role="tablist"
-        className="relative z-10 inline-flex items-center gap-1 rounded-full border border-accent-gold/40 bg-background/40 p-1 backdrop-blur-sm"
-      >
-        {options.map((opt) => {
-          const isActive = opt.value === value
-          return (
-            <button
-              key={opt.value}
-              role="tab"
-              aria-selected={isActive}
-              onClick={() => onChange(opt.value)}
-              className={cn(
-                "rounded-full px-4 py-1.5 font-cinzel text-xs sm:text-sm uppercase tracking-wide transition-colors",
-                isActive
-                  ? "bg-accent-gold text-background font-semibold shadow"
-                  : "text-accent-gold/80 hover:text-accent-gold",
-              )}
-            >
-              {opt.label}
-            </button>
-          )
-        })}
+      {/* Segmented control inset onto the wood panel */}
+      <div className="absolute inset-0 flex items-center justify-center px-[14%]">
+        <div
+          role="tablist"
+          className="inline-flex items-center gap-1 rounded-full border border-accent-gold/40 bg-background/40 p-1 backdrop-blur-sm"
+        >
+          {options.map((opt) => {
+            const isActive = opt.value === value
+            return (
+              <button
+                key={opt.value}
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => onChange(opt.value)}
+                className={cn(
+                  "rounded-full px-4 py-1.5 font-cinzel text-xs sm:text-sm uppercase tracking-wide transition-colors",
+                  isActive
+                    ? "bg-accent-gold text-background font-semibold shadow"
+                    : "text-accent-gold/80 hover:text-accent-gold",
+                )}
+              >
+                {opt.label}
+              </button>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
