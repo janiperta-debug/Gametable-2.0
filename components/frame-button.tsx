@@ -42,13 +42,16 @@ export const FrameButton = forwardRef<HTMLButtonElement, FrameButtonProps>(funct
       className={cn(
         "relative inline-flex items-center justify-center transition-all hover:scale-105 active:scale-100 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed",
         active && "brightness-125",
-        variant === "icon" ? "w-14 h-14" : "h-14 px-10 min-w-[9rem]",
+        // Sizes chosen so the frame's natural aspect ratio (~2.4:1, matching the
+        // nav button) is preserved. `object-contain` keeps the art undistorted;
+        // generous px keeps the label inside the frame's wood panel.
+        variant === "icon" ? "h-16 w-16" : "h-16 px-12",
         className,
       )}
       {...props}
     >
-      {/* Gold frame art */}
-      <img src={frameSrc || "/placeholder.svg"} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none" />
+      {/* Gold frame art — object-contain so the plate is never squashed/stretched */}
+      <img src={frameSrc || "/placeholder.svg"} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-contain pointer-events-none select-none" />
       {/* Label / icon */}
       <span className="relative z-10 inline-flex items-center justify-center gap-2 font-cinzel text-sm sm:text-base uppercase tracking-wide text-center text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
         {icon}
@@ -80,13 +83,13 @@ export function FrameToggle<T extends string>({ options, value, onChange, classN
   const frameSrc = getButtonFrame(currentAppTheme)
 
   return (
-    <div className={cn("relative inline-flex h-16 min-w-[20rem] items-center justify-center px-10", className)}>
-      {/* Decorative gold frame */}
+    <div className={cn("relative inline-flex h-20 items-center justify-center px-12", className)}>
+      {/* Decorative gold frame — object-contain keeps the plate undistorted */}
       <img
         src={frameSrc || "/placeholder.svg"}
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 h-full w-full object-fill pointer-events-none select-none"
+        className="absolute inset-0 h-full w-full object-contain pointer-events-none select-none"
       />
       {/* Transparent segmented toggle */}
       <div

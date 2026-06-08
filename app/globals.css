@@ -5,6 +5,10 @@
 /* Layered background for premium feel - wrapper div approach */
 .app-background {
   min-height: 100vh;
+  /* Establish a stacking context so a fixed, negative-z hero (ThemeHero
+     backdrop mode) paints ABOVE this gradient but BELOW page content. */
+  position: relative;
+  z-index: 0;
   background:
     radial-gradient(circle at 50% 0%, hsl(var(--accent-gold) / 0.15), transparent 60%),
     radial-gradient(circle at 50% 20%, hsl(var(--background)), hsl(var(--surface-dark)) 80%),

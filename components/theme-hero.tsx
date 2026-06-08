@@ -47,6 +47,27 @@ export function ThemeHero({ page, mode = "banner", title, subtitle, children, cl
     }
   }
 
+  // Backdrop mode: the hero image is a FIXED, full-viewport background that
+  // stays stationary while the page content scrolls over it ("text rolls over
+  // it"). No scrim/overlay — the image is shown as-is. The fixed layer is
+  // rendered outside any bordered/overflow wrapper so nothing clips it, and it
+  // sits at -z-10 (in front of the page gradient, behind all in-flow content).
+  if (mode === "backdrop") {
+    return (
+      <>
+        <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10">
+          <img
+            src={candidates[0] || "/placeholder.svg"}
+            alt=""
+            onError={handleError}
+            className="h-full w-full object-cover"
+          />
+        </div>
+        <div className={"relative z-10 mb-8 px-1 py-8 sm:px-2 " + (className ?? "")}>{children}</div>
+      </>
+    )
+  }
+
   return (
     <section
       className={
@@ -64,23 +85,19 @@ export function ThemeHero({ page, mode = "banner", title, subtitle, children, cl
       {/* Legibility scrim — darkens so gold text/controls read cleanly over the image */}
       <div className="absolute inset-0 bg-gradient-to-b from-background/75 via-background/45 to-background/90" />
 
-      {mode === "banner" ? (
-        <div className="relative z-10 flex min-h-[200px] flex-col items-center justify-center px-4 py-10 text-center sm:min-h-[240px] md:min-h-[280px]">
-          {title ? (
-            <h1 className="logo-text text-4xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] sm:text-5xl text-balance">
-              {title}
-            </h1>
-          ) : null}
-          {subtitle ? (
-            <p className="font-body mt-3 max-w-2xl text-base text-foreground/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] sm:text-lg text-pretty">
-              {subtitle}
-            </p>
-          ) : null}
-          {children ? <div className="mt-6 w-full">{children}</div> : null}
-        </div>
-      ) : (
-        <div className="relative z-10 px-4 py-8 sm:px-6">{children}</div>
-      )}
+      <div className="relative z-10 flex min-h-[200px] flex-col items-center justify-center px-4 py-10 text-center sm:min-h-[240px] md:min-h-[280px]">
+        {title ? (
+          <h1 className="logo-text text-4xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] sm:text-5xl text-balance">
+            {title}
+          </h1>
+        ) : null}
+        {subtitle ? (
+          <p className="font-body mt-3 max-w-2xl text-base text-foreground/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] sm:text-lg text-pretty">
+            {subtitle}
+          </p>
+        ) : null}
+        {children ? <div className="mt-6 w-full">{children}</div> : null}
+      </div>
     </section>
   )
 }
