@@ -6,26 +6,35 @@ import { useAppTheme } from "@/components/app-theme-provider"
 import { getPageHeroCandidates } from "@/lib/theme-assets"
 
 /**
- * ThemeHero — per-page, per-theme hero banner that REPLACES a page's old text
- * header block. Shows the page title once over a themed image, removing the
- * previous duplicated headings (e.g. collection's "Pelikokoelma" + "Kokoelmani").
+ * ThemeHero — per-page, per-theme hero IMAGE that replaces a page's old text
+ * header block.
+ *
+ * Modes:
+ *  - "banner"   : centered title/subtitle over the image (default; for pages
+ *                 that still want a headline rendered on the hero).
+ *  - "backdrop" : the image is purely a background spanning ALL children, with
+ *                 no overlaid title. Used by the collection page so the hero
+ *                 reaches from the top down past the page controls. The page's
+ *                 own headings (e.g. "Kokoelmani") render normally on top.
  *
  * The image source is resolved from lib/theme-assets. Because a 404 can't be
- * detected at SSR time, we attach an onError handler that walks the remaining
- * candidate paths so a missing per-page hero gracefully degrades to the theme's
- * main hero, then to a known-good image.
+ * detected at SSR time, an onError handler walks the remaining candidate paths
+ * so a missing per-page hero degrades to the theme's main hero, then to a
+ * known-good image.
  */
 
 interface ThemeHeroProps {
   /** Page key used to resolve /images/heroes/{page}/{theme}.jpg */
   page: string
-  title: string
+  mode?: "banner" | "backdrop"
+  title?: string
   subtitle?: string
-  /** Optional content rendered below the title inside the hero (e.g. a toggle). */
+  /** Content rendered inside the hero (a toggle in banner mode, the whole header block in backdrop mode). */
   children?: React.ReactNode
+  className?: string
 }
 
-export function ThemeHero({ page, title, subtitle, children }: ThemeHeroProps) {
+export function ThemeHero({ page, mode = "banner", title, subtitle, children, className }: ThemeHeroProps) {
   const { currentAppTheme } = useAppTheme()
   const candidates = useMemo(() => getPageHeroCandidates(page, currentAppTheme), [page, currentAppTheme])
   const idxRef = useRef(0)
@@ -39,7 +48,11 @@ export function ThemeHero({ page, title, subtitle, children }: ThemeHeroProps) {
   }
 
   return (
-    <section className="relative -mx-4 mb-8 overflow-hidden rounded-b-2xl border-b border-accent-gold/30 shadow-lg">
+    <section
+      className={
+        "relative -mx-4 mb-8 overflow-hidden rounded-b-2xl border-b border-accent-gold/30 shadow-lg " + (className ?? "")
+      }
+    >
       {/* Hero image */}
       <img
         src={candidates[0] || "/placeholder.svg"}
@@ -48,21 +61,26 @@ export function ThemeHero({ page, title, subtitle, children }: ThemeHeroProps) {
         onError={handleError}
         className="absolute inset-0 h-full w-full object-cover"
       />
-      {/* Legibility scrim — darkens edges and bottom so gold text reads cleanly */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/30 to-background/85" />
+      {/* Legibility scrim — darkens so gold text/controls read cleanly over the image */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/75 via-background/45 to-background/90" />
 
-      {/* Content */}
-      <div className="relative z-10 flex min-h-[200px] flex-col items-center justify-center px-4 py-10 text-center sm:min-h-[240px] md:min-h-[280px]">
-        <h1 className="logo-text text-4xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] sm:text-5xl text-balance">
-          {title}
-        </h1>
-        {subtitle ? (
-          <p className="font-body mt-3 max-w-2xl text-base text-foreground/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] sm:text-lg text-pretty">
-            {subtitle}
-          </p>
-        ) : null}
-        {children ? <div className="mt-6 w-full">{children}</div> : null}
-      </div>
+      {mode === "banner" ? (
+        <div className="relative z-10 flex min-h-[200px] flex-col items-center justify-center px-4 py-10 text-center sm:min-h-[240px] md:min-h-[280px]">
+          {title ? (
+            <h1 className="logo-text text-4xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] sm:text-5xl text-balance">
+              {title}
+            </h1>
+          ) : null}
+          {subtitle ? (
+            <p className="font-body mt-3 max-w-2xl text-base text-foreground/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] sm:text-lg text-pretty">
+              {subtitle}
+            </p>
+          ) : null}
+          {children ? <div className="mt-6 w-full">{children}</div> : null}
+        </div>
+      ) : (
+        <div className="relative z-10 px-4 py-8 sm:px-6">{children}</div>
+      )}
     </section>
   )
 }

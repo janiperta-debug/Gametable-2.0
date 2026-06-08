@@ -9,7 +9,7 @@ import { GameList } from "@/components/game-list"
 import { DiscoverGames } from "@/components/discover-games"
 import { ImportSection } from "@/components/import-section"
 import { ThemeHero } from "@/components/theme-hero"
-import { FrameButton } from "@/components/frame-button"
+import { FrameButton, FrameToggle } from "@/components/frame-button"
 import { Filter, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "@/lib/i18n"
@@ -164,44 +164,48 @@ export default function Collection() {
   return (
     <div className="min-h-screen">
       <main className="container mx-auto px-4 py-8">
-        <ThemeHero page="collection" title={t("collection.title")} subtitle={t("collection.subtitle")}>
-          <div className="flex justify-center gap-3">
-            <FrameButton
-              active={activeTab === "my-games"}
-              aria-pressed={activeTab === "my-games"}
-              onClick={() => setActiveTab("my-games")}
-            >
-              {t("collection.myGames")}
-            </FrameButton>
-            <FrameButton
-              active={activeTab === "find-games"}
-              aria-pressed={activeTab === "find-games"}
-              onClick={() => setActiveTab("find-games")}
-            >
-              {t("collection.findGames")}
-            </FrameButton>
+        <ThemeHero page="collection" mode="backdrop">
+          <div className="mb-8 flex justify-center">
+            <FrameToggle
+              value={activeTab}
+              onChange={(value) => setActiveTab(value)}
+              options={[
+                { value: "my-games", label: t("collection.myGames") },
+                { value: "find-games", label: t("collection.findGames") },
+              ]}
+            />
           </div>
+
+          {activeTab === "my-games" ? (
+            <>
+              <CollectionHeader
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+                statusFilter={statusFilter}
+                setStatusFilter={setStatusFilter}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
+                onAddGame={() => router.push("/collection/add")}
+                onImport={() => {}}
+                categoryCounts={categoryCounts}
+                statusCounts={statusCounts}
+              />
+
+              <div>
+                <FrameButton onClick={() => setShowFilters(!showFilters)} icon={<Filter className="h-4 w-4" />}>
+                  {showFilters ? t("collection.hideFilters") : t("collection.showFilters")}
+                </FrameButton>
+              </div>
+            </>
+          ) : null}
         </ThemeHero>
 
         {activeTab === "my-games" ? (
           <>
-            <CollectionHeader
-              viewMode={viewMode}
-              setViewMode={setViewMode}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              sortBy={sortBy}
-              setSortBy={setSortBy}
-              onAddGame={() => router.push("/collection/add")}
-              onImport={() => {}}
-              categoryCounts={categoryCounts}
-              statusCounts={statusCounts}
-            />
-
             {selectedCategory !== "all" && (
               <ImportSection selectedCategory={selectedCategory as Exclude<CategoryType, "all">} />
             )}
@@ -213,14 +217,6 @@ export default function Collection() {
                 </div>
               )}
               <div className={showFilters ? "lg:col-span-3" : "lg:col-span-4"}>
-                <div className="mb-4">
-                  <FrameButton
-                    onClick={() => setShowFilters(!showFilters)}
-                    icon={<Filter className="h-4 w-4" />}
-                  >
-                    {showFilters ? t("collection.hideFilters") : t("collection.showFilters")}
-                  </FrameButton>
-                </div>
                 {loading ? (
                   <div className="flex items-center justify-center py-16">
                     <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
@@ -236,8 +232,6 @@ export default function Collection() {
                 )}
               </div>
             </div>
-
-            
           </>
         ) : (
           <DiscoverGames onToggleWishlist={handleToggleWishlist} />

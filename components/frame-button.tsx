@@ -42,7 +42,7 @@ export const FrameButton = forwardRef<HTMLButtonElement, FrameButtonProps>(funct
       className={cn(
         "relative inline-flex items-center justify-center transition-all hover:scale-105 active:scale-100 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed",
         active && "brightness-125",
-        variant === "icon" ? "w-12 h-12" : "h-12 px-6 min-w-[7rem]",
+        variant === "icon" ? "w-14 h-14" : "h-14 px-10 min-w-[9rem]",
         className,
       )}
       {...props}
@@ -50,10 +50,69 @@ export const FrameButton = forwardRef<HTMLButtonElement, FrameButtonProps>(funct
       {/* Gold frame art */}
       <img src={frameSrc || "/placeholder.svg"} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none" />
       {/* Label / icon */}
-      <span className="relative z-10 inline-flex items-center justify-center gap-2 font-cinzel text-xs sm:text-sm uppercase tracking-wide text-center text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+      <span className="relative z-10 inline-flex items-center justify-center gap-2 font-cinzel text-sm sm:text-base uppercase tracking-wide text-center text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
         {icon}
         {children}
       </span>
     </button>
   )
 })
+
+/**
+ * FrameToggle — a single gold frame image acting as the decorative container,
+ * with a CSS segmented two-option toggle sitting transparently inside it.
+ * Matches the user's request: "css segmented toggle live inside one image".
+ */
+interface FrameToggleOption<T extends string> {
+  value: T
+  label: string
+}
+
+interface FrameToggleProps<T extends string> {
+  options: [FrameToggleOption<T>, FrameToggleOption<T>]
+  value: T
+  onChange: (value: T) => void
+  className?: string
+}
+
+export function FrameToggle<T extends string>({ options, value, onChange, className }: FrameToggleProps<T>) {
+  const { currentAppTheme } = useAppTheme()
+  const frameSrc = getButtonFrame(currentAppTheme)
+
+  return (
+    <div className={cn("relative inline-flex h-16 min-w-[20rem] items-center justify-center px-10", className)}>
+      {/* Decorative gold frame */}
+      <img
+        src={frameSrc || "/placeholder.svg"}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-fill pointer-events-none select-none"
+      />
+      {/* Transparent segmented toggle */}
+      <div
+        role="tablist"
+        className="relative z-10 inline-flex items-center gap-1 rounded-full border border-accent-gold/40 bg-background/40 p-1 backdrop-blur-sm"
+      >
+        {options.map((opt) => {
+          const isActive = opt.value === value
+          return (
+            <button
+              key={opt.value}
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => onChange(opt.value)}
+              className={cn(
+                "rounded-full px-4 py-1.5 font-cinzel text-xs sm:text-sm uppercase tracking-wide transition-colors",
+                isActive
+                  ? "bg-accent-gold text-background font-semibold shadow"
+                  : "text-accent-gold/80 hover:text-accent-gold",
+              )}
+            >
+              {opt.label}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
