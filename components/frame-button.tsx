@@ -45,7 +45,7 @@ export const FrameButton = forwardRef<HTMLButtonElement, FrameButtonProps>(funct
         // Sizes chosen so the frame's natural aspect ratio (~2.4:1, matching the
         // nav button) is preserved. `object-contain` keeps the art undistorted;
         // generous px keeps the label inside the frame's wood panel.
-        variant === "icon" ? "h-16 w-16" : "h-16 px-12",
+        variant === "icon" ? "h-20 w-20" : "h-24 px-14",
         className,
       )}
       {...props}
@@ -83,7 +83,7 @@ export function FrameToggle<T extends string>({ options, value, onChange, classN
   const frameSrc = getButtonFrame(currentAppTheme)
 
   return (
-    <div className={cn("relative inline-flex h-20 items-center justify-center px-12", className)}>
+    <div className={cn("relative inline-flex h-28 items-center justify-center px-14", className)}>
       {/* Decorative gold frame — object-contain keeps the plate undistorted */}
       <img
         src={frameSrc || "/placeholder.svg"}
