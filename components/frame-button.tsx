@@ -172,10 +172,10 @@ export function FrameToggle<T extends string>({ options, value, onChange, classN
         className="block h-auto w-full pointer-events-none select-none"
       />
       {/* Segmented control sitting directly on the wood panel — no container
-          background/border, so it reads as part of the frame. Only the active
-          option gets a gold pill. */}
+          background/border, so it reads as part of the frame. The active option
+          is marked with a gold underline rather than a filled pill. */}
       <div className="absolute inset-0 flex items-center justify-center px-[14%]">
-        <div role="tablist" className="inline-flex items-center gap-2">
+        <div role="tablist" className="inline-flex items-center gap-6">
           {options.map((opt) => {
             const isActive = opt.value === value
             return (
@@ -185,13 +185,18 @@ export function FrameToggle<T extends string>({ options, value, onChange, classN
                 aria-selected={isActive}
                 onClick={() => onChange(opt.value)}
                 className={cn(
-                  "rounded-full px-4 py-1.5 font-cinzel text-[9px] lg:text-[11px] uppercase tracking-wide transition-colors",
-                  isActive
-                    ? "bg-accent-gold text-background font-semibold shadow"
-                    : "text-accent-gold/80 hover:text-accent-gold",
+                  "font-cinzel text-sm lg:text-base uppercase tracking-wide transition-colors",
+                  isActive ? "text-accent-gold font-semibold" : "text-accent-gold/70 hover:text-accent-gold",
                 )}
               >
-                <span className="inline-block -translate-y-[0.16em]">{opt.label}</span>
+                <span
+                  className={cn(
+                    "inline-block -translate-y-[0.32em] border-b-2 pb-0.5",
+                    isActive ? "border-accent-gold" : "border-transparent",
+                  )}
+                >
+                  {opt.label}
+                </span>
               </button>
             )
           })}
