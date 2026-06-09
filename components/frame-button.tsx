@@ -125,10 +125,12 @@ export const FrameButton = forwardRef<HTMLButtonElement, FrameButtonProps>(funct
         aria-hidden="true"
         className="absolute inset-0 h-full w-full object-fill pointer-events-none select-none"
       />
-      {/* Label centered on the wood panel (both axes). */}
+      {/* Label centered on the wood panel. The small upward translate optically
+          centers Cinzel ALL-CAPS, whose em box has extra empty space above the
+          cap height — without it the text reads as bottom-aligned. */}
       <span
         className={cn(
-          "relative z-10 inline-flex items-center justify-center gap-2 whitespace-nowrap",
+          "relative z-10 inline-flex -translate-y-[0.08em] items-center justify-center gap-2 whitespace-nowrap",
           "font-cinzel uppercase tracking-wide text-center leading-none text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]",
           RECT_TEXT[size],
         )}
