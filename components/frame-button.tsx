@@ -78,20 +78,27 @@ export const FrameButton = forwardRef<HTMLButtonElement, FrameButtonProps>(funct
         className={cn(
           "relative inline-grid place-items-center transition-all hover:scale-105 active:scale-100 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed",
           active && "brightness-125",
+          ICON_SIZE[size],
           className,
         )}
         {...props}
       >
-        {/* Frame art in normal flow → button size == image size */}
+        {/* Oval frame art fills the square box (object-fill keeps it centered) */}
         <img
           src={frameSrc || "/placeholder.svg"}
           alt=""
           aria-hidden="true"
-          className={cn("block w-auto pointer-events-none select-none", ICON_HEIGHT[size])}
+          className="absolute inset-0 h-full w-full object-fill pointer-events-none select-none"
         />
-        {/* Icon centered on the wood panel (oval inset ~ center) */}
-        <span className="absolute inset-0 grid place-items-center text-accent-gold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-          {icon}
+        {/* Glyph centered on the wood panel. Accept the icon from either the
+            `icon` prop or `children` so callers can use whichever is natural. */}
+        <span
+          className={cn(
+            "relative z-10 grid place-items-center text-accent-gold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]",
+            ICON_GLYPH[size],
+          )}
+        >
+          {icon ?? children}
         </span>
       </button>
     )
@@ -101,12 +108,12 @@ export const FrameButton = forwardRef<HTMLButtonElement, FrameButtonProps>(funct
     <button
       ref={ref}
       className={cn(
-        // Content drives width; the wood plate (object-fill) stretches to match
-        // exactly so the label always sits on the panel — no truncation, and a
-        // horizontal plate tolerates modest horizontal stretch cleanly.
-        "relative inline-flex items-center justify-center px-10 transition-all hover:scale-105 active:scale-100 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed",
+        // Padding-sized: the wood plate (object-fill) stretches to whatever box
+        // the label needs, so height grows with content and the label stays
+        // centered on BOTH axes. A horizontal plate stretches cleanly.
+        "relative inline-flex items-center justify-center transition-all hover:scale-105 active:scale-100 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed",
         active && "brightness-125",
-        RECT_HEIGHT[size],
+        RECT_PADDING[size],
         className,
       )}
       {...props}
@@ -118,7 +125,7 @@ export const FrameButton = forwardRef<HTMLButtonElement, FrameButtonProps>(funct
         aria-hidden="true"
         className="absolute inset-0 h-full w-full object-fill pointer-events-none select-none"
       />
-      {/* Label centered on the wood panel. */}
+      {/* Label centered on the wood panel (both axes). */}
       <span
         className={cn(
           "relative z-10 inline-flex items-center justify-center gap-2 whitespace-nowrap",
