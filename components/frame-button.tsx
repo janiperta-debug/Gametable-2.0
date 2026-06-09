@@ -39,10 +39,10 @@ interface FrameButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
 // object-fill so it stretches to whatever box the label needs — height grows
 // with content and the label is always centered on both axes with no distortion.
 const RECT_PADDING: Record<FrameButtonSize, string> = {
-  sm: "px-8 py-2.5",
-  md: "px-10 py-3",
-  lg: "px-12 py-3.5",
-  xl: "px-14 py-4",
+  sm: "px-9 py-4",
+  md: "px-11 py-5",
+  lg: "px-14 py-6",
+  xl: "px-16 py-7",
 }
 // Icon buttons keep the oval art's aspect ratio (a fixed square box reads well).
 const ICON_SIZE: Record<FrameButtonSize, string> = {
