@@ -47,20 +47,21 @@ export function ThemeHero({ page, mode = "banner", title, subtitle, children, cl
     }
   }
 
-  // Backdrop mode: the hero image is a FIXED, full-viewport background that
-  // stays stationary while the page content scrolls over it ("text rolls over
-  // it"). No scrim/overlay — the image is shown as-is. The fixed layer is
-  // rendered outside any bordered/overflow wrapper so nothing clips it, and it
-  // sits at -z-10 (in front of the page gradient, behind all in-flow content).
+  // Backdrop mode: the hero image is a FIXED layer pinned to the top of the
+  // viewport, scaled to the FULL page WIDTH at its natural aspect ratio (no
+  // crop). Below the image, the layer is transparent so the page's background
+  // color/gradient continues. The image stays stationary while page content
+  // scrolls over it. No scrim/overlay — shown as-is. It sits at -z-10 (in front
+  // of the page gradient, behind all in-flow content).
   if (mode === "backdrop") {
     return (
       <>
-        <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10">
+        <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 -z-10">
           <img
             src={candidates[0] || "/placeholder.svg"}
             alt=""
             onError={handleError}
-            className="h-full w-full object-cover"
+            className="block h-auto w-full"
           />
         </div>
         <div className={"relative z-10 mb-8 px-1 py-8 sm:px-2 " + (className ?? "")}>{children}</div>
