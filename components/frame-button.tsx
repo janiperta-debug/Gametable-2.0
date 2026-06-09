@@ -58,10 +58,10 @@ const ICON_GLYPH: Record<FrameButtonSize, string> = {
   xl: "[&_svg]:h-7 [&_svg]:w-7",
 }
 const RECT_TEXT: Record<FrameButtonSize, string> = {
-  sm: "text-[11px]",
-  md: "text-xs",
-  lg: "text-sm",
-  xl: "text-base",
+  sm: "text-[9px] lg:text-[11px]",
+  md: "text-[9px] lg:text-[11px]",
+  lg: "text-[9px] lg:text-[11px]",
+  xl: "text-[9px] lg:text-[11px]",
 }
 
 export const FrameButton = forwardRef<HTMLButtonElement, FrameButtonProps>(function FrameButton(
@@ -125,17 +125,16 @@ export const FrameButton = forwardRef<HTMLButtonElement, FrameButtonProps>(funct
         aria-hidden="true"
         className="absolute inset-0 h-full w-full object-fill pointer-events-none select-none"
       />
-      {/* Label centered on the wood panel. The small upward translate optically
+      {/* Label centered on the wood panel. The upward translate optically
           centers Cinzel ALL-CAPS, whose em box has extra empty space above the
           cap height — without it the text reads as bottom-aligned. */}
       <span
         className={cn(
-          "relative z-10 inline-flex -translate-y-[0.08em] items-center justify-center gap-2 whitespace-nowrap",
+          "relative z-10 inline-flex -translate-y-[0.16em] items-center justify-center whitespace-nowrap",
           "font-cinzel uppercase tracking-wide text-center leading-none text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]",
           RECT_TEXT[size],
         )}
       >
-        {icon}
         {children}
       </span>
     </button>
@@ -172,12 +171,11 @@ export function FrameToggle<T extends string>({ options, value, onChange, classN
         aria-hidden="true"
         className="block h-auto w-full pointer-events-none select-none"
       />
-      {/* Segmented control inset onto the wood panel */}
+      {/* Segmented control sitting directly on the wood panel — no container
+          background/border, so it reads as part of the frame. Only the active
+          option gets a gold pill. */}
       <div className="absolute inset-0 flex items-center justify-center px-[14%]">
-        <div
-          role="tablist"
-          className="inline-flex items-center gap-1 rounded-full border border-accent-gold/40 bg-background/40 p-1 backdrop-blur-sm"
-        >
+        <div role="tablist" className="inline-flex items-center gap-2">
           {options.map((opt) => {
             const isActive = opt.value === value
             return (
@@ -187,13 +185,13 @@ export function FrameToggle<T extends string>({ options, value, onChange, classN
                 aria-selected={isActive}
                 onClick={() => onChange(opt.value)}
                 className={cn(
-                  "rounded-full px-4 py-1.5 font-cinzel text-xs sm:text-sm uppercase tracking-wide transition-colors",
+                  "rounded-full px-4 py-1.5 font-cinzel text-[9px] lg:text-[11px] uppercase tracking-wide transition-colors",
                   isActive
                     ? "bg-accent-gold text-background font-semibold shadow"
                     : "text-accent-gold/80 hover:text-accent-gold",
                 )}
               >
-                {opt.label}
+                <span className="inline-block -translate-y-[0.16em]">{opt.label}</span>
               </button>
             )
           })}

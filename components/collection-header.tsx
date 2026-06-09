@@ -4,7 +4,7 @@ import { FrameButton } from "@/components/frame-button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Plus, Search, SortAsc, Grid, List } from "lucide-react"
+import { Search, Grid, List } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 
 type CategoryType = "all" | "board-games" | "rpgs" | "miniatures" | "trading-cards"
@@ -118,9 +118,7 @@ export function CollectionHeader({
           </div>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-2">
-          <FrameButton onClick={onAddGame} icon={<Plus className="h-4 w-4" />}>
-            {t("collection.addGame")}
-          </FrameButton>
+          <FrameButton onClick={onAddGame}>{t("collection.addGame")}</FrameButton>
         </div>
       </div>
 
@@ -138,9 +136,7 @@ export function CollectionHeader({
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <FrameButton icon={<SortAsc className="h-4 w-4 flex-shrink-0" />}>
-                <span className="truncate">{t(currentSort.labelKey)}</span>
-              </FrameButton>
+              <FrameButton>{t(currentSort.labelKey)}</FrameButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {sortOptions.map((option) => (

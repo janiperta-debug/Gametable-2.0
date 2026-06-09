@@ -10,7 +10,7 @@ import { DiscoverGames } from "@/components/discover-games"
 import { ImportSection } from "@/components/import-section"
 import { ThemeHero } from "@/components/theme-hero"
 import { FrameButton, FrameToggle } from "@/components/frame-button"
-import { Filter, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "@/lib/i18n"
 import { useCollection } from "@/hooks/useCollection"
@@ -196,7 +196,7 @@ export default function Collection() {
               />
 
               <div>
-                <FrameButton onClick={() => setShowFilters(!showFilters)} icon={<Filter className="h-4 w-4" />}>
+                <FrameButton onClick={() => setShowFilters(!showFilters)}>
                   {showFilters ? t("collection.hideFilters") : t("collection.showFilters")}
                 </FrameButton>
               </div>
