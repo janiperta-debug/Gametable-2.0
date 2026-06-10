@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ThemeHero } from "@/components/theme-hero"
 import { Store, Heart, Search, MessageCircle, User, Plus, Loader2, Trash2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -145,15 +146,16 @@ export default function Marketplace() {
   return (
     <div className="min-h-screen room-environment">
       <main className="container mx-auto px-4 py-8">
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-4">
-            <Store className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="logo-text text-5xl font-bold">{t("marketplace.title")}</h1>
+        <ThemeHero page="marketplace" mode="backdrop">
+          <div className="text-center">
+            <h1 className="logo-text text-5xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+              {t("marketplace.title")}
+            </h1>
+            <p className="font-body text-foreground/90 text-xl max-w-3xl mx-auto mt-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+              {t("marketplace.subtitle")}
+            </p>
           </div>
-          <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
-            {t("marketplace.subtitle")}
-          </p>
-        </div>
+        </ThemeHero>
 
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "listings" | "wishlists")}>
