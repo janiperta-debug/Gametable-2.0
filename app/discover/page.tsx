@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { DiscoverPlayers } from "@/components/discover-players"
+import { ThemeHero } from "@/components/theme-hero"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Users, Clock, Loader2, Gamepad2, Calendar } from "lucide-react"
+import { Clock, Loader2, Gamepad2, Calendar } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { getFriendActivity } from "@/app/actions/friends"
 import { useUser } from "@/hooks/useUser"
@@ -41,19 +42,17 @@ export default function CommunityPage() {
   }, [user])
 
   return (
-    <div className="min-h-screen">
-      <main className="container mx-auto px-4 py-8">
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-4">
-            <Users className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="logo-text text-5xl font-bold">{t("community.title")}</h1>
-          </div>
-          <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
+    <main className="container mx-auto px-4 py-8">
+      <ThemeHero page="discover" mode="backdrop">
+        <div className="text-center">
+          <h1 className="logo-text text-5xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">{t("community.title")}</h1>
+          <p className="font-body text-foreground/90 text-xl max-w-3xl mx-auto mt-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
             {t("community.subtitle")}
           </p>
         </div>
+      </ThemeHero>
 
-        <div className="max-w-6xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8">
           <Card className="room-furniture">
             <CardHeader>
               <CardTitle className="text-2xl flex items-center">
@@ -122,7 +121,6 @@ export default function CommunityPage() {
 
           <DiscoverPlayers />
         </div>
-      </main>
-    </div>
+    </main>
   )
 }
