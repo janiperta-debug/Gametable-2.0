@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ThemeHero } from "@/components/theme-hero"
 import { Calendar, MapPin, Users, Clock, Plus, Search, Filter, Loader2, Check, HelpCircle, X } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { useEvents } from "@/hooks/useEvents"
@@ -232,16 +233,14 @@ export default function EventsPage() {
   return (
     <div className="min-h-screen room-environment">
       <main className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8 md:mb-12">
-          <div className="flex items-center justify-center mb-4">
-            <Calendar className="h-6 w-6 md:h-8 md:w-8 text-accent-gold mr-2 md:mr-3" />
-            <h1 className="logo-text text-3xl md:text-5xl font-bold">{t("events.title")}</h1>
+        <ThemeHero page="events" mode="backdrop">
+          <div className="text-center">
+            <h1 className="logo-text text-5xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">{t("events.title")}</h1>
+            <p className="font-body text-foreground/90 text-xl max-w-3xl mx-auto mt-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+              {t("events.subtitle")}
+            </p>
           </div>
-          <p className="font-body text-muted-foreground text-base md:text-xl max-w-3xl mx-auto px-4">
-            {t("events.subtitle")}
-          </p>
-        </div>
+        </ThemeHero>
 
         {/* Action Bar */}
         <div className="flex flex-col gap-3 mb-6 md:mb-8">
