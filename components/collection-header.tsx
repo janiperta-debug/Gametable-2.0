@@ -79,8 +79,7 @@ export function CollectionHeader({
     <div className="mb-8 space-y-4">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div className="flex-1">
-          <h2 className="ornate-text font-heading text-3xl font-bold mb-2">{t("collection.myCollection")}</h2>
-          <div className="flex flex-wrap gap-2 mt-2 max-w-full">
+          <div className="flex flex-wrap gap-2 max-w-full">
             {/* Status filters */}
             <Badge
               variant={statusFilter === "all" ? "secondary" : "outline"}

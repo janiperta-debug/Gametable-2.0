@@ -165,47 +165,54 @@ export default function Collection() {
     <div className="min-h-screen">
       <main className="container mx-auto px-4 py-8">
         <ThemeHero page="collection" mode="backdrop">
-          <div className="mb-8 flex justify-center">
-            <FrameToggle
-              value={activeTab}
-              onChange={(value) => setActiveTab(value)}
-              options={[
-                { value: "my-games", label: t("collection.myGames") },
-                { value: "find-games", label: t("collection.findGames") },
-              ]}
-            />
+          <div className="text-center">
+            <h1 className="logo-text text-5xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+              {t("collection.title")}
+            </h1>
+            <p className="font-body text-foreground/90 text-xl max-w-3xl mx-auto mt-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+              {t("collection.subtitle")}
+            </p>
           </div>
-
-          {activeTab === "my-games" ? (
-            <>
-              <CollectionHeader
-                viewMode={viewMode}
-                setViewMode={setViewMode}
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-                statusFilter={statusFilter}
-                setStatusFilter={setStatusFilter}
-                sortBy={sortBy}
-                setSortBy={setSortBy}
-                onAddGame={() => router.push("/collection/add")}
-                onImport={() => {}}
-                categoryCounts={categoryCounts}
-                statusCounts={statusCounts}
-              />
-
-              <div>
-                <FrameButton onClick={() => setShowFilters(!showFilters)}>
-                  {showFilters ? t("collection.hideFilters") : t("collection.showFilters")}
-                </FrameButton>
-              </div>
-            </>
-          ) : null}
         </ThemeHero>
+
+        {/* Tab toggle sits just above the category badges (consistent placement
+            across both tabs, since the hero scales differently on mobile/desktop). */}
+        <div className="mb-8 flex justify-center">
+          <FrameToggle
+            value={activeTab}
+            onChange={(value) => setActiveTab(value)}
+            options={[
+              { value: "my-games", label: t("collection.myGames") },
+              { value: "find-games", label: t("collection.findGames") },
+            ]}
+          />
+        </div>
 
         {activeTab === "my-games" ? (
           <>
+            <CollectionHeader
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              onAddGame={() => router.push("/collection/add")}
+              onImport={() => {}}
+              categoryCounts={categoryCounts}
+              statusCounts={statusCounts}
+            />
+
+            <div className="mb-8">
+              <FrameButton onClick={() => setShowFilters(!showFilters)}>
+                {showFilters ? t("collection.hideFilters") : t("collection.showFilters")}
+              </FrameButton>
+            </div>
+
             {selectedCategory !== "all" && (
               <ImportSection selectedCategory={selectedCategory as Exclude<CategoryType, "all">} />
             )}
