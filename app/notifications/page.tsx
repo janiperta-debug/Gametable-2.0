@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Bell, Check, X, Users, Calendar, Trophy, MessageCircle, Star, Settings, Loader2, UserCheck } from "lucide-react"
+import { ThemeHero } from "@/components/theme-hero"
 import { useTranslations } from "@/lib/i18n"
 import { useUser } from "@/hooks/useUser"
 import { 
@@ -182,6 +183,16 @@ export default function NotificationsPage() {
     return (
       <div className="min-h-screen room-environment">
         <main className="container mx-auto px-4 py-8">
+          <ThemeHero page="notifications" mode="backdrop">
+            <div className="text-center">
+              <h1 className="logo-text text-5xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+                {t("notifications.title")}
+              </h1>
+              <p className="font-body text-foreground/90 text-xl max-w-3xl mx-auto mt-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+                {t("notifications.subtitle")}
+              </p>
+            </div>
+          </ThemeHero>
           <Card className="room-furniture max-w-2xl mx-auto">
             <CardContent className="p-12 text-center">
               <Bell className="h-16 w-16 text-accent-gold mx-auto mb-4" />
@@ -197,21 +208,23 @@ export default function NotificationsPage() {
   return (
     <div className="min-h-screen room-environment">
       <main className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <Bell className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="logo-text text-5xl font-bold">{t("notifications.title")}</h1>
-            {unreadCount > 0 && (
-              <Badge variant="destructive" className="ml-3">
-                {unreadCount} {t("common.new")}
-              </Badge>
-            )}
+        <ThemeHero page="notifications" mode="backdrop">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-3">
+              <h1 className="logo-text text-5xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+                {t("notifications.title")}
+              </h1>
+              {unreadCount > 0 && (
+                <Badge variant="destructive">
+                  {unreadCount} {t("common.new")}
+                </Badge>
+              )}
+            </div>
+            <p className="font-body text-foreground/90 text-xl max-w-3xl mx-auto mt-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+              {t("notifications.subtitle")}
+            </p>
           </div>
-          <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
-            {t("notifications.subtitle")}
-          </p>
-        </div>
+        </ThemeHero>
 
         {/* Action Bar */}
         <div className="flex justify-between items-center mb-8">
