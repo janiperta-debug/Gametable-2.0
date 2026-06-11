@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { MessageCircle, Send, Search, Loader2 } from "lucide-react"
+import { ThemeHero } from "@/components/theme-hero"
 import { useTranslations } from "@/lib/i18n"
 import { useUser } from "@/hooks/useUser"
 import { createClient } from "@/lib/supabase/client"
@@ -199,16 +200,16 @@ export default function MessagingPage() {
   return (
     <div className="min-h-screen room-environment">
       <main className="container mx-auto px-4 py-8 max-w-full overflow-x-hidden">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <MessageCircle className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="logo-text text-5xl font-bold">{t("messages.title")}</h1>
+        <ThemeHero page="messages" mode="backdrop">
+          <div className="text-center">
+            <h1 className="logo-text text-5xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+              {t("messages.title")}
+            </h1>
+            <p className="font-body text-foreground/90 text-xl max-w-3xl mx-auto mt-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+              {t("messages.subtitle")}
+            </p>
           </div>
-          <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
-            {t("messages.subtitle")}
-          </p>
-        </div>
+        </ThemeHero>
 
         <div className="grid gap-6 grid-cols-1 lg:grid-cols-4 max-w-7xl mx-auto">
           {/* Conversations Sidebar */}
