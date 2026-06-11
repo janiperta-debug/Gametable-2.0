@@ -179,12 +179,16 @@ export default function MessagingPage() {
     return (
       <div className="min-h-screen room-environment">
         <main className="container mx-auto px-4 py-8">
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-4">
-              <MessageCircle className="h-8 w-8 text-accent-gold mr-3" />
-              <h1 className="logo-text text-5xl font-bold">{t("messages.title")}</h1>
+          <ThemeHero page="messages" mode="backdrop">
+            <div className="text-center">
+              <h1 className="logo-text text-5xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+                {t("messages.title")}
+              </h1>
+              <p className="font-body text-foreground/90 text-xl max-w-3xl mx-auto mt-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+                {t("messages.subtitle")}
+              </p>
             </div>
-          </div>
+          </ThemeHero>
           <Card className="room-furniture max-w-md mx-auto">
             <CardContent className="p-8 text-center">
               <MessageCircle className="h-16 w-16 text-accent-gold mx-auto mb-4" />
