@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Mail, Send, Shield, FileText, Facebook, Twitter, Instagram } from "lucide-react"
+import { Send, Shield, FileText, Facebook, Twitter, Instagram } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { sendContactEmail } from "@/app/actions/send-email"
 import { useTranslations } from "@/lib/i18n"
+import { ThemeHero } from "@/components/theme-hero"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -51,16 +52,16 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen room-environment">
       <main className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-4">
-            <Mail className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="logo-text text-5xl font-bold">{t("contact.title")}</h1>
+        <ThemeHero page="contact" mode="backdrop">
+          <div className="text-center">
+            <h1 className="logo-text text-5xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+              {t("contact.title")}
+            </h1>
+            <p className="font-body text-foreground/90 text-xl max-w-3xl mx-auto mt-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+              {t("contact.subtitle")}
+            </p>
           </div>
-          <p className="text-muted-foreground text-xl max-w-3xl mx-auto">
-            {t("contact.subtitle")}
-          </p>
-        </div>
+        </ThemeHero>
 
         <div className="grid gap-8 lg:grid-cols-2 max-w-6xl mx-auto">
           <div>
