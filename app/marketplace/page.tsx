@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { FrameButton, FrameToggle } from "@/components/frame-button"
 import { useTranslations } from "@/lib/i18n"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ThemeHero } from "@/components/theme-hero"
 import { Store, Heart, Search, MessageCircle, User, Plus, Loader2, Trash2 } from "lucide-react"
@@ -158,23 +158,20 @@ export default function Marketplace() {
         </ThemeHero>
 
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "listings" | "wishlists")}>
-            <TabsList className="grid w-full grid-cols-2 mb-6 md:mb-0 max-w-md mx-auto">
-              <TabsTrigger value="listings" className="font-cinzel text-xs sm:text-sm">
-                {t("marketplace.availableGames")}
-              </TabsTrigger>
-              <TabsTrigger value="wishlists" className="font-cinzel text-xs sm:text-sm">
-                {t("marketplace.userWishlists")}
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <FrameToggle
+            value={activeTab}
+            onChange={(value) => setActiveTab(value as "listings" | "wishlists")}
+            options={[
+              { value: "listings", label: t("marketplace.availableGames") },
+              { value: "wishlists", label: t("marketplace.userWishlists") },
+            ]}
+          />
 
           {user && (
             <Link href="/marketplace/create">
-              <Button className="bg-accent-gold hover:bg-accent-copper">
-                <Plus className="h-4 w-4 mr-2" />
+              <FrameButton icon={<Plus className="h-4 w-4" />}>
                 {t("marketplace.createListing")}
-              </Button>
+              </FrameButton>
             </Link>
           )}
         </div>

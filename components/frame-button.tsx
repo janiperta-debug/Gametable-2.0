@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { forwardRef } from "react"
+import { forwardRef, type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import { useAppTheme } from "@/components/app-theme-provider"
 import { getButtonFrame, getButtonRoundFrame } from "@/lib/theme-assets"
@@ -143,16 +143,22 @@ export const FrameButton = forwardRef<HTMLButtonElement, FrameButtonProps>(funct
 
 /**
  * FrameToggle — a single gold frame image as the decorative container, with a
- * CSS segmented two-option toggle sitting transparently on the wood panel.
- * Width-driven (the art fills the given width) so two labels fit comfortably.
+ * CSS segmented toggle sitting transparently on the wood panel. Width-driven
+ * (the art fills the given width) so the labels fit comfortably.
+ *
+ * Supports 2+ options and an optional leading icon per option. Width scales
+ * with the option count so 3-way toggles (e.g. event/theme floor tabs) still
+ * sit comfortably on the wood panel. The active option is marked with a gold
+ * underline rather than a filled pill so it reads as part of the frame.
  */
 interface FrameToggleOption<T extends string> {
   value: T
   label: string
+  icon?: ReactNode
 }
 
 interface FrameToggleProps<T extends string> {
-  options: [FrameToggleOption<T>, FrameToggleOption<T>]
+  options: FrameToggleOption<T>[]
   value: T
   onChange: (value: T) => void
   className?: string
@@ -162,8 +168,11 @@ export function FrameToggle<T extends string>({ options, value, onChange, classN
   const { currentAppTheme } = useAppTheme()
   const frameSrc = getButtonFrame(currentAppTheme)
 
+  // Wider frame for more options so labels never crowd the gold border.
+  const widthClass = options.length >= 3 ? "w-[30rem]" : "w-[22rem]"
+
   return (
-    <div className={cn("relative inline-block w-[22rem] max-w-full", className)}>
+    <div className={cn("relative inline-block max-w-full", widthClass, className)}>
       {/* Frame art fills width → toggle size == image size */}
       <img
         src={frameSrc || "/placeholder.svg"}
@@ -174,8 +183,8 @@ export function FrameToggle<T extends string>({ options, value, onChange, classN
       {/* Segmented control sitting directly on the wood panel — no container
           background/border, so it reads as part of the frame. The active option
           is marked with a gold underline rather than a filled pill. */}
-      <div className="absolute inset-0 flex items-center justify-center px-[14%]">
-        <div role="tablist" className="inline-flex items-center gap-6">
+      <div className="absolute inset-0 flex items-center justify-center px-[12%]">
+        <div role="tablist" className="inline-flex items-center gap-4 lg:gap-6">
           {options.map((opt) => {
             const isActive = opt.value === value
             return (
@@ -185,16 +194,17 @@ export function FrameToggle<T extends string>({ options, value, onChange, classN
                 aria-selected={isActive}
                 onClick={() => onChange(opt.value)}
                 className={cn(
-                  "font-cinzel text-sm lg:text-base uppercase tracking-wide transition-colors",
+                  "font-cinzel text-xs sm:text-sm lg:text-base uppercase tracking-wide transition-colors",
                   isActive ? "text-accent-gold font-semibold" : "text-accent-gold/70 hover:text-accent-gold",
                 )}
               >
                 <span
                   className={cn(
-                    "inline-block -translate-y-[0.32em] border-b-2 pb-0.5",
+                    "inline-flex items-center gap-1.5 -translate-y-[0.32em] border-b-2 pb-0.5 whitespace-nowrap",
                     isActive ? "border-accent-gold" : "border-transparent",
                   )}
                 >
+                  {opt.icon}
                   {opt.label}
                 </span>
               </button>
