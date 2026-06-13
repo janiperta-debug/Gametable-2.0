@@ -130,11 +130,12 @@ export const FrameButton = forwardRef<HTMLButtonElement, FrameButtonProps>(funct
           cap height — without it the text reads as bottom-aligned. */}
       <span
         className={cn(
-          "relative z-10 inline-flex -translate-y-[0.16em] items-center justify-center whitespace-nowrap",
+          "relative z-10 inline-flex -translate-y-[0.16em] items-center justify-center gap-1.5 whitespace-nowrap",
           "font-cinzel uppercase tracking-wide text-center leading-none text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]",
           RECT_TEXT[size],
         )}
       >
+        {icon}
         {children}
       </span>
     </button>

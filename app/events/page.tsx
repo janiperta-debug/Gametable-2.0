@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { FrameButton, FrameToggle } from "@/components/frame-button"
 import { ThemeHero } from "@/components/theme-hero"
 import { Calendar, MapPin, Users, Clock, Plus, Search, Filter, Loader2, Check, HelpCircle, X } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
@@ -254,22 +254,22 @@ export default function EventsPage() {
                 className="pl-10 font-body w-full"
               />
             </div>
-            <Button 
-              variant="outline" 
-              className={showFilters ? "theme-accent-gold" : "bg-transparent"}
+            <FrameButton
+              active={showFilters}
               onClick={() => setShowFilters(!showFilters)}
+              icon={<Filter className="h-4 w-4" />}
             >
-              <Filter className="h-4 w-4 mr-2" />
-              <span className="font-body">{showFilters ? t("common.hideFilters") : t("common.filters")}</span>
+              {showFilters ? t("common.hideFilters") : t("common.filters")}
               {selectedTypes.length > 0 && (
                 <Badge className="ml-2 bg-accent-gold text-background">{selectedTypes.length}</Badge>
               )}
-            </Button>
+            </FrameButton>
           </div>
-          <Button size="lg" className="theme-accent-gold w-full" onClick={() => router.push("/events/create")}>
-            <Plus className="h-4 w-4 mr-2" />
-            <span className="font-body">{t("events.createEvent")}</span>
-          </Button>
+          <div className="flex justify-center">
+            <FrameButton onClick={() => router.push("/events/create")} icon={<Plus className="h-4 w-4" />}>
+              {t("events.createEvent")}
+            </FrameButton>
+          </div>
 
           {/* Filter Panel */}
           {showFilters && (
@@ -302,90 +302,92 @@ export default function EventsPage() {
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="overflow-x-auto -mx-4 px-4 mb-6 md:mb-8">
-            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-3 sm:max-w-2xl sm:mx-auto">
-              <TabsTrigger value="upcoming" className="font-body text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">
-                {t("events.upcomingEvents")}
-              </TabsTrigger>
-              <TabsTrigger value="my-events" className="font-body text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">
-                {t("events.myEvents")}
-              </TabsTrigger>
-              <TabsTrigger value="past" className="font-body text-[10px] sm:text-sm whitespace-nowrap px-2 sm:px-4">
-                {t("events.pastEvents")}
-              </TabsTrigger>
-            </TabsList>
+        <div className="w-full">
+          <div className="mb-6 md:mb-8 flex justify-center">
+            <FrameToggle
+              value={activeTab}
+              onChange={setActiveTab}
+              options={[
+                { value: "upcoming", label: t("events.upcomingEvents") },
+                { value: "my-events", label: t("events.myEvents") },
+                { value: "past", label: t("events.pastEvents") },
+              ]}
+            />
           </div>
 
-          <TabsContent value="upcoming">
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
-              </div>
-            ) : filteredPublicEvents.length === 0 ? (
-              <Card className="room-furniture text-center py-12">
-                <CardContent>
-                  <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
-                  <h3 className="ornate-text font-heading text-xl font-semibold mb-2">{t("events.noEvents")}</h3>
-                  <p className="font-body text-muted-foreground">{t("events.noEventsDesc")}</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredPublicEvents.map((event) => (
-                  <EventCard 
-                    key={event.id} 
-                    event={event} 
-                    onViewDetails={handleViewDetails} 
-                    onRSVP={handleRSVP}
-                    t={t}
-                    isLoggedIn={!!user}
-                    currentUserId={user?.id}
-                  />
-                ))}
-              </div>
-            )}
-          </TabsContent>
+          {activeTab === "upcoming" && (
+            <div>
+              {loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
+                </div>
+              ) : filteredPublicEvents.length === 0 ? (
+                <Card className="room-furniture text-center py-12">
+                  <CardContent>
+                    <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
+                    <h3 className="ornate-text font-heading text-xl font-semibold mb-2">{t("events.noEvents")}</h3>
+                    <p className="font-body text-muted-foreground">{t("events.noEventsDesc")}</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {filteredPublicEvents.map((event) => (
+                    <EventCard 
+                      key={event.id} 
+                      event={event} 
+                      onViewDetails={handleViewDetails} 
+                      onRSVP={handleRSVP}
+                      t={t}
+                      isLoggedIn={!!user}
+                      currentUserId={user?.id}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
-          <TabsContent value="my-events">
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
-              </div>
-            ) : !user ? (
-              <Card className="room-furniture text-center py-12">
-                <CardContent>
-                  <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
-                  <h3 className="ornate-text font-heading text-xl font-semibold mb-2">{t("events.loginRequired")}</h3>
-                  <p className="font-body text-muted-foreground">{t("events.loginToSeeMyEvents")}</p>
-                </CardContent>
-              </Card>
-            ) : filteredMyEvents.length === 0 ? (
-              <Card className="room-furniture text-center py-12">
-                <CardContent>
-                  <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
-                  <h3 className="ornate-text font-heading text-xl font-semibold mb-2">{t("events.noMyEvents")}</h3>
-                  <p className="font-body text-muted-foreground">{t("events.noMyEventsDesc")}</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredMyEvents.map((event) => (
-                  <EventCard 
-                    key={event.id} 
-                    event={event} 
-                    onViewDetails={handleViewDetails}
-                    onRSVP={handleRSVP}
-                    t={t}
-                    isLoggedIn={!!user}
-                    currentUserId={user?.id}
-                  />
-                ))}
-              </div>
-            )}
-          </TabsContent>
+          {activeTab === "my-events" && (
+            <div>
+              {loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
+                </div>
+              ) : !user ? (
+                <Card className="room-furniture text-center py-12">
+                  <CardContent>
+                    <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
+                    <h3 className="ornate-text font-heading text-xl font-semibold mb-2">{t("events.loginRequired")}</h3>
+                    <p className="font-body text-muted-foreground">{t("events.loginToSeeMyEvents")}</p>
+                  </CardContent>
+                </Card>
+              ) : filteredMyEvents.length === 0 ? (
+                <Card className="room-furniture text-center py-12">
+                  <CardContent>
+                    <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
+                    <h3 className="ornate-text font-heading text-xl font-semibold mb-2">{t("events.noMyEvents")}</h3>
+                    <p className="font-body text-muted-foreground">{t("events.noMyEventsDesc")}</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {filteredMyEvents.map((event) => (
+                    <EventCard 
+                      key={event.id} 
+                      event={event} 
+                      onViewDetails={handleViewDetails}
+                      onRSVP={handleRSVP}
+                      t={t}
+                      isLoggedIn={!!user}
+                      currentUserId={user?.id}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
-          <TabsContent value="past">
+          {activeTab === "past" && (
             <Card className="room-furniture text-center py-12">
               <CardContent>
                 <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
@@ -395,8 +397,8 @@ export default function EventsPage() {
                 </p>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          )}
+        </div>
       </main>
     </div>
   )
