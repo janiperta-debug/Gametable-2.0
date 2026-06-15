@@ -7,6 +7,7 @@ import { BADGE_DEFINITIONS, type BadgeSeries } from "@/lib/badge-definitions"
 import { getBadgesWithProgress, type BadgeWithProgress } from "@/app/actions/badges"
 import { useUser } from "@/hooks/useUser"
 import { ThemeHero } from "@/components/theme-hero"
+import { ArchiveCard, ArchiveCardContent } from "@/components/archive-frame"
 import Image from "next/image"
 import { formatDistanceToNow } from "date-fns"
 
@@ -180,7 +181,8 @@ export default function TrophiesPage() {
             const seriesNameTranslated = t(`trophies.series.${series}`)
 
             return (
-              <div key={series} className="room-furniture p-6">
+              <ArchiveCard key={series}>
+                <ArchiveCardContent>
                 {/* Series Header */}
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-accent-gold/20">
                   <div>
@@ -293,7 +295,8 @@ export default function TrophiesPage() {
                     )
                   })}
                 </div>
-              </div>
+                </ArchiveCardContent>
+              </ArchiveCard>
             )
           })}
         </div>
