@@ -2,7 +2,16 @@
 
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Button } from "@/components/ui/button"
+import {
+  ArchiveCard,
+  ArchiveCardButton,
+  ArchiveCardContent,
+  ArchiveIconButton,
+  archiveField,
+  archiveSelectContent,
+  archiveSelectItem,
+} from "@/components/archive-frame"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -133,9 +142,11 @@ export default function CreateListingPage() {
     <div className="container mx-auto px-4 py-8 pt-20">
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
-        <ArchiveIconButton asChild icon={<ArrowLeft className="h-5 w-5" />} aria-label={t("common.cancel")}>
-          <Link href="/marketplace" />
-        </ArchiveIconButton>
+        <ArchiveIconButton
+          icon={<ArrowLeft className="h-5 w-5" />}
+          aria-label={t("common.cancel")}
+          onClick={() => router.push("/marketplace")}
+        />
         <div>
           <h1 className="font-heading text-3xl md:text-4xl text-accent-gold">{t("marketplace.createListing")}</h1>
           <p className="text-muted-foreground font-body">{t("marketplace.createListingDescription") || "List a game from your collection on the marketplace"}</p>
