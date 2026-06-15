@@ -330,3 +330,49 @@ export function ArchiveToggle<T extends string>({ options, value, onChange, clas
     </ArchiveFrame>
   )
 }
+
+/**
+ * ArchiveCard — a content card built on the full-weight ArchiveFrame so it
+ * shares the manor language with ArchivePanel. A faint inner scrim sits over
+ * the wood so body text and form controls stay legible without flattening the
+ * material. Pairs with ArchiveCardHeader / ArchiveCardTitle / ArchiveCardContent
+ * (a drop-in shape for shadcn's Card subcomponents).
+ */
+interface ArchiveCardProps extends Omit<ArchiveFrameProps, "weight"> {
+  /** Dim the wood behind the content for legibility. Defaults to true. */
+  scrim?: boolean
+}
+
+export function ArchiveCard({ scrim = true, className, children, ...props }: ArchiveCardProps) {
+  return (
+    <ArchiveFrame className={cn("rounded-xl", className)} {...props}>
+      <div className="relative">
+        {scrim && (
+          <div className="pointer-events-none absolute inset-0 z-0 rounded-[0.34rem] bg-gradient-to-b from-black/35 to-black/55" />
+        )}
+        <div className="relative z-10">{children}</div>
+      </div>
+    </ArchiveFrame>
+  )
+}
+
+export function ArchiveCardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn("px-5 pt-5 pb-3", className)} {...props} />
+}
+
+export function ArchiveCardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
+  return (
+    <h3
+      className={cn(
+        "font-cinzel text-lg font-bold uppercase tracking-wide",
+        "text-[var(--archive-gold,#d9b65c)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]",
+        className,
+      )}
+      {...props}
+    />
+  )
+}
+
+export function ArchiveCardContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn("px-5 pb-5", className)} {...props} />
+}
