@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
+import { ArchiveButton, archiveField } from "@/components/archive-frame"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -80,7 +81,7 @@ export function ProfileHeader() {
                 <Textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  className="min-h-24 bg-background/60 border-accent-gold/20"
+                  className={cn("min-h-24", archiveField)}
                 />
               </div>
               <div className="space-y-2">
@@ -89,26 +90,21 @@ export function ProfileHeader() {
                   value={profilePictureUrl}
                   onChange={(e) => setProfilePictureUrl(e.target.value)}
                   placeholder="https://..."
-                  className="bg-background/60 border-accent-gold/20"
+                  className={archiveField}
                 />
               </div>
               <div className="flex gap-3">
-                <Button
+                <ArchiveButton
                   onClick={handleSave}
+                  active
                   disabled={saving}
-                  className="bg-accent-gold hover:bg-accent-gold/90 text-background"
+                  icon={saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                 >
-                  {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
                   {t("common.save")}
-                </Button>
-                <Button
-                  onClick={() => setIsEditing(false)}
-                  variant="outline"
-                  className="border-accent-gold/40 text-accent-gold"
-                >
-                  <X className="w-4 h-4 mr-2" />
+                </ArchiveButton>
+                <ArchiveButton onClick={() => setIsEditing(false)} icon={<X className="w-4 h-4" />}>
                   {t("common.cancel")}
-                </Button>
+                </ArchiveButton>
               </div>
             </div>
           ) : (
@@ -116,14 +112,11 @@ export function ProfileHeader() {
               <p className="text-lg font-merriweather text-foreground max-w-2xl drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
                 {bio}
               </p>
-              <Button
-                onClick={() => setIsEditing(true)}
-                variant="outline"
-                className="border-accent-gold/40 text-accent-gold hover:bg-accent-gold hover:text-background shrink-0"
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                {t("profile.editProfile")}
-              </Button>
+              <div className="shrink-0">
+                <ArchiveButton onClick={() => setIsEditing(true)} icon={<Edit className="w-4 h-4" />}>
+                  {t("profile.editProfile")}
+                </ArchiveButton>
+              </div>
             </div>
           )}
         </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { ChevronDown, ChevronUp, Mail, Loader2 } from "lucide-react"
+import { ArchiveCard, ArchiveCardContent } from "@/components/archive-frame"
 import { useTranslations } from "@/lib/i18n"
 import { useUser } from "@/hooks/useUser"
 import { createClient } from "@/lib/supabase/client"
@@ -78,7 +79,8 @@ export function ProfileNotifications() {
   ]
 
   return (
-    <div className="room-furniture p-6">
+    <ArchiveCard>
+      <ArchiveCardContent className="p-6">
       <button onClick={() => setIsExpanded(!isExpanded)} className="w-full flex items-center justify-between text-left">
         <div className="flex items-center gap-3">
           <Mail className="w-5 h-5 text-accent-gold" />
@@ -135,6 +137,7 @@ export function ProfileNotifications() {
           )}
         </div>
       )}
-    </div>
+      </ArchiveCardContent>
+    </ArchiveCard>
   )
 }
