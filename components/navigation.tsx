@@ -9,11 +9,45 @@ import { useAppTheme } from "@/components/app-theme-provider"
 import { useTranslations } from "@/lib/i18n"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { ArchiveFrame } from "@/components/archive-frame"
+import { NAV_ICONS } from "@/components/nav-icons"
 import { useUser } from "@/hooks/useUser"
 import { createClient } from "@/lib/supabase/client"
 import { getUnreadCount } from "@/app/actions/messages"
 import { getUnreadNotificationCount } from "@/app/actions/notifications"
 import { xpProgressPercent } from "@/lib/xp-utils"
+
+/** Mobile bottom-bar button: square Archive frame wrapping an SVG glyph (no label). */
+function MobileNavButton({
+  item,
+  active,
+}: {
+  item: { href: string; label: string }
+  active: boolean
+}) {
+  const Icon = NAV_ICONS[item.href]
+  return (
+    <Link
+      href={item.href}
+      aria-label={item.label}
+      aria-current={active ? "page" : undefined}
+      className="transition-transform hover:scale-105 active:scale-100"
+    >
+      <ArchiveFrame
+        weight="thin"
+        cornerSize="sm"
+        className={`rounded-xl ${active ? "brightness-125" : "brightness-95"}`}
+      >
+        <div
+          className={`flex h-12 w-12 items-center justify-center ${
+            active ? "text-accent-gold" : "text-accent-gold/85"
+          }`}
+        >
+          {Icon && <Icon className="h-8 w-8" />}
+        </div>
+      </ArchiveFrame>
+    </Link>
+  )
+}
 
 export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -120,25 +154,25 @@ export function Navigation() {
 
   // Desktop bottom nav items (split into left and right groups, crest in middle)
   const desktopNavItemsLeft = [
-    { href: "/collection", label: t("nav.collection"), iconImg: "/images/nav-icons/collection.png" },
-    { href: "/discover", label: t("nav.community"), iconImg: "/images/nav-icons/community.png" },
-    { href: "/events", label: t("nav.events"), iconImg: "/images/nav-icons/events.png" },
-    { href: "/marketplace", label: t("nav.marketplace"), iconImg: "/images/nav-icons/marketplace.png" },
+    { href: "/collection", label: t("nav.collection") },
+    { href: "/discover", label: t("nav.community") },
+    { href: "/events", label: t("nav.events") },
+    { href: "/marketplace", label: t("nav.marketplace") },
   ]
   
   const desktopNavItemsRight = [
-    { href: "/themes", label: t("nav.manor"), iconImg: "/images/nav-icons/manor.png" },
-    { href: "/messages", label: t("nav.messages"), iconImg: "/images/nav-icons/messages.png" },
-    { href: "/trophies", label: t("nav.trophies"), iconImg: "/images/nav-icons/trophies.png" },
-    { href: "/contact", label: t("nav.contact"), iconImg: "/images/nav-icons/contact.png" },
+    { href: "/themes", label: t("nav.manor") },
+    { href: "/messages", label: t("nav.messages") },
+    { href: "/trophies", label: t("nav.trophies") },
+    { href: "/contact", label: t("nav.contact") },
   ]
 
   // Mobile bottom nav items (4 main items - icon buttons only, no text)
   const mobileNavItems = [
-    { href: "/collection", label: t("nav.collection"), icon: "/images/nav-icons/mobile-collection.png" },
-    { href: "/discover", label: t("nav.community"), icon: "/images/nav-icons/mobile-community.png" },
-    { href: "/events", label: t("nav.events"), icon: "/images/nav-icons/mobile-events.png" },
-    { href: "/themes", label: t("nav.themes"), icon: "/images/nav-icons/mobile-manor.png" },
+    { href: "/collection", label: t("nav.collection") },
+    { href: "/discover", label: t("nav.community") },
+    { href: "/events", label: t("nav.events") },
+    { href: "/themes", label: t("nav.themes") },
   ]
 
   // Crest menu items (shown when crest is tapped on mobile)
@@ -173,23 +207,6 @@ export function Navigation() {
       "treasure-vault": "/crests/treasure-crest.png",
     }
     return crestMap[theme] || crestMap["main-hall"]
-  }
-
-  // Get nav button frame images for current theme
-  const getNavButtonFrame = (theme: string) => {
-    const frameMap: { [key: string]: string } = {
-      "main-hall": "/images/nav-frames/main-hall-button.png",
-      // Add more themes here as they become available
-    }
-    return frameMap[theme] || frameMap["main-hall"]
-  }
-
-  const getNavButtonRoundFrame = (theme: string) => {
-    const frameMap: { [key: string]: string } = {
-      "main-hall": "/images/nav-frames/main-hall-button-round.png",
-      // Add more themes here as they become available
-    }
-    return frameMap[theme] || frameMap["main-hall"]
   }
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
@@ -318,27 +335,38 @@ export function Navigation() {
           DESKTOP NAVIGATION - BOTTOM BAR (8 buttons evenly spaced)
           ═══════════════════════════════════════════════════════ */}
       <nav className="hidden md:block fixed bottom-2 left-0 right-0 z-50 pointer-events-none">
-        <div className="max-w-[1920px] mx-auto px-0">
-          <div className="flex items-center justify-center gap-0 -space-x-6 lg:-space-x-8 pointer-events-auto">
-            {/* All 8 nav buttons */}
-            {[...desktopNavItemsLeft, ...desktopNavItemsRight].map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`relative flex items-center justify-center w-[230px] h-[95px] lg:w-[260px] lg:h-[106px] transition-all hover:scale-105 ${
-                  isActive(item.href) ? "brightness-125" : ""
-                }`}
-              >
-                <img 
-                  src={getNavButtonFrame(currentAppTheme)} 
-                  alt="" 
-                  className="absolute inset-0 w-full h-full object-contain"
-                />
-                <span className="relative z-10 -translate-y-[0.08em] font-cinzel text-[9px] lg:text-[11px] uppercase tracking-wide text-center text-accent-gold font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-                  {item.label}
-                </span>
-              </Link>
-            ))}
+        <div className="max-w-[1920px] mx-auto px-4">
+          <div className="flex items-end justify-center gap-3 lg:gap-4 pointer-events-auto">
+            {/* All 8 nav buttons — square Archive-framed SVG icon + label */}
+            {[...desktopNavItemsLeft, ...desktopNavItemsRight].map((item) => {
+              const Icon = NAV_ICONS[item.href]
+              const active = isActive(item.href)
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className="group transition-transform hover:scale-105"
+                >
+                  <ArchiveFrame
+                    weight="thin"
+                    cornerSize="sm"
+                    className={`rounded-xl ${active ? "brightness-125" : "brightness-95 group-hover:brightness-110"}`}
+                  >
+                    <div
+                      className={`flex w-[84px] h-[80px] lg:w-[96px] lg:h-[90px] flex-col items-center justify-center gap-1.5 px-1 ${
+                        active ? "text-accent-gold" : "text-accent-gold/85"
+                      }`}
+                    >
+                      {Icon && <Icon className="w-9 h-9 lg:w-10 lg:h-10" />}
+                      <span className="font-cinzel text-[8px] lg:text-[10px] uppercase tracking-wide text-center leading-tight">
+                        {item.label}
+                      </span>
+                    </div>
+                  </ArchiveFrame>
+                </Link>
+              )
+            })}
           </div>
         </div>
       </nav>
@@ -497,24 +525,12 @@ export function Navigation() {
           )}
         </div>
 
-        {/* The actual nav bar - transparent, just floating icons */}
+        {/* The actual nav bar - transparent, just floating Archive-framed icons */}
         <nav className="safe-area-bottom">
           <div className="flex items-end justify-around px-4 pt-2 pb-4">
             {/* First two nav items */}
             {mobileNavItems.slice(0, 2).map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center justify-center transition-all hover:scale-105 ${
-                  isActive(item.href) ? "brightness-125" : "opacity-90"
-                }`}
-              >
-                <img
-                  src={item.icon}
-                  alt={item.label}
-                  className="w-24 h-24 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
-                />
-              </Link>
+              <MobileNavButton key={item.href} item={item} active={isActive(item.href)} />
             ))}
 
             {/* Spacer for floating crest */}
@@ -522,19 +538,7 @@ export function Navigation() {
 
             {/* Last two nav items */}
             {mobileNavItems.slice(2).map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center justify-center transition-all hover:scale-105 ${
-                  isActive(item.href) ? "brightness-125" : "opacity-90"
-                }`}
-              >
-                <img
-                  src={item.icon}
-                  alt={item.label}
-                  className="w-24 h-24 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
-                />
-              </Link>
+              <MobileNavButton key={item.href} item={item} active={isActive(item.href)} />
             ))}
           </div>
         </nav>

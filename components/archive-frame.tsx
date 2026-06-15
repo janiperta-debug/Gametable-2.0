@@ -356,6 +356,60 @@ export const ArchiveIconButton = forwardRef<HTMLButtonElement, ArchiveIconButton
   )
 })
 
+interface ArchiveNavButtonProps {
+  /** The SVG nav icon (drawn with currentColor). */
+  icon: React.ReactNode
+  /** The route label. Hidden when `showLabel` is false (mobile icon-only). */
+  label: string
+  /** Marks the current route with a recessed gold slot + brighter frame. */
+  active?: boolean
+  /** Show the text label under the icon (desktop). Defaults to true. */
+  showLabel?: boolean
+  className?: string
+}
+
+/**
+ * ArchiveNavButton — a presentational square navigation tile on the "button"
+ * tier (thin double frame + corner flourishes), matching the Archive Icon
+ * concept. Houses a line-art SVG nav icon that inherits the theme accent via
+ * currentColor. The active route gets a recessed gold "slot" like ArchiveToggle.
+ * It is purely visual — wrap it in a Link (or button) so the whole tile is the
+ * single interactive element. Desktop shows icon + label; mobile passes
+ * `showLabel={false}` for an icon-only tile.
+ */
+export function ArchiveNavButton({ icon, label, active = false, showLabel = true, className }: ArchiveNavButtonProps) {
+  return (
+    <span className={cn("inline-block transition-transform hover:scale-[1.04] active:scale-100", className)}>
+      <ArchiveFrame
+        weight="thin"
+        corners
+        cornerSize="sm"
+        className={cn("rounded-lg", active && "brightness-125")}
+      >
+        <span
+          className={cn(
+            "relative flex flex-col items-center justify-center text-center",
+            "text-[var(--archive-gold,#d9b65c)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]",
+            showLabel ? "gap-1 px-3 py-2 min-w-[4.5rem]" : "p-2",
+            !active && "opacity-80",
+          )}
+        >
+          {active && (
+            <span className="absolute inset-0 rounded-md bg-[var(--archive-gold,#d9b65c)]/12 ring-1 ring-[var(--archive-gold,#d9b65c)]/40 shadow-[inset_0_1px_4px_rgba(0,0,0,0.5)]" />
+          )}
+          <span className={cn("relative", showLabel ? "h-7 w-7" : "h-6 w-6")}>{icon}</span>
+          {showLabel && (
+            <span className="relative font-cinzel text-[10px] uppercase tracking-wide font-semibold leading-none">
+              {label}
+            </span>
+          )}
+          {!showLabel && <span className="sr-only">{label}</span>}
+        </span>
+      </ArchiveFrame>
+    </span>
+  )
+}
+
 /**
  * ArchiveToggle — a segmented tab bar built on a single ArchiveFrame. The
  * active segment is marked by a recessed gold "slot" on the wood, so it reads
