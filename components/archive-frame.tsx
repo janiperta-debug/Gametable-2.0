@@ -376,3 +376,17 @@ export function ArchiveCardTitle({ className, ...props }: React.HTMLAttributes<H
 export function ArchiveCardContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return <div className={cn("px-5 pb-5", className)} {...props} />
 }
+
+/**
+ * archiveField — shared className for form controls (Input / SelectTrigger)
+ * placed on an archive surface. Renders as a recessed dark slot carved into the
+ * wood with a thin gold rim and gold-tinted text, matching the inset "gold slot"
+ * used by the active ArchiveToggle segment so inputs read as the same material.
+ */
+export const archiveField = cn(
+  "bg-black/45 border border-[var(--archive-gold,#d9b65c)]/40",
+  "text-foreground placeholder:text-[var(--archive-gold,#d9b65c)]/40",
+  "shadow-[inset_0_2px_6px_rgba(0,0,0,0.65)]",
+  "focus-visible:ring-1 focus-visible:ring-[var(--archive-gold,#d9b65c)]/60",
+  "focus-visible:border-[var(--archive-gold,#d9b65c)]/75",
+)

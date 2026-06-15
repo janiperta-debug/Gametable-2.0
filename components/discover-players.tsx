@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { ArchiveCard, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle } from "@/components/archive-frame"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -80,14 +80,14 @@ export function DiscoverPlayers() {
 
   return (
     <div className="space-y-8">
-      <ArchiveCard>
-        <ArchiveCardHeader>
-          <ArchiveCardTitle className="text-2xl normal-case">{t("community.refineSearch")}</ArchiveCardTitle>
-          <p className="font-merriweather text-muted-foreground mt-1">
+      <Card className="room-furniture">
+        <CardHeader>
+          <CardTitle className="text-2xl">{t("community.refineSearch")}</CardTitle>
+          <p className="font-merriweather text-muted-foreground">
             {t("community.refineSearchDescription")}
           </p>
-        </ArchiveCardHeader>
-        <ArchiveCardContent className="space-y-4">
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Location Filter */}
             <div className="space-y-2">
@@ -96,7 +96,7 @@ export function DiscoverPlayers() {
                 <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder={t("community.locationPlaceholder")}
-                  className="pl-10 font-merriweather"
+                  className={cn("pl-10 font-merriweather", archiveField)}
                   value={locationFilter}
                   onChange={(e) => setLocationFilter(e.target.value)}
                 />
@@ -110,7 +110,7 @@ export function DiscoverPlayers() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder={t("community.gameTitlePlaceholder")}
-                  className="pl-10 font-merriweather"
+                  className={cn("pl-10 font-merriweather", archiveField)}
                   value={gameFilter}
                   onChange={(e) => setGameFilter(e.target.value)}
                 />
@@ -146,8 +146,8 @@ export function DiscoverPlayers() {
               {t("community.searchPlayers")}
             </Button>
           </div>
-        </ArchiveCardContent>
-      </ArchiveCard>
+        </CardContent>
+      </Card>
 
       {/* Players Grid */}
       {loading ? (
@@ -155,13 +155,13 @@ export function DiscoverPlayers() {
           <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
         </div>
       ) : players.length === 0 && searched ? (
-        <ArchiveCard className="text-center">
-          <ArchiveCardContent className="py-12">
+        <Card className="room-furniture text-center py-12">
+          <CardContent>
             <Users className="h-16 w-16 text-accent-gold mx-auto mb-4" />
             <h3 className="font-heading text-xl font-semibold mb-2">{t("community.noPlayersFound")}</h3>
             <p className="font-body text-muted-foreground">{t("community.tryDifferentFilters")}</p>
-          </ArchiveCardContent>
-        </ArchiveCard>
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {players.map((player) => {
@@ -169,8 +169,8 @@ export function DiscoverPlayers() {
             const initials = displayName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
             
             return (
-              <ArchiveCard key={player.id}>
-                <ArchiveCardContent className="p-6">
+              <Card key={player.id} className="picture-frame">
+                <CardContent className="p-6">
                   <div className="space-y-4">
                     <div className="flex items-center space-x-4">
                       <Avatar className="h-16 w-16">
@@ -240,8 +240,8 @@ export function DiscoverPlayers() {
                       )}
                     </div>
                   </div>
-                </ArchiveCardContent>
-              </ArchiveCard>
+                </CardContent>
+              </Card>
             )
           })}
         </div>
