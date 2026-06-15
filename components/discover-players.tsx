@@ -138,8 +138,6 @@ export function DiscoverPlayers() {
                   <SelectItem value="rpgs" className={archiveSelectItem}>{t("community.rpgs")}</SelectItem>
                   <SelectItem value="miniatures" className={archiveSelectItem}>{t("community.miniatures")}</SelectItem>
                   <SelectItem value="trading-cards" className={archiveSelectItem}>{t("community.tradingCards")}</SelectItem>
-                  <SelectItem value="party-games" className={archiveSelectItem}>{t("community.partyGames")}</SelectItem>
-                  <SelectItem value="strategy" className={archiveSelectItem}>{t("community.strategyGames")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
