@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils"
 
 export type ArchiveMaterial = "wood"
 export type ArchiveCornerSize = "sm" | "md"
-export type ArchiveWeight = "regular" | "thin"
+export type ArchiveWeight = "regular" | "thin" | "hairline"
 
 interface ArchiveFrameProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Surface material. Currently only "wood"; API reserved for future materials. */
@@ -50,6 +50,7 @@ const WEIGHT_STYLE: Record<
 > = {
   regular: { pad: "p-[5px]", outerRadius: "rounded-xl", channelInset: 2, channelRadius: "rounded-[0.62rem]", surfaceRadius: "rounded-[0.5rem]" },
   thin: { pad: "p-[3px]", outerRadius: "rounded-lg", channelInset: 1, channelRadius: "rounded-[0.5rem]", surfaceRadius: "rounded-[0.4rem]" },
+  hairline: { pad: "p-[2px]", outerRadius: "rounded-md", channelInset: 1, channelRadius: "rounded-[0.4rem]", surfaceRadius: "rounded-[0.3rem]" },
 }
 
 /**
@@ -213,7 +214,7 @@ export function ArchiveFrame({
           <div
             className={cn(
               "pointer-events-none absolute rounded-[0.4rem] border border-[var(--archive-gold,#d9b65c)]/45",
-              weight === "thin" ? "inset-[2px]" : "inset-[3px]",
+              weight === "regular" ? "inset-[3px]" : weight === "thin" ? "inset-[2px]" : "inset-[1.5px]",
             )}
           />
           {weight === "regular" && (
@@ -242,12 +243,6 @@ export function ArchiveFrame({
   )
 }
 
-/**
- * ArchiveButton — an action button that reuses the exact ArchiveFrame surface
- * (gold gradient frame + horizontal-grain wood + SVG corners) so it shares one
- * visual language with ArchivePanel. Sizing is driven by padding, so the frame
- * grows with the label and the gold border never crops the text.
- */
 interface ArchiveButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** Optional leading icon. */
   icon?: React.ReactNode
@@ -259,35 +254,69 @@ interface ArchiveButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   asChild?: boolean
 }
 
-export const ArchiveButton = forwardRef<HTMLButtonElement, ArchiveButtonProps>(function ArchiveButton(
-  { icon, active = false, fullWidth = false, asChild = false, children, className, ...props },
-  ref,
-) {
-  const Comp = asChild ? Slot : "button"
-  return (
-    <Comp
-      ref={ref as never}
-      className={cn(
-        "transition-transform hover:scale-[1.03] active:scale-100",
-        "disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed",
-        fullWidth ? "block w-full" : "inline-block",
-        className,
-      )}
-      {...props}
-    >
-      <ArchiveFrame
-        weight="thin"
-        cornerSize="sm"
-        className={cn(fullWidth && "w-full", "rounded-lg", active && "brightness-125")}
+/** Per-variant frame config so the two button tiers can't visually drift apart. */
+const BUTTON_VARIANT = {
+  /** Tabs + standalone action buttons: thin double frame + corner flourishes. */
+  button: { weight: "thin" as ArchiveWeight, corners: true, pad: "px-7 py-2.5" },
+  /** Buttons living inside a card: hairline frame, NO corners, so they don't
+   *  fight with the card's own ornate frame. */
+  cardbutton: { weight: "hairline" as ArchiveWeight, corners: false, pad: "px-6 py-2" },
+}
+
+function makeArchiveButton(variant: keyof typeof BUTTON_VARIANT, displayName: string) {
+  const cfg = BUTTON_VARIANT[variant]
+  const Component = forwardRef<HTMLButtonElement, ArchiveButtonProps>(function ArchiveButtonBase(
+    { icon, active = false, fullWidth = false, asChild = false, children, className, ...props },
+    ref,
+  ) {
+    const Comp = asChild ? Slot : "button"
+    return (
+      <Comp
+        ref={ref as never}
+        className={cn(
+          "transition-transform hover:scale-[1.03] active:scale-100",
+          "disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed",
+          fullWidth ? "block w-full" : "inline-block",
+          className,
+        )}
+        {...props}
       >
-        <span className="flex items-center justify-center gap-2 px-7 py-2.5 font-cinzel text-xs sm:text-sm uppercase tracking-wide font-semibold text-[var(--archive-gold,#d9b65c)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
-          {icon}
-          {children}
-        </span>
-      </ArchiveFrame>
-    </Comp>
-  )
-})
+        <ArchiveFrame
+          weight={cfg.weight}
+          corners={cfg.corners}
+          cornerSize="sm"
+          className={cn(fullWidth && "w-full", "rounded-lg", active && "brightness-125")}
+        >
+          <span
+            className={cn(
+              "flex items-center justify-center gap-2 font-cinzel text-xs sm:text-sm uppercase tracking-wide font-semibold",
+              "text-[var(--archive-gold,#d9b65c)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]",
+              cfg.pad,
+            )}
+          >
+            {icon}
+            {children}
+          </span>
+        </ArchiveFrame>
+      </Comp>
+    )
+  })
+  Component.displayName = displayName
+  return Component
+}
+
+/**
+ * ArchiveButton (tier: "button") — standalone action button + tab segments.
+ * Thin double frame with corner flourishes, sharing the ArchivePanel language.
+ */
+export const ArchiveButton = makeArchiveButton("button", "ArchiveButton")
+
+/**
+ * ArchiveCardButton (tier: "cardbutton") — for buttons placed inside a card.
+ * Hairline frame and no corner flourishes so it reads as a quieter control that
+ * doesn't compete with the surrounding ArchiveCard frame.
+ */
+export const ArchiveCardButton = makeArchiveButton("cardbutton", "ArchiveCardButton")
 
 /**
  * ArchiveToggle — a segmented tab bar built on a single ArchiveFrame. The
@@ -389,15 +418,16 @@ export function ArchiveCardContent({ className, ...props }: React.HTMLAttributes
 }
 
 /**
- * archiveField — shared className for form controls (Input / SelectTrigger)
- * placed on an archive surface. Renders as a recessed dark slot carved into the
- * wood with a thin gold rim and gold-tinted text, matching the inset "gold slot"
- * used by the active ArchiveToggle segment so inputs read as the same material.
+ * archiveField (tier: "input") — shared className for form controls
+ * (Input / SelectTrigger) placed on an archive surface. The thinnest tier: a
+ * single crisp gold hairline (no double frame, no corners) around a recessed
+ * dark slot, so inputs read as the quietest member of the Archive family while
+ * still clearly gold. `!border-*` overrides shadcn's default maroon border-input.
  */
 export const archiveField = cn(
-  "bg-black/45 border border-[var(--archive-gold,#d9b65c)]/40",
+  "bg-black/50 border !border-[var(--archive-gold,#d9b65c)]/55",
   "text-foreground placeholder:text-[var(--archive-gold,#d9b65c)]/40",
-  "shadow-[inset_0_2px_6px_rgba(0,0,0,0.65)]",
+  "shadow-[inset_0_1px_5px_rgba(0,0,0,0.6)]",
   "focus-visible:ring-1 focus-visible:ring-[var(--archive-gold,#d9b65c)]/60",
-  "focus-visible:border-[var(--archive-gold,#d9b65c)]/75",
+  "focus-visible:!border-[var(--archive-gold,#d9b65c)]/85",
 )
