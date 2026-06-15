@@ -2,11 +2,19 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
+import {
+  ArchiveCard,
+  ArchiveCardButton,
+  ArchiveCardContent,
+  ArchiveCardHeader,
+  ArchiveCardTitle,
+  archiveField,
+  archiveSelectContent,
+  archiveSelectItem,
+} from "@/components/archive-frame"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowLeft, Loader2, Save } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
@@ -131,20 +139,21 @@ export default function EditEventPage() {
   if (error || !event) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-surface-dark to-background flex items-center justify-center">
-        <Card className="room-furniture max-w-md">
-          <CardContent className="p-8 text-center">
+        <ArchiveCard className="max-w-md">
+          <ArchiveCardContent className="p-8 text-center">
             <h1 className="text-2xl text-accent-gold font-cinzel mb-4">
               {t("common.error") || "Error"}
             </h1>
             <p className="text-muted-foreground mb-6">
               {error || (t("events.notFound") || "Event not found")}
             </p>
-            <Button onClick={() => router.push("/events")} className="theme-accent-gold">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              {t("events.backToEvents") || "Back to Events"}
-            </Button>
-          </CardContent>
-        </Card>
+            <div className="flex justify-center">
+              <ArchiveCardButton active onClick={() => router.push("/events")} icon={<ArrowLeft className="w-4 h-4" />}>
+                {t("events.backToEvents") || "Back to Events"}
+              </ArchiveCardButton>
+            </div>
+          </ArchiveCardContent>
+        </ArchiveCard>
       </div>
     )
   }
@@ -154,23 +163,21 @@ export default function EditEventPage() {
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <Button
-            variant="ghost"
+          <ArchiveCardButton
             onClick={() => router.push(`/events/${eventId}`)}
-            className="text-accent-gold hover:text-accent-gold/80"
+            icon={<ArrowLeft className="w-4 h-4" />}
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
             {t("common.back") || "Back"}
-          </Button>
+          </ArchiveCardButton>
         </div>
 
-        <Card className="room-furniture">
-          <CardHeader>
-            <CardTitle className="text-2xl text-accent-gold font-cinzel">
+        <ArchiveCard>
+          <ArchiveCardHeader>
+            <ArchiveCardTitle className="text-2xl normal-case">
               {t("events.editEvent") || "Edit Event"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </ArchiveCardTitle>
+          </ArchiveCardHeader>
+          <ArchiveCardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Title */}
               <div className="space-y-2">
@@ -182,6 +189,7 @@ export default function EditEventPage() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder={t("events.titlePlaceholder") || "Enter event title"}
+                  className={archiveField}
                   required
                 />
               </div>
@@ -197,6 +205,7 @@ export default function EditEventPage() {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder={t("events.descriptionPlaceholder") || "Describe your event..."}
                   rows={4}
+                  className={archiveField}
                 />
               </div>
 
@@ -207,20 +216,20 @@ export default function EditEventPage() {
                     {t("events.eventType") || "Event Type"}
                   </Label>
                   <Select value={eventType} onValueChange={(v) => setEventType(v as EventType)}>
-                    <SelectTrigger>
+                    <SelectTrigger className={archiveField}>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="board_game_night">
+                    <SelectContent className={archiveSelectContent}>
+                      <SelectItem value="board_game_night" className={archiveSelectItem}>
                         {t("events.boardGameNight") || "Board Game Night"}
                       </SelectItem>
-                      <SelectItem value="rpg_session">
+                      <SelectItem value="rpg_session" className={archiveSelectItem}>
                         {t("events.rpgSession") || "RPG Session"}
                       </SelectItem>
-                      <SelectItem value="tournament">
+                      <SelectItem value="tournament" className={archiveSelectItem}>
                         {t("events.tournament") || "Tournament"}
                       </SelectItem>
-                      <SelectItem value="custom">
+                      <SelectItem value="custom" className={archiveSelectItem}>
                         {t("events.custom") || "Custom Event"}
                       </SelectItem>
                     </SelectContent>
@@ -232,17 +241,17 @@ export default function EditEventPage() {
                     {t("events.privacy") || "Privacy"}
                   </Label>
                   <Select value={privacy} onValueChange={(v) => setPrivacy(v as EventPrivacy)}>
-                    <SelectTrigger>
+                    <SelectTrigger className={archiveField}>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="public">
+                    <SelectContent className={archiveSelectContent}>
+                      <SelectItem value="public" className={archiveSelectItem}>
                         {t("events.public") || "Public"}
                       </SelectItem>
-                      <SelectItem value="friends">
+                      <SelectItem value="friends" className={archiveSelectItem}>
                         {t("events.friendsOnly") || "Friends Only"}
                       </SelectItem>
-                      <SelectItem value="private">
+                      <SelectItem value="private" className={archiveSelectItem}>
                         {t("events.private") || "Private"}
                       </SelectItem>
                     </SelectContent>
@@ -260,6 +269,7 @@ export default function EditEventPage() {
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder={t("events.locationPlaceholder") || "Where will this event take place?"}
+                  className={archiveField}
                 />
               </div>
 
@@ -274,6 +284,7 @@ export default function EditEventPage() {
                     type="datetime-local"
                     value={startsAt}
                     onChange={(e) => setStartsAt(e.target.value)}
+                    className={archiveField}
                     required
                   />
                 </div>
@@ -290,31 +301,31 @@ export default function EditEventPage() {
                     value={maxPlayers}
                     onChange={(e) => setMaxPlayers(e.target.value)}
                     placeholder="e.g. 8"
+                    className={archiveField}
                   />
                 </div>
               </div>
 
               {/* Submit */}
               <div className="flex justify-end gap-4 pt-4">
-                <Button
+                <ArchiveCardButton
                   type="button"
-                  variant="outline"
                   onClick={() => router.push(`/events/${eventId}`)}
                 >
                   {t("common.cancel") || "Cancel"}
-                </Button>
-                <Button type="submit" className="theme-accent-gold" disabled={saving}>
-                  {saving ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4 mr-2" />
-                  )}
+                </ArchiveCardButton>
+                <ArchiveCardButton
+                  type="submit"
+                  active
+                  disabled={saving}
+                  icon={saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                >
                   {t("common.save") || "Save Changes"}
-                </Button>
+                </ArchiveCardButton>
               </div>
             </form>
-          </CardContent>
-        </Card>
+          </ArchiveCardContent>
+        </ArchiveCard>
       </div>
     </div>
   )

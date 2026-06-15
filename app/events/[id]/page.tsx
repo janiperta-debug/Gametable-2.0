@@ -3,9 +3,15 @@
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import {
+  ArchiveCard,
+  ArchiveCardButton,
+  ArchiveCardContent,
+  ArchiveCardHeader,
+  ArchiveCardTitle,
+  ArchiveIconButton,
+} from "@/components/archive-frame"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EventChat } from "@/components/event-chat"
 import { 
   ArrowLeft, Calendar, Clock, MapPin, Users, Globe, UserCheck, Lock, 
@@ -250,20 +256,21 @@ export default function EventDetailsPage() {
   if (error || !event) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-surface-dark to-background flex items-center justify-center">
-        <Card className="room-furniture max-w-md">
-          <CardContent className="p-8 text-center">
+        <ArchiveCard className="max-w-md">
+          <ArchiveCardContent className="p-8 text-center">
             <h1 className="text-2xl text-accent-gold font-cinzel mb-4">
               {t("events.notFound") || "Event Not Found"}
             </h1>
             <p className="text-muted-foreground mb-6">
               {error || (t("events.notFoundDesc") || "The event you're looking for doesn't exist.")}
             </p>
-            <Button onClick={() => router.push("/events")} className="theme-accent-gold">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              {t("events.backToEvents") || "Back to Events"}
-            </Button>
-          </CardContent>
-        </Card>
+            <div className="flex justify-center">
+              <ArchiveCardButton active onClick={() => router.push("/events")} icon={<ArrowLeft className="w-4 h-4" />}>
+                {t("events.backToEvents") || "Back to Events"}
+              </ArchiveCardButton>
+            </div>
+          </ArchiveCardContent>
+        </ArchiveCard>
       </div>
     )
   }
@@ -276,37 +283,26 @@ export default function EventDetailsPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex flex-wrap items-center gap-2 mb-8">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push("/events")}
-            className="text-accent-gold hover:text-accent-gold/80 mr-auto"
-          >
-            <ArrowLeft className="w-4 h-4 mr-1" />
-            <span className="hidden sm:inline">{t("events.backToEvents") || "Back to Events"}</span>
-          </Button>
+          <div className="mr-auto">
+            <ArchiveCardButton onClick={() => router.push("/events")} icon={<ArrowLeft className="w-4 h-4" />}>
+              <span className="hidden sm:inline">{t("events.backToEvents") || "Back to Events"}</span>
+            </ArchiveCardButton>
+          </div>
 
           {isHost && (
             <>
-              <Link href={`/events/${eventId}/edit`}>
-                <Button variant="outline" size="sm" className="border-accent-gold/30">
-                  <Edit className="w-4 h-4 sm:mr-2" />
+              <ArchiveCardButton asChild icon={<Edit className="w-4 h-4" />}>
+                <Link href={`/events/${eventId}/edit`}>
                   <span className="hidden sm:inline">{t("common.edit") || "Edit"}</span>
-                </Button>
-              </Link>
-              <Button 
-                variant="destructive"
-                size="sm"
+                </Link>
+              </ArchiveCardButton>
+              <ArchiveCardButton
                 onClick={handleCancel}
                 disabled={cancelling}
+                icon={cancelling ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
               >
-                {cancelling ? (
-                  <Loader2 className="w-4 h-4 sm:mr-2 animate-spin" />
-                ) : (
-                  <XCircle className="w-4 h-4 sm:mr-2" />
-                )}
                 <span className="hidden sm:inline">{t("events.cancel") || "Cancel"}</span>
-              </Button>
+              </ArchiveCardButton>
             </>
           )}
         </div>
@@ -315,13 +311,13 @@ export default function EventDetailsPage() {
           {/* Event Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Main Event Info */}
-            <Card className="room-furniture">
-              <CardHeader>
+            <ArchiveCard>
+              <ArchiveCardHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle className="text-3xl text-accent-gold font-cinzel mb-2">
+                    <ArchiveCardTitle className="text-3xl mb-2 normal-case">
                       {event.title}
-                    </CardTitle>
+                    </ArchiveCardTitle>
                     <div className="flex items-center gap-4 text-muted-foreground mb-4">
                       <div className="flex items-center gap-2">
                         {getPrivacyIcon(event.privacy)}
@@ -352,8 +348,8 @@ export default function EventDetailsPage() {
                     )}
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
+              </ArchiveCardHeader>
+              <ArchiveCardContent className="space-y-6">
                 {/* Host */}
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-accent-gold/20 flex items-center justify-center">
@@ -426,55 +422,52 @@ export default function EventDetailsPage() {
 
                 {/* RSVP Buttons - only show if not cancelled and user is logged in */}
                 {event.status !== "cancelled" && currentUserId && !isHost && (
-                  <div className="flex gap-3 pt-4 border-t border-border">
-                    <Button
+                  <div className="flex flex-wrap gap-3 pt-4 border-t border-accent-gold/20">
+                    <ArchiveCardButton
+                      active={userRsvp === "attending"}
                       onClick={() => handleRSVP("attending")}
-                      className={userRsvp === "attending" ? "theme-accent-gold" : ""}
-                      variant={userRsvp === "attending" ? "default" : "outline"}
                       disabled={updatingRsvp}
+                      icon={updatingRsvp ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}
                     >
-                      {updatingRsvp && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                       {t("events.attending") || "Attending"}
-                    </Button>
-                    <Button
+                    </ArchiveCardButton>
+                    <ArchiveCardButton
+                      active={userRsvp === "maybe"}
                       onClick={() => handleRSVP("maybe")}
-                      className={userRsvp === "maybe" ? "bg-yellow-600 hover:bg-yellow-700" : ""}
-                      variant={userRsvp === "maybe" ? "default" : "outline"}
                       disabled={updatingRsvp}
                     >
                       {t("events.maybe") || "Maybe"}
-                    </Button>
-                    <Button
+                    </ArchiveCardButton>
+                    <ArchiveCardButton
+                      active={userRsvp === "declined"}
                       onClick={() => handleRSVP("declined")}
-                      variant="ghost"
-                      className="text-muted-foreground"
                       disabled={updatingRsvp}
                     >
                       {t("events.cantAttend") || "Can't Attend"}
-                    </Button>
+                    </ArchiveCardButton>
                   </div>
                 )}
 
                 {!currentUserId && event.status !== "cancelled" && (
-                  <div className="pt-4 border-t border-border">
-                    <Link href="/auth/login">
-                      <Button className="theme-accent-gold w-full">
+                  <div className="pt-4 border-t border-accent-gold/20">
+                    <ArchiveCardButton asChild active fullWidth>
+                      <Link href="/auth/login">
                         {t("events.loginToRsvp") || t("auth.loginToRsvp") || "Log in to RSVP"}
-                      </Button>
-                    </Link>
+                      </Link>
+                    </ArchiveCardButton>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </ArchiveCardContent>
+            </ArchiveCard>
 
             {/* Attendees */}
-            <Card className="room-furniture">
-              <CardHeader>
-                <CardTitle className="font-cinzel text-accent-gold">
+            <ArchiveCard>
+              <ArchiveCardHeader>
+                <ArchiveCardTitle className="normal-case">
                   {t("events.attendees") || "Attendees"} ({event.participants?.length || 0})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                </ArchiveCardTitle>
+              </ArchiveCardHeader>
+              <ArchiveCardContent>
                 {event.participants && event.participants.length > 0 ? (
                   <div className="space-y-3">
                     {event.participants.map((participant) => (
@@ -512,14 +505,13 @@ export default function EventDetailsPage() {
                                 : (t("events.maybe") || "Maybe")}
                           </Badge>
                           {isHost && participant.user_id !== event.host_id && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                            <button
+                              className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-colors"
+                              aria-label={t("events.inviteRemoved") || "Remove participant"}
                               onClick={() => handleUninvite(participant.id)}
                             >
                               <X className="h-3 w-3" />
-                            </Button>
+                            </button>
                           )}
                         </div>
                       </div>
@@ -533,16 +525,15 @@ export default function EventDetailsPage() {
 
                 {/* Invite Section - Host Only */}
                 {isHost && (
-                  <div className="mt-6 pt-4 border-t border-border">
+                  <div className="mt-6 pt-4 border-t border-accent-gold/20">
                     {!showInviteSection ? (
-                      <Button
-                        variant="outline"
-                        className="w-full border-accent-gold/30"
+                      <ArchiveCardButton
+                        fullWidth
                         onClick={loadInvitableUsers}
+                        icon={<UserPlus className="w-4 h-4" />}
                       >
-                        <UserPlus className="w-4 h-4 mr-2" />
                         {t("events.inviteFriends") || "Invite Friends"}
-                      </Button>
+                      </ArchiveCardButton>
                     ) : (
                       <div className="space-y-3">
                         <h4 className="font-medium text-accent-gold">
@@ -551,7 +542,7 @@ export default function EventDetailsPage() {
                         {invitableUsers.length > 0 ? (
                           <div className="space-y-2">
                             {invitableUsers.map((user) => (
-                              <div key={user.id} className="flex items-center justify-between p-2 rounded-lg bg-background/50">
+                              <div key={user.id} className="flex items-center justify-between p-2 rounded-lg bg-black/30">
                                 <div className="flex items-center gap-2">
                                   <div className="w-8 h-8 rounded-full bg-accent-gold/20 flex items-center justify-center">
                                     {user.avatar_url ? (
@@ -564,18 +555,13 @@ export default function EventDetailsPage() {
                                   </div>
                                   <span className="text-sm">{user.display_name || "Anonymous"}</span>
                                 </div>
-                                <Button
-                                  size="sm"
-                                  className="theme-accent-gold"
+                                <ArchiveIconButton
+                                  active
+                                  aria-label={t("events.inviteFriends") || "Invite"}
                                   onClick={() => handleInvite(user.id)}
                                   disabled={inviting === user.id}
-                                >
-                                  {inviting === user.id ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    <UserPlus className="w-4 h-4" />
-                                  )}
-                                </Button>
+                                  icon={inviting === user.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                                />
                               </div>
                             ))}
                           </div>
@@ -588,8 +574,8 @@ export default function EventDetailsPage() {
                     )}
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </ArchiveCardContent>
+            </ArchiveCard>
           </div>
 
           {/* Event Chat - only show for participants/host */}
@@ -597,18 +583,18 @@ export default function EventDetailsPage() {
             {(isHost || userRsvp === "attending") ? (
               <EventChat eventId={eventId} eventTitle={event.title || ""} />
             ) : (
-              <Card className="room-furniture">
-                <CardHeader>
-                  <CardTitle className="font-cinzel text-accent-gold">
+              <ArchiveCard>
+                <ArchiveCardHeader>
+                  <ArchiveCardTitle className="normal-case">
                     {t("events.eventChat") || "Event Chat"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+                  </ArchiveCardTitle>
+                </ArchiveCardHeader>
+                <ArchiveCardContent>
                   <p className="text-muted-foreground text-center py-8">
                     {t("events.chatForAttendees") || "RSVP to join the event chat"}
                   </p>
-                </CardContent>
-              </Card>
+                </ArchiveCardContent>
+              </ArchiveCard>
             )}
           </div>
         </div>
