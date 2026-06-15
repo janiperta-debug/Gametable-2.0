@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { DiscoverPlayers } from "@/components/discover-players"
 import { ThemeHero } from "@/components/theme-hero"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ArchiveCard, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle } from "@/components/archive-frame"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Clock, Loader2, Gamepad2, Calendar } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
@@ -53,14 +53,14 @@ export default function CommunityPage() {
       </ThemeHero>
 
       <div className="max-w-6xl mx-auto space-y-8">
-          <Card className="room-furniture">
-            <CardHeader>
-              <CardTitle className="text-2xl flex items-center">
+          <ArchiveCard>
+            <ArchiveCardHeader>
+              <ArchiveCardTitle className="text-2xl flex items-center normal-case">
                 <Clock className="h-6 w-6 mr-2 text-accent-gold" />
                 {t("community.recentFriendActivity")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </ArchiveCardTitle>
+            </ArchiveCardHeader>
+            <ArchiveCardContent>
               {!user ? (
                 <p className="text-center text-muted-foreground font-body py-8">
                   {t("community.loginToSeeActivity")}
@@ -116,8 +116,8 @@ export default function CommunityPage() {
                   })}
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </ArchiveCardContent>
+          </ArchiveCard>
 
           <DiscoverPlayers />
         </div>

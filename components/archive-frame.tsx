@@ -1,5 +1,6 @@
 import type React from "react"
 import { forwardRef, useId } from "react"
+import { Slot } from "@radix-ui/react-slot"
 import { cn } from "@/lib/utils"
 
 /**
@@ -252,29 +253,39 @@ interface ArchiveButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   icon?: React.ReactNode
   /** Renders brighter to indicate the selected/active state. */
   active?: boolean
+  /** Stretch to fill the available width (e.g. paired card actions). */
+  fullWidth?: boolean
+  /** Render as a Slot so the child (e.g. a Link) becomes the interactive element. */
+  asChild?: boolean
 }
 
 export const ArchiveButton = forwardRef<HTMLButtonElement, ArchiveButtonProps>(function ArchiveButton(
-  { icon, active = false, children, className, ...props },
+  { icon, active = false, fullWidth = false, asChild = false, children, className, ...props },
   ref,
 ) {
+  const Comp = asChild ? Slot : "button"
   return (
-    <button
-      ref={ref}
+    <Comp
+      ref={ref as never}
       className={cn(
-        "inline-block transition-transform hover:scale-[1.03] active:scale-100",
+        "transition-transform hover:scale-[1.03] active:scale-100",
         "disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed",
+        fullWidth ? "block w-full" : "inline-block",
         className,
       )}
       {...props}
     >
-      <ArchiveFrame weight="thin" cornerSize="sm" className={cn("rounded-lg", active && "brightness-125")}>
+      <ArchiveFrame
+        weight="thin"
+        cornerSize="sm"
+        className={cn(fullWidth && "w-full", "rounded-lg", active && "brightness-125")}
+      >
         <span className="flex items-center justify-center gap-2 px-7 py-2.5 font-cinzel text-xs sm:text-sm uppercase tracking-wide font-semibold text-[var(--archive-gold,#d9b65c)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
           {icon}
           {children}
         </span>
       </ArchiveFrame>
-    </button>
+    </Comp>
   )
 })
 
