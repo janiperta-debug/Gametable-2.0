@@ -340,7 +340,7 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </ArchiveCardContent>
+    </ArchiveCard>
   )
 }
