@@ -8,6 +8,7 @@ import { useState, useEffect } from "react"
 import { useAppTheme } from "@/components/app-theme-provider"
 import { useTranslations } from "@/lib/i18n"
 import { LanguageSwitcher } from "@/components/language-switcher"
+import { ArchiveFrame } from "@/components/archive-frame"
 import { useUser } from "@/hooks/useUser"
 import { createClient } from "@/lib/supabase/client"
 import { getUnreadCount } from "@/app/actions/messages"
@@ -426,50 +427,47 @@ export function Navigation() {
             />
           </button>
 
-          {/* Crest popup menu - more solid background */}
+          {/* Crest popup menu - scalable ArchiveFrame (CSS wood + SVG corners) */}
           {isCrestMenuOpen && (
-            <div 
-              className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-64 rounded-xl shadow-2xl border border-accent-gold/30 overflow-hidden"
-              style={{ 
-                background: "linear-gradient(to bottom, rgba(61,21,21,0.98), rgba(26,8,8,0.99))"
-              }}
-            >
-              {crestMenuItems.map((item, index) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-4 px-5 py-4 hover:bg-accent-gold/10 transition-colors ${
-                    index !== crestMenuItems.length - 1 ? "border-b border-accent-gold/10" : ""
-                  }`}
-                  onClick={() => setIsCrestMenuOpen(false)}
-                >
-                  <item.icon className="w-5 h-5 text-accent-gold" />
-                  <div className="flex-1">
+            <ArchiveFrame className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-64 overflow-hidden">
+              <div className="p-1.5">
+                {crestMenuItems.map((item, index) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-4 px-4 py-3.5 rounded-lg hover:bg-accent-gold/10 transition-colors ${
+                      index !== crestMenuItems.length - 1 ? "border-b border-accent-gold/10" : ""
+                    }`}
+                    onClick={() => setIsCrestMenuOpen(false)}
+                  >
+                    <item.icon className="w-5 h-5 text-accent-gold" />
+                    <div className="flex-1">
+                      <span className="text-foreground font-cinzel text-sm uppercase tracking-wide">
+                        {item.label}
+                      </span>
+                    </div>
+                    {item.badge && item.badge > 0 && (
+                      <span className="bg-red-500 text-white text-[10px] rounded-full h-5 min-w-[20px] flex items-center justify-center px-1.5">
+                        {item.badge > 99 ? "99+" : item.badge}
+                      </span>
+                    )}
+                  </Link>
+                ))}
+
+                {/* Logout button */}
+                {user && (
+                  <button
+                    className="flex items-center gap-4 px-4 py-3.5 rounded-lg hover:bg-accent-gold/10 transition-colors w-full text-left border-t border-accent-gold/20"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="w-5 h-5 text-accent-gold" />
                     <span className="text-foreground font-cinzel text-sm uppercase tracking-wide">
-                      {item.label}
+                      {t("nav.logout")}
                     </span>
-                  </div>
-                  {item.badge && item.badge > 0 && (
-                    <span className="bg-red-500 text-white text-[10px] rounded-full h-5 min-w-[20px] flex items-center justify-center px-1.5">
-                      {item.badge > 99 ? "99+" : item.badge}
-                    </span>
-                  )}
-                </Link>
-              ))}
-              
-              {/* Logout button */}
-              {user && (
-                <button
-                  className="flex items-center gap-4 px-5 py-4 hover:bg-accent-gold/10 transition-colors w-full text-left border-t border-accent-gold/20"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="w-5 h-5 text-accent-gold" />
-                  <span className="text-foreground font-cinzel text-sm uppercase tracking-wide">
-                    {t("nav.logout")}
-                  </span>
-                </button>
-              )}
-            </div>
+                  </button>
+                )}
+              </div>
+            </ArchiveFrame>
           )}
         </div>
 
