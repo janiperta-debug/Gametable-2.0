@@ -425,11 +425,11 @@ export function ArchiveCardContent({ className, ...props }: React.HTMLAttributes
  * still clearly gold. `!border-*` overrides shadcn's default maroon border-input.
  */
 export const archiveField = cn(
-  "bg-black/50 border !border-[var(--archive-gold,#d9b65c)]/55",
+  "bg-black/50 border !border-[rgba(217,182,92,0.55)]",
   "text-foreground placeholder:text-[var(--archive-gold,#d9b65c)]/40",
   "shadow-[inset_0_1px_5px_rgba(0,0,0,0.6)]",
   "focus-visible:ring-1 focus-visible:ring-[var(--archive-gold,#d9b65c)]/60",
-  "focus-visible:!border-[var(--archive-gold,#d9b65c)]/85",
+  "focus-visible:!border-[rgba(217,182,92,0.85)]",
 )
 
 /**
@@ -439,7 +439,7 @@ export const archiveField = cn(
  */
 export const archiveSelectContent = cn(
   "bg-[#1f1206]/95 backdrop-blur-sm",
-  "border !border-[var(--archive-gold,#d9b65c)]/55",
+  "border !border-[rgba(217,182,92,0.55)]",
   "shadow-[0_12px_30px_rgba(0,0,0,0.6),inset_0_0_0_1px_rgba(0,0,0,0.4)]",
 )
 
