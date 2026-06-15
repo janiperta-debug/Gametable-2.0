@@ -1,4 +1,5 @@
 import type React from "react"
+import { forwardRef } from "react"
 import { cn } from "@/lib/utils"
 
 /**
@@ -16,27 +17,36 @@ import { cn } from "@/lib/utils"
  */
 
 export type ArchiveMaterial = "wood"
+export type ArchiveCornerSize = "sm" | "md"
 
 interface ArchiveFrameProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Surface material. Currently only "wood"; API reserved for future materials. */
   material?: ArchiveMaterial
   /** Render the decorative SVG corner flourishes. Defaults to true. */
   corners?: boolean
+  /** Size of the corner flourishes. "md" (panels) | "sm" (buttons/toggles). */
+  cornerSize?: ArchiveCornerSize
   children: React.ReactNode
+}
+
+const CORNER_DIMENSIONS: Record<ArchiveCornerSize, string> = {
+  sm: "h-6 w-6",
+  md: "h-10 w-10",
 }
 
 /**
  * Ornate baroque corner flourish — filled/stroked gold scrollwork that reads
  * as carved relief. Mirrored into each corner via CSS transforms.
  */
-function CornerFlourish({ className }: { className?: string }) {
+function CornerFlourish({ className, size = "md" }: { className?: string; size?: ArchiveCornerSize }) {
   return (
     <svg
       viewBox="0 0 56 56"
       fill="none"
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute z-20 h-10 w-10",
+        "pointer-events-none absolute z-20",
+        CORNER_DIMENSIONS[size],
         "text-[var(--archive-gold,#e8c45a)] drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)]",
         className,
       )}
@@ -70,6 +80,7 @@ function CornerFlourish({ className }: { className?: string }) {
 export function ArchiveFrame({
   material = "wood",
   corners = true,
+  cornerSize = "md",
   className,
   children,
   style,
@@ -114,12 +125,102 @@ export function ArchiveFrame({
 
       {corners && (
         <>
-          <CornerFlourish className="-left-1 -top-1" />
-          <CornerFlourish className="-right-1 -top-1 -scale-x-100" />
-          <CornerFlourish className="-bottom-1 -left-1 -scale-y-100" />
-          <CornerFlourish className="-bottom-1 -right-1 -scale-100" />
+          <CornerFlourish size={cornerSize} className="-left-1 -top-1" />
+          <CornerFlourish size={cornerSize} className="-right-1 -top-1 -scale-x-100" />
+          <CornerFlourish size={cornerSize} className="-bottom-1 -left-1 -scale-y-100" />
+          <CornerFlourish size={cornerSize} className="-bottom-1 -right-1 -scale-100" />
         </>
       )}
     </div>
+  )
+}
+
+/**
+ * ArchiveButton — an action button that reuses the exact ArchiveFrame surface
+ * (gold gradient frame + horizontal-grain wood + SVG corners) so it shares one
+ * visual language with ArchivePanel. Sizing is driven by padding, so the frame
+ * grows with the label and the gold border never crops the text.
+ */
+interface ArchiveButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  /** Optional leading icon. */
+  icon?: React.ReactNode
+  /** Renders brighter to indicate the selected/active state. */
+  active?: boolean
+}
+
+export const ArchiveButton = forwardRef<HTMLButtonElement, ArchiveButtonProps>(function ArchiveButton(
+  { icon, active = false, children, className, ...props },
+  ref,
+) {
+  return (
+    <button
+      ref={ref}
+      className={cn(
+        "inline-block transition-transform hover:scale-[1.03] active:scale-100",
+        "disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed",
+        className,
+      )}
+      {...props}
+    >
+      <ArchiveFrame cornerSize="sm" className={cn("rounded-lg", active && "brightness-125")}>
+        <span className="flex items-center justify-center gap-2 px-7 py-2.5 font-cinzel text-xs sm:text-sm uppercase tracking-wide font-semibold text-[var(--archive-gold,#e8c45a)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
+          {icon}
+          {children}
+        </span>
+      </ArchiveFrame>
+    </button>
+  )
+})
+
+/**
+ * ArchiveToggle — a segmented tab bar built on a single ArchiveFrame. The
+ * active segment is marked by a recessed gold "slot" on the wood, so it reads
+ * as the same archive material as ArchivePanel/ArchiveButton. Supports 2+
+ * options and optional per-option icons (drop-in for FrameToggle's API).
+ */
+interface ArchiveToggleOption<T extends string> {
+  value: T
+  label: string
+  icon?: React.ReactNode
+}
+
+interface ArchiveToggleProps<T extends string> {
+  options: ArchiveToggleOption<T>[]
+  value: T
+  onChange: (value: T) => void
+  className?: string
+}
+
+export function ArchiveToggle<T extends string>({ options, value, onChange, className }: ArchiveToggleProps<T>) {
+  return (
+    <ArchiveFrame cornerSize="sm" className={cn("inline-block rounded-lg", className)}>
+      <div role="tablist" className="flex items-center gap-1 p-1">
+        {options.map((opt) => {
+          const isActive = opt.value === value
+          return (
+            <button
+              key={opt.value}
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => onChange(opt.value)}
+              className={cn(
+                "relative rounded-md px-5 py-2 font-cinzel text-xs sm:text-sm uppercase tracking-wide transition-colors whitespace-nowrap",
+                isActive
+                  ? "font-semibold text-[var(--archive-gold,#e8c45a)]"
+                  : "text-[var(--archive-gold,#e8c45a)]/55 hover:text-[var(--archive-gold,#e8c45a)]",
+              )}
+            >
+              {isActive && (
+                <span className="absolute inset-0 rounded-md bg-[var(--archive-gold,#e8c45a)]/12 ring-1 ring-[var(--archive-gold,#e8c45a)]/40 shadow-[inset_0_1px_4px_rgba(0,0,0,0.5)]" />
+              )}
+              <span className="relative flex items-center gap-1.5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
+                {opt.icon}
+                {opt.label}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    </ArchiveFrame>
   )
 }

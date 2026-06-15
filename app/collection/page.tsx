@@ -9,7 +9,7 @@ import { GameList } from "@/components/game-list"
 import { DiscoverGames } from "@/components/discover-games"
 import { ImportSection } from "@/components/import-section"
 import { ThemeHero } from "@/components/theme-hero"
-import { FrameButton, FrameToggle } from "@/components/frame-button"
+import { ArchiveButton, ArchiveToggle } from "@/components/archive-frame"
 import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "@/lib/i18n"
@@ -178,7 +178,7 @@ export default function Collection() {
         {/* Tab toggle sits just above the category badges (consistent placement
             across both tabs, since the hero scales differently on mobile/desktop). */}
         <div className="mb-8 flex justify-center">
-          <FrameToggle
+          <ArchiveToggle
             value={activeTab}
             onChange={(value) => setActiveTab(value)}
             options={[
@@ -208,9 +208,9 @@ export default function Collection() {
             />
 
             <div className="mb-8">
-              <FrameButton onClick={() => setShowFilters(!showFilters)}>
+              <ArchiveButton onClick={() => setShowFilters(!showFilters)}>
                 {showFilters ? t("collection.hideFilters") : t("collection.showFilters")}
-              </FrameButton>
+              </ArchiveButton>
             </div>
 
             {selectedCategory !== "all" && (
