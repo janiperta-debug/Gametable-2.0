@@ -318,6 +318,41 @@ export const ArchiveButton = makeArchiveButton("button", "ArchiveButton")
  */
 export const ArchiveCardButton = makeArchiveButton("cardbutton", "ArchiveCardButton")
 
+interface ArchiveIconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  /** The icon to render (e.g. a lucide icon at h-4 w-4). */
+  icon: React.ReactNode
+  /** Renders brighter to indicate the selected/active state (e.g. wishlisted). */
+  active?: boolean
+}
+
+/**
+ * ArchiveIconButton — a compact square icon control on the "cardbutton" tier
+ * (hairline frame, no corner flourishes). Pairs with ArchiveCardButton for
+ * icon-only actions inside cards (marketplace, wishlist, kebab menus, steppers).
+ */
+export const ArchiveIconButton = forwardRef<HTMLButtonElement, ArchiveIconButtonProps>(function ArchiveIconButton(
+  { icon, active = false, className, ...props },
+  ref,
+) {
+  return (
+    <button
+      ref={ref}
+      className={cn(
+        "inline-block transition-transform hover:scale-[1.06] active:scale-100",
+        "disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed",
+        className,
+      )}
+      {...props}
+    >
+      <ArchiveFrame weight="hairline" corners={false} className={cn("rounded-lg", active && "brightness-125")}>
+        <span className="flex h-9 w-9 items-center justify-center text-[var(--archive-gold,#d9b65c)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
+          {icon}
+        </span>
+      </ArchiveFrame>
+    </button>
+  )
+})
+
 /**
  * ArchiveToggle — a segmented tab bar built on a single ArchiveFrame. The
  * active segment is marked by a recessed gold "slot" on the wood, so it reads

@@ -135,18 +135,22 @@ export function CollectionHeader({
             placeholder={t("collection.searchCollection")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 font-body"
+            className={cn("pl-10 font-body", archiveField)}
           />
         </div>
 
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <FrameButton>{t(currentSort.labelKey)}</FrameButton>
+              <ArchiveButton>{t(currentSort.labelKey)}</ArchiveButton>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className={archiveSelectContent}>
               {sortOptions.map((option) => (
-                <DropdownMenuItem key={option.value} className="font-body" onClick={() => setSortBy(option.value)}>
+                <DropdownMenuItem
+                  key={option.value}
+                  className={cn("font-body cursor-pointer", archiveSelectItem)}
+                  onClick={() => setSortBy(option.value)}
+                >
                   {t(option.labelKey)}
                 </DropdownMenuItem>
               ))}
@@ -154,24 +158,20 @@ export function CollectionHeader({
           </DropdownMenu>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            <FrameButton
-              variant="icon"
+            <ArchiveIconButton
+              icon={<Grid className="h-4 w-4" />}
               active={viewMode === "grid"}
               aria-pressed={viewMode === "grid"}
               aria-label={t("collection.gridView")}
               onClick={() => setViewMode("grid")}
-            >
-              <Grid className="h-4 w-4" />
-            </FrameButton>
-            <FrameButton
-              variant="icon"
+            />
+            <ArchiveIconButton
+              icon={<List className="h-4 w-4" />}
               active={viewMode === "list"}
               aria-pressed={viewMode === "list"}
               aria-label={t("collection.listView")}
               onClick={() => setViewMode("list")}
-            >
-              <List className="h-4 w-4" />
-            </FrameButton>
+            />
           </div>
         </div>
       </div>
