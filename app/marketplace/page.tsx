@@ -1,14 +1,23 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { FrameButton, FrameToggle } from "@/components/frame-button"
+import {
+  ArchiveButton,
+  ArchiveCard,
+  ArchiveCardButton,
+  ArchiveCardContent,
+  ArchiveToggle,
+  archiveField,
+  archiveSelectContent,
+  archiveSelectItem,
+} from "@/components/archive-frame"
+import { cn } from "@/lib/utils"
 import { useTranslations } from "@/lib/i18n"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ThemeHero } from "@/components/theme-hero"
-import { Store, Heart, Search, MessageCircle, User, Plus, Loader2, Trash2 } from "lucide-react"
+import { Store, Heart, Search, MessageCircle, User, Plus, Loader2, Trash2, Users, Clock } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -158,7 +167,7 @@ export default function Marketplace() {
         </ThemeHero>
 
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
-          <FrameToggle
+          <ArchiveToggle
             value={activeTab}
             onChange={(value) => setActiveTab(value as "listings" | "wishlists")}
             options={[
@@ -168,44 +177,44 @@ export default function Marketplace() {
           />
 
           {user && (
-            <Link href="/marketplace/create">
-              <FrameButton icon={<Plus className="h-4 w-4" />}>
-                {t("marketplace.createListing")}
-              </FrameButton>
-            </Link>
+            <ArchiveButton asChild icon={<Plus className="h-4 w-4" />}>
+              <Link href="/marketplace/create">{t("marketplace.createListing")}</Link>
+            </ArchiveButton>
           )}
         </div>
 
         {/* Search and Filters */}
-        <div className="manor-card p-6 mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={activeTab === "listings" ? t("marketplace.searchGames") : t("marketplace.searchUsersOrGames")}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 font-body bg-surface/50 border-accent-gold/20 focus:border-accent-gold"
-              />
-            </div>
+        <ArchiveCard className="mb-8">
+          <ArchiveCardContent className="p-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                <Input
+                  placeholder={activeTab === "listings" ? t("marketplace.searchGames") : t("marketplace.searchUsersOrGames")}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={cn("pl-10 font-body", archiveField)}
+                />
+              </div>
 
-            {activeTab === "listings" && (
-              <Select value={conditionFilter} onValueChange={setConditionFilter}>
-                <SelectTrigger className="w-full md:w-[180px] bg-surface/50 border-accent-gold/20 font-body">
-                  <SelectValue placeholder={t("marketplace.condition")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all" className="font-body">{t("marketplace.allConditions")}</SelectItem>
-                  <SelectItem value="new" className="font-body">{t("marketplace.conditionNew")}</SelectItem>
-                  <SelectItem value="like_new" className="font-body">{t("marketplace.likeNew")}</SelectItem>
-                  <SelectItem value="good" className="font-body">{t("marketplace.good")}</SelectItem>
-                  <SelectItem value="fair" className="font-body">{t("marketplace.fair")}</SelectItem>
-                  <SelectItem value="poor" className="font-body">{t("marketplace.poor")}</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-        </div>
+              {activeTab === "listings" && (
+                <Select value={conditionFilter} onValueChange={setConditionFilter}>
+                  <SelectTrigger className={cn("w-full md:w-[180px] font-body", archiveField)}>
+                    <SelectValue placeholder={t("marketplace.condition")} />
+                  </SelectTrigger>
+                  <SelectContent className={archiveSelectContent}>
+                    <SelectItem value="all" className={cn("font-body", archiveSelectItem)}>{t("marketplace.allConditions")}</SelectItem>
+                    <SelectItem value="new" className={cn("font-body", archiveSelectItem)}>{t("marketplace.conditionNew")}</SelectItem>
+                    <SelectItem value="like_new" className={cn("font-body", archiveSelectItem)}>{t("marketplace.likeNew")}</SelectItem>
+                    <SelectItem value="good" className={cn("font-body", archiveSelectItem)}>{t("marketplace.good")}</SelectItem>
+                    <SelectItem value="fair" className={cn("font-body", archiveSelectItem)}>{t("marketplace.fair")}</SelectItem>
+                    <SelectItem value="poor" className={cn("font-body", archiveSelectItem)}>{t("marketplace.poor")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+          </ArchiveCardContent>
+        </ArchiveCard>
 
         {/* Content */}
         {loading ? (
@@ -215,26 +224,27 @@ export default function Marketplace() {
         ) : activeTab === "listings" ? (
           <div className="space-y-6">
             {filteredListings.length === 0 ? (
-              <div className="text-center py-12 manor-card">
-                <Store className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground font-body text-lg">{t("marketplace.noListings")}</p>
-                {user && (
-                  <Button 
-                    onClick={() => setCreateModalOpen(true)}
-                    className="mt-4 bg-accent-gold hover:bg-accent-copper"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("marketplace.createFirstListing")}
-                  </Button>
-                )}
-              </div>
+              <ArchiveCard className="text-center">
+                <ArchiveCardContent className="py-12">
+                  <Store className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground font-body text-lg">{t("marketplace.noListings")}</p>
+                  {user && (
+                    <div className="flex justify-center mt-4">
+                      <ArchiveCardButton asChild active icon={<Plus className="h-4 w-4" />}>
+                        <Link href="/marketplace/create">{t("marketplace.createFirstListing")}</Link>
+                      </ArchiveCardButton>
+                    </div>
+                  )}
+                </ArchiveCardContent>
+              </ArchiveCard>
             ) : (
               filteredListings.map((listing) => {
                 const isOwner = user?.id === listing.seller_id
                 const sellerName = listing.seller?.display_name || listing.seller?.username || "Unknown"
                 
                 return (
-                  <div key={listing.id} className="manor-card p-6 hover:shadow-lg transition-all duration-300">
+                  <ArchiveCard key={listing.id} className="transition-all duration-300">
+                    <ArchiveCardContent className="p-6">
                     <div className="flex flex-col md:flex-row gap-6">
                       {/* Game Image */}
                       <div className="relative w-full md:w-32 h-48 md:h-44 flex-shrink-0">
@@ -306,49 +316,43 @@ export default function Marketplace() {
 
                             <div className="flex gap-2">
                               {isOwner ? (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="border-red-400/40 text-red-400 hover:bg-red-400/10 bg-transparent"
+                                <ArchiveCardButton
                                   onClick={() => handleDeleteListing(listing.id)}
                                   disabled={deleting === listing.id}
-                                >
-                                  {deleting === listing.id ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                  ) : (
-                                    <>
-                                      <Trash2 className="h-4 w-4 mr-2" />
-                                      {t("common.delete")}
-                                    </>
-                                  )}
-                                </Button>
-                              ) : (
-                                <>
-                                  <Link href={"/users/" + (listing.seller?.id || listing.seller_id)}>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="border-accent-gold/20 hover:border-accent-gold bg-transparent"
-                                    >
-                                      <User className="h-4 w-4 mr-2" />
-                                      {t("profile.viewProfile")}
-                                    </Button>
-                                  </Link>
-                                  <Button 
-                                    size="sm" 
-                                    className="bg-accent-gold hover:bg-accent-gold/90 text-background"
-                                    onClick={() => handleContactSeller(listing.seller_id)}
-                                    disabled={contacting === listing.seller_id}
-                                  >
-                                    {contacting === listing.seller_id ? (
+                                  icon={
+                                    deleting === listing.id ? (
                                       <Loader2 className="h-4 w-4 animate-spin" />
                                     ) : (
-                                      <>
-                                        <MessageCircle className="h-4 w-4 mr-2" />
-                                        {t("marketplace.contactSeller")}
-                                      </>
-                                    )}
-                                  </Button>
+                                      <Trash2 className="h-4 w-4" />
+                                    )
+                                  }
+                                >
+                                  {t("common.delete")}
+                                </ArchiveCardButton>
+                              ) : (
+                                <>
+                                  <ArchiveCardButton
+                                    asChild
+                                    icon={<User className="h-4 w-4" />}
+                                  >
+                                    <Link href={"/users/" + (listing.seller?.id || listing.seller_id)}>
+                                      {t("profile.viewProfile")}
+                                    </Link>
+                                  </ArchiveCardButton>
+                                  <ArchiveCardButton
+                                    active
+                                    onClick={() => handleContactSeller(listing.seller_id)}
+                                    disabled={contacting === listing.seller_id}
+                                    icon={
+                                      contacting === listing.seller_id ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                      ) : (
+                                        <MessageCircle className="h-4 w-4" />
+                                      )
+                                    }
+                                  >
+                                    {t("marketplace.contactSeller")}
+                                  </ArchiveCardButton>
                                 </>
                               )}
                             </div>
@@ -356,7 +360,8 @@ export default function Marketplace() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                    </ArchiveCardContent>
+                  </ArchiveCard>
                 )
               })
             )}
@@ -364,16 +369,19 @@ export default function Marketplace() {
         ) : (
           <div className="space-y-6">
             {Object.keys(groupedWishlists).length === 0 ? (
-              <div className="text-center py-12 manor-card">
-                <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground font-body text-lg">{t("marketplace.noWishlists")}</p>
-              </div>
+              <ArchiveCard className="text-center">
+                <ArchiveCardContent className="py-12">
+                  <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground font-body text-lg">{t("marketplace.noWishlists")}</p>
+                </ArchiveCardContent>
+              </ArchiveCard>
             ) : (
               Object.entries(groupedWishlists).map(([userId, wishlist]) => {
                 const userName = wishlist.user?.display_name || wishlist.user?.username || "Unknown"
                 
                 return (
-                  <div key={userId} className="manor-card p-6 hover:shadow-lg transition-all duration-300">
+                  <ArchiveCard key={userId} className="transition-all duration-300">
+                    <ArchiveCardContent className="p-6">
                     <div className="flex items-start justify-between mb-4 flex-wrap gap-4">
                       <div className="flex items-center gap-4">
                         <div className="relative w-16 h-16">
@@ -393,31 +401,23 @@ export default function Marketplace() {
                       </div>
 
                       <div className="flex gap-2">
-                        <Link href={"/users/" + userId}>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="border-accent-gold/20 hover:border-accent-gold bg-transparent"
-                          >
-                            <User className="h-4 w-4 mr-2" />
-                            {t("profile.viewProfile")}
-                          </Button>
-                        </Link>
-                        <Button 
-                          size="sm" 
-                          className="bg-accent-gold hover:bg-accent-gold/90 text-background"
+                        <ArchiveCardButton asChild icon={<User className="h-4 w-4" />}>
+                          <Link href={"/users/" + userId}>{t("profile.viewProfile")}</Link>
+                        </ArchiveCardButton>
+                        <ArchiveCardButton
+                          active
                           onClick={() => handleContactSeller(userId)}
                           disabled={contacting === userId}
+                          icon={
+                            contacting === userId ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <MessageCircle className="h-4 w-4" />
+                            )
+                          }
                         >
-                          {contacting === userId ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <>
-                              <MessageCircle className="h-4 w-4 mr-2" />
-                              {t("marketplace.offerTrade")}
-                            </>
-                          )}
-                        </Button>
+                          {t("marketplace.offerTrade")}
+                        </ArchiveCardButton>
                       </div>
                     </div>
 
@@ -441,7 +441,8 @@ export default function Marketplace() {
                         ))}
                       </div>
                     </div>
-                  </div>
+                    </ArchiveCardContent>
+                  </ArchiveCard>
                 )
               })
             )}

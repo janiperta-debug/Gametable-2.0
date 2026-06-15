@@ -323,6 +323,8 @@ interface ArchiveIconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
   icon: React.ReactNode
   /** Renders brighter to indicate the selected/active state (e.g. wishlisted). */
   active?: boolean
+  /** Render as a Slot so the child (e.g. a Link) becomes the interactive element. */
+  asChild?: boolean
 }
 
 /**
@@ -331,12 +333,13 @@ interface ArchiveIconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
  * icon-only actions inside cards (marketplace, wishlist, kebab menus, steppers).
  */
 export const ArchiveIconButton = forwardRef<HTMLButtonElement, ArchiveIconButtonProps>(function ArchiveIconButton(
-  { icon, active = false, className, ...props },
+  { icon, active = false, asChild = false, className, ...props },
   ref,
 ) {
+  const Comp = asChild ? Slot : "button"
   return (
-    <button
-      ref={ref}
+    <Comp
+      ref={ref as never}
       className={cn(
         "inline-block transition-transform hover:scale-[1.06] active:scale-100",
         "disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed",
@@ -349,7 +352,7 @@ export const ArchiveIconButton = forwardRef<HTMLButtonElement, ArchiveIconButton
           {icon}
         </span>
       </ArchiveFrame>
-    </button>
+    </Comp>
   )
 })
 
