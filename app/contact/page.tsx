@@ -65,17 +65,17 @@ export default function ContactPage() {
 
         <div className="grid gap-8 lg:grid-cols-2 max-w-6xl mx-auto">
           <div>
-            <Card className="room-furniture">
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold flex items-center">
+            <ArchiveCard>
+              <ArchiveCardHeader>
+                <ArchiveCardTitle className="text-2xl normal-case flex items-center">
                   <Send className="h-6 w-6 mr-3 text-accent-gold" />
                   {t("contact.sendMessage")}
-                </CardTitle>
+                </ArchiveCardTitle>
                 <p className="text-muted-foreground">
                   {t("contact.sendMessageDesc")}
                 </p>
-              </CardHeader>
-              <CardContent>
+              </ArchiveCardHeader>
+              <ArchiveCardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
@@ -85,6 +85,7 @@ export default function ContactPage() {
                         placeholder={t("contact.firstName")}
                         value={formData.firstName}
                         onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                        className={archiveField}
                         required
                       />
                     </div>
@@ -95,6 +96,7 @@ export default function ContactPage() {
                         placeholder={t("contact.lastName")}
                         value={formData.lastName}
                         onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                        className={archiveField}
                         required
                       />
                     </div>
@@ -107,6 +109,7 @@ export default function ContactPage() {
                       placeholder="your.email@example.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className={archiveField}
                       required
                     />
                   </div>
@@ -117,6 +120,7 @@ export default function ContactPage() {
                       placeholder={t("contact.subject")}
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                      className={archiveField}
                       required
                     />
                   </div>
@@ -125,7 +129,7 @@ export default function ContactPage() {
                     <Textarea
                       id="message"
                       placeholder={t("contact.message")}
-                      className="min-h-[120px]"
+                      className={cn("min-h-[120px]", archiveField)}
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       required
@@ -137,13 +141,12 @@ export default function ContactPage() {
                   {submitStatus === "error" && (
                     <p className="text-sm text-red-600 dark:text-red-400">{t("contact.error")}</p>
                   )}
-                  <Button type="submit" className="w-full theme-accent-gold" size="lg" disabled={isSubmitting}>
-                    <Send className="h-4 w-4 mr-2" />
-                    <span>{isSubmitting ? t("contact.sending") : t("contact.send")}</span>
-                  </Button>
+                  <ArchiveButton type="submit" fullWidth active disabled={isSubmitting} icon={<Send className="h-4 w-4" />}>
+                    {isSubmitting ? t("contact.sending") : t("contact.send")}
+                  </ArchiveButton>
                 </form>
-              </CardContent>
-            </Card>
+              </ArchiveCardContent>
+            </ArchiveCard>
           </div>
 
           <div>
