@@ -1,6 +1,13 @@
 "use client"
 
-import { FrameButton } from "@/components/frame-button"
+import {
+  ArchiveButton,
+  ArchiveIconButton,
+  archiveField,
+  archiveSelectContent,
+  archiveSelectItem,
+} from "@/components/archive-frame"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -117,7 +124,7 @@ export function CollectionHeader({
           </div>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-2">
-          <FrameButton onClick={onAddGame}>{t("collection.addGame")}</FrameButton>
+          <ArchiveButton onClick={onAddGame}>{t("collection.addGame")}</ArchiveButton>
         </div>
       </div>
 

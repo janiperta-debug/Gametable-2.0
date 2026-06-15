@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import { ArchiveCard, ArchiveCardButton, ArchiveIconButton } from "@/components/archive-frame"
 import { Badge } from "@/components/ui/badge"
 import { Star, Users, Clock, Heart, MoreVertical } from "lucide-react"
 import Image from "next/image"
@@ -21,7 +21,7 @@ interface GameListProps {
 
 export function GameList({ games }: GameListProps) {
   const t = useTranslations()
-  
+
   if (games.length === 0) {
     return (
       <div className="text-center py-12">
@@ -33,8 +33,8 @@ export function GameList({ games }: GameListProps) {
   return (
     <div className="space-y-4">
       {games.map((game) => (
-        <div key={game.id} className="manor-card p-4 group hover:shadow-lg transition-all duration-300">
-          <div className="flex gap-4">
+        <ArchiveCard key={game.id} corners={false} centerOrnaments={false} className="group">
+          <div className="flex gap-4 p-4">
             <div className="relative w-24 h-32 flex-shrink-0">
               <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-surface/50 w-full h-full">
                 <Image
@@ -63,9 +63,7 @@ export function GameList({ games }: GameListProps) {
                       )}
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
+                  <ArchiveIconButton icon={<MoreVertical className="h-4 w-4" />} aria-label="Lisää toimintoja" />
                 </div>
 
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
@@ -86,32 +84,24 @@ export function GameList({ games }: GameListProps) {
               </div>
 
               <div className="flex gap-2">
-                {(game.owned || game.wishlist) ? (
-                  <Link href={`/game/${game.id}`} className="flex-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full border-accent-gold/20 hover:border-accent-gold bg-transparent"
-                    >
-                      {t("collection.viewDetails")}
-                    </Button>
-                  </Link>
+                {game.owned || game.wishlist ? (
+                  <ArchiveCardButton asChild fullWidth className="flex-1">
+                    <Link href={`/game/${game.id}`}>{t("collection.viewDetails")}</Link>
+                  </ArchiveCardButton>
                 ) : (
-                  <Button size="sm" className="flex-1 bg-accent-gold hover:bg-accent-gold/90 text-background">
+                  <ArchiveCardButton active fullWidth className="flex-1">
                     {t("collection.addToCollection")}
-                  </Button>
+                  </ArchiveCardButton>
                 )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`${game.wishlist ? "text-accent-gold" : "text-muted-foreground"} hover:text-accent-gold`}
-                >
-                  <Heart className={`h-4 w-4 ${game.wishlist ? "fill-current" : ""}`} />
-                </Button>
+                <ArchiveIconButton
+                  icon={<Heart className={`h-4 w-4 ${game.wishlist ? "fill-current" : ""}`} />}
+                  active={game.wishlist}
+                  aria-label={t("collection.wishlist")}
+                />
               </div>
             </div>
           </div>
-        </div>
+        </ArchiveCard>
       ))}
     </div>
   )
