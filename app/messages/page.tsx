@@ -2,8 +2,15 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useSearchParams } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import {
+  ArchiveCard,
+  ArchiveCardContent,
+  ArchiveCardHeader,
+  ArchiveCardTitle,
+  ArchiveIconButton,
+  archiveField,
+} from "@/components/archive-frame"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -189,13 +196,13 @@ export default function MessagingPage() {
               </p>
             </div>
           </ThemeHero>
-          <Card className="room-furniture max-w-md mx-auto">
-            <CardContent className="p-8 text-center">
+          <ArchiveCard className="max-w-md mx-auto">
+            <ArchiveCardContent className="p-8 text-center">
               <MessageCircle className="h-16 w-16 text-accent-gold mx-auto mb-4" />
               <h3 className="font-heading text-xl mb-2">{t("messages.loginRequired")}</h3>
               <p className="text-muted-foreground font-body">{t("messages.loginToMessage")}</p>
-            </CardContent>
-          </Card>
+            </ArchiveCardContent>
+          </ArchiveCard>
         </main>
       </div>
     )
@@ -218,20 +225,20 @@ export default function MessagingPage() {
         <div className="grid gap-6 grid-cols-1 lg:grid-cols-4 max-w-7xl mx-auto">
           {/* Conversations Sidebar */}
           <div className="w-full lg:col-span-1">
-            <Card className="room-furniture h-[600px] flex flex-col">
-              <CardHeader className="flex-shrink-0">
-                <CardTitle className="font-heading text-xl">{t("messages.conversations")}</CardTitle>
+            <ArchiveCard>
+              <ArchiveCardHeader>
+                <ArchiveCardTitle className="text-xl normal-case mb-3">{t("messages.conversations")}</ArchiveCardTitle>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                   <Input 
                     placeholder={t("messages.searchConversations")} 
-                    className="pl-10 font-body"
+                    className={cn("pl-10 font-body", archiveField)}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-              </CardHeader>
-              <CardContent className="flex-1 overflow-y-auto p-0">
+              </ArchiveCardHeader>
+              <ArchiveCardContent className="h-[488px] overflow-y-auto px-0">
                 {loadingConversations ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin text-accent-gold" />
@@ -297,18 +304,18 @@ export default function MessagingPage() {
                     })}
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </ArchiveCardContent>
+            </ArchiveCard>
           </div>
 
           {/* Chat Area */}
           <div className="w-full lg:col-span-3">
-            <Card className="room-furniture h-[600px] flex flex-col">
+            <ArchiveCard className="min-h-[600px]">
               {selectedConversation ? (
                 <>
                   {/* Chat Header */}
-                  <CardHeader className="flex-shrink-0 border-b border-accent-gold/20">
-                    <div className="flex items-center space-x-3">
+                  <ArchiveCardHeader className="border-b border-accent-gold/20 pb-4">
+                    <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
                         <AvatarImage
                           src={selectedConversation.other_participant?.avatar_url || "/placeholder.svg"}
@@ -322,10 +329,10 @@ export default function MessagingPage() {
                         <h3 className="font-heading font-semibold">{getDisplayName(selectedConversation)}</h3>
                       </div>
                     </div>
-                  </CardHeader>
+                  </ArchiveCardHeader>
 
                   {/* Messages */}
-                  <CardContent className="flex-1 overflow-y-auto p-4">
+                  <ArchiveCardContent className="h-[408px] overflow-y-auto py-4">
                     {loadingMessages ? (
                       <div className="flex items-center justify-center h-full">
                         <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
@@ -346,12 +353,12 @@ export default function MessagingPage() {
                                 className={`max-w-[85%] sm:max-w-xs lg:max-w-md px-4 py-2 rounded-lg break-words ${
                                   isOwn
                                     ? "bg-accent-gold text-accent-gold-foreground"
-                                    : "bg-muted text-muted-foreground"
+                                    : "bg-black/45 text-foreground border border-accent-gold/20"
                                 }`}
                               >
                                 <p className="font-body text-sm break-words">{message.content}</p>
                                 <p
-                                  className={`text-xs mt-1 ${isOwn ? "text-accent-gold-foreground/70" : "text-muted-foreground"}`}
+                                  className={`text-xs mt-1 ${isOwn ? "text-accent-gold-foreground/70" : "text-foreground/50"}`}
                                 >
                                   {time}
                                 </p>
@@ -362,16 +369,16 @@ export default function MessagingPage() {
                         <div ref={messagesEndRef} />
                       </div>
                     )}
-                  </CardContent>
+                  </ArchiveCardContent>
 
                   {/* Message Input */}
-                  <div className="flex-shrink-0 p-4 border-t border-accent-gold/20">
-                    <div className="flex space-x-2">
+                  <div className="px-5 pb-5 pt-4 border-t border-accent-gold/20">
+                    <div className="flex items-end gap-2">
                       <Textarea
                         placeholder={t("messages.typeMessage")}
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
-                        className="flex-1 min-h-[40px] max-h-[120px] font-body"
+                        className={cn("flex-1 min-h-[40px] max-h-[120px] font-body", archiveField)}
                         onKeyPress={(e) => {
                           if (e.key === "Enter" && !e.shiftKey) {
                             e.preventDefault()
@@ -379,26 +386,22 @@ export default function MessagingPage() {
                           }
                         }}
                       />
-                      <Button
+                      <ArchiveIconButton
                         onClick={handleSendMessage}
                         disabled={!newMessage.trim() || sending}
-                        className="theme-accent-gold self-end"
-                      >
-                        {sending ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Send className="h-4 w-4" />
-                        )}
-                      </Button>
+                        active
+                        aria-label={t("messages.send") || "Send"}
+                        icon={sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                      />
                     </div>
                   </div>
                 </>
               ) : (
-                <div className="flex items-center justify-center h-full text-muted-foreground font-body">
+                <div className="flex items-center justify-center h-[560px] text-muted-foreground font-body">
                   {t("messages.selectConversation")}
                 </div>
               )}
-            </Card>
+            </ArchiveCard>
           </div>
         </div>
       </main>
