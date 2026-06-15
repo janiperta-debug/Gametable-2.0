@@ -140,10 +140,14 @@ export const NAV_ICONS: Record<string, (props: IconProps) => JSX.Element> = {
 }
 
 /**
- * Optional raster (PNG) icon per route. When a route has an entry here, the nav
- * renders this richer gold artwork instead of the flat SVG glyph. Use for routes
- * where the detailed Archive artwork reads better than line-art.
+ * Pre-framed raster (PNG) tiles per route — full gold Archive frame + wood
+ * background baked into the artwork. Used by the mobile bottom bar, which renders
+ * the image as the whole tile (no extra ArchiveFrame wrapper). Routes without an
+ * entry fall back to the flat SVG glyph.
  */
 export const NAV_ICON_IMAGES: Record<string, string> = {
   "/collection": "/nav-icons/collection.png",
+  "/discover": "/nav-icons/discover.png",
+  "/events": "/nav-icons/events.png",
+  "/themes": "/nav-icons/themes.png",
 }
