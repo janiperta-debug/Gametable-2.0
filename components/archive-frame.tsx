@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils"
 
 export type ArchiveMaterial = "wood"
 export type ArchiveCornerSize = "sm" | "md"
+export type ArchiveWeight = "regular" | "thin"
 
 interface ArchiveFrameProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Surface material. Currently only "wood"; API reserved for future materials. */
@@ -26,6 +27,9 @@ interface ArchiveFrameProps extends React.HTMLAttributes<HTMLDivElement> {
   corners?: boolean
   /** Size of the corner flourishes. "md" (panels) | "sm" (buttons/toggles). */
   cornerSize?: ArchiveCornerSize
+  /** Frame-band thickness. "regular" for large elements (panels/cards),
+   *  "thin" for compact controls (buttons/toggles). Defaults to "regular". */
+  weight?: ArchiveWeight
   /** Render the subtle palmette ornaments centered on the top/bottom edges.
    *  Defaults to true for "md" corners (panels), false for "sm" (buttons). */
   centerOrnaments?: boolean
@@ -35,6 +39,16 @@ interface ArchiveFrameProps extends React.HTMLAttributes<HTMLDivElement> {
 const CORNER_DIMENSIONS: Record<ArchiveCornerSize, string> = {
   sm: "h-7 w-7",
   md: "h-12 w-12",
+}
+
+/** Frame-band geometry per weight: outer gold pad, dark channel inset, and the
+ *  two inner hairlines. "thin" keeps compact controls from looking heavy. */
+const WEIGHT_STYLE: Record<
+  ArchiveWeight,
+  { pad: string; outerRadius: string; channelInset: number; channelRadius: string; surfaceRadius: string }
+> = {
+  regular: { pad: "p-[5px]", outerRadius: "rounded-xl", channelInset: 2, channelRadius: "rounded-[0.62rem]", surfaceRadius: "rounded-[0.5rem]" },
+  thin: { pad: "p-[3px]", outerRadius: "rounded-lg", channelInset: 1, channelRadius: "rounded-[0.5rem]", surfaceRadius: "rounded-[0.4rem]" },
 }
 
 /**
@@ -145,6 +159,7 @@ export function ArchiveFrame({
   material = "wood",
   corners = true,
   cornerSize = "md",
+  weight = "regular",
   centerOrnaments,
   className,
   children,
@@ -153,10 +168,11 @@ export function ArchiveFrame({
 }: ArchiveFrameProps) {
   const uid = useId()
   const showCenter = centerOrnaments ?? cornerSize === "md"
+  const w = WEIGHT_STYLE[weight]
   return (
     <div
       data-material={material}
-      className={cn("relative isolate rounded-xl p-[5px]", className)}
+      className={cn("relative isolate", w.outerRadius, w.pad, className)}
       style={{
         // Outer ANTIQUE-GOLD frame: a muted, aged gradient across the border
         // thickness gives a real beveled/sheen look without the bright "new
@@ -170,12 +186,12 @@ export function ArchiveFrame({
     >
       {/* Thin dark channel separating the two gold frames (the "double frame") */}
       <div
-        className="relative overflow-hidden rounded-[0.62rem]"
-        style={{ boxShadow: "inset 0 0 0 2px rgba(40,26,10,0.85)" }}
+        className={cn("relative overflow-hidden", w.channelRadius)}
+        style={{ boxShadow: `inset 0 0 0 ${w.channelInset}px rgba(40,26,10,0.85)` }}
       >
         {/* WOOD surface — deeper, richer plank with horizontal grain */}
         <div
-          className="relative overflow-hidden rounded-[0.5rem]"
+          className={cn("relative overflow-hidden", w.surfaceRadius)}
           style={{
             backgroundColor: "#2b190c",
             backgroundImage: [
@@ -193,8 +209,15 @@ export function ArchiveFrame({
           }}
         >
           {/* inner gold beaded hairline — second visible gold line of the double frame */}
-          <div className="pointer-events-none absolute inset-[3px] rounded-[0.4rem] border border-[var(--archive-gold,#d9b65c)]/45" />
-          <div className="pointer-events-none absolute inset-[5px] rounded-[0.34rem] border border-black/30" />
+          <div
+            className={cn(
+              "pointer-events-none absolute rounded-[0.4rem] border border-[var(--archive-gold,#d9b65c)]/45",
+              weight === "thin" ? "inset-[2px]" : "inset-[3px]",
+            )}
+          />
+          {weight === "regular" && (
+            <div className="pointer-events-none absolute inset-[5px] rounded-[0.34rem] border border-black/30" />
+          )}
           <div className="relative z-10">{children}</div>
         </div>
       </div>
@@ -245,7 +268,7 @@ export const ArchiveButton = forwardRef<HTMLButtonElement, ArchiveButtonProps>(f
       )}
       {...props}
     >
-      <ArchiveFrame cornerSize="sm" className={cn("rounded-lg", active && "brightness-125")}>
+      <ArchiveFrame weight="thin" cornerSize="sm" className={cn("rounded-lg", active && "brightness-125")}>
         <span className="flex items-center justify-center gap-2 px-7 py-2.5 font-cinzel text-xs sm:text-sm uppercase tracking-wide font-semibold text-[var(--archive-gold,#d9b65c)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
           {icon}
           {children}
@@ -276,7 +299,7 @@ interface ArchiveToggleProps<T extends string> {
 
 export function ArchiveToggle<T extends string>({ options, value, onChange, className }: ArchiveToggleProps<T>) {
   return (
-    <ArchiveFrame cornerSize="sm" className={cn("inline-block rounded-lg", className)}>
+    <ArchiveFrame weight="thin" cornerSize="sm" className={cn("inline-block rounded-lg", className)}>
       <div role="tablist" className="flex items-center gap-1 p-1">
         {options.map((opt) => {
           const isActive = opt.value === value
