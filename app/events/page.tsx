@@ -65,11 +65,11 @@ function EventCard({ event, onViewDetails, onRSVP, t, isLoggedIn, currentUserId 
   }
 
   return (
-    <Card className="room-furniture hover:shadow-lg transition-all">
-      <CardHeader className="pb-4">
+    <ArchiveCard className="transition-all">
+      <ArchiveCardHeader className="pb-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <CardTitle className="font-heading text-lg md:text-xl mb-2 break-words">{event.title}</CardTitle>
+            <ArchiveCardTitle className="text-lg md:text-xl mb-2 break-words normal-case">{event.title}</ArchiveCardTitle>
             <div className="flex items-center flex-wrap gap-2 mb-3">
               {isHost && (
                 <Badge className={statusColors.hosting}>{t("events.hosting")}</Badge>
@@ -90,8 +90,8 @@ function EventCard({ event, onViewDetails, onRSVP, t, isLoggedIn, currentUserId 
         {event.description && (
           <p className="font-body text-sm text-muted-foreground break-words line-clamp-2">{event.description}</p>
         )}
-      </CardHeader>
-      <CardContent className="space-y-4">
+      </ArchiveCardHeader>
+      <ArchiveCardContent className="space-y-4">
         <div className="grid gap-3 text-sm">
           <div className="flex items-center space-x-2">
             <Calendar className="h-4 w-4 text-accent-gold flex-shrink-0" />
@@ -127,46 +127,40 @@ function EventCard({ event, onViewDetails, onRSVP, t, isLoggedIn, currentUserId 
           {/* RSVP Buttons */}
           {isLoggedIn && !isHost && (
             <div className="flex flex-wrap gap-2">
-              <Button 
-                size="sm" 
-                className={event.user_rsvp === 'attending' ? 'theme-accent-gold' : 'bg-transparent'}
-                variant={event.user_rsvp === 'attending' ? 'default' : 'outline'}
+              <ArchiveCardButton
+                active={event.user_rsvp === 'attending'}
                 onClick={() => handleRSVP('attending')}
                 disabled={rsvpLoading !== null}
+                icon={rsvpLoading === 'attending' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
               >
-                {rsvpLoading === 'attending' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3 mr-1" />}
                 {t("events.join")}
-              </Button>
-              <Button 
-                size="sm" 
-                variant="outline"
-                className={event.user_rsvp === 'maybe' ? 'border-yellow-500 text-yellow-600' : 'bg-transparent'}
+              </ArchiveCardButton>
+              <ArchiveCardButton
+                active={event.user_rsvp === 'maybe'}
                 onClick={() => handleRSVP('maybe')}
                 disabled={rsvpLoading !== null}
+                icon={rsvpLoading === 'maybe' ? <Loader2 className="h-3 w-3 animate-spin" /> : <HelpCircle className="h-3 w-3" />}
               >
-                {rsvpLoading === 'maybe' ? <Loader2 className="h-3 w-3 animate-spin" /> : <HelpCircle className="h-3 w-3 mr-1" />}
                 {t("events.maybe")}
-              </Button>
-              <Button 
-                size="sm" 
-                variant="outline"
-                className={event.user_rsvp === 'declined' ? 'border-red-500 text-red-600' : 'bg-transparent'}
+              </ArchiveCardButton>
+              <ArchiveCardButton
+                active={event.user_rsvp === 'declined'}
                 onClick={() => handleRSVP('declined')}
                 disabled={rsvpLoading !== null}
+                icon={rsvpLoading === 'declined' ? <Loader2 className="h-3 w-3 animate-spin" /> : <X className="h-3 w-3" />}
               >
-                {rsvpLoading === 'declined' ? <Loader2 className="h-3 w-3 animate-spin" /> : <X className="h-3 w-3 mr-1" />}
                 {t("events.decline")}
-              </Button>
+              </ArchiveCardButton>
             </div>
           )}
           
           {/* View Details - always visible */}
-          <Button size="sm" variant="outline" className="bg-transparent" onClick={() => onViewDetails(event)}>
+          <ArchiveCardButton fullWidth onClick={() => onViewDetails(event)}>
             {isHost ? t("events.manage") : t("events.viewDetails") || "View Details"}
-          </Button>
+          </ArchiveCardButton>
         </div>
-      </CardContent>
-    </Card>
+      </ArchiveCardContent>
+    </ArchiveCard>
   )
 }
 
@@ -246,15 +240,15 @@ export default function EventsPage() {
         <div className="flex flex-col gap-3 mb-6 md:mb-8">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
               <Input
                 placeholder={t("events.searchEvents")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 font-body w-full"
+                className={cn("pl-10 font-body w-full", archiveField)}
               />
             </div>
-            <FrameButton
+            <ArchiveButton
               active={showFilters}
               onClick={() => setShowFilters(!showFilters)}
               icon={<Filter className="h-4 w-4" />}
@@ -263,48 +257,49 @@ export default function EventsPage() {
               {selectedTypes.length > 0 && (
                 <Badge className="ml-2 bg-accent-gold text-background">{selectedTypes.length}</Badge>
               )}
-            </FrameButton>
+            </ArchiveButton>
           </div>
           <div className="flex justify-center">
-            <FrameButton onClick={() => router.push("/events/create")} icon={<Plus className="h-4 w-4" />}>
+            <ArchiveButton onClick={() => router.push("/events/create")} icon={<Plus className="h-4 w-4" />}>
               {t("events.createEvent")}
-            </FrameButton>
+            </ArchiveButton>
           </div>
 
           {/* Filter Panel */}
           {showFilters && (
-            <Card className="room-furniture">
-              <CardContent className="pt-4">
+            <ArchiveCard>
+              <ArchiveCardContent className="pt-5">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-heading text-lg text-accent-gold">{t("events.eventType")}</h3>
                   {selectedTypes.length > 0 && (
-                    <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground">
+                    <button
+                      onClick={clearFilters}
+                      className="text-sm font-body text-muted-foreground hover:text-accent-gold transition-colors"
+                    >
                       {t("common.clearFilters")}
-                    </Button>
+                    </button>
                   )}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {eventTypes.map((type) => (
-                    <Button
+                    <ArchiveCardButton
                       key={type}
-                      variant={selectedTypes.includes(type) ? "default" : "outline"}
-                      size="sm"
+                      active={selectedTypes.includes(type)}
                       onClick={() => toggleEventType(type)}
-                      className={selectedTypes.includes(type) ? "theme-accent-gold" : "bg-transparent"}
                     >
                       {t(`events.types.${type}`)}
-                    </Button>
+                    </ArchiveCardButton>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
+              </ArchiveCardContent>
+            </ArchiveCard>
           )}
         </div>
 
         {/* Tabs */}
         <div className="w-full">
           <div className="mb-6 md:mb-8 flex justify-center">
-            <FrameToggle
+            <ArchiveToggle
               value={activeTab}
               onChange={setActiveTab}
               options={[
@@ -322,13 +317,13 @@ export default function EventsPage() {
                   <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
                 </div>
               ) : filteredPublicEvents.length === 0 ? (
-                <Card className="room-furniture text-center py-12">
-                  <CardContent>
+                <ArchiveCard className="text-center">
+                  <ArchiveCardContent className="py-12">
                     <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
                     <h3 className="ornate-text font-heading text-xl font-semibold mb-2">{t("events.noEvents")}</h3>
                     <p className="font-body text-muted-foreground">{t("events.noEventsDesc")}</p>
-                  </CardContent>
-                </Card>
+                  </ArchiveCardContent>
+                </ArchiveCard>
               ) : (
                 <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {filteredPublicEvents.map((event) => (
@@ -354,21 +349,21 @@ export default function EventsPage() {
                   <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
                 </div>
               ) : !user ? (
-                <Card className="room-furniture text-center py-12">
-                  <CardContent>
+                <ArchiveCard className="text-center">
+                  <ArchiveCardContent className="py-12">
                     <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
                     <h3 className="ornate-text font-heading text-xl font-semibold mb-2">{t("events.loginRequired")}</h3>
                     <p className="font-body text-muted-foreground">{t("events.loginToSeeMyEvents")}</p>
-                  </CardContent>
-                </Card>
+                  </ArchiveCardContent>
+                </ArchiveCard>
               ) : filteredMyEvents.length === 0 ? (
-                <Card className="room-furniture text-center py-12">
-                  <CardContent>
+                <ArchiveCard className="text-center">
+                  <ArchiveCardContent className="py-12">
                     <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
                     <h3 className="ornate-text font-heading text-xl font-semibold mb-2">{t("events.noMyEvents")}</h3>
                     <p className="font-body text-muted-foreground">{t("events.noMyEventsDesc")}</p>
-                  </CardContent>
-                </Card>
+                  </ArchiveCardContent>
+                </ArchiveCard>
               ) : (
                 <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {filteredMyEvents.map((event) => (
@@ -388,15 +383,15 @@ export default function EventsPage() {
           )}
 
           {activeTab === "past" && (
-            <Card className="room-furniture text-center py-12">
-              <CardContent>
+            <ArchiveCard className="text-center">
+              <ArchiveCardContent className="py-12">
                 <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
                 <h3 className="ornate-text font-heading text-xl font-semibold mb-2">No Past Events</h3>
                 <p className="font-body text-muted-foreground">
                   Your event history will appear here once you start attending gaming events.
                 </p>
-              </CardContent>
-            </Card>
+              </ArchiveCardContent>
+            </ArchiveCard>
           )}
         </div>
       </main>
