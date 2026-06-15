@@ -431,3 +431,25 @@ export const archiveField = cn(
   "focus-visible:ring-1 focus-visible:ring-[var(--archive-gold,#d9b65c)]/60",
   "focus-visible:!border-[var(--archive-gold,#d9b65c)]/85",
 )
+
+/**
+ * archiveSelectContent — className for a Select/dropdown panel. Edges read like
+ * the "cardbutton" tier (hairline gold rim on a dark recessed surface) while the
+ * interior hosts crest-menu-style options. Apply to <SelectContent>.
+ */
+export const archiveSelectContent = cn(
+  "bg-[#1f1206]/95 backdrop-blur-sm",
+  "border !border-[var(--archive-gold,#d9b65c)]/55",
+  "shadow-[0_12px_30px_rgba(0,0,0,0.6),inset_0_0_0_1px_rgba(0,0,0,0.4)]",
+)
+
+/**
+ * archiveSelectItem — className for each option, matching the crest-menu rows:
+ * gold-tinted label, gold-wash hover/highlight, subtle rounding. Apply to
+ * <SelectItem>.
+ */
+export const archiveSelectItem = cn(
+  "font-merriweather text-foreground rounded-md",
+  "focus:bg-[var(--archive-gold,#d9b65c)]/15 focus:text-[var(--archive-gold,#d9b65c)]",
+  "data-[state=checked]:text-[var(--archive-gold,#d9b65c)] data-[state=checked]:font-semibold",
+)

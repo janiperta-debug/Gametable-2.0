@@ -9,6 +9,8 @@ import {
   ArchiveCardHeader,
   ArchiveCardTitle,
   archiveField,
+  archiveSelectContent,
+  archiveSelectItem,
 } from "@/components/archive-frame"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
@@ -131,13 +133,13 @@ export function DiscoverPlayers() {
                 <SelectTrigger className={cn("font-merriweather", archiveField)}>
                   <SelectValue placeholder={t("community.anyGameType")} />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="board-games">{t("community.boardGames")}</SelectItem>
-                  <SelectItem value="rpgs">{t("community.rpgs")}</SelectItem>
-                  <SelectItem value="miniatures">{t("community.miniatures")}</SelectItem>
-                  <SelectItem value="trading-cards">{t("community.tradingCards")}</SelectItem>
-                  <SelectItem value="party-games">{t("community.partyGames")}</SelectItem>
-                  <SelectItem value="strategy">{t("community.strategyGames")}</SelectItem>
+                <SelectContent className={archiveSelectContent}>
+                  <SelectItem value="board-games" className={archiveSelectItem}>{t("community.boardGames")}</SelectItem>
+                  <SelectItem value="rpgs" className={archiveSelectItem}>{t("community.rpgs")}</SelectItem>
+                  <SelectItem value="miniatures" className={archiveSelectItem}>{t("community.miniatures")}</SelectItem>
+                  <SelectItem value="trading-cards" className={archiveSelectItem}>{t("community.tradingCards")}</SelectItem>
+                  <SelectItem value="party-games" className={archiveSelectItem}>{t("community.partyGames")}</SelectItem>
+                  <SelectItem value="strategy" className={archiveSelectItem}>{t("community.strategyGames")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
