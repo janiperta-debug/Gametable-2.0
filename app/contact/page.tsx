@@ -2,8 +2,16 @@
 
 import type React from "react"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import {
+  ArchiveButton,
+  ArchiveCard,
+  ArchiveCardButton,
+  ArchiveCardContent,
+  ArchiveCardHeader,
+  ArchiveCardTitle,
+  archiveField,
+} from "@/components/archive-frame"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
@@ -150,12 +158,12 @@ export default function ContactPage() {
           </div>
 
           <div>
-            <Card className="room-furniture">
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold">{t("contact.getInTouch")}</CardTitle>
+            <ArchiveCard>
+              <ArchiveCardHeader>
+                <ArchiveCardTitle className="text-2xl normal-case">{t("contact.getInTouch")}</ArchiveCardTitle>
                 <p className="text-muted-foreground">{t("contact.socialDesc")}</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
+              </ArchiveCardHeader>
+              <ArchiveCardContent className="space-y-4">
                 <a
                   href="https://x.com/gametable_app?s=21"
                   target="_blank"
@@ -217,48 +225,44 @@ export default function ContactPage() {
                     <p className="text-sm text-muted-foreground">Watch our gaming content</p>
                   </div>
                 </a>
-              </CardContent>
-            </Card>
+              </ArchiveCardContent>
+            </ArchiveCard>
           </div>
         </div>
 
         <div className="mt-16 max-w-6xl mx-auto">
-          <Card className="room-furniture border-accent-gold/30">
-            <CardHeader className="text-center">
-              <CardTitle className="text-3xl font-bold">{t("contact.legalInfo")}</CardTitle>
+          <ArchiveCard>
+            <ArchiveCardHeader className="text-center">
+              <ArchiveCardTitle className="text-3xl normal-case">{t("contact.legalInfo")}</ArchiveCardTitle>
               <p className="text-muted-foreground">{t("contact.legalDesc")}</p>
-            </CardHeader>
-            <CardContent>
+            </ArchiveCardHeader>
+            <ArchiveCardContent>
               <div className="grid gap-6 md:grid-cols-2 mb-8">
-                <Card className="room-furniture border-accent-gold/20">
-                  <CardContent className="pt-6 text-center">
+                <ArchiveCard>
+                  <ArchiveCardContent className="pt-6 text-center">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent-gold/20 mb-4">
                       <Shield className="h-8 w-8 text-accent-gold" />
                     </div>
                     <h3 className="text-xl font-bold mb-2">{t("contact.privacyPolicy")}</h3>
                     <p className="text-sm text-muted-foreground mb-4">{t("contact.privacyDesc")}</p>
-                    <Link href="/privacy-page">
-                      <Button variant="outline" className="bg-transparent">
-                        <span>{t("footer.privacy")}</span>
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
+                    <ArchiveCardButton asChild>
+                      <Link href="/privacy-page">{t("footer.privacy")}</Link>
+                    </ArchiveCardButton>
+                  </ArchiveCardContent>
+                </ArchiveCard>
 
-                <Card className="room-furniture border-accent-gold/20">
-                  <CardContent className="pt-6 text-center">
+                <ArchiveCard>
+                  <ArchiveCardContent className="pt-6 text-center">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent-gold/20 mb-4">
                       <FileText className="h-8 w-8 text-accent-gold" />
                     </div>
                     <h3 className="text-xl font-bold mb-2">{t("contact.termsOfService")}</h3>
                     <p className="text-sm text-muted-foreground mb-4">{t("contact.termsDesc")}</p>
-                    <Link href="/terms-page">
-                      <Button variant="outline" className="bg-transparent">
-                        <span>{t("footer.terms")}</span>
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
+                    <ArchiveCardButton asChild>
+                      <Link href="/terms-page">{t("footer.terms")}</Link>
+                    </ArchiveCardButton>
+                  </ArchiveCardContent>
+                </ArchiveCard>
               </div>
 
               <div className="text-center p-4 rounded-lg bg-accent-gold/10 border border-accent-gold/20">
@@ -269,8 +273,8 @@ export default function ContactPage() {
                   </a>
                 </p>
               </div>
-            </CardContent>
-          </Card>
+            </ArchiveCardContent>
+          </ArchiveCard>
         </div>
       </main>
     </div>
