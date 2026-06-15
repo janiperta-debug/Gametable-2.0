@@ -410,8 +410,9 @@ export function Navigation() {
               e.stopPropagation()
               setIsCrestMenuOpen(!isCrestMenuOpen)
             }}
-            className={`relative w-16 h-16 rounded-full border-2 border-yellow-600 shadow-lg shadow-black/50 flex items-center justify-center bg-[#1a0808] ${
-              isCrestMenuOpen ? "ring-2 ring-yellow-400 ring-offset-1 ring-offset-[#1a0808]" : ""
+            aria-label="Open menu"
+            className={`relative w-16 h-16 rounded-full border-2 border-yellow-600 shadow-lg shadow-black/50 flex items-center justify-center bg-[#1a0808] transition-opacity duration-200 ${
+              isCrestMenuOpen ? "opacity-0 pointer-events-none" : "opacity-100"
             }`}
           >
             {/* Decorative frame around crest */}
@@ -427,47 +428,72 @@ export function Navigation() {
             />
           </button>
 
-          {/* Crest popup menu - scalable ArchiveFrame (CSS wood + SVG corners) */}
+          {/* Crest popup menu — the crest rides on top and "drags" the
+              ArchiveFrame panel open from the bottom. */}
           {isCrestMenuOpen && (
-            <ArchiveFrame className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-64 overflow-hidden">
-              <div className="p-1.5">
-                {crestMenuItems.map((item, index) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center gap-4 px-4 py-3.5 rounded-lg hover:bg-accent-gold/10 transition-colors ${
-                      index !== crestMenuItems.length - 1 ? "border-b border-accent-gold/10" : ""
-                    }`}
-                    onClick={() => setIsCrestMenuOpen(false)}
-                  >
-                    <item.icon className="w-5 h-5 text-accent-gold" />
-                    <div className="flex-1">
-                      <span className="text-foreground font-cinzel text-sm uppercase tracking-wide">
-                        {item.label}
-                      </span>
-                    </div>
-                    {item.badge && item.badge > 0 && (
-                      <span className="bg-red-500 text-white text-[10px] rounded-full h-5 min-w-[20px] flex items-center justify-center px-1.5">
-                        {item.badge > 99 ? "99+" : item.badge}
-                      </span>
-                    )}
-                  </Link>
-                ))}
+            <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-64">
+              <ArchiveFrame className="w-64 animate-archive-unfurl">
+                <div className="p-1.5 pt-9">
+                  {crestMenuItems.map((item, index) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`flex items-center gap-4 px-4 py-3.5 rounded-lg hover:bg-accent-gold/10 transition-colors ${
+                        index !== crestMenuItems.length - 1 ? "border-b border-accent-gold/10" : ""
+                      }`}
+                      onClick={() => setIsCrestMenuOpen(false)}
+                    >
+                      <item.icon className="w-5 h-5 text-accent-gold" />
+                      <div className="flex-1">
+                        <span className="text-foreground font-cinzel text-sm uppercase tracking-wide">
+                          {item.label}
+                        </span>
+                      </div>
+                      {item.badge && item.badge > 0 && (
+                        <span className="bg-red-500 text-white text-[10px] rounded-full h-5 min-w-[20px] flex items-center justify-center px-1.5">
+                          {item.badge > 99 ? "99+" : item.badge}
+                        </span>
+                      )}
+                    </Link>
+                  ))}
 
-                {/* Logout button */}
-                {user && (
-                  <button
-                    className="flex items-center gap-4 px-4 py-3.5 rounded-lg hover:bg-accent-gold/10 transition-colors w-full text-left border-t border-accent-gold/20"
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="w-5 h-5 text-accent-gold" />
-                    <span className="text-foreground font-cinzel text-sm uppercase tracking-wide">
-                      {t("nav.logout")}
-                    </span>
-                  </button>
-                )}
-              </div>
-            </ArchiveFrame>
+                  {/* Logout button */}
+                  {user && (
+                    <button
+                      className="flex items-center gap-4 px-4 py-3.5 rounded-lg hover:bg-accent-gold/10 transition-colors w-full text-left border-t border-accent-gold/20"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="w-5 h-5 text-accent-gold" />
+                      <span className="text-foreground font-cinzel text-sm uppercase tracking-wide">
+                        {t("nav.logout")}
+                      </span>
+                    </button>
+                  )}
+                </div>
+              </ArchiveFrame>
+
+              {/* Crest medallion riding at the top of the panel (also closes) */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setIsCrestMenuOpen(false)
+                }}
+                aria-label="Close menu"
+                style={{ "--crest-rise": "150px" } as Record<string, string>}
+                className="animate-archive-crest-rise absolute -top-7 left-1/2 -translate-x-1/2 z-30 w-16 h-16 rounded-full border-2 border-yellow-600 shadow-lg shadow-black/50 flex items-center justify-center bg-[#1a0808]"
+              >
+                <img
+                  src="/images/icons/avatar-frame.jpeg"
+                  alt=""
+                  className="absolute inset-0 w-16 h-16 object-contain"
+                />
+                <img
+                  src={getCrestImage(currentAppTheme)}
+                  alt=""
+                  className="w-11 h-11 object-contain relative z-10"
+                />
+              </button>
+            </div>
           )}
         </div>
 

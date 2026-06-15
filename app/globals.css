@@ -2,6 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Archive crest menu: the crest "drags" the panel open from the bottom ── */
+@keyframes archive-unfurl {
+  from {
+    clip-path: inset(100% 0 0 0);
+    opacity: 0.35;
+    transform: translateY(10px);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-archive-unfurl {
+  transform-origin: bottom center;
+  animation: archive-unfurl 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes archive-crest-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--crest-rise, 200px)) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-archive-crest-rise {
+  animation: archive-crest-rise 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-archive-unfurl,
+  .animate-archive-crest-rise {
+    animation: none;
+  }
+}
+
 /* Layered background for premium feel - wrapper div approach */
 .app-background {
   min-height: 100vh;
