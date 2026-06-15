@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import {
-  ArchiveButton,
+  ArchiveCardButton,
   ArchiveCard,
   ArchiveCardContent,
   ArchiveCardHeader,
@@ -144,13 +144,13 @@ export function DiscoverPlayers() {
           </div>
 
           <div className="flex justify-center">
-            <ArchiveButton
+            <ArchiveCardButton
               onClick={handleSearch}
               disabled={loading}
               icon={loading ? <Loader2 className="h-4 w-4 animate-spin" /> : undefined}
             >
               {t("community.searchPlayers")}
-            </ArchiveButton>
+            </ArchiveCardButton>
           </div>
         </ArchiveCardContent>
       </ArchiveCard>
@@ -203,21 +203,21 @@ export function DiscoverPlayers() {
                     )}
 
                     <div className="flex gap-2">
-                      <ArchiveButton asChild fullWidth className="flex-1">
+                      <ArchiveCardButton asChild fullWidth className="flex-1">
                         <Link href={`/users/${player.username || player.id}`}>{t("community.viewProfile")}</Link>
-                      </ArchiveButton>
+                      </ArchiveCardButton>
 
                       {player.friendship_status === "accepted" ? (
-                        <ArchiveButton
+                        <ArchiveCardButton
                           fullWidth
                           className="flex-1"
                           icon={<UserCheck className="h-4 w-4" />}
                           disabled
                         >
                           {t("community.friends")}
-                        </ArchiveButton>
+                        </ArchiveCardButton>
                       ) : player.friendship_status === "pending" ? (
-                        <ArchiveButton
+                        <ArchiveCardButton
                           fullWidth
                           className="flex-1"
                           onClick={() => handleCancelRequest(player)}
@@ -231,9 +231,9 @@ export function DiscoverPlayers() {
                           }
                         >
                           {t("community.pending")}
-                        </ArchiveButton>
+                        </ArchiveCardButton>
                       ) : (
-                        <ArchiveButton
+                        <ArchiveCardButton
                           fullWidth
                           active
                           className="flex-1"
@@ -248,7 +248,7 @@ export function DiscoverPlayers() {
                           }
                         >
                           {t("community.connect")}
-                        </ArchiveButton>
+                        </ArchiveCardButton>
                       )}
                     </div>
                   </div>
