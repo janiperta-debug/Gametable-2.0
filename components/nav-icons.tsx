@@ -138,3 +138,12 @@ export const NAV_ICONS: Record<string, (props: IconProps) => JSX.Element> = {
   "/trophies": TrophiesIcon,
   "/contact": ContactIcon,
 }
+
+/**
+ * Optional raster (PNG) icon per route. When a route has an entry here, the nav
+ * renders this richer gold artwork instead of the flat SVG glyph. Use for routes
+ * where the detailed Archive artwork reads better than line-art.
+ */
+export const NAV_ICON_IMAGES: Record<string, string> = {
+  "/collection": "/nav-icons/collection.png",
+}

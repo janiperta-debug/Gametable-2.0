@@ -9,7 +9,7 @@ import { useAppTheme } from "@/components/app-theme-provider"
 import { useTranslations } from "@/lib/i18n"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { ArchiveFrame } from "@/components/archive-frame"
-import { NAV_ICONS } from "@/components/nav-icons"
+import { NAV_ICONS, NAV_ICON_IMAGES } from "@/components/nav-icons"
 import { useUser } from "@/hooks/useUser"
 import { createClient } from "@/lib/supabase/client"
 import { getUnreadCount } from "@/app/actions/messages"
@@ -25,6 +25,7 @@ function MobileNavButton({
   active: boolean
 }) {
   const Icon = NAV_ICONS[item.href]
+  const image = NAV_ICON_IMAGES[item.href]
   return (
     <Link
       href={item.href}
@@ -42,7 +43,15 @@ function MobileNavButton({
             active ? "text-accent-gold" : "text-accent-gold/85"
           }`}
         >
-          {Icon && <Icon className="h-8 w-8" />}
+          {image ? (
+            <img
+              src={image || "/placeholder.svg"}
+              alt=""
+              className={`h-9 w-9 object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)] ${active ? "" : "opacity-90"}`}
+            />
+          ) : (
+            Icon && <Icon className="h-8 w-8" />
+          )}
         </div>
       </ArchiveFrame>
     </Link>
