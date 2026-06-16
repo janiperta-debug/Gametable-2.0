@@ -1647,3 +1647,59 @@
 .rd1 { transition-delay: 0.1s; }
 .rd2 { transition-delay: 0.2s; }
 .rd3 { transition-delay: 0.3s; }
+
+/* ============================================================
+   MANOR MAP (/themes) — fixed sepia parchment look.
+   The manor map is the SAME regardless of the active theme, so
+   these colors are hard-coded (not derived from --accent-* vars).
+   ============================================================ */
+.manor-map {
+  /* Aged parchment panel that holds the whole blueprint. */
+  background-color: hsl(40, 45%, 88%);
+  background-image:
+    radial-gradient(circle at 20% 15%, hsla(30, 40%, 70%, 0.35), transparent 55%),
+    radial-gradient(circle at 85% 80%, hsla(30, 45%, 65%, 0.3), transparent 50%),
+    repeating-linear-gradient(0deg, hsla(30, 35%, 55%, 0.04), hsla(30, 35%, 55%, 0.04) 1px, transparent 1px, transparent 4px);
+  border: 2px solid hsl(35, 45%, 55%);
+  box-shadow:
+    inset 0 0 60px hsla(30, 50%, 40%, 0.25),
+    0 12px 40px hsla(30, 40%, 20%, 0.45);
+}
+
+.manor-floor-label {
+  color: hsl(30, 55%, 28%);
+  border-bottom: 1px solid hsla(30, 45%, 40%, 0.4);
+}
+
+.manor-tile {
+  background-color: hsl(42, 50%, 92%);
+  border: 2px solid hsl(35, 45%, 55%);
+  box-shadow: inset 0 0 18px hsla(30, 45%, 45%, 0.18);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.manor-tile-sketch {
+  /* Sketches are JPEGs on a white field; multiply drops the white
+     and fuses the sepia lines into the parchment tile. */
+  mix-blend-mode: multiply;
+}
+
+.manor-tile-active {
+  border-color: hsl(45, 80%, 45%);
+  box-shadow:
+    inset 0 0 18px hsla(45, 70%, 50%, 0.25),
+    0 0 0 2px hsla(45, 80%, 50%, 0.5),
+    0 4px 16px hsla(45, 60%, 35%, 0.4);
+}
+
+.manor-tile-locked {
+  filter: grayscale(0.35) opacity(0.7);
+}
+
+.manor-tile-interactive:hover {
+  transform: translateY(-3px);
+  border-color: hsl(45, 75%, 50%);
+  box-shadow:
+    inset 0 0 18px hsla(45, 70%, 50%, 0.2),
+    0 8px 22px hsla(30, 50%, 30%, 0.4);
+}
