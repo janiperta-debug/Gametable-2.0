@@ -26,6 +26,27 @@ function MobileNavButton({
 }) {
   const Icon = NAV_ICONS[item.href]
   const image = NAV_ICON_IMAGES[item.href]
+
+  // Pre-framed raster tiles render as the whole button — no ArchiveFrame wrapper.
+  if (image) {
+    return (
+      <Link
+        href={item.href}
+        aria-label={item.label}
+        aria-current={active ? "page" : undefined}
+        className="transition-transform hover:scale-105 active:scale-100"
+      >
+        <img
+          src={image || "/placeholder.svg"}
+          alt=""
+          className={`h-14 w-14 object-contain drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] ${
+            active ? "brightness-125" : "brightness-95"
+          }`}
+        />
+      </Link>
+    )
+  }
+
   return (
     <Link
       href={item.href}
@@ -43,15 +64,7 @@ function MobileNavButton({
             active ? "text-accent-gold" : "text-accent-gold/85"
           }`}
         >
-          {image ? (
-            <img
-              src={image || "/placeholder.svg"}
-              alt=""
-              className={`h-9 w-9 object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)] ${active ? "" : "opacity-90"}`}
-            />
-          ) : (
-            Icon && <Icon className="h-8 w-8" />
-          )}
+          {Icon && <Icon className="h-8 w-8" />}
         </div>
       </ArchiveFrame>
     </Link>
