@@ -359,9 +359,8 @@ export function Navigation() {
       <nav className="hidden md:block fixed bottom-2 left-0 right-0 z-50 pointer-events-none">
         <div className="max-w-[1920px] mx-auto px-4">
           <div className="flex items-end justify-center gap-3 lg:gap-4 pointer-events-auto">
-            {/* All 8 nav buttons — square Archive-framed SVG icon + label */}
+            {/* All 8 nav buttons — Archive-framed text-only label */}
             {[...desktopNavItemsLeft, ...desktopNavItemsRight].map((item) => {
-              const Icon = NAV_ICONS[item.href]
               const active = isActive(item.href)
               return (
                 <Link
@@ -376,12 +375,11 @@ export function Navigation() {
                     className={`rounded-xl ${active ? "brightness-125" : "brightness-95 group-hover:brightness-110"}`}
                   >
                     <div
-                      className={`flex w-[84px] h-[80px] lg:w-[96px] lg:h-[90px] flex-col items-center justify-center gap-1.5 px-1 ${
+                      className={`flex w-[84px] h-[80px] lg:w-[96px] lg:h-[90px] flex-col items-center justify-center px-2 ${
                         active ? "text-accent-gold" : "text-accent-gold/85"
                       }`}
                     >
-                      {Icon && <Icon className="w-9 h-9 lg:w-10 lg:h-10" />}
-                      <span className="font-cinzel text-[8px] lg:text-[10px] uppercase tracking-wide text-center leading-tight">
+                      <span className="font-cinzel text-[11px] lg:text-[12px] uppercase tracking-tight text-center leading-tight text-balance break-words hyphens-auto">
                         {item.label}
                       </span>
                     </div>
