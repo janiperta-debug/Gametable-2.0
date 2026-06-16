@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
+import { ArchiveCard, ArchiveCardContent } from "@/components/archive-frame"
 import { useTranslations } from "@/lib/i18n"
 import { createClient } from "@/lib/supabase/client"
 import { useUser } from "@/hooks/useUser"
@@ -75,24 +76,27 @@ export function GameInterests() {
 
   if (loading) {
     return (
-      <div className="room-furniture p-8 space-y-6">
-        <div>
-          <h2 className="text-2xl mb-2">{t("profile.gameInterests")}</h2>
-          <p className="text-sm font-merriweather text-muted-foreground">
-            {t("profile.gameInterestsDesc")}
-          </p>
-        </div>
-        <div className="animate-pulse space-y-4">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-6 bg-muted rounded w-48" />
-          ))}
-        </div>
-      </div>
+      <ArchiveCard>
+        <ArchiveCardContent className="p-8 space-y-6">
+          <div>
+            <h2 className="text-2xl mb-2">{t("profile.gameInterests")}</h2>
+            <p className="text-sm font-merriweather text-muted-foreground">
+              {t("profile.gameInterestsDesc")}
+            </p>
+          </div>
+          <div className="animate-pulse space-y-4">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-6 bg-muted rounded w-48" />
+            ))}
+          </div>
+        </ArchiveCardContent>
+      </ArchiveCard>
     )
   }
 
   return (
-    <div className="room-furniture p-8 space-y-6">
+    <ArchiveCard>
+    <ArchiveCardContent className="p-8 space-y-6">
       <div>
         <h2 className="text-2xl mb-2">{t("profile.gameInterests")}</h2>
         <p className="text-sm font-merriweather text-muted-foreground">
@@ -115,6 +119,7 @@ export function GameInterests() {
           </div>
         ))}
       </div>
-    </div>
+    </ArchiveCardContent>
+    </ArchiveCard>
   )
 }

@@ -1,7 +1,15 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
+import {
+  ArchiveButton,
+  ArchiveCard,
+  ArchiveCardContent,
+  archiveField,
+  archiveSelectContent,
+  archiveSelectItem,
+} from "@/components/archive-frame"
+import { cn } from "@/lib/utils"
 import { Switch } from "@/components/ui/switch"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -120,14 +128,17 @@ export function ManorCorrespondence() {
 
   if (loading) {
     return (
-      <div className="room-furniture p-8 flex items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-accent-gold" />
-      </div>
+      <ArchiveCard>
+        <ArchiveCardContent className="p-8 flex items-center justify-center">
+          <Loader2 className="w-6 h-6 animate-spin text-accent-gold" />
+        </ArchiveCardContent>
+      </ArchiveCard>
     )
   }
 
   return (
-    <div className="room-furniture p-8 space-y-6">
+    <ArchiveCard>
+    <ArchiveCardContent className="p-8 space-y-6">
       <div className="flex items-center space-x-3">
         <Mail className="w-6 h-6 text-accent-gold" />
         <h2 className="text-2xl">{t("correspondence.title")}</h2>
@@ -233,12 +244,12 @@ export function ManorCorrespondence() {
                   value={digestPrefs.max_distance_km?.toString() ?? "null"}
                   onValueChange={handleDistanceChange}
                 >
-                  <SelectTrigger className="w-full md:w-48">
+                  <SelectTrigger className={cn("w-full md:w-48", archiveField)}>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className={archiveSelectContent}>
                     {DISTANCE_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
+                      <SelectItem key={option.value} value={option.value} className={archiveSelectItem}>
                         {option.value === "null" ? t("correspondence.eventDigest.noLimit") : option.label}
                       </SelectItem>
                     ))}
@@ -249,21 +260,16 @@ export function ManorCorrespondence() {
           )}
         </div>
 
-        <Button
+        <ArchiveButton
           onClick={handleSave}
+          active
           disabled={saving}
-          className="bg-accent-gold hover:bg-accent-gold/90 text-background font-cinzel"
+          icon={saving ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}
         >
-          {saving ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              {t("common.saving")}
-            </>
-          ) : (
-            t("correspondence.savePreferences")
-          )}
-        </Button>
+          {saving ? t("common.saving") : t("correspondence.savePreferences")}
+        </ArchiveButton>
       </div>
-    </div>
+    </ArchiveCardContent>
+    </ArchiveCard>
   )
 }

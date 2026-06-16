@@ -2,10 +2,15 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import {
+  ArchiveButton,
+  ArchiveCard,
+  ArchiveCardButton,
+  ArchiveCardContent,
+} from "@/components/archive-frame"
 import { Badge } from "@/components/ui/badge"
 import { Bell, Check, X, Users, Calendar, Trophy, MessageCircle, Star, Settings, Loader2, UserCheck } from "lucide-react"
+import { ThemeHero } from "@/components/theme-hero"
 import { useTranslations } from "@/lib/i18n"
 import { useUser } from "@/hooks/useUser"
 import { 
@@ -182,13 +187,23 @@ export default function NotificationsPage() {
     return (
       <div className="min-h-screen room-environment">
         <main className="container mx-auto px-4 py-8">
-          <Card className="room-furniture max-w-2xl mx-auto">
-            <CardContent className="p-12 text-center">
+          <ThemeHero page="notifications" mode="backdrop">
+            <div className="text-center">
+              <h1 className="logo-text text-5xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+                {t("notifications.title")}
+              </h1>
+              <p className="font-body text-foreground/90 text-xl max-w-3xl mx-auto mt-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+                {t("notifications.subtitle")}
+              </p>
+            </div>
+          </ThemeHero>
+          <ArchiveCard className="max-w-2xl mx-auto">
+            <ArchiveCardContent className="p-12 text-center">
               <Bell className="h-16 w-16 text-accent-gold mx-auto mb-4" />
               <h3 className="font-heading text-xl font-semibold mb-2">{t("notifications.loginRequired")}</h3>
               <p className="font-body text-muted-foreground">{t("notifications.loginToView")}</p>
-            </CardContent>
-          </Card>
+            </ArchiveCardContent>
+          </ArchiveCard>
         </main>
       </div>
     )
@@ -197,45 +212,41 @@ export default function NotificationsPage() {
   return (
     <div className="min-h-screen room-environment">
       <main className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <Bell className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="logo-text text-5xl font-bold">{t("notifications.title")}</h1>
-            {unreadCount > 0 && (
-              <Badge variant="destructive" className="ml-3">
-                {unreadCount} {t("common.new")}
-              </Badge>
-            )}
+        <ThemeHero page="notifications" mode="backdrop">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-3">
+              <h1 className="logo-text text-5xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+                {t("notifications.title")}
+              </h1>
+              {unreadCount > 0 && (
+                <Badge variant="destructive">
+                  {unreadCount} {t("common.new")}
+                </Badge>
+              )}
+            </div>
+            <p className="font-body text-foreground/90 text-xl max-w-3xl mx-auto mt-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+              {t("notifications.subtitle")}
+            </p>
           </div>
-          <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
-            {t("notifications.subtitle")}
-          </p>
-        </div>
+        </ThemeHero>
 
         {/* Action Bar */}
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex space-x-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="bg-transparent"
+        <div className="flex justify-center sm:justify-start items-center mb-8">
+          <div className="flex flex-wrap gap-2">
+            <ArchiveButton
               onClick={handleMarkAllRead}
               disabled={unreadCount === 0}
+              icon={<Check className="h-4 w-4" />}
             >
-              <Check className="h-4 w-4 mr-2" />
               {t("notifications.markAllRead")}
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="bg-transparent"
+            </ArchiveButton>
+            <ArchiveButton
               onClick={handleClearAll}
               disabled={notifications.length === 0}
+              icon={<X className="h-4 w-4" />}
             >
-              <X className="h-4 w-4 mr-2" />
               {t("notifications.clearAll")}
-            </Button>
+            </ArchiveButton>
           </div>
         </div>
 
@@ -246,82 +257,76 @@ export default function NotificationsPage() {
           </div>
         ) : notifications.length === 0 ? (
           /* Empty State */
-          <Card className="room-furniture max-w-2xl mx-auto">
-            <CardContent className="p-12 text-center">
+          <ArchiveCard className="max-w-2xl mx-auto">
+            <ArchiveCardContent className="p-12 text-center">
               <Bell className="h-16 w-16 text-accent-gold mx-auto mb-4" />
               <h3 className="font-heading text-xl font-semibold mb-2">{t("notifications.allCaughtUp")}</h3>
               <p className="font-body text-muted-foreground">{t("notifications.noNotifications")}</p>
-            </CardContent>
-          </Card>
+            </ArchiveCardContent>
+          </ArchiveCard>
         ) : (
-          /* Notifications List */
-          <div className="max-w-4xl mx-auto space-y-4">
-            {notifications.map((notification) => {
-              const IconComponent = iconMap[notification.type] || Bell
-              const iconColor = colorMap[notification.type] || "text-accent-gold"
-              const timeAgo = formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })
+          /* Notifications List - single frame, rows separated by dividers */
+          <div className="max-w-4xl mx-auto">
+            <ArchiveCard>
+              <ArchiveCardContent className="p-0">
+                {notifications.map((notification) => {
+                  const IconComponent = iconMap[notification.type] || Bell
+                  const iconColor = colorMap[notification.type] || "text-accent-gold"
+                  const timeAgo = formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })
 
-              return (
-                <Card
-                  key={notification.id}
-                  className={`room-furniture transition-all duration-200 hover:shadow-md cursor-pointer ${
-                    !notification.read
-                      ? "border-accent-gold/50 dark:border-accent-gold/30 bg-accent-gold/5 dark:bg-accent-gold/5"
-                      : ""
-                  }`}
-                  onClick={() => handleNotificationClick(notification)}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className={`p-2 rounded-full bg-background ${iconColor} flex-shrink-0`}>
+                  return (
+                    <div
+                      key={notification.id}
+                      className={`relative flex items-start gap-4 p-6 cursor-pointer transition-colors border-b border-accent-gold/15 last:border-b-0 hover:bg-accent-gold/5 ${
+                        !notification.read ? "bg-accent-gold/[0.07]" : ""
+                      }`}
+                      onClick={() => handleNotificationClick(notification)}
+                    >
+                      {!notification.read && (
+                        <span className="absolute left-0 top-0 bottom-0 w-1 bg-accent-gold" />
+                      )}
+                      <div className={`p-2 rounded-full bg-black/30 ${iconColor} flex-shrink-0`}>
                         <IconComponent className="h-5 w-5" />
                       </div>
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-start justify-between">
-                          <div>
+                      <div className="flex-1 space-y-2 min-w-0">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
                             <h3 className="font-heading font-semibold flex items-center">
                               {notification.title}
                               {!notification.read && (
-                                <div className="w-2 h-2 bg-accent-gold rounded-full ml-2 flex-shrink-0" />
+                                <span className="w-2 h-2 bg-accent-gold rounded-full ml-2 flex-shrink-0" />
                               )}
                             </h3>
-                            <p className="font-body text-sm text-muted-foreground mt-1">{notification.body}</p>
+                            <p className="font-body text-sm text-muted-foreground mt-1 break-words">{notification.body}</p>
                           </div>
                           <span className="text-xs text-muted-foreground whitespace-nowrap font-body">
                             {timeAgo}
                           </span>
                         </div>
                         {notification.type === "friend_request" && (
-                          <div className="flex space-x-2 pt-2" onClick={(e) => e.stopPropagation()}>
-                            <Button
-                              size="sm"
-                              className="theme-accent-gold"
+                          <div className="flex gap-2 pt-2" onClick={(e) => e.stopPropagation()}>
+                            <ArchiveCardButton
+                              active
                               onClick={() => handleAcceptFriendRequest(notification)}
                               disabled={actionLoading === notification.id}
+                              icon={actionLoading === notification.id ? <Loader2 className="h-4 w-4 animate-spin" /> : undefined}
                             >
-                              {actionLoading === notification.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                t("profile.accept")
-                              )}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="bg-transparent"
+                              {t("profile.accept")}
+                            </ArchiveCardButton>
+                            <ArchiveCardButton
                               onClick={() => handleDeclineFriendRequest(notification)}
                               disabled={actionLoading === notification.id}
                             >
                               {t("profile.decline")}
-                            </Button>
+                            </ArchiveCardButton>
                           </div>
                         )}
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
+                  )
+                })}
+              </ArchiveCardContent>
+            </ArchiveCard>
           </div>
         )}
       </main>

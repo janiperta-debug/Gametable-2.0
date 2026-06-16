@@ -4,8 +4,15 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import {
+  ArchiveCard,
+  ArchiveCardButton,
+  ArchiveCardContent,
+  ArchiveCardHeader,
+  ArchiveCardTitle,
+  archiveField,
+} from "@/components/archive-frame"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -148,20 +155,19 @@ export default function CreateEventPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
-          <div className="flex items-center mb-8">
-            <Button variant="ghost" onClick={() => router.back()} className="mr-4">
-              <ArrowLeft className="h-4 w-4 mr-2" />
+          <div className="flex items-center gap-4 mb-8">
+            <ArchiveCardButton onClick={() => router.back()} icon={<ArrowLeft className="h-4 w-4" />}>
               {t("events.back")}
-            </Button>
+            </ArchiveCardButton>
             <h1 className="ornate-text font-heading text-3xl font-bold">{t("events.createEvent")}</h1>
           </div>
 
           {/* Form */}
-          <Card className="room-furniture">
-            <CardHeader>
-              <CardTitle className="font-heading text-xl">{t("events.eventDetails")}</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <ArchiveCard>
+            <ArchiveCardHeader>
+              <ArchiveCardTitle className="text-xl normal-case">{t("events.eventDetails")}</ArchiveCardTitle>
+            </ArchiveCardHeader>
+            <ArchiveCardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Title */}
                 <div className="space-y-2">
@@ -173,7 +179,7 @@ export default function CreateEventPage() {
                     placeholder={t("events.eventTitlePlaceholder")}
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="font-body" 
+                    className={cn("font-body", archiveField)}
                     required
                   />
                 </div>
@@ -181,29 +187,27 @@ export default function CreateEventPage() {
                 {/* Game Selection */}
                 <div className="space-y-4">
                   <Label className="font-body text-accent-gold">{t("events.game")}</Label>
-                  <div className="flex space-x-2">
-                    <Button
+                  <div className="flex gap-2">
+                    <ArchiveCardButton
                       type="button"
-                      variant={gameSelection === "collection" ? "default" : "outline"}
-                      className={gameSelection === "collection" ? "theme-accent-gold" : "bg-transparent"}
+                      active={gameSelection === "collection"}
                       onClick={() => setGameSelection("collection")}
                     >
                       {t("events.fromCollection")}
-                    </Button>
-                    <Button
+                    </ArchiveCardButton>
+                    <ArchiveCardButton
                       type="button"
-                      variant={gameSelection === "manual" ? "default" : "outline"}
-                      className={gameSelection === "manual" ? "theme-accent-gold" : "bg-transparent"}
+                      active={gameSelection === "manual"}
                       onClick={() => setGameSelection("manual")}
                     >
                       {t("events.manualEntry")}
-                    </Button>
+                    </ArchiveCardButton>
                   </div>
 
                   {gameSelection === "collection" ? (
                     <div className="relative">
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                         <Input
                           placeholder={loadingGames ? t("common.loading") : t("events.searchCollection")}
                           value={formData.game || gameSearchQuery}
@@ -213,7 +217,7 @@ export default function CreateEventPage() {
                             setShowGameResults(true)
                           }}
                           onFocus={() => setShowGameResults(true)}
-                          className="pl-10 pr-10"
+                          className={cn("pl-10 pr-10", archiveField)}
                           disabled={loadingGames}
                         />
                         {(formData.game || gameSearchQuery) && (
@@ -269,6 +273,7 @@ export default function CreateEventPage() {
                       placeholder={t("events.enterGameName")} 
                       value={formData.game}
                       onChange={(e) => setFormData({ ...formData, game: e.target.value })}
+                      className={archiveField}
                     />
                   )}
                 </div>
@@ -306,7 +311,7 @@ export default function CreateEventPage() {
                       type="date" 
                       value={formData.date}
                       onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      className="font-body" 
+                      className={cn("font-body", archiveField)}
                       required
                     />
                   </div>
@@ -319,7 +324,7 @@ export default function CreateEventPage() {
                       type="time" 
                       value={formData.time}
                       onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                      className="font-body" 
+                      className={cn("font-body", archiveField)}
                       required
                     />
                   </div>
@@ -335,7 +340,7 @@ export default function CreateEventPage() {
                     placeholder={t("events.locationPlaceholder")}
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    className="font-body" 
+                    className={cn("font-body", archiveField)}
                   />
                 </div>
 
@@ -350,7 +355,7 @@ export default function CreateEventPage() {
                     placeholder="4"
                     value={formData.maxPlayers}
                     onChange={(e) => setFormData({ ...formData, maxPlayers: e.target.value })}
-                    className="font-body" 
+                    className={cn("font-body", archiveField)}
                     min="1"
                   />
                 </div>
@@ -365,7 +370,7 @@ export default function CreateEventPage() {
                     placeholder={t("events.descriptionPlaceholder")}
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="font-body min-h-[100px]"
+                    className={cn("font-body min-h-[100px]", archiveField)}
                   />
                 </div>
 
@@ -475,24 +480,22 @@ export default function CreateEventPage() {
                 )}
 
                 {/* Actions */}
-                <div className="flex justify-end space-x-4 pt-6">
-                  <Button type="button" variant="outline" onClick={() => router.push("/events")} className="bg-transparent" disabled={saving}>
+                <div className="flex justify-end gap-4 pt-6">
+                  <ArchiveCardButton type="button" onClick={() => router.push("/events")} disabled={saving}>
                     {t("common.cancel")}
-                  </Button>
-                  <Button type="submit" className="theme-accent-gold" disabled={saving}>
-                    {saving ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        {t("common.loading")}
-                      </>
-                    ) : (
-                      t("events.createEvent")
-                    )}
-                  </Button>
+                  </ArchiveCardButton>
+                  <ArchiveCardButton
+                    type="submit"
+                    active
+                    disabled={saving}
+                    icon={saving ? <Loader2 className="h-4 w-4 animate-spin" /> : undefined}
+                  >
+                    {saving ? t("common.loading") : t("events.createEvent")}
+                  </ArchiveCardButton>
                 </div>
               </form>
-            </CardContent>
-          </Card>
+            </ArchiveCardContent>
+          </ArchiveCard>
         </div>
       </main>
     </div>

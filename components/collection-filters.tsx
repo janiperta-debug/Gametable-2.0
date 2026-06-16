@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ArchiveCard, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle } from "@/components/archive-frame"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Slider } from "@/components/ui/slider"
 import { Label } from "@/components/ui/label"
@@ -24,13 +24,13 @@ export function CollectionFilters() {
 
   return (
     <div className="space-y-6">
-      <Card className="room-furniture">
-        <CardHeader>
-          <CardTitle className="ornate-text font-heading text-lg font-bold">
+      <ArchiveCard>
+        <ArchiveCardHeader>
+          <ArchiveCardTitle>
             {t("collection.filters.playerCount")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </ArchiveCardTitle>
+        </ArchiveCardHeader>
+        <ArchiveCardContent className="space-y-4">
           <div>
             <Label className="text-sm font-body">
               {t("collection.filters.upToPlayers").replace("{count}", maxPlayers.toString())}
@@ -45,16 +45,16 @@ export function CollectionFilters() {
               className="mt-2" 
             />
           </div>
-        </CardContent>
-      </Card>
+        </ArchiveCardContent>
+      </ArchiveCard>
 
-      <Card className="room-furniture">
-        <CardHeader>
-          <CardTitle className="ornate-text font-heading text-lg font-bold">
+      <ArchiveCard>
+        <ArchiveCardHeader>
+          <ArchiveCardTitle>
             {t("collection.filters.playTime")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </ArchiveCardTitle>
+        </ArchiveCardHeader>
+        <ArchiveCardContent className="space-y-4">
           <div>
             <Label className="text-sm font-body">
               {t("collection.filters.upToMinutes").replace("{count}", maxPlayTime.toString())}
@@ -68,16 +68,16 @@ export function CollectionFilters() {
               className="mt-2" 
             />
           </div>
-        </CardContent>
-      </Card>
+        </ArchiveCardContent>
+      </ArchiveCard>
 
-      <Card className="room-furniture">
-        <CardHeader>
-          <CardTitle className="ornate-text font-heading text-lg font-bold">
+      <ArchiveCard>
+        <ArchiveCardHeader>
+          <ArchiveCardTitle>
             {t("collection.filters.mechanics")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
+          </ArchiveCardTitle>
+        </ArchiveCardHeader>
+        <ArchiveCardContent className="space-y-3">
           {mechanics.map((mechanic) => (
             <div key={mechanic.id} className="flex items-center space-x-2">
               <Checkbox id={mechanic.id} />
@@ -87,8 +87,8 @@ export function CollectionFilters() {
               <span className="text-xs text-muted-foreground font-body">({mechanic.count})</span>
             </div>
           ))}
-        </CardContent>
-      </Card>
+        </ArchiveCardContent>
+      </ArchiveCard>
     </div>
   )
 }

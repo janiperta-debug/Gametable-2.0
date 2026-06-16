@@ -2,7 +2,16 @@
 
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Button } from "@/components/ui/button"
+import {
+  ArchiveCard,
+  ArchiveCardButton,
+  ArchiveCardContent,
+  ArchiveIconButton,
+  archiveField,
+  archiveSelectContent,
+  archiveSelectItem,
+} from "@/components/archive-frame"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -113,16 +122,18 @@ export default function CreateListingPage() {
   if (!user) {
     return (
       <div className="container mx-auto px-4 py-8 pt-20">
-        <div className="manor-card p-8 text-center">
-          <Store className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h2 className="font-heading text-2xl mb-2">{t("auth.loginRequired")}</h2>
-          <p className="text-muted-foreground mb-4">{t("marketplace.loginToCreateListing")}</p>
-          <Link href="/auth/login">
-            <Button className="bg-accent-gold hover:bg-accent-copper">
-              {t("auth.login")}
-            </Button>
-          </Link>
-        </div>
+        <ArchiveCard className="max-w-md mx-auto text-center">
+          <ArchiveCardContent className="p-8">
+            <Store className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h2 className="font-heading text-2xl mb-2">{t("auth.loginRequired")}</h2>
+            <p className="text-muted-foreground mb-4">{t("marketplace.loginToCreateListing")}</p>
+            <div className="flex justify-center">
+              <ArchiveCardButton asChild active>
+                <Link href="/auth/login">{t("auth.login")}</Link>
+              </ArchiveCardButton>
+            </div>
+          </ArchiveCardContent>
+        </ArchiveCard>
       </div>
     )
   }
@@ -131,11 +142,11 @@ export default function CreateListingPage() {
     <div className="container mx-auto px-4 py-8 pt-20">
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
-        <Link href="/marketplace">
-          <Button variant="outline" size="icon" className="border-accent-gold/20 hover:border-accent-gold bg-transparent">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </Link>
+        <ArchiveIconButton
+          icon={<ArrowLeft className="h-5 w-5" />}
+          aria-label={t("common.cancel")}
+          onClick={() => router.push("/marketplace")}
+        />
         <div>
           <h1 className="font-heading text-3xl md:text-4xl text-accent-gold">{t("marketplace.createListing")}</h1>
           <p className="text-muted-foreground font-body">{t("marketplace.createListingDescription") || "List a game from your collection on the marketplace"}</p>
@@ -143,7 +154,8 @@ export default function CreateListingPage() {
       </div>
 
       <div className="max-w-2xl mx-auto">
-        <div className="manor-card p-6 md:p-8 space-y-6">
+        <ArchiveCard>
+          <ArchiveCardContent className="p-6 md:p-8 space-y-6">
           {/* Game Selection */}
           <div className="space-y-3">
             <Label className="font-heading text-lg">{t("marketplace.selectGameFromCollection")}</Label>
@@ -152,22 +164,22 @@ export default function CreateListingPage() {
                 <Loader2 className="h-6 w-6 animate-spin text-accent-gold" />
               </div>
             ) : userGames.length === 0 ? (
-              <div className="text-center py-8 bg-surface/30 rounded-lg">
+              <div className="text-center py-8 bg-black/30 rounded-lg">
                 <p className="text-muted-foreground mb-4">{t("marketplace.noGamesInCollection")}</p>
-                <Link href="/collection">
-                  <Button variant="outline" className="border-accent-gold/20 hover:border-accent-gold bg-transparent">
-                    {t("collection.addGames")}
-                  </Button>
-                </Link>
+                <div className="flex justify-center">
+                  <ArchiveCardButton asChild>
+                    <Link href="/collection">{t("collection.addGames")}</Link>
+                  </ArchiveCardButton>
+                </div>
               </div>
             ) : (
               <Select value={selectedGameId} onValueChange={setSelectedGameId}>
-                <SelectTrigger className="bg-surface/50 h-14">
+                <SelectTrigger className={cn("h-14", archiveField)}>
                   <SelectValue placeholder={t("marketplace.selectGame")} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={archiveSelectContent}>
                   {userGames.map(ug => (
-                    <SelectItem key={ug.id} value={ug.id} className="py-3">
+                    <SelectItem key={ug.id} value={ug.id} className={cn("py-3", archiveSelectItem)}>
                       <div className="flex items-center gap-3">
                         {ug.game?.thumbnail_url && (
                           <div className="relative w-10 h-10 rounded overflow-hidden flex-shrink-0">
@@ -189,7 +201,7 @@ export default function CreateListingPage() {
 
             {/* Show selected game preview */}
             {selectedGame?.game && (
-              <div className="flex items-center gap-4 p-4 bg-surface/30 rounded-lg">
+              <div className="flex items-center gap-4 p-4 bg-black/30 rounded-lg">
                 {selectedGame.game.thumbnail_url && (
                   <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0">
                     <Image
@@ -212,13 +224,13 @@ export default function CreateListingPage() {
           <div className="space-y-3">
             <Label className="font-heading text-lg">{t("marketplace.listingType")}</Label>
             <Select value={listingType} onValueChange={(v) => setListingType(v as ListingType)}>
-              <SelectTrigger className="bg-surface/50 h-12">
+              <SelectTrigger className={cn("h-12", archiveField)}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="sell">{t("marketplace.forSale")}</SelectItem>
-                <SelectItem value="trade">{t("marketplace.forTrade")}</SelectItem>
-                <SelectItem value="give">{t("marketplace.freeToGive")}</SelectItem>
+              <SelectContent className={archiveSelectContent}>
+                <SelectItem value="sell" className={archiveSelectItem}>{t("marketplace.forSale")}</SelectItem>
+                <SelectItem value="trade" className={archiveSelectItem}>{t("marketplace.forTrade")}</SelectItem>
+                <SelectItem value="give" className={archiveSelectItem}>{t("marketplace.freeToGive")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -227,15 +239,15 @@ export default function CreateListingPage() {
           <div className="space-y-3">
             <Label className="font-heading text-lg">{t("marketplace.condition")}</Label>
             <Select value={condition} onValueChange={(v) => setCondition(v as ListingCondition)}>
-              <SelectTrigger className="bg-surface/50 h-12">
+              <SelectTrigger className={cn("h-12", archiveField)}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="new">{t("marketplace.conditionNew")}</SelectItem>
-                <SelectItem value="like_new">{t("marketplace.likeNew")}</SelectItem>
-                <SelectItem value="good">{t("marketplace.good")}</SelectItem>
-                <SelectItem value="fair">{t("marketplace.fair")}</SelectItem>
-                <SelectItem value="poor">{t("marketplace.poor")}</SelectItem>
+              <SelectContent className={archiveSelectContent}>
+                <SelectItem value="new" className={archiveSelectItem}>{t("marketplace.conditionNew")}</SelectItem>
+                <SelectItem value="like_new" className={archiveSelectItem}>{t("marketplace.likeNew")}</SelectItem>
+                <SelectItem value="good" className={archiveSelectItem}>{t("marketplace.good")}</SelectItem>
+                <SelectItem value="fair" className={archiveSelectItem}>{t("marketplace.fair")}</SelectItem>
+                <SelectItem value="poor" className={archiveSelectItem}>{t("marketplace.poor")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -252,9 +264,9 @@ export default function CreateListingPage() {
                   placeholder="0.00"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
-                  className="bg-surface/50 h-12 pl-8"
+                  className={cn("h-12 pl-8", archiveField)}
                 />
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">€</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-accent-gold z-10">€</span>
               </div>
             </div>
           )}
@@ -266,27 +278,28 @@ export default function CreateListingPage() {
               placeholder={t("marketplace.descriptionPlaceholder")}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="bg-surface/50 min-h-[120px]"
+              className={cn("min-h-[120px]", archiveField)}
             />
           </div>
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3 pt-4">
-            <Link href="/marketplace" className="flex-1">
-              <Button variant="outline" className="w-full border-accent-gold/20 hover:border-accent-gold bg-transparent">
-                {t("common.cancel")}
-              </Button>
-            </Link>
-            <Button 
-              onClick={handleCreateListing} 
-              className="flex-1 bg-accent-gold hover:bg-accent-copper"
+            <ArchiveCardButton asChild fullWidth className="flex-1">
+              <Link href="/marketplace">{t("common.cancel")}</Link>
+            </ArchiveCardButton>
+            <ArchiveCardButton
+              active
+              fullWidth
+              className="flex-1"
+              onClick={handleCreateListing}
               disabled={creating || !selectedGameId}
+              icon={creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Store className="h-4 w-4" />}
             >
-              {creating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Store className="h-4 w-4 mr-2" />}
               {t("marketplace.createListing")}
-            </Button>
+            </ArchiveCardButton>
           </div>
-        </div>
+          </ArchiveCardContent>
+        </ArchiveCard>
       </div>
     </div>
   )

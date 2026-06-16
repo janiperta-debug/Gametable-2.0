@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import { ArchiveButton, ArchiveCard, ArchiveCardContent } from "@/components/archive-frame"
 import { AlertTriangle } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 
@@ -18,7 +18,8 @@ export function AccountManagement() {
   }
 
   return (
-    <div className="room-furniture p-6 space-y-6">
+    <ArchiveCard>
+    <ArchiveCardContent className="p-6 space-y-6">
       <div>
         <h2 className="text-2xl text-accent-gold mb-2">{t("profile.accountManagement")}</h2>
         <p className="text-sm font-merriweather text-accent-gold/60">
@@ -37,19 +38,19 @@ export function AccountManagement() {
           </div>
         </div>
 
-        <div className="flex gap-3 pt-2">
-          <Button
-            variant="outline"
-            onClick={handleExportData}
-            className="border-accent-gold/40 text-accent-gold hover:bg-accent-gold hover:text-background bg-transparent"
-          >
+        <div className="flex flex-wrap gap-3 pt-2">
+          <ArchiveButton onClick={handleExportData}>
             {t("profile.exportData")}
-          </Button>
-          <Button variant="destructive" onClick={handleDeleteAccount} className="bg-red-600 hover:bg-red-700">
+          </ArchiveButton>
+          <button
+            onClick={handleDeleteAccount}
+            className="inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-cinzel text-white transition-colors hover:bg-red-700"
+          >
             {t("profile.deleteAccount")}
-          </Button>
+          </button>
         </div>
       </div>
-    </div>
+    </ArchiveCardContent>
+    </ArchiveCard>
   )
 }

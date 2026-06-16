@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { FrameToggle } from "@/components/frame-button"
 import { ArrowLeft, Search, Loader2, Plus, Star, Users, Clock, Dices, Swords, CreditCard, Puzzle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { addGameToCollection } from "@/app/actions/games"
@@ -389,17 +389,23 @@ export default function AddGamePage() {
           {/* Search/Manual Tabs */}
           <Card className="room-furniture">
             <CardContent className="pt-6">
-              <Tabs defaultValue="search" value={activeTab} onValueChange={(v) => setActiveTab(v as "search" | "manual" | "bulk")}>
-                <TabsList className={`grid w-full mb-6 ${selectedCategory === "trading_card" || selectedCategory === "miniature" ? "grid-cols-3" : "grid-cols-2"}`}>
-                  <TabsTrigger value="search" className="font-body">{t("collection.searchDatabase")}</TabsTrigger>
-                  <TabsTrigger value="manual" className="font-body">{t("collection.manualEntry")}</TabsTrigger>
-                  {(selectedCategory === "trading_card" || selectedCategory === "miniature") && (
-                    <TabsTrigger value="bulk" className="font-body">{t("collection.bulkImport")}</TabsTrigger>
-                  )}
-                </TabsList>
+              <div className="mb-6 flex justify-center">
+                <FrameToggle
+                  value={activeTab}
+                  onChange={(v) => setActiveTab(v)}
+                  options={[
+                    { value: "search", label: t("collection.searchDatabase") },
+                    { value: "manual", label: t("collection.manualEntry") },
+                    ...(selectedCategory === "trading_card" || selectedCategory === "miniature"
+                      ? [{ value: "bulk" as const, label: t("collection.bulkImport") }]
+                      : []),
+                  ]}
+                />
+              </div>
 
-                {/* Search Tab */}
-                <TabsContent value="search" className="space-y-6">
+              {/* Search Tab */}
+              {activeTab === "search" && (
+                <div className="space-y-6">
                   <div>
                     <p className="font-body text-muted-foreground text-sm mb-4">
                       {t(`collection.search${selectedCategory === "board_game" ? "BGG" : selectedCategory === "rpg" ? "RPGG" : selectedCategory === "trading_card" ? "TCG" : "Mini"}Description`)}
@@ -729,10 +735,12 @@ export default function AddGamePage() {
                       )}
                     </div>
                   )}
-                </TabsContent>
+                </div>
+              )}
 
-                {/* Manual Entry Tab */}
-                <TabsContent value="manual" className="space-y-6">
+              {/* Manual Entry Tab */}
+              {activeTab === "manual" && (
+                <div className="space-y-6">
                   <p className="font-body text-muted-foreground text-sm">
                     {t("collection.manualEntryDescription")}
                   </p>
@@ -873,14 +881,15 @@ export default function AddGamePage() {
                       </Button>
                     </div>
                   </div>
-                </TabsContent>
+                </div>
+              )}
 
-                {/* Bulk Import Tab (only for TCG and Miniatures) */}
-                {(selectedCategory === "trading_card" || selectedCategory === "miniature") && (
-                  <TabsContent value="bulk" className="space-y-6">
-                    <p className="font-body text-muted-foreground text-sm">
-                      {t("collection.bulkImportDescription")}
-                    </p>
+              {/* Bulk Import Tab (only for TCG and Miniatures) */}
+              {activeTab === "bulk" && (selectedCategory === "trading_card" || selectedCategory === "miniature") && (
+                <div className="space-y-6">
+                  <p className="font-body text-muted-foreground text-sm">
+                    {t("collection.bulkImportDescription")}
+                  </p>
 
                     <div className="space-y-4">
                       <div>
@@ -941,9 +950,8 @@ export default function AddGamePage() {
                         </div>
                       )}
                     </div>
-                  </TabsContent>
-                )}
-              </Tabs>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

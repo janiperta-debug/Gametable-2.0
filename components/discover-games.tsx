@@ -1,9 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  ArchiveCard,
+  ArchiveCardContent,
+  ArchiveCardHeader,
+  ArchiveCardTitle,
+  ArchiveCardButton,
+  ArchiveIconButton,
+  archiveField,
+} from "@/components/archive-frame"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Search, ExternalLink, Heart, Plus, Loader2, Star, Users, Clock, Dices, Swords, BookOpen } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
@@ -243,51 +251,45 @@ export function DiscoverGames() {
   return (
     <div className="space-y-8">
       {/* Search and Filters */}
-      <Card className="room-furniture">
-        <CardHeader>
-          <CardTitle className="text-2xl font-heading text-accent-gold">{t("discover.title")}</CardTitle>
-          <p className="font-body text-muted-foreground">
+      <ArchiveCard>
+        <ArchiveCardHeader>
+          <ArchiveCardTitle className="text-2xl normal-case">{t("discover.title")}</ArchiveCardTitle>
+          <p className="font-body text-muted-foreground mt-1">
             {t("discover.subtitle")}
           </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        </ArchiveCardHeader>
+        <ArchiveCardContent className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder={`${t("discover.searchIn")} ${categoryConfig.sourceName}...`}
-                className="pl-10 font-body"
+                className={cn("pl-10 font-body", archiveField)}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               />
             </div>
-            <Button
+            <ArchiveCardButton
               onClick={handleSearch}
               disabled={isSearching || !searchQuery.trim()}
-              className="font-body theme-accent-gold"
+              active
+              icon={isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
             >
-              {isSearching ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <ExternalLink className="h-4 w-4 mr-2" />
-              )}
               {isSearching ? t("common.searching") : t("common.search")}
-            </Button>
+            </ArchiveCardButton>
           </div>
 
           {/* Category Tabs */}
           <div className="flex flex-wrap gap-2">
             {categories.map((cat) => (
-              <Button
+              <ArchiveCardButton
                 key={cat.id}
-                variant={cat.id === selectedCategory ? "default" : "outline"}
-                size="sm"
-                className={`font-body transition-all ${cat.id === selectedCategory ? "theme-accent-gold" : "bg-transparent hover:border-accent-gold/50"}`}
+                active={cat.id === selectedCategory}
                 onClick={() => handleCategoryChange(cat.id)}
               >
                 {t(`collection.${cat.labelKey}`)}
-              </Button>
+              </ArchiveCardButton>
             ))}
           </div>
 
@@ -321,13 +323,13 @@ export function DiscoverGames() {
           <div className="text-sm text-muted-foreground font-body">
             {t("discover.searchingIn")}: <span className="text-accent-gold font-medium">{categoryConfig.sourceName}</span>
           </div>
-        </CardContent>
-      </Card>
+        </ArchiveCardContent>
+      </ArchiveCard>
 
       {/* Selected Game Detail */}
       {selectedGame && (
-        <Card className="room-furniture">
-          <CardContent className="pt-6">
+        <ArchiveCard>
+          <ArchiveCardContent className="pt-6">
             <div className="flex gap-4">
               {((selectedGame as BGGGameDetails).thumbnail || (selectedGame as TCGSearchResult).imageUrl || (selectedGame as TCGSearchResult).thumbnailUrl) && (
                 <img
@@ -409,9 +411,9 @@ export function DiscoverGames() {
               <div className="flex items-center gap-3 mt-4 pt-4 border-t border-accent-gold/20">
                 <span className="text-accent-gold font-cinzel text-sm">{t("collection.quantity") || "Quantity"}:</span>
                 <div className="flex items-center gap-1">
-                  <Button type="button" variant="outline" size="sm" onClick={() => setTcgQuantity(Math.max(1, tcgQuantity - 1))} className="h-8 w-8 p-0">-</Button>
-                  <Input type="number" min="1" value={tcgQuantity} onChange={(e) => setTcgQuantity(Math.max(1, parseInt(e.target.value) || 1))} className="w-16 h-8 text-center" />
-                  <Button type="button" variant="outline" size="sm" onClick={() => setTcgQuantity(tcgQuantity + 1)} className="h-8 w-8 p-0">+</Button>
+                  <ArchiveIconButton type="button" icon={<span className="text-base leading-none">-</span>} onClick={() => setTcgQuantity(Math.max(1, tcgQuantity - 1))} aria-label="Vähennä" />
+                  <Input type="number" min="1" value={tcgQuantity} onChange={(e) => setTcgQuantity(Math.max(1, parseInt(e.target.value) || 1))} className={cn("w-16 h-9 text-center", archiveField)} />
+                  <ArchiveIconButton type="button" icon={<span className="text-base leading-none">+</span>} onClick={() => setTcgQuantity(tcgQuantity + 1)} aria-label="Lisää" />
                 </div>
               </div>
             )}
@@ -422,14 +424,14 @@ export function DiscoverGames() {
                 <div className="flex items-center gap-2">
                   <span className="text-accent-gold font-cinzel text-sm">{t("collection.quantity") || "Quantity"}:</span>
                   <div className="flex items-center gap-1">
-                    <Button type="button" variant="outline" size="sm" onClick={() => setMiniQuantity(Math.max(1, miniQuantity - 1))} className="h-8 w-8 p-0">-</Button>
-                    <Input type="number" min="1" value={miniQuantity} onChange={(e) => setMiniQuantity(Math.max(1, parseInt(e.target.value) || 1))} className="w-16 h-8 text-center" />
-                    <Button type="button" variant="outline" size="sm" onClick={() => setMiniQuantity(miniQuantity + 1)} className="h-8 w-8 p-0">+</Button>
+                    <ArchiveIconButton type="button" icon={<span className="text-base leading-none">-</span>} onClick={() => setMiniQuantity(Math.max(1, miniQuantity - 1))} aria-label="Vähennä" />
+                    <Input type="number" min="1" value={miniQuantity} onChange={(e) => setMiniQuantity(Math.max(1, parseInt(e.target.value) || 1))} className={cn("w-16 h-9 text-center", archiveField)} />
+                    <ArchiveIconButton type="button" icon={<span className="text-base leading-none">+</span>} onClick={() => setMiniQuantity(miniQuantity + 1)} aria-label="Lisää" />
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-accent-gold font-cinzel text-sm">{t("collection.paintStatus") || "Paint Status"}:</span>
-                  <select value={miniPaintStatus} onChange={(e) => setMiniPaintStatus(e.target.value as PaintStatus)} className="h-8 rounded-md border border-input bg-background px-2 text-sm font-body">
+                  <select value={miniPaintStatus} onChange={(e) => setMiniPaintStatus(e.target.value as PaintStatus)} className={cn("h-9 rounded-md px-2 text-sm font-body", archiveField)}>
                     <option value="unpainted">{t("collection.unpainted") || "Unpainted"}</option>
                     <option value="primed">{t("collection.primed") || "Primed"}</option>
                     <option value="in_progress">{t("collection.inProgress") || "In Progress"}</option>
@@ -441,37 +443,29 @@ export function DiscoverGames() {
             )}
             
             <div className={`flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 mt-4 ${selectedCategory !== "trading_card" && selectedCategory !== "miniature" ? "pt-4 border-t border-accent-gold/20" : ""}`}>
-              <Button variant="outline" onClick={() => setSelectedGame(null)} className="font-body bg-transparent w-full sm:w-auto">
+              <ArchiveCardButton onClick={() => setSelectedGame(null)} className="w-full sm:w-auto">
                 {t("common.cancel")}
-              </Button>
-              <Button
-                variant="outline"
+              </ArchiveCardButton>
+              <ArchiveCardButton
                 onClick={() => handleAddGame('wishlist')}
                 disabled={addingGame !== null}
-                className="font-body bg-transparent border-accent-gold/30 hover:bg-accent-gold/10 w-full sm:w-auto"
+                className="w-full sm:w-auto"
+                icon={addingGame?.type === 'wishlist' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Heart className="h-4 w-4" />}
               >
-                {addingGame?.type === 'wishlist' ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Heart className="h-4 w-4 mr-2" />
-                )}
                 {t("collection.addToWishlist")}
-              </Button>
-              <Button
+              </ArchiveCardButton>
+              <ArchiveCardButton
                 onClick={() => handleAddGame('owned')}
                 disabled={addingGame !== null}
-                className="theme-accent-gold font-body w-full sm:w-auto"
+                active
+                className="w-full sm:w-auto"
+                icon={addingGame?.type === 'collection' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               >
-                {addingGame?.type === 'collection' ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Plus className="h-4 w-4 mr-2" />
-                )}
                 {t("collection.addToCollection")}
-              </Button>
+              </ArchiveCardButton>
             </div>
-          </CardContent>
-        </Card>
+          </ArchiveCardContent>
+        </ArchiveCard>
       )}
 
       {/* Search Results */}
@@ -490,7 +484,7 @@ export function DiscoverGames() {
     {searchResults.map((game) => (
       selectedCategory === "trading_card" ? (
         // TCG Card display with image
-        <Card key={game.id} className="room-furniture overflow-hidden hover:border-accent-gold/50 transition-colors cursor-pointer group" onClick={() => handleSelectGame(game.id)}>
+        <ArchiveCard key={game.id} scrim={false} corners={false} centerOrnaments={false} className="overflow-hidden cursor-pointer group" onClick={() => handleSelectGame(game.id)}>
           <div className="relative aspect-[2.5/3.5] bg-surface/50">
             {(game as TCGSearchResult).imageUrl ? (
               <img 
@@ -511,7 +505,7 @@ export function DiscoverGames() {
             <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <Plus className="absolute bottom-2 right-2 h-6 w-6 text-accent-gold opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
-          <CardContent className="p-2">
+          <div className="p-2">
             <h4 className="font-body font-medium text-sm truncate">{game.name}</h4>
             <div className="flex flex-wrap gap-1 mt-1">
               {(game as TCGSearchResult).set && (
@@ -520,7 +514,7 @@ export function DiscoverGames() {
                 </Badge>
               )}
               {(game as TCGSearchResult).rarity && (
-                <Badge variant="outline" className="text-[10px] border-purple-500/30 text-purple-400 px-1 py-0">
+                <Badge variant="outline" className="text-[10px] border-accent-gold/30 text-accent-gold px-1 py-0">
                   {(game as TCGSearchResult).rarity}
                 </Badge>
               )}
@@ -528,12 +522,12 @@ export function DiscoverGames() {
             {(game as TCGSearchResult).price && (
               <p className="text-xs text-green-500 mt-1 font-body">${(game as TCGSearchResult).price?.toFixed(2)}</p>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </ArchiveCard>
       ) : (
         // Board game, RPG, Miniature display - with thumbnail or placeholder icon
-        <Card key={game.id} className="room-furniture overflow-hidden hover:border-accent-gold/50 transition-colors cursor-pointer group" onClick={() => handleSelectGame(game.id)}>
-          <CardContent className="p-0">
+        <ArchiveCard key={game.id} scrim={false} corners={false} centerOrnaments={false} className="overflow-hidden cursor-pointer group" onClick={() => handleSelectGame(game.id)}>
+          <div className="p-0">
             <div className="flex">
               {/* Thumbnail or category icon placeholder */}
               <div className="w-24 h-24 flex-shrink-0 bg-surface/30 flex items-center justify-center border-r border-accent-gold/10 overflow-hidden">
@@ -573,8 +567,8 @@ export function DiscoverGames() {
                 <Plus className="h-5 w-5 text-accent-gold ml-4 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </ArchiveCard>
       )
     ))}
           </div>

@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { ArchiveCard, ArchiveCardButton, ArchiveCardContent, archiveField } from "@/components/archive-frame"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Download, Loader2, Plus, FileText } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
@@ -237,46 +237,40 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
   // Render username import for board games and RPGs
   if (supportsUsernameImport) {
     return (
-      <Card className="room-furniture mb-6">
-        <CardContent className="p-6">
+      <ArchiveCard className="mb-6">
+        <ArchiveCardContent className="p-6">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1">
               <Input
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder={getPlaceholder()}
-                className="w-full bg-background text-foreground border-border"
+                className={cn("w-full", archiveField)}
               />
             </div>
-            <Button
+            <ArchiveCardButton
               onClick={handleImport}
+              active={!!username.trim()}
               disabled={!username.trim() || importing}
-              style={{
-                backgroundColor: username.trim() ? "hsl(var(--accent-gold))" : "hsl(var(--muted))",
-                color: username.trim() ? "hsl(var(--accent-gold-foreground))" : "hsl(var(--muted-foreground))",
-              }}
-              className="disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:opacity-90"
+              icon={
+                importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />
+              }
             >
-              {importing ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Download className="h-4 w-4 mr-2" />
-              )}
               {t("collection.importFrom") || "Import from"} {getSourceName()}
-            </Button>
+            </ArchiveCardButton>
           </div>
           <p className="text-sm text-muted-foreground font-body mt-2">
             {t("collection.importDescription") || `Import your collection from ${getSourceName()} by entering your username`}
           </p>
-        </CardContent>
-      </Card>
+        </ArchiveCardContent>
+      </ArchiveCard>
     )
   }
 
   // Render bulk import for miniatures and trading cards
   return (
-    <Card className="room-furniture mb-6">
-      <CardContent className="p-6">
+    <ArchiveCard className="mb-6">
+      <ArchiveCardContent className="p-6">
         <div className="flex items-center gap-2 mb-4">
           <FileText className="h-5 w-5 text-accent-gold" />
           <h3 className="font-heading text-lg text-accent-gold">
@@ -299,37 +293,38 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
               ? "4 Lightning Bolt\n2x Dark Ritual\n1 Black Lotus (LEA)"
               : "10 Intercessors\n5x Hellblasters\n1 Captain in Gravis Armour"
             }
-            className="w-full min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm font-body placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring font-mono"
+            className={cn(
+              "w-full min-h-[120px] rounded-md px-3 py-2 text-sm font-mono",
+              "placeholder:text-[var(--archive-gold,#d9b65c)]/40 focus-visible:outline-none",
+              archiveField,
+            )}
           />
 
           <div className="flex gap-3">
-            <Button
+            <ArchiveCardButton
               onClick={handleParseBulk}
-              variant="outline"
+              fullWidth
               disabled={!bulkText.trim()}
               className="flex-1"
             >
               {t("collection.parseList") || "Parse List"}
-            </Button>
-            
+            </ArchiveCardButton>
+
             {parsedItems.length > 0 && (
-              <Button
+              <ArchiveCardButton
                 onClick={handleBulkImport}
+                active
+                fullWidth
                 disabled={importingBulk}
-                className="flex-1 theme-accent-gold"
+                className="flex-1"
+                icon={
+                  importingBulk ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />
+                }
               >
-                {importingBulk ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    {t("collection.importing") || "Importing..."}
-                  </>
-                ) : (
-                  <>
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("collection.importAll") || "Import All"} ({parsedItems.length})
-                  </>
-                )}
-              </Button>
+                {importingBulk
+                  ? t("collection.importing") || "Importing..."
+                  : `${t("collection.importAll") || "Import All"} (${parsedItems.length})`}
+              </ArchiveCardButton>
             )}
           </div>
 
@@ -345,7 +340,7 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </ArchiveCardContent>
+    </ArchiveCard>
   )
 }

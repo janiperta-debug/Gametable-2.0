@@ -8,9 +8,9 @@ import { GameGrid } from "@/components/game-grid"
 import { GameList } from "@/components/game-list"
 import { DiscoverGames } from "@/components/discover-games"
 import { ImportSection } from "@/components/import-section"
-import { BookOpen, Filter, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ThemeHero } from "@/components/theme-hero"
+import { ArchiveButton, ArchiveToggle } from "@/components/archive-frame"
+import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "@/lib/i18n"
 import { useCollection } from "@/hooks/useCollection"
@@ -162,29 +162,30 @@ export default function Collection() {
   }, [transformedGames])
 
   return (
-    <div className="min-h-screen room-environment">
+    <div className="min-h-screen">
       <main className="container mx-auto px-4 py-8">
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-4">
-            <BookOpen className="h-8 w-8 text-accent-gold mr-3" />
-            <h1 className="logo-text text-5xl font-bold">{t("collection.title")}</h1>
+        <ThemeHero page="collection" mode="backdrop">
+          <div className="text-center">
+            <h1 className="logo-text text-5xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+              {t("collection.title")}
+            </h1>
+            <p className="font-body text-foreground/90 text-xl max-w-3xl mx-auto mt-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+              {t("collection.subtitle")}
+            </p>
           </div>
-          <p className="font-body text-muted-foreground text-xl max-w-3xl mx-auto">
-            {t("collection.subtitle")}
-          </p>
-        </div>
+        </ThemeHero>
 
-        <div className="flex justify-center mb-8">
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "my-games" | "find-games")}>
-            <TabsList className="grid w-full grid-cols-2 mb-6 md:mb-8 max-w-md mx-auto">
-              <TabsTrigger value="my-games" className="font-cinzel text-xs sm:text-sm">
-                {t("collection.myGames")}
-              </TabsTrigger>
-              <TabsTrigger value="find-games" className="font-cinzel text-xs sm:text-sm">
-                {t("collection.findGames")}
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+        {/* Tab toggle sits just above the category badges (consistent placement
+            across both tabs, since the hero scales differently on mobile/desktop). */}
+        <div className="mb-8 flex justify-center">
+          <ArchiveToggle
+            value={activeTab}
+            onChange={(value) => setActiveTab(value)}
+            options={[
+              { value: "my-games", label: t("collection.myGames") },
+              { value: "find-games", label: t("collection.findGames") },
+            ]}
+          />
         </div>
 
         {activeTab === "my-games" ? (
@@ -206,6 +207,12 @@ export default function Collection() {
               statusCounts={statusCounts}
             />
 
+            <div className="mb-8">
+              <ArchiveButton onClick={() => setShowFilters(!showFilters)}>
+                {showFilters ? t("collection.hideFilters") : t("collection.showFilters")}
+              </ArchiveButton>
+            </div>
+
             {selectedCategory !== "all" && (
               <ImportSection selectedCategory={selectedCategory as Exclude<CategoryType, "all">} />
             )}
@@ -217,16 +224,6 @@ export default function Collection() {
                 </div>
               )}
               <div className={showFilters ? "lg:col-span-3" : "lg:col-span-4"}>
-                <div className="mb-4">
-                  <Button
-                    onClick={() => setShowFilters(!showFilters)}
-                    variant="outline"
-                    className="theme-accent-gold bg-transparent"
-                  >
-                    <Filter className="h-4 w-4 mr-2" />
-                    <span className="font-cinzel">{showFilters ? t("collection.hideFilters") : t("collection.showFilters")}</span>
-                  </Button>
-                </div>
                 {loading ? (
                   <div className="flex items-center justify-center py-16">
                     <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
@@ -242,8 +239,6 @@ export default function Collection() {
                 )}
               </div>
             </div>
-
-            
           </>
         ) : (
           <DiscoverGames onToggleWishlist={handleToggleWishlist} />

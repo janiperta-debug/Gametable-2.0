@@ -6,6 +6,8 @@ import { useTranslations } from "@/lib/i18n"
 import { BADGE_DEFINITIONS, type BadgeSeries } from "@/lib/badge-definitions"
 import { getBadgesWithProgress, type BadgeWithProgress } from "@/app/actions/badges"
 import { useUser } from "@/hooks/useUser"
+import { ThemeHero } from "@/components/theme-hero"
+import { ArchiveCard, ArchiveCardContent } from "@/components/archive-frame"
 import Image from "next/image"
 import { formatDistanceToNow } from "date-fns"
 
@@ -142,34 +144,35 @@ export default function TrophiesPage() {
   return (
     <div className="min-h-screen">
       <main className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Header */}
-        <div className="room-furniture p-4 sm:p-8 mb-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 text-center sm:text-left">
+        <ThemeHero page="trophies" mode="backdrop">
+          <div className="flex flex-col items-center gap-6 text-center">
             <div>
-              <h1 className="text-2xl sm:text-4xl md:text-5xl logo-text mb-2">{t("trophies.title")}</h1>
-              <p className="text-sm sm:text-lg font-merriweather text-muted-foreground">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl logo-text mb-2 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+                {t("trophies.title")}
+              </h1>
+              <p className="text-base sm:text-lg font-merriweather text-foreground/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
                 {t("trophies.subtitle")}
               </p>
             </div>
-            <div className="flex gap-4 sm:gap-6">
+            <div className="flex gap-6 sm:gap-8">
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
                   <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-accent-gold" />
                   <span className="text-xl sm:text-3xl font-cinzel text-accent-gold">{earnedCount}</span>
-                  <span className="text-sm sm:text-xl font-merriweather text-muted-foreground">/ {totalBadges}</span>
+                  <span className="text-sm sm:text-xl font-merriweather text-foreground/90">/ {totalBadges}</span>
                 </div>
-                <p className="text-xs sm:text-sm font-merriweather text-muted-foreground">{t("trophies.badgesEarned")}</p>
+                <p className="text-xs sm:text-sm font-merriweather text-foreground/80">{t("trophies.badgesEarned")}</p>
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
                   <Award className="h-4 w-4 sm:h-5 sm:w-5 text-accent-gold" />
                   <span className="text-xl sm:text-3xl font-cinzel text-accent-gold">{totalXP}</span>
                 </div>
-                <p className="text-xs sm:text-sm font-merriweather text-muted-foreground">{t("trophies.totalXP")}</p>
+                <p className="text-xs sm:text-sm font-merriweather text-foreground/80">{t("trophies.totalXP")}</p>
               </div>
             </div>
           </div>
-        </div>
+        </ThemeHero>
 
         {/* Badge Series Grid */}
         <div className="space-y-6">
@@ -178,7 +181,8 @@ export default function TrophiesPage() {
             const seriesNameTranslated = t(`trophies.series.${series}`)
 
             return (
-              <div key={series} className="room-furniture p-6">
+              <ArchiveCard key={series}>
+                <ArchiveCardContent>
                 {/* Series Header */}
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-accent-gold/20">
                   <div>
@@ -291,7 +295,8 @@ export default function TrophiesPage() {
                     )
                   })}
                 </div>
-              </div>
+                </ArchiveCardContent>
+              </ArchiveCard>
             )
           })}
         </div>

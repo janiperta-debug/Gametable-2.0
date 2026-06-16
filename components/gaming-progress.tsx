@@ -1,6 +1,6 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import { ArchiveButton, ArchiveCard, ArchiveCardContent } from "@/components/archive-frame"
 import { Progress } from "@/components/ui/progress"
 import { RefreshCw, BookOpen, Users, Calendar, Trophy, Loader2 } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
@@ -131,14 +131,17 @@ export function GamingProgress() {
 
   if (loading || statsLoading) {
     return (
-      <div className="room-furniture p-8 flex items-center justify-center min-h-[200px]">
-        <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
-      </div>
+      <ArchiveCard>
+        <ArchiveCardContent className="p-8 flex items-center justify-center min-h-[200px]">
+          <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
+        </ArchiveCardContent>
+      </ArchiveCard>
     )
   }
 
   return (
-    <div className="room-furniture p-4 sm:p-8 space-y-4 sm:space-y-6">
+    <ArchiveCard>
+    <ArchiveCardContent className="p-4 sm:p-8 space-y-4 sm:space-y-6">
       {/* Header with Level and XP */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
@@ -150,15 +153,13 @@ export function GamingProgress() {
             <span className="text-sm sm:text-lg font-merriweather text-accent-gold/80">{stats.totalXP} {t("profile.totalXP")}</span>
           </div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="border-accent-gold/40 text-accent-gold hover:bg-accent-gold hover:text-background bg-transparent w-full sm:w-auto"
+        <ArchiveButton
+          className="w-full sm:w-auto"
           onClick={() => fetchStats()}
+          icon={<RefreshCw className="w-4 h-4" />}
         >
-          <RefreshCw className="w-4 h-4 mr-2" />
           {t("common.refresh")}
-        </Button>
+        </ArchiveButton>
       </div>
 
       {/* XP Progress Bar */}
@@ -222,6 +223,7 @@ export function GamingProgress() {
           </div>
         </div>
       </div>
-    </div>
+    </ArchiveCardContent>
+    </ArchiveCard>
   )
 }

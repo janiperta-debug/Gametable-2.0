@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
+import { ArchiveCard, ArchiveCardButton, ArchiveCardContent } from "@/components/archive-frame"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
@@ -80,14 +80,17 @@ export function FriendsList() {
 
   if (loading) {
     return (
-      <div className="room-furniture p-8 flex items-center justify-center min-h-[200px]">
-        <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
-      </div>
+      <ArchiveCard>
+        <ArchiveCardContent className="p-8 flex items-center justify-center min-h-[200px]">
+          <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
+        </ArchiveCardContent>
+      </ArchiveCard>
     )
   }
 
   return (
-    <div className="room-furniture p-8 space-y-6">
+    <ArchiveCard>
+    <ArchiveCardContent className="p-8 space-y-6">
       {/* Pending Requests Section */}
       {pendingRequests.length > 0 && (
         <div className="space-y-4">
@@ -120,31 +123,23 @@ export function FriendsList() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      className="flex-1 bg-accent-gold hover:bg-accent-copper"
+                    <ArchiveCardButton
+                      active
+                      className="flex-1"
                       onClick={() => handleAccept(request)}
                       disabled={actionLoading === request.id}
+                      icon={actionLoading === request.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                     >
-                      {actionLoading === request.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <>
-                          <Check className="h-4 w-4 mr-1" />
-                          {t("profile.accept")}
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 border-red-400/40 text-red-400 hover:bg-red-400/10 bg-transparent"
+                      {t("profile.accept")}
+                    </ArchiveCardButton>
+                    <ArchiveCardButton
+                      className="flex-1"
                       onClick={() => handleReject(request)}
                       disabled={actionLoading === request.id}
+                      icon={<X className="h-4 w-4" />}
                     >
-                      <X className="h-4 w-4 mr-1" />
                       {t("profile.decline")}
-                    </Button>
+                    </ArchiveCardButton>
                   </div>
                 </div>
               )
@@ -188,15 +183,11 @@ export function FriendsList() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Link href={`/users/${friend.username}`} className="flex-1">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full border-accent-gold/40 text-accent-gold hover:bg-accent-gold/10 bg-transparent"
-                      >
+                    <ArchiveCardButton asChild fullWidth>
+                      <Link href={`/users/${friend.username}`}>
                         {t("profile.viewProfile")}
-                      </Button>
-                    </Link>
+                      </Link>
+                    </ArchiveCardButton>
                   </div>
                 </div>
               )
@@ -208,6 +199,7 @@ export function FriendsList() {
       <p className="text-sm font-merriweather text-accent-gold/60 italic pt-2">
         {t("profile.friendsNote")}
       </p>
-    </div>
+    </ArchiveCardContent>
+    </ArchiveCard>
   )
 }

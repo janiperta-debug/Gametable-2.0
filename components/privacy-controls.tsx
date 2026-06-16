@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { ArchiveButton, ArchiveCard, ArchiveCardContent } from "@/components/archive-frame"
 import { Switch } from "@/components/ui/switch"
 import { Shield } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
@@ -14,7 +14,8 @@ export function PrivacyControls() {
   const t = useTranslations()
 
   return (
-    <div className="room-furniture p-8 space-y-6">
+    <ArchiveCard>
+    <ArchiveCardContent className="p-8 space-y-6">
       <div className="flex items-center space-x-3">
         <Shield className="w-6 h-6 text-accent-gold" />
         <div>
@@ -86,10 +87,11 @@ export function PrivacyControls() {
           />
         </div>
 
-        <Button className="bg-accent-gold hover:bg-accent-gold/90 text-background font-cinzel">
+        <ArchiveButton active>
           {t("profile.saveProfileChanges")}
-        </Button>
+        </ArchiveButton>
       </div>
-    </div>
+    </ArchiveCardContent>
+    </ArchiveCard>
   )
 }

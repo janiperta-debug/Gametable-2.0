@@ -1,10 +1,17 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import {
+  ArchiveButton,
+  ArchiveIconButton,
+  archiveField,
+  archiveSelectContent,
+  archiveSelectItem,
+} from "@/components/archive-frame"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Plus, Search, SortAsc, Grid, List } from "lucide-react"
+import { Search, Grid, List } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 
 type CategoryType = "all" | "board-games" | "rpgs" | "miniatures" | "trading-cards"
@@ -79,8 +86,7 @@ export function CollectionHeader({
     <div className="mb-8 space-y-4">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div className="flex-1">
-          <h2 className="ornate-text font-heading text-3xl font-bold mb-2">{t("collection.myCollection")}</h2>
-          <div className="flex flex-wrap gap-2 mt-2 max-w-full">
+          <div className="flex flex-wrap gap-2 max-w-full">
             {/* Status filters */}
             <Badge
               variant={statusFilter === "all" ? "secondary" : "outline"}
@@ -117,11 +123,8 @@ export function CollectionHeader({
             ))}
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-          <Button onClick={onAddGame} className="theme-accent-gold w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
-            <span className="font-body">{t("collection.addGame")}</span>
-          </Button>
+        <div className="flex flex-col sm:flex-row items-center gap-2">
+          <ArchiveButton onClick={onAddGame}>{t("collection.addGame")}</ArchiveButton>
         </div>
       </div>
 
@@ -132,44 +135,43 @@ export function CollectionHeader({
             placeholder={t("collection.searchCollection")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 font-body"
+            className={cn("pl-10 font-body", archiveField)}
           />
         </div>
 
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex-1 sm:flex-none bg-transparent min-w-0 flex-shrink">
-                <SortAsc className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span className="font-body truncate">{t(currentSort.labelKey)}</span>
-              </Button>
+              <ArchiveButton>{t(currentSort.labelKey)}</ArchiveButton>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className={archiveSelectContent}>
               {sortOptions.map((option) => (
-                <DropdownMenuItem key={option.value} className="font-body" onClick={() => setSortBy(option.value)}>
+                <DropdownMenuItem
+                  key={option.value}
+                  className={cn("font-body cursor-pointer", archiveSelectItem)}
+                  onClick={() => setSortBy(option.value)}
+                >
                   {t(option.labelKey)}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div className="flex items-center border rounded-md flex-shrink-0">
-            <Button
-              variant={viewMode === "grid" ? "default" : "ghost"}
-              size="sm"
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <ArchiveIconButton
+              icon={<Grid className="h-4 w-4" />}
+              active={viewMode === "grid"}
+              aria-pressed={viewMode === "grid"}
+              aria-label={t("collection.gridView")}
               onClick={() => setViewMode("grid")}
-              className={`rounded-r-none ${viewMode === "grid" ? "theme-accent-gold" : ""}`}
-            >
-              <Grid className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === "list" ? "default" : "ghost"}
-              size="sm"
+            />
+            <ArchiveIconButton
+              icon={<List className="h-4 w-4" />}
+              active={viewMode === "list"}
+              aria-pressed={viewMode === "list"}
+              aria-label={t("collection.listView")}
               onClick={() => setViewMode("list")}
-              className={`rounded-l-none ${viewMode === "list" ? "theme-accent-gold" : ""}`}
-            >
-              <List className="h-4 w-4" />
-            </Button>
+            />
           </div>
         </div>
       </div>

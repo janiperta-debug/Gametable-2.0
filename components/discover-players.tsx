@@ -2,9 +2,18 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  ArchiveCardButton,
+  ArchiveCard,
+  ArchiveCardContent,
+  ArchiveCardHeader,
+  ArchiveCardTitle,
+  archiveField,
+  archiveSelectContent,
+  archiveSelectItem,
+} from "@/components/archive-frame"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -80,14 +89,14 @@ export function DiscoverPlayers() {
 
   return (
     <div className="space-y-8">
-      <Card className="room-furniture">
-        <CardHeader>
-          <CardTitle className="text-2xl">{t("community.refineSearch")}</CardTitle>
-          <p className="font-merriweather text-muted-foreground">
+      <ArchiveCard>
+        <ArchiveCardHeader>
+          <ArchiveCardTitle className="text-2xl normal-case">{t("community.refineSearch")}</ArchiveCardTitle>
+          <p className="font-merriweather text-muted-foreground mt-1">
             {t("community.refineSearchDescription")}
           </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        </ArchiveCardHeader>
+        <ArchiveCardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Location Filter */}
             <div className="space-y-2">
@@ -96,7 +105,7 @@ export function DiscoverPlayers() {
                 <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder={t("community.locationPlaceholder")}
-                  className="pl-10 font-merriweather"
+                  className={cn("pl-10 font-merriweather", archiveField)}
                   value={locationFilter}
                   onChange={(e) => setLocationFilter(e.target.value)}
                 />
@@ -110,7 +119,7 @@ export function DiscoverPlayers() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder={t("community.gameTitlePlaceholder")}
-                  className="pl-10 font-merriweather"
+                  className={cn("pl-10 font-merriweather", archiveField)}
                   value={gameFilter}
                   onChange={(e) => setGameFilter(e.target.value)}
                 />
@@ -121,33 +130,30 @@ export function DiscoverPlayers() {
             <div className="space-y-2">
               <label className="text-sm font-cinzel text-accent-gold">{t("community.preferredGameType")}</label>
               <Select value={gameTypeFilter} onValueChange={setGameTypeFilter}>
-                <SelectTrigger className="font-merriweather">
+                <SelectTrigger className={cn("font-merriweather", archiveField)}>
                   <SelectValue placeholder={t("community.anyGameType")} />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="board-games">{t("community.boardGames")}</SelectItem>
-                  <SelectItem value="rpgs">{t("community.rpgs")}</SelectItem>
-                  <SelectItem value="miniatures">{t("community.miniatures")}</SelectItem>
-                  <SelectItem value="trading-cards">{t("community.tradingCards")}</SelectItem>
-                  <SelectItem value="party-games">{t("community.partyGames")}</SelectItem>
-                  <SelectItem value="strategy">{t("community.strategyGames")}</SelectItem>
+                <SelectContent className={archiveSelectContent}>
+                  <SelectItem value="board-games" className={archiveSelectItem}>{t("community.boardGames")}</SelectItem>
+                  <SelectItem value="rpgs" className={archiveSelectItem}>{t("community.rpgs")}</SelectItem>
+                  <SelectItem value="miniatures" className={archiveSelectItem}>{t("community.miniatures")}</SelectItem>
+                  <SelectItem value="trading-cards" className={archiveSelectItem}>{t("community.tradingCards")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div className="flex justify-center">
-            <Button 
-              className="px-8 font-cinzel bg-accent-gold hover:bg-accent-copper"
+            <ArchiveCardButton
               onClick={handleSearch}
               disabled={loading}
+              icon={loading ? <Loader2 className="h-4 w-4 animate-spin" /> : undefined}
             >
-              {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
               {t("community.searchPlayers")}
-            </Button>
+            </ArchiveCardButton>
           </div>
-        </CardContent>
-      </Card>
+        </ArchiveCardContent>
+      </ArchiveCard>
 
       {/* Players Grid */}
       {loading ? (
@@ -155,13 +161,13 @@ export function DiscoverPlayers() {
           <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
         </div>
       ) : players.length === 0 && searched ? (
-        <Card className="room-furniture text-center py-12">
-          <CardContent>
+        <ArchiveCard className="text-center">
+          <ArchiveCardContent className="py-12">
             <Users className="h-16 w-16 text-accent-gold mx-auto mb-4" />
             <h3 className="font-heading text-xl font-semibold mb-2">{t("community.noPlayersFound")}</h3>
             <p className="font-body text-muted-foreground">{t("community.tryDifferentFilters")}</p>
-          </CardContent>
-        </Card>
+          </ArchiveCardContent>
+        </ArchiveCard>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {players.map((player) => {
@@ -169,8 +175,8 @@ export function DiscoverPlayers() {
             const initials = displayName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
             
             return (
-              <Card key={player.id} className="picture-frame">
-                <CardContent className="p-6">
+              <ArchiveCard key={player.id}>
+                <ArchiveCardContent className="p-6">
                   <div className="space-y-4">
                     <div className="flex items-center space-x-4">
                       <Avatar className="h-16 w-16">
@@ -197,51 +203,57 @@ export function DiscoverPlayers() {
                     )}
 
                     <div className="flex gap-2">
-                      <Button asChild variant="outline" className="flex-1 font-cinzel bg-transparent">
+                      <ArchiveCardButton asChild fullWidth className="flex-1">
                         <Link href={`/users/${player.username || player.id}`}>{t("community.viewProfile")}</Link>
-                      </Button>
-                      
+                      </ArchiveCardButton>
+
                       {player.friendship_status === "accepted" ? (
-                        <Button variant="outline" className="flex-1 font-cinzel" disabled>
-                          <UserCheck className="h-4 w-4 mr-1" />
+                        <ArchiveCardButton
+                          fullWidth
+                          className="flex-1"
+                          icon={<UserCheck className="h-4 w-4" />}
+                          disabled
+                        >
                           {t("community.friends")}
-                        </Button>
+                        </ArchiveCardButton>
                       ) : player.friendship_status === "pending" ? (
-                        <Button 
-                          variant="outline" 
-                          className="flex-1 font-cinzel"
+                        <ArchiveCardButton
+                          fullWidth
+                          className="flex-1"
                           onClick={() => handleCancelRequest(player)}
                           disabled={actionLoading === player.id}
+                          icon={
+                            actionLoading === player.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Clock className="h-4 w-4" />
+                            )
+                          }
                         >
-                          {actionLoading === player.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <>
-                              <Clock className="h-4 w-4 mr-1" />
-                              {t("community.pending")}
-                            </>
-                          )}
-                        </Button>
+                          {t("community.pending")}
+                        </ArchiveCardButton>
                       ) : (
-                        <Button 
-                          className="flex-1 font-cinzel bg-accent-gold hover:bg-accent-copper"
+                        <ArchiveCardButton
+                          fullWidth
+                          active
+                          className="flex-1"
                           onClick={() => handleConnect(player)}
                           disabled={actionLoading === player.id}
+                          icon={
+                            actionLoading === player.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <UserPlus className="h-4 w-4" />
+                            )
+                          }
                         >
-                          {actionLoading === player.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <>
-                              <UserPlus className="h-4 w-4 mr-1" />
-                              {t("community.connect")}
-                            </>
-                          )}
-                        </Button>
+                          {t("community.connect")}
+                        </ArchiveCardButton>
                       )}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </ArchiveCardContent>
+              </ArchiveCard>
             )
           })}
         </div>
