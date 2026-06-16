@@ -596,7 +596,9 @@
   "tabManor": "Manor",
   "tabArtifacts": "Artifacts",
   "artifactsTitle": "Manor Artifacts",
-  "artifactsSubtitle": "Artifacts are found. Secrets remain. The story unfolds."
+  "artifactsSubtitle": "Artifacts are found. Secrets remain. The story unfolds.",
+  "manorTitle": "Manor Rooms",
+  "manorSubtitle": "Every journey begins at a door."
   },
   "trophies": {
     "title": "Trophy Collection",
