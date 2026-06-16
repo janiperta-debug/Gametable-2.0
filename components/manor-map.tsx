@@ -19,37 +19,29 @@ function ManorTile({ room, isActive, isUnlocked, t }: ManorTileProps) {
 
   return (
     <div
-      className={`manor-tile group relative flex flex-col overflow-hidden rounded-md ${
+      className={`manor-tile group relative aspect-square overflow-hidden rounded-sm ${
         isActive ? "manor-tile-active" : ""
       } ${locked ? "manor-tile-locked" : ""}`}
+      title={name}
     >
       {/* Sketch artwork — fused into the parchment via multiply blend */}
-      <div className="relative aspect-square">
-        <img
-          src={`/themes/sketches/${room.id}.png`}
-          alt={name}
-          loading="lazy"
-          className="manor-tile-sketch h-full w-full object-contain p-2"
-        />
-        {locked && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Lock className="h-6 w-6 text-[hsl(30,55%,28%)]" aria-hidden="true" />
-            <span className="sr-only">{t("themes.locked") || "Locked"}</span>
-          </div>
-        )}
-        {isActive && (
-          <span className="absolute left-1 top-1 rounded-sm bg-[hsl(45,80%,45%)] px-1.5 py-0.5 font-heading text-[9px] font-bold uppercase tracking-wide text-[hsl(40,60%,12%)]">
-            {t("themes.currentRoom") || "Current"}
-          </span>
-        )}
-      </div>
-
-      {/* Room name plate */}
-      <div className="border-t border-[hsla(30,45%,40%,0.35)] px-1 py-1.5 text-center">
-        <span className="font-heading text-[10px] font-semibold uppercase leading-tight tracking-tight text-[hsl(30,55%,25%)] sm:text-[11px] text-balance">
-          {name}
+      <img
+        src={`/themes/sketches/${room.id}.png`}
+        alt={name}
+        loading="lazy"
+        className="manor-tile-sketch h-full w-full object-contain p-1"
+      />
+      {locked && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Lock className="h-5 w-5 text-[hsl(30,55%,28%)]" aria-hidden="true" />
+          <span className="sr-only">{`${name} — ${t("themes.locked") || "Locked"}`}</span>
+        </div>
+      )}
+      {isActive && (
+        <span className="absolute inset-x-0 bottom-0 bg-[hsl(45,80%,45%)] py-0.5 text-center font-heading text-[8px] font-bold uppercase tracking-wide text-[hsl(40,60%,12%)]">
+          {t("themes.currentRoom") || "Current"}
         </span>
-      </div>
+      )}
     </div>
   )
 }
@@ -64,9 +56,9 @@ interface ManorFloorProps {
 
 function ManorFloor({ label, rooms, activeRoomId, unlockedRooms, t }: ManorFloorProps) {
   return (
-    <section className="space-y-3">
-      <h2 className="manor-floor-label pb-1 font-heading text-lg font-bold uppercase tracking-wide">{label}</h2>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+    <section>
+      <h2 className="manor-floor-label mb-2 font-heading text-xs font-bold uppercase tracking-[0.2em]">{label}</h2>
+      <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-5 lg:grid-cols-7 lg:gap-2">
         {rooms.map((room) => (
           <ManorTile
             key={room.id}
@@ -88,22 +80,23 @@ interface ManorMapProps {
 
 export function ManorMap({ activeRoomId, unlockedRooms }: ManorMapProps) {
   const t = useTranslations()
-  const secondFloor = getRoomsByCategory("Second Floor")
   const groundFloor = getRoomsByCategory("Ground Floor")
+  const secondFloor = getRoomsByCategory("Second Floor")
   const basement = getRoomsByCategory("Basement")
 
+  // Unlock order: ground floor first, then second floor, then basement.
   return (
-    <div className="manor-map space-y-8 rounded-lg p-4 sm:p-6">
+    <div className="space-y-6">
       <ManorFloor
-        label={t("themes.secondFloor")}
-        rooms={secondFloor}
+        label={t("themes.groundFloor")}
+        rooms={groundFloor}
         activeRoomId={activeRoomId}
         unlockedRooms={unlockedRooms}
         t={t}
       />
       <ManorFloor
-        label={t("themes.groundFloor")}
-        rooms={groundFloor}
+        label={t("themes.secondFloor")}
+        rooms={secondFloor}
         activeRoomId={activeRoomId}
         unlockedRooms={unlockedRooms}
         t={t}
