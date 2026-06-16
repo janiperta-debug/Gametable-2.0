@@ -363,7 +363,7 @@
     "location": "Sijainti",
     "date": "Päivämäärä",
     "time": "Aika",
-    "host": "J��rjestäjä",
+    "host": "J����rjestäjä",
     "joinEvent": "Liity tapahtumaan",
     "leaveEvent": "Poistu tapahtumasta",
     "editEvent": "Muokkaa tapahtumaa",
@@ -597,7 +597,9 @@
   "tabManor": "Kartano",
   "tabArtifacts": "Artefaktit",
   "artifactsTitle": "Kartanon Artefaktit",
-  "artifactsSubtitle": "Artefaktit löytyvät. Salaisuudet säilyvät. Tarina etenee."
+  "artifactsSubtitle": "Artefaktit löytyvät. Salaisuudet säilyvät. Tarina etenee.",
+  "manorTitle": "Kartanon huoneet",
+  "manorSubtitle": "Jokainen matka alkaa ovelta."
   },
   "trophies": {
     "title": "Palkintokokoelma",

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { Castle, Gem } from "lucide-react"
-import { ManorMap } from "@/components/manor-map"
+import { ManorRoomsBoard } from "@/components/manor-rooms-board"
 import { ArtifactsBoard } from "@/components/artifacts-board"
 import { ArchiveToggle } from "@/components/archive-frame"
 import { useTranslations } from "@/lib/i18n"
@@ -15,7 +15,6 @@ export default function ThemesPage() {
 
   // TEMPORARY: every theme is locked except Main Hall while room work is in progress.
   const unlockedRooms = useMemo(() => ["main-hall"], [])
-  const activeRoom = "main-hall"
 
   const tabs = (
     <div className="flex justify-center">
@@ -30,13 +29,19 @@ export default function ThemesPage() {
     </div>
   )
 
-  // Manor tab: the page IS the map — full-bleed sepia parchment.
+  // Manor tab: same dark cabinet layout as Artifacts — room images + locks.
   if (tab === "manor") {
     return (
-      <main className="manor-map min-h-screen px-3 py-6 sm:px-6 sm:py-10">
-        <div className="mx-auto max-w-5xl space-y-6">
+      <main className="artifact-cabinet min-h-screen px-3 py-6 sm:px-6 sm:py-10">
+        <div className="mx-auto max-w-5xl space-y-8">
           {tabs}
-          <ManorMap activeRoomId={activeRoom} unlockedRooms={unlockedRooms} />
+          <header className="text-center">
+            <h1 className="logo-text text-3xl font-bold sm:text-4xl drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+              {t("themes.manorTitle")}
+            </h1>
+            <p className="font-body text-foreground/80 mt-2 text-pretty">{t("themes.manorSubtitle")}</p>
+          </header>
+          <ManorRoomsBoard />
         </div>
       </main>
     )
