@@ -591,8 +591,12 @@
     "everyDimensionTellsStory": "Every dimension tells a different story",
     "selectTheme": "Select Theme",
     "applyTheme": "Apply Theme",
-    "currentlyActive": "Currently Active",
-    "enterRoom": "Enter Room"
+  "currentlyActive": "Currently Active",
+  "enterRoom": "Enter Room",
+  "tabManor": "Manor",
+  "tabArtifacts": "Artifacts",
+  "artifactsTitle": "Manor Artifacts",
+  "artifactsSubtitle": "Artifacts are found. Secrets remain. The story unfolds."
   },
   "trophies": {
     "title": "Trophy Collection",

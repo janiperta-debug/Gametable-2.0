@@ -363,7 +363,7 @@
     "location": "Sijainti",
     "date": "Päivämäärä",
     "time": "Aika",
-    "host": "Järjestäjä",
+    "host": "J��rjestäjä",
     "joinEvent": "Liity tapahtumaan",
     "leaveEvent": "Poistu tapahtumasta",
     "editEvent": "Muokkaa tapahtumaa",
@@ -592,8 +592,12 @@
     "everyDimensionTellsStory": "Jokainen ulottuvuus kertoo eri tarinan",
     "selectTheme": "Valitse teema",
     "applyTheme": "Käytä teemaa",
-    "currentlyActive": "Tällä hetkellä aktiivinen",
-    "enterRoom": "Siirry huoneeseen"
+  "currentlyActive": "Tällä hetkellä aktiivinen",
+  "enterRoom": "Siirry huoneeseen",
+  "tabManor": "Kartano",
+  "tabArtifacts": "Artefaktit",
+  "artifactsTitle": "Kartanon Artefaktit",
+  "artifactsSubtitle": "Artefaktit löytyvät. Salaisuudet säilyvät. Tarina etenee."
   },
   "trophies": {
     "title": "Palkintokokoelma",
