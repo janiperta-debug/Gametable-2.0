@@ -1649,6 +1649,23 @@
 .rd3 { transition-delay: 0.3s; }
 
 /* ============================================================
+   ARTIFACT CABINET (/themes → Artefaktit tab) — fixed dark look.
+   Like the manor map, this view is the SAME regardless of the
+   active theme, so the background is a hard-coded near-black
+   candlelight gradient (NOT the theme's wine-red room-environment).
+   This also stops the theme red from bleeding through the frames'
+   semi-transparent inner gold hairline.
+   ============================================================ */
+.artifact-cabinet {
+  background-color: #0e0a07;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, hsla(38, 70%, 30%, 0.32), transparent 60%),
+    radial-gradient(circle at 12% 30%, hsla(36, 65%, 35%, 0.18), transparent 45%),
+    radial-gradient(circle at 88% 35%, hsla(36, 65%, 35%, 0.18), transparent 45%),
+    linear-gradient(180deg, #14100b 0%, #0c0805 100%);
+}
+
+/* ============================================================
    MANOR MAP (/themes) — fixed sepia parchment look.
    The manor map is the SAME regardless of the active theme, so
    these colors are hard-coded (not derived from --accent-* vars).

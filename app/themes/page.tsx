@@ -44,7 +44,7 @@ export default function ThemesPage() {
 
   // Artifacts tab: dark manor cabinet of earned artifacts.
   return (
-    <main className="min-h-screen room-environment px-3 py-6 sm:px-6 sm:py-10">
+    <main className="artifact-cabinet min-h-screen px-3 py-6 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-5xl space-y-8">
         {tabs}
         <header className="text-center">
