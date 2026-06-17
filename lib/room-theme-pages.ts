@@ -9,6 +9,9 @@
  * "Copying & filling a theme" = adding one entry to ROOM_THEME_PAGES below.
  * The base/template never changes.
  *
+ * All copy is bilingual ({ fi, en }). Shared template chrome ("Back to Map",
+ * "The Essence", etc.) lives in the i18n JSON under `themes.roomPage`.
+ *
  * Asset rules (no new art needed):
  *  - crest  = the room's nav home-button crest
  *  - hero   = the room's start-page hero
@@ -16,25 +19,31 @@
  *  - artifact = /themes/artifacts/{id}.png
  */
 
+/** A string available in both supported locales. */
+export interface Localized {
+  fi: string
+  en: string
+}
+
 export interface JourneyStep {
   /** Short step label, e.g. "Arrival". */
-  title: string
+  title: Localized
   /** One-line description of the step. */
-  description: string
+  description: Localized
 }
 
 export interface GlimpseImage {
   /** Image path (reuses an existing hero asset). */
   image: string
   /** Bold caption under the image. */
-  caption: string
+  caption: Localized
 }
 
 export interface UnlockItem {
   /** What is unlocked, e.g. "Bar Theme". */
-  label: string
+  label: Localized
   /** Short explanation. */
-  description: string
+  description: Localized
 }
 
 export interface RoomThemePage {
@@ -45,18 +54,18 @@ export interface RoomThemePage {
   /** Start-page hero image. */
   hero: string
   /** Display title, e.g. "Main Hall". */
-  title: string
+  title: Localized
   /** Italic tagline beneath the title. */
-  tagline: string
+  tagline: Localized
 
   /** Left column heading, e.g. "The Main Hall". */
-  storyTitle: string
+  storyTitle: Localized
   /** Story paragraphs (each rendered as its own block). */
-  storyParagraphs: string[]
+  storyParagraphs: Localized[]
   /** "The Essence" one-line italic theme. */
-  essenceTagline: string
+  essenceTagline: Localized
   /** "The Essence" body lines. */
-  essenceText: string[]
+  essenceText: Localized[]
 
   /** "Your Journey in This Room" — exactly 10 steps. */
   journey: JourneyStep[]
@@ -66,16 +75,16 @@ export interface RoomThemePage {
 
   /** Artefact section (mention pulled from the room's artifact page). */
   artifact: {
-    name: string
+    name: Localized
     image: string
-    description: string[]
+    description: Localized[]
   }
 
   /** "What Unlocks" list. */
   unlocks: UnlockItem[]
 
   /** Themed closing line shown in the footer band. */
-  footerLine: string
+  footerLine: Localized
 }
 
 export const ROOM_THEME_PAGES: Record<string, RoomThemePage> = {
@@ -83,56 +92,138 @@ export const ROOM_THEME_PAGES: Record<string, RoomThemePage> = {
     id: "main-hall",
     crest: "/images/mainhall-crest-original.png",
     hero: "/images/themes/main-hall-hero.jpg",
-    title: "Main Hall",
-    tagline: "Every journey begins where you first step in.",
+    title: { fi: "Pääsali", en: "Main Hall" },
+    tagline: {
+      fi: "Jokainen matka alkaa siitä, mistä astut sisään.",
+      en: "Every journey begins where you first step in.",
+    },
 
-    storyTitle: "The Main Hall",
+    storyTitle: { fi: "Pääsali", en: "The Main Hall" },
     storyParagraphs: [
-      "Every door you open. Every room you enter. Every choice you make. It all begins here.",
-      "This is the heart of the Manor. From here, your path unfolds in countless ways.",
-      "Take a moment. Look around. Your story is ready to begin.",
+      {
+        fi: "Jokainen ovi jonka avaat. Jokainen huone johon astut. Jokainen valinta jonka teet. Kaikki alkaa täältä.",
+        en: "Every door you open. Every room you enter. Every choice you make. It all begins here.",
+      },
+      {
+        fi: "Tämä on kartanon sydän. Täältä polkusi avautuu lukemattomiin suuntiin.",
+        en: "This is the heart of the Manor. From here, your path unfolds in countless ways.",
+      },
+      {
+        fi: "Pysähdy hetkeksi. Katso ympärillesi. Tarinasi on valmis alkamaan.",
+        en: "Take a moment. Look around. Your story is ready to begin.",
+      },
     ],
-    essenceTagline: "Choice creates your journey.",
-    essenceText: ["The Main Hall is not just a place.", "It is a beginning.", "It is your invitation."],
+    essenceTagline: { fi: "Valinta luo matkasi.", en: "Choice creates your journey." },
+    essenceText: [
+      { fi: "Pääsali ei ole vain paikka.", en: "The Main Hall is not just a place." },
+      { fi: "Se on alku.", en: "It is a beginning." },
+      { fi: "Se on kutsusi.", en: "It is your invitation." },
+    ],
 
     journey: [
-      { title: "Arrival", description: "You step into something greater." },
-      { title: "Orientation", description: "You take it all in." },
-      { title: "Possibility", description: "Paths reveal themselves." },
-      { title: "Intention", description: "You set your direction." },
-      { title: "First Steps", description: "You begin your journey." },
-      { title: "Exploration", description: "You discover new doors." },
-      { title: "Growth", description: "You change along the way." },
-      { title: "Purpose", description: "You understand why you came." },
-      { title: "Impact", description: "Your journey shapes you." },
-      { title: "Legacy", description: "Your story becomes part of the Manor." },
+      {
+        title: { fi: "Saapuminen", en: "Arrival" },
+        description: { fi: "Astut sisään johonkin suurempaan.", en: "You step into something greater." },
+      },
+      {
+        title: { fi: "Suunnistautuminen", en: "Orientation" },
+        description: { fi: "Otat kaiken sisään.", en: "You take it all in." },
+      },
+      {
+        title: { fi: "Mahdollisuus", en: "Possibility" },
+        description: { fi: "Polut paljastuvat.", en: "Paths reveal themselves." },
+      },
+      {
+        title: { fi: "Aikomus", en: "Intention" },
+        description: { fi: "Asetat suuntasi.", en: "You set your direction." },
+      },
+      {
+        title: { fi: "Ensiaskeleet", en: "First Steps" },
+        description: { fi: "Aloitat matkasi.", en: "You begin your journey." },
+      },
+      {
+        title: { fi: "Tutkiminen", en: "Exploration" },
+        description: { fi: "Löydät uusia ovia.", en: "You discover new doors." },
+      },
+      {
+        title: { fi: "Kasvu", en: "Growth" },
+        description: { fi: "Muutut matkan varrella.", en: "You change along the way." },
+      },
+      {
+        title: { fi: "Tarkoitus", en: "Purpose" },
+        description: { fi: "Ymmärrät miksi tulit.", en: "You understand why you came." },
+      },
+      {
+        title: { fi: "Vaikutus", en: "Impact" },
+        description: { fi: "Matkasi muovaa sinua.", en: "Your journey shapes you." },
+      },
+      {
+        title: { fi: "Perintö", en: "Legacy" },
+        description: {
+          fi: "Tarinastasi tulee osa kartanoa.",
+          en: "Your story becomes part of the Manor.",
+        },
+      },
     ],
 
     glimpses: [
-      { image: "/images/heroes/collection/main-hall.jpg", caption: "The Grand Staircase" },
-      { image: "/images/heroes/events/main-hall.jpg", caption: "The Welcome Gallery" },
-      { image: "/images/heroes/discover/main-hall.jpg", caption: "The Central Foyer" },
+      {
+        image: "/images/heroes/collection/main-hall.jpg",
+        caption: { fi: "Suuri portaikko", en: "The Grand Staircase" },
+      },
+      {
+        image: "/images/heroes/events/main-hall.jpg",
+        caption: { fi: "Tervetulogalleria", en: "The Welcome Gallery" },
+      },
+      {
+        image: "/images/heroes/discover/main-hall.jpg",
+        caption: { fi: "Keskusaula", en: "The Central Foyer" },
+      },
     ],
 
     artifact: {
-      name: "The First Fragment",
+      name: { fi: "Ensimmäinen sirpale", en: "The First Fragment" },
       image: "/themes/artifacts/main-hall.png",
       description: [
-        "A small metal fragment bearing the seal of the Manor.",
-        "Its purpose is unknown.",
-        "Every guest receives one upon entering.",
+        {
+          fi: "Pieni metallinen sirpale, jossa on kartanon sinetti.",
+          en: "A small metal fragment bearing the seal of the Manor.",
+        },
+        { fi: "Sen tarkoitus on tuntematon.", en: "Its purpose is unknown." },
+        {
+          fi: "Jokainen vieras saa sellaisen astuessaan sisään.",
+          en: "Every guest receives one upon entering.",
+        },
       ],
     },
 
     unlocks: [
-      { label: "Main Hall Theme", description: "Full visual theme for the GameTable" },
-      { label: "10 Unique Room Screens", description: "A complete journey through the Manor" },
-      { label: "Story Chronicle", description: "Your story becomes part of the Manor" },
-      { label: "Achievement Path", description: "Milestones, challenges & rewards" },
-      { label: "Lore Entry", description: "Added to your Manor Library" },
+      {
+        label: { fi: "Pääsali-teema", en: "Main Hall Theme" },
+        description: { fi: "Täysi visuaalinen teema GameTablelle", en: "Full visual theme for the GameTable" },
+      },
+      {
+        label: { fi: "10 ainutlaatuista huonenäkymää", en: "10 Unique Room Screens" },
+        description: { fi: "Täydellinen matka kartanon läpi", en: "A complete journey through the Manor" },
+      },
+      {
+        label: { fi: "Tarinakronikka", en: "Story Chronicle" },
+        description: { fi: "Tarinastasi tulee osa kartanoa", en: "Your story becomes part of the Manor" },
+      },
+      {
+        label: { fi: "Saavutuspolku", en: "Achievement Path" },
+        description: { fi: "Virstanpylväät, haasteet ja palkinnot", en: "Milestones, challenges & rewards" },
+      },
+      {
+        label: { fi: "Tarustomerkintä", en: "Lore Entry" },
+        description: { fi: "Lisätty kartanon kirjastoon", en: "Added to your Manor Library" },
+      },
     ],
 
-    footerLine: "No two journeys are the same. But every journey starts here.",
+    footerLine: {
+      fi: "Mitkään kaksi matkaa eivät ole samanlaisia. Mutta jokainen matka alkaa täältä.",
+      en: "No two journeys are the same. But every journey starts here.",
+    },
   },
 }
 

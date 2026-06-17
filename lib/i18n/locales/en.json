@@ -598,7 +598,16 @@
   "artifactsTitle": "Manor Artifacts",
   "artifactsSubtitle": "Artifacts are found. Secrets remain. The story unfolds.",
   "manorTitle": "Manor Rooms",
-  "manorSubtitle": "Every journey begins at a door."
+  "manorSubtitle": "Every journey begins at a door.",
+  "roomPage": {
+    "backToMap": "Back to Map",
+    "essence": "The Essence",
+    "journey": "Your Journey in This Room",
+    "glimpse": "A Glimpse Inside",
+    "artefact": "Artefact",
+    "whatUnlocks": "What Unlocks",
+    "progressSaved": "Your progress will always be saved."
+  }
   },
   "trophies": {
     "title": "Trophy Collection",
