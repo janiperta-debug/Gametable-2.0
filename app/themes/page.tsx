@@ -1,6 +1,7 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { Suspense, useMemo, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { Castle, Gem } from "lucide-react"
 import { ManorRoomsBoard } from "@/components/manor-rooms-board"
 import { ArtifactsBoard } from "@/components/artifacts-board"
@@ -9,9 +10,11 @@ import { useTranslations } from "@/lib/i18n"
 
 type ThemesTab = "manor" | "artifacts"
 
-export default function ThemesPage() {
+function ThemesPageContent() {
   const t = useTranslations()
-  const [tab, setTab] = useState<ThemesTab>("manor")
+  const searchParams = useSearchParams()
+  const initialTab: ThemesTab = searchParams.get("tab") === "artifacts" ? "artifacts" : "manor"
+  const [tab, setTab] = useState<ThemesTab>(initialTab)
 
   // TEMPORARY: every theme is locked except Main Hall while room work is in progress.
   const unlockedRooms = useMemo(() => ["main-hall"], [])
@@ -61,5 +64,13 @@ export default function ThemesPage() {
         <ArtifactsBoard unlockedRooms={unlockedRooms} />
       </div>
     </main>
+  )
+}
+
+export default function ThemesPage() {
+  return (
+    <Suspense fallback={null}>
+      <ThemesPageContent />
+    </Suspense>
   )
 }

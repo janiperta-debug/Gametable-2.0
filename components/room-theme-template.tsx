@@ -1,0 +1,214 @@
+"use client"
+
+import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
+import { ArchiveFrame } from "@/components/archive-frame"
+import { useTranslation } from "@/lib/i18n"
+import type { Localized, RoomThemePage } from "@/lib/room-theme-pages"
+
+/**
+ * RoomThemeTemplate — the FIXED theme-page template, modeled on the Bar mockup
+ * (the only mockup that includes an Artefact section). Every room reuses this
+ * exact structure; only the data changes (see lib/room-theme-pages.ts).
+ *
+ * All room copy is bilingual ({ fi, en }) and resolved here via the active
+ * locale; shared chrome ("Back to Map", "The Essence", …) comes from the i18n
+ * JSON under `themes.roomPage`.
+ *
+ * Sections (top → bottom):
+ *   Back to Map → crest + title + tagline + hero
+ *   → story + The Essence | Your Journey in This Room (10 steps)
+ *   → A Glimpse Inside (3 images)
+ *   → Artefact + What Unlocks
+ *   → footer band
+ */
+export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
+  const { t, locale } = useTranslation()
+  const L = (value: Localized) => value[locale] ?? value.en
+  const goldText = "text-[var(--archive-gold,#d9b65c)]"
+
+  const title = L(data.title)
+
+  return (
+    <main className="artifact-cabinet min-h-screen px-3 py-5 sm:px-6 sm:py-8">
+      <div className="mx-auto max-w-5xl space-y-6">
+        {/* Back to Map */}
+        <Link
+          href="/themes"
+          className={`inline-flex min-h-11 items-center gap-2 font-cinzel text-sm uppercase tracking-wide ${goldText} drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] transition-opacity hover:opacity-80`}
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          {t("themes.roomPage.backToMap")}
+        </Link>
+
+        {/* Crest + title + tagline + hero */}
+        <header className="grid items-center gap-5 sm:grid-cols-[auto_1fr]">
+          <div className="flex items-center gap-4 sm:flex-col sm:items-start">
+            <img
+              src={data.crest || "/placeholder.svg"}
+              alt={`${title} crest`}
+              className="h-24 w-auto drop-shadow-[0_3px_8px_rgba(0,0,0,0.8)] sm:h-32"
+            />
+            <div>
+              <h1 className="logo-text text-3xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] sm:text-4xl">
+                {title}
+              </h1>
+              <p className="font-body mt-1 text-pretty italic text-foreground/80">{L(data.tagline)}</p>
+            </div>
+          </div>
+          <ArchiveFrame weight="thin" cornerSize="sm" className="overflow-hidden rounded-xl">
+            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[0.4rem]">
+              <img
+                src={data.hero || "/placeholder.svg"}
+                alt={`${title} interior`}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            </div>
+          </ArchiveFrame>
+        </header>
+
+        {/* Story + Essence | Journey */}
+        <div className="grid gap-5 lg:grid-cols-2">
+          {/* Story column */}
+          <ArchiveFrame className="rounded-xl">
+            <div className="space-y-5 p-5 sm:p-6">
+              <h2 className={`font-cinzel text-xl font-bold uppercase tracking-wide ${goldText}`}>
+                {L(data.storyTitle)}
+              </h2>
+              <div className="space-y-4">
+                {data.storyParagraphs.map((p, i) => (
+                  <p key={i} className="font-body leading-relaxed text-foreground/85 text-pretty">
+                    {L(p)}
+                  </p>
+                ))}
+              </div>
+              {/* The Essence */}
+              <div className="rounded-lg border border-[var(--archive-gold,#d9b65c)]/30 bg-black/30 p-4">
+                <h3 className={`font-cinzel text-sm font-bold uppercase tracking-wide ${goldText}`}>
+                  {t("themes.roomPage.essence")}
+                </h3>
+                <p className={`font-body mt-1 italic ${goldText}/90`}>{L(data.essenceTagline)}</p>
+                <div className="mt-2 space-y-1">
+                  {data.essenceText.map((line, i) => (
+                    <p key={i} className="font-body leading-relaxed text-foreground/80 text-pretty">
+                      {L(line)}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </ArchiveFrame>
+
+          {/* Journey column */}
+          <ArchiveFrame className="rounded-xl">
+            <div className="space-y-4 p-5 sm:p-6">
+              <h2 className={`font-cinzel text-xl font-bold uppercase tracking-wide ${goldText}`}>
+                {t("themes.roomPage.journey")}
+              </h2>
+              <ol className="grid gap-x-5 gap-y-3 sm:grid-cols-2">
+                {data.journey.map((step, i) => (
+                  <li key={i} className="flex gap-3">
+                    <span
+                      className={`flex h-7 w-7 flex-none items-center justify-center rounded-full border border-[var(--archive-gold,#d9b65c)]/50 font-cinzel text-sm font-bold ${goldText}`}
+                    >
+                      {i + 1}
+                    </span>
+                    <div>
+                      <p className={`font-cinzel text-sm font-semibold ${goldText}`}>{L(step.title)}</p>
+                      <p className="font-body text-sm leading-snug text-foreground/75 text-pretty">
+                        {L(step.description)}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </ArchiveFrame>
+        </div>
+
+        {/* A Glimpse Inside */}
+        <ArchiveFrame className="rounded-xl">
+          <div className="space-y-4 p-5 sm:p-6">
+            <h2 className={`text-center font-cinzel text-xl font-bold uppercase tracking-wide ${goldText}`}>
+              {t("themes.roomPage.glimpse")}
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-3">
+              {data.glimpses.map((g, i) => (
+                <figure key={i} className="space-y-2">
+                  <div className="overflow-hidden rounded-lg border border-[var(--archive-gold,#d9b65c)]/30">
+                    <div className="relative aspect-[4/3] w-full">
+                      <img
+                        src={g.image || "/placeholder.svg"}
+                        alt={L(g.caption)}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  <figcaption className={`text-center font-cinzel text-xs uppercase tracking-wide ${goldText}`}>
+                    {L(g.caption)}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </ArchiveFrame>
+
+        {/* Artefact + What Unlocks */}
+        <div className="grid gap-5 lg:grid-cols-2">
+          {/* Artefact */}
+          <ArchiveFrame className="rounded-xl">
+            <div className="space-y-4 p-5 sm:p-6">
+              <h2 className={`text-center font-cinzel text-sm font-bold uppercase tracking-[0.2em] ${goldText}/80`}>
+                {t("themes.roomPage.artefact")}
+              </h2>
+              <h3 className={`text-center font-cinzel text-2xl font-bold uppercase ${goldText}`}>
+                {L(data.artifact.name)}
+              </h3>
+              <div className="flex justify-center">
+                <img
+                  src={data.artifact.image || "/placeholder.svg"}
+                  alt={L(data.artifact.name)}
+                  className="h-40 w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)]"
+                />
+              </div>
+              <div className="space-y-1 text-center">
+                {data.artifact.description.map((line, i) => (
+                  <p key={i} className="font-body leading-relaxed text-foreground/80 text-pretty">
+                    {L(line)}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </ArchiveFrame>
+
+          {/* What Unlocks */}
+          <ArchiveFrame className="rounded-xl">
+            <div className="space-y-4 p-5 sm:p-6">
+              <h2 className={`font-cinzel text-xl font-bold uppercase tracking-wide ${goldText}`}>
+                {t("themes.roomPage.whatUnlocks")}
+              </h2>
+              <ul className="space-y-3">
+                {data.unlocks.map((u, i) => (
+                  <li key={i} className="border-b border-[var(--archive-gold,#d9b65c)]/15 pb-3 last:border-0 last:pb-0">
+                    <p className={`font-cinzel text-sm font-semibold uppercase tracking-wide ${goldText}`}>
+                      {L(u.label)}
+                    </p>
+                    <p className="font-body text-sm leading-snug text-foreground/75 text-pretty">{L(u.description)}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </ArchiveFrame>
+        </div>
+
+        {/* Footer band */}
+        <ArchiveFrame weight="thin" cornerSize="sm" className="rounded-xl">
+          <div className="px-5 py-4 text-center">
+            <p className={`font-cinzel text-sm uppercase tracking-wide ${goldText} text-pretty`}>{L(data.footerLine)}</p>
+            <p className="font-body mt-1 text-xs text-foreground/60">{t("themes.roomPage.progressSaved")}</p>
+          </div>
+        </ArchiveFrame>
+      </div>
+    </main>
+  )
+}
