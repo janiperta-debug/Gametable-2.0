@@ -363,7 +363,7 @@
     "location": "Sijainti",
     "date": "Päivämäärä",
     "time": "Aika",
-    "host": "J������rjestäjä",
+    "host": "J��������rjestäjä",
     "joinEvent": "Liity tapahtumaan",
     "leaveEvent": "Poistu tapahtumasta",
     "editEvent": "Muokkaa tapahtumaa",
@@ -608,6 +608,18 @@
     "artefact": "Artefakti",
     "whatUnlocks": "Mitä avautuu",
     "progressSaved": "Edistymisesi tallennetaan aina."
+  },
+  "artifactPage": {
+    "backToArtifacts": "Takaisin artefakteihin",
+    "artefact": "Artefakti",
+    "loreEntry": "Tarustomerkintä",
+    "loreNote": "Tämä merkintä lisätään tarustokokoelmaasi ja sen voi lukea milloin tahansa profiilistasi.",
+    "unlocks": "Avautuu",
+    "rowTheme": "Teema",
+    "rowRoomAccess": "Huonepääsy",
+    "rowLore": "Tarustomerkintä",
+    "rowArtefact": "Artefakti",
+    "rowAchievement": "Saavutus"
   }
   },
   "trophies": {

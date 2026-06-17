@@ -607,6 +607,18 @@
     "artefact": "Artefact",
     "whatUnlocks": "What Unlocks",
     "progressSaved": "Your progress will always be saved."
+  },
+  "artifactPage": {
+    "backToArtifacts": "Back to Artifacts",
+    "artefact": "Artefact",
+    "loreEntry": "Lore Entry",
+    "loreNote": "This entry is added to your Lore Collection and can be read anytime in your Profile.",
+    "unlocks": "Unlocks",
+    "rowTheme": "Theme",
+    "rowRoomAccess": "Room Access",
+    "rowLore": "Lore Entry",
+    "rowArtefact": "Artefact",
+    "rowAchievement": "Achievement"
   }
   },
   "trophies": {
