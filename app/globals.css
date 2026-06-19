@@ -1720,3 +1720,54 @@
     inset 0 0 18px hsla(45, 70%, 50%, 0.2),
     0 8px 22px hsla(30, 50%, 30%, 0.4);
 }
+
+/* ============================================================
+   UNIFIED APP BACKGROUND (all pages, all themes)
+   ------------------------------------------------------------
+   One dark, candlelit near-black base everywhere. Hero images
+   never sat well on the old per-theme colored backgrounds
+   (burgundy etc.), so the background is now theme-INDEPENDENT.
+   The active theme only swaps the 10 hero images and the gold
+   ACCENT palette (archive frames / buttons) — those vars
+   (--accent-gold, --primary, etc.) are NOT touched here.
+
+   This block is intentionally LAST in the file so it overrides
+   every earlier per-theme background + neutral-palette rule.
+   1) Neutral palette is unified for every theme (equal
+      specificity to [data-theme="x"], later in source = wins).
+   2) The page wrapper classes + body are pinned to the fixed
+      dark gradient with !important (to beat the higher-
+      specificity [data-theme="x"] .page-background rules).
+   Palette ref: #120d09 / #1a120c / #22170f.
+   ============================================================ */
+:root,
+[data-theme] {
+  --background: 28 28% 5%; /* #150f0a near-black warm base */
+  --surface-dark: 30 35% 3%;
+  --foreground: 40 30% 90%; /* warm off-white text on dark */
+  --card: 30 18% 9%;
+  --card-foreground: 40 30% 90%;
+  --popover: 30 20% 7%;
+  --popover-foreground: 40 30% 90%;
+  --muted: 30 12% 14%;
+  --muted-foreground: 40 14% 64%;
+  --border: 40 22% 18%;
+  --input: 30 15% 14%;
+}
+
+/* The unified dark base lives on the OUTER layer (.app-background, the layout
+   wrapper) + body, which both sit BEHIND the fixed hero (-z-10). The
+   .page-background wrapper (used by pages WITHOUT a hero) gets the same base.
+   .room-environment is intentionally NOT listed here: it must stay
+   `background: transparent !important` (set earlier) so the per-page hero
+   image shows through on pages that use it. */
+.app-background,
+.page-background,
+body {
+  background-color: #120d09 !important;
+  background-image:
+    radial-gradient(ellipse 90% 55% at 50% -8%, hsla(38, 68%, 32%, 0.22), transparent 60%),
+    radial-gradient(circle at 50% 18%, hsla(36, 60%, 30%, 0.1), transparent 55%),
+    linear-gradient(180deg, #1a120c 0%, #120d09 55%, #0e0a07 100%) !important;
+  background-attachment: fixed !important;
+}

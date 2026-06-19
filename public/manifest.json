@@ -4,8 +4,8 @@
   "description": "Step into an elegant sanctuary where tabletop enthusiasts gather to discover remarkable games, forge lasting friendships, and create unforgettable gaming experiences.",
   "start_url": "/home",
   "display": "standalone",
-  "background_color": "#3d1515",
-  "theme_color": "#3d1515",
+  "background_color": "#120d09",
+  "theme_color": "#120d09",
   "orientation": "portrait-primary",
   "scope": "/",
   "icons": [
