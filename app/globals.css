@@ -1755,17 +1755,19 @@
   --input: 30 15% 14%;
 }
 
-.room-environment,
+/* The unified dark base lives on the OUTER layer (.app-background, the layout
+   wrapper) + body, which both sit BEHIND the fixed hero (-z-10). The
+   .page-background wrapper (used by pages WITHOUT a hero) gets the same base.
+   .room-environment is intentionally NOT listed here: it must stay
+   `background: transparent !important` (set earlier) so the per-page hero
+   image shows through on pages that use it. */
+.app-background,
 .page-background,
-.app-background {
+body {
   background-color: #120d09 !important;
   background-image:
     radial-gradient(ellipse 90% 55% at 50% -8%, hsla(38, 68%, 32%, 0.22), transparent 60%),
-    radial-gradient(circle at 50% 18%, hsla(36, 60%, 30%, 0.10), transparent 55%),
+    radial-gradient(circle at 50% 18%, hsla(36, 60%, 30%, 0.1), transparent 55%),
     linear-gradient(180deg, #1a120c 0%, #120d09 55%, #0e0a07 100%) !important;
   background-attachment: fixed !important;
-}
-
-body {
-  background-color: #120d09 !important;
 }
