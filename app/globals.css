@@ -1771,3 +1771,99 @@ body {
     linear-gradient(180deg, #1a120c 0%, #120d09 55%, #0e0a07 100%) !important;
   background-attachment: fixed !important;
 }
+
+/* ============================================================
+   PER-THEME ARCHIVE PALETTE (frames / corner + center flourishes
+   / buttons / wood surface)
+   ------------------------------------------------------------
+   This is the ONLY thing the active theme changes besides the 10
+   hero images: the metal + wood tones of the ArchiveFrame SVG art.
+   Everything else (layout, structure, navigation, the unified dark
+   background) stays identical across themes.
+
+   HOW IT WORKS
+   - components/archive-frame.tsx reads these vars (with the gold
+     values below baked in as inline fallbacks). So when a theme
+     does NOT define them (e.g. main-hall), the frame keeps the
+     original gold look automatically.
+   - Override per theme below to re-skin the archive art.
+
+   THE 9 VARIABLES (metal ramp light -> dark, then wood):
+     --archive-metal-highlight  brightest sheen / top edge
+     --archive-metal-light      light gold band
+     --archive-metal-mid        mid tone
+     --archive-metal-dark       shadow tone
+     --archive-metal-deep       deepest recess / tarnish
+     --archive-wood-base        flat wood fill behind the grain
+     --archive-wood-top         plank gradient top
+     --archive-wood-mid         plank gradient middle
+     --archive-wood-bottom      plank gradient bottom
+   --archive-gold (text/hairline accent) is set elsewhere; override
+   it here too if a theme's text accent should match its metal.
+
+   Each block below is PRE-FILLED with the default GOLD/WOOD values
+   so nothing changes visually yet. Replace the hexes per theme with
+   the exact metals you want (e.g. silver, bronze, copper, pewter).
+   ============================================================ */
+[data-theme="alchemist-laboratory"],
+[data-theme="artroom"],
+[data-theme="balcony"],
+[data-theme="ballroom"],
+[data-theme="bar"],
+[data-theme="clock-tower"],
+[data-theme="conservatory"],
+[data-theme="crystal-cavern"],
+[data-theme="dungeon"],
+[data-theme="fireside-lounge"],
+[data-theme="gallery"],
+[data-theme="garden"],
+[data-theme="library"],
+[data-theme="map-room"],
+[data-theme="observatory"],
+[data-theme="spa"],
+[data-theme="theater-room"],
+[data-theme="treasure-vault"],
+[data-theme="underground-temple"],
+[data-theme="war-room"] {
+  /* GOLD baseline (same as main-hall). Edit per theme below. */
+  --archive-metal-highlight: #f4e3a8;
+  --archive-metal-light: #dcc384;
+  --archive-metal-mid: #c9a14a;
+  --archive-metal-dark: #9c7a28;
+  --archive-metal-deep: #6b4a08;
+  --archive-wood-base: #2b190c;
+  --archive-wood-top: #1f1107;
+  --archive-wood-mid: #4a2c16;
+  --archive-wood-bottom: #23140a;
+}
+
+/* ---- Per-theme overrides — fill with exact metals ----------
+   Uncomment a block and set the hexes for that theme. Example
+   patterns (delete once you supply real values):
+
+   [data-theme="observatory"] {
+     --archive-metal-highlight: #eef2f6;  // silver
+     --archive-metal-light: #c7d0d8;
+     --archive-metal-mid: #9aa6b2;
+     --archive-metal-dark: #6c7884;
+     --archive-metal-deep: #3a434c;
+     --archive-wood-base: #14181d;
+     --archive-wood-top: #10141a;
+     --archive-wood-mid: #232b34;
+     --archive-wood-bottom: #0d1013;
+     --archive-gold: #cdd6df;
+   }
+
+   [data-theme="war-room"] {
+     --archive-metal-highlight: #e8bd8f;  // bronze/copper
+     --archive-metal-light: #c98a55;
+     --archive-metal-mid: #a5602f;
+     --archive-metal-dark: #743c1a;
+     --archive-metal-deep: #401d0c;
+     --archive-wood-base: #221008;
+     --archive-wood-top: #190b05;
+     --archive-wood-mid: #3a1d0f;
+     --archive-wood-bottom: #1c0d06;
+     --archive-gold: #d79a66;
+   }
+   ------------------------------------------------------------ */
