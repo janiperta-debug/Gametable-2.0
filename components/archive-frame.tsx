@@ -69,10 +69,10 @@ function CornerFlourish({ id, className, size = "md" }: { id: string; className?
     >
       <defs>
         <linearGradient id={`${id}-cg`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#f4e3a8" />
-          <stop offset="34%" stopColor="#d8b25a" />
-          <stop offset="62%" stopColor="#9a7320" />
-          <stop offset="100%" stopColor="#6b4a08" />
+          <stop offset="0%" stopColor="var(--archive-metal-highlight, #f4e3a8)" />
+          <stop offset="34%" stopColor="var(--archive-metal-light, #d8b25a)" />
+          <stop offset="62%" stopColor="var(--archive-metal-dark, #9a7320)" />
+          <stop offset="100%" stopColor="var(--archive-metal-deep, #6b4a08)" />
         </linearGradient>
       </defs>
       <g fill={`url(#${id}-cg)`} stroke={`url(#${id}-cg)`}>
@@ -139,9 +139,9 @@ function CenterFlourish({ id, className }: { id: string; className?: string }) {
     >
       <defs>
         <linearGradient id={`${id}-mg`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#f4e3a8" />
-          <stop offset="55%" stopColor="#c9a14a" />
-          <stop offset="100%" stopColor="#7c5710" />
+          <stop offset="0%" stopColor="var(--archive-metal-highlight, #f4e3a8)" />
+          <stop offset="55%" stopColor="var(--archive-metal-mid, #c9a14a)" />
+          <stop offset="100%" stopColor="var(--archive-metal-deep, #7c5710)" />
         </linearGradient>
       </defs>
       <g fill={`url(#${id}-mg)`} stroke={`url(#${id}-mg)`}>
@@ -180,7 +180,7 @@ export function ArchiveFrame({
         // thickness gives a real beveled/sheen look without the bright "new
         // brass" tone. Darker stops read as tarnish in the recesses.
         backgroundImage:
-          "linear-gradient(135deg,#e7d49a 0%,#b8902f 24%,#5f4308 50%,#9c7a28 72%,#dcc384 100%)",
+          "linear-gradient(135deg,var(--archive-metal-highlight,#e7d49a) 0%,var(--archive-metal-mid,#b8902f) 24%,var(--archive-metal-deep,#5f4308) 50%,var(--archive-metal-dark,#9c7a28) 72%,var(--archive-metal-light,#dcc384) 100%)",
         boxShadow: "0 14px 34px rgba(0,0,0,0.65), 0 0 0 1px rgba(45,30,8,0.9)",
         ...style,
       }}
@@ -195,7 +195,7 @@ export function ArchiveFrame({
         <div
           className={cn("relative overflow-hidden", w.surfaceRadius)}
           style={{
-            backgroundColor: "#2b190c",
+            backgroundColor: "var(--archive-wood-base, #2b190c)",
             backgroundImage: [
               // soft top-down sheen
               "linear-gradient(180deg, rgba(255,225,180,0.10) 0%, rgba(0,0,0,0.55) 100%)",
@@ -204,7 +204,7 @@ export function ArchiveFrame({
               // broader HORIZONTAL plank streaks for depth
               "repeating-linear-gradient(0deg, rgba(0,0,0,0.10) 0px, rgba(0,0,0,0) 14px, rgba(120,80,40,0.12) 22px, rgba(0,0,0,0) 30px)",
               // deep plank tone falloff
-              "linear-gradient(0deg, #1f1107 0%, #4a2c16 50%, #23140a 100%)",
+              "linear-gradient(0deg, var(--archive-wood-top, #1f1107) 0%, var(--archive-wood-mid, #4a2c16) 50%, var(--archive-wood-bottom, #23140a) 100%)",
             ].join(","),
             backgroundBlendMode: "overlay, overlay, soft-light, normal",
             boxShadow: "inset 0 0 0 1px rgba(231,212,154,0.5), inset 0 3px 16px rgba(0,0,0,0.65)",
