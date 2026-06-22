@@ -58,13 +58,20 @@ export function useUser(): UseUserReturn {
   }
 
   useEffect(() => {
+    let isMounted = true
 
-    // Get initial session
-    const getInitialSession = async () => {
+    // Restore the session from local storage. getSession() reads the persisted
+    // session WITHOUT a network round-trip (and refreshes the token if needed),
+    // so it works reliably when an installed PWA resumes from the background on
+    // iOS — unlike getUser(), whose network call can fail on resume and wrongly
+    // report the user as logged out until a full app restart.
+    const restoreSession = async () => {
       try {
-        const { data: { user }, error: userError } = await supabase.auth.getUser()
-        
-        if (userError) {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+
+        if (!isMounted) return
+
+        if (sessionError) {
           // Not authenticated - this is not an error state
           setUser(null)
           setProfile(null)
@@ -72,23 +79,25 @@ export function useUser(): UseUserReturn {
           return
         }
 
-        setUser(user)
+        const currentUser = session?.user ?? null
+        setUser(currentUser)
 
-        if (user) {
-          await fetchProfile(user.id)
+        if (currentUser) {
+          await fetchProfile(currentUser.id)
         }
       } catch (err) {
-        setError(err instanceof Error ? err : new Error('Unknown error'))
+        if (isMounted) setError(err instanceof Error ? err : new Error('Unknown error'))
       } finally {
-        setLoading(false)
+        if (isMounted) setLoading(false)
       }
     }
 
-    getInitialSession()
+    restoreSession()
 
     // Subscribe to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!isMounted) return
         const currentUser = session?.user ?? null
         setUser(currentUser)
 
@@ -100,8 +109,22 @@ export function useUser(): UseUserReturn {
       }
     )
 
+    // When the installed PWA returns to the foreground, iOS may have suspended
+    // the token-refresh timer while backgrounded. Re-read the persisted session
+    // so the UI reflects the real auth state instead of showing logged-out.
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        restoreSession()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    window.addEventListener('focus', handleVisibility)
+
     return () => {
+      isMounted = false
       subscription.unsubscribe()
+      document.removeEventListener('visibilitychange', handleVisibility)
+      window.removeEventListener('focus', handleVisibility)
     }
   }, [])
 
