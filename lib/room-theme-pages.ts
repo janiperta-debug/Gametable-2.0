@@ -225,6 +225,138 @@ export const ROOM_THEME_PAGES: Record<string, RoomThemePage> = {
       en: "No two journeys are the same. But every journey starts here.",
     },
   },
+
+  library: {
+    id: "library",
+    crest: "/images/crests/library-crest.png",
+    hero: "/images/themes/library-hero.jpg",
+    title: { fi: "Kirjasto", en: "Library" },
+    tagline: {
+      fi: "Jokainen kirja on keskustelu halki aikojen.",
+      en: "Every book is a conversation across time.",
+    },
+
+    storyTitle: { fi: "Kirjasto", en: "The Library" },
+    storyParagraphs: [
+      {
+        fi: "Täällä tieto kerätään, eivätkä tarinat koskaan oikeasti pääty.",
+        en: "Here, knowledge is gathered and stories never truly end.",
+      },
+      {
+        fi: "Kysymykset ovat tervetulleita. Uteliaisuutta juhlitaan. Sinun ei tarvitse tietää kaikkea. Sinun täytyy vain olla valmis oppimaan.",
+        en: "Questions are welcomed. Curiosity is celebrated. You don't have to know everything. You just have to be willing to learn.",
+      },
+      {
+        fi: "Istu alas. Avaa kirja. Seuraava luku odottaa.",
+        en: "Take a seat. Open a book. The next chapter is waiting.",
+      },
+    ],
+    essenceTagline: {
+      fi: "Tieto muuttuu viisaudeksi, kun se jaetaan.",
+      en: "Knowledge becomes wisdom when shared.",
+    },
+    essenceText: [
+      { fi: "Kirjasto ei ole kirjojen keräämistä.", en: "The Library is not about collecting books." },
+      { fi: "Se on ymmärryksen keräämistä.", en: "It is about collecting understanding." },
+    ],
+
+    journey: [
+      {
+        title: { fi: "Uteliaisuus", en: "Curiosity" },
+        description: { fi: "Kysy. Ihmettele. Tutki.", en: "Ask. Wonder. Explore." },
+      },
+      {
+        title: { fi: "Löytäminen", en: "Discovery" },
+        description: { fi: "Löydä se, mikä innostaa sinua.", en: "Find what inspires you." },
+      },
+      {
+        title: { fi: "Lukeminen", en: "Reading" },
+        description: { fi: "Sukella uusiin maailmoihin.", en: "Dive into new worlds." },
+      },
+      {
+        title: { fi: "Pohdinta", en: "Reflection" },
+        description: { fi: "Pysähdy. Ajattele. Imeydy.", en: "Pause. Think. Absorb." },
+      },
+      {
+        title: { fi: "Oppiminen", en: "Learning" },
+        description: { fi: "Anna tiedon juurtua.", en: "Let knowledge take root." },
+      },
+      {
+        title: { fi: "Oivallus", en: "Insight" },
+        description: { fi: "Näe pinnan taakse.", en: "See beyond the surface." },
+      },
+      {
+        title: { fi: "Ymmärrys", en: "Understanding" },
+        description: { fi: "Yhdistä palaset.", en: "Connect the pieces." },
+      },
+      {
+        title: { fi: "Jakaminen", en: "Sharing" },
+        description: { fi: "Opeta, mitä olet oppinut.", en: "Teach what you've learned." },
+      },
+      {
+        title: { fi: "Perintö", en: "Legacy" },
+        description: { fi: "Jätä jotain jälkeesi.", en: "Leave something behind." },
+      },
+      {
+        title: { fi: "Viisaus", en: "Wisdom" },
+        description: { fi: "Kanna sitä eteenpäin.", en: "Carry it forward." },
+      },
+    ],
+
+    glimpses: [
+      {
+        image: "/images/heroes/collection/library.jpg",
+        caption: { fi: "Kokoelmat", en: "Collection" },
+      },
+      {
+        image: "/images/heroes/events/library.jpg",
+        caption: { fi: "Tapahtumat", en: "Events" },
+      },
+      {
+        image: "/images/heroes/discover/library.jpg",
+        caption: { fi: "Yhteisöt", en: "Community" },
+      },
+    ],
+
+    artifact: {
+      name: { fi: "Ensimmäinen sivu", en: "The First Page" },
+      image: "/themes/artifacts/library.png",
+      description: [
+        {
+          fi: "Yksittäinen kullattu sivu, jolta tarinasi alkaa.",
+          en: "A single gilded page where your story begins.",
+        },
+      ],
+    },
+
+    unlocks: [
+      {
+        label: { fi: "Kirjasto-teema", en: "Library Theme" },
+        description: { fi: "Täysi visuaalinen teema GameTablelle", en: "Full visual theme for the GameTable" },
+      },
+      {
+        label: { fi: "10 ainutlaatuista huonenäkymää", en: "10 Unique Room Screens" },
+        description: { fi: "Täydellinen matka kirjaston läpi", en: "A complete journey through the Library" },
+      },
+      {
+        label: { fi: "Tarinakronikka", en: "Story Chronicle" },
+        description: { fi: "Tarinoita, löytöjä ja ajatonta viisautta", en: "Tales, discoveries & timeless wisdom" },
+      },
+      {
+        label: { fi: "Saavutuspolku", en: "Achievement Path" },
+        description: { fi: "Haastavia virstanpylväitä ja palkintoja", en: "Challenging milestones & rewards" },
+      },
+      {
+        label: { fi: "Tarustomerkintä", en: "Lore Entry" },
+        description: { fi: "Lisätty kartanon kirjastoon", en: "Added to your Manor Library" },
+      },
+    ],
+
+    footerLine: {
+      fi: "Suurimmat matkat alkavat usein yhdeltä sivulta.",
+      en: "The greatest journeys often begin on a single page.",
+    },
+  },
 }
 
 export function getRoomThemePage(roomId: string): RoomThemePage | undefined {
