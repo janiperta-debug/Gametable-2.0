@@ -319,12 +319,12 @@ export const ROOM_THEME_PAGES: Record<string, RoomThemePage> = {
     ],
 
     artifact: {
-      name: { fi: "Ensimmäinen sivu", en: "The First Page" },
+      name: { fi: "Arkistonhoitajan sulkakynä", en: "Archivist's Quill" },
       image: "/themes/artifacts/library.png",
       description: [
         {
-          fi: "Yksittäinen kullattu sivu, jolta tarinasi alkaa.",
-          en: "A single gilded page where your story begins.",
+          fi: "Sulkakynä, jolla arkistonhoitajat aikoinaan kirjasivat maailmojen totuudet.",
+          en: "A quill once used by the Archivists to record the truths of worlds.",
         },
       ],
     },
