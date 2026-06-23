@@ -39,6 +39,15 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
 
   const title = L(data.title)
 
+  // The 3 "Glimpse Inside" images are always the room's Collection / Events /
+  // Community heroes, so their labels are FIXED section names (not per-room
+  // data) to match the rest of the app's navigation.
+  const glimpseLabels = [
+    t("themes.roomPage.glimpseCollection"),
+    t("themes.roomPage.glimpseEvents"),
+    t("themes.roomPage.glimpseCommunity"),
+  ]
+
   // Theme status for this room: active (in use) / unlocked (available) / locked.
   const roomTheme = getRoomTheme(data.id)
   const isActive = currentAppTheme === data.id
@@ -212,13 +221,13 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
                     <div className="relative aspect-[4/3] w-full">
                       <img
                         src={g.image || "/placeholder.svg"}
-                        alt={L(g.caption)}
+                        alt={glimpseLabels[i] ?? L(g.caption)}
                         className="absolute inset-0 h-full w-full object-cover"
                       />
                     </div>
                   </div>
                   <figcaption className={`text-center font-cinzel text-xs uppercase tracking-wide ${goldText}`}>
-                    {L(g.caption)}
+                    {glimpseLabels[i] ?? L(g.caption)}
                   </figcaption>
                 </figure>
               ))}
@@ -226,19 +235,39 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
           </div>
         </ArchiveFrame>
 
-        {/* Artefact + What Unlocks */}
-        <div className="grid gap-5 lg:grid-cols-2">
-          {/* Artefact — name only; full presentation lives on the artifact's own page */}
-          <ArchiveFrame className="rounded-xl">
-            <div className="flex h-full flex-col items-center justify-center gap-3 p-5 text-center sm:p-6">
-              <h2 className={`font-cinzel text-sm font-bold uppercase tracking-[0.2em] ${goldText}/80`}>
-                {t("themes.roomPage.artefact")}
-              </h2>
-              <h3 className={`font-cinzel text-2xl font-bold uppercase ${goldText} text-balance`}>
-                {L(data.artifact.name)}
-              </h3>
-            </div>
-          </ArchiveFrame>
+        {/* Artefact (+ footer band beneath) | What Unlocks.
+            Left column stacks the artefact card and the footer band so together
+            they match the height of the taller "What Unlocks" card. */}
+        <div className="grid items-stretch gap-5 lg:grid-cols-2">
+          {/* Left column: artefact card + footer band */}
+          <div className="flex flex-col gap-5">
+            {/* Artefact — name + image only; full presentation lives on the artifact's own page */}
+            <ArchiveFrame className="rounded-xl">
+              <div className="flex h-full flex-col items-center justify-center gap-3 p-5 text-center sm:p-6">
+                <h2 className={`font-cinzel text-sm font-bold uppercase tracking-[0.2em] ${goldText}/80`}>
+                  {t("themes.roomPage.artefact")}
+                </h2>
+                <h3 className={`font-cinzel text-2xl font-bold uppercase ${goldText} text-balance`}>
+                  {L(data.artifact.name)}
+                </h3>
+                <img
+                  src={data.artifact.image || "/placeholder.svg"}
+                  alt={L(data.artifact.name)}
+                  className="h-32 w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)] sm:h-36"
+                />
+              </div>
+            </ArchiveFrame>
+
+            {/* Footer band */}
+            <ArchiveFrame weight="thin" cornerSize="sm" className="rounded-xl">
+              <div className="px-5 py-4 text-center">
+                <p className={`font-cinzel text-sm uppercase tracking-wide ${goldText} text-pretty`}>
+                  {L(data.footerLine)}
+                </p>
+                <p className="font-body mt-1 text-xs text-foreground/60">{t("themes.roomPage.progressSaved")}</p>
+              </div>
+            </ArchiveFrame>
+          </div>
 
           {/* What Unlocks */}
           <ArchiveFrame className="rounded-xl">
@@ -259,14 +288,6 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
             </div>
           </ArchiveFrame>
         </div>
-
-        {/* Footer band */}
-        <ArchiveFrame weight="thin" cornerSize="sm" className="rounded-xl">
-          <div className="px-5 py-4 text-center">
-            <p className={`font-cinzel text-sm uppercase tracking-wide ${goldText} text-pretty`}>{L(data.footerLine)}</p>
-            <p className="font-body mt-1 text-xs text-foreground/60">{t("themes.roomPage.progressSaved")}</p>
-          </div>
-        </ArchiveFrame>
       </div>
     </main>
   )
