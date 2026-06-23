@@ -65,7 +65,7 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
         {/* Back to Map */}
         <Link
           href="/themes"
-          className={`inline-flex min-h-11 items-center gap-2 font-cinzel text-sm uppercase tracking-wide ${goldText} drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] transition-opacity hover:opacity-80`}
+          className="inline-flex min-h-11 items-center gap-2 font-cinzel text-sm uppercase tracking-wide text-[var(--archive-gold-bright,#d9b65c)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] transition-opacity hover:opacity-80"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           {t("themes.roomPage.backToMap")}
@@ -117,7 +117,7 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
                     ? t("themes.roomPage.themeUnlocked")
                     : t("themes.roomPage.themeLocked")}
               </p>
-              <p className="font-body text-sm leading-snug text-foreground/70 text-pretty">
+              <p className="font-body text-sm leading-snug text-[var(--archive-ink-soft)] text-pretty">
                 {isActive
                   ? t("themes.roomPage.themeActiveDesc")
                   : isUnlocked
@@ -159,20 +159,20 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
               </h2>
               <div className="space-y-4">
                 {data.storyParagraphs.map((p, i) => (
-                  <p key={i} className="font-body leading-relaxed text-foreground/85 text-pretty">
+                  <p key={i} className="font-body leading-relaxed text-[var(--archive-ink-strong)] text-pretty">
                     {L(p)}
                   </p>
                 ))}
               </div>
               {/* The Essence */}
-              <div className="rounded-lg border border-[var(--archive-gold,#d9b65c)]/30 bg-black/30 p-4">
+              <div className="rounded-lg border border-[var(--archive-gold,#d9b65c)]/30 bg-[var(--archive-inset-bg)] p-4">
                 <h3 className={`font-cinzel text-sm font-bold uppercase tracking-wide ${goldText}`}>
                   {t("themes.roomPage.essence")}
                 </h3>
                 <p className={`font-body mt-1 italic ${goldText}/90`}>{L(data.essenceTagline)}</p>
                 <div className="mt-2 space-y-1">
                   {data.essenceText.map((line, i) => (
-                    <p key={i} className="font-body leading-relaxed text-foreground/80 text-pretty">
+                    <p key={i} className="font-body leading-relaxed text-[var(--archive-ink-soft)] text-pretty">
                       {L(line)}
                     </p>
                   ))}
@@ -197,7 +197,7 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
                     </span>
                     <div>
                       <p className={`font-cinzel text-sm font-semibold ${goldText}`}>{L(step.title)}</p>
-                      <p className="font-body text-sm leading-snug text-foreground/75 text-pretty">
+                      <p className="font-body text-sm leading-snug text-[var(--archive-ink-soft)] text-pretty">
                         {L(step.description)}
                       </p>
                     </div>
@@ -264,7 +264,7 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
                 <p className={`font-cinzel text-sm uppercase tracking-wide ${goldText} text-pretty`}>
                   {L(data.footerLine)}
                 </p>
-                <p className="font-body mt-1 text-xs text-foreground/60">{t("themes.roomPage.progressSaved")}</p>
+                <p className="font-body mt-1 text-xs text-[var(--archive-ink-faint)]">{t("themes.roomPage.progressSaved")}</p>
               </div>
             </ArchiveFrame>
           </div>
@@ -281,7 +281,7 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
                     <p className={`font-cinzel text-sm font-semibold uppercase tracking-wide ${goldText}`}>
                       {L(u.label)}
                     </p>
-                    <p className="font-body text-sm leading-snug text-foreground/75 text-pretty">{L(u.description)}</p>
+                    <p className="font-body text-sm leading-snug text-[var(--archive-ink-soft)] text-pretty">{L(u.description)}</p>
                   </li>
                 ))}
               </ul>
