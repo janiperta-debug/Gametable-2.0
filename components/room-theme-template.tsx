@@ -88,7 +88,7 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
               <img
                 src={data.crest || "/placeholder.svg"}
                 alt={`${title} crest`}
-                className="h-24 w-auto drop-shadow-[0_3px_10px_rgba(0,0,0,0.85)] sm:h-32"
+                className="h-24 w-fit max-w-full self-start object-contain drop-shadow-[0_3px_10px_rgba(0,0,0,0.85)] sm:h-32"
               />
               <h1 className="logo-text text-3xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] sm:text-5xl">
                 {title}
