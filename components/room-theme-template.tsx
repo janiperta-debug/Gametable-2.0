@@ -84,16 +84,16 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
               className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/30 to-transparent"
               aria-hidden="true"
             />
-            <div className="absolute inset-0 flex flex-col justify-center gap-2 p-5 sm:p-8">
+            <div className="absolute inset-0 flex flex-col items-start justify-center gap-2 p-5 text-left sm:p-8">
               <img
                 src={data.crest || "/placeholder.svg"}
                 alt={`${title} crest`}
-                className="h-24 w-fit max-w-full self-start object-contain drop-shadow-[0_3px_10px_rgba(0,0,0,0.85)] sm:h-32"
+                className="h-20 w-fit max-w-full self-start object-contain drop-shadow-[0_3px_10px_rgba(0,0,0,0.85)] sm:h-28"
               />
-              <h1 className="logo-text text-3xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] sm:text-5xl">
+              <h1 className="logo-text text-left text-3xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] sm:text-5xl">
                 {title}
               </h1>
-              <p className="font-body max-w-md text-pretty italic text-foreground/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+              <p className="font-body max-w-md text-left text-pretty italic text-foreground/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
                 {L(data.tagline)}
               </p>
             </div>
