@@ -1,10 +1,19 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Check, Lock } from "lucide-react"
 import { ArchiveFrame } from "@/components/archive-frame"
 import { useTranslation } from "@/lib/i18n"
+import { useAppTheme, type AppThemeName } from "@/components/app-theme-provider"
+import { getRoomTheme } from "@/lib/room-themes"
 import type { Localized, RoomThemePage } from "@/lib/room-theme-pages"
+
+/** Floor → roman level shown in the status badge (the floor gates progression). */
+const FLOOR_LEVEL: Record<string, string> = {
+  "Ground Floor": "I",
+  "Second Floor": "II",
+  Basement: "III",
+}
 
 /**
  * RoomThemeTemplate — the FIXED theme-page template, modeled on the Bar mockup
@@ -24,13 +33,25 @@ import type { Localized, RoomThemePage } from "@/lib/room-theme-pages"
  */
 export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
   const { t, locale } = useTranslation()
+  const { currentAppTheme, setAppTheme } = useAppTheme()
   const L = (value: Localized) => value[locale] ?? value.en
   const goldText = "text-[var(--archive-gold,#d9b65c)]"
 
   const title = L(data.title)
 
+  // Theme status for this room: active (in use) / unlocked (available) / locked.
+  const roomTheme = getRoomTheme(data.id)
+  const isActive = currentAppTheme === data.id
+  const isUnlocked = roomTheme?.isUnlocked ?? false
+  const level = roomTheme ? FLOOR_LEVEL[roomTheme.category] ?? "I" : "I"
+
   return (
-    <main className="artifact-cabinet min-h-screen px-3 py-5 sm:px-6 sm:py-8">
+    // data-theme scopes the ArchiveFrame palette to a live PREVIEW of this
+    // room's theme (metal + wood tones) without changing the global app theme.
+    <main
+      data-theme={data.id as AppThemeName}
+      className="artifact-cabinet min-h-screen px-3 py-5 sm:px-6 sm:py-8"
+    >
       <div className="mx-auto max-w-5xl space-y-6">
         {/* Back to Map */}
         <Link
@@ -66,6 +87,55 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
             </div>
           </ArchiveFrame>
         </header>
+
+        {/* Theme status band — active / unlocked / locked + floor level badge */}
+        <ArchiveFrame weight="thin" cornerSize="sm" className="rounded-xl">
+          <div className="flex flex-wrap items-center gap-3 p-4 sm:gap-4">
+            <span
+              className={`flex h-10 w-10 flex-none items-center justify-center rounded-full border border-[var(--archive-gold,#d9b65c)]/50 ${goldText}`}
+              aria-hidden="true"
+            >
+              {isActive ? <Check className="h-5 w-5" /> : isUnlocked ? <Check className="h-5 w-5" /> : <Lock className="h-5 w-5" />}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className={`font-cinzel text-sm font-bold uppercase tracking-wide ${goldText}`}>
+                {isActive
+                  ? t("themes.roomPage.themeActive")
+                  : isUnlocked
+                    ? t("themes.roomPage.themeUnlocked")
+                    : t("themes.roomPage.themeLocked")}
+              </p>
+              <p className="font-body text-sm leading-snug text-foreground/70 text-pretty">
+                {isActive
+                  ? t("themes.roomPage.themeActiveDesc")
+                  : isUnlocked
+                    ? t("themes.roomPage.themeUnlockedDesc")
+                    : t("themes.roomPage.themeLockedDesc")}
+              </p>
+            </div>
+            <span
+              className={`flex-none rounded-md border border-[var(--archive-gold,#d9b65c)]/40 px-2.5 py-1 font-cinzel text-xs font-bold uppercase tracking-wide ${goldText}`}
+            >
+              {`${t("themes.roomPage.levelLabel")} ${level}`}
+            </span>
+            {isActive ? (
+              <span
+                className={`flex-none inline-flex min-h-9 items-center gap-1.5 rounded-md border border-[var(--archive-gold,#d9b65c)]/50 bg-[var(--archive-gold,#d9b65c)]/15 px-3 font-cinzel text-xs font-bold uppercase tracking-wide ${goldText}`}
+              >
+                <Check className="h-4 w-4" aria-hidden="true" />
+                {t("themes.roomPage.inUse")}
+              </span>
+            ) : isUnlocked ? (
+              <button
+                type="button"
+                onClick={() => setAppTheme(data.id as AppThemeName)}
+                className={`flex-none inline-flex min-h-9 items-center rounded-md border border-[var(--archive-gold,#d9b65c)]/60 px-3 font-cinzel text-xs font-bold uppercase tracking-wide ${goldText} transition-colors hover:bg-[var(--archive-gold,#d9b65c)]/15`}
+              >
+                {t("themes.roomPage.useTheme")}
+              </button>
+            ) : null}
+          </div>
+        </ArchiveFrame>
 
         {/* Story + Essence | Journey */}
         <div className="grid gap-5 lg:grid-cols-2">

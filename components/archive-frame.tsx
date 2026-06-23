@@ -197,8 +197,8 @@ export function ArchiveFrame({
           style={{
             backgroundColor: "var(--archive-wood-base, #2b190c)",
             backgroundImage: [
-              // soft top-down sheen
-              "linear-gradient(180deg, rgba(255,225,180,0.10) 0%, rgba(0,0,0,0.55) 100%)",
+              // soft top-down sheen (shade var lets light/parchment themes avoid a dark falloff)
+              "linear-gradient(180deg, var(--archive-surface-sheen, rgba(255,225,180,0.10)) 0%, var(--archive-surface-shade, rgba(0,0,0,0.55)) 100%)",
               // fine HORIZONTAL grain hairlines
               "repeating-linear-gradient(0deg, rgba(0,0,0,0.22) 0px, rgba(0,0,0,0.22) 1px, rgba(255,235,200,0.025) 2px, rgba(255,235,200,0) 9px)",
               // broader HORIZONTAL plank streaks for depth
