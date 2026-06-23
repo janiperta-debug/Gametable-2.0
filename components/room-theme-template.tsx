@@ -93,7 +93,7 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
               <h1 className="logo-text text-left text-3xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] sm:text-5xl">
                 {title}
               </h1>
-              <p className="font-body max-w-md text-left text-pretty italic text-foreground/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+              <p className="font-body max-w-[15rem] text-center text-pretty italic text-foreground/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
                 {L(data.tagline)}
               </p>
             </div>
