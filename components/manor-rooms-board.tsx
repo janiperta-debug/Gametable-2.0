@@ -5,15 +5,16 @@ import { ArchiveFrame } from "@/components/archive-frame"
 
 // First 7 grid slots show room images; every other slot shows a lock.
 // Slots with an `href` are clickable and open that room's theme page.
-const ROOM_SLOTS: { src: string; href?: string }[] = [
+const ROOM_SLOTS: { src: string; href?: string; label?: string }[] = [
   { src: "/themes/rooms/room-1.png" },
   { src: "/themes/rooms/room-2.png" },
   { src: "/themes/rooms/room-3.png" },
   { src: "/themes/rooms/room-4.png" },
   { src: "/themes/rooms/room-5.png" },
-  { src: "/themes/rooms/room-6.png" },
+  // Library bookshelf — opens the Library theme page (room still locked).
+  { src: "/themes/rooms/room-6.png", href: "/themes/library", label: "Library" },
   // Main Hall staircase — opens the Main Hall theme page.
-  { src: "/themes/rooms/room-7.png", href: "/themes/main-hall" },
+  { src: "/themes/rooms/room-7.png", href: "/themes/main-hall", label: "Main Hall" },
 ]
 
 // Total number of grid slots (matches the artifacts board layout).
@@ -46,7 +47,7 @@ export function ManorRoomsBoard() {
             <Link
               key={i}
               href={slot.href}
-              aria-label="Main Hall"
+              aria-label={slot.label ?? "Room"}
               className="block rounded-lg transition-transform hover:scale-[1.03] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--archive-gold,#d9b65c)]"
             >
               {tile}

@@ -52,7 +52,7 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 10,
     category: "Ground Floor",
     isActive: false,
-    isUnlocked: true, // Temporarily unlocked for testing
+    isUnlocked: false, // Not yet opened — theme page shows the locked state
   },
   {
     id: "conservatory",
