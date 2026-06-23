@@ -188,12 +188,12 @@ export function ArchiveFrame({
     >
       {/* Thin dark channel separating the two gold frames (the "double frame") */}
       <div
-        className={cn("relative overflow-hidden", w.channelRadius)}
+        className={cn("relative h-full overflow-hidden", w.channelRadius)}
         style={{ boxShadow: `inset 0 0 0 ${w.channelInset}px rgba(40,26,10,0.85)` }}
       >
         {/* WOOD surface — deeper, richer plank with horizontal grain */}
         <div
-          className={cn("relative overflow-hidden", w.surfaceRadius)}
+          className={cn("relative h-full overflow-hidden", w.surfaceRadius)}
           style={{
             backgroundColor: "var(--archive-wood-base, #2b190c)",
             backgroundImage: [

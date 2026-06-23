@@ -62,30 +62,33 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
           {t("themes.roomPage.backToMap")}
         </Link>
 
-        {/* Crest + title + tagline + hero */}
-        <header className="grid items-center gap-5 sm:grid-cols-[auto_1fr]">
-          <div className="flex items-center gap-4 sm:flex-col sm:items-start">
+        {/* Hero (no frame) with crest + title + tagline overlaid */}
+        <header className="relative overflow-hidden rounded-xl">
+          <div className="relative aspect-[16/10] w-full sm:aspect-[16/7]">
             <img
-              src={data.crest || "/placeholder.svg"}
-              alt={`${title} crest`}
-              className="h-24 w-auto drop-shadow-[0_3px_8px_rgba(0,0,0,0.8)] sm:h-32"
+              src={data.hero || "/placeholder.svg"}
+              alt={`${title} interior`}
+              className="absolute inset-0 h-full w-full object-cover"
             />
-            <div>
-              <h1 className="logo-text text-3xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] sm:text-4xl">
+            {/* Legibility gradient under the overlaid crest/title/tagline */}
+            <div
+              className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/30 to-transparent"
+              aria-hidden="true"
+            />
+            <div className="absolute inset-0 flex flex-col justify-center gap-2 p-5 sm:p-8">
+              <img
+                src={data.crest || "/placeholder.svg"}
+                alt={`${title} crest`}
+                className="h-24 w-auto drop-shadow-[0_3px_10px_rgba(0,0,0,0.85)] sm:h-32"
+              />
+              <h1 className="logo-text text-3xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] sm:text-5xl">
                 {title}
               </h1>
-              <p className="font-body mt-1 text-pretty italic text-foreground/80">{L(data.tagline)}</p>
+              <p className="font-body max-w-md text-pretty italic text-foreground/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+                {L(data.tagline)}
+              </p>
             </div>
           </div>
-          <ArchiveFrame weight="thin" cornerSize="sm" className="overflow-hidden rounded-xl">
-            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[0.4rem]">
-              <img
-                src={data.hero || "/placeholder.svg"}
-                alt={`${title} interior`}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            </div>
-          </ArchiveFrame>
         </header>
 
         {/* Theme status band — active / unlocked / locked + floor level badge */}
@@ -225,29 +228,15 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
 
         {/* Artefact + What Unlocks */}
         <div className="grid gap-5 lg:grid-cols-2">
-          {/* Artefact */}
+          {/* Artefact — name only; full presentation lives on the artifact's own page */}
           <ArchiveFrame className="rounded-xl">
-            <div className="space-y-4 p-5 sm:p-6">
-              <h2 className={`text-center font-cinzel text-sm font-bold uppercase tracking-[0.2em] ${goldText}/80`}>
+            <div className="flex h-full flex-col items-center justify-center gap-3 p-5 text-center sm:p-6">
+              <h2 className={`font-cinzel text-sm font-bold uppercase tracking-[0.2em] ${goldText}/80`}>
                 {t("themes.roomPage.artefact")}
               </h2>
-              <h3 className={`text-center font-cinzel text-2xl font-bold uppercase ${goldText}`}>
+              <h3 className={`font-cinzel text-2xl font-bold uppercase ${goldText} text-balance`}>
                 {L(data.artifact.name)}
               </h3>
-              <div className="flex justify-center">
-                <img
-                  src={data.artifact.image || "/placeholder.svg"}
-                  alt={L(data.artifact.name)}
-                  className="h-40 w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)]"
-                />
-              </div>
-              <div className="space-y-1 text-center">
-                {data.artifact.description.map((line, i) => (
-                  <p key={i} className="font-body leading-relaxed text-foreground/80 text-pretty">
-                    {L(line)}
-                  </p>
-                ))}
-              </div>
             </div>
           </ArchiveFrame>
 
