@@ -1659,11 +1659,21 @@
 .artifact-cabinet {
   background-color: #0e0a07;
   background-image:
-    radial-gradient(ellipse at 50% 0%, hsla(38, 70%, 30%, 0.32), transparent 60%),
-    radial-gradient(circle at 12% 30%, hsla(36, 65%, 35%, 0.18), transparent 45%),
-    radial-gradient(circle at 88% 35%, hsla(36, 65%, 35%, 0.18), transparent 45%),
-    linear-gradient(180deg, #14100b 0%, #0c0805 100%);
-}
+  radial-gradient(ellipse at 50% 0%, hsla(38, 70%, 30%, 0.32), transparent 60%),
+  radial-gradient(circle at 12% 30%, hsla(36, 65%, 35%, 0.18), transparent 45%),
+  radial-gradient(circle at 88% 35%, hsla(36, 65%, 35%, 0.18), transparent 45%),
+  linear-gradient(180deg, #14100b 0%, #0c0805 100%);
+  /* In-frame ("on-surface") text tones for the room-theme template. Defaults
+     are LIGHT, for the usual dark-wood ArchiveFrame fill. Parchment/light
+     themes (e.g. library) override these to dark ink so text stays readable.
+     --archive-gold-bright stays light for chrome that sits on the fixed-dark
+     PAGE background (e.g. the "Back to Map" link) regardless of frame palette. */
+  --archive-gold-bright: #e8c879;
+  --archive-ink-strong: #ece0c6;
+  --archive-ink-soft: #cdbf9f;
+  --archive-ink-faint: #a89878;
+  --archive-inset-bg: rgba(0, 0, 0, 0.3);
+  }
 
 /* ============================================================
    MANOR MAP (/themes) — fixed sepia parchment look.
@@ -1867,3 +1877,31 @@ body {
      --archive-gold: #d79a66;
    }
    ------------------------------------------------------------ */
+
+/* LIBRARY — the first re-skinned theme. Aged, darker gold borders + a parchment
+   fill instead of dark wood, with near-black ink for in-frame text. Has NO hero
+   imagery; the theme is purely this ArchiveFrame skin. The surface-shade var is
+   lightened so the parchment fill stays light (the default dark falloff would
+   crush it). --archive-gold is darkened so frame headings read as aged ink. */
+[data-theme="library"] {
+  --archive-metal-highlight: #c7a85f; /* aged gold */
+  --archive-metal-light: #ac8c43;
+  --archive-metal-mid: #8c6e2c;
+  --archive-metal-dark: #5f4717;
+  --archive-metal-deep: #3a2a0c;
+  /* parchment fill */
+  --archive-wood-base: #d8c7a0;
+  --archive-wood-top: #e7dabb;
+  --archive-wood-mid: #cdba8f;
+  --archive-wood-bottom: #bda572;
+  --archive-surface-sheen: rgba(255, 248, 230, 0); /* keep parchment flat on top */
+  --archive-surface-shade: rgba(70, 50, 20, 0.14); /* gentle aged vignette */
+  --archive-gold: #4a3414; /* dark ink for headings on parchment */
+  /* In-frame body text → dark ink on parchment (overrides .artifact-cabinet
+     light defaults). --archive-gold-bright is intentionally NOT overridden so
+     the "Back to Map" link stays light gold on the dark page background. */
+  --archive-ink-strong: #2e2008;
+  --archive-ink-soft: #4a3414;
+  --archive-ink-faint: #6a5226;
+  --archive-inset-bg: rgba(74, 52, 20, 0.1);
+}

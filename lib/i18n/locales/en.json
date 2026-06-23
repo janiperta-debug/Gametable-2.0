@@ -604,9 +604,21 @@
     "essence": "The Essence",
     "journey": "Your Journey in This Room",
     "glimpse": "A Glimpse Inside",
+    "glimpseCollection": "Collection",
+    "glimpseEvents": "Events",
+    "glimpseCommunity": "Community",
     "artefact": "Artefact",
     "whatUnlocks": "What Unlocks",
-    "progressSaved": "Your progress will always be saved."
+    "progressSaved": "Your progress will always be saved.",
+    "levelLabel": "Level",
+    "themeActive": "Theme in use",
+    "themeActiveDesc": "This room defines the look of your GameTable.",
+    "themeUnlocked": "Theme unlocked",
+    "themeUnlockedDesc": "Apply this room's theme to your GameTable.",
+    "themeLocked": "Theme locked",
+    "themeLockedDesc": "Unlock this room to use its theme.",
+    "useTheme": "Use theme",
+    "inUse": "In use"
   },
   "artifactPage": {
     "backToArtifacts": "Back to Artifacts",
