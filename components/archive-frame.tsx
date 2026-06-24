@@ -34,6 +34,10 @@ interface ArchiveFrameProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Render the subtle palmette ornaments centered on the top/bottom edges.
    *  Defaults to true for "md" corners (panels), false for "sm" (buttons). */
   centerOrnaments?: boolean
+  /** Render as a perfect circle: forces every band radius to rounded-full and
+   *  (by default) drops the corner/center flourishes, since they only read
+   *  correctly on a rectangular frame. Use for round home-crest buttons etc. */
+  round?: boolean
   children: React.ReactNode
 }
 
@@ -163,14 +167,22 @@ export function ArchiveFrame({
   cornerSize = "md",
   weight = "regular",
   centerOrnaments,
+  round = false,
   className,
   children,
   style,
   ...props
 }: ArchiveFrameProps) {
   const uid = useId()
-  const showCenter = centerOrnaments ?? cornerSize === "md"
-  const w = WEIGHT_STYLE[weight]
+  // On a circle the corner/center flourishes sit on a square's edges, so they
+  // float off the rim — suppress them entirely for round frames.
+  const showCorners = round ? false : corners
+  const showCenter = round ? false : (centerOrnaments ?? cornerSize === "md")
+  const base = WEIGHT_STYLE[weight]
+  // When round, override every band radius with rounded-full.
+  const w = round
+    ? { ...base, outerRadius: "rounded-full", channelRadius: "rounded-full", surfaceRadius: "rounded-full" }
+    : base
   return (
     <div
       data-material={material}
