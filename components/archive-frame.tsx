@@ -225,12 +225,18 @@ export function ArchiveFrame({
           {/* inner gold beaded hairline — second visible gold line of the double frame */}
           <div
             className={cn(
-              "pointer-events-none absolute rounded-[0.4rem] border border-[var(--archive-gold,#d9b65c)]/45",
+              "pointer-events-none absolute border border-[var(--archive-gold,#d9b65c)]/45",
+              round ? "rounded-full" : "rounded-[0.4rem]",
               weight === "regular" ? "inset-[3px]" : weight === "thin" ? "inset-[2px]" : "inset-[1.5px]",
             )}
           />
           {weight === "regular" && (
-            <div className="pointer-events-none absolute inset-[5px] rounded-[0.34rem] border border-black/30" />
+            <div
+              className={cn(
+                "pointer-events-none absolute inset-[5px] border border-black/30",
+                round ? "rounded-full" : "rounded-[0.34rem]",
+              )}
+            />
           )}
           <div className="relative z-10">{children}</div>
         </div>
@@ -243,7 +249,7 @@ export function ArchiveFrame({
         </>
       )}
 
-      {corners && (
+      {showCorners && (
         <>
           <CornerFlourish id={`${uid}-tl`} size={cornerSize} className="-left-1.5 -top-1.5" />
           <CornerFlourish id={`${uid}-tr`} size={cornerSize} className="-right-1.5 -top-1.5 -scale-x-100" />
