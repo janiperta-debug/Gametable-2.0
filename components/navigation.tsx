@@ -71,6 +71,39 @@ function MobileNavButton({
   )
 }
 
+/** Desktop bottom-bar button: thin Archive frame wrapping a text-only label. */
+function DesktopNavButton({
+  item,
+  active,
+}: {
+  item: { href: string; label: string }
+  active: boolean
+}) {
+  return (
+    <Link
+      href={item.href}
+      aria-current={active ? "page" : undefined}
+      className="group shrink-0 transition-transform hover:scale-105"
+    >
+      <ArchiveFrame
+        weight="thin"
+        cornerSize="sm"
+        className={`rounded-xl ${active ? "brightness-125" : "brightness-95 group-hover:brightness-110"}`}
+      >
+        <div
+          className={`flex w-[84px] h-[80px] lg:w-[96px] lg:h-[90px] flex-col items-center justify-center px-2 ${
+            active ? "text-accent-gold" : "text-accent-gold/85"
+          }`}
+        >
+          <span className="font-cinzel text-[11px] lg:text-[12px] uppercase tracking-tight text-center leading-tight text-balance break-words hyphens-auto">
+            {item.label}
+          </span>
+        </div>
+      </ArchiveFrame>
+    </Link>
+  )
+}
+
 export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
@@ -260,18 +293,6 @@ export function Navigation() {
               <LanguageSwitcher />
             </div>
 
-            {/* Center: Crest (Home link) */}
-            <Link
-              href="/home"
-              className="absolute left-1/2 -translate-x-1/2 transition-all hover:scale-105"
-            >
-              <img
-                src={getCrestImage(currentAppTheme)}
-                alt="Home"
-                className="w-16 h-16 lg:w-20 lg:h-20 object-contain"
-              />
-            </Link>
-
             {/* Right side: XP Progress, Profile */}
             <div className="flex items-center gap-3 lg:gap-4">
               {/* XP Progress Badge */}
@@ -354,39 +375,43 @@ export function Navigation() {
       </nav>
 
       {/* ═══════════════════════════════════════════════════════
-          DESKTOP NAVIGATION - BOTTOM BAR (8 buttons evenly spaced)
+          DESKTOP NAVIGATION - BOTTOM BAR (4 buttons · crest · 4 buttons)
           ═══════════════════════════════════════════════════════ */}
       <nav className="hidden md:block fixed bottom-2 left-0 right-0 z-50 pointer-events-none">
         <div className="max-w-[1920px] mx-auto px-4">
           <div className="flex items-end justify-center gap-3 lg:gap-4 pointer-events-auto">
-            {/* All 8 nav buttons — Archive-framed text-only label */}
-            {[...desktopNavItemsLeft, ...desktopNavItemsRight].map((item) => {
-              const active = isActive(item.href)
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  className="group transition-transform hover:scale-105"
-                >
-                  <ArchiveFrame
-                    weight="thin"
-                    cornerSize="sm"
-                    className={`rounded-xl ${active ? "brightness-125" : "brightness-95 group-hover:brightness-110"}`}
-                  >
-                    <div
-                      className={`flex w-[84px] h-[80px] lg:w-[96px] lg:h-[90px] flex-col items-center justify-center px-2 ${
-                        active ? "text-accent-gold" : "text-accent-gold/85"
-                      }`}
-                    >
-                      <span className="font-cinzel text-[11px] lg:text-[12px] uppercase tracking-tight text-center leading-tight text-balance break-words hyphens-auto">
-                        {item.label}
-                      </span>
-                    </div>
-                  </ArchiveFrame>
-                </Link>
-              )
-            })}
+            {/* Left group (4) */}
+            {desktopNavItemsLeft.map((item) => (
+              <DesktopNavButton key={item.href} item={item} active={isActive(item.href)} />
+            ))}
+
+            {/* Center: round Archive-framed crest = Home button. Larger than the
+                text buttons so the crest stays at full, legible size inside. */}
+            <Link
+              href="/home"
+              aria-label={t("nav.home")}
+              aria-current={isActive("/home") ? "page" : undefined}
+              className="group shrink-0 transition-transform hover:scale-105"
+            >
+              <ArchiveFrame
+                round
+                weight="thin"
+                className={`${isActive("/home") ? "brightness-125" : "brightness-95 group-hover:brightness-110"}`}
+              >
+                <div className="flex h-[92px] w-[92px] lg:h-[104px] lg:w-[104px] items-center justify-center">
+                  <img
+                    src={getCrestImage(currentAppTheme) || "/placeholder.svg"}
+                    alt=""
+                    className="w-16 h-16 lg:w-20 lg:h-20 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]"
+                  />
+                </div>
+              </ArchiveFrame>
+            </Link>
+
+            {/* Right group (4) */}
+            {desktopNavItemsRight.map((item) => (
+              <DesktopNavButton key={item.href} item={item} active={isActive(item.href)} />
+            ))}
           </div>
         </div>
       </nav>
