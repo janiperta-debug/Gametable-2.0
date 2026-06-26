@@ -395,8 +395,11 @@ interface ArchiveToggleProps<T extends string> {
 
 export function ArchiveToggle<T extends string>({ options, value, onChange, className }: ArchiveToggleProps<T>) {
   return (
-    <ArchiveFrame weight="thin" cornerSize="sm" className={cn("inline-block rounded-lg", className)}>
-      <div role="tablist" className="flex items-center gap-1 p-1">
+    <ArchiveFrame weight="thin" cornerSize="sm" className={cn("inline-block max-w-full rounded-lg", className)}>
+      <div
+        role="tablist"
+        className="flex items-center gap-1 p-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+      >
         {options.map((opt) => {
           const isActive = opt.value === value
           return (
@@ -406,7 +409,7 @@ export function ArchiveToggle<T extends string>({ options, value, onChange, clas
               aria-selected={isActive}
               onClick={() => onChange(opt.value)}
               className={cn(
-                "relative rounded-md px-5 py-2 font-cinzel text-xs sm:text-sm uppercase tracking-wide transition-colors whitespace-nowrap",
+                "relative shrink-0 rounded-md px-3 sm:px-5 py-2 font-cinzel text-xs sm:text-sm uppercase tracking-wide transition-colors whitespace-nowrap",
                 isActive
                   ? "font-semibold text-[var(--archive-gold,#d9b65c)]"
                   : "text-[var(--archive-gold,#d9b65c)]/55 hover:text-[var(--archive-gold,#d9b65c)]",
