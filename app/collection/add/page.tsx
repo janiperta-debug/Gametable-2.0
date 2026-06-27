@@ -2,8 +2,17 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import {
+  ArchiveCard,
+  ArchiveCardHeader,
+  ArchiveCardTitle,
+  ArchiveCardContent,
+  ArchiveButton,
+  ArchiveCardButton,
+  ArchiveIconButton,
+  archiveField,
+} from "@/components/archive-frame"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
@@ -352,43 +361,43 @@ export default function AddGamePage() {
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
-          <div className="flex items-center mb-8">
-            <Button variant="ghost" onClick={() => router.back()} className="mr-4">
-              <ArrowLeft className="h-4 w-4 mr-2" />
+          <div className="flex items-center gap-4 mb-8">
+            <ArchiveButton icon={<ArrowLeft className="h-4 w-4" />} onClick={() => router.back()}>
               {t("collection.back")}
-            </Button>
+            </ArchiveButton>
             <h1 className="ornate-text font-heading text-3xl font-bold">{t("collection.addGame")}</h1>
           </div>
 
           {/* Category Selector */}
-          <Card className="room-furniture mb-6">
-            <CardHeader>
-              <CardTitle className="font-heading text-xl text-accent-gold">{t("collection.selectCategory")}</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <ArchiveCard className="mb-6">
+            <ArchiveCardHeader>
+              <ArchiveCardTitle>{t("collection.selectCategory")}</ArchiveCardTitle>
+            </ArchiveCardHeader>
+            <ArchiveCardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {categories.map(({ id, icon: Icon }) => (
-                  <button
+                  <ArchiveCardButton
                     key={id}
                     type="button"
+                    fullWidth
+                    active={selectedCategory === id}
                     onClick={() => handleCategoryChange(id)}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${
-                      selectedCategory === id
-                        ? "border-accent-gold bg-accent-gold/10 text-accent-gold"
-                        : "border-border bg-transparent hover:border-accent-gold/50"
-                    }`}
                   >
-                    <Icon className="h-6 w-6" />
-                    <span className="text-sm font-body text-center">{t(`collection.${id === "board_game" ? "boardGames" : id === "rpg" ? "rpgs" : id === "trading_card" ? "tradingCards" : "miniatures"}`)}</span>
-                  </button>
+                    <span className="flex flex-col items-center gap-2 py-2">
+                      <Icon className="h-6 w-6" />
+                      <span className="text-center normal-case">
+                        {t(`collection.${id === "board_game" ? "boardGames" : id === "rpg" ? "rpgs" : id === "trading_card" ? "tradingCards" : "miniatures"}`)}
+                      </span>
+                    </span>
+                  </ArchiveCardButton>
                 ))}
               </div>
-            </CardContent>
-          </Card>
+            </ArchiveCardContent>
+          </ArchiveCard>
 
           {/* Search/Manual Tabs */}
-          <Card className="room-furniture">
-            <CardContent className="pt-6">
+          <ArchiveCard>
+            <ArchiveCardContent className="pt-6">
               <div className="mb-6 flex justify-center">
                 <FrameToggle
                   value={activeTab}
@@ -422,22 +431,18 @@ export default function AddGamePage() {
                           { id: "flesh-and-blood", label: "Flesh & Blood" },
                           { id: "one-piece", label: "One Piece" },
                         ].map((game) => (
-                          <button
+                          <ArchiveCardButton
                             key={game.id}
                             type="button"
+                            active={tcgGame === game.id}
                             onClick={() => {
                               setTcgGame(game.id as typeof tcgGame)
                               setSearchResults([])
                               setSelectedGame(null)
                             }}
-                            className={`px-3 py-1.5 rounded-full text-sm font-body transition-colors ${
-                              tcgGame === game.id
-                                ? "bg-accent-gold text-background"
-                                : "bg-surface/50 text-foreground hover:bg-accent-gold/20"
-                            }`}
                           >
-                            {game.label}
-                          </button>
+                            <span className="normal-case">{game.label}</span>
+                          </ArchiveCardButton>
                         ))}
                       </div>
                     )}
