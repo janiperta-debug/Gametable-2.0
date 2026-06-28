@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { FrameToggle } from "@/components/frame-button"
-import { ArrowLeft, Search, Loader2, Plus, Star, Users, Clock, Dices, Swords, CreditCard, Puzzle } from "lucide-react"
+import { ArrowLeft, Search, Loader2, Plus, Minus, Star, Users, Clock, Dices, Swords, CreditCard, Puzzle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { addGameToCollection } from "@/app/actions/games"
 import { addCardToCollection } from "@/app/actions/tcg"
@@ -459,13 +459,12 @@ export default function AddGamePage() {
                           className="pl-10 font-body"
                         />
                       </div>
-                      <Button
+                      <ArchiveIconButton
                         onClick={handleSearch}
                         disabled={searching || !searchQuery.trim()}
-                        className="theme-accent-gold"
-                      >
-                        {searching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                      </Button>
+                        aria-label={t("collection.search")}
+                        icon={searching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                      />
                     </div>
                   </div>
 
@@ -562,15 +561,12 @@ export default function AddGamePage() {
                         <div className="flex items-center gap-3 mt-4 pt-4 border-t border-accent-gold/20">
                           <Label className="text-accent-gold font-cinzel text-sm">{t("collection.quantity") || "Quantity"}:</Label>
                           <div className="flex items-center gap-2">
-                            <Button
+                            <ArchiveIconButton
                               type="button"
-                              variant="outline"
-                              size="sm"
+                              aria-label={t("collection.decrease") || "Decrease"}
                               onClick={() => setTcgQuantity(Math.max(1, tcgQuantity - 1))}
-                              className="h-8 w-8 p-0"
-                            >
-                              -
-                            </Button>
+                              icon={<Minus className="h-4 w-4" />}
+                            />
                             <Input
                               type="number"
                               min="1"
@@ -578,15 +574,12 @@ export default function AddGamePage() {
                               onChange={(e) => setTcgQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                               className="w-16 h-8 text-center"
                             />
-                            <Button
+                            <ArchiveIconButton
                               type="button"
-                              variant="outline"
-                              size="sm"
+                              aria-label={t("collection.increase") || "Increase"}
                               onClick={() => setTcgQuantity(tcgQuantity + 1)}
-                              className="h-8 w-8 p-0"
-                            >
-                              +
-                            </Button>
+                              icon={<Plus className="h-4 w-4" />}
+                            />
                           </div>
                         </div>
                       )}
@@ -596,15 +589,12 @@ export default function AddGamePage() {
                           <div className="flex items-center gap-2">
                             <Label className="text-accent-gold font-cinzel text-sm">{t("collection.quantity") || "Quantity"}:</Label>
                             <div className="flex items-center gap-1">
-                              <Button
+                              <ArchiveIconButton
                                 type="button"
-                                variant="outline"
-                                size="sm"
+                                aria-label={t("collection.decrease") || "Decrease"}
                                 onClick={() => setMiniQuantity(Math.max(1, miniQuantity - 1))}
-                                className="h-8 w-8 p-0"
-                              >
-                                -
-                              </Button>
+                                icon={<Minus className="h-4 w-4" />}
+                              />
                               <Input
                                 type="number"
                                 min="1"
@@ -612,15 +602,12 @@ export default function AddGamePage() {
                                 onChange={(e) => setMiniQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                                 className="w-16 h-8 text-center"
                               />
-                              <Button
+                              <ArchiveIconButton
                                 type="button"
-                                variant="outline"
-                                size="sm"
+                                aria-label={t("collection.increase") || "Increase"}
                                 onClick={() => setMiniQuantity(miniQuantity + 1)}
-                                className="h-8 w-8 p-0"
-                              >
-                                +
-                              </Button>
+                                icon={<Plus className="h-4 w-4" />}
+                              />
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
@@ -640,21 +627,22 @@ export default function AddGamePage() {
                         </div>
                       )}
                       <div className={`flex justify-end gap-3 mt-4 ${selectedCategory !== "trading_card" && selectedCategory !== "miniature" ? "pt-4 border-t border-accent-gold/20" : ""}`}>
-                        <Button variant="outline" onClick={() => setSelectedGame(null)} className="font-body bg-transparent">
+                        <ArchiveButton onClick={() => setSelectedGame(null)}>
                           {t("common.cancel")}
-                        </Button>
-                        <Button
+                        </ArchiveButton>
+                        <ArchiveButton
                           onClick={handleAddGame}
                           disabled={addingGameId === selectedGame.id}
-                          className="theme-accent-gold font-body"
+                          icon={
+                            addingGameId === selectedGame.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Plus className="h-4 w-4" />
+                            )
+                          }
                         >
-                          {addingGameId === selectedGame.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          ) : (
-                            <Plus className="h-4 w-4 mr-2" />
-                          )}
                           {t("collection.addToCollection")}
-                        </Button>
+                        </ArchiveButton>
                       </div>
                     </div>
                   )}
@@ -872,18 +860,19 @@ export default function AddGamePage() {
                     </div>
 
                     <div className="flex justify-end pt-4">
-                      <Button
+                      <ArchiveButton
                         onClick={handleManualSubmit}
                         disabled={savingManual || !manualForm.name.trim()}
-                        className="theme-accent-gold font-body"
+                        icon={
+                          savingManual ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Plus className="h-4 w-4" />
+                          )
+                        }
                       >
-                        {savingManual ? (
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        ) : (
-                          <Plus className="h-4 w-4 mr-2" />
-                        )}
                         {t("collection.addToCollection")}
-                      </Button>
+                      </ArchiveButton>
                     </div>
                   </div>
                 </div>
@@ -913,13 +902,9 @@ export default function AddGamePage() {
                         />
                       </div>
 
-                      <Button
-                        onClick={handleParseBulk}
-                        variant="outline"
-                        className="w-full"
-                      >
+                      <ArchiveButton onClick={handleParseBulk} fullWidth>
                         {t("collection.parseList")}
-                      </Button>
+                      </ArchiveButton>
 
                       {parsedItems.length > 0 && (
                         <div className="space-y-3">
@@ -935,23 +920,22 @@ export default function AddGamePage() {
                             ))}
                           </div>
 
-                          <Button
+                          <ArchiveButton
                             onClick={handleBulkImport}
                             disabled={importingBulk}
-                            className="w-full theme-accent-gold font-body"
+                            fullWidth
+                            icon={
+                              importingBulk ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Plus className="h-4 w-4" />
+                              )
+                            }
                           >
-                            {importingBulk ? (
-                              <>
-                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                Importing...
-                              </>
-                            ) : (
-                              <>
-                                <Plus className="h-4 w-4 mr-2" />
-                                {t("collection.importAll")} ({parsedItems.length})
-                              </>
-                            )}
-                          </Button>
+                            {importingBulk
+                              ? "Importing..."
+                              : `${t("collection.importAll")} (${parsedItems.length})`}
+                          </ArchiveButton>
                         </div>
                       )}
                     </div>
