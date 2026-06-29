@@ -12,7 +12,6 @@ import {
   ArchiveIconButton,
   archiveField,
 } from "@/components/archive-frame"
-import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
@@ -748,7 +747,7 @@ export default function AddGamePage() {
                         value={manualForm.name}
                         onChange={(e) => setManualForm({ ...manualForm, name: e.target.value })}
                         placeholder={t("collection.gameNamePlaceholder")}
-                        className="mt-1 font-body"
+                        className={`mt-1 font-body ${archiveField}`}
                       />
                     </div>
 
@@ -763,7 +762,7 @@ export default function AddGamePage() {
                           value={manualForm.year}
                           onChange={(e) => setManualForm({ ...manualForm, year: e.target.value })}
                           placeholder="2024"
-                          className="mt-1 font-body"
+                          className={`mt-1 font-body ${archiveField}`}
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-2">
@@ -778,7 +777,7 @@ export default function AddGamePage() {
                             value={manualForm.minPlayers}
                             onChange={(e) => setManualForm({ ...manualForm, minPlayers: e.target.value })}
                             placeholder="1"
-                            className="mt-1 font-body"
+                            className={`mt-1 font-body ${archiveField}`}
                           />
                         </div>
                         <div>
@@ -792,7 +791,7 @@ export default function AddGamePage() {
                             value={manualForm.maxPlayers}
                             onChange={(e) => setManualForm({ ...manualForm, maxPlayers: e.target.value })}
                             placeholder="4"
-                            className="mt-1 font-body"
+                            className={`mt-1 font-body ${archiveField}`}
                           />
                         </div>
                       </div>
@@ -810,7 +809,7 @@ export default function AddGamePage() {
                           value={manualForm.minPlaytime}
                           onChange={(e) => setManualForm({ ...manualForm, minPlaytime: e.target.value })}
                           placeholder="30"
-                          className="mt-1 font-body"
+                          className={`mt-1 font-body ${archiveField}`}
                         />
                       </div>
                       <div>
@@ -824,7 +823,7 @@ export default function AddGamePage() {
                           value={manualForm.maxPlaytime}
                           onChange={(e) => setManualForm({ ...manualForm, maxPlaytime: e.target.value })}
                           placeholder="60"
-                          className="mt-1 font-body"
+                          className={`mt-1 font-body ${archiveField}`}
                         />
                       </div>
                     </div>
@@ -839,7 +838,7 @@ export default function AddGamePage() {
                         value={manualForm.imageUrl}
                         onChange={(e) => setManualForm({ ...manualForm, imageUrl: e.target.value })}
                         placeholder="https://example.com/game-image.jpg"
-                        className="mt-1 font-body"
+                        className={`mt-1 font-body ${archiveField}`}
                       />
                       <p className="mt-1 text-xs text-muted-foreground">
                         {t("collection.imageUrlHelp") || "Optional: Paste a URL to an image of the game"}
@@ -855,7 +854,7 @@ export default function AddGamePage() {
                         value={manualForm.description}
                         onChange={(e) => setManualForm({ ...manualForm, description: e.target.value })}
                         placeholder={t("collection.descriptionPlaceholder")}
-                        className="mt-1 w-full min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm font-body placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className={`mt-1 w-full min-h-[100px] rounded-md px-3 py-2 text-sm font-body focus-visible:outline-none ${archiveField}`}
                       />
                     </div>
 
@@ -898,7 +897,7 @@ export default function AddGamePage() {
                             ? "4 Lightning Bolt\n2x Dark Ritual\n1 Black Lotus (LEA)"
                             : "10 Intercessors\n5x Hellblasters\n1 Captain in Gravis Armour"
                           }
-                          className="mt-1 w-full min-h-[150px] rounded-md border border-input bg-background px-3 py-2 text-sm font-body placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring font-mono"
+                          className={`mt-1 w-full min-h-[150px] rounded-md px-3 py-2 text-sm font-mono focus-visible:outline-none ${archiveField}`}
                         />
                       </div>
 
@@ -941,8 +940,8 @@ export default function AddGamePage() {
                     </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </ArchiveCardContent>
+          </ArchiveCard>
         </div>
       </main>
     </div>
