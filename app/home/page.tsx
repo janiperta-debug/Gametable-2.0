@@ -2,11 +2,20 @@
 
 import Image from "next/image"
 import { useAppTheme } from "@/components/app-theme-provider"
-import { useTranslations } from "@/lib/i18n"
+import { useTranslation } from "@/lib/i18n"
+import { getRoomThemePage } from "@/lib/room-theme-pages"
 
 export default function HomePage() {
   const { currentAppTheme } = useAppTheme()
-  const t = useTranslations()
+  const { t, locale } = useTranslation()
+
+  // Pull the welcome heading + description from the ACTIVE theme's room page so
+  // the home screen always reflects the current room. Falls back to the generic
+  // i18n copy for themes that don't have a filled theme page yet.
+  const themePage = getRoomThemePage(currentAppTheme)
+  const welcomeTitle = themePage ? themePage.title[locale] : t("home.welcome")
+  const welcomeDescription =
+    themePage?.storyParagraphs[0]?.[locale] ?? t("home.description")
 
   // Get hero image for current theme (default to main-hall)
   const getHeroImage = (theme: string) => {
@@ -52,15 +61,15 @@ export default function HomePage() {
           className="text-2xl sm:text-3xl md:text-4xl mb-3 md:mb-4 text-white drop-shadow-lg"
           style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)" }}
         >
-          {t("home.welcome")}
+          {welcomeTitle}
         </h2>
 
-        {/* Description - with shadow for visibility */}
+        {/* Description - pulled from the active theme's room page */}
         <p 
           className="text-base sm:text-lg md:text-xl text-foreground leading-relaxed drop-shadow-lg"
           style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5)" }}
         >
-          {t("home.description")}
+          {welcomeDescription}
         </p>
       </div>
     </div>
