@@ -10,12 +10,12 @@ import {
   ArchiveButton,
   ArchiveCardButton,
   ArchiveIconButton,
+  ArchiveToggle,
   archiveField,
 } from "@/components/archive-frame"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { FrameToggle } from "@/components/frame-button"
 import { ArrowLeft, Search, Loader2, Plus, Minus, Star, Users, Clock, Dices, Swords, CreditCard, Puzzle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { addGameToCollection } from "@/app/actions/games"
@@ -398,7 +398,7 @@ export default function AddGamePage() {
           <ArchiveCard>
             <ArchiveCardContent className="pt-6">
               <div className="mb-6 flex justify-center">
-                <FrameToggle
+                <ArchiveToggle
                   value={activeTab}
                   onChange={(v) => setActiveTab(v)}
                   options={[
