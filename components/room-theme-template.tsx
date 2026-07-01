@@ -81,19 +81,21 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
             />
             {/* Legibility gradient under the overlaid crest/title/tagline */}
             <div
-              className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/30 to-transparent"
+              className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-transparent"
               aria-hidden="true"
             />
-            <div className="absolute inset-0 flex flex-col items-start justify-center gap-2 p-5 text-left sm:p-8">
+            {/* crest + title + tagline, grouped and centered within the hero's
+                left third (both axes). */}
+            <div className="absolute inset-y-0 left-0 flex w-2/5 flex-col items-center justify-center gap-2 p-3 text-center sm:w-1/3 sm:p-5">
               <img
                 src={data.crest || "/placeholder.svg"}
                 alt={`${title} crest`}
-                className="h-20 w-fit max-w-full self-start object-contain drop-shadow-[0_3px_10px_rgba(0,0,0,0.85)] sm:h-28"
+                className="h-16 w-fit max-w-full object-contain drop-shadow-[0_3px_10px_rgba(0,0,0,0.85)] sm:h-24"
               />
-              <h1 className="logo-text text-left text-3xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] sm:text-5xl">
+              <h1 className="logo-text text-center text-2xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] sm:text-4xl">
                 {title}
               </h1>
-              <p className="font-body max-w-[15rem] text-center text-pretty italic text-foreground/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+              <p className="font-body text-center text-sm text-pretty italic text-foreground/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)] sm:text-base">
                 {L(data.tagline)}
               </p>
             </div>

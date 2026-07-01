@@ -1878,17 +1878,18 @@ body {
    }
    ------------------------------------------------------------ */
 
-/* LIBRARY — the first re-skinned theme. Aged, darker gold borders + a parchment
-   fill instead of dark wood, with near-black ink for in-frame text. Has NO hero
-   imagery; the theme is purely this ArchiveFrame skin. The surface-shade var is
-   lightened so the parchment fill stays light (the default dark falloff would
-   crush it). --archive-gold is darkened so frame headings read as aged ink. */
+/* LIBRARY — the first re-skinned theme. COPPER borders (gold read too dull
+   against the parchment fill) + a parchment fill instead of dark wood, with
+   near-black ink for in-frame text. Has NO hero imagery; the theme is purely
+   this ArchiveFrame skin. The surface-shade var is lightened so the parchment
+   fill stays light (the default dark falloff would crush it). --archive-gold is
+   a dark copper-brown so frame headings read as aged ink on parchment. */
 [data-theme="library"] {
-  --archive-metal-highlight: #c7a85f; /* aged gold */
-  --archive-metal-light: #ac8c43;
-  --archive-metal-mid: #8c6e2c;
-  --archive-metal-dark: #5f4717;
-  --archive-metal-deep: #3a2a0c;
+  --archive-metal-highlight: #e6ab73; /* copper sheen */
+  --archive-metal-light: #cf8a4f;
+  --archive-metal-mid: #b06a38;
+  --archive-metal-dark: #7e4420;
+  --archive-metal-deep: #46240f;
   /* parchment fill */
   --archive-wood-base: #d8c7a0;
   --archive-wood-top: #e7dabb;
@@ -1896,7 +1897,7 @@ body {
   --archive-wood-bottom: #bda572;
   --archive-surface-sheen: rgba(255, 248, 230, 0); /* keep parchment flat on top */
   --archive-surface-shade: rgba(70, 50, 20, 0.14); /* gentle aged vignette */
-  --archive-gold: #4a3414; /* dark ink for headings on parchment */
+  --archive-gold: #5e3417; /* dark copper-brown ink for headings on parchment */
   /* In-frame body text → dark ink on parchment (overrides .artifact-cabinet
      light defaults). --archive-gold-bright is intentionally NOT overridden so
      the "Back to Map" link stays light gold on the dark page background. */
