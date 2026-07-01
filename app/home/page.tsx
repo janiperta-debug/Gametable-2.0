@@ -9,13 +9,12 @@ export default function HomePage() {
   const { currentAppTheme } = useAppTheme()
   const { t, locale } = useTranslation()
 
-  // Pull the welcome heading + description from the ACTIVE theme's room page so
-  // the home screen always reflects the current room. Falls back to the generic
-  // i18n copy for themes that don't have a filled theme page yet.
+  // Pull the full description from the ACTIVE theme's room page so the home
+  // screen always reflects the current room. Falls back to the generic i18n
+  // copy for themes that don't have a filled theme page yet.
   const themePage = getRoomThemePage(currentAppTheme)
-  const welcomeTitle = themePage ? themePage.title[locale] : t("home.welcome")
-  const welcomeDescription =
-    themePage?.storyParagraphs[0]?.[locale] ?? t("home.description")
+  const welcomeParagraphs =
+    themePage?.storyParagraphs.map((p) => p[locale]) ?? [t("home.description")]
 
   // Get hero image for current theme (default to main-hall)
   const getHeroImage = (theme: string) => {
@@ -56,21 +55,18 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Welcome title - white with shadow for visibility */}
-        <h2 
-          className="text-2xl sm:text-3xl md:text-4xl mb-3 md:mb-4 text-white drop-shadow-lg"
-          style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)" }}
-        >
-          {welcomeTitle}
-        </h2>
-
-        {/* Description - pulled from the active theme's room page */}
-        <p 
-          className="text-base sm:text-lg md:text-xl text-foreground leading-relaxed drop-shadow-lg"
-          style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5)" }}
-        >
-          {welcomeDescription}
-        </p>
+        {/* Full description - all paragraphs from the active theme's room page */}
+        <div className="flex flex-col gap-4">
+          {welcomeParagraphs.map((paragraph, i) => (
+            <p
+              key={i}
+              className="text-base sm:text-lg md:text-xl text-foreground leading-relaxed drop-shadow-lg"
+              style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5)" }}
+            >
+              {paragraph}
+            </p>
+          ))}
+        </div>
       </div>
     </div>
   )
