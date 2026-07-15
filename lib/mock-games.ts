@@ -1,5 +1,5 @@
 export interface Game {
-  id: number
+  id: string
   title: string
   image: string
   rating: number
@@ -14,11 +14,14 @@ export interface Game {
   yearPublished: number
   owned: boolean
   wishlist: boolean
+  forTrade?: boolean
+  userGameId?: string
+  ownedExpansionCount?: number
 }
 
 export const MOCK_GAMES: Game[] = [
   {
-    id: 1,
+    id: "1",
     title: "Wingspan",
     image: "/wingspan-board-game-box.png",
     rating: 4.8,
@@ -35,7 +38,7 @@ export const MOCK_GAMES: Game[] = [
     wishlist: false,
   },
   {
-    id: 2,
+    id: "2",
     title: "Azul",
     image: "/azul-board-game-box.png",
     rating: 4.6,
@@ -52,7 +55,7 @@ export const MOCK_GAMES: Game[] = [
     wishlist: false,
   },
   {
-    id: 3,
+    id: "3",
     title: "Gloomhaven",
     image: "/gloomhaven-board-game-box.png",
     rating: 4.9,
@@ -69,7 +72,7 @@ export const MOCK_GAMES: Game[] = [
     wishlist: false,
   },
   {
-    id: 4,
+    id: "4",
     title: "Ticket to Ride",
     image: "/ticket-to-ride-board-game-box.png",
     rating: 4.4,
@@ -86,7 +89,7 @@ export const MOCK_GAMES: Game[] = [
     wishlist: true,
   },
   {
-    id: 5,
+    id: "5",
     title: "Scythe",
     image: "/scythe-board-game-box.png",
     rating: 4.7,
@@ -103,7 +106,7 @@ export const MOCK_GAMES: Game[] = [
     wishlist: false,
   },
   {
-    id: 6,
+    id: "6",
     title: "Pandemic",
     image: "/pandemic-board-game-box.png",
     rating: 4.5,
@@ -120,7 +123,7 @@ export const MOCK_GAMES: Game[] = [
     wishlist: false,
   },
   {
-    id: 7,
+    id: "7",
     title: "Terraforming Mars",
     image: "/terraforming-mars-board-game.jpg",
     rating: 4.7,
@@ -137,7 +140,7 @@ export const MOCK_GAMES: Game[] = [
     wishlist: false,
   },
   {
-    id: 8,
+    id: "8",
     title: "Catan",
     image: "/catan-board-game.jpg",
     rating: 4.3,

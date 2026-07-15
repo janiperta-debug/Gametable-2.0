@@ -29,7 +29,29 @@ export async function getUserGames() {
     return { error: error.message, games: [] }
   }
 
-  return { games: data || [], error: null }
+  // Count owned expansions per base game so the collection card can show a
+  // "N expansions" badge. One extra query, mapped in memory.
+  const { data: ownedExpansions } = await supabase
+    .from('user_game_expansions')
+    .select('game_expansion:game_expansions(base_game_id)')
+    .eq('user_id', user.id)
+
+  const expansionCountByGameId = new Map<string, number>()
+  for (const row of ownedExpansions || []) {
+    // Supabase types embedded relations as an array; take the first.
+    const rel = row.game_expansion as unknown as { base_game_id: string }[] | { base_game_id: string } | null
+    const baseGameId = Array.isArray(rel) ? rel[0]?.base_game_id : rel?.base_game_id
+    if (baseGameId) {
+      expansionCountByGameId.set(baseGameId, (expansionCountByGameId.get(baseGameId) || 0) + 1)
+    }
+  }
+
+  const games = (data || []).map((ug) => ({
+    ...ug,
+    ownedExpansionCount: expansionCountByGameId.get(ug.game_id) || 0,
+  }))
+
+  return { games, error: null }
 }
 
 export type GameCategory = 'board_game' | 'rpg' | 'trading_card' | 'miniature'
@@ -165,6 +187,30 @@ export async function addGameToCollection(
   if (userGameError) {
     console.error('Error adding game to collection:', userGameError)
     return { error: userGameError.message }
+  }
+
+  // Populate the shared expansion catalog for board games (best effort — never
+  // block adding the game itself if this fails).
+  if (category === 'board_game' && bggDetails.expansions?.length) {
+    const rows = bggDetails.expansions
+      .filter((e) => e.bggId)
+      .map((e, i) => ({
+        base_game_id: gameId,
+        bgg_id: e.bggId,
+        name: e.name,
+        year: e.year,
+        image_url: e.image,
+        sort_order: i,
+      }))
+
+    if (rows.length) {
+      const { error: expError } = await supabase
+        .from('game_expansions')
+        .upsert(rows, { onConflict: 'bgg_id' })
+      if (expError) {
+        console.error('[v0] Error upserting expansions:', expError.message)
+      }
+    }
   }
 
   // Award XP using the centralized server action
@@ -309,6 +355,80 @@ export async function getGameById(gameId: string) {
   }
 
   return { game, userGame, error: null }
+}
+
+// List the expansion catalog for a base game, flagging which ones the current
+// user owns.
+export async function getGameExpansions(gameId: string) {
+  const supabase = await createClient()
+
+  const { data: expansions, error } = await supabase
+    .from('game_expansions')
+    .select('*')
+    .eq('base_game_id', gameId)
+    .order('sort_order', { ascending: true })
+    .order('year', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching expansions:', error)
+    return { error: error.message, expansions: [] }
+  }
+
+  const { data: { user } } = await supabase.auth.getUser()
+  let ownedIds = new Set<string>()
+
+  if (user && expansions?.length) {
+    const { data: owned } = await supabase
+      .from('user_game_expansions')
+      .select('game_expansion_id')
+      .eq('user_id', user.id)
+      .in('game_expansion_id', expansions.map((e) => e.id))
+    ownedIds = new Set((owned || []).map((o) => o.game_expansion_id))
+  }
+
+  return {
+    expansions: (expansions || []).map((e) => ({ ...e, owned: ownedIds.has(e.id) })),
+    error: null,
+  }
+}
+
+// Toggle whether the current user owns a given expansion.
+export async function toggleGameExpansionOwnership(
+  gameExpansionId: string,
+  owned: boolean,
+  gameId?: string
+) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return { error: 'Not authenticated' }
+  }
+
+  if (owned) {
+    const { error } = await supabase
+      .from('user_game_expansions')
+      .insert({ user_id: user.id, game_expansion_id: gameExpansionId })
+    // Ignore unique-violation (already owned) so the action is idempotent.
+    if (error && error.code !== '23505') {
+      console.error('Error adding expansion ownership:', error)
+      return { error: error.message }
+    }
+  } else {
+    const { error } = await supabase
+      .from('user_game_expansions')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('game_expansion_id', gameExpansionId)
+    if (error) {
+      console.error('Error removing expansion ownership:', error)
+      return { error: error.message }
+    }
+  }
+
+  revalidatePath('/collection')
+  if (gameId) revalidatePath(`/game/${gameId}`)
+  return { success: true }
 }
 
 
