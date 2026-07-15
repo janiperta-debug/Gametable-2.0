@@ -2,7 +2,7 @@
 
 import { ArchiveCard, ArchiveCardButton, ArchiveIconButton } from "@/components/archive-frame"
 import { Badge } from "@/components/ui/badge"
-import { Star, Users, Clock, Heart, ShoppingBag, Store } from "lucide-react"
+import { Star, Users, Clock, Heart, ShoppingBag, Store, Puzzle } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -68,6 +68,14 @@ export function GameGrid({
                     <Badge variant="secondary" className="bg-accent-gold/90 text-background font-body">
                       <Heart className="h-3 w-3 mr-1 fill-current" />
                       {t("collection.wishlist")}
+                    </Badge>
+                  </div>
+                )}
+                {!!game.ownedExpansionCount && game.ownedExpansionCount > 0 && (
+                  <div className="absolute bottom-2 left-2">
+                    <Badge variant="secondary" className="bg-accent-gold/90 text-background font-body">
+                      <Puzzle className="h-3 w-3 mr-1" />
+                      {t("game.expansionsOwnedShort", { count: game.ownedExpansionCount })}
                     </Badge>
                   </div>
                 )}

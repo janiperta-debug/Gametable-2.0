@@ -27,6 +27,7 @@ import { ArrowLeft, Edit, Save, X, Star, Users, Clock, Loader2, Trash2 } from "l
 import Image from "next/image"
 import Link from "next/link"
 import { getGameById, updateGame, removeGameFromCollection, type GameCategory } from "@/app/actions/games"
+import { GameExpansions } from "@/components/game-expansions"
 import { useTranslations } from "@/lib/i18n"
 
 const CATEGORIES: { value: GameCategory; label: string }[] = [
@@ -432,6 +433,8 @@ export default function GameDetailPage() {
                       </a>
                     </div>
                   )}
+
+                  {game.category === "board_game" && <GameExpansions gameId={gameId} />}
                 </>
               )}
             </div>

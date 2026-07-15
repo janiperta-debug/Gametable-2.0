@@ -31,6 +31,7 @@ export interface UserGame {
 
 export interface UserGameWithGame extends UserGame {
   game: Game
+  ownedExpansionCount?: number
 }
 
 export interface Profile {

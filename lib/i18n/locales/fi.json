@@ -23,7 +23,11 @@
     "published": "Julkaistu",
     "viewOnBGG": "Katso BoardGameGeekissä",
     "deleteTitle": "Poista kokoelmasta?",
-    "deleteDescription": "Haluatko varmasti poistaa tämän pelin kokoelmastasi? Tätä toimintoa ei voi perua."
+    "deleteDescription": "Haluatko varmasti poistaa tämän pelin kokoelmastasi? Tätä toimintoa ei voi perua.",
+    "expansions": "Laajennukset",
+    "expansionsOwned": "{{owned}}/{{total}} omistettu",
+    "expansionsNone": "Tälle pelille ei löytynyt laajennuksia.",
+    "expansionsOwnedShort": "{{count}} laajennusta"
   },
   "common": {
     "loading": "Ladataan...",

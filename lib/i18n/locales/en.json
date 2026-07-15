@@ -22,7 +22,11 @@
     "published": "Published",
     "viewOnBGG": "View on BoardGameGeek",
     "deleteTitle": "Remove from collection?",
-    "deleteDescription": "Are you sure you want to remove this game from your collection? This action cannot be undone."
+    "deleteDescription": "Are you sure you want to remove this game from your collection? This action cannot be undone.",
+    "expansions": "Expansions",
+    "expansionsOwned": "{{owned}}/{{total}} owned",
+    "expansionsNone": "No expansions found for this game.",
+    "expansionsOwnedShort": "{{count}} expansions"
   },
   "common": {
     "loading": "Loading...",
