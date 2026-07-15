@@ -480,6 +480,8 @@
   "community": {
     "title": "Yhteisö",
     "subtitle": "Yhdistä muihin pelaajiin ja seuraa pelipiiriäsi",
+    "tabActivity": "Viimeaikainen toiminta",
+    "tabSearch": "Etsi pelaajia",
     "recentFriendActivity": "Ystävien viimeaikainen toiminta",
     "loginToSeeActivity": "Kirjaudu sisään nähdäksesi ystäviesi toiminnan",
     "noFriendActivity": "Ei viimeaikaista toimintaa ystäviltä. Lisää ystäviä nähdäksesi heidän päivityksensä!",
@@ -1026,7 +1028,7 @@
     "clockTower": { "name": "Kellotorni", "description": "Jäänsininen tarkkuus teräs- ja kromimekanismeilla", "atmosphere": "Mekaaninen tarkkuus" },
     "warRoom": { "name": "Sotahuone", "description": "Sotilasvihrään strategiaa pronssisilla taistelusuunnitelmilla", "atmosphere": "Strateginen komentokeskus" },
     "artroom": { "name": "Taidehuone", "description": "Luova studio rikkailla sinapinseinillä ja hiilipiirustustyökaluilla", "atmosphere": "Taiteellinen ja inspiroiva" },
-    "alchemistLaboratory": { "name": "Alkemistin laboratorio", "description": "Smaragdinvihreät liemiet ja taivaansininen mystinen energia", "atmosphere": "Maaginen ja kokeellinen" },
+    "alchemistLaboratory": { "name": "Alkemistin laboratorio", "description": "Smaragdinvihre��t liemiet ja taivaansininen mystinen energia", "atmosphere": "Maaginen ja kokeellinen" },
     "dungeon": { "name": "Vankityrmä", "description": "Hunajanväriset kiviseinät pronssisilla soihtutelineillä", "atmosphere": "Mysteerinen ja muinainen" },
     "undergroundTemple": { "name": "Maanalainen temppeli", "description": "Kivenharmaata pyhyyttä sinivihreillä pyhillä vesillä", "atmosphere": "Pyhä ja ajaton" },
     "crystalCavern": { "name": "Kristalliluola", "description": "Ruusukvartsiformaatioita ja ametistiklustereita", "atmosphere": "Eteeerinen ja lumoava" },

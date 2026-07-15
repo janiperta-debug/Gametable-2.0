@@ -492,6 +492,8 @@
   "community": {
     "title": "Community",
     "subtitle": "Connect with fellow gamers and stay updated with your gaming circle",
+    "tabActivity": "Recent Activity",
+    "tabSearch": "Find Players",
     "recentFriendActivity": "Recent Friend Activity",
     "loginToSeeActivity": "Log in to see your friends' activity",
     "noFriendActivity": "No recent activity from friends. Add more friends to see their updates!",
