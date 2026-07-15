@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { DiscoverPlayers } from "@/components/discover-players"
 import { ThemeHero } from "@/components/theme-hero"
-import { ArchiveCard, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle } from "@/components/archive-frame"
+import { ArchiveCard, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle, ArchiveToggle } from "@/components/archive-frame"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Clock, Loader2, Gamepad2, Calendar } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
@@ -25,6 +25,7 @@ export default function CommunityPage() {
   const { user } = useUser()
   const [activity, setActivity] = useState<Activity[]>([])
   const [loadingActivity, setLoadingActivity] = useState(true)
+  const [activeTab, setActiveTab] = useState<"activity" | "search">("activity")
 
   useEffect(() => {
     async function loadActivity() {
@@ -53,6 +54,18 @@ export default function CommunityPage() {
       </ThemeHero>
 
       <div className="max-w-6xl mx-auto space-y-8">
+          <div className="flex justify-center">
+            <ArchiveToggle
+              value={activeTab}
+              onChange={(v) => setActiveTab(v)}
+              options={[
+                { value: "activity", label: t("community.tabActivity") },
+                { value: "search", label: t("community.tabSearch") },
+              ]}
+            />
+          </div>
+
+          {activeTab === "activity" ? (
           <ArchiveCard>
             <ArchiveCardHeader>
               <ArchiveCardTitle className="text-2xl flex items-center normal-case">
@@ -118,8 +131,9 @@ export default function CommunityPage() {
               )}
             </ArchiveCardContent>
           </ArchiveCard>
-
-          <DiscoverPlayers />
+          ) : (
+            <DiscoverPlayers />
+          )}
         </div>
     </main>
   )
