@@ -70,4 +70,12 @@ export interface BGGGameDetails {
   image: string | null
   thumbnail: string | null
   description: string | null
+  expansions?: BGGExpansion[]
+}
+
+export interface BGGExpansion {
+  bggId: number
+  name: string
+  year: number | null
+  image: string | null
 }
