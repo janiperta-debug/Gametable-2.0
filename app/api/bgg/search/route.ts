@@ -50,11 +50,16 @@ function parseXMLSearchResults(xmlText: string): SearchResult[] {
   })
 }
 
-// Fetch thumbnails for multiple IDs in a single API call
-async function fetchThumbnails(ids: number[], headers: Record<string, string>): Promise<Map<number, string>> {
-  const thumbnailMap = new Map<number, string>()
-  
-  if (ids.length === 0) return thumbnailMap
+// Fetch thumbnail + item type for multiple IDs in a single API call. The type
+// lets us drop expansions (they carry type="boardgameexpansion") so only base
+// games appear as search rows.
+async function fetchThingMeta(
+  ids: number[],
+  headers: Record<string, string>
+): Promise<Map<number, { thumbnail: string | null; type: string }>> {
+  const metaMap = new Map<number, { thumbnail: string | null; type: string }>()
+
+  if (ids.length === 0) return metaMap
 
   try {
     // BGG API allows comma-separated IDs for batch requests
