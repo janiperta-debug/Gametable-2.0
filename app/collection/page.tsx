@@ -72,6 +72,7 @@ export default function Collection() {
       // Store the user_game id for actions
       userGameId: ug.id,
       ownedExpansionCount: ug.ownedExpansionCount || 0,
+      ownedExpansions: ug.ownedExpansions || [],
     }))
   }, [userGames])
 
