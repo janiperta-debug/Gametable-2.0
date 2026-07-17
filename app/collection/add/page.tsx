@@ -46,6 +46,62 @@ const categories: CategoryConfig[] = [
   { id: "miniature", icon: Puzzle, searchEndpoint: "/api/miniatures/search", detailsEndpoint: "/api/miniatures/details" },
 ]
 
+// A base game with its expansions nested underneath. `synthetic` means the base
+// game itself was not in the search results (we inferred it from an expansion's
+// baseGame link) — we still show it as a host so expansions never stand alone.
+type BoardHost = {
+  base: BGGSearchResult
+  synthetic: boolean
+  expansions: BGGSearchResult[]
+}
+
+function groupBoardResults(results: BGGSearchResult[]): BoardHost[] {
+  const hostsById = new Map<number, BoardHost>()
+  const order: number[] = []
+
+  const ensureHost = (base: BGGSearchResult, synthetic: boolean): BoardHost => {
+    const existing = hostsById.get(base.id)
+    if (existing) {
+      if (!synthetic && existing.synthetic) {
+        existing.base = base
+        existing.synthetic = false
+      }
+      return existing
+    }
+    const host: BoardHost = { base, synthetic, expansions: [] }
+    hostsById.set(base.id, host)
+    order.push(base.id)
+    return host
+  }
+
+  // First pass: real base games become hosts.
+  for (const r of results) {
+    if (r.type !== "expansion") ensureHost(r, false)
+  }
+  // Second pass: nest expansions under their base (synthesizing a host if the
+  // base game wasn't among the results).
+  for (const r of results) {
+    if (r.type !== "expansion") continue
+    if (r.baseGame) {
+      const hadBase = hostsById.has(r.baseGame.bggId)
+      const base: BGGSearchResult = hostsById.get(r.baseGame.bggId)?.base ?? {
+        id: r.baseGame.bggId,
+        name: r.baseGame.name,
+        yearPublished: null,
+        thumbnail: null,
+        type: "base",
+        baseGame: null,
+      }
+      ensureHost(base, !hadBase).expansions.push(r)
+    } else {
+      // No base info at all — show the expansion as its own host as a fallback.
+      ensureHost(r, false)
+    }
+  }
+
+  return order.map((id) => hostsById.get(id)!)
+}
+
 export default function AddGamePage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<"search" | "manual" | "bulk">("search")
@@ -703,6 +759,58 @@ export default function AddGamePage() {
                               </button>
                             )
                           })}
+                        </div>
+                      ) : selectedCategory === "board_game" ? (
+                        <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                          {groupBoardResults(searchResults as BGGSearchResult[]).map((host) => (
+                            <div key={host.base.id} className="rounded-lg border border-accent-gold/20 overflow-hidden">
+                              {/* Base game (host) */}
+                              <button
+                                onClick={() => handleSelectGame(host.base.id)}
+                                className="w-full flex items-center justify-between p-4 hover:bg-accent-gold/10 transition-colors text-left"
+                              >
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-heading font-medium text-lg truncate">{host.base.name}</h4>
+                                  <div className="flex flex-wrap items-center gap-2 mt-1">
+                                    {host.base.yearPublished && (
+                                      <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
+                                        {host.base.yearPublished}
+                                      </Badge>
+                                    )}
+                                    {host.expansions.length > 0 && (
+                                      <span className="flex items-center gap-1 text-xs text-muted-foreground font-body">
+                                        <Puzzle className="h-3 w-3" />
+                                        {t("game.expansionsOwnedShort", { count: host.expansions.length })}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <Plus className="h-5 w-5 text-accent-gold ml-4 flex-shrink-0" />
+                              </button>
+
+                              {/* Nested expansions */}
+                              {host.expansions.length > 0 && (
+                                <ul className="border-t border-accent-gold/15 bg-surface/20">
+                                  {host.expansions.map((exp) => (
+                                    <li key={exp.id}>
+                                      <button
+                                        onClick={() => handleSelectGame(exp.id)}
+                                        className="w-full flex items-center justify-between py-2.5 pl-8 pr-4 hover:bg-accent-gold/10 transition-colors text-left border-l-2 border-accent-gold/20"
+                                      >
+                                        <div className="flex-1 min-w-0">
+                                          <span className="font-body text-sm text-foreground/90 line-clamp-1">{exp.name}</span>
+                                          {exp.yearPublished && (
+                                            <span className="ml-2 text-xs text-muted-foreground">{exp.yearPublished}</span>
+                                          )}
+                                        </div>
+                                        <Plus className="h-4 w-4 text-accent-gold ml-3 flex-shrink-0" />
+                                      </button>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       ) : (
                         <div className="space-y-2 max-h-[400px] overflow-y-auto">

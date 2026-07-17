@@ -66,6 +66,8 @@ export interface BGGSearchResult {
   name: string
   yearPublished: number | null
   thumbnail?: string | null
+  type?: 'base' | 'expansion'
+  baseGame?: { bggId: number; name: string } | null
 }
 
 export interface BGGGameDetails {
@@ -80,6 +82,8 @@ export interface BGGGameDetails {
   image: string | null
   thumbnail: string | null
   description: string | null
+  isExpansion?: boolean
+  baseGame?: { bggId: number; name: string } | null
   expansions?: BGGExpansion[]
 }
 

@@ -50,14 +50,20 @@ function parseXMLSearchResults(xmlText: string): SearchResult[] {
   })
 }
 
-// Fetch thumbnail + item type for multiple IDs in a single API call. The type
-// lets us drop expansions (they carry type="boardgameexpansion") so only base
-// games appear as search rows.
+type ThingMeta = {
+  thumbnail: string | null
+  type: string
+  baseGame: { bggId: number; name: string } | null
+}
+
+// Fetch thumbnail + item type + (for expansions) the inbound base game for
+// multiple IDs in a single API call. The `thing` response already contains the
+// <link> elements, so classifying + linking costs no extra requests.
 async function fetchThingMeta(
   ids: number[],
   headers: Record<string, string>
-): Promise<Map<number, { thumbnail: string | null; type: string }>> {
-  const metaMap = new Map<number, { thumbnail: string | null; type: string }>()
+): Promise<Map<number, ThingMeta>> {
+  const metaMap = new Map<number, ThingMeta>()
 
   if (ids.length === 0) return metaMap
 
@@ -92,7 +98,24 @@ async function fetchThingMeta(
       const id = parseInt(String(item['@_id']), 10)
       const thumbnail = (item.thumbnail as string | undefined) || null
       const type = String(item['@_type'] || 'boardgame')
-      metaMap.set(id, { thumbnail, type })
+
+      // For expansions, find the inbound boardgameexpansion link → base game.
+      let baseGame: { bggId: number; name: string } | null = null
+      if (type === 'boardgameexpansion') {
+        const links = Array.isArray(item.link) ? item.link : item.link ? [item.link] : []
+        const inbound = links.find(
+          (l: Record<string, unknown>) =>
+            l['@_type'] === 'boardgameexpansion' && String(l['@_inbound']) === 'true',
+        )
+        if (inbound) {
+          const baseId = parseInt(String(inbound['@_id']), 10)
+          if (!Number.isNaN(baseId)) {
+            baseGame = { bggId: baseId, name: String(inbound['@_value'] || '') }
+          }
+        }
+      }
+
+      metaMap.set(id, { thumbnail, type, baseGame })
     }
   } catch (error) {
     console.error("[v0] BGG thing batch fetch error:", error)
@@ -133,20 +156,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ results: [] })
     }
 
-    // Step 2: Fetch thumbnail + type for all results in one batch call
+    // Step 2: Fetch thumbnail + type + base game for all results in one batch.
     const ids = results.map(r => r.id)
     const meta = await fetchThingMeta(ids, headers)
 
-    // Step 3: Merge thumbnails, and DROP expansions so only base games show as
-    // rows (expansions are surfaced as children of their base game instead).
-    const resultsWithThumbnails = results
-      .filter(r => meta.get(r.id)?.type !== 'boardgameexpansion')
-      .map(r => ({
+    // Step 3: Annotate each result with thumbnail, whether it's an expansion,
+    // and its base game. Expansions are KEPT so the client can nest them under
+    // their base game (never dropped).
+    const annotated = results.map(r => {
+      const m = meta.get(r.id)
+      const isExpansion = m?.type === 'boardgameexpansion'
+      return {
         ...r,
-        thumbnail: meta.get(r.id)?.thumbnail || null
-      }))
+        thumbnail: m?.thumbnail || null,
+        type: isExpansion ? ('expansion' as const) : ('base' as const),
+        baseGame: m?.baseGame || null,
+      }
+    })
 
-    return NextResponse.json({ results: resultsWithThumbnails })
+    return NextResponse.json({ results: annotated })
   } catch (error) {
     console.error('BGG search error:', error)
     return NextResponse.json({ 
