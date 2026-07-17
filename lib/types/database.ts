@@ -29,9 +29,18 @@ export interface UserGame {
   added_at: string | null
 }
 
+export interface OwnedExpansion {
+  id: string
+  base_game_id: string
+  name: string
+  year: number | null
+  image_url: string | null
+}
+
 export interface UserGameWithGame extends UserGame {
   game: Game
   ownedExpansionCount?: number
+  ownedExpansions?: OwnedExpansion[]
 }
 
 export interface Profile {

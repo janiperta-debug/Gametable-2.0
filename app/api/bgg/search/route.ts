@@ -50,11 +50,16 @@ function parseXMLSearchResults(xmlText: string): SearchResult[] {
   })
 }
 
-// Fetch thumbnails for multiple IDs in a single API call
-async function fetchThumbnails(ids: number[], headers: Record<string, string>): Promise<Map<number, string>> {
-  const thumbnailMap = new Map<number, string>()
-  
-  if (ids.length === 0) return thumbnailMap
+// Fetch thumbnail + item type for multiple IDs in a single API call. The type
+// lets us drop expansions (they carry type="boardgameexpansion") so only base
+// games appear as search rows.
+async function fetchThingMeta(
+  ids: number[],
+  headers: Record<string, string>
+): Promise<Map<number, { thumbnail: string | null; type: string }>> {
+  const metaMap = new Map<number, { thumbnail: string | null; type: string }>()
+
+  if (ids.length === 0) return metaMap
 
   try {
     // BGG API allows comma-separated IDs for batch requests
@@ -64,8 +69,8 @@ async function fetchThumbnails(ids: number[], headers: Record<string, string>): 
     const response = await fetch(detailsUrl, { headers, cache: 'no-store' })
     
     if (!response.ok) {
-      console.log("[v0] BGG Thumbnail batch fetch failed:", response.status)
-      return thumbnailMap
+      console.log("[v0] BGG thing batch fetch failed:", response.status)
+      return metaMap
     }
 
     const xmlText = await response.text()
@@ -76,7 +81,7 @@ async function fetchThumbnails(ids: number[], headers: Record<string, string>): 
     const result = parser.parse(xmlText)
 
     if (!result.items || !result.items.item) {
-      return thumbnailMap
+      return metaMap
     }
 
     const items = Array.isArray(result.items.item) 
@@ -85,16 +90,15 @@ async function fetchThumbnails(ids: number[], headers: Record<string, string>): 
 
     for (const item of items) {
       const id = parseInt(String(item['@_id']), 10)
-      const thumbnail = item.thumbnail as string | undefined
-      if (thumbnail) {
-        thumbnailMap.set(id, thumbnail)
-      }
+      const thumbnail = (item.thumbnail as string | undefined) || null
+      const type = String(item['@_type'] || 'boardgame')
+      metaMap.set(id, { thumbnail, type })
     }
   } catch (error) {
-    console.error("[v0] BGG Thumbnail batch fetch error:", error)
+    console.error("[v0] BGG thing batch fetch error:", error)
   }
 
-  return thumbnailMap
+  return metaMap
 }
 
 export async function GET(request: NextRequest) {
@@ -129,15 +133,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ results: [] })
     }
 
-    // Step 2: Fetch thumbnails for all results in one batch call
+    // Step 2: Fetch thumbnail + type for all results in one batch call
     const ids = results.map(r => r.id)
-    const thumbnails = await fetchThumbnails(ids, headers)
+    const meta = await fetchThingMeta(ids, headers)
 
-    // Step 3: Merge thumbnails into results
-    const resultsWithThumbnails = results.map(r => ({
-      ...r,
-      thumbnail: thumbnails.get(r.id) || null
-    }))
+    // Step 3: Merge thumbnails, and DROP expansions so only base games show as
+    // rows (expansions are surfaced as children of their base game instead).
+    const resultsWithThumbnails = results
+      .filter(r => meta.get(r.id)?.type !== 'boardgameexpansion')
+      .map(r => ({
+        ...r,
+        thumbnail: meta.get(r.id)?.thumbnail || null
+      }))
 
     return NextResponse.json({ results: resultsWithThumbnails })
   } catch (error) {

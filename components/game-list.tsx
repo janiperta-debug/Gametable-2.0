@@ -2,9 +2,10 @@
 
 import { ArchiveCard, ArchiveCardButton, ArchiveIconButton } from "@/components/archive-frame"
 import { Badge } from "@/components/ui/badge"
-import { Star, Users, Clock, Heart, MoreVertical } from "lucide-react"
+import { Star, Users, Clock, Heart, MoreVertical, Puzzle, ChevronDown } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useState } from "react"
 import type { Game } from "@/lib/mock-games"
 import { useTranslations } from "@/lib/i18n"
 
@@ -33,7 +34,20 @@ export function GameList({ games }: GameListProps) {
   return (
     <div className="space-y-4">
       {games.map((game) => (
-        <ArchiveCard key={game.id} corners={false} centerOrnaments={false} className="group">
+        <GameListItem key={game.id} game={game} />
+      ))}
+    </div>
+  )
+}
+
+function GameListItem({ game }: { game: Game }) {
+  const t = useTranslations()
+  const [expanded, setExpanded] = useState(false)
+  const expansionCount = game.ownedExpansionCount || 0
+  const expansions = game.ownedExpansions || []
+
+  return (
+        <ArchiveCard corners={false} centerOrnaments={false} className="group">
           <div className="flex gap-4 p-4">
             <div className="relative w-24 h-32 flex-shrink-0">
               <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-surface/50 w-full h-full">
@@ -99,10 +113,43 @@ export function GameList({ games }: GameListProps) {
                   aria-label={t("collection.wishlist")}
                 />
               </div>
+
+              {expansionCount > 0 && (
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setExpanded((v) => !v)}
+                    aria-expanded={expanded}
+                    className="flex w-full items-center justify-between gap-2 rounded-md border border-accent-gold/20 bg-surface/40 px-3 py-2 text-sm font-body text-accent-gold transition-colors hover:bg-surface/70 min-h-11"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Puzzle className="h-4 w-4" />
+                      {t("game.expansionsOwnedShort", { count: expansionCount })}
+                    </span>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {expanded && (
+                    <ul className="mt-2 space-y-1 border-l border-accent-gold/20 pl-3">
+                      {expansions.map((exp) => (
+                        <li key={exp.id} className="flex items-center gap-2 py-1">
+                          <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded bg-surface/50">
+                            <Image
+                              src={exp.image_url || "/placeholder.svg"}
+                              alt={exp.name}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                          <span className="font-body text-sm text-foreground/90 line-clamp-2">{exp.name}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </ArchiveCard>
-      ))}
-    </div>
   )
 }

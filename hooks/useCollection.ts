@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import type { UserGameWithGame } from '@/lib/types/database'
+import type { UserGameWithGame, OwnedExpansion } from '@/lib/types/database'
 
 export function useCollection() {
   const [games, setGames] = useState<UserGameWithGame[]>([])
@@ -34,27 +34,34 @@ export function useCollection() {
       return
     }
 
-    // Count owned expansions per base game so cards can show a badge.
+    // Fetch owned expansions (with details) per base game so cards can list
+    // them as expandable children.
     const { data: ownedExpansions } = await supabase
       .from('user_game_expansions')
-      .select('game_expansion:game_expansions(base_game_id)')
+      .select('game_expansion:game_expansions(id, base_game_id, name, year, image_url)')
       .eq('user_id', user.id)
 
-    const expansionCountByGameId = new Map<string, number>()
+    const expansionsByGameId = new Map<string, OwnedExpansion[]>()
     for (const row of ownedExpansions || []) {
       // Supabase types embedded relations as an array; take the first.
-      const rel = row.game_expansion as unknown as { base_game_id: string }[] | { base_game_id: string } | null
-      const baseGameId = Array.isArray(rel) ? rel[0]?.base_game_id : rel?.base_game_id
-      if (baseGameId) {
-        expansionCountByGameId.set(baseGameId, (expansionCountByGameId.get(baseGameId) || 0) + 1)
+      const rel = row.game_expansion as unknown as OwnedExpansion[] | OwnedExpansion | null
+      const exp = Array.isArray(rel) ? rel[0] : rel
+      if (exp?.base_game_id) {
+        const list = expansionsByGameId.get(exp.base_game_id) || []
+        list.push(exp)
+        expansionsByGameId.set(exp.base_game_id, list)
       }
     }
 
     setGames(
-      (data || []).map((ug) => ({
-        ...ug,
-        ownedExpansionCount: expansionCountByGameId.get(ug.game_id) || 0,
-      }))
+      (data || []).map((ug) => {
+        const expansions = expansionsByGameId.get(ug.game_id) || []
+        return {
+          ...ug,
+          ownedExpansions: expansions,
+          ownedExpansionCount: expansions.length,
+        }
+      })
     )
     setError(null)
     setLoading(false)
