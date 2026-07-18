@@ -34,21 +34,32 @@ export function useCollection() {
       return
     }
 
-    // Fetch owned expansions (with details) per base game so cards can list
-    // them as expandable children.
-    const { data: ownedExpansions } = await supabase
-      .from('user_game_expansions')
-      .select('game_expansion:game_expansions(id, base_game_id, name, year, image_url)')
-      .eq('user_id', user.id)
+    const gameIds = (data || []).map((ug) => ug.game_id)
 
+    // Fetch the FULL expansion catalog for the user's base games so each host
+    // can show every expansion — owned ones in color, missing ones darkened.
     const expansionsByGameId = new Map<string, OwnedExpansion[]>()
-    for (const row of ownedExpansions || []) {
-      // Supabase types embedded relations as an array; take the first.
-      const rel = row.game_expansion as unknown as OwnedExpansion[] | OwnedExpansion | null
-      const exp = Array.isArray(rel) ? rel[0] : rel
-      if (exp?.base_game_id) {
+    const ownedExpansionIds = new Set<string>()
+
+    if (gameIds.length > 0) {
+      const [{ data: catalog }, { data: owned }] = await Promise.all([
+        supabase
+          .from('game_expansions')
+          .select('id, base_game_id, name, year, image_url')
+          .in('base_game_id', gameIds)
+          .order('sort_order', { ascending: true })
+          .order('year', { ascending: true }),
+        supabase
+          .from('user_game_expansions')
+          .select('game_expansion_id')
+          .eq('user_id', user.id),
+      ])
+
+      for (const o of owned || []) ownedExpansionIds.add(o.game_expansion_id)
+
+      for (const exp of catalog || []) {
         const list = expansionsByGameId.get(exp.base_game_id) || []
-        list.push(exp)
+        list.push({ ...exp, owned: ownedExpansionIds.has(exp.id) })
         expansionsByGameId.set(exp.base_game_id, list)
       }
     }
@@ -58,8 +69,9 @@ export function useCollection() {
         const expansions = expansionsByGameId.get(ug.game_id) || []
         return {
           ...ug,
-          ownedExpansions: expansions,
-          ownedExpansionCount: expansions.length,
+          expansions,
+          ownedExpansionCount: expansions.filter((e) => e.owned).length,
+          totalExpansionCount: expansions.length,
         }
       })
     )

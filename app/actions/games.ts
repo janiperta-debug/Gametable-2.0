@@ -56,6 +56,83 @@ export async function getUserGames() {
 
 export type GameCategory = 'board_game' | 'rpg' | 'trading_card' | 'miniature'
 
+// Adds an expansion (as classified by BGG) to the catalog + the user's owned
+// expansions. Ensures the base game exists in `games` first so the expansion
+// always has a host to nest under. Never creates a standalone user_games row.
+async function addExpansionToCollection(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  bggDetails: BGGGameDetails
+) {
+  if (!bggDetails.baseGame) {
+    console.error('[v0] Expansion has no base game link:', bggDetails.name)
+    return { error: 'Expansion is missing its base game' }
+  }
+
+  // 1. Ensure the base game exists in `games` (create a minimal row if not).
+  let baseGameId: string
+  const { data: existingBase } = await supabase
+    .from('games')
+    .select('id')
+    .eq('bgg_id', bggDetails.baseGame.bggId)
+    .single()
+
+  if (existingBase) {
+    baseGameId = existingBase.id
+  } else {
+    const { data: newBase, error: baseError } = await supabase
+      .from('games')
+      .insert({
+        bgg_id: bggDetails.baseGame.bggId,
+        name: bggDetails.baseGame.name,
+        category: 'board_game',
+      })
+      .select('id')
+      .single()
+
+    if (baseError || !newBase) {
+      console.error('[v0] Error creating base game for expansion:', baseError?.message)
+      return { error: baseError?.message || 'Could not create base game' }
+    }
+    baseGameId = newBase.id
+  }
+
+  // 2. Upsert the expansion into the shared catalog (bgg_id is globally unique).
+  const { data: expansion, error: expError } = await supabase
+    .from('game_expansions')
+    .upsert(
+      {
+        base_game_id: baseGameId,
+        bgg_id: bggDetails.id,
+        name: bggDetails.name,
+        year: bggDetails.yearPublished,
+        image_url: bggDetails.image,
+      },
+      { onConflict: 'bgg_id' }
+    )
+    .select('id')
+    .single()
+
+  if (expError || !expansion) {
+    console.error('[v0] Error upserting expansion:', expError?.message)
+    return { error: expError?.message || 'Could not save expansion' }
+  }
+
+  // 3. Mark ownership (idempotent — ignore unique-violation).
+  const { error: ownError } = await supabase
+    .from('user_game_expansions')
+    .insert({ user_id: userId, game_expansion_id: expansion.id })
+
+  if (ownError && ownError.code !== '23505') {
+    console.error('[v0] Error marking expansion ownership:', ownError.message)
+    return { error: ownError.message }
+  }
+
+  await awardXP(userId, 'add_game', XP_FOR_ADDING_GAME)
+  revalidatePath('/collection')
+  return { success: true, gameId: baseGameId, expansionId: expansion.id }
+}
+
 export async function addGameToCollection(
   bggDetails: BGGGameDetails,
   status: 'owned' | 'wishlist' = 'owned',
@@ -72,6 +149,13 @@ export async function addGameToCollection(
   if (!user) {
     console.log("[v0] No user authenticated")
     return { error: 'Not authenticated' }
+  }
+
+  // If BGG classified this title as an expansion, it belongs in the
+  // game_expansions catalog + user_game_expansions ownership — NEVER as a
+  // standalone user_games entry. Route it there and stop.
+  if (category === 'board_game' && bggDetails.isExpansion && !isManualEntry) {
+    return addExpansionToCollection(supabase, user.id, bggDetails)
   }
 
   // For manual entries, we don't have a bgg_id
