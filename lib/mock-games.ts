@@ -17,7 +17,8 @@ export interface Game {
   forTrade?: boolean
   userGameId?: string
   ownedExpansionCount?: number
-  ownedExpansions?: { id: string; name: string; year: number | null; image_url: string | null }[]
+  totalExpansionCount?: number
+  expansions?: { id: string; name: string; year: number | null; image_url: string | null; owned: boolean }[]
 }
 
 export const MOCK_GAMES: Game[] = [

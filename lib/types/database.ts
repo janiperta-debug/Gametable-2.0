@@ -35,12 +35,14 @@ export interface OwnedExpansion {
   name: string
   year: number | null
   image_url: string | null
+  owned: boolean
 }
 
 export interface UserGameWithGame extends UserGame {
   game: Game
+  expansions?: OwnedExpansion[]
   ownedExpansionCount?: number
-  ownedExpansions?: OwnedExpansion[]
+  totalExpansionCount?: number
 }
 
 export interface Profile {
