@@ -43,8 +43,9 @@ export function GameList({ games }: GameListProps) {
 function GameListItem({ game }: { game: Game }) {
   const t = useTranslations()
   const [expanded, setExpanded] = useState(false)
-  const expansionCount = game.ownedExpansionCount || 0
-  const expansions = game.ownedExpansions || []
+  const expansions = game.expansions || []
+  const ownedCount = game.ownedExpansionCount ?? expansions.filter((e) => e.owned).length
+  const totalCount = game.totalExpansionCount ?? expansions.length
 
   return (
         <ArchiveCard corners={false} centerOrnaments={false} className="group">
@@ -114,7 +115,7 @@ function GameListItem({ game }: { game: Game }) {
                 />
               </div>
 
-              {expansionCount > 0 && (
+              {totalCount > 0 && (
                 <div className="pt-2">
                   <button
                     type="button"
@@ -124,7 +125,7 @@ function GameListItem({ game }: { game: Game }) {
                   >
                     <span className="flex items-center gap-2">
                       <Puzzle className="h-4 w-4" />
-                      {t("game.expansionsOwnedShort", { count: expansionCount })}
+                      {t("game.expansionsProgress", { owned: ownedCount, total: totalCount })}
                     </span>
                     <ChevronDown className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
                   </button>
@@ -132,13 +133,16 @@ function GameListItem({ game }: { game: Game }) {
                   {expanded && (
                     <ul className="mt-2 space-y-1 border-l border-accent-gold/20 pl-3">
                       {expansions.map((exp) => (
-                        <li key={exp.id} className="flex items-center gap-2 py-1">
+                        <li
+                          key={exp.id}
+                          className={`flex items-center gap-2 py-1 ${exp.owned ? "" : "opacity-40"}`}
+                        >
                           <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded bg-surface/50">
                             <Image
                               src={exp.image_url || "/placeholder.svg"}
                               alt={exp.name}
                               fill
-                              className="object-cover"
+                              className={`object-cover ${exp.owned ? "" : "grayscale"}`}
                             />
                           </div>
                           <span className="font-body text-sm text-foreground/90 line-clamp-2">{exp.name}</span>
