@@ -35,12 +35,14 @@ export interface OwnedExpansion {
   name: string
   year: number | null
   image_url: string | null
+  owned: boolean
 }
 
 export interface UserGameWithGame extends UserGame {
   game: Game
+  expansions?: OwnedExpansion[]
   ownedExpansionCount?: number
-  ownedExpansions?: OwnedExpansion[]
+  totalExpansionCount?: number
 }
 
 export interface Profile {
@@ -66,6 +68,8 @@ export interface BGGSearchResult {
   name: string
   yearPublished: number | null
   thumbnail?: string | null
+  type?: 'base' | 'expansion'
+  baseGame?: { bggId: number; name: string } | null
 }
 
 export interface BGGGameDetails {
@@ -80,6 +84,8 @@ export interface BGGGameDetails {
   image: string | null
   thumbnail: string | null
   description: string | null
+  isExpansion?: boolean
+  baseGame?: { bggId: number; name: string } | null
   expansions?: BGGExpansion[]
 }
 

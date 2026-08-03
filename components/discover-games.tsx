@@ -70,6 +70,61 @@ const categories: CategoryConfig[] = [
   },
 ]
 
+// A base game with its expansions nested underneath. `synthetic` means the base
+// game itself was not in the search results (inferred from an expansion's
+// baseGame link) — still shown as a host so expansions never stand alone.
+type BoardHost = {
+  base: BGGSearchResult
+  synthetic: boolean
+  expansions: BGGSearchResult[]
+}
+
+function groupBoardResults(results: BGGSearchResult[]): BoardHost[] {
+  const hostsById = new Map<number, BoardHost>()
+  const order: number[] = []
+
+  const ensureHost = (base: BGGSearchResult, synthetic: boolean): BoardHost => {
+    const existing = hostsById.get(base.id)
+    if (existing) {
+      if (!synthetic && existing.synthetic) {
+        existing.base = base
+        existing.synthetic = false
+      }
+      return existing
+    }
+    const host: BoardHost = { base, synthetic, expansions: [] }
+    hostsById.set(base.id, host)
+    order.push(base.id)
+    return host
+  }
+
+  // First pass: real base games become hosts.
+  for (const r of results) {
+    if (r.type !== "expansion") ensureHost(r, false)
+  }
+  // Second pass: nest expansions under their base (synthesizing a host if the
+  // base game wasn't among the results).
+  for (const r of results) {
+    if (r.type !== "expansion") continue
+    if (r.baseGame) {
+      const hadBase = hostsById.has(r.baseGame.bggId)
+      const base: BGGSearchResult = hostsById.get(r.baseGame.bggId)?.base ?? {
+        id: r.baseGame.bggId,
+        name: r.baseGame.name,
+        yearPublished: null,
+        thumbnail: null,
+        type: "base",
+        baseGame: null,
+      }
+      ensureHost(base, !hadBase).expansions.push(r)
+    } else {
+      ensureHost(r, false)
+    }
+  }
+
+  return order.map((id) => hostsById.get(id)!)
+}
+
 export function DiscoverGames() {
   const t = useTranslations()
   const { toast } = useToast()
@@ -479,6 +534,84 @@ export function DiscoverGames() {
             <div className="text-center py-12 text-muted-foreground font-body">
               {searchQuery ? t("collection.noResults") : t("discover.searchToStart")}
             </div>
+) : selectedCategory === "board_game" ? (
+  // Board games: group results so each base game is a HOST with its
+  // expansions nested underneath (expansions never stand alone).
+  <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+    {groupBoardResults(searchResults as BGGSearchResult[]).map((host) => (
+      <ArchiveCard key={host.base.id} scrim={false} corners={false} centerOrnaments={false} className="overflow-hidden">
+        {/* Base game (host) */}
+        <button
+          type="button"
+          onClick={() => handleSelectGame(host.base.id)}
+          className="w-full text-left cursor-pointer group"
+        >
+          <div className="flex">
+            <div className="w-24 h-24 flex-shrink-0 bg-surface/30 flex items-center justify-center border-r border-accent-gold/10 overflow-hidden">
+              {loadingDetails === host.base.id ? (
+                <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
+              ) : host.base.thumbnail ? (
+                <img src={host.base.thumbnail} alt={host.base.name} className="w-full h-full object-cover" />
+              ) : (
+                <Dices className="h-10 w-10 text-accent-gold/40 group-hover:text-accent-gold/60 transition-colors" />
+              )}
+            </div>
+            <div className="flex-1 p-4 flex items-center justify-between min-w-0">
+              <div className="flex-1 min-w-0">
+                <h4 className="font-heading font-medium text-lg truncate">{host.base.name}</h4>
+                <div className="flex flex-wrap items-center gap-2 mt-1">
+                  {host.base.yearPublished && (
+                    <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
+                      {host.base.yearPublished}
+                    </Badge>
+                  )}
+                  {host.expansions.length > 0 && (
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground font-body">
+                      <Plus className="h-3 w-3" />
+                      {t("game.expansionsOwnedShort", { count: host.expansions.length })}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <Plus className="h-5 w-5 text-accent-gold ml-4 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </div>
+        </button>
+
+        {/* Nested expansions */}
+        {host.expansions.length > 0 && (
+          <ul className="border-t border-accent-gold/15 bg-surface/20">
+            {host.expansions.map((exp) => (
+              <li key={exp.id}>
+                <button
+                  type="button"
+                  onClick={() => handleSelectGame(exp.id)}
+                  className="w-full flex items-center gap-3 py-2 pl-4 pr-3 hover:bg-accent-gold/10 transition-colors text-left border-l-2 border-accent-gold/20 cursor-pointer group"
+                >
+                  <div className="w-10 h-10 flex-shrink-0 bg-surface/40 rounded overflow-hidden flex items-center justify-center">
+                    {loadingDetails === exp.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-accent-gold" />
+                    ) : exp.thumbnail ? (
+                      <img src={exp.thumbnail} alt={exp.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <Dices className="h-5 w-5 text-accent-gold/40" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="font-body text-sm text-foreground/90 line-clamp-1">{exp.name}</span>
+                    {exp.yearPublished && (
+                      <span className="ml-1 text-xs text-muted-foreground">{exp.yearPublished}</span>
+                    )}
+                  </div>
+                  <Plus className="h-4 w-4 text-accent-gold flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </ArchiveCard>
+    ))}
+  </div>
 ) : (
   <div className={`grid gap-4 ${selectedCategory === "trading_card" ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"}`}>
     {searchResults.map((game) => (

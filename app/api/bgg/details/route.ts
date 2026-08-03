@@ -109,8 +109,28 @@ export async function GET(request: NextRequest) {
       ? parseFloat(String(stats.average['@_value']))
       : null
 
-    // Collect outbound expansion links (this base game HAS these expansions).
+    // Is THIS item itself an expansion?
+    const isExpansion = String(item['@_type']) === 'boardgameexpansion'
+
     const links = Array.isArray(item.link) ? item.link : item.link ? [item.link] : []
+
+    // For an expansion, the INBOUND boardgameexpansion link points to its base
+    // game. Grab the first one as the base.
+    let baseGame: { bggId: number; name: string } | null = null
+    if (isExpansion) {
+      const inbound = links.find(
+        (l: Record<string, unknown>) =>
+          l['@_type'] === 'boardgameexpansion' && String(l['@_inbound']) === 'true',
+      )
+      if (inbound) {
+        const baseId = parseInt(String(inbound['@_id']), 10)
+        if (!Number.isNaN(baseId)) {
+          baseGame = { bggId: baseId, name: String(inbound['@_value'] || '') }
+        }
+      }
+    }
+
+    // Collect outbound expansion links (this base game HAS these expansions).
     const expansionLinks = links
       .filter(
         (l: Record<string, unknown>) =>
@@ -122,7 +142,8 @@ export async function GET(request: NextRequest) {
       }))
       .filter((e: { bggId: number }) => !Number.isNaN(e.bggId))
 
-    const expansions = await enrichExpansions(expansionLinks)
+    // Only enrich the catalog for base games (expansions don't own expansions).
+    const expansions = isExpansion ? [] : await enrichExpansions(expansionLinks)
 
     const gameDetails = {
       id: parseInt(String(item['@_id']), 10),
@@ -148,6 +169,8 @@ export async function GET(request: NextRequest) {
       description: item.description
         ? String(item.description).replace(/&#10;/g, '\n').substring(0, 2000)
         : null,
+      isExpansion,
+      baseGame,
       expansions,
     }
 
