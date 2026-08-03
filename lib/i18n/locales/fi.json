@@ -27,7 +27,8 @@
     "expansions": "Laajennukset",
     "expansionsOwned": "{{owned}}/{{total}} omistettu",
     "expansionsNone": "Tälle pelille ei löytynyt laajennuksia.",
-    "expansionsOwnedShort": "{{count}} laajennusta"
+    "expansionsOwnedShort": "{{count}} laajennusta",
+    "expansionsProgress": "{{owned}}/{{total}} laajennusta"
   },
   "common": {
     "loading": "Ladataan...",

@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Search, Loader2, Plus, Minus, Star, Users, Clock, Dices, Swords, CreditCard, Puzzle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { addGameToCollection } from "@/app/actions/games"
+import { addGameToCollection, type AddGameResult } from "@/app/actions/games"
 import { addCardToCollection } from "@/app/actions/tcg"
 import { addMiniatureToCollection, type PaintStatus } from "@/app/actions/miniatures"
 import { useTranslations } from "@/lib/i18n"
@@ -220,7 +220,7 @@ export default function AddGamePage() {
     setAddingGameId(selectedGame.id)
 
     try {
-      let result: { error?: string }
+      let result: AddGameResult
 
       if (selectedCategory === "trading_card") {
         // Use TCG-specific action

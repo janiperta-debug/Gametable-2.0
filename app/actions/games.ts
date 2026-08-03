@@ -56,6 +56,13 @@ export async function getUserGames() {
 
 export type GameCategory = 'board_game' | 'rpg' | 'trading_card' | 'miniature'
 
+export type AddGameResult = {
+  success?: boolean
+  error?: string
+  gameId?: string
+  expansionId?: string
+}
+
 // Adds an expansion (as classified by BGG) to the catalog + the user's owned
 // expansions. Ensures the base game exists in `games` first so the expansion
 // always has a host to nest under. Never creates a standalone user_games row.
@@ -63,7 +70,7 @@ async function addExpansionToCollection(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
   bggDetails: BGGGameDetails
-) {
+): Promise<AddGameResult> {
   if (!bggDetails.baseGame) {
     console.error('[v0] Expansion has no base game link:', bggDetails.name)
     return { error: 'Expansion is missing its base game' }
@@ -138,7 +145,7 @@ export async function addGameToCollection(
   status: 'owned' | 'wishlist' = 'owned',
   category: GameCategory = 'board_game',
   isManualEntry: boolean = false
-) {
+  ): Promise<AddGameResult> {
   console.log("[v0] addGameToCollection called:", { bggDetails, status, category, isManualEntry })
   
   const supabase = await createClient()
