@@ -34,28 +34,63 @@ export function useCollection() {
       return
     }
 
-    const gameIds = (data || []).map((ug) => ug.game_id)
+    const directGameIds = (data || []).map((ug) => ug.game_id)
 
-    // Fetch the FULL expansion catalog for the user's base games so each host
-    // can show every expansion — owned ones in color, missing ones darkened.
-    const expansionsByGameId = new Map<string, OwnedExpansion[]>()
+    // Also find base games the user owns expansions for but has NOT added
+    // directly — these become "expansion-only host" cards.
+    const { data: ownedExpData } = await supabase
+      .from('user_game_expansions')
+      .select('game_expansion_id, game_expansion:game_expansions(id, base_game_id)')
+      .eq('user_id', user.id)
+
     const ownedExpansionIds = new Set<string>()
+    const expansionOnlyBaseIds = new Set<string>()
+    for (const row of ownedExpData || []) {
+      const rel = row.game_expansion as unknown as { id: string; base_game_id: string }[] | { id: string; base_game_id: string } | null
+      const exp = Array.isArray(rel) ? rel[0] : rel
+      if (exp?.id) ownedExpansionIds.add(exp.id)
+      if (exp?.base_game_id && !directGameIds.includes(exp.base_game_id)) {
+        expansionOnlyBaseIds.add(exp.base_game_id)
+      }
+    }
 
-    if (gameIds.length > 0) {
-      const [{ data: catalog }, { data: owned }] = await Promise.all([
-        supabase
-          .from('game_expansions')
-          .select('id, base_game_id, name, year, image_url')
-          .in('base_game_id', gameIds)
-          .order('sort_order', { ascending: true })
-          .order('year', { ascending: true }),
-        supabase
-          .from('user_game_expansions')
-          .select('game_expansion_id')
-          .eq('user_id', user.id),
-      ])
+    // Fetch the base game rows for expansion-only hosts.
+    const expansionOnlyHostRows: UserGameWithGame[] = []
+    if (expansionOnlyBaseIds.size > 0) {
+      const { data: hostGames } = await supabase
+        .from('games')
+        .select('*')
+        .in('id', Array.from(expansionOnlyBaseIds))
 
-      for (const o of owned || []) ownedExpansionIds.add(o.game_expansion_id)
+      for (const g of hostGames || []) {
+        expansionOnlyHostRows.push({
+          id: `expansion-host-${g.id}`,
+          user_id: user.id,
+          game_id: g.id,
+          game: g,
+          status: 'owned',
+          added_at: new Date().toISOString(),
+          expansions: [],
+          ownedExpansionCount: 0,
+          totalExpansionCount: 0,
+        } as unknown as UserGameWithGame)
+      }
+    }
+
+    // All game IDs to load the full expansion catalog for.
+    const allGameIds = [...directGameIds, ...Array.from(expansionOnlyBaseIds)]
+
+    // Fetch the FULL expansion catalog for all host games so each card shows
+    // every expansion — owned ones in color, missing ones darkened.
+    const expansionsByGameId = new Map<string, OwnedExpansion[]>()
+
+    if (allGameIds.length > 0) {
+      const { data: catalog } = await supabase
+        .from('game_expansions')
+        .select('id, base_game_id, name, year, image_url')
+        .in('base_game_id', allGameIds)
+        .order('sort_order', { ascending: true })
+        .order('year', { ascending: true })
 
       for (const exp of catalog || []) {
         const list = expansionsByGameId.get(exp.base_game_id) || []
@@ -64,17 +99,20 @@ export function useCollection() {
       }
     }
 
-    setGames(
-      (data || []).map((ug) => {
-        const expansions = expansionsByGameId.get(ug.game_id) || []
-        return {
-          ...ug,
-          expansions,
-          ownedExpansionCount: expansions.filter((e) => e.owned).length,
-          totalExpansionCount: expansions.length,
-        }
-      })
-    )
+    const attachExpansions = (ug: UserGameWithGame): UserGameWithGame => {
+      const expansions = expansionsByGameId.get(ug.game_id) || []
+      return {
+        ...ug,
+        expansions,
+        ownedExpansionCount: expansions.filter((e) => e.owned).length,
+        totalExpansionCount: expansions.length,
+      }
+    }
+
+    const directRows = (data || []).map(attachExpansions)
+    const hostRows = expansionOnlyHostRows.map(attachExpansions)
+
+    setGames([...directRows, ...hostRows])
     setError(null)
     setLoading(false)
   }, [])
