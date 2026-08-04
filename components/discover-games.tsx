@@ -704,8 +704,8 @@ export function DiscoverGames() {
         </ArchiveCard>
       )
     ))}
-          </div>
-          )}
+  </div>
+)}
         </div>
       )}
     </div>
