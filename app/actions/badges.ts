@@ -312,7 +312,7 @@ export async function checkAndAwardBadges(userId: string): Promise<{
         // Award badge XP through the authoritative XP engine.
         if (badge.xp_reward) {
           const { awardXP } = await import("./xp")
-          await awardXP(userId, "badge_earned", badge.xp_reward, badge.id)
+          await awardXP(userId, "badge_earned", badge.xp_reward, badge.id, false)
         }
       } else {
         console.error("Error awarding badge:", badge.id, insertError)

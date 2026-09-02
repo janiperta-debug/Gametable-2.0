@@ -13,7 +13,8 @@ export async function awardXP(
   userId: string,
   reason: string,
   amount: number,
-  referenceId?: string
+  referenceId?: string,
+  evaluateBadges: boolean = true
 ): Promise<{ success: boolean; newXP?: number; newLevel?: number; error?: string }> {
   const supabase = await createClient()
 
@@ -98,8 +99,11 @@ export async function awardXP(
   revalidatePath("/themes")
   revalidatePath("/home")
 
-  // Check and award any badges the user has now earned
-  await checkAndAwardBadges(userId)
+  // Check and award any badges the user has now earned. Badge rewards invoke
+  // this engine with evaluation disabled to avoid nested badge processing.
+  if (evaluateBadges) {
+    await checkAndAwardBadges(userId)
+  }
 
   return { success: true, newXP, newLevel }
 }
