@@ -26,7 +26,8 @@ export async function addMiniatureToCollection(
   unit: MiniatureSearchResult | MiniatureDetails,
   quantity: number = 1,
   paintStatus: PaintStatus = "unpainted",
-  status: "owned" | "wishlist" = "owned"
+  status: "owned" | "wishlist" = "owned",
+  isImport: boolean = false
 ) {
   const supabase = await createClient()
 
@@ -166,8 +167,8 @@ export async function addMiniatureToCollection(
       }
 
       // Award XP for adding to collection
-      if (status === "owned") {
-        await awardXP(user.id, 10, "Added miniature to collection")
+      if (status === "owned" && !isImport) {
+        await awardXP(user.id, "miniature_added", 5, unitDbId)
       }
     }
 

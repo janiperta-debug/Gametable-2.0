@@ -23,6 +23,12 @@ export async function awardXP(
   if (authError || !user) {
     return { success: false, error: "Unauthorized" }
   }
+  if (user.id !== userId) {
+    return { success: false, error: "Forbidden" }
+  }
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return { success: false, error: "Invalid XP amount" }
+  }
 
   // Get current profile
   const { data: profile, error: profileError } = await supabase
@@ -38,6 +44,25 @@ export async function awardXP(
   const currentXP = profile.xp ?? 0
   const newXP = currentXP + amount
   const newLevel = calculateLevel(newXP)
+
+  if (referenceId) {
+    const { data: existingEvent, error: identityError } = await supabase
+      .from("xp_events")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("reason", reason)
+      .eq("reference_id", referenceId)
+      .limit(1)
+      .maybeSingle()
+
+    if (identityError) {
+      console.error("Error checking XP event identity:", identityError)
+      return { success: false, error: "Failed to check XP event" }
+    }
+    if (existingEvent) {
+      return { success: true, newXP: currentXP, newLevel: profile.level ?? calculateLevel(currentXP) }
+    }
+  }
 
   // Insert XP event
   const { error: eventError } = await supabase
@@ -77,6 +102,15 @@ export async function awardXP(
   await checkAndAwardBadges(userId)
 
   return { success: true, newXP, newLevel }
+}
+
+export type CollectionCategory = "board_game" | "rpg" | "tcg" | "miniatures"
+
+export async function awardCategoryImportXP(
+  userId: string,
+  category: CollectionCategory,
+): Promise<{ success: boolean; error?: string }> {
+  return awardXP(userId, "category_import", 200, `first_collection_import:${category}`)
 }
 
 /**

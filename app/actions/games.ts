@@ -69,7 +69,8 @@ export type AddGameResult = {
 async function addExpansionToCollection(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
-  bggDetails: BGGGameDetails
+  bggDetails: BGGGameDetails,
+  isImport: boolean = false
 ): Promise<AddGameResult> {
   if (!bggDetails.baseGame) {
     console.error('[v0] Expansion has no base game link:', bggDetails.name)
@@ -135,7 +136,9 @@ async function addExpansionToCollection(
     return { error: ownError.message }
   }
 
-  await awardXP(userId, 'add_game', XP_FOR_ADDING_GAME)
+  if (!isImport) {
+    await awardXP(userId, 'add_expansion', 5, expansion.id)
+  }
   revalidatePath('/collection')
   return { success: true, gameId: baseGameId, expansionId: expansion.id }
 }
@@ -144,9 +147,10 @@ export async function addGameToCollection(
   bggDetails: BGGGameDetails,
   status: 'owned' | 'wishlist' = 'owned',
   category: GameCategory = 'board_game',
-  isManualEntry: boolean = false
+  isManualEntry: boolean = false,
+  isImport: boolean = false
   ): Promise<AddGameResult> {
-  console.log("[v0] addGameToCollection called:", { bggDetails, status, category, isManualEntry })
+  console.log("[v0] addGameToCollection called:", { bggDetails, status, category, isManualEntry, isImport })
   
   const supabase = await createClient()
   
@@ -162,7 +166,7 @@ export async function addGameToCollection(
   // game_expansions catalog + user_game_expansions ownership — NEVER as a
   // standalone user_games entry. Route it there and stop.
   if (category === 'board_game' && bggDetails.isExpansion && !isManualEntry) {
-    return addExpansionToCollection(supabase, user.id, bggDetails)
+    return addExpansionToCollection(supabase, user.id, bggDetails, isImport)
   }
 
   // For manual entries, we don't have a bgg_id
@@ -256,13 +260,30 @@ export async function addGameToCollection(
   // Check if user already has this game
   const { data: existingUserGame } = await supabase
     .from('user_games')
-    .select('id')
+    .select('id, status')
     .eq('user_id', user.id)
     .eq('game_id', gameId)
     .single()
 
   if (existingUserGame) {
-    return { error: 'Game already in your collection' }
+    if (existingUserGame.status !== 'wishlist' || status !== 'owned') {
+      return { error: 'Game already in your collection' }
+    }
+
+    const { error: transitionError } = await supabase
+      .from('user_games')
+      .update({ status: 'owned' })
+      .eq('id', existingUserGame.id)
+      .eq('user_id', user.id)
+
+    if (transitionError) {
+      return { error: transitionError.message }
+    }
+    if (!isImport) {
+      await awardXP(user.id, 'add_game', XP_FOR_ADDING_GAME, existingUserGame.id)
+    }
+    revalidatePath('/collection')
+    return { success: true, gameId }
   }
 
   // Add to user's collection
@@ -305,7 +326,11 @@ export async function addGameToCollection(
   }
 
   // Award XP using the centralized server action
-  await awardXP(user.id, 'add_game', XP_FOR_ADDING_GAME)
+  if (!isImport) {
+    const amount = bggDetails.isExpansion ? 5 : XP_FOR_ADDING_GAME
+    const reason = bggDetails.isExpansion ? 'add_expansion' : 'add_game'
+    await awardXP(user.id, reason, amount, gameId)
+  }
 
   revalidatePath('/collection')
   return { success: true, gameId }
@@ -521,5 +546,3 @@ export async function toggleGameExpansionOwnership(
   if (gameId) revalidatePath(`/game/${gameId}`)
   return { success: true }
 }
-
-

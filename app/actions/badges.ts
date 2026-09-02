@@ -309,34 +309,10 @@ export async function checkAndAwardBadges(userId: string): Promise<{
           data: { badge_id: badge.id, badge_name: badge.name }
         })
         
-        // Award XP for the badge (import awardXP inline to avoid circular dependency)
+        // Award badge XP through the authoritative XP engine.
         if (badge.xp_reward) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("xp, level")
-            .eq("id", userId)
-            .single()
-          
-          if (profile) {
-            const newXP = (profile.xp || 0) + badge.xp_reward
-            // Calculate new level (same formula as in xp-utils)
-            const newLevel = Math.floor(newXP / 100) + 1
-            
-            await supabase
-              .from("profiles")
-              .update({ xp: newXP, level: newLevel })
-              .eq("id", userId)
-            
-            // Record XP event
-            await supabase
-              .from("xp_events")
-              .insert({
-                user_id: userId,
-                amount: badge.xp_reward,
-                reason: `badge_earned:${badge.id}`,
-                reference_id: badge.id,
-              })
-          }
+          const { awardXP } = await import("./xp")
+          await awardXP(userId, "badge_earned", badge.xp_reward, badge.id)
         }
       } else {
         console.error("Error awarding badge:", badge.id, insertError)

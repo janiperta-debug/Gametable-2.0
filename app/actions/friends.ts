@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import { checkAndAwardBadges } from "./badges"
 import { createNotification } from "./notifications"
+import { awardXP } from "./xp"
 
 export type FriendshipStatus = "pending" | "accepted" | "rejected"
 
@@ -321,6 +322,7 @@ export async function acceptFriendRequest(friendshipId: string): Promise<{ succe
   })
 
   // Check and award badges for both users
+  await awardXP(user.id, "new_friend", 50, friendship.id)
   await checkAndAwardBadges(user.id)
   await checkAndAwardBadges(friendship.requester_id)
 

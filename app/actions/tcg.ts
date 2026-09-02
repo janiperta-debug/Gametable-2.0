@@ -16,7 +16,8 @@ export interface AddCardResult {
 export async function addCardToCollection(
   card: TCGSearchResult,
   quantity: number = 1,
-  status: "owned" | "wishlist" = "owned"
+  status: "owned" | "wishlist" = "owned",
+  isImport: boolean = false
 ): Promise<AddCardResult> {
   const supabase = await createClient()
 
@@ -104,8 +105,8 @@ export async function addCardToCollection(
       }
 
       // Award XP for new addition
-      if (status === "owned") {
-        await awardXP(user.id, 5, "tcg_card_added", `Added ${card.name} to TCG collection`)
+      if (status === "owned" && !isImport) {
+        await awardXP(user.id, "tcg_card_added", 5, cardId)
       }
 
       return { success: true, cardId, isNew: true }
