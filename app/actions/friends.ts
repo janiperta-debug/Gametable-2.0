@@ -322,7 +322,7 @@ export async function acceptFriendRequest(friendshipId: string): Promise<{ succe
   })
 
   // Check and award badges for both users
-  await awardXP(user.id, "new_friend", 50, friendship.id)
+  await awardXP(user.id, "new_friend", 50, friendshipId)
   await checkAndAwardBadges(user.id)
   await checkAndAwardBadges(friendship.requester_id)
 
