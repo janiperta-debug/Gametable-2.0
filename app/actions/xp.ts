@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/service"
 import { revalidatePath } from "next/cache"
 import { checkAndAwardBadges } from "./badges"
 
@@ -28,7 +29,19 @@ export async function awardXP(
     return { success: false, error: "Invalid XP amount" }
   }
 
-  const { data, error } = await supabase.rpc("award_xp", {
+  const allowedRewards: Record<string, number> = {
+    add_game: 10,
+    add_expansion: 5,
+    tcg_card_added: 5,
+    miniature_added: 5,
+    new_friend: 50,
+  }
+  if (allowedRewards[reason] !== amount) {
+    return { success: false, error: "Invalid XP reward" }
+  }
+  const trusted = createServiceClient()
+  const { data, error } = await trusted.rpc("award_xp_trusted", {
+    p_target_user: userId,
     p_reason: reason,
     p_amount: amount,
     p_reference_id: referenceId || null,
@@ -51,22 +64,6 @@ export async function awardXP(
   }
 
   return { success: true, newXP: result.new_xp, newLevel: result.new_level }
-}
-
-export type CollectionCategory = "board_game" | "rpg" | "tcg" | "miniatures"
-
-export async function awardCategoryImportXP(
-  userId: string,
-  category: CollectionCategory,
-): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user || user.id !== userId) {
-    return { success: false, error: "Unauthorized" }
-  }
-  const { data, error } = await supabase.rpc("award_category_import_xp", { p_category: category })
-  if (error || !data?.[0]) return { success: false, error: error?.message || "Failed to award import XP" }
-  return { success: true }
 }
 
 /**

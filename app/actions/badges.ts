@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import { awardTrustedXP } from "@/lib/xp-engine"
+import { createServiceClient } from "@/lib/supabase/service"
 import { createNotification } from "./notifications"
 
 export interface BadgeDefinition {
@@ -33,8 +34,8 @@ export interface BadgeWithProgress extends BadgeDefinition {
 /**
  * Get all badge definitions from the database
  */
-export async function getBadgeDefinitions(): Promise<{ data: BadgeDefinition[]; error?: string }> {
-  const supabase = await createClient()
+export async function getBadgeDefinitions(client?: any): Promise<{ data: BadgeDefinition[]; error?: string }> {
+  const supabase = client || await createClient()
   
   const { data, error } = await supabase
     .from("badge_definitions")
@@ -53,8 +54,8 @@ export async function getBadgeDefinitions(): Promise<{ data: BadgeDefinition[]; 
 /**
  * Get user's earned badges
  */
-export async function getUserBadges(userId?: string): Promise<{ data: UserBadge[]; error?: string }> {
-  const supabase = await createClient()
+export async function getUserBadges(userId?: string, client?: any): Promise<{ data: UserBadge[]; error?: string }> {
+  const supabase = client || await createClient()
   
   let targetUserId = userId
   if (!targetUserId) {
@@ -82,7 +83,7 @@ const { data, error } = await supabase
 /**
  * Get user stats for badge progress calculation
  */
-export async function getUserStats(userId: string): Promise<{
+export async function getUserStats(userId: string, client?: any): Promise<{
   game_count: number
   category_count: number
   friend_count: number
@@ -91,7 +92,7 @@ export async function getUserStats(userId: string): Promise<{
   level: number
   bgg_imports: number
 }> {
-  const supabase = await createClient()
+  const supabase = client || await createClient()
   
   // Get game count
   const { count: gameCount } = await supabase
@@ -209,7 +210,7 @@ export async function getBadgesWithProgress(userId?: string): Promise<{
   }
   
   // Get all badge definitions
-  const { data: definitions, error: defError } = await getBadgeDefinitions()
+  const { data: definitions, error: defError } = await getBadgeDefinitions(supabase)
   if (defError) {
     return { badges: [], earnedCount: 0, totalXP: 0, error: defError }
   }
@@ -260,6 +261,15 @@ export async function checkAndAwardBadges(userId: string): Promise<{
   error?: string
 }> {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user || user.id !== userId) return { newBadges: [], error: "Forbidden" }
+  return checkAndAwardBadgesInternal(userId, supabase)
+}
+
+async function checkAndAwardBadgesInternal(userId: string, supabase: any): Promise<{
+  newBadges: string[]
+  error?: string
+}> {
   
   // Get all badge definitions
   const { data: definitions, error: defError } = await getBadgeDefinitions()
@@ -268,7 +278,7 @@ export async function checkAndAwardBadges(userId: string): Promise<{
   }
   
   // Get user's already earned badges
-  const { data: existingBadges, error: existingError } = await getUserBadges(userId)
+  const { data: existingBadges, error: existingError } = await getUserBadges(userId, supabase)
   if (existingError) {
     return { newBadges: [], error: existingError }
   }
@@ -276,14 +286,20 @@ export async function checkAndAwardBadges(userId: string): Promise<{
   const earnedBadgeIds = new Set(existingBadges.map((b) => b.badge_id))
   
   // Get user stats
-  const stats = await getUserStats(userId)
+  const stats = await getUserStats(userId, supabase)
   
   // Find badges that should be awarded
   const newBadges: string[] = []
   
   for (const badge of definitions) {
     // Skip if already earned
-    if (earnedBadgeIds.has(badge.id)) continue
+    if (earnedBadgeIds.has(badge.id)) {
+      // Retry a previously persisted badge reward; the XP event key makes this idempotent.
+      if (badge.xp_reward) {
+        await awardTrustedXP(userId, "badge_earned", badge.xp_reward, null, `badge:${badge.id}`)
+      }
+      continue
+    }
     
     // Check if requirement is met
     const currentProgress = getProgressForRequirement(stats, badge.requirement_type)
@@ -326,4 +342,22 @@ export async function checkAndAwardBadges(userId: string): Promise<{
   }
   
   return { newBadges }
+}
+
+export async function checkAndAwardRequesterBadges(friendshipId: string): Promise<{
+  newBadges: string[]
+  error?: string
+}> {
+  const client = await createClient()
+  const { data: { user } } = await client.auth.getUser()
+  if (!user) return { newBadges: [], error: "Unauthorized" }
+  const { data: friendship } = await client
+    .from("friendships")
+    .select("requester_id")
+    .eq("id", friendshipId)
+    .eq("addressee_id", user.id)
+    .eq("status", "accepted")
+    .single()
+  if (!friendship) return { newBadges: [], error: "Forbidden" }
+  return checkAndAwardBadgesInternal(friendship.requester_id, createServiceClient())
 }

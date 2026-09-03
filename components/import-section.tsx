@@ -10,7 +10,6 @@ import { useTranslations } from "@/lib/i18n"
 import { addCardToCollection } from "@/app/actions/tcg"
 import { addMiniatureToCollection } from "@/app/actions/miniatures"
 import { addGameToCollection } from "@/app/actions/games"
-import { awardCategoryImportXP, type CollectionCategory } from "@/app/actions/xp"
 import type { TCGSearchResult } from "@/app/api/tcg/search/route"
 import type { MiniatureSearchResult } from "@/app/api/miniatures/search/route"
 import type { BGGCollectionItem } from "@/app/api/bgg/collection/route"
@@ -134,11 +133,6 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
         }
       }
 
-      if (successCount > 0 && user) {
-        const category: CollectionCategory = selectedCategory === "board-games" ? "board_game" : "rpg"
-        await awardCategoryImportXP(user.id, category)
-      }
-      
       toast({
         title: t("common.success"),
         description: `${t("collection.imported") || "Imported"} ${successCount} ${t("collection.items") || "games"}${errorCount > 0 ? `, ${errorCount} ${t("collection.failed") || "failed"}` : ""}`,
@@ -228,11 +222,6 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
       } catch {
         errorCount++
       }
-    }
-
-    if (successCount > 0 && user) {
-      const category: CollectionCategory = selectedCategory === "trading-cards" ? "tcg" : "miniatures"
-      await awardCategoryImportXP(user.id, category)
     }
 
     setImportingBulk(false)

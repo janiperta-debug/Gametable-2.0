@@ -127,17 +127,25 @@ async function addExpansionToCollection(
   }
 
   // 3. Mark ownership (idempotent — ignore unique-violation).
-  const { error: ownError } = await supabase
+  const { data: ownership, error: ownError } = await supabase
     .from('user_game_expansions')
     .insert({ user_id: userId, game_expansion_id: expansion.id })
+    .select('id')
+    .single()
 
   if (ownError && ownError.code !== '23505') {
     console.error('[v0] Error marking expansion ownership:', ownError.message)
     return { error: ownError.message }
   }
+  const ownershipId = ownership?.id ?? (await supabase
+    .from('user_game_expansions')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('game_expansion_id', expansion.id)
+    .single()).data?.id
 
   if (!isImport) {
-    await awardXP(userId, 'add_expansion', 5, expansion.id)
+    if (ownershipId) await awardXP(userId, 'add_expansion', 5, ownershipId)
   }
   revalidatePath('/collection')
   return { success: true, gameId: baseGameId, expansionId: expansion.id }
@@ -281,13 +289,16 @@ export async function addGameToCollection(
     }
     if (!isImport) {
       await awardXP(user.id, 'add_game', XP_FOR_ADDING_GAME, existingUserGame.id)
+    } else {
+      const { awardCategoryImportXP } = await import("@/lib/xp-engine")
+      await awardCategoryImportXP(user.id, category === "board_game" ? "board_game" : "rpg")
     }
     revalidatePath('/collection')
     return { success: true, gameId }
   }
 
   // Add to user's collection
-  const { error: userGameError } = await supabase
+  const { data: userGame, error: userGameError } = await supabase
     .from('user_games')
     .insert({
       user_id: user.id,
@@ -295,6 +306,8 @@ export async function addGameToCollection(
       status,
       play_count: 0,
     })
+    .select('id')
+    .single()
 
   if (userGameError) {
     console.error('Error adding game to collection:', userGameError)
@@ -329,7 +342,10 @@ export async function addGameToCollection(
   if (!isImport) {
     const amount = bggDetails.isExpansion ? 5 : XP_FOR_ADDING_GAME
     const reason = bggDetails.isExpansion ? 'add_expansion' : 'add_game'
-    await awardXP(user.id, reason, amount, gameId)
+    if (userGame?.id) await awardXP(user.id, reason, amount, userGame.id)
+  } else {
+    const { awardCategoryImportXP } = await import("@/lib/xp-engine")
+    await awardCategoryImportXP(user.id, category === "board_game" ? "board_game" : "rpg")
   }
 
   revalidatePath('/collection')

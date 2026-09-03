@@ -90,7 +90,7 @@ export async function addCardToCollection(
       return { success: true, cardId, isNew: false }
     } else {
       // Insert new collection entry
-      const { error: collectionError } = await supabase
+      const { data: collectionEntry, error: collectionError } = await supabase
         .from("tcg_collection")
         .insert({
           user_id: user.id,
@@ -98,6 +98,8 @@ export async function addCardToCollection(
           quantity,
           status,
         })
+        .select("id")
+        .single()
 
       if (collectionError) {
         console.error("Error adding to collection:", collectionError)
@@ -106,7 +108,10 @@ export async function addCardToCollection(
 
       // Award XP for new addition
       if (status === "owned" && !isImport) {
-        await awardXP(user.id, "tcg_card_added", 5, cardId)
+        if (collectionEntry?.id) await awardXP(user.id, "tcg_card_added", 5, collectionEntry.id)
+      } else if (status === "owned" && isImport) {
+        const { awardCategoryImportXP } = await import("@/lib/xp-engine")
+        await awardCategoryImportXP(user.id, "tcg")
       }
 
       return { success: true, cardId, isNew: true }

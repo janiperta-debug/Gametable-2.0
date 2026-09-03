@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS public.collection_import_rewards (
   xp_event_id uuid NULL REFERENCES public.xp_events(id) ON DELETE SET NULL,
   PRIMARY KEY (user_id, category)
 );
+ALTER TABLE public.collection_import_rewards ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public.collection_import_rewards FROM PUBLIC, anon, authenticated;
 
 CREATE OR REPLACE FUNCTION public.award_xp_internal(
   p_target_user uuid,
@@ -117,6 +119,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.award_category_import_xp(
+  p_target_user uuid,
   p_category text
 )
 RETURNS TABLE (applied boolean, event_id uuid, new_xp integer, new_level integer)
@@ -128,18 +131,24 @@ DECLARE
   reward_inserted boolean;
   result_row record;
 BEGIN
-  IF auth.uid() IS NULL THEN
+  IF current_setting('request.jwt.claim.role', true) <> 'service_role' THEN
+    RAISE EXCEPTION 'Forbidden';
+  END IF;
+  IF p_category NOT IN ('board_game', 'rpg', 'tcg', 'miniatures') THEN
+    RAISE EXCEPTION 'Invalid import category';
+  END IF;
+  IF p_target_user IS NULL THEN
     RAISE EXCEPTION 'Unauthorized';
   END IF;
 
   INSERT INTO public.collection_import_rewards (user_id, category)
-  VALUES (auth.uid(), p_category)
+  VALUES (p_target_user, p_category)
   ON CONFLICT (user_id, category) DO NOTHING;
   reward_inserted := FOUND;
 
   SELECT * INTO result_row
     FROM public.award_xp_internal(
-      auth.uid(), 'category_import', 200, NULL,
+      p_target_user, 'category_import', 200, NULL,
       'import:' || p_category
     );
 
@@ -149,7 +158,7 @@ BEGIN
 
   UPDATE public.collection_import_rewards
      SET xp_event_id = result_row.event_id
-   WHERE user_id = auth.uid()
+   WHERE user_id = p_target_user
      AND category = p_category
      AND xp_event_id IS NULL
      AND result_row.event_id IS NOT NULL;
@@ -160,8 +169,9 @@ END;
 $$;
 
 REVOKE ALL ON FUNCTION public.award_xp_internal(uuid, text, integer, uuid, text) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.award_xp(text, integer, uuid, text) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.award_xp_trusted(uuid, text, integer, uuid, text) FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.award_xp(text, integer, uuid, text) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.award_category_import_xp(text) TO authenticated;
+REVOKE ALL ON FUNCTION public.award_category_import_xp(uuid, text) FROM PUBLIC, anon, authenticated;
 
 REVOKE INSERT, UPDATE, DELETE ON TABLE public.xp_events FROM PUBLIC, anon, authenticated;
+REVOKE UPDATE (xp, level) ON TABLE public.profiles FROM PUBLIC, anon, authenticated;
