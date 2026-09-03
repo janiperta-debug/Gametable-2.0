@@ -14,6 +14,7 @@ import type { TCGSearchResult } from "@/app/api/tcg/search/route"
 import type { MiniatureSearchResult } from "@/app/api/miniatures/search/route"
 import type { BGGCollectionItem } from "@/app/api/bgg/collection/route"
 import { useToast } from "@/hooks/use-toast"
+import { useUser } from "@/hooks/useUser"
 
 type CategoryType = "board-games" | "rpgs" | "miniatures" | "trading-cards"
 
@@ -33,6 +34,7 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
   
   const t = useTranslations()
   const { toast } = useToast()
+  const { user } = useUser()
 
   // Check if this category supports username import
   const supportsUsernameImport = selectedCategory === "board-games" || selectedCategory === "rpgs"
@@ -114,13 +116,14 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
             const status = item.status.own ? 'owned' : 'wishlist'
             const category = selectedCategory === "board-games" ? 'board_game' : 'rpg'
             
-            const result = await addGameToCollection(details, status, category)
+            const result = await addGameToCollection(details, status, category, false, true)
             
             if (result.error && result.error !== 'Game already in your collection') {
               errorCount++
             } else {
               successCount++
             }
+
           } else {
             errorCount++
           }
@@ -129,7 +132,7 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
           errorCount++
         }
       }
-      
+
       toast({
         title: t("common.success"),
         description: `${t("collection.imported") || "Imported"} ${successCount} ${t("collection.items") || "games"}${errorCount > 0 ? `, ${errorCount} ${t("collection.failed") || "failed"}` : ""}`,
@@ -196,7 +199,7 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
           
           if (data.results && data.results.length > 0) {
             const card = data.results[0] as TCGSearchResult
-            const result = await addCardToCollection(card, item.quantity, "owned")
+            const result = await addCardToCollection(card, item.quantity, "owned", true)
             if (result.success) successCount++
             else errorCount++
           } else {
@@ -208,12 +211,13 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
           
           if (data.results && data.results.length > 0) {
             const mini = data.results[0] as MiniatureSearchResult
-            const result = await addMiniatureToCollection(mini, item.quantity, "unpainted", "owned")
+            const result = await addMiniatureToCollection(mini, item.quantity, "unpainted", "owned", true)
             if (result.success) successCount++
             else errorCount++
           } else {
             errorCount++
           }
+
         }
       } catch {
         errorCount++

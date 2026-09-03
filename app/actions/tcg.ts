@@ -16,7 +16,8 @@ export interface AddCardResult {
 export async function addCardToCollection(
   card: TCGSearchResult,
   quantity: number = 1,
-  status: "owned" | "wishlist" = "owned"
+  status: "owned" | "wishlist" = "owned",
+  isImport: boolean = false
 ): Promise<AddCardResult> {
   const supabase = await createClient()
 
@@ -89,7 +90,7 @@ export async function addCardToCollection(
       return { success: true, cardId, isNew: false }
     } else {
       // Insert new collection entry
-      const { error: collectionError } = await supabase
+      const { data: collectionEntry, error: collectionError } = await supabase
         .from("tcg_collection")
         .insert({
           user_id: user.id,
@@ -97,6 +98,8 @@ export async function addCardToCollection(
           quantity,
           status,
         })
+        .select("id")
+        .single()
 
       if (collectionError) {
         console.error("Error adding to collection:", collectionError)
@@ -104,8 +107,11 @@ export async function addCardToCollection(
       }
 
       // Award XP for new addition
-      if (status === "owned") {
-        await awardXP(user.id, 5, "tcg_card_added", `Added ${card.name} to TCG collection`)
+      if (status === "owned" && !isImport) {
+        if (collectionEntry?.id) await awardXP(user.id, "tcg_card_added", 5, collectionEntry.id)
+      } else if (status === "owned" && isImport) {
+        const { awardCategoryImportXP } = await import("@/lib/xp-engine")
+        await awardCategoryImportXP(user.id, "tcg")
       }
 
       return { success: true, cardId, isNew: true }

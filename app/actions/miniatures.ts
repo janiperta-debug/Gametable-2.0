@@ -26,7 +26,8 @@ export async function addMiniatureToCollection(
   unit: MiniatureSearchResult | MiniatureDetails,
   quantity: number = 1,
   paintStatus: PaintStatus = "unpainted",
-  status: "owned" | "wishlist" = "owned"
+  status: "owned" | "wishlist" = "owned",
+  isImport: boolean = false
 ) {
   const supabase = await createClient()
 
@@ -152,13 +153,13 @@ export async function addMiniatureToCollection(
       }
     } else {
       // Insert new entry
-      const { error: insertError } = await supabase.from("mini_army_units").insert({
+      const { data: insertedUnit, error: insertError } = await supabase.from("mini_army_units").insert({
         user_id: user.id,
         unit_id: unitDbId,
         quantity,
         paint_status: paintStatus,
         status,
-      })
+      }).select("id").single()
 
       if (insertError) {
         console.error("Error adding miniature:", insertError)
@@ -166,8 +167,11 @@ export async function addMiniatureToCollection(
       }
 
       // Award XP for adding to collection
-      if (status === "owned") {
-        await awardXP(user.id, 10, "Added miniature to collection")
+      if (status === "owned" && !isImport) {
+        if (insertedUnit?.id) await awardXP(user.id, "miniature_added", 5, insertedUnit.id)
+      } else if (status === "owned" && isImport) {
+        const { awardCategoryImportXP } = await import("@/lib/xp-engine")
+        await awardCategoryImportXP(user.id, "miniatures")
       }
     }
 

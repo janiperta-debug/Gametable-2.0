@@ -1,8 +1,8 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/service"
 import { revalidatePath } from "next/cache"
-import { calculateLevel } from "@/lib/xp-utils"
 import { checkAndAwardBadges } from "./badges"
 
 /**
@@ -13,7 +13,8 @@ export async function awardXP(
   userId: string,
   reason: string,
   amount: number,
-  referenceId?: string
+  referenceId?: string,
+  evaluateBadges: boolean = true
 ): Promise<{ success: boolean; newXP?: number; newLevel?: number; error?: string }> {
   const supabase = await createClient()
 
@@ -23,60 +24,46 @@ export async function awardXP(
   if (authError || !user) {
     return { success: false, error: "Unauthorized" }
   }
-
-  // Get current profile
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("xp, level")
-    .eq("id", userId)
-    .single()
-
-  if (profileError || !profile) {
-    return { success: false, error: "Profile not found" }
+  if (user.id !== userId) return { success: false, error: "Forbidden" }
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return { success: false, error: "Invalid XP amount" }
   }
 
-  const currentXP = profile.xp ?? 0
-  const newXP = currentXP + amount
-  const newLevel = calculateLevel(newXP)
-
-  // Insert XP event
-  const { error: eventError } = await supabase
-    .from("xp_events")
-    .insert({
-      user_id: userId,
-      amount,
-      reason,
-      reference_id: referenceId || null,
-    })
-
-  if (eventError) {
-    console.error("Error inserting xp_event:", eventError)
-    return { success: false, error: "Failed to record XP event" }
+  const allowedRewards: Record<string, number> = {
+    add_game: 10,
+    add_expansion: 5,
+    tcg_card_added: 5,
+    miniature_added: 5,
+    new_friend: 50,
   }
-
-  // Update profile with new XP and level
-  const { error: updateError } = await supabase
-    .from("profiles")
-    .update({
-      xp: newXP,
-      level: newLevel,
-    })
-    .eq("id", userId)
-
-  if (updateError) {
-    console.error("Error updating profile XP:", updateError)
-    return { success: false, error: "Failed to update profile" }
+  if (allowedRewards[reason] !== amount) {
+    return { success: false, error: "Invalid XP reward" }
   }
+  const trusted = createServiceClient()
+  const { data, error } = await trusted.rpc("award_xp_trusted", {
+    p_target_user: userId,
+    p_reason: reason,
+    p_amount: amount,
+    p_reference_id: referenceId || null,
+    p_event_key: referenceId ? `${reason}:${referenceId}` : `${reason}:${crypto.randomUUID()}`,
+  })
+  if (error || !data?.[0]) {
+    return { success: false, error: error?.message || "Failed to award XP" }
+  }
+  const result = data[0] as { new_xp: number; new_level: number }
 
   // Revalidate pages that show XP data
   revalidatePath("/profile")
   revalidatePath("/themes")
   revalidatePath("/home")
 
-  // Check and award any badges the user has now earned
-  await checkAndAwardBadges(userId)
+  // Check and award any badges the user has now earned. Badge rewards invoke
+  // this engine with evaluation disabled to avoid nested badge processing.
+  if (evaluateBadges) {
+    await checkAndAwardBadges(userId)
+  }
 
-  return { success: true, newXP, newLevel }
+  return { success: true, newXP: result.new_xp, newLevel: result.new_level }
 }
 
 /**
