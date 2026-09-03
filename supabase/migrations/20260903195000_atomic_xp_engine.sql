@@ -172,6 +172,8 @@ REVOKE ALL ON FUNCTION public.award_xp_internal(uuid, text, integer, uuid, text)
 REVOKE ALL ON FUNCTION public.award_xp(text, integer, uuid, text) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.award_xp_trusted(uuid, text, integer, uuid, text) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.award_category_import_xp(uuid, text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.award_xp_trusted(uuid, text, integer, uuid, text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.award_category_import_xp(uuid, text) TO service_role;
 
 REVOKE INSERT, UPDATE, DELETE ON TABLE public.xp_events FROM PUBLIC, anon, authenticated;
 REVOKE UPDATE (xp, level) ON TABLE public.profiles FROM PUBLIC, anon, authenticated;

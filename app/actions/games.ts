@@ -289,9 +289,6 @@ export async function addGameToCollection(
     }
     if (!isImport) {
       await awardXP(user.id, 'add_game', XP_FOR_ADDING_GAME, existingUserGame.id)
-    } else {
-      const { awardCategoryImportXP } = await import("@/lib/xp-engine")
-      await awardCategoryImportXP(user.id, category === "board_game" ? "board_game" : "rpg")
     }
     revalidatePath('/collection')
     return { success: true, gameId }
