@@ -27,6 +27,7 @@ SET search_path = public, pg_temp
 AS $$
 DECLARE
   inserted_event public.xp_events;
+  existing_event_id uuid;
   profile_row public.profiles;
 BEGIN
   IF p_amount <= 0 THEN
@@ -44,12 +45,17 @@ BEGIN
   RETURNING * INTO inserted_event;
 
   IF inserted_event.id IS NULL THEN
+    SELECT e.id
+      INTO existing_event_id
+      FROM public.xp_events AS e
+     WHERE e.user_id = p_target_user
+       AND e.event_key = p_event_key;
     SELECT p.xp, p.level
       INTO profile_row.xp, profile_row.level
       FROM public.profiles AS p
      WHERE p.id = p_target_user
      FOR UPDATE;
-    RETURN QUERY SELECT false, NULL::uuid, profile_row.xp, profile_row.level;
+    RETURN QUERY SELECT false, existing_event_id, profile_row.xp, profile_row.level;
     RETURN;
   END IF;
 
