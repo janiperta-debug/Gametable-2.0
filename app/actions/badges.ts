@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+import { awardTrustedXP } from "@/lib/xp-engine"
 import { createNotification } from "./notifications"
 
 export interface BadgeDefinition {
@@ -311,8 +312,7 @@ export async function checkAndAwardBadges(userId: string): Promise<{
         
         // Award badge XP through the authoritative XP engine.
         if (badge.xp_reward) {
-          const { awardXP } = await import("./xp")
-          await awardXP(userId, "badge_earned", badge.xp_reward, badge.id, false)
+          await awardTrustedXP(userId, "badge_earned", badge.xp_reward, null, `badge:${badge.id}`)
         }
       } else {
         console.error("Error awarding badge:", badge.id, insertError)
