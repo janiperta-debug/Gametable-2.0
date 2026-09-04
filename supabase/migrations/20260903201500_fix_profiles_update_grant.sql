@@ -9,20 +9,20 @@ REVOKE UPDATE ON TABLE public.profiles FROM PUBLIC, anon, authenticated;
 
 DO $$
 DECLARE
-  col text;
+  cols text;
 BEGIN
-  FOR col IN
-    SELECT column_name
+  SELECT string_agg(quote_ident(column_name), ', ' ORDER BY column_name)
+    INTO cols
     FROM information_schema.columns
     WHERE table_schema = 'public'
       AND table_name = 'profiles'
-      AND column_name NOT IN ('xp', 'level')
-    ORDER BY column_name
-  LOOP
+      AND column_name NOT IN ('xp', 'level');
+
+  IF cols IS NOT NULL THEN
     EXECUTE format(
-      'GRANT UPDATE (%I) ON TABLE public.profiles TO anon, authenticated',
-      col
+      'GRANT UPDATE (%s) ON TABLE public.profiles TO anon, authenticated',
+      cols
     );
-  END LOOP;
+  END IF;
 END;
 $$;
