@@ -1,3 +1,5 @@
+export * from './types/collection'
+
 // Game types matching Firebase structure
 export interface Game {
   id: string
