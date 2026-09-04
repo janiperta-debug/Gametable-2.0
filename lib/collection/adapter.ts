@@ -78,8 +78,12 @@ function normalizeStatus(status?: string | null): CollectionStatus {
     case 'previously_owned':
       return 'previously_owned'
     case 'owned':
-    default:
       return 'owned'
+    case undefined:
+    case null:
+      return 'owned'
+    default:
+      throw new Error(`Unsupported collection status: ${String(status)}`)
   }
 }
 
