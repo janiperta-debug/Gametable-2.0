@@ -116,8 +116,73 @@ export function useCollection() {
     const hostRows = expansionOnlyHostRows.map(attachExpansions)
     const mergedRows = [...directRows, ...hostRows]
 
+    const [tcgResult, miniResult] = await Promise.all([
+      supabase
+        .from('tcg_collection')
+        .select(`
+          id,
+          quantity,
+          status,
+          added_at,
+          card:tcg_cards (
+            id,
+            external_id,
+            name,
+            tcg_system,
+            set_name,
+            set_code,
+            rarity,
+            image_url,
+            mana_cost,
+            type_line,
+            card_type,
+            cmc,
+            price_usd
+          )
+        `)
+        .eq('user_id', user.id)
+        .eq('status', 'owned')
+        .order('added_at', { ascending: false }),
+      supabase
+        .from('mini_army_units')
+        .select(`
+          id,
+          quantity,
+          paint_status,
+          status,
+          notes,
+          created_at,
+          unit:mini_units (
+            id,
+            external_id,
+            name,
+            type,
+            points,
+            model_count,
+            faction:mini_factions (
+              id,
+              name
+            ),
+            system:mini_systems (
+              id,
+              code,
+              name
+            )
+          )
+        `)
+        .eq('user_id', user.id)
+        .eq('status', 'owned')
+        .order('created_at', { ascending: false })
+    ])
+
     setGames(mergedRows)
-    setCollectionEntries(getCollectionEntries({ userGames: mergedRows }))
+    setCollectionEntries(
+      getCollectionEntries({
+        userGames: mergedRows,
+        tcgCollection: tcgResult.data || [],
+        miniatureCollection: miniResult.data || [],
+      })
+    )
     setError(null)
     setLoading(false)
   }, [])

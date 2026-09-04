@@ -104,23 +104,33 @@ export function getCollectionEntries({
   expansions = [],
 }: CollectionQueryInputs = {}): CollectionEntry[] {
   const entries: CollectionEntry[] = []
+  const seen = new Set<string>()
+
+  const pushIfUnique = (entry: CollectionEntry) => {
+    const identityKey = `${entry.domain}:${entry.ownershipId}`
+    if (seen.has(identityKey)) {
+      return
+    }
+    seen.add(identityKey)
+    entries.push(entry)
+  }
 
   for (const row of userGames) {
-    entries.push(mapUserGameToCollectionEntry(row))
+    pushIfUnique(mapUserGameToCollectionEntry(row))
   }
 
   for (const row of tcgCollection) {
-    entries.push(mapTCGCollectionToCollectionEntry(row))
+    pushIfUnique(mapTCGCollectionToCollectionEntry(row))
   }
 
   for (const row of miniatureCollection) {
-    entries.push(mapMiniatureCollectionToCollectionEntry(row))
+    pushIfUnique(mapMiniatureCollectionToCollectionEntry(row))
   }
 
   for (const row of expansions) {
     const mapped = mapUserGameExpansionToCollectionEntry(row)
     if (mapped) {
-      entries.push(mapped)
+      pushIfUnique(mapped)
     }
   }
 

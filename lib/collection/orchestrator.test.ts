@@ -179,6 +179,79 @@ test('status values are preserved without silent coercion', () => {
   assert.equal(entries[0].status, 'wishlist')
 })
 
+test('missing optional domain data does not crash the orchestrator', () => {
+  const entries = getCollectionEntries({
+    userGames: [
+      {
+        id: 'ownership-game-null',
+        game_id: 'catalog-game-null',
+        status: 'owned',
+        game: {
+          id: 'catalog-game-null',
+          name: 'Game with partial data',
+          category: null,
+        },
+      },
+    ],
+    tcgCollection: [
+      {
+        id: 'ownership-tcg-null',
+        card_id: 'catalog-tcg-null',
+        status: 'owned',
+        quantity: null,
+        card: {
+          id: 'catalog-tcg-null',
+          name: 'Card with minimal data',
+          tcg_system: null,
+          image_url: null,
+        },
+      },
+    ],
+    miniatureCollection: [
+      {
+        id: 'ownership-mini-null',
+        unit_id: 'catalog-mini-null',
+        status: null,
+        quantity: null,
+        unit: {
+          id: 'catalog-mini-null',
+          name: 'Mini with minimal data',
+          type: null,
+          system: null,
+          faction: null,
+        },
+      },
+    ],
+  })
+
+  assert.equal(entries.length, 3)
+  assert.equal(entries[0].domain, 'board_game')
+  assert.equal(entries[1].domain, 'tcg')
+  assert.equal(entries[2].domain, 'miniature')
+})
+
+test('duplicate rows do not produce duplicate CollectionEntry records', () => {
+  const entries = getCollectionEntries({
+    userGames: [
+      {
+        id: 'ownership-dup',
+        game_id: 'catalog-dup',
+        status: 'owned',
+        game: { id: 'catalog-dup', name: 'Duplicate Game', category: 'board_game' },
+      },
+      {
+        id: 'ownership-dup',
+        game_id: 'catalog-dup',
+        status: 'owned',
+        game: { id: 'catalog-dup', name: 'Duplicate Game', category: 'board_game' },
+      },
+    ],
+  })
+
+  assert.equal(entries.length, 1)
+  assert.equal(entries[0].ownershipId, 'ownership-dup')
+})
+
 test('current useCollection-style board-game query data maps through the orchestrator without UI changes', () => {
   const currentQueryRows = [
     {
