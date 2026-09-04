@@ -2,10 +2,13 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getCollectionEntries } from '@/lib/collection/orchestrator'
+import type { CollectionEntry } from '@/lib/types/collection'
 import type { UserGameWithGame, OwnedExpansion } from '@/lib/types/database'
 
 export function useCollection() {
   const [games, setGames] = useState<UserGameWithGame[]>([])
+  const [collectionEntries, setCollectionEntries] = useState<CollectionEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -111,8 +114,10 @@ export function useCollection() {
 
     const directRows = (data || []).map(attachExpansions)
     const hostRows = expansionOnlyHostRows.map(attachExpansions)
+    const mergedRows = [...directRows, ...hostRows]
 
-    setGames([...directRows, ...hostRows])
+    setGames(mergedRows)
+    setCollectionEntries(getCollectionEntries({ userGames: mergedRows }))
     setError(null)
     setLoading(false)
   }, [])
@@ -145,5 +150,5 @@ export function useCollection() {
     }
   }, [fetchGames])
 
-  return { games, loading, error, refetch: fetchGames }
+  return { games, collectionEntries, loading, error, refetch: fetchGames }
 }

@@ -178,3 +178,63 @@ test('status values are preserved without silent coercion', () => {
 
   assert.equal(entries[0].status, 'wishlist')
 })
+
+test('current useCollection-style board-game query data maps through the orchestrator without UI changes', () => {
+  const currentQueryRows = [
+    {
+      id: 'user-game-123',
+      user_id: 'user-456',
+      game_id: 'game-789',
+      status: 'owned',
+      added_at: '2026-01-01T00:00:00Z',
+      game: {
+        id: 'game-789',
+        name: 'Root',
+        category: 'board_game',
+        image_url: 'https://example.com/root.jpg',
+        thumbnail_url: 'https://example.com/root-thumb.jpg',
+        min_players: 2,
+        max_players: 4,
+        min_playtime: 45,
+        max_playtime: 90,
+        bgg_rating: 8.2,
+        year: 2018,
+      },
+      expansions: [],
+      ownedExpansionCount: 0,
+      totalExpansionCount: 0,
+    },
+    {
+      id: 'user-game-456',
+      user_id: 'user-456',
+      game_id: 'game-rpg-123',
+      status: 'wishlist',
+      added_at: '2026-01-02T00:00:00Z',
+      game: {
+        id: 'game-rpg-123',
+        name: 'The Dying Earth',
+        category: 'rpg',
+        image_url: 'https://example.com/dying-earth.jpg',
+        year: 2020,
+      },
+      expansions: [],
+      ownedExpansionCount: 0,
+      totalExpansionCount: 0,
+    },
+  ] as const
+
+  const entries = getCollectionEntries({ userGames: currentQueryRows as any })
+
+  assert.equal(entries.length, 2)
+  assert.equal(entries[0].domain, 'board_game')
+  assert.equal(entries[0].catalogId, 'game-789')
+  assert.equal(entries[0].ownershipId, 'user-game-123')
+  assert.equal(entries[0].status, 'owned')
+  assert.equal(entries[0].detailTarget, '/game/game-789')
+
+  assert.equal(entries[1].domain, 'rpg')
+  assert.equal(entries[1].catalogId, 'game-rpg-123')
+  assert.equal(entries[1].ownershipId, 'user-game-456')
+  assert.equal(entries[1].status, 'wishlist')
+  assert.equal(entries[1].detailTarget, '/game/game-rpg-123')
+})
