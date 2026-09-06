@@ -208,13 +208,14 @@ test('domain filtering never includes TCG/miniatures in the current Board/RPG vi
     miniatures: 0,
     'trading-cards': 0,
   })
+})
 
-  test('TCG entries produce visible cards and participate in Collection controls without rendering miniatures', () => {
+test('TCG entries produce visible cards and participate in Collection controls without rendering miniatures', () => {
     const cards = buildCollectionCardsFromEntries([...BOARD_RPG_ENTRIES, TCG_ENTRY, MINIATURE_ENTRY])
     const tcgCard = cards.find((item) => item.entry.domain === 'tcg')
 
     assert.equal(cards.length, 3)
-    assert.ok(tcgCard)
+    if (!tcgCard) assert.fail('Expected a TCG card')
     assert.equal(tcgCard.card.kind, 'tcg')
     if (tcgCard.card.kind === 'tcg') {
       assert.equal(tcgCard.card.title, 'Lightning Bolt')
@@ -233,9 +234,9 @@ test('domain filtering never includes TCG/miniatures in the current Board/RPG vi
     assert.deepEqual(filterCardsByCategory(cards, 'trading-cards').map((item) => item.entry.displayName), ['Lightning Bolt'])
     assert.deepEqual(filterCardsByCategory(cards, 'all').map((item) => item.entry.domain), ['board_game', 'rpg', 'tcg'])
     assert.equal(searchCards(cards, 'lightning bolt')[0].entry.domain, 'tcg')
-  })
+})
 
-  test('TCG card data preserves identity, domain-specific quantity, and no detail route', () => {
+test('TCG card data preserves identity, domain-specific quantity, and no detail route', () => {
     const entry = makeEntry({
       domain: 'tcg',
       catalogId: 'tcg-card-id',
@@ -268,7 +269,6 @@ test('domain filtering never includes TCG/miniatures in the current Board/RPG vi
       assert.equal(item.card.rarity, 'rare')
       assert.equal(item.card.tcgSystem, 'magic')
     }
-  })
 })
 
 test('miniatures system options are derived only from the user\'s own miniature entries', () => {

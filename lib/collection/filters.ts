@@ -109,6 +109,8 @@ export function sortCards(
   sorted.sort((left, right) => {
     const leftTitle = left.card.title || left.entry.displayName || ''
     const rightTitle = right.card.title || right.entry.displayName || ''
+    const leftBoardCard = left.card.kind === 'board-rpg' ? left.card : null
+    const rightBoardCard = right.card.kind === 'board-rpg' ? right.card : null
 
     switch (sortBy) {
       case 'name-asc':
@@ -116,13 +118,13 @@ export function sortCards(
       case 'name-desc':
         return rightTitle.localeCompare(leftTitle)
       case 'rating-high':
-        return (right.card.rating || 0) - (left.card.rating || 0)
+        return (rightBoardCard?.rating || 0) - (leftBoardCard?.rating || 0)
       case 'rating-low':
-        return (left.card.rating || 0) - (right.card.rating || 0)
+        return (leftBoardCard?.rating || 0) - (rightBoardCard?.rating || 0)
       case 'year':
-        return (right.card.yearPublished || 0) - (left.card.yearPublished || 0)
+        return (rightBoardCard?.yearPublished || 0) - (leftBoardCard?.yearPublished || 0)
       case 'playtime':
-        return (left.card.minPlayTime || 0) - (right.card.minPlayTime || 0)
+        return (leftBoardCard?.minPlayTime || 0) - (rightBoardCard?.minPlayTime || 0)
       default:
         return 0
     }
