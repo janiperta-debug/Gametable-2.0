@@ -37,6 +37,7 @@ export interface BoardRPGCollectionCardData {
 
 export interface TCGCollectionCardData {
   kind: 'tcg'
+  id: string
   title: string
   image: string
   quantity: number

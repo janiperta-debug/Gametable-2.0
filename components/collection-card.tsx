@@ -25,6 +25,10 @@ interface CollectionCardProps {
   showWishlistButton?: boolean
 }
 
+function assertUnreachableCardKind(card: never): never {
+  throw new Error(`Unsupported Collection card kind: ${String(card)}`)
+}
+
 export function CollectionCard({
   item,
   onToggleForTrade,
@@ -69,7 +73,7 @@ export function CollectionCard({
   }
 
   if (card.kind !== 'board-rpg') {
-    return null
+    return assertUnreachableCardKind(card)
   }
 
   const expansions = card.expansions || []

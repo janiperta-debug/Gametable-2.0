@@ -55,6 +55,7 @@ export function buildCollectionCardsFromEntries(
     .map((entry) => {
       const card: TCGCollectionCardData = {
         kind: 'tcg',
+        id: entry.catalogId,
         title: entry.displayName || 'Unknown card',
         image: entry.image || '/placeholder.svg',
         quantity: typeof entry.metadata.quantity === 'number' ? entry.metadata.quantity : 1,

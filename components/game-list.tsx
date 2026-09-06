@@ -13,6 +13,10 @@ interface GameListProps {
   cards?: CollectionCardItem[]
 }
 
+function assertUnreachableCardKind(card: never): never {
+  throw new Error(`Unsupported Collection card kind: ${String(card)}`)
+}
+
 function legacyGameToCollectionCardItem(game: Game): CollectionCardItem {
   const entryDomain = game.category === "rpg" ? "rpg" : "board_game"
 
@@ -105,7 +109,7 @@ function GameListItem({ item }: { item: CollectionCardItem }) {
     )
   }
   if (card.kind !== 'board-rpg') {
-    return null
+    return assertUnreachableCardKind(card)
   }
   const expansions = card.expansions || []
   const ownedCount = card.ownedExpansionCount ?? expansions.filter((exp) => exp.owned).length

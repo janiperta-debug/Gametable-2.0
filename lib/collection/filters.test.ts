@@ -261,6 +261,7 @@ test('TCG card data preserves identity, domain-specific quantity, and no detail 
     assert.notEqual(item.entry.detailTarget, `/game/${item.entry.catalogId}`)
     assert.equal(item.card.kind, 'tcg')
     if (item.card.kind === 'tcg') {
+      assert.equal(item.card.id, 'tcg-card-id')
       assert.equal(item.card.title, 'Black Lotus')
       assert.equal(item.card.image, 'https://example.com/black-lotus.jpg')
       assert.equal(item.card.quantity, 4)
