@@ -1,4 +1,9 @@
-import type { CollectionEntry, CollectionCardItem, BoardRPGCollectionCardData } from '@/lib/types/collection'
+import type {
+  BoardRPGCollectionCardData,
+  CollectionCardItem,
+  CollectionEntry,
+  TCGCollectionCardData,
+} from '@/lib/types/collection'
 import type { UserGameWithGame } from '@/lib/types/database'
 
 export function buildBoardRPGCardsFromEntries(
@@ -14,6 +19,7 @@ export function buildBoardRPGCardsFromEntries(
       const game = userGame?.game ?? null
 
       const card: BoardRPGCollectionCardData = {
+        kind: 'board-rpg',
         id: entry.catalogId,
         title: entry.displayName || game?.name || 'Unknown game',
         image: entry.image || game?.image_url || game?.thumbnail_url || '/placeholder.svg',
@@ -37,4 +43,29 @@ export function buildBoardRPGCardsFromEntries(
 
       return { entry, card }
     })
+}
+
+export function buildCollectionCardsFromEntries(
+  entries: CollectionEntry[],
+  userGames: UserGameWithGame[] = [],
+): CollectionCardItem[] {
+  const boardRpgCards = buildBoardRPGCardsFromEntries(entries, userGames)
+  const tcgCards = entries
+    .filter((entry) => entry.domain === 'tcg')
+    .map((entry) => {
+      const card: TCGCollectionCardData = {
+        kind: 'tcg',
+        title: entry.displayName || 'Unknown card',
+        image: entry.image || '/placeholder.svg',
+        quantity: typeof entry.metadata.quantity === 'number' ? entry.metadata.quantity : 1,
+        tcgSystem: typeof entry.metadata.tcg_system === 'string' ? entry.metadata.tcg_system : null,
+        setName: typeof entry.metadata.set_name === 'string' ? entry.metadata.set_name : null,
+        setCode: typeof entry.metadata.set_code === 'string' ? entry.metadata.set_code : null,
+        rarity: typeof entry.metadata.rarity === 'string' ? entry.metadata.rarity : null,
+      }
+
+      return { entry, card }
+    })
+
+  return [...boardRpgCards, ...tcgCards]
 }

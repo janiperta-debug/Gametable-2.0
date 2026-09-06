@@ -14,7 +14,7 @@ import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "@/lib/i18n"
 import { useCollection } from "@/hooks/useCollection"
-import { buildBoardRPGCardsFromEntries } from "@/lib/collection/card"
+import { buildCollectionCardsFromEntries } from "@/lib/collection/card"
 import {
   applyCollectionControls,
   getCategoryCounts,
@@ -52,25 +52,25 @@ export default function Collection() {
     })
   }
 
-  const boardGameCards = useMemo(
-    () => buildBoardRPGCardsFromEntries(collectionEntries, userGames),
+  const collectionCards = useMemo(
+    () => buildCollectionCardsFromEntries(collectionEntries, userGames),
     [collectionEntries, userGames],
   )
 
   const filteredAndSortedGames = useMemo(
     () =>
-      applyCollectionControls(boardGameCards, {
+      applyCollectionControls(collectionCards, {
         category: selectedCategory,
         status: statusFilter,
         searchQuery,
         sortBy,
       }),
-    [boardGameCards, searchQuery, selectedCategory, statusFilter, sortBy],
+    [collectionCards, searchQuery, selectedCategory, statusFilter, sortBy],
   )
 
-  const statusCounts = useMemo(() => getStatusCounts(boardGameCards), [boardGameCards])
+  const statusCounts = useMemo(() => getStatusCounts(collectionCards), [collectionCards])
 
-  const categoryCounts = useMemo(() => getCategoryCounts(boardGameCards), [boardGameCards])
+  const categoryCounts = useMemo(() => getCategoryCounts(collectionCards), [collectionCards])
 
   return (
     <div className="min-h-screen">

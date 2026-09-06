@@ -13,6 +13,7 @@ export interface CollectionExpansionSummary {
 }
 
 export interface BoardRPGCollectionCardData {
+  kind: 'board-rpg'
   id: string
   title: string
   image: string
@@ -34,10 +35,28 @@ export interface BoardRPGCollectionCardData {
   expansions?: CollectionExpansionSummary[]
 }
 
-export interface CollectionCardItem {
+export interface TCGCollectionCardData {
+  kind: 'tcg'
+  title: string
+  image: string
+  quantity: number
+  tcgSystem: string | null
+  setName: string | null
+  setCode: string | null
+  rarity: string | null
+}
+
+export interface BoardRPGCollectionCardItem {
   entry: CollectionEntry
   card: BoardRPGCollectionCardData
 }
+
+export interface TCGCollectionCardItem {
+  entry: CollectionEntry
+  card: TCGCollectionCardData
+}
+
+export type CollectionCardItem = BoardRPGCollectionCardItem | TCGCollectionCardItem
 
 export interface CollectionEntry {
   domain: CollectionDomain

@@ -34,6 +34,7 @@ function legacyGameToCollectionCardItem(game: Game): CollectionCardItem {
   return {
     entry,
     card: {
+      kind: "board-rpg",
       id: game.id,
       title: game.title,
       image: game.image || "/placeholder.svg",

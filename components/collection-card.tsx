@@ -2,7 +2,7 @@
 
 import { ArchiveCard, ArchiveCardButton, ArchiveIconButton } from "@/components/archive-frame"
 import { Badge } from "@/components/ui/badge"
-import { Star, Users, Clock, Heart, ShoppingBag, Store, Puzzle, ChevronDown } from "lucide-react"
+import { Star, Users, Clock, Heart, ShoppingBag, Store, Puzzle, ChevronDown, Layers } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -36,6 +36,37 @@ export function CollectionCard({
   const router = useRouter()
   const [expanded, setExpanded] = useState(false)
   const { card, entry } = item
+
+  if (card.kind === 'tcg') {
+    const set = [card.setName, card.setCode ? `(${card.setCode})` : null].filter(Boolean).join(' ')
+
+    return (
+      <ArchiveCard corners={false} centerOrnaments={false} className="group">
+        <div className="p-4">
+          <div className="relative mb-4">
+            <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-surface/50">
+              <Image src={card.image} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+            </div>
+          </div>
+          <div className="space-y-3">
+            <div>
+              <h3 className="font-heading font-semibold text-lg mb-1">{card.title}</h3>
+              <div className="flex flex-wrap gap-2">
+                {card.tcgSystem && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">{card.tcgSystem}</Badge>}
+                {card.rarity && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">{card.rarity}</Badge>}
+              </div>
+            </div>
+            {(set || card.quantity > 0) && (
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span className="truncate">{set}</span>
+                <span className="flex shrink-0 items-center gap-1"><Layers className="h-4 w-4" />{card.quantity}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </ArchiveCard>
+    )
+  }
 
   const expansions = card.expansions || []
   const ownedCount = card.ownedExpansionCount ?? expansions.filter((exp) => exp.owned).length
@@ -97,9 +128,9 @@ export function CollectionCard({
           </div>
 
           <div className="flex gap-2 pt-2">
-            {card.owned || card.wishlist ? (
+            {entry.detailTarget && (card.owned || card.wishlist) ? (
               <ArchiveCardButton asChild fullWidth className="flex-1">
-                <Link href={entry.detailTarget || `/game/${entry.catalogId}`}>{t("collection.viewDetails")}</Link>
+                <Link href={entry.detailTarget}>{t("collection.viewDetails")}</Link>
               </ArchiveCardButton>
             ) : (
               <ArchiveCardButton active fullWidth className="flex-1">

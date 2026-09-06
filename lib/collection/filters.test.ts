@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { buildBoardRPGCardsFromEntries } from './card'
+import { buildBoardRPGCardsFromEntries, buildCollectionCardsFromEntries } from './card'
 import {
   applyCollectionControls,
   filterCardsByCategory,
   filterCardsByStatus,
   getCategoryCounts,
+  hasVisibleCategory,
   getMiniatureSystemOptions,
   getStatusCounts,
   searchCards,
@@ -206,6 +207,67 @@ test('domain filtering never includes TCG/miniatures in the current Board/RPG vi
     rpgs: 1,
     miniatures: 0,
     'trading-cards': 0,
+  })
+
+  test('TCG entries produce visible cards and participate in Collection controls without rendering miniatures', () => {
+    const cards = buildCollectionCardsFromEntries([...BOARD_RPG_ENTRIES, TCG_ENTRY, MINIATURE_ENTRY])
+    const tcgCard = cards.find((item) => item.entry.domain === 'tcg')
+
+    assert.equal(cards.length, 3)
+    assert.ok(tcgCard)
+    assert.equal(tcgCard.card.kind, 'tcg')
+    if (tcgCard.card.kind === 'tcg') {
+      assert.equal(tcgCard.card.title, 'Lightning Bolt')
+      assert.equal(tcgCard.card.quantity, 1)
+    }
+    assert.ok(cards.every((item) => item.entry.domain !== 'miniature'))
+    assert.deepEqual(getCategoryCounts(cards), {
+      all: 3,
+      'board-games': 1,
+      rpgs: 1,
+      miniatures: 0,
+      'trading-cards': 1,
+    })
+    assert.equal(hasVisibleCategory('trading-cards', 1), true)
+    assert.equal(hasVisibleCategory('trading-cards', 0), false)
+    assert.deepEqual(filterCardsByCategory(cards, 'trading-cards').map((item) => item.entry.displayName), ['Lightning Bolt'])
+    assert.deepEqual(filterCardsByCategory(cards, 'all').map((item) => item.entry.domain), ['board_game', 'rpg', 'tcg'])
+    assert.equal(searchCards(cards, 'lightning bolt')[0].entry.domain, 'tcg')
+  })
+
+  test('TCG card data preserves identity, domain-specific quantity, and no detail route', () => {
+    const entry = makeEntry({
+      domain: 'tcg',
+      catalogId: 'tcg-card-id',
+      ownershipId: 'tcg-collection-id',
+      displayName: 'Black Lotus',
+      image: 'https://example.com/black-lotus.jpg',
+      detailTarget: null,
+      metadata: {
+        quantity: 4,
+        tcg_system: 'magic',
+        set_name: 'Limited Edition Alpha',
+        set_code: 'LEA',
+        rarity: 'rare',
+      },
+    })
+    const [item] = buildCollectionCardsFromEntries([entry])
+
+    assert.equal(item.entry.catalogId, 'tcg-card-id')
+    assert.equal(item.entry.ownershipId, 'tcg-collection-id')
+    assert.notEqual(item.entry.catalogId, item.entry.ownershipId)
+    assert.equal(item.entry.detailTarget, null)
+    assert.notEqual(item.entry.detailTarget, `/game/${item.entry.catalogId}`)
+    assert.equal(item.card.kind, 'tcg')
+    if (item.card.kind === 'tcg') {
+      assert.equal(item.card.title, 'Black Lotus')
+      assert.equal(item.card.image, 'https://example.com/black-lotus.jpg')
+      assert.equal(item.card.quantity, 4)
+      assert.equal(item.card.setName, 'Limited Edition Alpha')
+      assert.equal(item.card.setCode, 'LEA')
+      assert.equal(item.card.rarity, 'rare')
+      assert.equal(item.card.tcgSystem, 'magic')
+    }
   })
 })
 

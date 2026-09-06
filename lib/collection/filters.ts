@@ -189,6 +189,10 @@ export function getCategoryCounts(cards: readonly CollectionCardItem[]): Collect
   return counts
 }
 
+export function hasVisibleCategory(category: CollectionCategoryFilter, count: number): boolean {
+  return category === 'all' || count > 0
+}
+
 export interface MiniatureSystemOption {
   /** Stable system code, e.g. 'wh40k'. */
   id: string
