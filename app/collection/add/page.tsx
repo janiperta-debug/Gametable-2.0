@@ -25,7 +25,7 @@ import { useTranslations } from "@/lib/i18n"
 import type { BGGSearchResult, BGGGameDetails } from "@/lib/types/database"
 import type { TCGSearchResult } from "@/app/api/tcg/search/route"
 import type { MiniatureSearchResult } from "@/app/api/miniatures/search/route"
-import { getSearchResultId, isAmbiguousMiniatureMatch } from "@/lib/search-result-id"
+import { getSearchResultId } from "@/lib/search-result-id"
 
 type GameCategory = "board_game" | "rpg" | "trading_card" | "miniature"
 
@@ -379,7 +379,6 @@ export default function AddGamePage() {
             if (result.success) successCount++
             else errorCount++
           } else {
-            isAmbiguousMiniatureMatch(data.results || [], item.name)
             errorCount++
           }
         } else if (selectedCategory === "miniature") {
