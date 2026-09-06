@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-import { mapMiniatureCatalogUnit } from "./route"
+import { mapMiniatureCatalogUnit } from "../catalog"
 
 test("maps production catalog identity and relations without collapsing source identity", () => {
   const result = mapMiniatureCatalogUnit({
