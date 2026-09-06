@@ -278,38 +278,45 @@ export async function getUserMiniatureCollection(system?: MiniatureSystem) {
   }
 
   try {
-    let query = supabase
+    // mini_army_units has no `status`/`quantity`/`notes` columns in
+    // production. Ownership is represented by the `owned` boolean, and the
+    // faction/system relationship is reached through mini_units -> mini_factions
+    // -> mini_systems (mini_army_units has no direct system/faction column).
+    const query = supabase
       .from("mini_army_units")
       .select(
         `
         id,
-        quantity,
+        model_count,
+        points_total,
         paint_status,
-        status,
-        notes,
-        created_at,
+        custom_name,
+        upgrades,
+        is_warlord,
+        owned,
         unit:mini_units (
           id,
-          external_id,
           name,
-          type,
-          points,
-          model_count,
+          unit_type,
+          base_points,
+          model_count_min,
+          model_count_max,
           faction:mini_factions (
             id,
-            name
-          ),
-          system:mini_systems (
-            id,
-            code,
-            name
+            name,
+            system:mini_systems (
+              id,
+              code,
+              name
+            )
           )
         )
       `
       )
       .eq("user_id", user.id)
-      .eq("status", "owned")
-      .order("created_at", { ascending: false })
+      // mini_army_units has no created_at/added_at column in production, so
+      // there is no timestamp column to order by here.
+      .eq("owned", true)
 
     const { data, error } = await query
 
@@ -321,7 +328,7 @@ export async function getUserMiniatureCollection(system?: MiniatureSystem) {
     // Filter by system if specified
     let filtered = data || []
     if (system) {
-      filtered = filtered.filter((entry: any) => entry.unit?.system?.code === system)
+      filtered = filtered.filter((entry: any) => entry.unit?.faction?.system?.code === system)
     }
 
     return { success: true, data: filtered }

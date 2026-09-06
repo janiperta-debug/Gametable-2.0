@@ -104,6 +104,29 @@ function GameListItem({ item }: { item: CollectionCardItem }) {
       </ArchiveCard>
     )
   }
+  if (card.kind === 'miniature') {
+    return (
+      <ArchiveCard corners={false} centerOrnaments={false} className="group">
+        <div className="flex gap-4 p-4">
+          <div className="relative w-24 h-32 flex-shrink-0">
+            <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-surface/50 w-full h-full">
+              <Image src={card.image} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+            </div>
+          </div>
+          <div className="flex-1">
+            <h3 className="font-heading font-semibold text-xl mb-1">{card.title}</h3>
+            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              {card.system && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold">{card.system}</Badge>}
+              {card.faction && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold">{card.faction}</Badge>}
+              {card.paintStatus && <span>{card.paintStatus}</span>}
+              {card.modelCount != null && <span>Models: {card.modelCount}</span>}
+              {card.pointsTotal != null && <span>Points: {card.pointsTotal}</span>}
+            </div>
+          </div>
+        </div>
+      </ArchiveCard>
+    )
+  }
   if (card.kind !== 'board-rpg') {
     return assertUnreachableCollectionCard(card)
   }

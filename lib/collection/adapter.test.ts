@@ -56,12 +56,13 @@ test('mapUserGameToCollectionEntry maps RPG entries using the RPG domain', () =>
   assert.equal(entry.detailTarget, '/game/catalog-uuid-rpg')
 })
 
-test('mapTCGCollectionToCollectionEntry maps TCG rows with null detailTarget and key metadata', () => {
+test('mapTCGCollectionToCollectionEntry maps TCG rows with null detailTarget and key metadata (no status column)', () => {
   const entry = mapTCGCollectionToCollectionEntry({
     id: 'ownership-tcg-1',
     card_id: 'catalog-tcg-1',
-    status: 'owned',
     quantity: 3,
+    condition: 'near_mint',
+    foil: true,
     card: {
       id: 'catalog-tcg-1',
       name: 'Lightning Bolt',
@@ -80,32 +81,40 @@ test('mapTCGCollectionToCollectionEntry maps TCG rows with null detailTarget and
   assert.equal(entry.domain, 'tcg')
   assert.equal(entry.catalogId, 'catalog-tcg-1')
   assert.equal(entry.ownershipId, 'ownership-tcg-1')
+  assert.notEqual(entry.catalogId, entry.ownershipId)
+  assert.equal(entry.status, 'owned')
   assert.equal(entry.detailTarget, null)
   assert.equal(entry.metadata.tcg_system, 'magic')
   assert.equal(entry.metadata.set_code, 'M21')
   assert.equal(entry.metadata.quantity, 3)
+  assert.equal(entry.metadata.condition, 'near_mint')
+  assert.equal(entry.metadata.foil, true)
+  assert.equal('status' in entry.metadata, false)
 })
 
-test('mapMiniatureCollectionToCollectionEntry maps miniatures with null details and system metadata', () => {
+test('mapMiniatureCollectionToCollectionEntry maps mini_army_units rows using owned/model_count/points_total/paint_status', () => {
   const entry = mapMiniatureCollectionToCollectionEntry({
     id: 'ownership-mini-1',
     unit_id: 'catalog-mini-1',
-    status: 'owned',
-    quantity: 10,
+    owned: true,
+    model_count: 5,
+    points_total: 200,
     paint_status: 'painted',
-    notes: 'freshly painted',
+    custom_name: 'Alpha Squad',
+    is_warlord: false,
     unit: {
       id: 'catalog-mini-1',
       name: 'Intercessor Squad',
-      type: 'unit',
-      points: 200,
-      model_count: 5,
-      system: {
-        code: 'wh40k',
-        name: 'Warhammer 40,000',
-      },
+      unit_type: 'infantry',
+      base_points: 190,
+      model_count_min: 5,
+      model_count_max: 10,
       faction: {
         name: 'Ultramarines',
+        system: {
+          code: 'wh40k',
+          name: 'Warhammer 40,000',
+        },
       },
     },
   })
@@ -113,10 +122,28 @@ test('mapMiniatureCollectionToCollectionEntry maps miniatures with null details 
   assert.equal(entry.domain, 'miniature')
   assert.equal(entry.catalogId, 'catalog-mini-1')
   assert.equal(entry.ownershipId, 'ownership-mini-1')
+  assert.notEqual(entry.catalogId, entry.ownershipId)
+  assert.equal(entry.status, 'owned')
   assert.equal(entry.detailTarget, null)
+  assert.equal(entry.displayName, 'Alpha Squad')
   assert.equal(entry.metadata.system, 'wh40k')
+  assert.equal(entry.metadata.system_name, 'Warhammer 40,000')
   assert.equal(entry.metadata.faction, 'Ultramarines')
   assert.equal(entry.metadata.model_count, 5)
+  assert.equal(entry.metadata.points_total, 200)
+  assert.equal(entry.metadata.paint_status, 'painted')
+  assert.equal(entry.metadata.unit_type, 'infantry')
+})
+
+test('mapMiniatureCollectionToCollectionEntry rejects owned=false rows rather than inventing wishlist semantics', () => {
+  assert.throws(() =>
+    mapMiniatureCollectionToCollectionEntry({
+      id: 'ownership-mini-unowned',
+      unit_id: 'catalog-mini-unowned',
+      owned: false,
+      unit: { id: 'catalog-mini-unowned', name: 'Unowned Unit' },
+    }),
+  )
 })
 
 test('domain mapper keeps catalog identity separate from ownership identity', () => {

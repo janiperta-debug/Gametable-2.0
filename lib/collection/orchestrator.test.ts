@@ -33,14 +33,15 @@ test('single board-game domain input maps to a CollectionEntry list', () => {
   assert.equal(entries[0].status, 'owned')
 })
 
-test('single TCG domain input maps to a CollectionEntry list', () => {
+test('single TCG domain input maps to a CollectionEntry list (no status column)', () => {
   const entries = getCollectionEntries({
     tcgCollection: [
       {
         id: 'ownership-tcg-1',
         card_id: 'catalog-tcg-1',
-        status: 'wishlist',
         quantity: 2,
+        condition: 'lightly_played',
+        foil: false,
         card: {
           id: 'catalog-tcg-1',
           name: 'Lightning Bolt',
@@ -56,28 +57,28 @@ test('single TCG domain input maps to a CollectionEntry list', () => {
   assert.equal(entries[0].domain, 'tcg')
   assert.equal(entries[0].catalogId, 'catalog-tcg-1')
   assert.equal(entries[0].ownershipId, 'ownership-tcg-1')
-  assert.equal(entries[0].status, 'wishlist')
+  assert.equal(entries[0].status, 'owned')
   assert.equal(entries[0].detailTarget, null)
   assert.equal(entries[0].metadata.set_code, 'M21')
+  assert.equal(entries[0].metadata.condition, 'lightly_played')
 })
 
-test('single miniature domain input maps to a CollectionEntry list', () => {
+test('single miniature domain input maps to a CollectionEntry list (owned boolean, no status)', () => {
   const entries = getCollectionEntries({
     miniatureCollection: [
       {
         id: 'ownership-mini-1',
         unit_id: 'catalog-mini-1',
-        status: 'owned',
-        quantity: 5,
+        owned: true,
+        model_count: 5,
+        points_total: 200,
         paint_status: 'painted',
         unit: {
           id: 'catalog-mini-1',
           name: 'Intercessor Squad',
-          type: 'unit',
-          points: 200,
-          model_count: 5,
-          system: { code: 'wh40k', name: 'Warhammer 40,000' },
-          faction: { name: 'Ultramarines' },
+          unit_type: 'infantry',
+          base_points: 190,
+          faction: { name: 'Ultramarines', system: { code: 'wh40k', name: 'Warhammer 40,000' } },
         },
       },
     ],
@@ -87,9 +88,12 @@ test('single miniature domain input maps to a CollectionEntry list', () => {
   assert.equal(entries[0].domain, 'miniature')
   assert.equal(entries[0].catalogId, 'catalog-mini-1')
   assert.equal(entries[0].ownershipId, 'ownership-mini-1')
+  assert.equal(entries[0].status, 'owned')
   assert.equal(entries[0].detailTarget, null)
   assert.equal(entries[0].metadata.system, 'wh40k')
   assert.equal(entries[0].metadata.faction, 'Ultramarines')
+  assert.equal(entries[0].metadata.model_count, 5)
+  assert.equal(entries[0].metadata.points_total, 200)
 })
 
 test('mixed domain inputs preserve each domain identity and return a deterministic merged list', () => {
@@ -106,7 +110,6 @@ test('mixed domain inputs preserve each domain identity and return a determinist
       {
         id: 'ownership-tcg-1',
         card_id: 'catalog-tcg-1',
-        status: 'owned',
         quantity: 1,
         card: { id: 'catalog-tcg-1', name: 'Forest', tcg_system: 'magic' },
       },
@@ -115,9 +118,9 @@ test('mixed domain inputs preserve each domain identity and return a determinist
       {
         id: 'ownership-mini-1',
         unit_id: 'catalog-mini-1',
-        status: 'owned',
-        quantity: 1,
-        unit: { id: 'catalog-mini-1', name: 'Intercessor', type: 'unit' },
+        owned: true,
+        model_count: 1,
+        unit: { id: 'catalog-mini-1', name: 'Intercessor', unit_type: 'infantry' },
       },
     ],
   })
@@ -146,7 +149,6 @@ test('identity preservation keeps catalog and ownership ids separate for all dom
       {
         id: 'ownership-tcg-1',
         card_id: 'catalog-tcg-1',
-        status: 'owned',
         card: { id: 'catalog-tcg-1', name: 'Island', tcg_system: 'magic' },
       },
     ],
@@ -154,8 +156,8 @@ test('identity preservation keeps catalog and ownership ids separate for all dom
       {
         id: 'ownership-mini-1',
         unit_id: 'catalog-mini-1',
-        status: 'owned',
-        unit: { id: 'catalog-mini-1', name: 'Captain', type: 'unit' },
+        owned: true,
+        unit: { id: 'catalog-mini-1', name: 'Captain', unit_type: 'infantry' },
       },
     ],
   })
@@ -198,7 +200,6 @@ test('missing optional domain data does not crash the orchestrator', () => {
       {
         id: 'ownership-tcg-null',
         card_id: 'catalog-tcg-null',
-        status: 'owned',
         quantity: null,
         card: {
           id: 'catalog-tcg-null',
@@ -212,13 +213,12 @@ test('missing optional domain data does not crash the orchestrator', () => {
       {
         id: 'ownership-mini-null',
         unit_id: 'catalog-mini-null',
-        status: null,
-        quantity: null,
+        owned: true,
+        model_count: null,
         unit: {
           id: 'catalog-mini-null',
           name: 'Mini with minimal data',
-          type: null,
-          system: null,
+          unit_type: null,
           faction: null,
         },
       },
@@ -229,6 +229,28 @@ test('missing optional domain data does not crash the orchestrator', () => {
   assert.equal(entries[0].domain, 'board_game')
   assert.equal(entries[1].domain, 'tcg')
   assert.equal(entries[2].domain, 'miniature')
+})
+
+test('a non-owned miniature row is skipped rather than breaking the whole Collection batch', () => {
+  const entries = getCollectionEntries({
+    miniatureCollection: [
+      {
+        id: 'ownership-mini-owned',
+        unit_id: 'catalog-mini-owned',
+        owned: true,
+        unit: { id: 'catalog-mini-owned', name: 'Owned Unit' },
+      },
+      {
+        id: 'ownership-mini-unowned',
+        unit_id: 'catalog-mini-unowned',
+        owned: false,
+        unit: { id: 'catalog-mini-unowned', name: 'Unowned Unit' },
+      },
+    ],
+  })
+
+  assert.equal(entries.length, 1)
+  assert.equal(entries[0].ownershipId, 'ownership-mini-owned')
 })
 
 test('duplicate rows do not produce duplicate CollectionEntry records', () => {
@@ -279,7 +301,6 @@ test('Board/RPG collection entries can be converted to UI card data without incl
       {
         id: 'ownership-tcg-1',
         card_id: 'catalog-tcg-1',
-        status: 'owned',
         quantity: 1,
         card: { id: 'catalog-tcg-1', name: 'Forest', tcg_system: 'magic' },
       },
@@ -288,9 +309,9 @@ test('Board/RPG collection entries can be converted to UI card data without incl
       {
         id: 'ownership-mini-1',
         unit_id: 'catalog-mini-1',
-        status: 'owned',
-        quantity: 1,
-        unit: { id: 'catalog-mini-1', name: 'Intercessor', type: 'unit' },
+        owned: true,
+        model_count: 1,
+        unit: { id: 'catalog-mini-1', name: 'Intercessor', unit_type: 'infantry' },
       },
     ],
   })
