@@ -37,7 +37,7 @@ export function CollectionCard({
   const [expanded, setExpanded] = useState(false)
   const { card, entry } = item
 
-  if (card.kind !== 'board-rpg') {
+  if (card.kind === 'tcg') {
     const set = [card.setName, card.setCode ? `(${card.setCode})` : null].filter(Boolean).join(' ')
 
     return (
@@ -66,6 +66,10 @@ export function CollectionCard({
         </div>
       </ArchiveCard>
     )
+  }
+
+  if (card.kind !== 'board-rpg') {
+    return null
   }
 
   const expansions = card.expansions || []

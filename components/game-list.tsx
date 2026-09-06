@@ -80,7 +80,7 @@ export function GameList({ games, cards }: GameListProps) {
 
 function GameListItem({ item }: { item: CollectionCardItem }) {
   const { card, entry } = item
-  if (card.kind !== 'board-rpg') {
+  if (card.kind === 'tcg') {
     const set = [card.setName, card.setCode ? `(${card.setCode})` : null].filter(Boolean).join(' ')
 
     return (
@@ -103,6 +103,9 @@ function GameListItem({ item }: { item: CollectionCardItem }) {
         </div>
       </ArchiveCard>
     )
+  }
+  if (card.kind !== 'board-rpg') {
+    return null
   }
   const expansions = card.expansions || []
   const ownedCount = card.ownedExpansionCount ?? expansions.filter((exp) => exp.owned).length
