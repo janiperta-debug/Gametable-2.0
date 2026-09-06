@@ -80,7 +80,7 @@ export function GameList({ games, cards }: GameListProps) {
 
 function GameListItem({ item }: { item: CollectionCardItem }) {
   const { card, entry } = item
-  if (card.kind === 'tcg') {
+  if (card.kind !== 'board-rpg') {
     const set = [card.setName, card.setCode ? `(${card.setCode})` : null].filter(Boolean).join(' ')
 
     return (

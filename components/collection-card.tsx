@@ -37,7 +37,7 @@ export function CollectionCard({
   const [expanded, setExpanded] = useState(false)
   const { card, entry } = item
 
-  if (card.kind === 'tcg') {
+  if (card.kind !== 'board-rpg') {
     const set = [card.setName, card.setCode ? `(${card.setCode})` : null].filter(Boolean).join(' ')
 
     return (
@@ -58,7 +58,7 @@ export function CollectionCard({
             </div>
             {(set || card.quantity > 0) && (
               <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span className="truncate">{set}</span>
+                {set && <span className="truncate">{set}</span>}
                 <span className="flex shrink-0 items-center gap-1"><Layers className="h-4 w-4" />{card.quantity}</span>
               </div>
             )}
