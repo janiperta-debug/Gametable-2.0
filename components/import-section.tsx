@@ -215,6 +215,9 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
             if (result.success) successCount++
             else errorCount++
           } else {
+            if (data.results?.length > 1) {
+              console.warn(`Ambiguous miniature catalog match for "${item.name}"`)
+            }
             errorCount++
           }
 

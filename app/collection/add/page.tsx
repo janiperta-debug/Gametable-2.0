@@ -25,16 +25,13 @@ import { useTranslations } from "@/lib/i18n"
 import type { BGGSearchResult, BGGGameDetails } from "@/lib/types/database"
 import type { TCGSearchResult } from "@/app/api/tcg/search/route"
 import type { MiniatureSearchResult } from "@/app/api/miniatures/search/route"
+import { getSearchResultId } from "@/lib/search-result-id"
 
 type GameCategory = "board_game" | "rpg" | "trading_card" | "miniature"
 
 // Union type for search results from different APIs
 type SearchResult = BGGSearchResult | TCGSearchResult | MiniatureSearchResult
 type GameDetails = BGGGameDetails | TCGSearchResult | MiniatureSearchResult
-
-function getSearchResultId(result: SearchResult | GameDetails): string | number {
-  return "catalogId" in result ? result.catalogId : result.id
-}
 
 interface CategoryConfig {
   id: GameCategory
@@ -382,6 +379,9 @@ export default function AddGamePage() {
             if (result.success) successCount++
             else errorCount++
           } else {
+            if (data.results?.length > 1) {
+              console.warn(`Ambiguous miniature catalog match for "${item.name}"`)
+            }
             errorCount++
           }
         } else if (selectedCategory === "miniature") {

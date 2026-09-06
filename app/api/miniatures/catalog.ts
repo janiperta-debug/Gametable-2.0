@@ -24,7 +24,7 @@ function asObject(value: unknown): Record<string, unknown> {
 export function mapMiniatureCatalogUnit(unit: Record<string, any>): MiniatureSearchResult | null {
   const faction = Array.isArray(unit.faction) ? unit.faction[0] : unit.faction
   const system = Array.isArray(faction?.system) ? faction.system[0] : faction?.system
-  if (!system?.id) return null
+  if (!unit.id || !unit.name || !system?.id) return null
 
   const datasheet = asObject(unit.datasheet)
   const sourceId = typeof datasheet.wahapedia_id === "string" ? datasheet.wahapedia_id : undefined

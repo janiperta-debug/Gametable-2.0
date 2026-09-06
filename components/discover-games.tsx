@@ -22,13 +22,10 @@ import { useToast } from "@/hooks/use-toast"
 import type { BGGSearchResult, BGGGameDetails } from "@/lib/types/database"
 import type { TCGSearchResult } from "@/app/api/tcg/search/route"
 import type { MiniatureSearchResult } from "@/app/api/miniatures/search/route"
+import { getSearchResultId } from "@/lib/search-result-id"
 
 type SearchResult = BGGSearchResult | TCGSearchResult | MiniatureSearchResult
 type GameDetails = BGGGameDetails | TCGSearchResult | MiniatureSearchResult
-
-function getSearchResultId(result: SearchResult | GameDetails): string | number {
-  return "catalogId" in result ? result.catalogId : result.id
-}
 
 interface CategoryConfig {
   id: GameCategory
