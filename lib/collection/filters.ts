@@ -36,6 +36,21 @@ export interface CollectionStatusCounts {
   wishlist: number
 }
 
+function compareBoardSpecificCards(
+  left: CollectionCardItem['card'],
+  right: CollectionCardItem['card'],
+  field: 'rating' | 'yearPublished' | 'minPlayTime',
+  direction: 1 | -1,
+): number {
+  if (left.kind !== 'board-rpg') {
+    return right.kind === 'board-rpg' ? 1 : 0
+  }
+  if (right.kind !== 'board-rpg') {
+    return -1
+  }
+  return direction * (left[field] - right[field])
+}
+
 const CATEGORY_DOMAINS: Record<Exclude<CollectionCategoryFilter, 'all'>, readonly CollectionDomain[]> = {
   'board-games': ['board_game'],
   rpgs: ['rpg'],
@@ -109,22 +124,19 @@ export function sortCards(
   sorted.sort((left, right) => {
     const leftTitle = left.card.title || left.entry.displayName || ''
     const rightTitle = right.card.title || right.entry.displayName || ''
-    const leftBoardCard = left.card.kind === 'board-rpg' ? left.card : null
-    const rightBoardCard = right.card.kind === 'board-rpg' ? right.card : null
-
     switch (sortBy) {
       case 'name-asc':
         return leftTitle.localeCompare(rightTitle)
       case 'name-desc':
         return rightTitle.localeCompare(leftTitle)
       case 'rating-high':
-        return (rightBoardCard?.rating || 0) - (leftBoardCard?.rating || 0)
+        return compareBoardSpecificCards(left.card, right.card, 'rating', -1)
       case 'rating-low':
-        return (leftBoardCard?.rating || 0) - (rightBoardCard?.rating || 0)
+        return compareBoardSpecificCards(left.card, right.card, 'rating', 1)
       case 'year':
-        return (rightBoardCard?.yearPublished || 0) - (leftBoardCard?.yearPublished || 0)
+        return compareBoardSpecificCards(left.card, right.card, 'yearPublished', -1)
       case 'playtime':
-        return (leftBoardCard?.minPlayTime || 0) - (rightBoardCard?.minPlayTime || 0)
+        return compareBoardSpecificCards(left.card, right.card, 'minPlayTime', 1)
       default:
         return 0
     }

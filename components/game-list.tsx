@@ -6,15 +6,11 @@ import { Star, Users, Clock, Heart, MoreVertical, Puzzle, ChevronDown } from "lu
 import Image from "next/image"
 import Link from "next/link"
 import type { Game } from "@/lib/mock-games"
-import type { CollectionCardItem } from "@/lib/types/collection"
+import { assertUnreachableCollectionCard, type CollectionCardItem } from "@/lib/types/collection"
 
 interface GameListProps {
   games?: Game[]
   cards?: CollectionCardItem[]
-}
-
-function assertUnreachableCardKind(card: never): never {
-  throw new Error(`Unsupported Collection card kind: ${String(card)}`)
 }
 
 function legacyGameToCollectionCardItem(game: Game): CollectionCardItem {
@@ -109,7 +105,7 @@ function GameListItem({ item }: { item: CollectionCardItem }) {
     )
   }
   if (card.kind !== 'board-rpg') {
-    return assertUnreachableCardKind(card)
+    return assertUnreachableCollectionCard(card)
   }
   const expansions = card.expansions || []
   const ownedCount = card.ownedExpansionCount ?? expansions.filter((exp) => exp.owned).length

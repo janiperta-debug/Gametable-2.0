@@ -59,6 +59,10 @@ export interface TCGCollectionCardItem {
 
 export type CollectionCardItem = BoardRPGCollectionCardItem | TCGCollectionCardItem
 
+export function assertUnreachableCollectionCard(value: never): never {
+  throw new Error(`Unsupported Collection card kind: ${String(value)}`)
+}
+
 export interface CollectionEntry {
   domain: CollectionDomain
   catalogId: string

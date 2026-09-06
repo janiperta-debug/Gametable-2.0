@@ -8,7 +8,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useTranslations } from "@/lib/i18n"
-import type { CollectionCardItem } from "@/lib/types/collection"
+import { assertUnreachableCollectionCard, type CollectionCardItem } from "@/lib/types/collection"
 
 const CATEGORY_LABELS: Record<string, string> = {
   board_game: "Lautapeli",
@@ -23,10 +23,6 @@ interface CollectionCardProps {
   onToggleWishlist?: (gameId: string) => void
   showMarketplaceButton?: boolean
   showWishlistButton?: boolean
-}
-
-function assertUnreachableCardKind(card: never): never {
-  throw new Error(`Unsupported Collection card kind: ${String(card)}`)
 }
 
 export function CollectionCard({
@@ -73,7 +69,7 @@ export function CollectionCard({
   }
 
   if (card.kind !== 'board-rpg') {
-    return assertUnreachableCardKind(card)
+    return assertUnreachableCollectionCard(card)
   }
 
   const expansions = card.expansions || []

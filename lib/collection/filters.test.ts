@@ -234,6 +234,10 @@ test('TCG entries produce visible cards and participate in Collection controls w
     assert.deepEqual(filterCardsByCategory(cards, 'trading-cards').map((item) => item.entry.displayName), ['Lightning Bolt'])
     assert.deepEqual(filterCardsByCategory(cards, 'all').map((item) => item.entry.domain), ['board_game', 'rpg', 'tcg'])
     assert.equal(searchCards(cards, 'lightning bolt')[0].entry.domain, 'tcg')
+    assert.deepEqual(
+      applyCollectionControls(cards, { sortBy: 'name-asc' }).map((item) => item.entry.displayName),
+      ['Lightning Bolt', 'Root', 'The Dying Earth'],
+    )
 })
 
 test('TCG card data preserves identity, domain-specific quantity, and no detail route', () => {
