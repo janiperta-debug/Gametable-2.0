@@ -224,6 +224,24 @@ export default function AddGamePage() {
     }
   }
 
+  const handleCreateMiniatureArmy = async () => {
+    const miniature = selectedGame as MiniatureSearchResult | null
+    if (!miniature?.factionId || !armyName.trim()) return
+    setArmyLoading(true)
+    try {
+      const result = await createMiniatureArmy(armyName, miniature.factionId)
+      if (!result.success || !result.data) throw new Error(result.error)
+      setSelectedArmy(result.data)
+      setArmyMode("idle")
+      setArmyName("")
+      toast({ title: t("common.success"), description: `Army "${result.data.name}" selected.` })
+    } catch (error) {
+      toast({ title: t("common.error"), description: error instanceof Error ? error.message : "Unable to create Army.", variant: "destructive" })
+    } finally {
+      setArmyLoading(false)
+    }
+  }
+
   const handleAddGame = async () => {
     if (!selectedGame) return
     
@@ -268,24 +286,6 @@ export default function AddGamePage() {
       } else {
         // Use general game action
         result = await addGameToCollection(selectedGame as BGGGameDetails, "owned", selectedCategory)
-      }
-
-      const handleCreateMiniatureArmy = async () => {
-        const miniature = selectedGame as MiniatureSearchResult | null
-        if (!miniature?.factionId || !armyName.trim()) return
-        setArmyLoading(true)
-        try {
-          const result = await createMiniatureArmy(armyName, miniature.factionId)
-          if (!result.success || !result.data) throw new Error(result.error)
-          setSelectedArmy(result.data)
-          setArmyMode("idle")
-          setArmyName("")
-          toast({ title: t("common.success"), description: `Army "${result.data.name}" selected.` })
-        } catch (error) {
-          toast({ title: t("common.error"), description: error instanceof Error ? error.message : "Unable to create Army.", variant: "destructive" })
-        } finally {
-          setArmyLoading(false)
-        }
       }
 
       if (result.error) {
