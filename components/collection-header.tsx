@@ -67,13 +67,15 @@ export function CollectionHeader({
   // cards are shown. TCG and Miniatures are not rendered in the current
   // Board/RPG Collection UI, so their badges stay hidden until a later WP
   // enables their rendering and supplies cards.
+  const shouldShowCategory = (id: CategoryType, count: number) => id === "all" || count > 0
+
   const categories = [
     { id: "all" as CategoryType, labelKey: "collection.allGames", count: categoryCounts?.all ?? 0, importSource: "BGG" },
     { id: "board-games" as CategoryType, labelKey: "collection.boardGames", count: categoryCounts?.["board-games"] ?? 0, importSource: "BGG" },
     { id: "rpgs" as CategoryType, labelKey: "collection.rpgs", count: categoryCounts?.rpgs ?? 0, importSource: "RPGG" },
     { id: "miniatures" as CategoryType, labelKey: "collection.miniatures", count: categoryCounts?.miniatures ?? 0, importSource: "Miniature Market" },
     { id: "trading-cards" as CategoryType, labelKey: "collection.tradingCards", count: categoryCounts?.["trading-cards"] ?? 0, importSource: "TCGPlayer" },
-  ].filter((category) => category.id === "all" || category.count > 0)
+  ].filter((category) => shouldShowCategory(category.id, category.count))
 
   const sortOptions = [
     { value: "name-asc" as SortOption, labelKey: "collection.sortNameAZ" },
