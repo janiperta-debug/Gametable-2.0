@@ -2,10 +2,13 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getCollectionEntries } from '@/lib/collection/orchestrator'
+import type { CollectionEntry } from '@/lib/types/collection'
 import type { UserGameWithGame, OwnedExpansion } from '@/lib/types/database'
 
 export function useCollection() {
   const [games, setGames] = useState<UserGameWithGame[]>([])
+  const [collectionEntries, setCollectionEntries] = useState<CollectionEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -111,8 +114,75 @@ export function useCollection() {
 
     const directRows = (data || []).map(attachExpansions)
     const hostRows = expansionOnlyHostRows.map(attachExpansions)
+    const mergedRows = [...directRows, ...hostRows]
 
-    setGames([...directRows, ...hostRows])
+    const [tcgResult, miniResult] = await Promise.all([
+      supabase
+        .from('tcg_collection')
+        .select(`
+          id,
+          quantity,
+          status,
+          added_at,
+          card:tcg_cards (
+            id,
+            external_id,
+            name,
+            tcg_system,
+            set_name,
+            set_code,
+            rarity,
+            image_url,
+            mana_cost,
+            type_line,
+            card_type,
+            cmc,
+            price_usd
+          )
+        `)
+        .eq('user_id', user.id)
+        .eq('status', 'owned')
+        .order('added_at', { ascending: false }),
+      supabase
+        .from('mini_army_units')
+        .select(`
+          id,
+          quantity,
+          paint_status,
+          status,
+          notes,
+          created_at,
+          unit:mini_units (
+            id,
+            external_id,
+            name,
+            type,
+            points,
+            model_count,
+            faction:mini_factions (
+              id,
+              name
+            ),
+            system:mini_systems (
+              id,
+              code,
+              name
+            )
+          )
+        `)
+        .eq('user_id', user.id)
+        .eq('status', 'owned')
+        .order('created_at', { ascending: false })
+    ])
+
+    setGames(mergedRows)
+    setCollectionEntries(
+      getCollectionEntries({
+        userGames: mergedRows,
+        tcgCollection: tcgResult.data || [],
+        miniatureCollection: miniResult.data || [],
+      })
+    )
     setError(null)
     setLoading(false)
   }, [])
@@ -145,5 +215,5 @@ export function useCollection() {
     }
   }, [fetchGames])
 
-  return { games, loading, error, refetch: fetchGames }
+  return { games, collectionEntries, loading, error, refetch: fetchGames }
 }

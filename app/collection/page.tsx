@@ -14,7 +14,7 @@ import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "@/lib/i18n"
 import { useCollection } from "@/hooks/useCollection"
-import type { Game } from "@/lib/mock-games"
+import { buildBoardRPGCardsFromEntries } from "@/lib/collection/card"
 
 type CategoryType = "all" | "board-games" | "rpgs" | "miniatures" | "trading-cards"
 
@@ -24,7 +24,7 @@ export default function Collection() {
   const [showFilters, setShowFilters] = useState(false)
   const { toast } = useToast()
   const t = useTranslations()
-  const { games: userGames, loading, refetch } = useCollection()
+  const { games: userGames, collectionEntries, loading } = useCollection()
 
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [searchQuery, setSearchQuery] = useState("")
@@ -46,58 +46,29 @@ export default function Collection() {
     })
   }
 
-  // Transform database games to the format expected by GameGrid
-  const transformedGames: Game[] = useMemo(() => {
-    return userGames.map((ug) => ({
-      id: ug.game.id,  // Use actual game UUID for routing to detail page
-      title: ug.game.name,
-      image: ug.game.image_url || ug.game.thumbnail_url || "/placeholder.svg",
-      rating: ug.personal_rating || ug.game.bgg_rating || 0,
-      playerCount: ug.game.min_players && ug.game.max_players 
-        ? `${ug.game.min_players}-${ug.game.max_players}` 
-        : "?",
-      minPlayers: ug.game.min_players || 1,
-      maxPlayers: ug.game.max_players || 4,
-      playTime: ug.game.min_playtime && ug.game.max_playtime
-        ? `${ug.game.min_playtime}-${ug.game.max_playtime}`
-        : "?",
-      minPlayTime: ug.game.min_playtime || 30,
-      maxPlayTime: ug.game.max_playtime || 60,
-      category: ug.game.category || "Board Game",
-      mechanics: [],
-      yearPublished: ug.game.year || 0,
-      owned: ug.status === "owned",
-      wishlist: ug.status === "wishlist",
-      forTrade: false, // TODO: Connect to marketplace
-      // Store the user_game id for actions
-      userGameId: ug.id,
-      ownedExpansionCount: ug.ownedExpansionCount || 0,
-      totalExpansionCount: ug.totalExpansionCount || 0,
-      expansions: ug.expansions || [],
-    }))
-  }, [userGames])
+  const boardGameCards = useMemo(
+    () => buildBoardRPGCardsFromEntries(collectionEntries, userGames),
+    [collectionEntries, userGames],
+  )
 
   const filteredAndSortedGames = useMemo(() => {
-    let filtered = [...transformedGames]
+    let filtered: typeof boardGameCards = [...boardGameCards]
 
-    // Filter by status (owned/wishlist)
     if (statusFilter === "owned") {
-      filtered = filtered.filter((game) => game.owned)
+      filtered = filtered.filter((item: { card: { owned: boolean } }) => item.card.owned)
     } else if (statusFilter === "wishlist") {
-      filtered = filtered.filter((game) => game.wishlist)
+      filtered = filtered.filter((item: { card: { wishlist: boolean } }) => item.card.wishlist)
     }
 
-    // Filter by search query
     if (searchQuery) {
-      filtered = filtered.filter((game) => 
-        game.title.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter((item: { card: { title: string } }) =>
+        item.card.title.toLowerCase().includes(searchQuery.toLowerCase()),
       )
     }
 
-    // Filter by category
     if (selectedCategory !== "all") {
-      filtered = filtered.filter((game) => {
-        const cat = game.category?.toLowerCase() || ""
+      filtered = filtered.filter((item: { card: { category?: string | null } }) => {
+        const cat = (item.card.category ?? "").toLowerCase()
         switch (selectedCategory) {
           case "board-games":
             return cat.includes("board") || cat === "board_game"
@@ -113,56 +84,58 @@ export default function Collection() {
       })
     }
 
-    // Sort games
-    filtered.sort((a, b) => {
+    filtered.sort((left, right) => {
+      const leftTitle = left.card.title
+      const rightTitle = right.card.title
+
       switch (sortBy) {
         case "name-asc":
-          return a.title.localeCompare(b.title)
+          return leftTitle.localeCompare(rightTitle)
         case "name-desc":
-          return b.title.localeCompare(a.title)
+          return rightTitle.localeCompare(leftTitle)
         case "rating-high":
-          return (b.rating || 0) - (a.rating || 0)
+          return (right.card.rating || 0) - (left.card.rating || 0)
         case "rating-low":
-          return (a.rating || 0) - (b.rating || 0)
+          return (left.card.rating || 0) - (right.card.rating || 0)
         case "year":
-          return (b.yearPublished || 0) - (a.yearPublished || 0)
+          return (right.card.yearPublished || 0) - (left.card.yearPublished || 0)
         case "playtime":
-          return (a.minPlayTime || 0) - (b.minPlayTime || 0)
+          return (left.card.minPlayTime || 0) - (right.card.minPlayTime || 0)
         default:
           return 0
       }
     })
 
     return filtered
-  }, [transformedGames, searchQuery, selectedCategory, statusFilter, sortBy])
+  }, [boardGameCards, searchQuery, selectedCategory, statusFilter, sortBy])
 
-  // Calculate status counts
   const statusCounts = useMemo(() => {
     return {
-      all: transformedGames.length,
-      owned: transformedGames.filter(g => g.owned).length,
-      wishlist: transformedGames.filter(g => g.wishlist).length,
+      all: boardGameCards.length,
+      owned: boardGameCards.filter(({ card }) => card.owned).length,
+      wishlist: boardGameCards.filter(({ card }) => card.wishlist).length,
     }
-  }, [transformedGames])
+  }, [boardGameCards])
 
-  // Calculate category counts
   const categoryCounts = useMemo(() => {
     const counts = {
-      all: transformedGames.length,
+      all: boardGameCards.length,
       "board-games": 0,
       rpgs: 0,
       miniatures: 0,
       "trading-cards": 0,
     }
-    transformedGames.forEach((game) => {
-      const cat = game.category?.toLowerCase() || ""
+
+    boardGameCards.forEach((item: { card: { category?: string | null } }) => {
+      const cat = (item.card.category ?? "").toLowerCase()
       if (cat.includes("rpg") || cat.includes("role")) counts.rpgs++
       else if (cat.includes("miniature") || cat.includes("wargame")) counts.miniatures++
       else if (cat.includes("trading") || cat.includes("tcg") || cat.includes("card game")) counts["trading-cards"]++
       else counts["board-games"]++
     })
+
     return counts
-  }, [transformedGames])
+  }, [boardGameCards])
 
   return (
     <div className="min-h-screen">
@@ -178,8 +151,6 @@ export default function Collection() {
           </div>
         </ThemeHero>
 
-        {/* Tab toggle sits just above the category badges (consistent placement
-            across both tabs, since the hero scales differently on mobile/desktop). */}
         <div className="mb-8 flex justify-center">
           <ArchiveToggle
             value={activeTab}
@@ -233,12 +204,12 @@ export default function Collection() {
                   </div>
                 ) : viewMode === "grid" ? (
                   <GameGrid
-                    games={filteredAndSortedGames}
+                    cards={filteredAndSortedGames}
                     onToggleForTrade={handleToggleForTrade}
                     showMarketplaceButton={true}
                   />
                 ) : (
-                  <GameList games={filteredAndSortedGames} />
+                  <GameList cards={filteredAndSortedGames} />
                 )}
               </div>
             </div>
