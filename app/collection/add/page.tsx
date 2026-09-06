@@ -20,7 +20,8 @@ import { ArrowLeft, Search, Loader2, Plus, Minus, Star, Users, Clock, Dices, Swo
 import { useToast } from "@/hooks/use-toast"
 import { addGameToCollection, type AddGameResult } from "@/app/actions/games"
 import { addCardToCollection } from "@/app/actions/tcg"
-import { addMiniatureToCollection, type PaintStatus } from "@/app/actions/miniatures"
+import { addMiniatureToCollection, createMiniatureArmy, getUserMiniatureArmies, type MiniatureArmyContext, type PaintStatus } from "@/app/actions/miniatures"
+import { resolveMiniatureArmy } from "@/lib/miniatures/army-resolver"
 import { useTranslations } from "@/lib/i18n"
 import type { BGGSearchResult, BGGGameDetails } from "@/lib/types/database"
 import type { TCGSearchResult } from "@/app/api/tcg/search/route"
@@ -116,6 +117,11 @@ export default function AddGamePage() {
   const [tcgGame, setTcgGame] = useState<"magic" | "pokemon" | "yugioh" | "lorcana" | "flesh-and-blood" | "one-piece">("magic")
   const [miniQuantity, setMiniQuantity] = useState(1)
   const [miniPaintStatus, setMiniPaintStatus] = useState<PaintStatus>("unpainted")
+  const [miniatureArmies, setMiniatureArmies] = useState<MiniatureArmyContext[]>([])
+  const [selectedArmy, setSelectedArmy] = useState<MiniatureArmyContext | null>(null)
+  const [armyMode, setArmyMode] = useState<"idle" | "select" | "create">("idle")
+  const [armyName, setArmyName] = useState("")
+  const [armyLoading, setArmyLoading] = useState(false)
   const [loadingDetails, setLoadingDetails] = useState(false)
   const { toast } = useToast()
   const t = useTranslations()
@@ -180,6 +186,9 @@ export default function AddGamePage() {
     setTcgQuantity(1) // Reset quantity for new selection
     setMiniQuantity(1)
     setMiniPaintStatus("unpainted")
+    setMiniatureArmies([])
+    setSelectedArmy(null)
+    setArmyMode("idle")
     try {
       // For TCG, also pass game type
       // For TCG and miniatures, use the search result directly (already has all data)
@@ -228,12 +237,55 @@ export default function AddGamePage() {
         const tcgResult = await addCardToCollection(selectedGame as TCGSearchResult, tcgQuantity, "owned")
         result = tcgResult.success ? {} : { error: tcgResult.error }
       } else if (selectedCategory === "miniature") {
-        // Use miniatures-specific action
-        const miniResult = await addMiniatureToCollection(selectedGame as MiniatureSearchResult, miniQuantity, miniPaintStatus, "owned")
-        result = miniResult.success ? {} : { error: miniResult.error }
+        const miniature = selectedGame as MiniatureSearchResult
+        if (!selectedArmy) {
+          setArmyLoading(true)
+          const armiesResult = await getUserMiniatureArmies()
+          if (!armiesResult.success) throw new Error(armiesResult.error)
+          const resolution = resolveMiniatureArmy(miniature.factionId, armiesResult.data)
+          setMiniatureArmies(resolution.candidates)
+          if (resolution.kind === "create") {
+            setArmyMode("create")
+            setArmyLoading(false)
+            result = { error: "Create an Army context before adding this Miniature." }
+            return
+          }
+          if (resolution.kind === "select") {
+            setArmyMode("select")
+            setArmyLoading(false)
+            result = { error: "Select an Army context before adding this Miniature." }
+            return
+          }
+          setSelectedArmy(resolution.army)
+          setArmyMode("idle")
+          setArmyLoading(false)
+          const miniResult = await addMiniatureToCollection(miniature, miniQuantity, miniPaintStatus, "owned", false, resolution.army)
+          result = miniResult.success ? {} : { error: miniResult.error }
+        } else {
+          const miniResult = await addMiniatureToCollection(miniature, miniQuantity, miniPaintStatus, "owned", false, selectedArmy)
+          result = miniResult.success ? {} : { error: miniResult.error }
+        }
       } else {
         // Use general game action
         result = await addGameToCollection(selectedGame as BGGGameDetails, "owned", selectedCategory)
+      }
+
+      const handleCreateMiniatureArmy = async () => {
+        const miniature = selectedGame as MiniatureSearchResult | null
+        if (!miniature?.factionId || !armyName.trim()) return
+        setArmyLoading(true)
+        try {
+          const result = await createMiniatureArmy(armyName, miniature.factionId)
+          if (!result.success || !result.data) throw new Error(result.error)
+          setSelectedArmy(result.data)
+          setArmyMode("idle")
+          setArmyName("")
+          toast({ title: t("common.success"), description: `Army "${result.data.name}" selected.` })
+        } catch (error) {
+          toast({ title: t("common.error"), description: error instanceof Error ? error.message : "Unable to create Army.", variant: "destructive" })
+        } finally {
+          setArmyLoading(false)
+        }
       }
 
       if (result.error) {
@@ -682,13 +734,40 @@ export default function AddGamePage() {
                           </div>
                         </div>
                       )}
+                      {selectedCategory === "miniature" && armyMode !== "idle" && (
+                        <div className="mt-4 rounded border border-accent-gold/20 p-3 space-y-2">
+                          {armyMode === "select" ? (
+                            <>
+                              <Label className="text-accent-gold font-cinzel text-sm">Army context</Label>
+                              <select
+                                value={selectedArmy?.id ?? ""}
+                                onChange={(event) => setSelectedArmy(miniatureArmies.find((army) => army.id === event.target.value) ?? null)}
+                                className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+                              >
+                                <option value="">Select an Army</option>
+                                {miniatureArmies.map((army) => <option key={army.id} value={army.id}>{army.name}</option>)}
+                              </select>
+                            </>
+                          ) : (
+                            <>
+                              <Label className="text-accent-gold font-cinzel text-sm">Create Army context</Label>
+                              <div className="flex gap-2">
+                                <Input value={armyName} onChange={(event) => setArmyName(event.target.value)} placeholder="Army name" />
+                                <ArchiveButton type="button" onClick={handleCreateMiniatureArmy} disabled={armyLoading || !armyName.trim()}>
+                                  {armyLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create"}
+                                </ArchiveButton>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      )}
                       <div className={`flex justify-end gap-3 mt-4 ${selectedCategory !== "trading_card" && selectedCategory !== "miniature" ? "pt-4 border-t border-accent-gold/20" : ""}`}>
                         <ArchiveButton onClick={() => setSelectedGame(null)}>
                           {t("common.cancel")}
                         </ArchiveButton>
                         <ArchiveButton
                           onClick={handleAddGame}
-                          disabled={addingGameId === getSearchResultId(selectedGame)}
+                          disabled={addingGameId === getSearchResultId(selectedGame) || (selectedCategory === "miniature" && armyMode !== "idle" && !selectedArmy)}
                           icon={
                             addingGameId === getSearchResultId(selectedGame) ? (
                               <Loader2 className="h-4 w-4 animate-spin" />

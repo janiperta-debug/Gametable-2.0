@@ -17,7 +17,8 @@ import { Search, ExternalLink, Heart, Plus, Loader2, Star, Users, Clock, Dices, 
 import { useTranslations } from "@/lib/i18n"
 import { addGameToCollection, type GameCategory } from "@/app/actions/games"
 import { addCardToCollection } from "@/app/actions/tcg"
-import { addMiniatureToCollection, type PaintStatus } from "@/app/actions/miniatures"
+import { addMiniatureToCollection, createMiniatureArmy, getUserMiniatureArmies, type MiniatureArmyContext, type PaintStatus } from "@/app/actions/miniatures"
+import { resolveMiniatureArmy } from "@/lib/miniatures/army-resolver"
 import { useToast } from "@/hooks/use-toast"
 import type { BGGSearchResult, BGGGameDetails } from "@/lib/types/database"
 import type { TCGSearchResult } from "@/app/api/tcg/search/route"
@@ -140,6 +141,11 @@ export function DiscoverGames() {
   const [tcgGame, setTcgGame] = useState<"magic" | "pokemon" | "yugioh" | "lorcana" | "flesh-and-blood" | "one-piece">("magic")
   const [miniQuantity, setMiniQuantity] = useState(1)
   const [miniPaintStatus, setMiniPaintStatus] = useState<PaintStatus>("unpainted")
+  const [miniatureArmies, setMiniatureArmies] = useState<MiniatureArmyContext[]>([])
+  const [selectedArmy, setSelectedArmy] = useState<MiniatureArmyContext | null>(null)
+  const [armyMode, setArmyMode] = useState<"idle" | "select" | "create">("idle")
+  const [armyName, setArmyName] = useState("")
+  const [armyLoading, setArmyLoading] = useState(false)
 
   const categoryConfig = categories.find(c => c.id === selectedCategory)!
 
@@ -204,6 +210,9 @@ export function DiscoverGames() {
     setTcgQuantity(1)
     setMiniQuantity(1)
     setMiniPaintStatus("unpainted")
+    setMiniatureArmies([])
+    setSelectedArmy(null)
+    setArmyMode("idle")
     
     try {
       // For TCG and miniatures, use the search result directly (already has all data)
@@ -255,13 +264,62 @@ export function DiscoverGames() {
         result = tcgResult.success ? {} : { error: tcgResult.error }
       } else if (selectedCategory === "miniature") {
         console.log("[v0] Adding miniature:", selectedGame)
-        const miniResult = await addMiniatureToCollection(selectedGame as MiniatureSearchResult, miniQuantity, miniPaintStatus, status)
-        console.log("[v0] Miniature result:", miniResult)
-        result = miniResult.success ? {} : { error: miniResult.error }
+        if (status === "wishlist") {
+          result = { error: "Miniature Wishlist is not supported." }
+        } else {
+          const miniature = selectedGame as MiniatureSearchResult
+          if (!selectedArmy) {
+            setArmyLoading(true)
+            const armiesResult = await getUserMiniatureArmies()
+            if (!armiesResult.success) throw new Error(armiesResult.error)
+            const resolution = resolveMiniatureArmy(miniature.factionId, armiesResult.data)
+            setMiniatureArmies(resolution.candidates)
+            if (resolution.kind === "create") {
+              setArmyMode("create")
+              setArmyLoading(false)
+              result = { error: "Create an Army context before adding this Miniature." }
+              return
+            }
+            if (resolution.kind === "select") {
+              setArmyMode("select")
+              setArmyLoading(false)
+              result = { error: "Select an Army context before adding this Miniature." }
+              return
+            }
+            setSelectedArmy(resolution.army)
+            setArmyMode("idle")
+            setArmyLoading(false)
+            const miniResult = await addMiniatureToCollection(miniature, miniQuantity, miniPaintStatus, "owned", false, resolution.army)
+            console.log("[v0] Miniature result:", miniResult)
+            result = miniResult.success ? {} : { error: miniResult.error }
+          } else {
+            const miniResult = await addMiniatureToCollection(miniature, miniQuantity, miniPaintStatus, "owned", false, selectedArmy)
+            console.log("[v0] Miniature result:", miniResult)
+            result = miniResult.success ? {} : { error: miniResult.error }
+          }
+        }
       } else {
         console.log("[v0] Adding board game/RPG:", selectedGame)
         result = await addGameToCollection(selectedGame as BGGGameDetails, status, selectedCategory)
         console.log("[v0] Board game/RPG result:", result)
+      }
+
+      const handleCreateMiniatureArmy = async () => {
+        const miniature = selectedGame as MiniatureSearchResult | null
+        if (!miniature?.factionId || !armyName.trim()) return
+        setArmyLoading(true)
+        try {
+          const result = await createMiniatureArmy(armyName, miniature.factionId)
+          if (!result.success || !result.data) throw new Error(result.error)
+          setSelectedArmy(result.data)
+          setArmyMode("idle")
+          setArmyName("")
+          toast({ title: t("common.success"), description: `Army "${result.data.name}" selected.` })
+        } catch (error) {
+          toast({ title: t("common.error"), description: error instanceof Error ? error.message : "Unable to create Army.", variant: "destructive" })
+        } finally {
+          setArmyLoading(false)
+        }
       }
 
       if (result.error) {
@@ -497,22 +555,51 @@ export function DiscoverGames() {
                 </div>
               </div>
             )}
+            {selectedCategory === "miniature" && armyMode !== "idle" && (
+              <div className="mt-4 rounded border border-accent-gold/20 p-3 space-y-2">
+                {armyMode === "select" ? (
+                  <>
+                    <span className="text-accent-gold font-cinzel text-sm">Army context</span>
+                    <select
+                      value={selectedArmy?.id ?? ""}
+                      onChange={(event) => setSelectedArmy(miniatureArmies.find((army) => army.id === event.target.value) ?? null)}
+                      className={cn("h-9 w-full rounded-md px-2 text-sm", archiveField)}
+                    >
+                      <option value="">Select an Army</option>
+                      {miniatureArmies.map((army) => <option key={army.id} value={army.id}>{army.name}</option>)}
+                    </select>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-accent-gold font-cinzel text-sm">Create Army context</span>
+                    <div className="flex gap-2">
+                      <Input value={armyName} onChange={(event) => setArmyName(event.target.value)} placeholder="Army name" className={archiveField} />
+                      <ArchiveCardButton type="button" onClick={handleCreateMiniatureArmy} disabled={armyLoading || !armyName.trim()}>
+                        {armyLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create"}
+                      </ArchiveCardButton>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
             
             <div className={`flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 mt-4 ${selectedCategory !== "trading_card" && selectedCategory !== "miniature" ? "pt-4 border-t border-accent-gold/20" : ""}`}>
               <ArchiveCardButton onClick={() => setSelectedGame(null)} className="w-full sm:w-auto">
                 {t("common.cancel")}
               </ArchiveCardButton>
-              <ArchiveCardButton
-                onClick={() => handleAddGame('wishlist')}
-                disabled={addingGame !== null}
-                className="w-full sm:w-auto"
-                icon={addingGame?.type === 'wishlist' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Heart className="h-4 w-4" />}
-              >
-                {t("collection.addToWishlist")}
-              </ArchiveCardButton>
+              {selectedCategory !== "miniature" && (
+                <ArchiveCardButton
+                  onClick={() => handleAddGame('wishlist')}
+                  disabled={addingGame !== null}
+                  className="w-full sm:w-auto"
+                  icon={addingGame?.type === 'wishlist' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Heart className="h-4 w-4" />}
+                >
+                  {t("collection.addToWishlist")}
+                </ArchiveCardButton>
+              )}
               <ArchiveCardButton
                 onClick={() => handleAddGame('owned')}
-                disabled={addingGame !== null}
+                disabled={addingGame !== null || (selectedCategory === "miniature" && armyMode !== "idle" && !selectedArmy)}
                 active
                 className="w-full sm:w-auto"
                 icon={addingGame?.type === 'collection' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
