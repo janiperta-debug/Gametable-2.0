@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
+import { buildBoardRPGCardsFromEntries } from './card'
 import { getCollectionEntries } from './orchestrator'
 
 test('empty collection returns an empty array', () => {
@@ -250,6 +251,90 @@ test('duplicate rows do not produce duplicate CollectionEntry records', () => {
 
   assert.equal(entries.length, 1)
   assert.equal(entries[0].ownershipId, 'ownership-dup')
+})
+
+test('Board/RPG collection entries can be converted to UI card data without including TCG or miniatures', () => {
+  const entries = getCollectionEntries({
+    userGames: [
+      {
+        id: 'ownership-game-1',
+        game_id: 'catalog-game-1',
+        status: 'owned',
+        game: {
+          id: 'catalog-game-1',
+          name: 'Root',
+          category: 'board_game',
+          image_url: 'https://example.com/root.jpg',
+          thumbnail_url: 'https://example.com/root-thumb.jpg',
+          min_players: 2,
+          max_players: 4,
+          min_playtime: 45,
+          max_playtime: 90,
+          bgg_rating: 8.2,
+          year: 2018,
+        },
+      },
+    ],
+    tcgCollection: [
+      {
+        id: 'ownership-tcg-1',
+        card_id: 'catalog-tcg-1',
+        status: 'owned',
+        quantity: 1,
+        card: { id: 'catalog-tcg-1', name: 'Forest', tcg_system: 'magic' },
+      },
+    ],
+    miniatureCollection: [
+      {
+        id: 'ownership-mini-1',
+        unit_id: 'catalog-mini-1',
+        status: 'owned',
+        quantity: 1,
+        unit: { id: 'catalog-mini-1', name: 'Intercessor', type: 'unit' },
+      },
+    ],
+  })
+
+  const cards = buildBoardRPGCardsFromEntries(entries, [
+    {
+      id: 'ownership-game-1',
+      user_id: 'user-1',
+      game_id: 'catalog-game-1',
+      status: 'owned',
+      personal_rating: 8.5,
+      play_count: 1,
+      notes: null,
+      added_at: '2026-01-02T00:00:00Z',
+      game: {
+        id: 'catalog-game-1',
+        name: 'Root',
+        category: 'board_game',
+        image_url: 'https://example.com/root.jpg',
+        thumbnail_url: 'https://example.com/root-thumb.jpg',
+        min_players: 2,
+        max_players: 4,
+        min_playtime: 45,
+        max_playtime: 90,
+        bgg_rating: 8.2,
+        year: 2018,
+        created_at: null,
+        bgg_id: null,
+        name: 'Root',
+        description: null,
+      },
+      expansions: [
+        { id: 'exp-1', name: 'Root: Expansion', year: 2019, image_url: 'https://example.com/root-exp.jpg', owned: true },
+      ],
+      ownedExpansionCount: 1,
+      totalExpansionCount: 1,
+    },
+  ] as any)
+
+  assert.equal(cards.length, 1)
+  assert.equal(cards[0].entry.domain, 'board_game')
+  assert.equal(cards[0].entry.catalogId, 'catalog-game-1')
+  assert.equal(cards[0].card.ownedExpansionCount, 1)
+  assert.equal(cards[0].card.expansions?.[0]?.name, 'Root: Expansion')
 })
 
 test('current useCollection-style board-game query data maps through the orchestrator without UI changes', () => {
