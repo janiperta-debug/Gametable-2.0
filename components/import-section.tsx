@@ -12,6 +12,7 @@ import { addMiniatureToCollection } from "@/app/actions/miniatures"
 import { addGameToCollection } from "@/app/actions/games"
 import type { TCGSearchResult } from "@/app/api/tcg/search/route"
 import type { MiniatureSearchResult } from "@/app/api/miniatures/search/route"
+import { isAmbiguousMiniatureMatch } from "@/lib/search-result-id"
 import type { BGGCollectionItem } from "@/app/api/bgg/collection/route"
 import { useToast } from "@/hooks/use-toast"
 import { useUser } from "@/hooks/useUser"
@@ -215,9 +216,7 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
             if (result.success) successCount++
             else errorCount++
           } else {
-            if (data.results?.length > 1) {
-              console.warn(`Ambiguous miniature catalog match for "${item.name}"`)
-            }
+            isAmbiguousMiniatureMatch(data.results || [], item.name)
             errorCount++
           }
 
