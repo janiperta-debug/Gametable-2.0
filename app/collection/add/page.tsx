@@ -32,6 +32,10 @@ type GameCategory = "board_game" | "rpg" | "trading_card" | "miniature"
 type SearchResult = BGGSearchResult | TCGSearchResult | MiniatureSearchResult
 type GameDetails = BGGGameDetails | TCGSearchResult | MiniatureSearchResult
 
+function getSearchResultId(result: SearchResult | GameDetails): string | number {
+  return "catalogId" in result ? result.catalogId : result.id
+}
+
 interface CategoryConfig {
   id: GameCategory
   icon: React.ElementType
@@ -183,7 +187,7 @@ export default function AddGamePage() {
       // For TCG, also pass game type
       // For TCG and miniatures, use the search result directly (already has all data)
       if (selectedCategory === "trading_card" || selectedCategory === "miniature") {
-        const searchResult = searchResults.find(r => r.id === gameId)
+        const searchResult = searchResults.find(r => getSearchResultId(r) === gameId)
         if (searchResult) {
           // Ensure the game field is set for TCG cards
           if (selectedCategory === "trading_card") {
@@ -217,7 +221,7 @@ export default function AddGamePage() {
   const handleAddGame = async () => {
     if (!selectedGame) return
     
-    setAddingGameId(selectedGame.id)
+    setAddingGameId(getSearchResultId(selectedGame))
 
     try {
       let result: AddGameResult
@@ -385,7 +389,7 @@ export default function AddGamePage() {
           const response = await fetch(`/api/miniatures/search?query=${encodeURIComponent(item.name)}`)
           const data = await response.json()
           
-          if (data.results && data.results.length > 0) {
+          if (data.results?.length === 1 && data.results[0].catalogId) {
             const mini = data.results[0] as MiniatureSearchResult
             const result = await addMiniatureToCollection(mini, item.quantity, "unpainted", "owned")
             if (result.success) successCount++
@@ -583,9 +587,9 @@ export default function AddGamePage() {
                               </Badge>
                             )}
                             {/* Miniature specific badges */}
-                            {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).faction && (
+                            {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).factionName && (
                               <Badge variant="outline" className="text-xs border-accent-gold/30">
-                                {(selectedGame as MiniatureSearchResult).faction}
+                                {(selectedGame as MiniatureSearchResult).factionName}
                               </Badge>
                             )}
                             {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).systemName && (
@@ -593,14 +597,14 @@ export default function AddGamePage() {
                                 {(selectedGame as MiniatureSearchResult).systemName}
                               </Badge>
                             )}
-                            {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).points && (
+                            {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).basePoints && (
                               <Badge variant="outline" className="text-xs border-accent-gold/30">
-                                {(selectedGame as MiniatureSearchResult).points} pts
+                                {(selectedGame as MiniatureSearchResult).basePoints} pts
                               </Badge>
                             )}
-                            {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).models && (
+                            {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).modelCountMin && (
                               <Badge variant="outline" className="text-xs border-accent-gold/30">
-                                {(selectedGame as MiniatureSearchResult).models} models
+                                {(selectedGame as MiniatureSearchResult).modelCountMin} models
                               </Badge>
                             )}
                           </div>
@@ -687,9 +691,9 @@ export default function AddGamePage() {
                         </ArchiveButton>
                         <ArchiveButton
                           onClick={handleAddGame}
-                          disabled={addingGameId === selectedGame.id}
+                          disabled={addingGameId === getSearchResultId(selectedGame)}
                           icon={
-                            addingGameId === selectedGame.id ? (
+                            addingGameId === getSearchResultId(selectedGame) ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
                               <Plus className="h-4 w-4" />
@@ -814,10 +818,12 @@ export default function AddGamePage() {
                         </div>
                       ) : (
                         <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                          {searchResults.map((game) => (
+                          {searchResults.map((game) => {
+                            const resultId = getSearchResultId(game)
+                            return (
                             <button
-                              key={game.id}
-                              onClick={() => handleSelectGame(game.id)}
+                              key={resultId}
+                              onClick={() => handleSelectGame(resultId)}
                               className="w-full flex items-center justify-between p-4 rounded-lg border border-accent-gold/20 hover:bg-accent-gold/10 hover:border-accent-gold/40 transition-colors text-left"
                             >
                               <div className="flex-1 min-w-0">
@@ -830,7 +836,8 @@ export default function AddGamePage() {
                               </div>
                               <Plus className="h-5 w-5 text-accent-gold ml-4 flex-shrink-0" />
                             </button>
-                          ))}
+                            )
+                          })}
                         </div>
                       )}
                     </div>

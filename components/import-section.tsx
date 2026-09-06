@@ -209,7 +209,7 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
           const response = await fetch(`/api/miniatures/search?query=${encodeURIComponent(item.name)}`)
           const data = await response.json()
           
-          if (data.results && data.results.length > 0) {
+          if (data.results?.length === 1 && data.results[0].catalogId) {
             const mini = data.results[0] as MiniatureSearchResult
             const result = await addMiniatureToCollection(mini, item.quantity, "unpainted", "owned", true)
             if (result.success) successCount++
