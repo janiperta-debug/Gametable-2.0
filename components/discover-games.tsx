@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast"
 import type { BGGSearchResult, BGGGameDetails } from "@/lib/types/database"
 import type { TCGSearchResult } from "@/app/api/tcg/search/route"
 import type { MiniatureSearchResult } from "@/app/api/miniatures/search/route"
+import { getSearchResultId } from "@/lib/search-result-id"
 
 type SearchResult = BGGSearchResult | TCGSearchResult | MiniatureSearchResult
 type GameDetails = BGGGameDetails | TCGSearchResult | MiniatureSearchResult
@@ -207,7 +208,7 @@ export function DiscoverGames() {
     try {
       // For TCG and miniatures, use the search result directly (already has all data)
       if (selectedCategory === "trading_card" || selectedCategory === "miniature") {
-        const searchResult = searchResults.find(r => r.id === gameId)
+        const searchResult = searchResults.find(r => getSearchResultId(r) === gameId)
         if (searchResult) {
           // Ensure the game field is set for TCG cards
           if (selectedCategory === "trading_card") {
@@ -242,7 +243,7 @@ export function DiscoverGames() {
     if (!selectedGame) return
     
     console.log("[v0] handleAddGame called with:", { selectedGame, status, selectedCategory })
-    setAddingGame({ id: selectedGame.id, type: status === 'owned' ? 'collection' : 'wishlist' })
+    setAddingGame({ id: getSearchResultId(selectedGame), type: status === 'owned' ? 'collection' : 'wishlist' })
 
     try {
       let result: { error?: string }
@@ -437,9 +438,9 @@ export function DiscoverGames() {
                     </Badge>
                   )}
                   {/* Miniature badges */}
-                  {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).faction && (
+                  {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).factionName && (
                     <Badge variant="outline" className="text-xs border-accent-gold/30">
-                      {(selectedGame as MiniatureSearchResult).faction}
+                      {(selectedGame as MiniatureSearchResult).factionName}
                     </Badge>
                   )}
                   {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).systemName && (
@@ -447,9 +448,9 @@ export function DiscoverGames() {
                       {(selectedGame as MiniatureSearchResult).systemName}
                     </Badge>
                   )}
-                  {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).points && (
+                  {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).basePoints && (
                     <Badge variant="outline" className="text-xs border-accent-gold/30">
-                      {(selectedGame as MiniatureSearchResult).points} pts
+                      {(selectedGame as MiniatureSearchResult).basePoints} pts
                     </Badge>
                   )}
                 </div>
@@ -617,7 +618,7 @@ export function DiscoverGames() {
     {searchResults.map((game) => (
       selectedCategory === "trading_card" ? (
         // TCG Card display with image
-        <ArchiveCard key={game.id} scrim={false} corners={false} centerOrnaments={false} className="overflow-hidden cursor-pointer group" onClick={() => handleSelectGame(game.id)}>
+        <ArchiveCard key={getSearchResultId(game)} scrim={false} corners={false} centerOrnaments={false} className="overflow-hidden cursor-pointer group" onClick={() => handleSelectGame(getSearchResultId(game))}>
           <div className="relative aspect-[2.5/3.5] bg-surface/50">
             {(game as TCGSearchResult).imageUrl ? (
               <img 
@@ -659,12 +660,12 @@ export function DiscoverGames() {
         </ArchiveCard>
       ) : (
         // Board game, RPG, Miniature display - with thumbnail or placeholder icon
-        <ArchiveCard key={game.id} scrim={false} corners={false} centerOrnaments={false} className="overflow-hidden cursor-pointer group" onClick={() => handleSelectGame(game.id)}>
+        <ArchiveCard key={getSearchResultId(game)} scrim={false} corners={false} centerOrnaments={false} className="overflow-hidden cursor-pointer group" onClick={() => handleSelectGame(getSearchResultId(game))}>
           <div className="p-0">
             <div className="flex">
               {/* Thumbnail or category icon placeholder */}
               <div className="w-24 h-24 flex-shrink-0 bg-surface/30 flex items-center justify-center border-r border-accent-gold/10 overflow-hidden">
-                {loadingDetails === game.id ? (
+                {loadingDetails === getSearchResultId(game) ? (
                   <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
                 ) : (game as BGGSearchResult).thumbnail ? (
                   <img 
@@ -690,9 +691,9 @@ export function DiscoverGames() {
                         {(game as BGGSearchResult).yearPublished}
                       </Badge>
                     )}
-                    {(game as MiniatureSearchResult).faction && (
+                    {(game as MiniatureSearchResult).factionName && (
                       <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
-                        {(game as MiniatureSearchResult).faction}
+                        {(game as MiniatureSearchResult).factionName}
                       </Badge>
                     )}
                   </div>

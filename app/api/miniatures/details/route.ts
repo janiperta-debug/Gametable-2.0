@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
-import type { MiniatureSearchResult, MiniatureSystem } from "../search/route"
+import { createClient } from "@/lib/supabase/server"
+import type { MiniatureSearchResult } from "../search/route"
 
 export interface MiniatureDetails extends MiniatureSearchResult {
   description?: string
@@ -16,87 +17,69 @@ export interface MiniatureDetails extends MiniatureSearchResult {
   }
 }
 
-// Extended unit data for details view
-const UNIT_DETAILS: Record<string, MiniatureDetails> = {
-  "40k-sm-intercessors": {
-    id: "40k-sm-intercessors",
-    name: "Intercessor Squad",
-    system: "wh40k",
-    systemName: "Warhammer 40,000",
-    faction: "Space Marines",
-    type: "unit",
-    points: 80,
-    models: 5,
-    description: "Intercessors are the most common type of Primaris Space Marine. They are versatile warriors armed with bolt rifles.",
-    keywords: ["Infantry", "Battleline", "Imperium", "Tacticus", "Intercessor Squad"],
-    abilities: ["Oath of Moment", "Combat Squads"],
-    wargear: ["Bolt rifle", "Bolt pistol", "Frag grenades", "Krak grenades"],
-    stats: { movement: "6\"", toughness: 4, save: "3+", wounds: 2, leadership: 6, objectiveControl: 2 },
-  },
-  "40k-sm-terminators": {
-    id: "40k-sm-terminators",
-    name: "Terminator Squad",
-    system: "wh40k",
-    systemName: "Warhammer 40,000",
-    faction: "Space Marines",
-    type: "unit",
-    points: 185,
-    models: 5,
-    description: "Terminators are elite warriors clad in ancient Tactical Dreadnought Armour.",
-    keywords: ["Infantry", "Imperium", "Terminator", "Terminator Squad"],
-    abilities: ["Oath of Moment", "Teleport Strike", "Fury of the First"],
-    wargear: ["Storm bolter", "Power fist"],
-    stats: { movement: "5\"", toughness: 5, save: "2+", wounds: 3, leadership: 6, objectiveControl: 1 },
-  },
-  "40k-necrons-warriors": {
-    id: "40k-necrons-warriors",
-    name: "Necron Warriors",
-    system: "wh40k",
-    systemName: "Warhammer 40,000",
-    faction: "Necrons",
-    type: "unit",
-    points: 100,
-    models: 10,
-    description: "Necron Warriors form the core of the Necron legions, relentless and undying.",
-    keywords: ["Infantry", "Battleline", "Necron Warriors"],
-    abilities: ["Reanimation Protocols", "Their Number is Legion"],
-    wargear: ["Gauss flayer", "Gauss reaper"],
-    stats: { movement: "5\"", toughness: 4, save: "4+", wounds: 1, leadership: 7, objectiveControl: 2 },
-  },
-}
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  const id = searchParams.get("id")
+  const catalogId = searchParams.get("catalogId") || searchParams.get("id")
 
-  if (!id) {
-    return NextResponse.json({ error: "Missing id parameter" }, { status: 400 })
+  if (!catalogId) {
+    return NextResponse.json({ error: "Missing catalogId parameter" }, { status: 400 })
   }
 
-  try {
-    // Check if we have detailed info
-    const details = UNIT_DETAILS[id]
-    
-    if (details) {
-      return NextResponse.json(details)
-    }
-
-    // Parse ID to create basic details
-    const [system, faction, ...nameParts] = id.split("-")
-    const name = nameParts.join(" ").replace(/\b\w/g, (c) => c.toUpperCase())
-    
-    const basicDetails: MiniatureDetails = {
+  const supabase = await createClient()
+  const { data: unit, error } = await supabase
+    .from("mini_units")
+    .select(`
       id,
       name,
-      system: system as MiniatureSystem,
-      systemName: system === "wh40k" ? "Warhammer 40,000" : "Age of Sigmar",
-      faction: faction.replace(/\b\w/g, (c) => c.toUpperCase()),
-      type: "unit",
-    }
+      unit_type,
+      base_points,
+      model_count_min,
+      model_count_max,
+      datasheet,
+      faction:mini_factions!inner (
+        id,
+        name,
+        system:mini_systems!inner (
+          id,
+          name,
+          code,
+          edition
+        )
+      )
+    `)
+    .eq("id", catalogId)
+    .maybeSingle()
 
-    return NextResponse.json(basicDetails)
-  } catch (error) {
-    console.error("Miniatures details error:", error)
-    return NextResponse.json({ error: "Failed to fetch details" }, { status: 500 })
+  if (error || !unit) {
+    return NextResponse.json({ error: "Miniature catalog detail not found" }, { status: 404 })
   }
+
+  const faction = Array.isArray(unit.faction) ? unit.faction[0] : unit.faction
+  const system = Array.isArray(faction?.system) ? faction.system[0] : faction?.system
+  if (!faction || !system?.id) {
+    return NextResponse.json({ error: "Miniature catalog detail not found" }, { status: 404 })
+  }
+  const datasheet = unit.datasheet && typeof unit.datasheet === "object" && !Array.isArray(unit.datasheet)
+    ? unit.datasheet as Record<string, unknown>
+    : {}
+  const sourceId = typeof datasheet.wahapedia_id === "string" ? datasheet.wahapedia_id : undefined
+
+  const details: MiniatureDetails = {
+    catalogId: unit.id,
+    name: unit.name,
+    source: sourceId ? "wahapedia" : undefined,
+    sourceId,
+    systemId: system.id,
+    systemCode: system.code || "unknown",
+    systemName: system.name,
+    edition: system.edition || undefined,
+    factionId: faction?.id,
+    factionName: faction?.name,
+    unitType: unit.unit_type || undefined,
+    basePoints: unit.base_points,
+    modelCountMin: unit.model_count_min,
+    modelCountMax: unit.model_count_max,
+  }
+
+  return NextResponse.json(details)
 }

@@ -12,6 +12,7 @@ import { addMiniatureToCollection } from "@/app/actions/miniatures"
 import { addGameToCollection } from "@/app/actions/games"
 import type { TCGSearchResult } from "@/app/api/tcg/search/route"
 import type { MiniatureSearchResult } from "@/app/api/miniatures/search/route"
+import { isAmbiguousMiniatureMatch } from "@/lib/search-result-id"
 import type { BGGCollectionItem } from "@/app/api/bgg/collection/route"
 import { useToast } from "@/hooks/use-toast"
 import { useUser } from "@/hooks/useUser"
@@ -209,12 +210,13 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
           const response = await fetch(`/api/miniatures/search?query=${encodeURIComponent(item.name)}`)
           const data = await response.json()
           
-          if (data.results && data.results.length > 0) {
+          if (data.results?.length === 1 && data.results[0].catalogId) {
             const mini = data.results[0] as MiniatureSearchResult
             const result = await addMiniatureToCollection(mini, item.quantity, "unpainted", "owned", true)
             if (result.success) successCount++
             else errorCount++
           } else {
+            isAmbiguousMiniatureMatch(data.results || [], item.name)
             errorCount++
           }
 

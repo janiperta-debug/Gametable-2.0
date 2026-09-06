@@ -1,7 +1,6 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
-import { awardXP } from "./xp"
 import type { MiniatureSearchResult, MiniatureSystem } from "@/app/api/miniatures/search/route"
 import type { MiniatureDetails } from "@/app/api/miniatures/details/route"
 
@@ -29,156 +28,20 @@ export async function addMiniatureToCollection(
   status: "owned" | "wishlist" = "owned",
   isImport: boolean = false
 ) {
-  const supabase = await createClient()
+  void quantity
+  void paintStatus
+  void status
+  void isImport
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    return { success: false, error: "Not authenticated" }
+  if (!unit.catalogId) {
+    return { success: false, error: "Miniature is not a canonical catalog result" }
   }
 
-  try {
-    // First, ensure the unit exists in mini_units table
-    const { data: existingUnit } = await supabase
-      .from("mini_units")
-      .select("id")
-      .eq("external_id", unit.id)
-      .single()
-
-    let unitDbId: string
-
-    if (existingUnit) {
-      unitDbId = existingUnit.id
-    } else {
-      // Get or create system
-      let systemId: string
-      const { data: existingSystem } = await supabase
-        .from("mini_systems")
-        .select("id")
-        .eq("code", unit.system)
-        .single()
-
-      if (existingSystem) {
-        systemId = existingSystem.id
-      } else {
-        const { data: newSystem, error: systemError } = await supabase
-          .from("mini_systems")
-          .insert({
-            code: unit.system,
-            name: unit.systemName,
-          })
-          .select("id")
-          .single()
-
-        if (systemError) {
-          console.error("Error creating system:", systemError)
-          return { success: false, error: systemError.message }
-        }
-        systemId = newSystem.id
-      }
-
-      // Get or create faction
-      let factionId: string | null = null
-      if (unit.faction) {
-        const { data: existingFaction } = await supabase
-          .from("mini_factions")
-          .select("id")
-          .eq("name", unit.faction)
-          .eq("system_id", systemId)
-          .single()
-
-        if (existingFaction) {
-          factionId = existingFaction.id
-        } else {
-          const { data: newFaction, error: factionError } = await supabase
-            .from("mini_factions")
-            .insert({
-              system_id: systemId,
-              name: unit.faction,
-            })
-            .select("id")
-            .single()
-
-          if (factionError) {
-            console.error("Error creating faction:", factionError)
-            // Continue without faction
-          } else {
-            factionId = newFaction.id
-          }
-        }
-      }
-
-      // Create the unit
-      const { data: newUnit, error: unitError } = await supabase
-        .from("mini_units")
-        .insert({
-          external_id: unit.id,
-          system_id: systemId,
-          faction_id: factionId,
-          name: unit.name,
-          type: unit.type || "unit",
-          points: unit.points,
-          model_count: unit.models || 1,
-        })
-        .select("id")
-        .single()
-
-      if (unitError) {
-        console.error("Error creating unit:", unitError)
-        return { success: false, error: unitError.message }
-      }
-      unitDbId = newUnit.id
-    }
-
-    // Check if user already has this unit
-    const { data: existingEntry } = await supabase
-      .from("mini_army_units")
-      .select("id, quantity")
-      .eq("user_id", user.id)
-      .eq("unit_id", unitDbId)
-      .eq("paint_status", paintStatus)
-      .single()
-
-    if (existingEntry) {
-      // Update quantity
-      const { error: updateError } = await supabase
-        .from("mini_army_units")
-        .update({ quantity: existingEntry.quantity + quantity })
-        .eq("id", existingEntry.id)
-
-      if (updateError) {
-        console.error("Error updating quantity:", updateError)
-        return { success: false, error: updateError.message }
-      }
-    } else {
-      // Insert new entry
-      const { data: insertedUnit, error: insertError } = await supabase.from("mini_army_units").insert({
-        user_id: user.id,
-        unit_id: unitDbId,
-        quantity,
-        paint_status: paintStatus,
-        status,
-      }).select("id").single()
-
-      if (insertError) {
-        console.error("Error adding miniature:", insertError)
-        return { success: false, error: insertError.message }
-      }
-
-      // Award XP for adding to collection
-      if (status === "owned" && !isImport) {
-        if (insertedUnit?.id) await awardXP(user.id, "miniature_added", 5, insertedUnit.id)
-      } else if (status === "owned" && isImport) {
-        const { awardCategoryImportXP } = await import("@/lib/xp-engine")
-        await awardCategoryImportXP(user.id, "miniatures")
-      }
-    }
-
-    return { success: true }
-  } catch (error) {
-    console.error("Add miniature error:", error)
-    return { success: false, error: "Failed to add miniature" }
+  // WP-004C establishes catalog identity only. Army selection and the
+  // production mini_army_units write belong to the later write-path work.
+  return {
+    success: false,
+    error: `Miniature catalog resolved (${unit.catalogId}); army context is required before adding it`,
   }
 }
 
