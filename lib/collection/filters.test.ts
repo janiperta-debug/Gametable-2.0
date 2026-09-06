@@ -210,33 +210,41 @@ test('domain filtering never includes TCG/miniatures in the current Board/RPG vi
   })
 })
 
-test('TCG entries produce visible cards and participate in Collection controls without rendering miniatures', () => {
+test('TCG and Miniature entries produce visible cards and participate in Collection controls', () => {
     const cards = buildCollectionCardsFromEntries([...BOARD_RPG_ENTRIES, TCG_ENTRY, MINIATURE_ENTRY])
     const tcgCard = cards.find((item) => item.entry.domain === 'tcg')
+    const miniatureCard = cards.find((item) => item.entry.domain === 'miniature')
 
-    assert.equal(cards.length, 3)
+    assert.equal(cards.length, 4)
     if (!tcgCard) assert.fail('Expected a TCG card')
     assert.equal(tcgCard.card.kind, 'tcg')
     if (tcgCard.card.kind === 'tcg') {
       assert.equal(tcgCard.card.title, 'Lightning Bolt')
       assert.equal(tcgCard.card.quantity, 1)
     }
-    assert.ok(cards.every((item) => item.entry.domain !== 'miniature'))
+    if (!miniatureCard) assert.fail('Expected a Miniature card')
+    assert.equal(miniatureCard.card.kind, 'miniature')
+    if (miniatureCard.card.kind === 'miniature') {
+      assert.equal(miniatureCard.card.title, 'Intercessor Squad')
+    }
     assert.deepEqual(getCategoryCounts(cards), {
-      all: 3,
+      all: 4,
       'board-games': 1,
       rpgs: 1,
-      miniatures: 0,
+      miniatures: 1,
       'trading-cards': 1,
     })
     assert.equal(hasVisibleCategory('trading-cards', 1), true)
     assert.equal(hasVisibleCategory('trading-cards', 0), false)
+    assert.equal(hasVisibleCategory('miniatures', 1), true)
+    assert.equal(hasVisibleCategory('miniatures', 0), false)
     assert.deepEqual(filterCardsByCategory(cards, 'trading-cards').map((item) => item.entry.displayName), ['Lightning Bolt'])
-    assert.deepEqual(filterCardsByCategory(cards, 'all').map((item) => item.entry.domain), ['board_game', 'rpg', 'tcg'])
+    assert.deepEqual(filterCardsByCategory(cards, 'miniatures').map((item) => item.entry.displayName), ['Intercessor Squad'])
+    assert.deepEqual(filterCardsByCategory(cards, 'all').map((item) => item.entry.domain), ['board_game', 'rpg', 'tcg', 'miniature'])
     assert.equal(searchCards(cards, 'lightning bolt')[0].entry.domain, 'tcg')
     assert.deepEqual(
       applyCollectionControls(cards, { sortBy: 'name-asc' }).map((item) => item.entry.displayName),
-      ['Lightning Bolt', 'Root', 'The Dying Earth'],
+      ['Intercessor Squad', 'Lightning Bolt', 'Root', 'The Dying Earth'],
     )
 })
 

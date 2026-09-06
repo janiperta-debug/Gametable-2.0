@@ -41,10 +41,26 @@ export interface TCGCollectionCardData {
   title: string
   image: string
   quantity: number
+  condition: string | null
+  foil: boolean
   tcgSystem: string | null
   setName: string | null
   setCode: string | null
   rarity: string | null
+}
+
+export interface MiniatureCollectionCardData {
+  kind: 'miniature'
+  id: string
+  title: string
+  image: string
+  modelCount: number | null
+  pointsTotal: number | null
+  paintStatus: string | null
+  unitType: string | null
+  faction: string | null
+  system: string | null
+  isWarlord: boolean
 }
 
 export interface BoardRPGCollectionCardItem {
@@ -57,7 +73,12 @@ export interface TCGCollectionCardItem {
   card: TCGCollectionCardData
 }
 
-export type CollectionCardItem = BoardRPGCollectionCardItem | TCGCollectionCardItem
+export interface MiniatureCollectionCardItem {
+  entry: CollectionEntry
+  card: MiniatureCollectionCardData
+}
+
+export type CollectionCardItem = BoardRPGCollectionCardItem | TCGCollectionCardItem | MiniatureCollectionCardItem
 
 export function assertUnreachableCollectionCard(value: never): never {
   throw new Error(`Unsupported Collection card kind: ${String(value)}`)

@@ -29,8 +29,9 @@ export interface CollectionQueryInputs {
   tcgCollection?: Array<{
     id: string
     card_id?: string | null
-    status?: string | null
     quantity?: number | null
+    condition?: string | null
+    foil?: boolean | null
     card?: {
       id?: string | null
       external_id?: string | null
@@ -50,23 +51,28 @@ export interface CollectionQueryInputs {
   miniatureCollection?: Array<{
     id: string
     unit_id?: string | null
-    status?: string | null
-    quantity?: number | null
+    owned?: boolean | null
+    model_count?: number | null
+    points_total?: number | null
     paint_status?: string | null
-    notes?: string | null
+    custom_name?: string | null
+    upgrades?: unknown
+    is_warlord?: boolean | null
     unit?: {
       id?: string | null
-      external_id?: string | null
       name?: string | null
-      type?: string | null
-      points?: number | null
-      model_count?: number | null
-      system?: {
-        code?: string | null
-        name?: string | null
-      } | null
+      unit_type?: string | null
+      base_points?: number | null
+      model_count_min?: number | null
+      model_count_max?: number | null
       faction?: {
+        id?: string | null
         name?: string | null
+        system?: {
+          id?: string | null
+          code?: string | null
+          name?: string | null
+        } | null
       } | null
     } | null
   }>
@@ -124,6 +130,12 @@ export function getCollectionEntries({
   }
 
   for (const row of miniatureCollection) {
+    // Skip (rather than throw for) rows that are not owned=true: a single
+    // unexpected row should not break the whole Collection batch, and
+    // owned=false still has no proven Collection semantics to map to.
+    if (row.owned !== true) {
+      continue
+    }
     pushIfUnique(mapMiniatureCollectionToCollectionEntry(row))
   }
 

@@ -122,7 +122,8 @@ export function useCollection() {
         .select(`
           id,
           quantity,
-          status,
+          condition,
+          foil,
           added_at,
           card:tcg_cards (
             id,
@@ -141,38 +142,40 @@ export function useCollection() {
           )
         `)
         .eq('user_id', user.id)
-        .eq('status', 'owned')
         .order('added_at', { ascending: false }),
       supabase
         .from('mini_army_units')
         .select(`
           id,
-          quantity,
+          model_count,
+          points_total,
           paint_status,
-          status,
-          notes,
-          created_at,
+          custom_name,
+          upgrades,
+          is_warlord,
+          owned,
           unit:mini_units (
             id,
-            external_id,
             name,
-            type,
-            points,
-            model_count,
+            unit_type,
+            base_points,
+            model_count_min,
+            model_count_max,
             faction:mini_factions (
               id,
-              name
-            ),
-            system:mini_systems (
-              id,
-              code,
-              name
+              name,
+              system:mini_systems (
+                id,
+                code,
+                name
+              )
             )
           )
         `)
         .eq('user_id', user.id)
-        .eq('status', 'owned')
-        .order('created_at', { ascending: false })
+        // mini_army_units has no created_at/added_at column in production,
+        // so there is no timestamp to order by here (unlike tcg_collection).
+        .eq('owned', true)
     ])
 
     setGames(mergedRows)

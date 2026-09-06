@@ -66,13 +66,43 @@ export async function addCardToCollection(
       cardId = newCard.id
     }
 
-    // Check if user already has this card in their collection
+    if (status === "wishlist") {
+      // tcg_wishlist is the canonical wishlist table and has no quantity
+      // concept — it only tracks that the user wants a card, plus an
+      // optional target price.
+      const { data: existingWishlistEntry } = await supabase
+        .from("tcg_wishlist")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("card_id", cardId)
+        .single()
+
+      if (existingWishlistEntry) {
+        return { success: true, cardId, isNew: false }
+      }
+
+      const { error: wishlistError } = await supabase
+        .from("tcg_wishlist")
+        .insert({
+          user_id: user.id,
+          card_id: cardId,
+        })
+
+      if (wishlistError) {
+        console.error("Error adding to wishlist:", wishlistError)
+        return { success: false, error: wishlistError.message }
+      }
+
+      return { success: true, cardId, isNew: true }
+    }
+
+    // status === "owned": tcg_collection has no `status` column — every row
+    // in this table represents an owned card.
     const { data: existingCollectionEntry } = await supabase
       .from("tcg_collection")
       .select("id, quantity")
       .eq("user_id", user.id)
       .eq("card_id", cardId)
-      .eq("status", status)
       .single()
 
     if (existingCollectionEntry) {
@@ -96,7 +126,6 @@ export async function addCardToCollection(
           user_id: user.id,
           card_id: cardId,
           quantity,
-          status,
         })
         .select("id")
         .single()
@@ -107,9 +136,9 @@ export async function addCardToCollection(
       }
 
       // Award XP for new addition
-      if (status === "owned" && !isImport) {
+      if (!isImport) {
         if (collectionEntry?.id) await awardXP(user.id, "tcg_card_added", 5, collectionEntry.id)
-      } else if (status === "owned" && isImport) {
+      } else {
         const { awardCategoryImportXP } = await import("@/lib/xp-engine")
         await awardCategoryImportXP(user.id, "tcg")
       }
@@ -177,12 +206,14 @@ export async function getUserTCGCollection(game?: TCGGame) {
     return { error: "Not authenticated", cards: [] }
   }
 
+  // tcg_collection has no `status` column — every row is an owned card.
   let query = supabase
     .from("tcg_collection")
     .select(`
       id,
       quantity,
-      status,
+      condition,
+      foil,
       added_at,
       card:tcg_cards (
         id,
@@ -201,7 +232,6 @@ export async function getUserTCGCollection(game?: TCGGame) {
       )
     `)
     .eq("user_id", user.id)
-    .eq("status", "owned")
 
   if (game) {
     query = query.eq("tcg_cards.tcg_system", game)
@@ -225,12 +255,13 @@ export async function getUserTCGWishlist(game?: TCGGame) {
     return { error: "Not authenticated", cards: [] }
   }
 
+  // tcg_wishlist is the canonical wishlist model — a separate table from
+  // tcg_collection, keyed by card_id with an optional target_price.
   let query = supabase
-    .from("tcg_collection")
+    .from("tcg_wishlist")
     .select(`
       id,
-      quantity,
-      status,
+      target_price,
       added_at,
       card:tcg_cards (
         id,
@@ -249,7 +280,6 @@ export async function getUserTCGWishlist(game?: TCGGame) {
       )
     `)
     .eq("user_id", user.id)
-    .eq("status", "wishlist")
 
   if (game) {
     query = query.eq("tcg_cards.tcg_system", game)

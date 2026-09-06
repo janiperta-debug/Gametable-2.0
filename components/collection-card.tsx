@@ -68,6 +68,38 @@ export function CollectionCard({
     )
   }
 
+  if (card.kind === 'miniature') {
+    return (
+      <ArchiveCard corners={false} centerOrnaments={false} className="group">
+        <div className="p-4">
+          <div className="relative mb-4">
+            <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-surface/50">
+              <Image src={card.image} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+            </div>
+          </div>
+          <div className="space-y-3">
+            <div>
+              <h3 className="font-heading font-semibold text-lg mb-1">{card.title}</h3>
+              <div className="flex flex-wrap gap-2">
+                {card.system && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">{card.system}</Badge>}
+                {card.faction && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">{card.faction}</Badge>}
+                {card.isWarlord && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">Warlord</Badge>}
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              {card.paintStatus && <span className="truncate">{card.paintStatus}</span>}
+              <span className="flex shrink-0 items-center gap-1">
+                {card.modelCount != null && <Layers className="h-4 w-4" />}
+                {card.modelCount != null && card.modelCount}
+                {card.pointsTotal != null && ` (${card.pointsTotal} pts)`}
+              </span>
+            </div>
+          </div>
+        </div>
+      </ArchiveCard>
+    )
+  }
+
   if (card.kind !== 'board-rpg') {
     return assertUnreachableCollectionCard(card)
   }
