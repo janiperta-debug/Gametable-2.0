@@ -3,8 +3,10 @@
 import { createClient } from "@/lib/supabase/server"
 import type { MiniatureSearchResult, MiniatureSystem } from "@/app/api/miniatures/search/route"
 import type { MiniatureDetails } from "@/app/api/miniatures/details/route"
+import type { MiniatureArmyContext } from "@/lib/miniatures/army-resolver"
 
 export type PaintStatus = "unpainted" | "primed" | "in_progress" | "painted" | "based"
+export type { MiniatureArmyContext } from "@/lib/miniatures/army-resolver"
 
 export interface MiniatureCollectionEntry {
   id: string
@@ -20,18 +22,103 @@ export interface MiniatureCollectionEntry {
   addedAt: string
 }
 
+function mapArmyContext(row: any): MiniatureArmyContext {
+  const faction = Array.isArray(row.faction) ? row.faction[0] : row.faction
+  const system = Array.isArray(faction?.system) ? faction.system[0] : faction?.system
+  return {
+    id: row.id,
+    name: row.name,
+    factionId: row.faction_id,
+    factionName: faction?.name ?? "",
+    systemId: system?.id ?? "",
+    systemName: system?.name ?? "",
+    edition: system?.edition ?? undefined,
+    pointLimit: row.point_limit ?? 2000,
+    isCrusade: row.is_crusade ?? false,
+  }
+}
+
+const armySelect = `
+  id,
+  name,
+  faction_id,
+  point_limit,
+  is_crusade,
+  faction:mini_factions (
+    id,
+    name,
+    system:mini_systems (
+      id,
+      name,
+      edition
+    )
+  )
+`
+
+export async function getUserMiniatureArmies() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: "Not authenticated", data: [] as MiniatureArmyContext[] }
+
+  const { data, error } = await supabase
+    .from("mini_armies")
+    .select(armySelect)
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: true })
+
+  if (error) {
+    console.error("Error fetching miniature armies:", error)
+    return { success: false, error: error.message, data: [] as MiniatureArmyContext[] }
+  }
+
+  return { success: true, data: (data ?? []).map(mapArmyContext) }
+}
+
+export async function createMiniatureArmy(name: string, factionId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: "Not authenticated" }
+
+  const trimmedName = name.trim()
+  if (!trimmedName) return { success: false, error: "Army name is required" }
+  if (!factionId) return { success: false, error: "Faction is required" }
+
+  const { data: faction, error: factionError } = await supabase
+    .from("mini_factions")
+    .select("id")
+    .eq("id", factionId)
+    .maybeSingle()
+  if (factionError) return { success: false, error: factionError.message }
+  if (!faction) return { success: false, error: "Faction not found" }
+
+  const { data, error } = await supabase
+    .from("mini_armies")
+    .insert({ user_id: user.id, name: trimmedName, faction_id: factionId })
+    .select(armySelect)
+    .single()
+
+  if (error) {
+    console.error("Error creating miniature army:", error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true, data: mapArmyContext(data) }
+}
+
 // Add a miniature unit to the collection
 export async function addMiniatureToCollection(
   unit: MiniatureSearchResult | MiniatureDetails,
   quantity: number = 1,
   paintStatus: PaintStatus = "unpainted",
   status: "owned" | "wishlist" = "owned",
-  isImport: boolean = false
+  isImport: boolean = false,
+  army?: MiniatureArmyContext,
 ) {
   void quantity
   void paintStatus
   void status
   void isImport
+  void army
 
   if (!unit.catalogId) {
     return { success: false, error: "Miniature is not a canonical catalog result" }
