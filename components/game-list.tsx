@@ -6,7 +6,7 @@ import { Star, Users, Clock, Heart, MoreVertical, Puzzle, ChevronDown } from "lu
 import Image from "next/image"
 import Link from "next/link"
 import type { Game } from "@/lib/mock-games"
-import type { CollectionCardItem } from "@/lib/types/collection"
+import { assertUnreachableCollectionCard, type CollectionCardItem } from "@/lib/types/collection"
 
 interface GameListProps {
   games?: Game[]
@@ -34,6 +34,7 @@ function legacyGameToCollectionCardItem(game: Game): CollectionCardItem {
   return {
     entry,
     card: {
+      kind: "board-rpg",
       id: game.id,
       title: game.title,
       image: game.image || "/placeholder.svg",
@@ -79,6 +80,33 @@ export function GameList({ games, cards }: GameListProps) {
 
 function GameListItem({ item }: { item: CollectionCardItem }) {
   const { card, entry } = item
+  if (card.kind === 'tcg') {
+    const set = [card.setName, card.setCode ? `(${card.setCode})` : null].filter(Boolean).join(' ')
+
+    return (
+      <ArchiveCard corners={false} centerOrnaments={false} className="group">
+        <div className="flex gap-4 p-4">
+          <div className="relative w-24 h-32 flex-shrink-0">
+            <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-surface/50 w-full h-full">
+              <Image src={card.image} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+            </div>
+          </div>
+          <div className="flex-1">
+            <h3 className="font-heading font-semibold text-xl mb-1">{card.title}</h3>
+            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              {card.tcgSystem && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold">{card.tcgSystem}</Badge>}
+              {card.rarity && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold">{card.rarity}</Badge>}
+              {set && <span>{set}</span>}
+              <span>Quantity: {card.quantity}</span>
+            </div>
+          </div>
+        </div>
+      </ArchiveCard>
+    )
+  }
+  if (card.kind !== 'board-rpg') {
+    return assertUnreachableCollectionCard(card)
+  }
   const expansions = card.expansions || []
   const ownedCount = card.ownedExpansionCount ?? expansions.filter((exp) => exp.owned).length
   const totalCount = card.totalExpansionCount ?? expansions.length
@@ -130,9 +158,9 @@ function GameListItem({ item }: { item: CollectionCardItem }) {
           </div>
 
           <div className="flex gap-2">
-            {card.owned || card.wishlist ? (
+            {entry.detailTarget && (card.owned || card.wishlist) ? (
               <ArchiveCardButton asChild fullWidth className="flex-1">
-                <Link href={entry.detailTarget || `/game/${entry.catalogId}`}>View details</Link>
+                <Link href={entry.detailTarget}>View details</Link>
               </ArchiveCardButton>
             ) : (
               <ArchiveCardButton active fullWidth className="flex-1">

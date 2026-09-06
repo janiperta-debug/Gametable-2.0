@@ -36,6 +36,21 @@ export interface CollectionStatusCounts {
   wishlist: number
 }
 
+function compareBoardSpecificCards(
+  left: CollectionCardItem['card'],
+  right: CollectionCardItem['card'],
+  field: 'rating' | 'yearPublished' | 'minPlayTime',
+  direction: 1 | -1,
+): number {
+  if (left.kind !== 'board-rpg') {
+    return right.kind === 'board-rpg' ? 1 : 0
+  }
+  if (right.kind !== 'board-rpg') {
+    return -1
+  }
+  return direction * (left[field] - right[field])
+}
+
 const CATEGORY_DOMAINS: Record<Exclude<CollectionCategoryFilter, 'all'>, readonly CollectionDomain[]> = {
   'board-games': ['board_game'],
   rpgs: ['rpg'],
@@ -109,20 +124,19 @@ export function sortCards(
   sorted.sort((left, right) => {
     const leftTitle = left.card.title || left.entry.displayName || ''
     const rightTitle = right.card.title || right.entry.displayName || ''
-
     switch (sortBy) {
       case 'name-asc':
         return leftTitle.localeCompare(rightTitle)
       case 'name-desc':
         return rightTitle.localeCompare(leftTitle)
       case 'rating-high':
-        return (right.card.rating || 0) - (left.card.rating || 0)
+        return compareBoardSpecificCards(left.card, right.card, 'rating', -1)
       case 'rating-low':
-        return (left.card.rating || 0) - (right.card.rating || 0)
+        return compareBoardSpecificCards(left.card, right.card, 'rating', 1)
       case 'year':
-        return (right.card.yearPublished || 0) - (left.card.yearPublished || 0)
+        return compareBoardSpecificCards(left.card, right.card, 'yearPublished', -1)
       case 'playtime':
-        return (left.card.minPlayTime || 0) - (right.card.minPlayTime || 0)
+        return compareBoardSpecificCards(left.card, right.card, 'minPlayTime', 1)
       default:
         return 0
     }
@@ -187,6 +201,10 @@ export function getCategoryCounts(cards: readonly CollectionCardItem[]): Collect
   }
 
   return counts
+}
+
+export function hasVisibleCategory(category: CollectionCategoryFilter, count: number): boolean {
+  return category === 'all' || count > 0
 }
 
 export interface MiniatureSystemOption {
