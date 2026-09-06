@@ -56,6 +56,9 @@ export async function GET(request: Request) {
 
   const faction = Array.isArray(unit.faction) ? unit.faction[0] : unit.faction
   const system = Array.isArray(faction?.system) ? faction.system[0] : faction?.system
+  if (!faction || !system?.id) {
+    return NextResponse.json({ error: "Miniature catalog detail not found" }, { status: 404 })
+  }
   const datasheet = unit.datasheet && typeof unit.datasheet === "object" && !Array.isArray(unit.datasheet)
     ? unit.datasheet as Record<string, unknown>
     : {}
