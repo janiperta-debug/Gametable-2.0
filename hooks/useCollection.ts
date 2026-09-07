@@ -147,6 +147,7 @@ export function useCollection() {
         .from('mini_army_units')
         .select(`
           id,
+          army_id,
           model_count,
           points_total,
           paint_status,
@@ -178,12 +179,32 @@ export function useCollection() {
         .eq('owned', true)
     ])
 
+    const miniatureRows = miniResult.data || []
+    const armyIds = [...new Set(miniatureRows.map((row) => row.army_id).filter(Boolean))]
+    const armiesById = new Map<string, string>()
+    if (armyIds.length > 0) {
+      const { data: armies } = await supabase
+        .from('mini_armies')
+        .select('id, name')
+        .eq('user_id', user.id)
+        .in('id', armyIds)
+
+      for (const army of armies || []) {
+        armiesById.set(army.id, army.name)
+      }
+    }
+
+    const miniatureCollection = miniatureRows.map((row) => ({
+      ...row,
+      army_name: row.army_id ? armiesById.get(row.army_id) ?? null : null,
+    }))
+
     setGames(mergedRows)
     setCollectionEntries(
       getCollectionEntries({
         userGames: mergedRows,
         tcgCollection: tcgResult.data || [],
-        miniatureCollection: miniResult.data || [],
+        miniatureCollection,
       })
     )
     setError(null)

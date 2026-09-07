@@ -253,6 +253,36 @@ test('a non-owned miniature row is skipped rather than breaking the whole Collec
   assert.equal(entries[0].ownershipId, 'ownership-mini-owned')
 })
 
+test('Miniature ownership rows remain separate when they share a catalogId or display name', () => {
+  const entries = getCollectionEntries({
+    miniatureCollection: [
+      {
+        id: 'ownership-mini-army-1',
+        army_id: 'army-1',
+        army_name: 'First Company',
+        unit_id: 'catalog-mini-1',
+        owned: true,
+        unit: { id: 'catalog-mini-1', name: 'Intercessor Squad' },
+      },
+      {
+        id: 'ownership-mini-army-2',
+        army_id: 'army-2',
+        army_name: 'Second Company',
+        unit_id: 'catalog-mini-1',
+        owned: true,
+        unit: { id: 'catalog-mini-1', name: 'Intercessor Squad' },
+      },
+    ],
+  })
+
+  assert.equal(entries.length, 2)
+  assert.deepEqual(entries.map((entry) => entry.catalogId), ['catalog-mini-1', 'catalog-mini-1'])
+  assert.deepEqual(entries.map((entry) => entry.ownershipId), ['ownership-mini-army-1', 'ownership-mini-army-2'])
+  assert.deepEqual(entries.map((entry) => entry.displayName), ['Intercessor Squad', 'Intercessor Squad'])
+  assert.equal(entries[0].metadata.army_name, 'First Company')
+  assert.equal(entries[1].metadata.army_name, 'Second Company')
+})
+
 test('duplicate rows do not produce duplicate CollectionEntry records', () => {
   const entries = getCollectionEntries({
     userGames: [

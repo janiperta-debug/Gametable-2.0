@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import type { MiniatureSearchResult, MiniatureSystem } from "@/app/api/miniatures/search/route"
 import type { MiniatureDetails } from "@/app/api/miniatures/details/route"
 import type { MiniatureArmyContext } from "@/lib/miniatures/army-resolver"
+import { buildMiniatureArmyUnitPayload } from "@/lib/miniatures/ownership"
 
 export type PaintStatus = "unpainted" | "primed" | "in_progress" | "painted" | "based"
 export type { MiniatureArmyContext } from "@/lib/miniatures/army-resolver"
@@ -114,22 +115,54 @@ export async function addMiniatureToCollection(
   isImport: boolean = false,
   army?: MiniatureArmyContext,
 ) {
-  void quantity
-  void paintStatus
-  void status
-  void isImport
-  void army
-
   if (!unit.catalogId) {
     return { success: false, error: "Miniature is not a canonical catalog result" }
   }
-
-  // WP-004C establishes catalog identity only. Army selection and the
-  // production mini_army_units write belong to the later write-path work.
-  return {
-    success: false,
-    error: `Miniature catalog resolved (${unit.catalogId}); army context is required before adding it`,
+  if (!army?.id) return { success: false, error: "Army context is required" }
+  if (status === "wishlist") return { success: false, error: "Miniature Wishlist is not supported" }
+  if (isImport) return { success: false, error: "Miniature import ownership is not supported" }
+  if (!Number.isInteger(quantity) || quantity < 1) {
+    return { success: false, error: "Miniature quantity must be a positive integer" }
   }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: "Not authenticated" }
+
+  const { data: canonicalUnit, error: canonicalUnitError } = await supabase
+    .from("mini_units")
+    .select("id, faction_id, base_points")
+    .eq("id", unit.catalogId)
+    .maybeSingle()
+  if (canonicalUnitError) return { success: false, error: canonicalUnitError.message }
+  if (!canonicalUnit) return { success: false, error: "Miniature catalog unit not found" }
+
+  const { data: validatedArmy, error: armyError } = await supabase
+    .from("mini_armies")
+    .select("id, faction_id")
+    .eq("id", army.id)
+    .eq("user_id", user.id)
+    .maybeSingle()
+  if (armyError) return { success: false, error: armyError.message }
+  if (!validatedArmy) return { success: false, error: "Army not found" }
+
+  const payload = buildMiniatureArmyUnitPayload({
+    catalogId: unit.catalogId,
+    army: { id: validatedArmy.id, factionId: validatedArmy.faction_id },
+    canonicalUnit,
+    userId: user.id,
+    modelCount: quantity,
+    paintStatus,
+  })
+  if (!payload.success) return payload
+
+  const { error } = await supabase.from("mini_army_units").insert(payload.data)
+  if (error) {
+    console.error("Error adding miniature to collection:", error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true }
 }
 
 // Parse BattleScribe .ros (roster) file
