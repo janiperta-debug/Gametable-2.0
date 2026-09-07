@@ -55,10 +55,16 @@ test("uses canonical data and the authenticated user for the ownership payload",
 test("maps every UI paint status to a production value", () => {
   assert.deepEqual(
     ["unpainted", "primed", "in_progress", "painted", "based"].map((status) =>
-      mapMiniaturePaintStatus(status as Parameters<typeof mapMiniaturePaintStatus>[0]),
+      mapMiniaturePaintStatus(status),
     ),
     ["unpainted", "primed", "wip", "battle_ready", "parade_ready"],
   )
+})
+
+test("rejects paint statuses unsupported by production", () => {
+  assert.deepEqual(buildMiniatureArmyUnitPayload({
+    catalogId: "unit-1", army, canonicalUnit, userId: "user-1", modelCount: 1, paintStatus: "display",
+  }), { success: false, error: "Invalid miniature paint status" })
 })
 
 test("permits duplicate catalog entries as separate payloads", () => {

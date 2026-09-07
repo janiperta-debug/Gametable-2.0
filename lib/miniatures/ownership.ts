@@ -11,8 +11,10 @@ const paintStatusMap: Record<MiniaturePaintStatus, ProductionPaintStatus> = {
   based: "parade_ready",
 }
 
-export function mapMiniaturePaintStatus(paintStatus: MiniaturePaintStatus): ProductionPaintStatus {
-  return paintStatusMap[paintStatus]
+export function mapMiniaturePaintStatus(paintStatus: string): ProductionPaintStatus | undefined {
+  return paintStatus in paintStatusMap
+    ? paintStatusMap[paintStatus as MiniaturePaintStatus]
+    : undefined
 }
 
 interface CanonicalMiniatureUnit {
@@ -27,7 +29,7 @@ interface BuildMiniatureArmyUnitPayloadOptions {
   canonicalUnit?: CanonicalMiniatureUnit
   userId: string
   modelCount: number
-  paintStatus: MiniaturePaintStatus
+  paintStatus: string
 }
 
 export function buildMiniatureArmyUnitPayload({
@@ -46,6 +48,8 @@ export function buildMiniatureArmyUnitPayload({
   if (canonicalUnit.faction_id !== army.factionId) {
     return { success: false, error: "Selected Army faction is incompatible with this Miniature" }
   }
+  const productionPaintStatus = mapMiniaturePaintStatus(paintStatus)
+  if (!productionPaintStatus) return { success: false, error: "Invalid miniature paint status" }
 
   return {
     success: true,
@@ -56,7 +60,7 @@ export function buildMiniatureArmyUnitPayload({
       model_count: modelCount,
       points_total: canonicalUnit.base_points,
       owned: true,
-      paint_status: mapMiniaturePaintStatus(paintStatus),
+      paint_status: productionPaintStatus,
       custom_name: null,
       upgrades: null,
       is_warlord: false,
