@@ -95,6 +95,8 @@ test('mapTCGCollectionToCollectionEntry maps TCG rows with null detailTarget and
 test('mapMiniatureCollectionToCollectionEntry maps mini_army_units rows using owned/model_count/points_total/paint_status', () => {
   const entry = mapMiniatureCollectionToCollectionEntry({
     id: 'ownership-mini-1',
+    army_id: 'army-1',
+    army_name: 'First Company',
     unit_id: 'catalog-mini-1',
     owned: true,
     model_count: 5,
@@ -133,6 +135,8 @@ test('mapMiniatureCollectionToCollectionEntry maps mini_army_units rows using ow
   assert.equal(entry.metadata.points_total, 200)
   assert.equal(entry.metadata.paint_status, 'painted')
   assert.equal(entry.metadata.unit_type, 'infantry')
+  assert.equal(entry.metadata.army_id, 'army-1')
+  assert.equal(entry.metadata.army_name, 'First Company')
 })
 
 test('mapMiniatureCollectionToCollectionEntry rejects owned=false rows rather than inventing wishlist semantics', () => {

@@ -50,6 +50,8 @@ export interface CollectionQueryInputs {
   }>
   miniatureCollection?: Array<{
     id: string
+    army_id?: string | null
+    army_name?: string | null
     unit_id?: string | null
     owned?: boolean | null
     model_count?: number | null

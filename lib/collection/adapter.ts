@@ -79,6 +79,8 @@ interface MiniatureUnitRowLike {
  */
 interface MiniatureCollectionRowLike {
   id: string
+  army_id?: string | null
+  army_name?: string | null
   unit_id?: string | null
   owned?: boolean | null
   model_count?: number | null
@@ -211,6 +213,8 @@ export function mapMiniatureCollectionToCollectionEntry(row: MiniatureCollection
   if (row.model_count != null) metadata.model_count = row.model_count
   if (row.points_total != null) metadata.points_total = row.points_total
   if (row.paint_status) metadata.paint_status = row.paint_status
+  if (row.army_id) metadata.army_id = row.army_id
+  if (row.army_name) metadata.army_name = row.army_name
   if (row.custom_name) metadata.custom_name = row.custom_name
   if (row.upgrades != null) metadata.upgrades = row.upgrades
   if (row.is_warlord != null) metadata.is_warlord = row.is_warlord
