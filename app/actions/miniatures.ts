@@ -1,6 +1,8 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { awardXP } from "./xp"
+import { awardCategoryImportXP } from "@/lib/xp-engine"
 import type { MiniatureSearchResult, MiniatureSystem } from "@/app/api/miniatures/search/route"
 import type { MiniatureDetails } from "@/app/api/miniatures/details/route"
 import type { MiniatureArmyContext } from "@/lib/miniatures/army-resolver"
@@ -156,10 +158,21 @@ export async function addMiniatureToCollection(
   })
   if (!payload.success) return payload
 
-  const { error } = await supabase.from("mini_army_units").insert(payload.data)
-  if (error) {
+  const { data: insertedUnit, error } = await supabase
+    .from("mini_army_units")
+    .insert(payload.data)
+    .select("id")
+    .single()
+  if (error || !insertedUnit) {
     console.error("Error adding miniature to collection:", error)
-    return { success: false, error: error.message }
+    return { success: false, error: error?.message || "Failed to add miniature to collection" }
+  }
+
+  // A single successful Collection ownership row earns +5 XP. The ownership
+  // row id is the stable event identity, so retries cannot mint XP twice.
+  const xpResult = await awardXP(user.id, "miniature_added", 5, insertedUnit.id)
+  if (!xpResult.success) {
+    console.error("Miniature ownership was created but XP award failed:", xpResult.error)
   }
 
   return { success: true }
@@ -244,13 +257,30 @@ export async function importMiniaturesToCollection(
     payloads.push(payload.data)
   }
 
-  const { error } = await supabase.from("mini_army_units").insert(payloads)
+  const { data: insertedUnits, error } = await supabase
+    .from("mini_army_units")
+    .insert(payloads)
+    .select("id")
   if (error) {
     console.error("Error importing miniatures to collection:", error)
     return { success: false, error: error.message }
   }
 
-  return { success: true, insertedCount: payloads.length }
+  if (!insertedUnits?.length) {
+    return { success: false, error: "No Miniatures were imported" }
+  }
+
+  // Bulk import is one category onboarding reward, never per-item XP.
+  // awardCategoryImportXP is itself idempotent on (user_id, category).
+  const xpResult = await awardCategoryImportXP(user.id, "miniatures")
+  if (!xpResult.applied) {
+    console.info("Miniatures category import XP was not applied", {
+      userId: user.id,
+      insertedCount: insertedUnits.length,
+    })
+  }
+
+  return { success: true, insertedCount: insertedUnits.length }
 }
 
 // Parse BattleScribe .ros (roster) file
@@ -260,8 +290,6 @@ export async function parseRosterFile(
   const parsed: Array<{ name: string; quantity: number; faction?: string; points?: number }> = []
 
   try {
-    // Simple XML parsing for BattleScribe roster format
-    // <selection ... name="Intercessor Squad" ... number="1" ...>
     const selectionRegex =
       /<selection[^>]*\sname="([^"]+)"[^>]*\snumber="(\d+)"[^>]*(?:\scosts="([^"]*)")?[^>]*>/gi
     let match
@@ -269,23 +297,16 @@ export async function parseRosterFile(
     while ((match = selectionRegex.exec(xmlContent)) !== null) {
       const name = match[1]
       const quantity = parseInt(match[2], 10) || 1
-
-      // Try to extract points from costs attribute
       let points: number | undefined
       if (match[3]) {
         const ptsMatch = match[3].match(/(\d+)\s*pts/i)
-        if (ptsMatch) {
-          points = parseInt(ptsMatch[1], 10)
-        }
+        if (ptsMatch) points = parseInt(ptsMatch[1], 10)
       }
-
-      // Skip non-unit entries (upgrades, wargear, etc.)
       if (!name.includes("Upgrade") && !name.includes("Wargear")) {
         parsed.push({ name, quantity, points })
       }
     }
 
-    // Also try to find force/faction
     const forceMatch = xmlContent.match(/<force[^>]*\scatalogueName="([^"]+)"[^>]*>/i)
     if (forceMatch) {
       const faction = forceMatch[1]
@@ -308,14 +329,9 @@ export async function parseArmyList(
   const parsed: Array<{ name: string; quantity: number; points?: number }> = []
 
   for (const line of lines) {
-    // Skip comments and section headers
     if (line.startsWith("//") || line.startsWith("#") || line.startsWith("++") || line.endsWith(":"))
       continue
 
-    // Match patterns like:
-    // "10x Intercessors"
-    // "10 Intercessors (200pts)"
-    // "Intercessors x10 [200]"
     const match = line.match(/^(\d+)x?\s+(.+?)(?:\s*[\(\[]?\s*(\d+)\s*(?:pts|points)?[\)\]]?)?$/i)
     const reverseMatch = line.match(/^(.+?)\s*x(\d+)(?:\s*[\(\[]?\s*(\d+)\s*(?:pts|points)?[\)\]]?)?$/i)
 
@@ -349,10 +365,6 @@ export async function getUserMiniatureCollection(system?: MiniatureSystem) {
   }
 
   try {
-    // mini_army_units has no `status`/`quantity`/`notes` columns in
-    // production. Ownership is represented by the `owned` boolean, and the
-    // faction/system relationship is reached through mini_units -> mini_factions
-    // -> mini_systems (mini_army_units has no direct system/faction column).
     const query = supabase
       .from("mini_army_units")
       .select(
@@ -385,8 +397,6 @@ export async function getUserMiniatureCollection(system?: MiniatureSystem) {
       `
       )
       .eq("user_id", user.id)
-      // mini_army_units has no created_at/added_at column in production, so
-      // there is no timestamp column to order by here.
       .eq("owned", true)
 
     const { data, error } = await query
@@ -396,7 +406,6 @@ export async function getUserMiniatureCollection(system?: MiniatureSystem) {
       return { success: false, error: error.message, data: [] }
     }
 
-    // Filter by system if specified
     let filtered = data || []
     if (system) {
       filtered = filtered.filter((entry: any) => entry.unit?.faction?.system?.code === system)
