@@ -199,8 +199,7 @@ export async function GET(request: NextRequest) {
     catalogResults = await searchCatalog(query)
 
     // Catalog-first means local Catalog data is preferred, not that BGG is skipped.
-    // Always query BGG as the complementary external source so broader results
-    // (including expansions) remain discoverable.
+    // BGG remains the complementary source so broader matches and expansions stay visible.
     const bggUrl = `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame`
     const searchResponse = await fetch(bggUrl, { headers, cache: 'no-store' })
 
@@ -216,8 +215,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ results: [] })
     }
 
-    // Enrich the merged result set with BGG metadata while preserving the
-    // Catalog result as the preferred value for duplicate BGG identities.
     const limited = merged.slice(0, 20)
     const meta = await fetchThingMeta(limited.map(r => r.id), headers)
 
