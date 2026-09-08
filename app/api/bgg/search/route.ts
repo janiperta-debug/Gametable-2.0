@@ -64,9 +64,6 @@ type ThingMeta = {
   baseGame: { bggId: number; name: string } | null
 }
 
-// Fetch thumbnail + item type + (for expansions) the inbound base game for
-// multiple IDs in a single API call. The `thing` response already contains the
-// <link> elements, so classifying + linking costs no extra requests.
 async function fetchThingMeta(
   ids: number[],
   headers: Record<string, string>
@@ -76,10 +73,8 @@ async function fetchThingMeta(
   if (ids.length === 0) return metaMap
 
   try {
-    // BGG API allows comma-separated IDs for batch requests
     const idsParam = ids.join(',')
     const detailsUrl = `https://boardgamegeek.com/xmlapi2/thing?id=${idsParam}`
-    
     const response = await fetch(detailsUrl, { headers, cache: 'no-store' })
     
     if (!response.ok) {
@@ -165,7 +160,10 @@ function mapCatalogResults(games: CatalogGame[]): SearchResult[] {
   }))
 }
 
-function mergeSearchResults(catalogResults: SearchResult[], bggResults: ReturnType<typeof parseXMLSearchResults>): SearchResult[] {
+function mergeSearchResults(
+  catalogResults: SearchResult[],
+  bggResults: SearchResult[],
+): SearchResult[] {
   const merged = new Map<number, SearchResult>()
 
   for (const result of catalogResults) {
@@ -178,7 +176,7 @@ function mergeSearchResults(catalogResults: SearchResult[], bggResults: ReturnTy
     }
   }
 
-  return Array.from(merged.values()).slice(0, 20)
+  return Array.from(merged.values())
 }
 
 export async function GET(request: NextRequest) {
@@ -204,8 +202,7 @@ export async function GET(request: NextRequest) {
     const searchResponse = await fetch(bggUrl, { headers, cache: 'no-store' })
 
     if (!searchResponse.ok) {
-      const mappedCatalog = mapCatalogResults(catalogResults)
-      return NextResponse.json({ results: mappedCatalog })
+      return NextResponse.json({ results: mapCatalogResults(catalogResults) })
     }
 
     const xmlText = await searchResponse.text()
@@ -216,10 +213,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ results: [] })
     }
 
-    const ids = merged.map(r => r.id)
+    const ids = merged.slice(0, 20).map(r => r.id)
     const meta = await fetchThingMeta(ids, headers)
 
-    const annotated = merged.map(r => {
+    const annotated = merged.slice(0, 20).map(r => {
       const m = meta.get(r.id)
       const isExpansion = m?.type === 'boardgameexpansion'
       return {
