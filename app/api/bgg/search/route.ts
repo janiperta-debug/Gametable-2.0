@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { XMLParser } from 'fast-xml-parser'
 import { createClient } from '@/lib/supabase/server'
-import type { BGGSearchResult } from '@/lib/types/database'
 
 const BGG_API_TOKEN = process.env.BGG_API_TOKEN
 
@@ -10,6 +9,13 @@ interface SearchResult {
   name: string
   yearPublished: number | null
   thumbnail?: string
+}
+
+interface CatalogGame {
+  bgg_id: number
+  name: string
+  year: number | null
+  thumbnail_url: string | null
 }
 
 function parseXMLSearchResults(xmlText: string): SearchResult[] {
@@ -101,7 +107,6 @@ async function fetchThingMeta(
       const thumbnail = (item.thumbnail as string | undefined) || null
       const type = String(item['@_type'] || 'boardgame')
 
-      // For expansions, find the inbound boardgameexpansion link → base game.
       let baseGame: { bggId: number; name: string } | null = null
       if (type === 'boardgameexpansion') {
         const links = Array.isArray(item.link) ? item.link : item.link ? [item.link] : []
@@ -126,51 +131,62 @@ async function fetchThingMeta(
   return metaMap
 }
 
-async function searchCatalog(query: string): Promise<BGGSearchResult[] | null> {
+async function searchCatalog(query: string): Promise<CatalogGame[]> {
   try {
     const supabase = await createClient()
+    const normalizedQuery = query.trim()
+
     const { data, error } = await supabase
       .from('games')
       .select('bgg_id, name, year, thumbnail_url')
       .eq('category', 'board_game')
       .not('bgg_id', 'is', null)
-      .ilike('name', `%${query}%`)
+      .ilike('name', `%${normalizedQuery}%`)
       .limit(20)
 
     if (error) {
-      console.error('Board Game Catalog search error:', error)
-      return null
+      console.error('Catalog board game search failed:', error)
+      return []
     }
 
-    return (data ?? []).flatMap((game) => {
-      if (game.bgg_id === null) return []
-
-      return [{
-        id: game.bgg_id,
-        name: game.name,
-        yearPublished: game.year,
-        thumbnail: game.thumbnail_url,
-        type: 'base' as const,
-        baseGame: null,
-      }]
-    })
+    return (data ?? []) as CatalogGame[]
   } catch (error) {
-    console.error('Board Game Catalog search failed:', error)
-    return null
+    console.error('Catalog board game search error:', error)
+    return []
   }
+}
+
+function mapCatalogResults(games: CatalogGame[]): SearchResult[] {
+  return games.map(game => ({
+    id: game.bgg_id,
+    name: game.name,
+    yearPublished: game.year,
+    thumbnail: game.thumbnail_url ?? undefined,
+  }))
+}
+
+function mergeSearchResults(catalogResults: SearchResult[], bggResults: ReturnType<typeof parseXMLSearchResults>): SearchResult[] {
+  const merged = new Map<number, SearchResult>()
+
+  for (const result of catalogResults) {
+    merged.set(result.id, result)
+  }
+
+  for (const result of bggResults) {
+    if (!merged.has(result.id)) {
+      merged.set(result.id, result)
+    }
+  }
+
+  return Array.from(merged.values()).slice(0, 20)
 }
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
-  const query = searchParams.get('query')?.trim()
+  const query = searchParams.get('query')
 
   if (!query) {
     return NextResponse.json({ error: 'Query parameter is required' }, { status: 400 })
-  }
-
-  const catalogResults = await searchCatalog(query)
-  if (catalogResults && catalogResults.length > 0) {
-    return NextResponse.json({ results: catalogResults })
   }
 
   const headers: Record<string, string> = {
@@ -182,34 +198,33 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Catalog miss: search BGG as the external fallback.
+    const catalogResults = await searchCatalog(query)
+
     const bggUrl = `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame`
     const searchResponse = await fetch(bggUrl, { headers, cache: 'no-store' })
 
     if (!searchResponse.ok) {
-      return NextResponse.json({ results: [], note: 'BGG API temporarily unavailable' })
+      const mappedCatalog = mapCatalogResults(catalogResults)
+      return NextResponse.json({ results: mappedCatalog })
     }
 
     const xmlText = await searchResponse.text()
-    const results = parseXMLSearchResults(xmlText)
+    const bggResults = parseXMLSearchResults(xmlText)
+    const merged = mergeSearchResults(mapCatalogResults(catalogResults), bggResults)
 
-    if (results.length === 0) {
+    if (merged.length === 0) {
       return NextResponse.json({ results: [] })
     }
 
-    // Step 2: Fetch thumbnail + type + base game for all results in one batch.
-    const ids = results.map(r => r.id)
+    const ids = merged.map(r => r.id)
     const meta = await fetchThingMeta(ids, headers)
 
-    // Step 3: Annotate each result with thumbnail, whether it's an expansion,
-    // and its base game. Expansions are KEPT so the client can nest them under
-    // their base game (never dropped).
-    const annotated = results.map(r => {
+    const annotated = merged.map(r => {
       const m = meta.get(r.id)
       const isExpansion = m?.type === 'boardgameexpansion'
       return {
         ...r,
-        thumbnail: m?.thumbnail || null,
+        thumbnail: m?.thumbnail || r.thumbnail || null,
         type: isExpansion ? ('expansion' as const) : ('base' as const),
         baseGame: m?.baseGame || null,
       }
@@ -219,7 +234,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('BGG search error:', error)
     return NextResponse.json({ 
-      results: [], 
+      results: mapCatalogResults(await searchCatalog(query)),
       error: 'BoardGameGeek search temporarily unavailable' 
     })
   }
