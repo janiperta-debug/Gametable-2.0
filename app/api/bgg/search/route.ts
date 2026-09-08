@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { XMLParser } from 'fast-xml-parser'
+import { createClient } from '@/lib/supabase/server'
+import type { BGGSearchResult } from '@/lib/types/database'
 
 const BGG_API_TOKEN = process.env.BGG_API_TOKEN
 
@@ -124,12 +126,51 @@ async function fetchThingMeta(
   return metaMap
 }
 
+async function searchCatalog(query: string): Promise<BGGSearchResult[] | null> {
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('games')
+      .select('bgg_id, name, year, thumbnail_url')
+      .eq('category', 'board_game')
+      .not('bgg_id', 'is', null)
+      .ilike('name', `%${query}%`)
+      .limit(20)
+
+    if (error) {
+      console.error('Board Game Catalog search error:', error)
+      return null
+    }
+
+    return (data ?? []).flatMap((game) => {
+      if (game.bgg_id === null) return []
+
+      return [{
+        id: game.bgg_id,
+        name: game.name,
+        yearPublished: game.year,
+        thumbnail: game.thumbnail_url,
+        type: 'base' as const,
+        baseGame: null,
+      }]
+    })
+  } catch (error) {
+    console.error('Board Game Catalog search failed:', error)
+    return null
+  }
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
-  const query = searchParams.get('query')
+  const query = searchParams.get('query')?.trim()
 
   if (!query) {
     return NextResponse.json({ error: 'Query parameter is required' }, { status: 400 })
+  }
+
+  const catalogResults = await searchCatalog(query)
+  if (catalogResults && catalogResults.length > 0) {
+    return NextResponse.json({ results: catalogResults })
   }
 
   const headers: Record<string, string> = {
@@ -141,7 +182,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Step 1: Search for board games
+    // Catalog miss: search BGG as the external fallback.
     const bggUrl = `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(query)}&type=boardgame`
     const searchResponse = await fetch(bggUrl, { headers, cache: 'no-store' })
 
