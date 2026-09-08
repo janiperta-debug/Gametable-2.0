@@ -8,11 +8,17 @@ import { Badge } from "@/components/ui/badge"
 import { Download, Loader2, Plus, FileText } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { addCardToCollection } from "@/app/actions/tcg"
-import { addMiniatureToCollection } from "@/app/actions/miniatures"
+import {
+  createMiniatureArmy,
+  getUserMiniatureArmies,
+  importMiniaturesToCollection,
+  type MiniatureArmyContext,
+} from "@/app/actions/miniatures"
 import { addGameToCollection } from "@/app/actions/games"
 import type { TCGSearchResult } from "@/app/api/tcg/search/route"
 import type { MiniatureSearchResult } from "@/app/api/miniatures/search/route"
-import { isAmbiguousMiniatureMatch } from "@/lib/search-result-id"
+import { resolveMiniatureArmy } from "@/lib/miniatures/army-resolver"
+import { validateMiniatureBulkImport, type ResolvedMiniatureImportRow } from "@/lib/miniatures/bulk-import"
 import type { BGGCollectionItem } from "@/app/api/bgg/collection/route"
 import { useToast } from "@/hooks/use-toast"
 import { useUser } from "@/hooks/useUser"
@@ -32,6 +38,16 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
   const [bulkText, setBulkText] = useState("")
   const [parsedItems, setParsedItems] = useState<Array<{ name: string; quantity: number; setCode?: string }>>([])
   const [importingBulk, setImportingBulk] = useState(false)
+
+  // Miniatures Bulk Import is a Collection mass-add (owned = true). Because
+  // mini_army_units.army_id is required, a validated import may still need
+  // Army context resolved/selected/created before the write happens.
+  const [bulkArmyMode, setBulkArmyMode] = useState<"idle" | "select" | "create">("idle")
+  const [bulkArmies, setBulkArmies] = useState<MiniatureArmyContext[]>([])
+  const [bulkSelectedArmyId, setBulkSelectedArmyId] = useState("")
+  const [bulkArmyName, setBulkArmyName] = useState("")
+  const [bulkArmyLoading, setBulkArmyLoading] = useState(false)
+  const [pendingImportRows, setPendingImportRows] = useState<ResolvedMiniatureImportRow[] | null>(null)
   
   const t = useTranslations()
   const { toast } = useToast()
@@ -185,41 +201,142 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
     }
   }
 
-  const handleBulkImport = async () => {
-    if (parsedItems.length === 0) return
-    
+  // Performs the actual Collection write once Army context is resolved. All
+  // rows use owned = true - this is a physical Collection mass-add, not a
+  // roster/army-planning import.
+  const runMiniatureImport = async (
+    rows: ResolvedMiniatureImportRow[],
+    army: Pick<MiniatureArmyContext, "id" | "factionId">,
+  ) => {
+    const result = await importMiniaturesToCollection(
+      rows.map((row) => ({ catalogId: row.catalogId, modelCount: row.modelCount })),
+      army,
+    )
+
+    setImportingBulk(false)
+    setBulkArmyMode("idle")
+    setBulkArmies([])
+    setBulkSelectedArmyId("")
+    setBulkArmyName("")
+    setPendingImportRows(null)
+
+    if (result.success) {
+      setBulkText("")
+      setParsedItems([])
+      toast({
+        title: t("common.success"),
+        description: `${t("collection.imported") || "Imported"} ${result.insertedCount ?? rows.length} ${t("collection.items") || "items"}`,
+      })
+      if (onImportComplete) onImportComplete()
+    } else {
+      toast({
+        title: t("common.error"),
+        description: result.error || (t("collection.importFailed") || "Import failed"),
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleBulkImportMiniatures = async () => {
+    setImportingBulk(true)
+    try {
+      // Resolve and validate the ENTIRE import before creating any Army or
+      // ownership rows (partial import safety).
+      const searchResultsByLine = await Promise.all(
+        parsedItems.map(async (item) => {
+          const response = await fetch(`/api/miniatures/search?query=${encodeURIComponent(item.name)}`)
+          const data = await response.json()
+          return (data.results || []) as MiniatureSearchResult[]
+        }),
+      )
+
+      const validation = validateMiniatureBulkImport(parsedItems, searchResultsByLine)
+      if (!validation.success) {
+        setImportingBulk(false)
+        const names = validation.issues.map((issue) => issue.name).join(", ")
+        toast({
+          title: t("common.error"),
+          description: names ? `${validation.error}: ${names}` : validation.error,
+          variant: "destructive",
+        })
+        return
+      }
+
+      const armiesResult = await getUserMiniatureArmies()
+      if (!armiesResult.success) {
+        setImportingBulk(false)
+        toast({ title: t("common.error"), description: armiesResult.error, variant: "destructive" })
+        return
+      }
+
+      const resolution = resolveMiniatureArmy(validation.factionId, armiesResult.data)
+      if (resolution.kind === "auto") {
+        await runMiniatureImport(validation.rows, resolution.army)
+        return
+      }
+
+      // Needs user input: select among multiple compatible Armies, or create one.
+      setBulkArmies(resolution.candidates)
+      setPendingImportRows(validation.rows)
+      setBulkArmyMode(resolution.kind)
+      setImportingBulk(false)
+    } catch {
+      setImportingBulk(false)
+      toast({
+        title: t("common.error"),
+        description: t("collection.importFailed") || "Import failed",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleBulkArmySelect = async () => {
+    if (!pendingImportRows || !bulkSelectedArmyId) return
+    const army = bulkArmies.find((a) => a.id === bulkSelectedArmyId)
+    if (!army) return
+    setImportingBulk(true)
+    await runMiniatureImport(pendingImportRows, army)
+  }
+
+  const handleBulkArmyCreate = async () => {
+    if (!pendingImportRows || !bulkArmyName.trim()) return
+    const factionId = pendingImportRows[0]?.factionId
+    if (!factionId) return
+
+    setBulkArmyLoading(true)
+    try {
+      const result = await createMiniatureArmy(bulkArmyName, factionId)
+      if (!result.success || !result.data) throw new Error(result.error)
+      setBulkArmyLoading(false)
+      setImportingBulk(true)
+      await runMiniatureImport(pendingImportRows, result.data)
+    } catch (error) {
+      setBulkArmyLoading(false)
+      toast({
+        title: t("common.error"),
+        description: error instanceof Error ? error.message : "Unable to create Army.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleBulkImportTCG = async () => {
     setImportingBulk(true)
     let successCount = 0
     let errorCount = 0
 
     for (const item of parsedItems) {
       try {
-        if (selectedCategory === "trading-cards") {
-          const response = await fetch(`/api/tcg/search?q=${encodeURIComponent(item.name)}&game=mtg`)
-          const data = await response.json()
-          
-          if (data.results && data.results.length > 0) {
-            const card = data.results[0] as TCGSearchResult
-            const result = await addCardToCollection(card, item.quantity, "owned", true)
-            if (result.success) successCount++
-            else errorCount++
-          } else {
-            errorCount++
-          }
-        } else if (selectedCategory === "miniatures") {
-          const response = await fetch(`/api/miniatures/search?query=${encodeURIComponent(item.name)}`)
-          const data = await response.json()
-          
-          if (data.results?.length === 1 && data.results[0].catalogId) {
-            const mini = data.results[0] as MiniatureSearchResult
-            const result = await addMiniatureToCollection(mini, item.quantity, "unpainted", "owned", true)
-            if (result.success) successCount++
-            else errorCount++
-          } else {
-            isAmbiguousMiniatureMatch(data.results || [], item.name)
-            errorCount++
-          }
+        const response = await fetch(`/api/tcg/search?q=${encodeURIComponent(item.name)}&game=mtg`)
+        const data = await response.json()
 
+        if (data.results && data.results.length > 0) {
+          const card = data.results[0] as TCGSearchResult
+          const result = await addCardToCollection(card, item.quantity, "owned", true)
+          if (result.success) successCount++
+          else errorCount++
+        } else {
+          errorCount++
         }
       } catch {
         errorCount++
@@ -229,7 +346,7 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
     setImportingBulk(false)
     setBulkText("")
     setParsedItems([])
-    
+
     toast({
       title: t("common.success"),
       description: `${t("collection.imported") || "Imported"} ${successCount} ${t("collection.items") || "items"}${errorCount > 0 ? `, ${errorCount} ${t("collection.failed") || "failed"}` : ""}`,
@@ -237,6 +354,19 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
 
     if (successCount > 0 && onImportComplete) {
       onImportComplete()
+    }
+  }
+
+  const handleBulkImport = async () => {
+    if (parsedItems.length === 0) return
+
+    if (selectedCategory === "miniatures") {
+      await handleBulkImportMiniatures()
+      return
+    }
+
+    if (selectedCategory === "trading-cards") {
+      await handleBulkImportTCG()
     }
   }
 
@@ -321,7 +451,7 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
                 onClick={handleBulkImport}
                 active
                 fullWidth
-                disabled={importingBulk}
+                disabled={importingBulk || bulkArmyMode !== "idle"}
                 className="flex-1"
                 icon={
                   importingBulk ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />
@@ -343,6 +473,67 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
                   </Badge>
                 ))}
               </div>
+            </div>
+          )}
+
+          {selectedCategory === "miniatures" && bulkArmyMode !== "idle" && (
+            <div className="border border-accent-gold/20 rounded-lg p-3 space-y-2">
+              {bulkArmyMode === "select" ? (
+                <>
+                  <p className="text-sm text-accent-gold font-cinzel">
+                    {t("collection.armyContext") || "Army context"}
+                  </p>
+                  <select
+                    value={bulkSelectedArmyId}
+                    onChange={(e) => setBulkSelectedArmyId(e.target.value)}
+                    className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+                  >
+                    <option value="">{t("collection.selectArmy") || "Select an Army"}</option>
+                    {bulkArmies.map((army) => (
+                      <option key={army.id} value={army.id}>
+                        {army.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ArchiveCardButton
+                    onClick={handleBulkArmySelect}
+                    active
+                    fullWidth
+                    disabled={!bulkSelectedArmyId || importingBulk}
+                    icon={importingBulk ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                  >
+                    {t("collection.importToArmy") || "Import to selected Army"}
+                  </ArchiveCardButton>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-accent-gold font-cinzel">
+                    {t("collection.createArmyContext") || "Create Army context"}
+                  </p>
+                  <div className="flex gap-2">
+                    <Input
+                      value={bulkArmyName}
+                      onChange={(e) => setBulkArmyName(e.target.value)}
+                      placeholder={t("collection.armyNamePlaceholder") || "Army name"}
+                      className={cn("flex-1", archiveField)}
+                    />
+                    <ArchiveCardButton
+                      onClick={handleBulkArmyCreate}
+                      active
+                      disabled={bulkArmyLoading || importingBulk || !bulkArmyName.trim()}
+                      icon={
+                        bulkArmyLoading || importingBulk ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Plus className="h-4 w-4" />
+                        )
+                      }
+                    >
+                      {t("collection.createAndImport") || "Create & Import"}
+                    </ArchiveCardButton>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>

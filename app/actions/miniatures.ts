@@ -165,6 +165,94 @@ export async function addMiniatureToCollection(
   return { success: true }
 }
 
+// WP-004G: Miniatures Bulk Import is a Collection mass-add. Each row here
+// represents a Miniature the user says they physically own, so every
+// inserted mini_army_units row uses owned = true via buildMiniatureArmyUnitPayload
+// (the same builder addMiniatureToCollection uses). This does NOT implement a
+// roster/army-planning import and does NOT support owned = false.
+export interface MiniatureBulkImportLine {
+  catalogId: string
+  modelCount: number
+}
+
+export interface MiniatureBulkImportResult {
+  success: boolean
+  error?: string
+  insertedCount?: number
+}
+
+export async function importMiniaturesToCollection(
+  lines: MiniatureBulkImportLine[],
+  army: Pick<MiniatureArmyContext, "id" | "factionId">,
+): Promise<MiniatureBulkImportResult> {
+  if (!Array.isArray(lines) || lines.length === 0) {
+    return { success: false, error: "No Miniatures to import" }
+  }
+  if (!army?.id) return { success: false, error: "Army context is required" }
+
+  for (const line of lines) {
+    if (!line.catalogId) {
+      return { success: false, error: "Every imported Miniature requires a canonical catalog match" }
+    }
+    if (!Number.isInteger(line.modelCount) || line.modelCount < 1) {
+      return { success: false, error: "Miniature quantity must be a positive integer" }
+    }
+  }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: "Not authenticated" }
+
+  const { data: validatedArmy, error: armyError } = await supabase
+    .from("mini_armies")
+    .select("id, faction_id")
+    .eq("id", army.id)
+    .eq("user_id", user.id)
+    .maybeSingle()
+  if (armyError) return { success: false, error: armyError.message }
+  if (!validatedArmy) return { success: false, error: "Army not found" }
+
+  // Resolve every canonical catalog unit in one query. Duplicate catalogIds
+  // across lines are expected and are NOT deduplicated - only the lookup is.
+  const catalogIds = Array.from(new Set(lines.map((line) => line.catalogId)))
+  const { data: canonicalUnits, error: canonicalUnitError } = await supabase
+    .from("mini_units")
+    .select("id, faction_id, base_points")
+    .in("id", catalogIds)
+  if (canonicalUnitError) return { success: false, error: canonicalUnitError.message }
+
+  const canonicalById = new Map((canonicalUnits ?? []).map((unit) => [unit.id, unit]))
+  if (canonicalById.size !== catalogIds.length) {
+    return {
+      success: false,
+      error: "One or more imported Miniatures could not be resolved to a canonical catalog unit",
+    }
+  }
+
+  // Validate and build every row before writing anything (partial import safety).
+  const payloads: Record<string, string | number | boolean | null>[] = []
+  for (const line of lines) {
+    const payload = buildMiniatureArmyUnitPayload({
+      catalogId: line.catalogId,
+      army: { id: validatedArmy.id, factionId: validatedArmy.faction_id },
+      canonicalUnit: canonicalById.get(line.catalogId),
+      userId: user.id,
+      modelCount: line.modelCount,
+      paintStatus: "unpainted",
+    })
+    if (!payload.success) return { success: false, error: payload.error }
+    payloads.push(payload.data)
+  }
+
+  const { error } = await supabase.from("mini_army_units").insert(payloads)
+  if (error) {
+    console.error("Error importing miniatures to collection:", error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true, insertedCount: payloads.length }
+}
+
 // Parse BattleScribe .ros (roster) file
 export async function parseRosterFile(
   xmlContent: string
