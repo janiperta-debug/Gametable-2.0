@@ -20,8 +20,16 @@ import { ArrowLeft, Search, Loader2, Plus, Minus, Star, Users, Clock, Dices, Swo
 import { useToast } from "@/hooks/use-toast"
 import { addGameToCollection, type AddGameResult } from "@/app/actions/games"
 import { addCardToCollection } from "@/app/actions/tcg"
-import { addMiniatureToCollection, createMiniatureArmy, getUserMiniatureArmies, type MiniatureArmyContext, type PaintStatus } from "@/app/actions/miniatures"
+import {
+  addMiniatureToCollection,
+  createMiniatureArmy,
+  getUserMiniatureArmies,
+  importMiniaturesToCollection,
+  type MiniatureArmyContext,
+  type PaintStatus,
+} from "@/app/actions/miniatures"
 import { resolveMiniatureArmy } from "@/lib/miniatures/army-resolver"
+import { validateMiniatureBulkImport, type ResolvedMiniatureImportRow } from "@/lib/miniatures/bulk-import"
 import { useTranslations } from "@/lib/i18n"
 import type { BGGSearchResult, BGGGameDetails } from "@/lib/types/database"
 import type { TCGSearchResult } from "@/app/api/tcg/search/route"
@@ -143,6 +151,16 @@ export default function AddGamePage() {
   const [bulkText, setBulkText] = useState("")
   const [parsedItems, setParsedItems] = useState<Array<{ name: string; quantity: number; setCode?: string }>>([])
   const [importingBulk, setImportingBulk] = useState(false)
+
+  // Miniatures Bulk Import (Collection mass-add, owned = true) needs its own
+  // Army context resolution state, independent of the "search" tab's Army
+  // state above, because mini_army_units.army_id is required for every row.
+  const [bulkArmyMode, setBulkArmyMode] = useState<"idle" | "select" | "create">("idle")
+  const [bulkArmies, setBulkArmies] = useState<MiniatureArmyContext[]>([])
+  const [bulkSelectedArmyId, setBulkSelectedArmyId] = useState("")
+  const [bulkArmyName, setBulkArmyName] = useState("")
+  const [bulkArmyLoading, setBulkArmyLoading] = useState(false)
+  const [pendingImportRows, setPendingImportRows] = useState<ResolvedMiniatureImportRow[] | null>(null)
 
   const categoryConfig = categories.find(c => c.id === selectedCategory)!
 
@@ -411,41 +429,147 @@ export default function AddGamePage() {
     }
   }
 
+  // Performs the actual Collection write once Army context is resolved. All
+  // rows use owned = true - this is a physical Collection mass-add, not a
+  // roster/army-planning import (see WP-004G/WP-004H).
+  const runMiniatureBulkImport = async (
+    rows: ResolvedMiniatureImportRow[],
+    army: Pick<MiniatureArmyContext, "id" | "factionId">,
+  ) => {
+    const result = await importMiniaturesToCollection(
+      rows.map((row) => ({ catalogId: row.catalogId, modelCount: row.modelCount })),
+      army,
+    )
+
+    setImportingBulk(false)
+    setBulkArmyMode("idle")
+    setBulkArmies([])
+    setBulkSelectedArmyId("")
+    setBulkArmyName("")
+    setPendingImportRows(null)
+
+    if (result.success) {
+      setBulkText("")
+      setParsedItems([])
+      toast({
+        title: t("common.success"),
+        description: `Imported ${result.insertedCount ?? rows.length} items`,
+      })
+      router.push("/collection")
+    } else {
+      toast({
+        title: t("common.error"),
+        description: result.error || "Import failed",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleBulkArmySelect = async () => {
+    if (!pendingImportRows || !bulkSelectedArmyId) return
+    const army = bulkArmies.find((a) => a.id === bulkSelectedArmyId)
+    if (!army) return
+    setImportingBulk(true)
+    await runMiniatureBulkImport(pendingImportRows, army)
+  }
+
+  const handleBulkArmyCreate = async () => {
+    if (!pendingImportRows || !bulkArmyName.trim()) return
+    const factionId = pendingImportRows[0]?.factionId
+    if (!factionId) return
+
+    setBulkArmyLoading(true)
+    try {
+      const result = await createMiniatureArmy(bulkArmyName, factionId)
+      if (!result.success || !result.data) throw new Error(result.error)
+      setBulkArmyLoading(false)
+      setImportingBulk(true)
+      await runMiniatureBulkImport(pendingImportRows, result.data)
+    } catch (error) {
+      setBulkArmyLoading(false)
+      toast({
+        title: t("common.error"),
+        description: error instanceof Error ? error.message : "Unable to create Army.",
+        variant: "destructive",
+      })
+    }
+  }
+
   const handleBulkImport = async () => {
     if (parsedItems.length === 0) return
     
     setImportingBulk(true)
+
+    if (selectedCategory === "miniature") {
+      try {
+        // Resolve and validate the ENTIRE import before creating any Army or
+        // ownership rows (partial import safety) - the same contract as the
+        // Miniatures Bulk Import in components/import-section.tsx.
+        const searchResultsByLine = await Promise.all(
+          parsedItems.map(async (item) => {
+            const response = await fetch(`/api/miniatures/search?query=${encodeURIComponent(item.name)}`)
+            const data = await response.json()
+            return (data.results || []) as MiniatureSearchResult[]
+          }),
+        )
+
+        const validation = validateMiniatureBulkImport(parsedItems, searchResultsByLine)
+        if (!validation.success) {
+          setImportingBulk(false)
+          const names = validation.issues.map((issue) => issue.name).join(", ")
+          toast({
+            title: t("common.error"),
+            description: names ? `${validation.error}: ${names}` : validation.error,
+            variant: "destructive",
+          })
+          return
+        }
+
+        const armiesResult = await getUserMiniatureArmies()
+        if (!armiesResult.success) {
+          setImportingBulk(false)
+          toast({ title: t("common.error"), description: armiesResult.error, variant: "destructive" })
+          return
+        }
+
+        const resolution = resolveMiniatureArmy(validation.factionId, armiesResult.data)
+        if (resolution.kind === "auto") {
+          await runMiniatureBulkImport(validation.rows, resolution.army)
+          return
+        }
+
+        // Needs user input: select among multiple compatible Armies, or create one.
+        setBulkArmies(resolution.candidates)
+        setPendingImportRows(validation.rows)
+        setBulkArmyMode(resolution.kind)
+        setImportingBulk(false)
+      } catch {
+        setImportingBulk(false)
+        toast({
+          title: t("common.error"),
+          description: "Import failed",
+          variant: "destructive",
+        })
+      }
+      return
+    }
+
+    // Trading cards keep their existing per-line best-effort import.
     let successCount = 0
     let errorCount = 0
 
     for (const item of parsedItems) {
       try {
-        // For TCG, search for the card and add it
-        if (selectedCategory === "trading_card") {
-          const response = await fetch(`/api/tcg/search?q=${encodeURIComponent(item.name)}&game=${tcgGame}`)
-          const data = await response.json()
-          
-          if (data.results && data.results.length > 0) {
-            const card = data.results[0] as TCGSearchResult
-            const result = await addCardToCollection(card, item.quantity, "owned")
-            if (result.success) successCount++
-            else errorCount++
-          } else {
-            errorCount++
-          }
-        } else if (selectedCategory === "miniature") {
-          // For miniatures, search and add
-          const response = await fetch(`/api/miniatures/search?query=${encodeURIComponent(item.name)}`)
-          const data = await response.json()
-          
-          if (data.results?.length === 1 && data.results[0].catalogId) {
-            const mini = data.results[0] as MiniatureSearchResult
-            const result = await addMiniatureToCollection(mini, item.quantity, "unpainted", "owned")
-            if (result.success) successCount++
-            else errorCount++
-          } else {
-            errorCount++
-          }
+        const response = await fetch(`/api/tcg/search?q=${encodeURIComponent(item.name)}&game=${tcgGame}`)
+        const data = await response.json()
+
+        if (data.results && data.results.length > 0) {
+          const card = data.results[0] as TCGSearchResult
+          const result = await addCardToCollection(card, item.quantity, "owned")
+          if (result.success) successCount++
+          else errorCount++
+        } else {
+          errorCount++
         }
       } catch {
         errorCount++
@@ -1112,7 +1236,7 @@ export default function AddGamePage() {
 
                           <ArchiveButton
                             onClick={handleBulkImport}
-                            disabled={importingBulk}
+                            disabled={importingBulk || bulkArmyMode !== "idle"}
                             fullWidth
                             icon={
                               importingBulk ? (
@@ -1126,6 +1250,54 @@ export default function AddGamePage() {
                               ? "Importing..."
                               : `${t("collection.importAll")} (${parsedItems.length})`}
                           </ArchiveButton>
+                        </div>
+                      )}
+
+                      {selectedCategory === "miniature" && bulkArmyMode !== "idle" && (
+                        <div className="border border-accent-gold/20 rounded-lg p-3 space-y-2">
+                          {bulkArmyMode === "select" ? (
+                            <>
+                              <Label className="text-accent-gold font-cinzel text-sm">Army context</Label>
+                              <select
+                                value={bulkSelectedArmyId}
+                                onChange={(e) => setBulkSelectedArmyId(e.target.value)}
+                                className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+                              >
+                                <option value="">Select an Army</option>
+                                {bulkArmies.map((army) => (
+                                  <option key={army.id} value={army.id}>
+                                    {army.name}
+                                  </option>
+                                ))}
+                              </select>
+                              <ArchiveButton
+                                onClick={handleBulkArmySelect}
+                                disabled={!bulkSelectedArmyId || importingBulk}
+                                fullWidth
+                                icon={importingBulk ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                              >
+                                Import to selected Army
+                              </ArchiveButton>
+                            </>
+                          ) : (
+                            <>
+                              <Label className="text-accent-gold font-cinzel text-sm">Create Army context</Label>
+                              <div className="flex gap-2">
+                                <Input
+                                  value={bulkArmyName}
+                                  onChange={(e) => setBulkArmyName(e.target.value)}
+                                  placeholder="Army name"
+                                />
+                                <ArchiveButton
+                                  type="button"
+                                  onClick={handleBulkArmyCreate}
+                                  disabled={bulkArmyLoading || importingBulk || !bulkArmyName.trim()}
+                                >
+                                  {bulkArmyLoading || importingBulk ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create & Import"}
+                                </ArchiveButton>
+                              </div>
+                            </>
+                          )}
                         </div>
                       )}
                     </div>
