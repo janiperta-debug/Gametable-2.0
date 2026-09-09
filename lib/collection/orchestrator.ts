@@ -1,4 +1,4 @@
-import type { CollectionEntry } from '@/lib/types/collection'
+import type { CollectionEntry, CollectionMetadata } from '@/lib/types/collection'
 
 import {
   mapMiniatureCollectionToCollectionEntry,
@@ -6,6 +6,17 @@ import {
   mapUserGameExpansionToCollectionEntry,
   mapUserGameToCollectionEntry,
 } from './adapter'
+
+export interface RPGCatalogItemInput {
+  game_id: string
+  rpg?: {
+    id?: string | null
+    name?: string | null
+  } | {
+    id?: string | null
+    name?: string | null
+  }[] | null
+}
 
 export interface CollectionQueryInputs {
   userGames?: Array<{
@@ -96,6 +107,7 @@ export interface CollectionQueryInputs {
       } | null
     } | null
   }>
+  rpgCatalogItems?: RPGCatalogItemInput[]
 }
 
 const DOMAIN_ORDER: Record<string, number> = {
@@ -105,14 +117,83 @@ const DOMAIN_ORDER: Record<string, number> = {
   miniature: 3,
 }
 
+interface RPGGroupMeta {
+  id: string
+  name: string
+  totalItemCount: number
+  ownedItemCount: number
+}
+
+function enrichRPGEntry(entry: CollectionEntry, groups: RPGGroupMeta[]): CollectionEntry {
+  if (entry.domain !== 'rpg' || groups.length === 0) {
+    return entry
+  }
+
+  const metadata: CollectionMetadata = {
+    ...entry.metadata,
+    rpg_catalogs: groups,
+  }
+
+  return { ...entry, metadata }
+}
+
+function buildRPGGroupMetadata(
+  userGames: CollectionQueryInputs['userGames'],
+  catalogItems: RPGCatalogItemInput[],
+): Map<string, RPGGroupMeta[]> {
+  const totalByGroup = new Map<string, RPGGroupMeta>()
+  const gamesByGroup = new Map<string, Set<string>>()
+
+  for (const item of catalogItems) {
+    const relations = Array.isArray(item.rpg) ? item.rpg : item.rpg ? [item.rpg] : []
+    for (const relation of relations) {
+      if (!relation.id || !relation.name) continue
+      const gameIds = gamesByGroup.get(relation.id) ?? new Set<string>()
+      gameIds.add(item.game_id)
+      gamesByGroup.set(relation.id, gameIds)
+      totalByGroup.set(relation.id, {
+        id: relation.id,
+        name: relation.name,
+        totalItemCount: 0,
+        ownedItemCount: 0,
+      })
+    }
+  }
+
+  for (const [groupId, group] of totalByGroup) {
+    const gameIds = gamesByGroup.get(groupId) ?? new Set<string>()
+    group.totalItemCount = gameIds.size
+    group.ownedItemCount = (userGames ?? []).filter(
+      (userGame) => userGame.game?.category === 'rpg' && gameIds.has(userGame.game_id),
+    ).length
+  }
+
+  const byGameId = new Map<string, RPGGroupMeta[]>()
+  for (const item of catalogItems) {
+    const relations = Array.isArray(item.rpg) ? item.rpg : item.rpg ? [item.rpg] : []
+    const groups = relations
+      .map((relation) => (relation.id ? totalByGroup.get(relation.id) : null))
+      .filter((group): group is RPGGroupMeta => Boolean(group))
+      .sort((left, right) => left.name.localeCompare(right.name))
+
+    if (groups.length > 0) {
+      byGameId.set(item.game_id, groups)
+    }
+  }
+
+  return byGameId
+}
+
 export function getCollectionEntries({
   userGames = [],
   tcgCollection = [],
   miniatureCollection = [],
   expansions = [],
+  rpgCatalogItems = [],
 }: CollectionQueryInputs = {}): CollectionEntry[] {
   const entries: CollectionEntry[] = []
   const seen = new Set<string>()
+  const rpgGroupsByGameId = buildRPGGroupMetadata(userGames, rpgCatalogItems)
 
   const pushIfUnique = (entry: CollectionEntry) => {
     const identityKey = `${entry.domain}:${entry.ownershipId}`
@@ -124,7 +205,8 @@ export function getCollectionEntries({
   }
 
   for (const row of userGames) {
-    pushIfUnique(mapUserGameToCollectionEntry(row))
+    const mapped = mapUserGameToCollectionEntry(row)
+    pushIfUnique(enrichRPGEntry(mapped, rpgGroupsByGameId.get(row.game_id) ?? []))
   }
 
   for (const row of tcgCollection) {
@@ -132,9 +214,6 @@ export function getCollectionEntries({
   }
 
   for (const row of miniatureCollection) {
-    // Skip (rather than throw for) rows that are not owned=true: a single
-    // unexpected row should not break the whole Collection batch, and
-    // owned=false still has no proven Collection semantics to map to.
     if (row.owned !== true) {
       continue
     }
