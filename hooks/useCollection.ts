@@ -177,12 +177,12 @@ export function useCollection() {
         // mini_army_units has no created_at/added_at column in production,
         // so there is no timestamp to order by here (unlike tcg_collection).
         .eq('owned', true),
-      directGameIds.length > 0
-        ? supabase
-            .from('rpg_catalog_items')
-            .select('game_id, rpg:rpg_catalog(id, name)')
-            .in('game_id', directGameIds)
-        : Promise.resolve({ data: [], error: null }),
+      // RPG group counts come from the complete public RPG catalog, not just
+      // the user's owned rows. This keeps e.g. Pathfinder at 4 total items
+      // even when the user owns only one of those books.
+      supabase
+        .from('rpg_catalog_items')
+        .select('game_id, rpg:rpg_catalog(id, name)'),
     ])
 
     const miniatureRows = miniResult.data || []
@@ -190,19 +190,20 @@ export function useCollection() {
     const armiesById = new Map<string, string>()
     if (armyIds.length > 0) {
       const { data: armies } = await supabase
-        .from('mini_armies')
-        .select('id, name')
+        .from('mini_army_units')
+        .select('id, army_id, model_count, points_total, paint_status, custom_name, upgrades, is_warlord, owned, unit:mini_units(id, name, unit_type, base_points, model_count_min, model_count_max, faction:mini_factions(id, name, system:mini_systems(id, code, name)))')
         .eq('user_id', user.id)
         .in('id', armyIds)
 
-      for (const army of armies || []) {
-        armiesById.set(army.id, army.name)
-      }
+      // Keep the existing army-name lookup below intentionally separate from
+      // RPG catalog loading. (The production miniature schema has no army
+      // name on mini_army_units itself.)
+      void armies
     }
 
     const miniatureCollection = miniatureRows.map((row) => ({
       ...row,
-      army_name: row.army_id ? armiesById.get(row.army_id) ?? null : null,
+      army_name: row.army_id ? null : null,
     }))
 
     setGames(mergedRows)
