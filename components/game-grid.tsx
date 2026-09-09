@@ -3,7 +3,6 @@
 import { CollectionCard } from "@/components/collection-card"
 import { RPGCollectionGroup } from "@/components/rpg-collection-group"
 import type { CollectionCardItem } from "@/lib/types/collection"
-import type { UserGameWithGame } from "@/lib/types/database"
 import type { Game } from "@/lib/mock-games"
 
 interface GameGridProps {
