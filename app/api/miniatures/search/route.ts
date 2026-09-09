@@ -8,7 +8,12 @@ export type MiniatureSystem = "wh40k" | "aos" | "xwing" | string
 // Miniatures is currently a Catalog-authoritative domain. There is no reliable
 // general-purpose external search source to merge here, so search stays local
 // rather than inventing fallback/demo results.
-async function searchCatalog(query: string, systemCode?: string): Promise<MiniatureSearchResult[]> {
+async function searchCatalog(
+  query: string,
+  systemCode?: string,
+  systemId?: string,
+  factionId?: string,
+): Promise<MiniatureSearchResult[]> {
   const supabase = await createClient()
   let dbQuery = supabase
     .from("mini_units")
@@ -33,10 +38,20 @@ async function searchCatalog(query: string, systemCode?: string): Promise<Miniat
       )
     `)
     .ilike("name", `%${query}%`)
+    .order("name")
     .limit(20)
 
-  if (systemCode) {
+  // Prefer canonical UUID filters when supplied. `system` remains supported
+  // for the existing UI/API contract, but a system code can be ambiguous
+  // across editions, so systemId is the authoritative filter.
+  if (systemId) {
+    dbQuery = dbQuery.eq("faction.system.id", systemId)
+  } else if (systemCode) {
     dbQuery = dbQuery.eq("faction.system.code", systemCode)
+  }
+
+  if (factionId) {
+    dbQuery = dbQuery.eq("faction.id", factionId)
   }
 
   const { data, error } = await dbQuery
@@ -57,6 +72,10 @@ export async function GET(request: Request) {
   const query = rawQuery.trim()
   const rawSystemCode = searchParams.get("system") || ""
   const systemCode = rawSystemCode.trim() || undefined
+  const rawSystemId = searchParams.get("systemId") || ""
+  const systemId = rawSystemId.trim() || undefined
+  const rawFactionId = searchParams.get("factionId") || ""
+  const factionId = rawFactionId.trim() || undefined
 
   if (query.length < 2) {
     return NextResponse.json({ results: [] })
@@ -66,7 +85,7 @@ export async function GET(request: Request) {
     // Same orchestration contract as the other Catalog-first domains:
     // the route resolves from the local canonical Catalog and returns the
     // normalized domain result. External ingestion is intentionally separate.
-    const results = await searchCatalog(query, systemCode)
+    const results = await searchCatalog(query, systemCode, systemId, factionId)
     return NextResponse.json({ results })
   } catch (error) {
     console.error("Miniatures Catalog search error:", error)
