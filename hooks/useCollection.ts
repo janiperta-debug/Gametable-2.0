@@ -190,20 +190,19 @@ export function useCollection() {
     const armiesById = new Map<string, string>()
     if (armyIds.length > 0) {
       const { data: armies } = await supabase
-        .from('mini_army_units')
-        .select('id, army_id, model_count, points_total, paint_status, custom_name, upgrades, is_warlord, owned, unit:mini_units(id, name, unit_type, base_points, model_count_min, model_count_max, faction:mini_factions(id, name, system:mini_systems(id, code, name)))')
+        .from('mini_armies')
+        .select('id, name')
         .eq('user_id', user.id)
         .in('id', armyIds)
 
-      // Keep the existing army-name lookup below intentionally separate from
-      // RPG catalog loading. (The production miniature schema has no army
-      // name on mini_army_units itself.)
-      void armies
+      for (const army of armies || []) {
+        armiesById.set(army.id, army.name)
+      }
     }
 
     const miniatureCollection = miniatureRows.map((row) => ({
       ...row,
-      army_name: row.army_id ? null : null,
+      army_name: row.army_id ? armiesById.get(row.army_id) ?? null : null,
     }))
 
     setGames(mergedRows)
