@@ -116,7 +116,7 @@ export function useCollection() {
     const hostRows = expansionOnlyHostRows.map(attachExpansions)
     const mergedRows = [...directRows, ...hostRows]
 
-    const [tcgResult, miniResult] = await Promise.all([
+    const [tcgResult, miniResult, rpgCatalogResult] = await Promise.all([
       supabase
         .from('tcg_collection')
         .select(`
@@ -176,7 +176,13 @@ export function useCollection() {
         .eq('user_id', user.id)
         // mini_army_units has no created_at/added_at column in production,
         // so there is no timestamp to order by here (unlike tcg_collection).
-        .eq('owned', true)
+        .eq('owned', true),
+      directGameIds.length > 0
+        ? supabase
+            .from('rpg_catalog_items')
+            .select('game_id, rpg:rpg_catalog(id, name)')
+            .in('game_id', directGameIds)
+        : Promise.resolve({ data: [], error: null }),
     ])
 
     const miniatureRows = miniResult.data || []
@@ -205,6 +211,7 @@ export function useCollection() {
         userGames: mergedRows,
         tcgCollection: tcgResult.data || [],
         miniatureCollection,
+        rpgCatalogItems: rpgCatalogResult.data || [],
       })
     )
     setError(null)
