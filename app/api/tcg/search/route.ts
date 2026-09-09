@@ -91,6 +91,24 @@ async function searchSupabase(query: string, tcgSystem: TCGGame): Promise<TCGSea
   }
 }
 
+function mergeSearchResults(catalogResults: TCGSearchResult[], externalResults: TCGSearchResult[]): TCGSearchResult[] {
+  const merged = new Map<string, TCGSearchResult>()
+
+  for (const result of catalogResults) {
+    const key = result.externalId ? `${result.game}:${result.externalId}` : `${result.game}:catalog:${result.id}`
+    merged.set(key, result)
+  }
+
+  for (const result of externalResults) {
+    const key = result.externalId ? `${result.game}:${result.externalId}` : `${result.game}:external:${result.id}`
+    if (!merged.has(key)) {
+      merged.set(key, result)
+    }
+  }
+
+  return Array.from(merged.values()).slice(0, 20)
+}
+
 // Save external API results to Supabase
 async function saveToSupabase(cards: TCGSearchResult[], tcgSystem: TCGGame): Promise<void> {
   if (cards.length === 0) return
@@ -333,45 +351,46 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Query must be at least 2 characters" }, { status: 400 })
   }
 
-  // Step 1: Query Supabase first
-  let results = await searchSupabase(query, tcgSystem)
-  
-  // Step 2: If no Supabase results, call external API
-  if (results.length === 0) {
-    let externalResults: TCGSearchResult[] = []
-    
-    switch (tcgSystem) {
-      case "magic":
-        externalResults = await searchScryfall(query)
-        break
-      case "pokemon":
-        externalResults = await searchPokemonTCG(query)
-        break
-      case "yugioh":
-        externalResults = await searchYGOProDeck(query)
-        break
-      case "lorcana":
-        externalResults = await searchLorcana(query)
-        break
-      case "flesh-and-blood":
-      case "one-piece":
-        // No reliable public API - return empty with message
-        return NextResponse.json({ 
-          results: [],
-          message: "No results found. Try adding cards manually for this game."
-        })
-      default:
-        externalResults = []
-    }
-    
-    // Step 3: Save external results to Supabase for future searches
-    if (externalResults.length > 0) {
-      // Don't await - save in background
-      saveToSupabase(externalResults, tcgSystem).catch(err => 
-        console.error("Background save failed:", err)
-      )
-      results = externalResults
-    }
+  // Catalog remains the preferred source, but supported external sources are always queried
+  // so broader matches remain discoverable and the two result sets can be reconciled.
+  const catalogResults = await searchSupabase(query, tcgSystem)
+  let externalResults: TCGSearchResult[] = []
+
+  switch (tcgSystem) {
+    case "magic":
+      externalResults = await searchScryfall(query)
+      break
+    case "pokemon":
+      externalResults = await searchPokemonTCG(query)
+      break
+    case "yugioh":
+      externalResults = await searchYGOProDeck(query)
+      break
+    case "lorcana":
+      externalResults = await searchLorcana(query)
+      break
+    case "flesh-and-blood":
+    case "one-piece":
+      // No reliable public API - local Catalog remains the only search source.
+      break
+    default:
+      externalResults = []
+  }
+
+  // Save newly discovered external cards for future Catalog-first searches.
+  if (externalResults.length > 0) {
+    saveToSupabase(externalResults, tcgSystem).catch(err =>
+      console.error("Background save failed:", err)
+    )
+  }
+
+  const results = mergeSearchResults(catalogResults, externalResults)
+
+  if (results.length === 0 && (tcgSystem === "flesh-and-blood" || tcgSystem === "one-piece")) {
+    return NextResponse.json({
+      results: [],
+      message: "No results found. Try adding cards manually for this game."
+    })
   }
 
   return NextResponse.json({ results })
