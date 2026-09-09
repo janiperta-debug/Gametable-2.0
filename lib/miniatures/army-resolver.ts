@@ -17,40 +17,21 @@ export type MiniatureArmyResolution =
 
 export function resolveMiniatureArmy(
   selectedFactionId: string | undefined,
-  armies: MiniatureArmyContext[],
+  _armies: MiniatureArmyContext[],
 ): MiniatureArmyResolution {
-  const candidates = selectedFactionId
-    ? armies.filter((army) => army.factionId === selectedFactionId)
-    : []
-
-  // Army Builder is not part of Miniatures Collection ownership. Keep the
-  // legacy resolver usable for future Army Builder flows, but do not require
-  // an army just to add a catalog unit to Collection.
-  if (candidates.length === 0) {
-    return {
-      kind: "auto",
-      army: {
-        id: "",
-        name: "Collection",
-        factionId: selectedFactionId ?? "",
-        factionName: "",
-        systemId: "",
-        systemName: "",
-        pointLimit: 0,
-        isCrusade: false,
-      },
-      candidates: [{
-        id: "",
-        name: "Collection",
-        factionId: selectedFactionId ?? "",
-        factionName: "",
-        systemId: "",
-        systemName: "",
-        pointLimit: 0,
-        isCrusade: false,
-      }],
-    }
+  // Collection ownership does not require an Army Builder context. The
+  // existing resolver contract is retained for callers, but returns a
+  // zero-id context so the legacy UI can proceed without creating/selecting
+  // an Army. A real Army Builder can use the actual army records later.
+  const collectionContext: MiniatureArmyContext = {
+    id: "",
+    name: "Collection",
+    factionId: selectedFactionId ?? "",
+    factionName: "",
+    systemId: "",
+    systemName: "",
+    pointLimit: 0,
+    isCrusade: false,
   }
-  if (candidates.length === 1) return { kind: "auto", army: candidates[0], candidates }
-  return { kind: "select", candidates }
+  return { kind: "auto", army: collectionContext, candidates: [collectionContext] }
 }
