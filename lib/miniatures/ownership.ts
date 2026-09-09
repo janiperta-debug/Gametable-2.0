@@ -1,5 +1,3 @@
-import type { MiniatureArmyContext } from "./army-resolver"
-
 export type MiniaturePaintStatus = "unpainted" | "primed" | "in_progress" | "painted" | "based"
 type ProductionPaintStatus = "unpainted" | "primed" | "wip" | "battle_ready" | "parade_ready"
 
@@ -25,13 +23,22 @@ interface CanonicalMiniatureUnit {
 
 interface BuildMiniatureArmyUnitPayloadOptions {
   catalogId?: string
-  army?: Pick<MiniatureArmyContext, "id" | "factionId">
+  /** Optional future Army Builder context. Collection ownership does not require it. */
+  army?: { id: string; factionId: string }
   canonicalUnit?: CanonicalMiniatureUnit
   userId: string
   modelCount: number
   paintStatus: string
 }
 
+/**
+ * Builds the production ownership row for a Miniatures Collection entry.
+ *
+ * The table is still named `mini_army_units` for historical reasons, but an
+ * ownership row is not an Army Builder row. `army_id` is therefore optional.
+ * If an army is supplied, its faction must match the catalog unit; otherwise
+ * the row remains unassigned and can later be used by the Army Builder.
+ */
 export function buildMiniatureArmyUnitPayload({
   catalogId,
   army,
@@ -43,9 +50,8 @@ export function buildMiniatureArmyUnitPayload({
   | { success: true; data: Record<string, string | number | boolean | null> }
   | { success: false; error: string } {
   if (!catalogId) return { success: false, error: "Miniature is not a canonical catalog result" }
-  if (!army?.id) return { success: false, error: "Army context is required" }
   if (!canonicalUnit) return { success: false, error: "Miniature catalog unit not found" }
-  if (canonicalUnit.faction_id !== army.factionId) {
+  if (army && canonicalUnit.faction_id !== army.factionId) {
     return { success: false, error: "Selected Army faction is incompatible with this Miniature" }
   }
   const productionPaintStatus = mapMiniaturePaintStatus(paintStatus)
@@ -54,7 +60,7 @@ export function buildMiniatureArmyUnitPayload({
   return {
     success: true,
     data: {
-      army_id: army.id,
+      army_id: army?.id ?? null,
       unit_id: canonicalUnit.id,
       user_id: userId,
       model_count: modelCount,
