@@ -5,7 +5,10 @@ import { mapMiniatureCatalogUnit, type MiniatureSearchResult } from "../catalog"
 export type { MiniatureSearchResult } from "../catalog"
 export type MiniatureSystem = "wh40k" | "aos" | "xwing" | string
 
-async function searchSupabase(query: string, systemCode?: string): Promise<MiniatureSearchResult[]> {
+// Miniatures is currently a Catalog-authoritative domain. There is no reliable
+// general-purpose external search source to merge here, so search stays local
+// rather than inventing fallback/demo results.
+async function searchCatalog(query: string, systemCode?: string): Promise<MiniatureSearchResult[]> {
   const supabase = await createClient()
   let dbQuery = supabase
     .from("mini_units")
@@ -38,7 +41,7 @@ async function searchSupabase(query: string, systemCode?: string): Promise<Minia
 
   const { data, error } = await dbQuery
   if (error) {
-    console.error("Supabase miniatures query error:", error)
+    console.error("Miniature Catalog search error:", error)
     return []
   }
 
@@ -50,17 +53,23 @@ async function searchSupabase(query: string, systemCode?: string): Promise<Minia
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  const query = searchParams.get("q") || searchParams.get("query") || ""
-  const systemCode = searchParams.get("system") || undefined
+  const rawQuery = searchParams.get("q") || searchParams.get("query") || ""
+  const query = rawQuery.trim()
+  const rawSystemCode = searchParams.get("system") || ""
+  const systemCode = rawSystemCode.trim() || undefined
 
-  if (!query || query.length < 2) {
+  if (query.length < 2) {
     return NextResponse.json({ results: [] })
   }
 
   try {
-    return NextResponse.json({ results: await searchSupabase(query, systemCode) })
+    // Same orchestration contract as the other Catalog-first domains:
+    // the route resolves from the local canonical Catalog and returns the
+    // normalized domain result. External ingestion is intentionally separate.
+    const results = await searchCatalog(query, systemCode)
+    return NextResponse.json({ results })
   } catch (error) {
-    console.error("Miniatures search error:", error)
+    console.error("Miniatures Catalog search error:", error)
     return NextResponse.json({ results: [] })
   }
 }
