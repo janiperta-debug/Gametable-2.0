@@ -17,8 +17,8 @@ import { Search, ExternalLink, Heart, Plus, Loader2, Star, Users, Clock, Dices, 
 import { useTranslations } from "@/lib/i18n"
 import { addGameToCollection, type GameCategory } from "@/app/actions/games"
 import { addCardToCollection } from "@/app/actions/tcg"
-import { addMiniatureToCollection, createMiniatureArmy, getUserMiniatureArmies, type MiniatureArmyContext, type PaintStatus } from "@/app/actions/miniatures"
-import { resolveMiniatureArmy } from "@/lib/miniatures/army-resolver"
+import { addMiniatureToCollection, type PaintStatus } from "@/app/actions/miniatures"
+import { addMiniatureToWishlist } from "@/app/actions/miniature-wishlist"
 import { useToast } from "@/hooks/use-toast"
 import type { BGGSearchResult, BGGGameDetails } from "@/lib/types/database"
 import type { TCGSearchResult } from "@/app/api/tcg/search/route"
@@ -141,11 +141,6 @@ export function DiscoverGames() {
   const [tcgGame, setTcgGame] = useState<"magic" | "pokemon" | "yugioh" | "lorcana" | "flesh-and-blood" | "one-piece">("magic")
   const [miniQuantity, setMiniQuantity] = useState(1)
   const [miniPaintStatus, setMiniPaintStatus] = useState<PaintStatus>("unpainted")
-  const [miniatureArmies, setMiniatureArmies] = useState<MiniatureArmyContext[]>([])
-  const [selectedArmy, setSelectedArmy] = useState<MiniatureArmyContext | null>(null)
-  const [armyMode, setArmyMode] = useState<"idle" | "select" | "create">("idle")
-  const [armyName, setArmyName] = useState("")
-  const [armyLoading, setArmyLoading] = useState(false)
 
   const categoryConfig = categories.find(c => c.id === selectedCategory)!
 
@@ -210,9 +205,6 @@ export function DiscoverGames() {
     setTcgQuantity(1)
     setMiniQuantity(1)
     setMiniPaintStatus("unpainted")
-    setMiniatureArmies([])
-    setSelectedArmy(null)
-    setArmyMode("idle")
     
     try {
       // For TCG and miniatures, use the search result directly (already has all data)
@@ -263,63 +255,19 @@ export function DiscoverGames() {
         console.log("[v0] TCG result:", tcgResult)
         result = tcgResult.success ? {} : { error: tcgResult.error }
       } else if (selectedCategory === "miniature") {
-        console.log("[v0] Adding miniature:", selectedGame)
+        const miniature = selectedGame as MiniatureSearchResult
         if (status === "wishlist") {
-          result = { error: "Miniature Wishlist is not supported." }
+          const wishlistResult = await addMiniatureToWishlist(miniature)
+          result = wishlistResult.success ? {} : { error: wishlistResult.error }
         } else {
-          const miniature = selectedGame as MiniatureSearchResult
-          if (!selectedArmy) {
-            setArmyLoading(true)
-            const armiesResult = await getUserMiniatureArmies()
-            if (!armiesResult.success) throw new Error(armiesResult.error)
-            const resolution = resolveMiniatureArmy(miniature.factionId, armiesResult.data)
-            setMiniatureArmies(resolution.candidates)
-            if (resolution.kind === "create") {
-              setArmyMode("create")
-              setArmyLoading(false)
-              result = { error: "Create an Army context before adding this Miniature." }
-              return
-            }
-            if (resolution.kind === "select") {
-              setArmyMode("select")
-              setArmyLoading(false)
-              result = { error: "Select an Army context before adding this Miniature." }
-              return
-            }
-            setSelectedArmy(resolution.army)
-            setArmyMode("idle")
-            setArmyLoading(false)
-            const miniResult = await addMiniatureToCollection(miniature, miniQuantity, miniPaintStatus, "owned", false, resolution.army)
-            console.log("[v0] Miniature result:", miniResult)
-            result = miniResult.success ? {} : { error: miniResult.error }
-          } else {
-            const miniResult = await addMiniatureToCollection(miniature, miniQuantity, miniPaintStatus, "owned", false, selectedArmy)
-            console.log("[v0] Miniature result:", miniResult)
-            result = miniResult.success ? {} : { error: miniResult.error }
-          }
+          const miniResult = await addMiniatureToCollection(miniature, miniQuantity, miniPaintStatus)
+          console.log("[v0] Miniature result:", miniResult)
+          result = miniResult.success ? {} : { error: miniResult.error }
         }
       } else {
         console.log("[v0] Adding board game/RPG:", selectedGame)
         result = await addGameToCollection(selectedGame as BGGGameDetails, status, selectedCategory)
         console.log("[v0] Board game/RPG result:", result)
-      }
-
-      const handleCreateMiniatureArmy = async () => {
-        const miniature = selectedGame as MiniatureSearchResult | null
-        if (!miniature?.factionId || !armyName.trim()) return
-        setArmyLoading(true)
-        try {
-          const result = await createMiniatureArmy(armyName, miniature.factionId)
-          if (!result.success || !result.data) throw new Error(result.error)
-          setSelectedArmy(result.data)
-          setArmyMode("idle")
-          setArmyName("")
-          toast({ title: t("common.success"), description: `Army "${result.data.name}" selected.` })
-        } catch (error) {
-          toast({ title: t("common.error"), description: error instanceof Error ? error.message : "Unable to create Army.", variant: "destructive" })
-        } finally {
-          setArmyLoading(false)
-        }
       }
 
       if (result.error) {
@@ -587,7 +535,7 @@ export function DiscoverGames() {
               <ArchiveCardButton onClick={() => setSelectedGame(null)} className="w-full sm:w-auto">
                 {t("common.cancel")}
               </ArchiveCardButton>
-              {selectedCategory !== "miniature" && (
+              {(
                 <ArchiveCardButton
                   onClick={() => handleAddGame('wishlist')}
                   disabled={addingGame !== null}
