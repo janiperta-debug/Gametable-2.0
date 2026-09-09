@@ -72,7 +72,6 @@ function getRPGGroups(cards: readonly CollectionCardItem[]) {
       items: RPGCardItem[]
     }
   >()
-  const groupedOwnershipIds = new Set<string>()
 
   for (const item of cards) {
     if (item.entry.domain !== 'rpg' || item.card.kind !== 'board-rpg') {
@@ -108,14 +107,12 @@ function getRPGGroups(cards: readonly CollectionCardItem[]) {
       current.totalItemCount = group.totalItemCount
       current.ownedItemCount = group.ownedItemCount
       groups.set(group.id, current)
-      groupedOwnershipIds.add(item.entry.ownershipId)
     }
   }
 
-  return {
-    groups: Array.from(groups.values()).sort((left, right) => left.name.localeCompare(right.name)),
-    groupedOwnershipIds,
-  }
+  return Array.from(groups.entries())
+    .map(([id, group]) => ({ id, ...group }))
+    .sort((left, right) => left.name.localeCompare(right.name))
 }
 
 export function GameGrid({
@@ -136,7 +133,7 @@ export function GameGrid({
     )
   }
 
-  const { groups, groupedOwnershipIds } = getRPGGroups(resolvedCards)
+  const groups = getRPGGroups(resolvedCards)
   const groupedCards = new Set(groups.flatMap((group) => group.items.map((item) => item.entry.ownershipId)))
   const visibleCards = resolvedCards.filter((item) => !groupedCards.has(item.entry.ownershipId))
 
@@ -144,7 +141,7 @@ export function GameGrid({
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {groups.map((group) => (
         <RPGCollectionGroup
-          key={group.name}
+          key={group.id}
           name={group.name}
           totalItemCount={group.totalItemCount}
           ownedItemCount={group.ownedItemCount}
