@@ -24,6 +24,7 @@ begin
       'Event Invitation',
       host_name || ' invited you to ' || coalesce(event_title, 'an event'),
       jsonb_build_object(
+        'notification_type', 'event_invite',
         'event_id', new.event_id,
         'participant_id', new.id,
         'event_name', coalesce(event_title, 'an event'),
