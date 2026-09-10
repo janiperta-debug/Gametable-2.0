@@ -503,34 +503,6 @@ export function DiscoverGames() {
                 </div>
               </div>
             )}
-            {selectedCategory === "miniature" && armyMode !== "idle" && (
-              <div className="mt-4 rounded border border-accent-gold/20 p-3 space-y-2">
-                {armyMode === "select" ? (
-                  <>
-                    <span className="text-accent-gold font-cinzel text-sm">Army context</span>
-                    <select
-                      value={selectedArmy?.id ?? ""}
-                      onChange={(event) => setSelectedArmy(miniatureArmies.find((army) => army.id === event.target.value) ?? null)}
-                      className={cn("h-9 w-full rounded-md px-2 text-sm", archiveField)}
-                    >
-                      <option value="">Select an Army</option>
-                      {miniatureArmies.map((army) => <option key={army.id} value={army.id}>{army.name}</option>)}
-                    </select>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-accent-gold font-cinzel text-sm">Create Army context</span>
-                    <div className="flex gap-2">
-                      <Input value={armyName} onChange={(event) => setArmyName(event.target.value)} placeholder="Army name" className={archiveField} />
-                      <ArchiveCardButton type="button" onClick={handleCreateMiniatureArmy} disabled={armyLoading || !armyName.trim()}>
-                        {armyLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create"}
-                      </ArchiveCardButton>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-            
             <div className={`flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 mt-4 ${selectedCategory !== "trading_card" && selectedCategory !== "miniature" ? "pt-4 border-t border-accent-gold/20" : ""}`}>
               <ArchiveCardButton onClick={() => setSelectedGame(null)} className="w-full sm:w-auto">
                 {t("common.cancel")}
@@ -547,7 +519,7 @@ export function DiscoverGames() {
               )}
               <ArchiveCardButton
                 onClick={() => handleAddGame('owned')}
-                disabled={addingGame !== null || (selectedCategory === "miniature" && armyMode !== "idle" && !selectedArmy)}
+                disabled={addingGame !== null}
                 active
                 className="w-full sm:w-auto"
                 icon={addingGame?.type === 'collection' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
