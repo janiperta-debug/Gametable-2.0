@@ -47,7 +47,7 @@ export default function Collection() {
     })
   }
 
-  const handleToggleWishlist = async (gameId: string, domain: CollectionDomain) => {
+  const handleToggleWishlist = async (gameId: string, domain?: CollectionDomain) => {
     if (domain === "miniature") {
       const result = await removeMiniatureFromWishlist(gameId)
       if (!result.success) {
@@ -60,11 +60,6 @@ export default function Collection() {
       }
 
       await refetch()
-      toast({
-        title: t("common.updated"),
-        description: t("collection.wishlistUpdated"),
-      })
-      return
     }
 
     toast({
