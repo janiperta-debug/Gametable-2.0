@@ -20,7 +20,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 interface CollectionCardProps {
   item: CollectionCardItem
   onToggleForTrade?: (gameId: string) => void
-  onToggleWishlist?: (gameId: string) => void
+  onToggleWishlist?: (gameId: string, domain: CollectionCardItem["entry"]["domain"]) => void
   showMarketplaceButton?: boolean
   showWishlistButton?: boolean
 }
@@ -75,6 +75,14 @@ export function CollectionCard({
           <div className="relative mb-4">
             <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-surface/50">
               <Image src={card.image} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+              {entry.status === 'wishlist' && (
+                <div className="absolute top-2 right-2">
+                  <Badge variant="secondary" className="bg-accent-gold/90 text-background font-body">
+                    <Heart className="h-3 w-3 mr-1 fill-current" />
+                    {t("collection.wishlist")}
+                  </Badge>
+                </div>
+              )}
             </div>
           </div>
           <div className="space-y-3">
@@ -94,6 +102,17 @@ export function CollectionCard({
                 {card.pointsTotal != null && ` (${card.pointsTotal} pts)`}
               </span>
             </div>
+            {showWishlistButton && (
+              <div className="flex justify-end pt-2">
+                <ArchiveIconButton
+                  icon={<Heart className={`h-4 w-4 ${entry.status === 'wishlist' ? "fill-current" : ""}`} />}
+                  active={entry.status === 'wishlist'}
+                  onClick={() => onToggleWishlist?.(card.id, entry.domain)}
+                  aria-label={t("collection.wishlist")}
+                  title={t("collection.wishlist")}
+                />
+              </div>
+            )}
           </div>
         </div>
       </ArchiveCard>
@@ -185,7 +204,7 @@ export function CollectionCard({
               <ArchiveIconButton
                 icon={<Heart className={`h-4 w-4 ${card.wishlist ? "fill-current" : ""}`} />}
                 active={card.wishlist}
-                onClick={() => onToggleWishlist?.(card.id)}
+                onClick={() => onToggleWishlist?.(card.id, entry.domain)}
                 aria-label={t("collection.wishlist")}
               />
             )}
