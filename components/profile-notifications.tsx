@@ -46,7 +46,7 @@ export function ProfileNotifications() {
         .single()
 
       if (data?.email_notification_types) {
-        setEmailPrefs(data.email_notification_types as EmailNotificationPrefs)
+        setEmailPrefs({ ...defaultPrefs, ...(data.email_notification_types as Partial<EmailNotificationPrefs>) })
       }
       setLoading(false)
     }
@@ -113,15 +113,22 @@ export function ProfileNotifications() {
                 <div key={key} className="flex items-center justify-between py-2">
                   <span className="font-merriweather text-foreground">{label}</span>
                   <button
+                    type="button"
                     onClick={() => handleToggle(key)}
                     disabled={saving}
-                    className={`relative w-12 h-6 rounded-full transition-colors ${
-                      emailPrefs[key] ? "bg-accent-gold" : "bg-muted"
+                    aria-label={label}
+                    aria-pressed={emailPrefs[key]}
+                    className={`relative w-12 h-6 rounded-full border-2 transition-colors ${
+                      emailPrefs[key]
+                        ? "bg-accent-gold border-accent-gold"
+                        : "bg-background border-accent-gold/60"
                     }`}
                   >
                     <span
-                      className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
-                        emailPrefs[key] ? "translate-x-7" : "translate-x-1"
+                      className={`absolute top-0.5 w-4 h-4 rounded-full transition-transform ${
+                        emailPrefs[key]
+                          ? "translate-x-6 bg-white"
+                          : "translate-x-0.5 bg-accent-gold"
                       }`}
                     />
                   </button>
