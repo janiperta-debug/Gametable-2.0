@@ -16,10 +16,10 @@ interface EmailNotificationPrefs {
 }
 
 const defaultPrefs: EmailNotificationPrefs = {
-  friend_request: false,
-  badge_earned: false,
-  event_rsvp: false,
-  new_message: false,
+  friend_request: true,
+  badge_earned: true,
+  event_rsvp: true,
+  new_message: true,
   admin_broadcast: true,
 }
 
