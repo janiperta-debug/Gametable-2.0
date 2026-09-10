@@ -39,8 +39,6 @@ export function useCollection() {
 
     const directGameIds = (data || []).map((ug) => ug.game_id)
 
-    // Also find base games the user owns expansions for but has NOT added
-    // directly — these become "expansion-only host" cards.
     const { data: ownedExpData } = await supabase
       .from('user_game_expansions')
       .select('game_expansion_id, game_expansion:game_expansions(id, base_game_id)')
@@ -57,7 +55,6 @@ export function useCollection() {
       }
     }
 
-    // Fetch the base game rows for expansion-only hosts.
     const expansionOnlyHostRows: UserGameWithGame[] = []
     if (expansionOnlyBaseIds.size > 0) {
       const { data: hostGames } = await supabase
@@ -80,11 +77,7 @@ export function useCollection() {
       }
     }
 
-    // All game IDs to load the full expansion catalog for.
     const allGameIds = [...directGameIds, ...Array.from(expansionOnlyBaseIds)]
-
-    // Fetch the FULL expansion catalog for all host games so each card shows
-    // every expansion — owned ones in color, missing ones darkened.
     const expansionsByGameId = new Map<string, OwnedExpansion[]>()
 
     if (allGameIds.length > 0) {
@@ -116,7 +109,7 @@ export function useCollection() {
     const hostRows = expansionOnlyHostRows.map(attachExpansions)
     const mergedRows = [...directRows, ...hostRows]
 
-    const [tcgResult, miniResult, rpgCatalogResult] = await Promise.all([
+    const [tcgResult, miniResult, miniWishlistResult, rpgCatalogResult] = await Promise.all([
       supabase
         .from('tcg_collection')
         .select(`
@@ -174,16 +167,41 @@ export function useCollection() {
           )
         `)
         .eq('user_id', user.id)
-        // mini_army_units has no created_at/added_at column in production,
-        // so there is no timestamp to order by here (unlike tcg_collection).
         .eq('owned', true),
-      // RPG group counts come from the complete public RPG catalog, not just
-      // the user's owned rows. This keeps e.g. Pathfinder at 4 total items
-      // even when the user owns only one of those books.
+      supabase
+        .from('miniature_wishlist')
+        .select(`
+          id,
+          unit_id,
+          created_at,
+          unit:mini_units (
+            id,
+            name,
+            unit_type,
+            base_points,
+            model_count_min,
+            model_count_max,
+            faction:mini_factions (
+              id,
+              name,
+              system:mini_systems (
+                id,
+                code,
+                name
+              )
+            )
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false }),
       supabase
         .from('rpg_catalog_items')
         .select('game_id, rpg:rpg_catalog(id, name)'),
     ])
+
+    if (miniWishlistResult.error) {
+      console.error('Miniatures wishlist fetch error:', miniWishlistResult.error)
+    }
 
     const miniatureRows = miniResult.data || []
     const armyIds = [...new Set(miniatureRows.map((row) => row.army_id).filter(Boolean))]
@@ -211,6 +229,7 @@ export function useCollection() {
         userGames: mergedRows,
         tcgCollection: tcgResult.data || [],
         miniatureCollection,
+        miniatureWishlist: miniWishlistResult.data || [],
         rpgCatalogItems: rpgCatalogResult.data || [],
       })
     )
@@ -222,7 +241,6 @@ export function useCollection() {
     fetchGames()
   }, [fetchGames])
 
-  // Subscribe to real-time changes
   useEffect(() => {
     const supabase = createClient()
     
