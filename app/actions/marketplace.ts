@@ -19,18 +19,8 @@ export interface MarketplaceListing {
   status: ListingStatus
   is_active: boolean
   created_at: string
-  game?: {
-    id: string
-    name: string
-    thumbnail_url: string | null
-  }
-  seller?: {
-    id: string
-    display_name: string | null
-    username: string | null
-    avatar_url: string | null
-    location: string | null
-  }
+  game?: { id: string; name: string; thumbnail_url: string | null }
+  seller?: { id: string; display_name: string | null; username: string | null; avatar_url: string | null; location: string | null }
 }
 
 export interface WishlistItem {
@@ -40,19 +30,8 @@ export interface WishlistItem {
   priority: number
   notes: string | null
   created_at: string
-  game?: {
-    id: string
-    name: string
-    thumbnail_url: string | null
-    image_url?: string | null
-  }
-  user?: {
-    id: string
-    display_name: string | null
-    username: string | null
-    avatar_url: string | null
-    location: string | null
-  }
+  game?: { id: string; name: string; thumbnail_url: string | null; image_url?: string | null }
+  user?: { id: string; display_name: string | null; username: string | null; avatar_url: string | null; location: string | null }
 }
 
 export type WishlistEntry = WishlistItem
@@ -60,184 +39,68 @@ export type WishlistEntry = WishlistItem
 export interface UserGameForListing {
   id: string
   game_id: string
-  game: {
-    id: string
-    name: string
-    thumbnail_url: string | null
-  }
+  game: { id: string; name: string; thumbnail_url: string | null }
 }
 
-export async function getMarketplaceListings(filters?: {
-  listingType?: ListingType
-  search?: string
-}) {
+export async function getMarketplaceListings(filters?: { listingType?: ListingType; search?: string }) {
   const supabase = await createClient()
-
-  let query = supabase
-    .from("marketplace_listings")
-    .select(`
-      *,
-      game:games(id, name, thumbnail_url),
-      seller:profiles(id, display_name, username, avatar_url, location)
-    `)
-    .eq("is_active", true)
-    .eq("status", "active")
-    .order("created_at", { ascending: false })
-
+  let query = supabase.from("marketplace_listings").select(`*, game:games(id, name, thumbnail_url), seller:profiles(id, display_name, username, avatar_url, location)`).eq("is_active", true).eq("status", "active").order("created_at", { ascending: false })
   if (filters?.listingType) query = query.eq("listing_type", filters.listingType)
-
   const { data, error } = await query
-
-  if (error) {
-    console.error("Error fetching marketplace listings:", error)
-    return { data: [], error: error.message }
-  }
-
+  if (error) { console.error("Error fetching marketplace listings:", error); return { data: [], error: error.message } }
   let listings = data as MarketplaceListing[]
-  if (filters?.search) {
-    const searchLower = filters.search.toLowerCase()
-    listings = listings.filter(l => l.game?.name?.toLowerCase().includes(searchLower))
-  }
-
+  if (filters?.search) { const searchLower = filters.search.toLowerCase(); listings = listings.filter(l => l.game?.name?.toLowerCase().includes(searchLower)) }
   return { data: listings, error: null }
 }
 
 export async function getMyListings() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-
   if (!user) return { data: [], error: "Not authenticated" }
-
-  const { data, error } = await supabase
-    .from("marketplace_listings")
-    .select(`
-      *,
-      game:games(id, name, thumbnail_url),
-      seller:profiles(id, display_name, username, avatar_url, location)
-    `)
-    .eq("seller_id", user.id)
-    .order("created_at", { ascending: false })
-
-  if (error) {
-    console.error("Error fetching my listings:", error)
-    return { data: [], error: error.message }
-  }
-
+  const { data, error } = await supabase.from("marketplace_listings").select(`*, game:games(id, name, thumbnail_url), seller:profiles(id, display_name, username, avatar_url, location)`).eq("seller_id", user.id).order("created_at", { ascending: false })
+  if (error) { console.error("Error fetching my listings:", error); return { data: [], error: error.message } }
   return { data: data as MarketplaceListing[], error: null }
 }
 
 export async function getMyGamesForListing() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-
   if (!user) return { data: [], error: "Not authenticated" }
-
-  const { data, error } = await supabase
-    .from("user_games")
-    .select(`
-      id,
-      game_id,
-      status,
-      game:games(id, name, thumbnail_url)
-    `)
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-
-  if (error) {
-    console.error("Error fetching user games:", error)
-    return { data: [], error: error.message }
-  }
-
+  const { data, error } = await supabase.from("user_games").select(`id, game_id, status, game:games(id, name, thumbnail_url)`).eq("user_id", user.id).order("created_at", { ascending: false })
+  if (error) { console.error("Error fetching user games:", error); return { data: [], error: error.message } }
   const ownedGames = data?.filter(g => !g.status || g.status === "owned") || []
   return { data: ownedGames as UserGameForListing[], error: null }
 }
 
 export const getUserGamesForListing = getMyGamesForListing
 
-export async function createListing(input: {
-  user_game_id: string
-  listing_type: ListingType
-  condition: ListingCondition
-  price?: number
-  description?: string
-}) {
+export async function createListing(input: { user_game_id: string; listing_type: ListingType; condition: ListingCondition; price?: number; description?: string }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-
   if (!user) return { success: false, error: "Not authenticated" }
+  const { data: userGame, error: userGameError } = await supabase.from("user_games").select("id, game_id").eq("id", input.user_game_id).eq("user_id", user.id).eq("status", "owned").single()
+  if (userGameError || !userGame) { console.error("Error fetching user game:", userGameError); return { success: false, error: "Game not found in your collection" } }
 
-  // Validate that the selected collection item belongs to the current user.
-  // Keep the original user_games id so the listing remains tied to ownership.
-  const { data: userGame, error: userGameError } = await supabase
-    .from("user_games")
-    .select("id, game_id")
-    .eq("id", input.user_game_id)
-    .eq("user_id", user.id)
-    .eq("status", "owned")
-    .single()
-
-  if (userGameError || !userGame) {
-    console.error("Error fetching user game:", userGameError)
-    return { success: false, error: "Game not found in your collection" }
-  }
-
-  const conditionMap: Record<string, string> = {
-    new: "mint",
+  const conditionMap: Record<ListingCondition, ListingCondition> = {
+    new: "new",
     like_new: "like_new",
     good: "good",
     fair: "fair",
-    poor: "fair",
+    poor: "poor",
   }
 
-  const { data, error } = await supabase
-    .from("marketplace_listings")
-    .insert({
-      seller_id: user.id,
-      user_game_id: userGame.id,
-      game_id: userGame.game_id,
-      listing_type: input.listing_type,
-      condition: conditionMap[input.condition] || "good",
-      price: input.price || null,
-      description: input.description || null,
-      status: "active",
-    })
-    .select()
-    .single()
-
-  if (error) {
-    console.error("Error creating listing:", error)
-    return { success: false, error: error.message }
-  }
-
+  const { data, error } = await supabase.from("marketplace_listings").insert({ seller_id: user.id, user_game_id: userGame.id, game_id: userGame.game_id, listing_type: input.listing_type, condition: conditionMap[input.condition], price: input.price || null, description: input.description || null, status: "active" }).select().single()
+  if (error) { console.error("Error creating listing:", error); return { success: false, error: error.message } }
   revalidatePath("/marketplace")
   return { success: true, data }
 }
 
-export async function updateListing(
-  listingId: string,
-  updates: {
-    listing_type?: ListingType
-    condition?: ListingCondition
-    price?: number | null
-    description?: string | null
-    status?: ListingStatus
-  }
-) {
+export async function updateListing(listingId: string, updates: { listing_type?: ListingType; condition?: ListingCondition; price?: number | null; description?: string | null; status?: ListingStatus }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: "Not authenticated" }
-
-  const { error } = await supabase
-    .from("marketplace_listings")
-    .update({ ...updates, updated_at: new Date().toISOString() })
-    .eq("id", listingId)
-    .eq("seller_id", user.id)
-
-  if (error) {
-    console.error("Error updating listing:", error)
-    return { success: false, error: error.message }
-  }
-
+  const { error } = await supabase.from("marketplace_listings").update({ ...updates, updated_at: new Date().toISOString() }).eq("id", listingId).eq("seller_id", user.id)
+  if (error) { console.error("Error updating listing:", error); return { success: false, error: error.message } }
   revalidatePath("/marketplace")
   return { success: true }
 }
@@ -246,77 +109,26 @@ export async function deleteListing(listingId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: "Not authenticated" }
-
-  const { error } = await supabase
-    .from("marketplace_listings")
-    .delete()
-    .eq("id", listingId)
-    .eq("seller_id", user.id)
-
-  if (error) {
-    console.error("Error deleting listing:", error)
-    return { success: false, error: error.message }
-  }
-
+  const { error } = await supabase.from("marketplace_listings").delete().eq("id", listingId).eq("seller_id", user.id)
+  if (error) { console.error("Error deleting listing:", error); return { success: false, error: error.message } }
   revalidatePath("/marketplace")
   return { success: true }
 }
 
 export async function getWishlists() {
   const supabase = await createClient()
-  const { data, error } = await supabase
-    .from("user_games")
-    .select(`
-      id,
-      user_id,
-      game_id,
-      created_at,
-      game:games(id, name, thumbnail_url, image_url),
-      user:profiles(id, display_name, username, avatar_url, location)
-    `)
-    .eq("status", "wishlist")
-    .order("created_at", { ascending: false })
-
-  if (error) {
-    console.error("Error fetching wishlists:", error)
-    return { data: [], error: error.message }
-  }
-
-  const wishlists = (data || []).map(item => ({
-    id: item.id,
-    user_id: item.user_id,
-    game_id: item.game_id,
-    priority: 3,
-    notes: null,
-    created_at: item.created_at,
-    game: item.game,
-    user: item.user,
-  }))
-
+  const { data, error } = await supabase.from("user_games").select(`id, user_id, game_id, created_at, game:games(id, name, thumbnail_url, image_url), user:profiles(id, display_name, username, avatar_url, location)`).eq("status", "wishlist").order("created_at", { ascending: false })
+  if (error) { console.error("Error fetching wishlists:", error); return { data: [], error: error.message } }
+  const wishlists = (data || []).map(item => ({ id: item.id, user_id: item.user_id, game_id: item.game_id, priority: 3, notes: null, created_at: item.created_at, game: item.game, user: item.user }))
   return { data: wishlists as WishlistEntry[], error: null }
 }
 
-export async function addToWishlist(input: {
-  game_id: string
-  priority?: number
-  notes?: string
-}) {
+export async function addToWishlist(input: { game_id: string; priority?: number; notes?: string }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: "Not authenticated" }
-
-  const { error } = await supabase.from("wishlists").insert({
-    user_id: user.id,
-    game_id: input.game_id,
-    priority: input.priority || 3,
-    notes: input.notes || null,
-  })
-
-  if (error) {
-    console.error("Error adding to wishlist:", error)
-    return { success: false, error: error.message }
-  }
-
+  const { error } = await supabase.from("wishlists").insert({ user_id: user.id, game_id: input.game_id, priority: input.priority || 3, notes: input.notes || null })
+  if (error) { console.error("Error adding to wishlist:", error); return { success: false, error: error.message } }
   revalidatePath("/marketplace")
   return { success: true }
 }
@@ -325,18 +137,8 @@ export async function removeFromWishlist(wishlistId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: "Not authenticated" }
-
-  const { error } = await supabase
-    .from("wishlists")
-    .delete()
-    .eq("id", wishlistId)
-    .eq("user_id", user.id)
-
-  if (error) {
-    console.error("Error removing from wishlist:", error)
-    return { success: false, error: error.message }
-  }
-
+  const { error } = await supabase.from("wishlists").delete().eq("id", wishlistId).eq("user_id", user.id)
+  if (error) { console.error("Error removing from wishlist:", error); return { success: false, error: error.message } }
   revalidatePath("/marketplace")
   return { success: true }
 }
@@ -345,57 +147,22 @@ export async function getOrCreateConversation(otherUserId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
-
-  const { data: existing } = await supabase
-    .from("conversations")
-    .select("id, participants")
-    .contains("participants", [user.id])
-
-  const existingConvo = existing?.find(conv => {
-    const participants = conv.participants as string[]
-    return participants.length === 2 && participants.includes(user.id) && participants.includes(otherUserId)
-  })
-
+  const { data: existing } = await supabase.from("conversations").select("id, participants").contains("participants", [user.id])
+  const existingConvo = existing?.find(conv => { const participants = conv.participants as string[]; return participants.length === 2 && participants.includes(user.id) && participants.includes(otherUserId) })
   if (existingConvo) return existingConvo.id
-
-  const { data: created } = await supabase
-    .from("conversations")
-    .insert({ participants: [user.id, otherUserId] })
-    .select("id")
-    .single()
-
+  const { data: created } = await supabase.from("conversations").insert({ participants: [user.id, otherUserId] }).select("id").single()
   return created?.id
 }
 
 export async function contactSeller(sellerId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-
   if (!user) return { success: false, error: "Not authenticated", conversationId: null }
   if (user.id === sellerId) return { success: false, error: "Cannot message yourself", conversationId: null }
-
-  const { data: existingConversations } = await supabase
-    .from("conversations")
-    .select("id, participants")
-    .contains("participants", [user.id])
-
-  const existingConvo = existingConversations?.find(conv => {
-    const participants = conv.participants as string[]
-    return participants.length === 2 && participants.includes(user.id) && participants.includes(sellerId)
-  })
-
+  const { data: existingConversations } = await supabase.from("conversations").select("id, participants").contains("participants", [user.id])
+  const existingConvo = existingConversations?.find(conv => { const participants = conv.participants as string[]; return participants.length === 2 && participants.includes(user.id) && participants.includes(sellerId) })
   if (existingConvo) return { success: true, conversationId: existingConvo.id }
-
-  const { data: newConvo, error } = await supabase
-    .from("conversations")
-    .insert({ participants: [user.id, sellerId] })
-    .select("id")
-    .single()
-
-  if (error) {
-    console.error("Error creating conversation:", error)
-    return { success: false, error: error.message, conversationId: null }
-  }
-
+  const { data: newConvo, error } = await supabase.from("conversations").insert({ participants: [user.id, sellerId] }).select("id").single()
+  if (error) { console.error("Error creating conversation:", error); return { success: false, error: error.message, conversationId: null } }
   return { success: true, conversationId: newConvo.id }
 }
