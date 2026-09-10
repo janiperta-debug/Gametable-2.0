@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/service"
 import { revalidatePath } from "next/cache"
 import {
   sendEmail,
@@ -78,6 +79,7 @@ export async function createNotification(params: {
   title: string
   body?: string
   data?: Record<string, any>
+  sendEmail?: boolean
 }): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const { error } = await supabase.from("notifications").insert({
@@ -90,16 +92,23 @@ export async function createNotification(params: {
   })
   if (error) return { success: false, error: error.message }
 
+  if (params.sendEmail === false) return { success: true }
+
   const emailType = mapNotificationTypeToEmailType(params.type)
   if (emailType) {
     const { data: profile } = await supabase.from("profiles").select("email_notification_types").eq("id", params.user_id).single()
     const emailPrefs = profile?.email_notification_types as Record<string, boolean> | null
     if (emailPrefs?.[emailType]) {
-      const { data: authData } = await supabase.auth.admin.getUserById(params.user_id)
-      const userEmail = authData?.user?.email
-      if (userEmail) {
-        const emailTemplate = getEmailTemplate(emailType, params)
-        if (emailTemplate) await sendEmail({ to: userEmail, subject: emailTemplate.subject, html: emailTemplate.html })
+      try {
+        const serviceClient = createServiceClient()
+        const { data: authData } = await serviceClient.auth.admin.getUserById(params.user_id)
+        const userEmail = authData?.user?.email
+        if (userEmail) {
+          const emailTemplate = getEmailTemplate(emailType, params)
+          if (emailTemplate) await sendEmail({ to: userEmail, subject: emailTemplate.subject, html: emailTemplate.html })
+        }
+      } catch (error) {
+        console.error("[Email] Failed to resolve recipient:", error)
       }
     }
   }
