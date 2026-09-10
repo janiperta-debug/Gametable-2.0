@@ -9,7 +9,7 @@ interface GameGridProps {
   games?: Game[]
   cards?: CollectionCardItem[]
   onToggleForTrade?: (gameId: string) => void
-  onToggleWishlist?: (gameId: string) => void
+  onToggleWishlist?: (gameId: string, domain: CollectionCardItem["entry"]["domain"]) => void
   showMarketplaceButton?: boolean
   showWishlistButton?: boolean
 }
