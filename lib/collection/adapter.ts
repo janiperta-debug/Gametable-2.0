@@ -92,6 +92,13 @@ interface MiniatureCollectionRowLike {
   unit?: MiniatureUnitRowLike | null
 }
 
+interface MiniatureWishlistRowLike {
+  id: string
+  unit_id?: string | null
+  created_at?: string | null
+  unit?: MiniatureUnitRowLike | null
+}
+
 function normalizeStatus(status?: string | null): CollectionStatus {
   switch (status) {
     case 'wishlist':
@@ -176,48 +183,26 @@ export function mapTCGCollectionToCollectionEntry(row: TCGCollectionRowLike): Co
     ownershipId: row.id,
     displayName: card?.name ?? 'Unknown card',
     image: card?.image_url ?? null,
-    // tcg_collection has no `status` column in production — every row here
-    // is, by definition, an owned card. Wishlist state lives in the separate
-    // tcg_wishlist table and is not represented by this mapper.
     status: 'owned',
     detailTarget: null,
     metadata,
   }
 }
 
-/**
- * Maps a `mini_army_units` row (joined through `mini_units` -> `mini_factions`
- * -> `mini_systems`) to a shared CollectionEntry. This mapper represents the
- * user's owned Miniatures Collection: callers are expected to have already
- * filtered rows to `owned = true` at the query level, since `owned = false`
- * has no proven wishlist/army-planning semantics in the current application.
- */
-export function mapMiniatureCollectionToCollectionEntry(row: MiniatureCollectionRowLike): CollectionEntry {
-  if (row.owned !== true) {
-    // `owned = false` (or missing/null) has no proven Collection semantics
-    // yet (it is not established to mean wishlist/army-planning/etc).
-    // Callers must filter to `owned = true` before mapping; fail fast rather
-    // than silently mislabel the row as owned.
-    throw new Error(
-      `mapMiniatureCollectionToCollectionEntry received a mini_army_units row (${row.id}) that is not owned=true; only owned=true rows represent the Collection.`,
-    )
-  }
-
+function buildMiniatureMetadata(row: MiniatureCollectionRowLike | MiniatureWishlistRowLike): CollectionMetadata {
   const unit = row.unit ?? null
   const faction = unit?.faction ?? null
   const system = faction?.system ?? null
-  const catalogId = unit?.id ?? row.unit_id ?? 'unknown-unit'
-
   const metadata: CollectionMetadata = {}
 
-  if (row.model_count != null) metadata.model_count = row.model_count
-  if (row.points_total != null) metadata.points_total = row.points_total
-  if (row.paint_status) metadata.paint_status = row.paint_status
-  if (row.army_id) metadata.army_id = row.army_id
-  if (row.army_name) metadata.army_name = row.army_name
-  if (row.custom_name) metadata.custom_name = row.custom_name
-  if (row.upgrades != null) metadata.upgrades = row.upgrades
-  if (row.is_warlord != null) metadata.is_warlord = row.is_warlord
+  if ('model_count' in row && row.model_count != null) metadata.model_count = row.model_count
+  if ('points_total' in row && row.points_total != null) metadata.points_total = row.points_total
+  if ('paint_status' in row && row.paint_status) metadata.paint_status = row.paint_status
+  if ('army_id' in row && row.army_id) metadata.army_id = row.army_id
+  if ('army_name' in row && row.army_name) metadata.army_name = row.army_name
+  if ('custom_name' in row && row.custom_name) metadata.custom_name = row.custom_name
+  if ('upgrades' in row && row.upgrades != null) metadata.upgrades = row.upgrades
+  if ('is_warlord' in row && row.is_warlord != null) metadata.is_warlord = row.is_warlord
   if (unit?.unit_type) metadata.unit_type = unit.unit_type
   if (unit?.base_points != null) metadata.base_points = unit.base_points
   if (unit?.model_count_min != null) metadata.model_count_min = unit.model_count_min
@@ -225,6 +210,22 @@ export function mapMiniatureCollectionToCollectionEntry(row: MiniatureCollection
   if (faction?.name) metadata.faction = faction.name
   if (system?.code) metadata.system = system.code
   if (system?.name) metadata.system_name = system.name
+
+  return metadata
+}
+
+/**
+ * Maps an owned `mini_army_units` row to the shared CollectionEntry model.
+ */
+export function mapMiniatureCollectionToCollectionEntry(row: MiniatureCollectionRowLike): CollectionEntry {
+  if (row.owned !== true) {
+    throw new Error(
+      `mapMiniatureCollectionToCollectionEntry received a mini_army_units row (${row.id}) that is not owned=true; only owned=true rows represent the Collection.`,
+    )
+  }
+
+  const unit = row.unit ?? null
+  const catalogId = unit?.id ?? row.unit_id ?? 'unknown-unit'
 
   return {
     domain: 'miniature',
@@ -234,7 +235,27 @@ export function mapMiniatureCollectionToCollectionEntry(row: MiniatureCollection
     image: null,
     status: 'owned',
     detailTarget: null,
-    metadata,
+    metadata: buildMiniatureMetadata(row),
+  }
+}
+
+/**
+ * Maps the first-class `miniature_wishlist` row into the same CollectionEntry
+ * model as owned Miniatures, so Wishlist remains a shared Collection view.
+ */
+export function mapMiniatureWishlistToCollectionEntry(row: MiniatureWishlistRowLike): CollectionEntry {
+  const unit = row.unit ?? null
+  const catalogId = unit?.id ?? row.unit_id ?? 'unknown-unit'
+
+  return {
+    domain: 'miniature',
+    catalogId,
+    ownershipId: row.id,
+    displayName: unit?.name ?? 'Unknown miniature',
+    image: null,
+    status: 'wishlist',
+    detailTarget: null,
+    metadata: buildMiniatureMetadata(row),
   }
 }
 
