@@ -82,14 +82,17 @@ export async function createNotification(params: {
   sendEmail?: boolean
 }): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
-  const { error } = await supabase.from("notifications").insert({
-    user_id: params.user_id,
-    type: params.type,
-    title: params.title,
-    body: params.body || null,
-    data: params.data || {},
-    read: false,
+
+  // Notification creation is a server-side system action: the caller is authenticated
+  // before reaching this function, while the SECURITY DEFINER RPC handles the cross-user insert.
+  const { error } = await supabase.rpc("create_notification_server", {
+    p_user_id: params.user_id,
+    p_type: params.type,
+    p_title: params.title,
+    p_body: params.body || null,
+    p_data: params.data || {},
   })
+
   if (error) return { success: false, error: error.message }
   if (params.sendEmail === false) return { success: true }
 
