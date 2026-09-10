@@ -78,8 +78,19 @@ export async function createListing(input: { user_game_id: string; listing_type:
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: "Not authenticated" }
-  const { data: userGame, error: userGameError } = await supabase.from("user_games").select("id, game_id").eq("id", input.user_game_id).eq("user_id", user.id).eq("status", "owned").single()
-  if (userGameError || !userGame) { console.error("Error fetching user game:", userGameError); return { success: false, error: "Game not found in your collection" } }
+
+  const { data: userGame, error: userGameError } = await supabase
+    .from("user_games")
+    .select("id, game_id")
+    .eq("id", input.user_game_id)
+    .eq("user_id", user.id)
+    .or("status.eq.owned,status.is.null")
+    .single()
+
+  if (userGameError || !userGame) {
+    console.error("Error fetching user game:", userGameError)
+    return { success: false, error: "Game not found in your collection" }
+  }
 
   const conditionMap: Record<ListingCondition, ListingCondition> = {
     new: "new",
@@ -89,8 +100,22 @@ export async function createListing(input: { user_game_id: string; listing_type:
     poor: "poor",
   }
 
-  const { data, error } = await supabase.from("marketplace_listings").insert({ seller_id: user.id, user_game_id: userGame.id, game_id: userGame.game_id, listing_type: input.listing_type, condition: conditionMap[input.condition], price: input.price || null, description: input.description || null, status: "active" }).select().single()
-  if (error) { console.error("Error creating listing:", error); return { success: false, error: error.message } }
+  const { data, error } = await supabase.from("marketplace_listings").insert({
+    seller_id: user.id,
+    user_game_id: userGame.id,
+    game_id: userGame.game_id,
+    listing_type: input.listing_type,
+    condition: conditionMap[input.condition],
+    price: input.price || null,
+    description: input.description || null,
+    status: "active",
+  }).select().single()
+
+  if (error) {
+    console.error("Error creating listing:", error)
+    return { success: false, error: error.message }
+  }
+
   revalidatePath("/marketplace")
   return { success: true, data }
 }
