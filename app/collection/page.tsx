@@ -14,6 +14,7 @@ import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "@/lib/i18n"
 import { useCollection } from "@/hooks/useCollection"
+import { removeMiniatureFromWishlist } from "@/app/actions/miniature-wishlist"
 import { buildCollectionCardsFromEntries } from "@/lib/collection/card"
 import {
   applyCollectionControls,
@@ -21,6 +22,7 @@ import {
   getStatusCounts,
   type CollectionCategoryFilter,
 } from "@/lib/collection/filters"
+import type { CollectionDomain } from "@/lib/types/collection"
 
 type CategoryType = CollectionCategoryFilter
 
@@ -30,7 +32,7 @@ export default function Collection() {
   const [showFilters, setShowFilters] = useState(false)
   const { toast } = useToast()
   const t = useTranslations()
-  const { games: userGames, collectionEntries, loading } = useCollection()
+  const { games: userGames, collectionEntries, loading, refetch } = useCollection()
 
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [searchQuery, setSearchQuery] = useState("")
@@ -45,7 +47,26 @@ export default function Collection() {
     })
   }
 
-  const handleToggleWishlist = (gameId: string) => {
+  const handleToggleWishlist = async (gameId: string, domain: CollectionDomain) => {
+    if (domain === "miniature") {
+      const result = await removeMiniatureFromWishlist(gameId)
+      if (!result.success) {
+        toast({
+          title: t("common.error"),
+          description: result.error,
+          variant: "destructive",
+        })
+        return
+      }
+
+      await refetch()
+      toast({
+        title: t("common.updated"),
+        description: t("collection.wishlistUpdated"),
+      })
+      return
+    }
+
     toast({
       title: t("common.updated"),
       description: t("collection.wishlistUpdated"),
@@ -141,7 +162,9 @@ export default function Collection() {
                   <GameGrid
                     cards={filteredAndSortedGames}
                     onToggleForTrade={handleToggleForTrade}
+                    onToggleWishlist={handleToggleWishlist}
                     showMarketplaceButton={true}
+                    showWishlistButton={true}
                   />
                 ) : (
                   <GameList cards={filteredAndSortedGames} />
