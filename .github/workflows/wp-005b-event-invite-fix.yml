@@ -1,0 +1,120 @@
+name: WP-005B event invite fix
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Patch event invitation delivery
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('app/actions/events.ts')
+          text = path.read_text()
+
+          if 'import { createNotification } from "@/app/actions/notifications"' not in text:
+              text = text.replace(
+                  'import { revalidatePath } from "next/cache"\n',
+                  'import { revalidatePath } from "next/cache"\nimport { createNotification } from "@/app/actions/notifications"\n',
+                  1,
+              )
+
+          old_select = '''  const { data: event } = await supabase
+    .from("events")
+    .select("host_id")
+    .eq("id", eventId)
+    .single()
+'''
+
+          new_select = '''  const { data: event } = await supabase
+    .from("events")
+    .select("host_id, title")
+    .eq("id", eventId)
+    .single()
+'''
+
+          marker = '''export async function inviteToEvent(
+  eventId: string,
+  userId: string
+): Promise<{ success: boolean; error?: string }> {'''
+          start = text.index(marker)
+          end = text.index('\n}\n\n/**\n * Remove invitation', start) + 2
+          block = text[start:end]
+
+          block = block.replace(old_select, new_select, 1)
+
+          insert_marker = '''  if (error) {
+    console.error("Error inviting user:", error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath(`/events/${eventId}`)'''
+          replacement = '''  if (error) {
+    console.error("Error inviting user:", error)
+    return { success: false, error: error.message }
+  }
+
+  try {
+    const { data: hostProfile } = await supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("id", user.id)
+      .single()
+
+    const notificationResult = await createNotification({
+      user_id: userId,
+      type: "event_invite",
+      title: "Event Invitation",
+      body: `${hostProfile?.display_name || "Someone"} invited you to ${event.title || "an event"}`,
+      data: {
+        notification_type: "event_invite",
+        event_id: eventId,
+        event_name: event.title || "an event",
+        host_name: hostProfile?.display_name || "Someone",
+      },
+    })
+
+    if (!notificationResult.success) {
+      console.error("[Events] Failed to create invitation notification:", notificationResult.error)
+    }
+  } catch (notificationError) {
+    console.error("[Events] Failed to deliver invitation notification:", notificationError)
+  }
+
+  revalidatePath(`/events/${eventId}`)'''
+
+          if insert_marker not in block:
+              raise SystemExit('Invitation insert marker not found')
+          block = block.replace(insert_marker, replacement, 1)
+          text = text[:start] + block + text[end:]
+
+          path.write_text(text)
+          PY
+
+      - name: Commit patched source
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/actions/events.ts .github/workflows/wp-005b-event-invite-fix.yml
+          git commit -m 'WP-005B: deliver event invitation email through notifications' || exit 0
+          git push
+
+      - name: Remove one-shot workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/wp-005b-event-invite-fix.yml
+          git commit -m 'chore: remove one-shot event invite patch workflow'
+          git push
