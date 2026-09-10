@@ -12,7 +12,6 @@ export async function inviteToEvent(
   userId: string
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
-
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return { success: false, error: "Unauthorized" }
 
