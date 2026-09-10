@@ -2,6 +2,7 @@ import type { CollectionEntry, CollectionMetadata } from '@/lib/types/collection
 
 import {
   mapMiniatureCollectionToCollectionEntry,
+  mapMiniatureWishlistToCollectionEntry,
   mapTCGCollectionToCollectionEntry,
   mapUserGameExpansionToCollectionEntry,
   mapUserGameToCollectionEntry,
@@ -71,6 +72,28 @@ export interface CollectionQueryInputs {
     custom_name?: string | null
     upgrades?: unknown
     is_warlord?: boolean | null
+    unit?: {
+      id?: string | null
+      name?: string | null
+      unit_type?: string | null
+      base_points?: number | null
+      model_count_min?: number | null
+      model_count_max?: number | null
+      faction?: {
+        id?: string | null
+        name?: string | null
+        system?: {
+          id?: string | null
+          code?: string | null
+          name?: string | null
+        } | null
+      } | null
+    } | null
+  }>
+  miniatureWishlist?: Array<{
+    id: string
+    unit_id?: string | null
+    created_at?: string | null
     unit?: {
       id?: string | null
       name?: string | null
@@ -188,6 +211,7 @@ export function getCollectionEntries({
   userGames = [],
   tcgCollection = [],
   miniatureCollection = [],
+  miniatureWishlist = [],
   expansions = [],
   rpgCatalogItems = [],
 }: CollectionQueryInputs = {}): CollectionEntry[] {
@@ -218,6 +242,10 @@ export function getCollectionEntries({
       continue
     }
     pushIfUnique(mapMiniatureCollectionToCollectionEntry(row))
+  }
+
+  for (const row of miniatureWishlist) {
+    pushIfUnique(mapMiniatureWishlistToCollectionEntry(row))
   }
 
   for (const row of expansions) {
