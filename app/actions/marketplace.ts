@@ -10,6 +10,7 @@ export type ListingStatus = "active" | "sold" | "reserved" | "cancelled"
 export interface MarketplaceListing {
   id: string
   seller_id: string
+  user_game_id: string | null
   game_id: string
   listing_type: ListingType
   condition: ListingCondition
@@ -54,7 +55,6 @@ export interface WishlistItem {
   }
 }
 
-// Alias for backwards compatibility
 export type WishlistEntry = WishlistItem
 
 export interface UserGameForListing {
@@ -67,7 +67,6 @@ export interface UserGameForListing {
   }
 }
 
-// Get all active marketplace listings
 export async function getMarketplaceListings(filters?: {
   listingType?: ListingType
   search?: string
@@ -85,13 +84,7 @@ export async function getMarketplaceListings(filters?: {
     .eq("status", "active")
     .order("created_at", { ascending: false })
 
-  if (filters?.listingType) {
-    query = query.eq("listing_type", filters.listingType)
-  }
-
-  if (filters?.search) {
-    // Search in game name - need to filter after fetching due to join limitations
-  }
+  if (filters?.listingType) query = query.eq("listing_type", filters.listingType)
 
   const { data, error } = await query
 
@@ -100,26 +93,20 @@ export async function getMarketplaceListings(filters?: {
     return { data: [], error: error.message }
   }
 
-  // Filter by search if provided
   let listings = data as MarketplaceListing[]
   if (filters?.search) {
     const searchLower = filters.search.toLowerCase()
-    listings = listings.filter(l => 
-      l.game?.name?.toLowerCase().includes(searchLower)
-    )
+    listings = listings.filter(l => l.game?.name?.toLowerCase().includes(searchLower))
   }
 
   return { data: listings, error: null }
 }
 
-// Get user's own listings
 export async function getMyListings() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
-    return { data: [], error: "Not authenticated" }
-  }
+  if (!user) return { data: [], error: "Not authenticated" }
 
   const { data, error } = await supabase
     .from("marketplace_listings")
@@ -139,17 +126,13 @@ export async function getMyListings() {
   return { data: data as MarketplaceListing[], error: null }
 }
 
-// Get user's games that can be listed (from their collection)
 export async function getMyGamesForListing() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
-    return { data: [], error: "Not authenticated" }
-  }
+  if (!user) return { data: [], error: "Not authenticated" }
 
-  // First try with status filter
-  let { data, error } = await supabase
+  const { data, error } = await supabase
     .from("user_games")
     .select(`
       id,
@@ -165,16 +148,12 @@ export async function getMyGamesForListing() {
     return { data: [], error: error.message }
   }
 
-  // Filter to only owned games (not wishlist) if status column exists
   const ownedGames = data?.filter(g => !g.status || g.status === "owned") || []
-
   return { data: ownedGames as UserGameForListing[], error: null }
 }
 
-// Alias for backwards compatibility
 export const getUserGamesForListing = getMyGamesForListing
 
-// Create a new listing
 export async function createListing(input: {
   user_game_id: string
   listing_type: ListingType
@@ -185,16 +164,16 @@ export async function createListing(input: {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
-    return { success: false, error: "Not authenticated" }
-  }
+  if (!user) return { success: false, error: "Not authenticated" }
 
-  // Get the game_id from the user_game
+  // Validate that the selected collection item belongs to the current user.
+  // Keep the original user_games id so the listing remains tied to ownership.
   const { data: userGame, error: userGameError } = await supabase
     .from("user_games")
-    .select("game_id")
+    .select("id, game_id")
     .eq("id", input.user_game_id)
     .eq("user_id", user.id)
+    .eq("status", "owned")
     .single()
 
   if (userGameError || !userGame) {
@@ -202,26 +181,22 @@ export async function createListing(input: {
     return { success: false, error: "Game not found in your collection" }
   }
 
-  // Map condition values to match database check constraint
-  // DB allows: 'mint', 'like_new', 'good', 'fair'
-  // Code uses: 'new', 'like_new', 'good', 'fair', 'poor'
   const conditionMap: Record<string, string> = {
-    "new": "mint",
-    "like_new": "like_new",
-    "good": "good",
-    "fair": "fair",
-    "poor": "fair", // Map 'poor' to 'fair' as fallback
+    new: "mint",
+    like_new: "like_new",
+    good: "good",
+    fair: "fair",
+    poor: "fair",
   }
-  
-  const mappedCondition = conditionMap[input.condition] || "good"
 
   const { data, error } = await supabase
     .from("marketplace_listings")
     .insert({
       seller_id: user.id,
+      user_game_id: userGame.id,
       game_id: userGame.game_id,
       listing_type: input.listing_type,
-      condition: mappedCondition,
+      condition: conditionMap[input.condition] || "good",
       price: input.price || null,
       description: input.description || null,
       status: "active",
@@ -238,7 +213,6 @@ export async function createListing(input: {
   return { success: true, data }
 }
 
-// Update a listing
 export async function updateListing(
   listingId: string,
   updates: {
@@ -251,16 +225,13 @@ export async function updateListing(
 ) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { success: false, error: "Not authenticated" }
-  }
+  if (!user) return { success: false, error: "Not authenticated" }
 
   const { error } = await supabase
     .from("marketplace_listings")
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq("id", listingId)
-    .eq("seller_id", user.id) // Ensure user owns the listing
+    .eq("seller_id", user.id)
 
   if (error) {
     console.error("Error updating listing:", error)
@@ -271,20 +242,16 @@ export async function updateListing(
   return { success: true }
 }
 
-// Delete a listing
 export async function deleteListing(listingId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { success: false, error: "Not authenticated" }
-  }
+  if (!user) return { success: false, error: "Not authenticated" }
 
   const { error } = await supabase
     .from("marketplace_listings")
     .delete()
     .eq("id", listingId)
-    .eq("seller_id", user.id) // Ensure user owns the listing
+    .eq("seller_id", user.id)
 
   if (error) {
     console.error("Error deleting listing:", error)
@@ -295,11 +262,8 @@ export async function deleteListing(listingId: string) {
   return { success: true }
 }
 
-// Get all wishlists (for matching)
 export async function getWishlists() {
   const supabase = await createClient()
-  
-  // Get wishlist items from user_games where status is 'wishlist'
   const { data, error } = await supabase
     .from("user_games")
     .select(`
@@ -312,28 +276,26 @@ export async function getWishlists() {
     `)
     .eq("status", "wishlist")
     .order("created_at", { ascending: false })
-  
+
   if (error) {
     console.error("Error fetching wishlists:", error)
     return { data: [], error: error.message }
   }
-  
-  // Transform to WishlistEntry format
+
   const wishlists = (data || []).map(item => ({
     id: item.id,
     user_id: item.user_id,
     game_id: item.game_id,
-    priority: 3, // Default priority since user_games doesn't have this
+    priority: 3,
     notes: null,
     created_at: item.created_at,
     game: item.game,
-    user: item.user
+    user: item.user,
   }))
-  
+
   return { data: wishlists as WishlistEntry[], error: null }
 }
 
-// Add to wishlist
 export async function addToWishlist(input: {
   game_id: string
   priority?: number
@@ -341,19 +303,14 @@ export async function addToWishlist(input: {
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: "Not authenticated" }
 
-  if (!user) {
-    return { success: false, error: "Not authenticated" }
-  }
-
-  const { error } = await supabase
-    .from("wishlists")
-    .insert({
-      user_id: user.id,
-      game_id: input.game_id,
-      priority: input.priority || 3,
-      notes: input.notes || null,
-    })
+  const { error } = await supabase.from("wishlists").insert({
+    user_id: user.id,
+    game_id: input.game_id,
+    priority: input.priority || 3,
+    notes: input.notes || null,
+  })
 
   if (error) {
     console.error("Error adding to wishlist:", error)
@@ -364,14 +321,10 @@ export async function addToWishlist(input: {
   return { success: true }
 }
 
-// Remove from wishlist
 export async function removeFromWishlist(wishlistId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { success: false, error: "Not authenticated" }
-  }
+  if (!user) return { success: false, error: "Not authenticated" }
 
   const { error } = await supabase
     .from("wishlists")
@@ -388,75 +341,54 @@ export async function removeFromWishlist(wishlistId: string) {
   return { success: true }
 }
 
-/**
- * Get or create a conversation with another user
- */
 export async function getOrCreateConversation(otherUserId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
   const { data: existing } = await supabase
-    .from('conversations')
-    .select('id, participants')
-    .contains('participants', [user.id])
+    .from("conversations")
+    .select("id, participants")
+    .contains("participants", [user.id])
 
-  // Find conversation with exactly these two participants
   const existingConvo = existing?.find(conv => {
     const participants = conv.participants as string[]
-    return participants.length === 2 && 
-           participants.includes(user.id) && 
-           participants.includes(otherUserId)
+    return participants.length === 2 && participants.includes(user.id) && participants.includes(otherUserId)
   })
 
   if (existingConvo) return existingConvo.id
 
   const { data: created } = await supabase
-    .from('conversations')
+    .from("conversations")
     .insert({ participants: [user.id, otherUserId] })
-    .select('id')
+    .select("id")
     .single()
 
   return created?.id
 }
 
-// Contact seller - creates or finds existing conversation
 export async function contactSeller(sellerId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
-    return { success: false, error: "Not authenticated", conversationId: null }
-  }
+  if (!user) return { success: false, error: "Not authenticated", conversationId: null }
+  if (user.id === sellerId) return { success: false, error: "Cannot message yourself", conversationId: null }
 
-  if (user.id === sellerId) {
-    return { success: false, error: "Cannot message yourself", conversationId: null }
-  }
-
-  // Check for existing conversation between these two users
   const { data: existingConversations } = await supabase
     .from("conversations")
     .select("id, participants")
     .contains("participants", [user.id])
 
-  // Find a conversation that has exactly these two participants
   const existingConvo = existingConversations?.find(conv => {
     const participants = conv.participants as string[]
-    return participants.length === 2 && 
-           participants.includes(user.id) && 
-           participants.includes(sellerId)
+    return participants.length === 2 && participants.includes(user.id) && participants.includes(sellerId)
   })
 
-  if (existingConvo) {
-    return { success: true, conversationId: existingConvo.id }
-  }
+  if (existingConvo) return { success: true, conversationId: existingConvo.id }
 
-  // Create new conversation
   const { data: newConvo, error } = await supabase
     .from("conversations")
-    .insert({
-      participants: [user.id, sellerId],
-    })
+    .insert({ participants: [user.id, sellerId] })
     .select("id")
     .single()
 
