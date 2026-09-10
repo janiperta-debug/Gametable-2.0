@@ -1,3 +1,5 @@
+"use server"
+
 import { createClient } from "@/lib/supabase/server"
 import { createNotification } from "@/app/actions/notifications"
 import { revalidatePath } from "next/cache"
@@ -9,8 +11,6 @@ export async function inviteToEvent(
   eventId: string,
   userId: string
 ): Promise<{ success: boolean; error?: string }> {
-  "use server"
-
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return { success: false, error: "Unauthorized" }
