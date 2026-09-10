@@ -91,7 +91,6 @@ export async function createNotification(params: {
     read: false,
   })
   if (error) return { success: false, error: error.message }
-
   if (params.sendEmail === false) return { success: true }
 
   const emailType = mapNotificationTypeToEmailType(params.type)
@@ -108,7 +107,7 @@ export async function createNotification(params: {
           if (emailTemplate) await sendEmail({ to: userEmail, subject: emailTemplate.subject, html: emailTemplate.html })
         }
       } catch (error) {
-        console.error("[Email] Failed to resolve recipient:", error)
+        console.error("[Email] Failed to deliver notification email:", error)
       }
     }
   }
@@ -120,8 +119,8 @@ function mapNotificationTypeToEmailType(type: Notification["type"]): EmailNotifi
     friend_request: "friend_request",
     friend_accepted: "friend_request",
     badge_earned: "badge_earned",
-    event_invite: "event_invite",
-    event_reminder: "event_invite",
+    event_invite: "event_rsvp",
+    event_reminder: "event_rsvp",
     message: "new_message",
     system: "admin_broadcast",
   }
@@ -135,7 +134,9 @@ function getEmailTemplate(type: EmailNotificationType, params: { title: string; 
     case "badge_earned":
       return getBadgeEarnedEmailTemplate(params.data?.badge_name || "a new badge")
     case "event_rsvp":
-      return getEventRsvpEmailTemplate(params.data?.event_name || "your event", params.data?.attendee_name || "Someone")
+      return params.data?.notification_type === "event_invite"
+        ? getEventInvitationEmailTemplate(params.data?.event_name || "an event", params.data?.host_name || "Someone")
+        : getEventRsvpEmailTemplate(params.data?.event_name || "your event", params.data?.attendee_name || "Someone")
     case "event_invite":
       return getEventInvitationEmailTemplate(params.data?.event_name || "an event", params.data?.host_name || "Someone")
     case "new_message":
