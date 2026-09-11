@@ -84,7 +84,6 @@ export async function createListing(input: { user_game_id: string; listing_type:
     .select("id, game_id")
     .eq("id", input.user_game_id)
     .eq("user_id", user.id)
-    .or("status.eq.owned,status.is.null")
     .single()
 
   if (userGameError || !userGame) {
