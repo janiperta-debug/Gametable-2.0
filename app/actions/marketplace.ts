@@ -19,7 +19,7 @@ export interface MarketplaceListing {
   status: ListingStatus
   created_at: string
   updated_at: string
-  game?: { id: string; name: string; thumbnail_url: string | null }
+  game?: { id: string; name: string; thumbnail_url: string | null; cover_url?: string | null; playing_time?: number | null }
   seller?: { id: string; display_name: string | null; username: string | null; avatar_url: string | null; location: string | null }
 }
 
@@ -44,7 +44,7 @@ export interface UserGameForListing {
 
 export async function getMarketplaceListings(filters?: { listingType?: ListingType; search?: string }) {
   const supabase = await createClient()
-  let query = supabase.from("marketplace_listings").select(`*, game:games(id, name, thumbnail_url), seller:profiles(id, display_name, username, avatar_url, location)`).eq("status", "active").order("created_at", { ascending: false })
+  let query = supabase.from("marketplace_listings").select(`*, game:games(id, name, thumbnail_url, cover_url:image_url, playing_time:min_playtime), seller:profiles(id, display_name, username, avatar_url, location)`).eq("status", "active").order("created_at", { ascending: false })
   if (filters?.listingType) query = query.eq("listing_type", filters.listingType)
   const { data, error } = await query
   if (error) { console.error("Error fetching marketplace listings:", error); return { data: [], error: error.message } }
@@ -57,7 +57,7 @@ export async function getMyListings() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { data: [], error: "Not authenticated" }
-  const { data, error } = await supabase.from("marketplace_listings").select(`*, game:games(id, name, thumbnail_url), seller:profiles(id, display_name, username, avatar_url, location)`).eq("seller_id", user.id).order("created_at", { ascending: false })
+  const { data, error } = await supabase.from("marketplace_listings").select(`*, game:games(id, name, thumbnail_url, cover_url:image_url, playing_time:min_playtime), seller:profiles(id, display_name, username, avatar_url, location)`).eq("seller_id", user.id).order("created_at", { ascending: false })
   if (error) { console.error("Error fetching my listings:", error); return { data: [], error: error.message } }
   return { data: data as MarketplaceListing[], error: null }
 }
