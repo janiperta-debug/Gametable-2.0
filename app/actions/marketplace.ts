@@ -100,7 +100,7 @@ export async function createListing(input: { user_game_id: string; listing_type:
     poor: "poor",
   }
 
-  const { data, error } = await supabase.from("marketplace_listings").insert({
+  const { error } = await supabase.from("marketplace_listings").insert({
     seller_id: user.id,
     user_game_id: userGame.id,
     game_id: userGame.game_id,
@@ -109,7 +109,7 @@ export async function createListing(input: { user_game_id: string; listing_type:
     price: input.price || null,
     description: input.description || null,
     status: "active",
-  }).select().single()
+  })
 
   if (error) {
     console.error("Error creating listing:", error)
@@ -117,7 +117,7 @@ export async function createListing(input: { user_game_id: string; listing_type:
   }
 
   revalidatePath("/marketplace")
-  return { success: true, data }
+  return { success: true }
 }
 
 export async function updateListing(listingId: string, updates: { listing_type?: ListingType; condition?: ListingCondition; price?: number | null; description?: string | null; status?: ListingStatus }) {
