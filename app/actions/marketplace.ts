@@ -17,8 +17,8 @@ export interface MarketplaceListing {
   price: number | null
   description: string | null
   status: ListingStatus
-  is_active: boolean
   created_at: string
+  updated_at: string
   game?: { id: string; name: string; thumbnail_url: string | null }
   seller?: { id: string; display_name: string | null; username: string | null; avatar_url: string | null; location: string | null }
 }
@@ -44,7 +44,7 @@ export interface UserGameForListing {
 
 export async function getMarketplaceListings(filters?: { listingType?: ListingType; search?: string }) {
   const supabase = await createClient()
-  let query = supabase.from("marketplace_listings").select(`*, game:games(id, name, thumbnail_url), seller:profiles(id, display_name, username, avatar_url, location)`).eq("is_active", true).eq("status", "active").order("created_at", { ascending: false })
+  let query = supabase.from("marketplace_listings").select(`*, game:games(id, name, thumbnail_url), seller:profiles(id, display_name, username, avatar_url, location)`).eq("status", "active").order("created_at", { ascending: false })
   if (filters?.listingType) query = query.eq("listing_type", filters.listingType)
   const { data, error } = await query
   if (error) { console.error("Error fetching marketplace listings:", error); return { data: [], error: error.message } }
@@ -92,20 +92,12 @@ export async function createListing(input: { user_game_id: string; listing_type:
     return { success: false, error: "Game not found in your collection" }
   }
 
-  const conditionMap: Record<ListingCondition, string> = {
-    new: "mint",
-    like_new: "like_new",
-    good: "good",
-    fair: "fair",
-    poor: "fair",
-  }
-
   const { error } = await supabase.from("marketplace_listings").insert({
     seller_id: user.id,
     user_game_id: userGame.id,
     game_id: userGame.game_id,
     listing_type: input.listing_type,
-    condition: conditionMap[input.condition],
+    condition: input.condition,
     price: input.price || null,
     description: input.description || null,
     status: "active",
