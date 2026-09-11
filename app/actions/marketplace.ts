@@ -84,6 +84,7 @@ export async function createListing(input: { user_game_id: string; listing_type:
     .select("id, game_id")
     .eq("id", input.user_game_id)
     .eq("user_id", user.id)
+    .eq("status", "owned")
     .single()
 
   if (userGameError || !userGame) {
@@ -151,8 +152,23 @@ export async function addToWishlist(input: { game_id: string; priority?: number;
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: "Not authenticated" }
-  const { error } = await supabase.from("wishlists").insert({ user_id: user.id, game_id: input.game_id, priority: input.priority || 3, notes: input.notes || null })
-  if (error) { console.error("Error adding to wishlist:", error); return { success: false, error: error.message } }
+
+  const { data: existing } = await supabase
+    .from("user_games")
+    .select("id, status")
+    .eq("user_id", user.id)
+    .eq("game_id", input.game_id)
+    .maybeSingle()
+
+  if (existing) {
+    if (existing.status === "wishlist") return { success: true }
+    const { error } = await supabase.from("user_games").update({ status: "wishlist" }).eq("id", existing.id).eq("user_id", user.id)
+    if (error) { console.error("Error updating game to wishlist:", error); return { success: false, error: error.message } }
+  } else {
+    const { error } = await supabase.from("user_games").insert({ user_id: user.id, game_id: input.game_id, status: "wishlist" })
+    if (error) { console.error("Error adding game to wishlist:", error); return { success: false, error: error.message } }
+  }
+
   revalidatePath("/marketplace")
   return { success: true }
 }
@@ -161,8 +177,8 @@ export async function removeFromWishlist(wishlistId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: "Not authenticated" }
-  const { error } = await supabase.from("wishlists").delete().eq("id", wishlistId).eq("user_id", user.id)
-  if (error) { console.error("Error removing from wishlist:", error); return { success: false, error: error.message } }
+  const { error } = await supabase.from("user_games").delete().eq("id", wishlistId).eq("user_id", user.id).eq("status", "wishlist")
+  if (error) { console.error("Error removing game from wishlist:", error); return { success: false, error: error.message } }
   revalidatePath("/marketplace")
   return { success: true }
 }
