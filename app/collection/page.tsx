@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { CollectionHeader, type SortOption, type ViewMode, type StatusFilter } from "@/components/collection-header"
 import { CollectionFilters } from "@/components/collection-filters"
@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "@/lib/i18n"
 import { useCollection } from "@/hooks/useCollection"
 import { removeMiniatureFromWishlist } from "@/app/actions/miniature-wishlist"
+import { getMyListings } from "@/app/actions/marketplace"
 import { buildCollectionCardsFromEntries } from "@/lib/collection/card"
 import {
   applyCollectionControls,
@@ -33,12 +34,34 @@ export default function Collection() {
   const { toast } = useToast()
   const t = useTranslations()
   const { games: userGames, collectionEntries, loading, refetch } = useCollection()
+  const [activeMarketplaceGameIds, setActiveMarketplaceGameIds] = useState<Set<string>>(new Set())
 
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>("all")
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
   const [sortBy, setSortBy] = useState<SortOption>("name-asc")
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadMarketplaceStatus() {
+      const result = await getMyListings()
+      if (cancelled || result.error) return
+      setActiveMarketplaceGameIds(
+        new Set(
+          result.data
+            .filter((listing) => listing.status === "active" && listing.user_game_id)
+            .map((listing) => listing.user_game_id as string),
+        ),
+      )
+    }
+
+    loadMarketplaceStatus()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const handleToggleForTrade = (gameId: string) => {
     toast({
@@ -69,8 +92,8 @@ export default function Collection() {
   }
 
   const collectionCards = useMemo(
-    () => buildCollectionCardsFromEntries(collectionEntries, userGames),
-    [collectionEntries, userGames],
+    () => buildCollectionCardsFromEntries(collectionEntries, userGames, activeMarketplaceGameIds),
+    [collectionEntries, userGames, activeMarketplaceGameIds],
   )
 
   const filteredAndSortedGames = useMemo(
