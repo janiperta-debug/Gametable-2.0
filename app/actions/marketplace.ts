@@ -92,12 +92,12 @@ export async function createListing(input: { user_game_id: string; listing_type:
     return { success: false, error: "Game not found in your collection" }
   }
 
-  const conditionMap: Record<ListingCondition, ListingCondition> = {
-    new: "new",
+  const conditionMap: Record<ListingCondition, string> = {
+    new: "mint",
     like_new: "like_new",
     good: "good",
     fair: "fair",
-    poor: "poor",
+    poor: "fair",
   }
 
   const { error } = await supabase.from("marketplace_listings").insert({
