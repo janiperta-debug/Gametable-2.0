@@ -109,6 +109,7 @@ export async function createListing(input: { user_game_id: string; listing_type:
   }
 
   revalidatePath("/marketplace")
+  revalidatePath("/collection")
   return { success: true }
 }
 
@@ -119,7 +120,30 @@ export async function updateListing(listingId: string, updates: { listing_type?:
   const { error } = await supabase.from("marketplace_listings").update({ ...updates, updated_at: new Date().toISOString() }).eq("id", listingId).eq("seller_id", user.id)
   if (error) { console.error("Error updating listing:", error); return { success: false, error: error.message } }
   revalidatePath("/marketplace")
+  revalidatePath("/collection")
   return { success: true }
+}
+
+export async function cancelListing(listingId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: "Not authenticated" }
+  const { data, error } = await supabase.rpc("cancel_marketplace_listing", { p_listing_id: listingId })
+  if (error) { console.error("Error cancelling listing:", error); return { success: false, error: error.message } }
+  revalidatePath("/marketplace")
+  revalidatePath("/collection")
+  return { success: true, data }
+}
+
+export async function markListingSold(listingId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: "Not authenticated" }
+  const { data, error } = await supabase.rpc("complete_marketplace_sale", { p_listing_id: listingId })
+  if (error) { console.error("Error completing marketplace sale:", error); return { success: false, error: error.message } }
+  revalidatePath("/marketplace")
+  revalidatePath("/collection")
+  return { success: true, data }
 }
 
 export async function deleteListing(listingId: string) {
@@ -129,6 +153,7 @@ export async function deleteListing(listingId: string) {
   const { error } = await supabase.from("marketplace_listings").delete().eq("id", listingId).eq("seller_id", user.id)
   if (error) { console.error("Error deleting listing:", error); return { success: false, error: error.message } }
   revalidatePath("/marketplace")
+  revalidatePath("/collection")
   return { success: true }
 }
 
