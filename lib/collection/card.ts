@@ -10,6 +10,7 @@ import type { UserGameWithGame } from '@/lib/types/database'
 export function buildBoardRPGCardsFromEntries(
   entries: CollectionEntry[],
   userGames: UserGameWithGame[] = [],
+  activeMarketplaceGameIds: ReadonlySet<string> = new Set(),
 ): CollectionCardItem[] {
   const byOwnershipId = new Map(userGames.map((userGame) => [userGame.id, userGame]))
 
@@ -35,7 +36,7 @@ export function buildBoardRPGCardsFromEntries(
         yearPublished: game?.year ?? 0,
         owned: entry.status === 'owned',
         wishlist: entry.status === 'wishlist',
-        forTrade: false,
+        forTrade: userGame ? activeMarketplaceGameIds.has(userGame.id) : false,
         userGameId: userGame?.id ?? entry.ownershipId,
         ownedExpansionCount: userGame?.ownedExpansionCount ?? 0,
         totalExpansionCount: userGame?.totalExpansionCount ?? 0,
@@ -93,8 +94,9 @@ export function buildMiniatureCardsFromEntries(entries: CollectionEntry[]): Coll
 export function buildCollectionCardsFromEntries(
   entries: CollectionEntry[],
   userGames: UserGameWithGame[] = [],
+  activeMarketplaceGameIds: ReadonlySet<string> = new Set(),
 ): CollectionCardItem[] {
-  const boardRpgCards = buildBoardRPGCardsFromEntries(entries, userGames)
+  const boardRpgCards = buildBoardRPGCardsFromEntries(entries, userGames, activeMarketplaceGameIds)
   const tcgCards = buildTCGCardsFromEntries(entries)
   const miniatureCards = buildMiniatureCardsFromEntries(entries)
 
