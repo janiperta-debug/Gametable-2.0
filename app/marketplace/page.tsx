@@ -17,16 +17,17 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ThemeHero } from "@/components/theme-hero"
-import { Store, Heart, Search, MessageCircle, User, Plus, Loader2, Trash2, Users, Clock } from "lucide-react"
+import { Store, Heart, Search, MessageCircle, User, Plus, Loader2, CheckCircle2, XCircle, Users, Clock } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useUser } from "@/hooks/useUser"
 import { useToast } from "@/hooks/use-toast"
-import { 
-  getMarketplaceListings, 
-  getWishlists, 
-  deleteListing,
+import {
+  getMarketplaceListings,
+  getWishlists,
+  cancelListing,
+  markListingSold,
   contactSeller,
   type MarketplaceListing,
   type WishlistEntry
@@ -41,8 +42,8 @@ export default function Marketplace() {
   const [wishlists, setWishlists] = useState<WishlistEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [contacting, setContacting] = useState<string | null>(null)
-  const [deleting, setDeleting] = useState<string | null>(null)
-  
+  const [updatingListing, setUpdatingListing] = useState<string | null>(null)
+
   const t = useTranslations()
   const { user } = useUser()
   const { toast } = useToast()
@@ -126,16 +127,28 @@ export default function Marketplace() {
     setContacting(null)
   }
 
-  async function handleDeleteListing(listingId: string) {
-    setDeleting(listingId)
-    const result = await deleteListing(listingId)
+  async function handleCancelListing(listingId: string) {
+    setUpdatingListing(listingId)
+    const result = await cancelListing(listingId)
     if (result.error) {
       toast({ title: t("common.error"), description: result.error, variant: "destructive" })
     } else {
-      toast({ title: t("common.success"), description: t("marketplace.listingDeleted") })
+      toast({ title: t("common.success"), description: "Ilmoitus peruttu" })
       setListings(prev => prev.filter(l => l.id !== listingId))
     }
-    setDeleting(null)
+    setUpdatingListing(null)
+  }
+
+  async function handleMarkListingSold(listingId: string) {
+    setUpdatingListing(listingId)
+    const result = await markListingSold(listingId)
+    if (result.error) {
+      toast({ title: t("common.error"), description: result.error, variant: "destructive" })
+    } else {
+      toast({ title: t("common.success"), description: "Ilmoitus merkitty myydyksi" })
+      setListings(prev => prev.filter(l => l.id !== listingId))
+    }
+    setUpdatingListing(null)
   }
 
   const conditionLabels: Record<string, string> = {
@@ -231,7 +244,7 @@ export default function Marketplace() {
                   {user && (
                     <div className="flex justify-center mt-4">
                       <ArchiveCardButton asChild active icon={<Plus className="h-4 w-4" />}>
-                        <Link href="/marketplace/create">{t("marketplace.createFirstListing")}</Link>
+                        <Link href="/marketplace/create">{t("marketplace.createListing")}</Link>
                       </ArchiveCardButton>
                     </div>
                   )}
@@ -239,29 +252,28 @@ export default function Marketplace() {
               </ArchiveCard>
             ) : (
               filteredListings.map((listing) => {
-                const isOwner = user?.id === listing.seller_id
                 const sellerName = listing.seller?.display_name || listing.seller?.username || "Unknown"
-                
+                const isOwner = user?.id === listing.seller_id
+
                 return (
                   <ArchiveCard key={listing.id} className="transition-all duration-300">
                     <ArchiveCardContent className="p-6">
-                    <div className="flex flex-col md:flex-row gap-6">
-                      {/* Game Image */}
-                      <div className="relative w-full md:w-32 h-48 md:h-44 flex-shrink-0">
-                        <Image
-                          src={listing.game?.thumbnail_url || listing.game?.image_url || "/placeholder.svg"}
-                          alt={listing.game?.name || "Game"}
-                          fill
-                          className="object-cover rounded-lg"
-                        />
-                      </div>
+                      <div className="flex flex-col lg:flex-row gap-6">
+                        <div className="relative w-full lg:w-48 h-48 shrink-0">
+                          <Image
+                            src={listing.game?.cover_url || "/placeholder.svg"}
+                            alt={listing.game?.name || "Game"}
+                            fill
+                            className="object-cover rounded-lg"
+                          />
+                        </div>
 
-                      {/* Game Details */}
-                      <div className="flex-1 space-y-4">
-                        <div>
-                          <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-4 mb-3">
                             <div>
-                              <h3 className="font-heading font-semibold text-2xl mb-2">{listing.game?.name}</h3>
+                              <h3 className="font-heading font-semibold text-2xl mb-2">
+                                {listing.game?.name}
+                              </h3>
                               <div className="flex items-center gap-2 flex-wrap">
                                 <Badge variant="outline" className="border-accent-gold/20 text-accent-gold">
                                   {listingTypeLabels[listing.listing_type]}
@@ -316,19 +328,29 @@ export default function Marketplace() {
 
                             <div className="flex gap-2">
                               {isOwner ? (
-                                <ArchiveCardButton
-                                  onClick={() => handleDeleteListing(listing.id)}
-                                  disabled={deleting === listing.id}
-                                  icon={
-                                    deleting === listing.id ? (
-                                      <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                      <Trash2 className="h-4 w-4" />
-                                    )
-                                  }
-                                >
-                                  {t("common.delete")}
-                                </ArchiveCardButton>
+                                <>
+                                  <ArchiveCardButton
+                                    onClick={() => handleMarkListingSold(listing.id)}
+                                    disabled={updatingListing === listing.id}
+                                    icon={
+                                      updatingListing === listing.id ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                      ) : (
+                                        <CheckCircle2 className="h-4 w-4" />
+                                      )
+                                    }
+                                  >
+                                    Merkitse myydyksi
+                                  </ArchiveCardButton>
+
+                                  <ArchiveCardButton
+                                    onClick={() => handleCancelListing(listing.id)}
+                                    disabled={updatingListing === listing.id}
+                                    icon={<XCircle className="h-4 w-4" />}
+                                  >
+                                    Peru ilmoitus
+                                  </ArchiveCardButton>
+                                </>
                               ) : (
                                 <>
                                   <ArchiveCardButton
@@ -339,6 +361,7 @@ export default function Marketplace() {
                                       {t("profile.viewProfile")}
                                     </Link>
                                   </ArchiveCardButton>
+
                                   <ArchiveCardButton
                                     active
                                     onClick={() => handleContactSeller(listing.seller_id)}
@@ -359,7 +382,6 @@ export default function Marketplace() {
                           </div>
                         </div>
                       </div>
-                    </div>
                     </ArchiveCardContent>
                   </ArchiveCard>
                 )
@@ -378,69 +400,72 @@ export default function Marketplace() {
             ) : (
               Object.entries(groupedWishlists).map(([userId, wishlist]) => {
                 const userName = wishlist.user?.display_name || wishlist.user?.username || "Unknown"
-                
+
                 return (
                   <ArchiveCard key={userId} className="transition-all duration-300">
                     <ArchiveCardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4 flex-wrap gap-4">
-                      <div className="flex items-center gap-4">
-                        <div className="relative w-16 h-16">
-                          <Image
-                            src={wishlist.user?.avatar_url || "/placeholder.svg"}
-                            alt={userName}
-                            fill
-                            className="object-cover rounded-full"
-                          />
+                      <div className="flex items-start justify-between mb-4 flex-wrap gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className="relative w-16 h-16">
+                            <Image
+                              src={wishlist.user?.avatar_url || "/placeholder.svg"}
+                              alt={userName}
+                              fill
+                              className="object-cover rounded-full"
+                            />
+                          </div>
+
+                          <div>
+                            <h3 className="font-heading font-semibold text-xl mb-1">{userName}</h3>
+                            {wishlist.user?.location && (
+                              <p className="text-sm text-muted-foreground">{wishlist.user.location}</p>
+                            )}
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-heading font-semibold text-xl mb-1">{userName}</h3>
-                          {wishlist.user?.location && (
-                            <p className="text-sm text-muted-foreground">{wishlist.user.location}</p>
-                          )}
+
+                        <div className="flex gap-2">
+                          <ArchiveCardButton asChild icon={<User className="h-4 w-4" />}>
+                            <Link href={"/users/" + userId}>{t("profile.viewProfile")}</Link>
+                          </ArchiveCardButton>
+
+                          <ArchiveCardButton
+                            active
+                            onClick={() => handleContactSeller(userId)}
+                            disabled={contacting === userId}
+                            icon={
+                              contacting === userId ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <MessageCircle className="h-4 w-4" />
+                              )
+                            }
+                          >
+                            {t("marketplace.offerTrade")}
+                          </ArchiveCardButton>
                         </div>
                       </div>
 
-                      <div className="flex gap-2">
-                        <ArchiveCardButton asChild icon={<User className="h-4 w-4" />}>
-                          <Link href={"/users/" + userId}>{t("profile.viewProfile")}</Link>
-                        </ArchiveCardButton>
-                        <ArchiveCardButton
-                          active
-                          onClick={() => handleContactSeller(userId)}
-                          disabled={contacting === userId}
-                          icon={
-                            contacting === userId ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <MessageCircle className="h-4 w-4" />
-                            )
-                          }
-                        >
-                          {t("marketplace.offerTrade")}
-                        </ArchiveCardButton>
-                      </div>
-                    </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <Heart className="h-4 w-4 text-accent-gold" />
+                          <h4 className="font-heading font-medium">
+                            {t("marketplace.wishlist")} ({wishlist.games.length} {t("marketplace.games")})
+                          </h4>
+                        </div>
 
-                    <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <Heart className="h-4 w-4 text-accent-gold" />
-                        <h4 className="font-heading font-medium">
-                          {t("marketplace.wishlist")} ({wishlist.games.length} {t("marketplace.games")})
-                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {wishlist.games.map((entry) => (
+                            <Link key={entry.id} href={`/game/${entry.game_id}`}>
+                              <Badge
+                                variant="outline"
+                                className="border-accent-gold/20 text-foreground font-body cursor-pointer hover:bg-accent-gold/10 hover:border-accent-gold transition-colors"
+                              >
+                                {entry.game?.name}
+                              </Badge>
+                            </Link>
+                          ))}
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        {wishlist.games.map((entry) => (
-                          <Link key={entry.id} href={`/game/${entry.game_id}`}>
-                            <Badge
-                              variant="outline"
-                              className="border-accent-gold/20 text-foreground font-body cursor-pointer hover:bg-accent-gold/10 hover:border-accent-gold transition-colors"
-                            >
-                              {entry.game?.name}
-                            </Badge>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
                     </ArchiveCardContent>
                   </ArchiveCard>
                 )
