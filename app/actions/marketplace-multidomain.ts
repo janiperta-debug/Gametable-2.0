@@ -33,7 +33,7 @@ export async function getMarketplaceSources(): Promise<{ data: MarketplaceSource
   const data: MarketplaceSource[] = []
   for (const row of games.data ?? []) {
     const game = Array.isArray(row.game) ? row.game[0] : row.game
-    data.push({ id: `board_game:${row.id}`, sourceType: "board_game", title: game?.name ?? "Unknown game", image: game?.thumbnail_url ?? null, subtitle: "Board game", ownershipId: row.id })
+    data.push({ id: `board_game:${row.id}`, sourceType: "board_game", title: game?.name ?? "Unknown game", image: game?.thumbnail_url ?? null, subtitle: "Board game / RPG", ownershipId: row.id })
   }
   for (const row of cards.data ?? []) {
     const card = Array.isArray(row.card) ? row.card[0] : row.card
