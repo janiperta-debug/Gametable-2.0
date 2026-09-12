@@ -24,7 +24,7 @@ export async function getMarketplaceSources(): Promise<{ data: MarketplaceSource
   const [games, cards, miniatures] = await Promise.all([
     supabase.from("user_games").select("id, game_id, game:games(name, thumbnail_url)").eq("user_id", auth.user.id).eq("status", "owned"),
     supabase.from("tcg_collection").select("id, card_id, foil, card:tcg_cards(name, image_url, set_name, rarity)").eq("user_id", auth.user.id),
-    supabase.from("mini_army_units").select("id, unit_id, model_count, unit:mini_units(name, unit_type)").eq("user_id", auth.user.id).eq("owned", true),
+    supabase.from("mini_army_units").select("id, unit_id, model_count, unit:mini_units(name, unit_type, faction:mini_factions(name, system:mini_systems(code)))").eq("user_id", auth.user.id).eq("owned", true),
   ])
   if (games.error) return { data: [], error: games.error.message }
   if (cards.error) return { data: [], error: cards.error.message }
@@ -41,7 +41,9 @@ export async function getMarketplaceSources(): Promise<{ data: MarketplaceSource
   }
   for (const row of miniatures.data ?? []) {
     const unit = Array.isArray(row.unit) ? row.unit[0] : row.unit
-    data.push({ id: `miniature:${row.id}`, sourceType: "miniature", title: unit?.name ?? "Unknown miniature", image: null, subtitle: [unit?.unit_type, row.model_count ? `${row.model_count} models` : null].filter(Boolean).join(" · ") || "Miniature", ownershipId: row.id })
+    const faction = Array.isArray(unit?.faction) ? unit?.faction[0] : unit?.faction
+    const system = Array.isArray(faction?.system) ? faction?.system[0] : faction?.system
+    data.push({ id: `miniature:${row.id}`, sourceType: "miniature", title: unit?.name ?? "Unknown miniature", image: null, subtitle: [system?.code, faction?.name, unit?.unit_type, row.model_count ? `${row.model_count} models` : null].filter(Boolean).join(" · ") || "Miniature", ownershipId: row.id })
   }
   return { data, error: null }
 }
