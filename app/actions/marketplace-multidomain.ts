@@ -51,11 +51,27 @@ export async function createMultidomainListing(input: { sourceType: MarketplaceS
   const { data: auth } = await supabase.auth.getUser()
   if (!auth.user) return { success: false, error: "Not authenticated" }
 
-  const payload: Record<string, unknown> = { seller_id: auth.user.id, source_type: input.sourceType, listing_type: input.listingType, condition: input.condition, price: input.price ?? null, description: input.description ?? null, status: "active", game_id: null }
+  const source = (await getMarketplaceSources()).data.find(item => item.sourceType === input.sourceType && item.ownershipId === input.ownershipId)
+  if (!source) return { success: false, error: "Item not found in your collection" }
+
+  const payload: Record<string, unknown> = {
+    seller_id: auth.user.id,
+    source_type: input.sourceType,
+    listing_type: input.listingType,
+    condition: input.condition,
+    price: input.price ?? null,
+    description: input.description ?? null,
+    status: "active",
+    game_id: null,
+    source_title: source.title,
+    source_image_url: source.image,
+    source_subtitle: source.subtitle,
+  }
+
   if (input.sourceType === "board_game") {
-    const { data } = await supabase.from("user_games").select("id, game_id").eq("id", input.ownershipId).eq("user_id", auth.user.id).eq("status", "owned").maybeSingle()
+    payload.user_game_id = input.ownershipId
+    const { data } = await supabase.from("user_games").select("game_id").eq("id", input.ownershipId).eq("user_id", auth.user.id).eq("status", "owned").maybeSingle()
     if (!data) return { success: false, error: "Game not found in your collection" }
-    payload.user_game_id = data.id
     payload.game_id = data.game_id
   } else if (input.sourceType === "tcg") {
     const { data } = await supabase.from("tcg_collection").select("id").eq("id", input.ownershipId).eq("user_id", auth.user.id).maybeSingle()
