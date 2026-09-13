@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useMemo, useState } from "react"
+import { Suspense, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { Castle, Gem } from "lucide-react"
 import { ManorRoomsBoard } from "@/components/manor-rooms-board"
@@ -15,9 +15,6 @@ function ThemesPageContent() {
   const searchParams = useSearchParams()
   const initialTab: ThemesTab = searchParams.get("tab") === "artifacts" ? "artifacts" : "manor"
   const [tab, setTab] = useState<ThemesTab>(initialTab)
-
-  // TEMPORARY: every theme is locked except Main Hall while room work is in progress.
-  const unlockedRooms = useMemo(() => ["main-hall"], [])
 
   const tabs = (
     <div className="flex justify-center">
@@ -61,7 +58,7 @@ function ThemesPageContent() {
           </h1>
           <p className="font-body text-foreground/80 mt-2 text-pretty">{t("themes.artifactsSubtitle")}</p>
         </header>
-        <ArtifactsBoard unlockedRooms={unlockedRooms} />
+        <ArtifactsBoard />
       </div>
     </main>
   )
