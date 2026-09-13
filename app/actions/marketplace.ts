@@ -187,6 +187,7 @@ export async function addToWishlist(input: { game_id: string; priority?: number;
   }
 
   revalidatePath("/marketplace")
+  revalidatePath("/collection")
   return { success: true }
 }
 
@@ -197,6 +198,7 @@ export async function removeFromWishlist(wishlistId: string) {
   const { error } = await supabase.from("user_games").delete().eq("id", wishlistId).eq("user_id", user.id).eq("status", "wishlist")
   if (error) { console.error("Error removing game from wishlist:", error); return { success: false, error: error.message } }
   revalidatePath("/marketplace")
+  revalidatePath("/collection")
   return { success: true }
 }
 
