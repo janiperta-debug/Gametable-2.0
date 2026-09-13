@@ -28,6 +28,7 @@ export function ProfileNotifications() {
   const [emailPrefs, setEmailPrefs] = useState<EmailNotificationPrefs>(defaultPrefs)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const { user } = useUser()
   const t = useTranslations()
 
@@ -38,14 +39,17 @@ export function ProfileNotifications() {
         return
       }
 
+      setError(null)
       const supabase = createClient()
-      const { data } = await supabase
+      const { data, error: fetchError } = await supabase
         .from("profiles")
         .select("email_notification_types")
         .eq("id", user.id)
         .single()
 
-      if (data?.email_notification_types) {
+      if (fetchError) {
+        setError("Could not load email preferences. Please try again.")
+      } else if (data?.email_notification_types) {
         setEmailPrefs({ ...defaultPrefs, ...(data.email_notification_types as Partial<EmailNotificationPrefs>) })
       }
       setLoading(false)
@@ -55,18 +59,24 @@ export function ProfileNotifications() {
   }, [user])
 
   async function handleToggle(key: keyof EmailNotificationPrefs) {
-    if (!user) return
+    if (!user || saving) return
 
+    const previousPrefs = emailPrefs
     const newPrefs = { ...emailPrefs, [key]: !emailPrefs[key] }
     setEmailPrefs(newPrefs)
     setSaving(true)
+    setError(null)
 
     const supabase = createClient()
-    await supabase
+    const { error: updateError } = await supabase
       .from("profiles")
       .update({ email_notification_types: newPrefs })
       .eq("id", user.id)
 
+    if (updateError) {
+      setEmailPrefs(previousPrefs)
+      setError("Could not save email preferences. Please try again.")
+    }
     setSaving(false)
   }
 
@@ -81,69 +91,74 @@ export function ProfileNotifications() {
   return (
     <ArchiveCard>
       <ArchiveCardContent className="p-6">
-      <button onClick={() => setIsExpanded(!isExpanded)} className="w-full flex items-center justify-between text-left">
-        <div className="flex items-center gap-3">
-          <Mail className="w-5 h-5 text-accent-gold" />
-          <h2 className="text-2xl text-accent-gold">{t("profile.emailNotifications")}</h2>
-        </div>
-        {isExpanded ? (
-          <ChevronUp className="w-5 h-5 text-accent-gold" />
-        ) : (
-          <ChevronDown className="w-5 h-5 text-accent-gold" />
-        )}
-      </button>
-
-      {isExpanded && (
-        <div className="mt-4 pt-4 border-t border-accent-gold/20">
-          {!user ? (
-            <p className="text-center text-muted-foreground font-merriweather py-8">
-              {t("profile.loginToManageNotifications")}
-            </p>
-          ) : loading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-accent-gold" />
-            </div>
+        <button onClick={() => setIsExpanded(!isExpanded)} className="w-full flex items-center justify-between text-left">
+          <div className="flex items-center gap-3">
+            <Mail className="w-5 h-5 text-accent-gold" />
+            <h2 className="text-2xl text-accent-gold">{t("profile.emailNotifications")}</h2>
+          </div>
+          {isExpanded ? (
+            <ChevronUp className="w-5 h-5 text-accent-gold" />
           ) : (
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground font-merriweather mb-4">
-                {t("profile.emailNotificationsDescription")}
-              </p>
-              
-              {notificationTypes.map(({ key, label }) => (
-                <div key={key} className="flex items-center justify-between py-2">
-                  <span className="font-merriweather text-foreground">{label}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleToggle(key)}
-                    disabled={saving}
-                    aria-label={label}
-                    aria-pressed={emailPrefs[key]}
-                    className={`relative w-12 h-6 rounded-full border-2 transition-colors ${
-                      emailPrefs[key]
-                        ? "bg-accent-gold border-accent-gold"
-                        : "bg-background border-accent-gold/60"
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-0.5 w-4 h-4 rounded-full transition-transform ${
-                        emailPrefs[key]
-                          ? "translate-x-6 bg-white"
-                          : "translate-x-0.5 bg-accent-gold"
-                      }`}
-                    />
-                  </button>
-                </div>
-              ))}
-
-              {saving && (
-                <p className="text-xs text-muted-foreground text-center">
-                  {t("common.saving")}...
-                </p>
-              )}
-            </div>
+            <ChevronDown className="w-5 h-5 text-accent-gold" />
           )}
-        </div>
-      )}
+        </button>
+
+        {isExpanded && (
+          <div className="mt-4 pt-4 border-t border-accent-gold/20">
+            {!user ? (
+              <p className="text-center text-muted-foreground font-merriweather py-8">
+                {t("profile.loginToManageNotifications")}
+              </p>
+            ) : loading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-accent-gold" />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground font-merriweather mb-4">
+                  {t("profile.emailNotificationsDescription")}
+                </p>
+
+                {notificationTypes.map(({ key, label }) => (
+                  <div key={key} className="flex items-center justify-between py-2">
+                    <span className="font-merriweather text-foreground">{label}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleToggle(key)}
+                      disabled={saving}
+                      aria-label={label}
+                      aria-pressed={emailPrefs[key]}
+                      className={`relative w-12 h-6 rounded-full border-2 transition-colors ${
+                        emailPrefs[key]
+                          ? "bg-accent-gold border-accent-gold"
+                          : "bg-background border-accent-gold/60"
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-0.5 w-4 h-4 rounded-full transition-transform ${
+                          emailPrefs[key]
+                            ? "translate-x-6 bg-white"
+                            : "translate-x-0.5 bg-accent-gold"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                ))}
+
+                {saving && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    {t("common.saving")}...
+                  </p>
+                )}
+                {error && (
+                  <p role="alert" className="text-sm text-red-300 text-center">
+                    {error}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </ArchiveCardContent>
     </ArchiveCard>
   )
