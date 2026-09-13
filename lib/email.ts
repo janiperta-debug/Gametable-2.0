@@ -49,7 +49,10 @@ export async function sendEmail({ to, subject, html, text }: SendEmailParams) {
 }
 
 // Email templates
-export function getFriendRequestEmailTemplate(senderName: string) {
+export function getFriendRequestEmailTemplate(senderName: string, senderId?: string) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://gametable.app'
+  const profileUrl = senderId ? `${appUrl}/profile/${encodeURIComponent(senderId)}` : null
+
   return {
     subject: `${senderName} wants to connect on Gametable`,
     html: `
@@ -57,7 +60,8 @@ export function getFriendRequestEmailTemplate(senderName: string) {
         <h2 style="color: #1a1a1a;">New Friend Request</h2>
         <p style="color: #4a4a4a; line-height: 1.6;"><strong>${senderName}</strong> wants to connect with you on Gametable!</p>
         <p style="color: #4a4a4a; line-height: 1.6;">Log in to accept their request and start sharing your gaming experiences.</p>
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://gametable.app'}/notifications" style="display:inline-block;background:#d4af37;color:#1a1a1a;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;margin-top:16px;">View Request</a>
+        ${profileUrl ? `<a href="${profileUrl}" style="display:inline-block;background:#d4af37;color:#1a1a1a;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;margin-top:16px;margin-right:8px;">View Profile</a>` : ''}
+        <a href="${appUrl}/notifications" style="display:inline-block;background:#d4af37;color:#1a1a1a;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;margin-top:16px;">View Request</a>
       </div>
     `,
   }
@@ -78,54 +82,17 @@ export function getBadgeEarnedEmailTemplate(badgeName: string) {
 }
 
 export function getEventRsvpEmailTemplate(eventName: string, attendeeName: string) {
-  return {
-    subject: `${attendeeName} RSVP'd to ${eventName}`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #1a1a1a;">New RSVP!</h2>
-        <p style="color: #4a4a4a; line-height: 1.6;"><strong>${attendeeName}</strong> has RSVP'd to your event: <strong>${eventName}</strong></p>
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://gametable.app'}/events" style="display:inline-block;background:#d4af37;color:#1a1a1a;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;margin-top:16px;">View Event</a>
-      </div>
-    `,
-  }
+  return { subject: `${attendeeName} RSVP'd to ${eventName}`, html: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;"><h2 style="color: #1a1a1a;">New RSVP!</h2><p style="color: #4a4a4a; line-height: 1.6;"><strong>${attendeeName}</strong> has RSVP'd to your event: <strong>${eventName}</strong></p><a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://gametable.app'}/events" style="display:inline-block;background:#d4af37;color:#1a1a1a;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;margin-top:16px;">View Event</a></div>` }
 }
 
 export function getEventInvitationEmailTemplate(eventName: string, hostName: string) {
-  return {
-    subject: `${hostName} invited you to ${eventName}`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #1a1a1a;">You're Invited!</h2>
-        <p style="color: #4a4a4a; line-height: 1.6;"><strong>${hostName}</strong> invited you to <strong>${eventName}</strong> on Gametable.</p>
-        <p style="color: #4a4a4a; line-height: 1.6;">Log in to view the event and respond to the invitation.</p>
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://gametable.app'}/events" style="display:inline-block;background:#d4af37;color:#1a1a1a;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;margin-top:16px;">View Event</a>
-      </div>
-    `,
-  }
+  return { subject: `${hostName} invited you to ${eventName}`, html: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;"><h2 style="color: #1a1a1a;">You're Invited!</h2><p style="color: #4a4a4a; line-height: 1.6;"><strong>${hostName}</strong> invited you to <strong>${eventName}</strong> on Gametable.</p><p style="color: #4a4a4a; line-height: 1.6;">Log in to view the event and respond to the invitation.</p><a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://gametable.app'}/events" style="display:inline-block;background:#d4af37;color:#1a1a1a;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;margin-top:16px;">View Event</a></div>` }
 }
 
 export function getNewMessageEmailTemplate(senderName: string) {
-  return {
-    subject: `New message from ${senderName} on Gametable`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #1a1a1a;">New Message</h2>
-        <p style="color: #4a4a4a; line-height: 1.6;">You have a new message from <strong>${senderName}</strong> on Gametable.</p>
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://gametable.app'}/messages" style="display:inline-block;background:#d4af37;color:#1a1a1a;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;margin-top:16px;">Read Message</a>
-      </div>
-    `,
-  }
+  return { subject: `New message from ${senderName} on Gametable`, html: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;"><h2 style="color: #1a1a1a;">New Message</h2><p style="color: #4a4a4a; line-height: 1.6;">You have a new message from <strong>${senderName}</strong> on Gametable.</p><a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://gametable.app'}/messages" style="display:inline-block;background:#d4af37;color:#1a1a1a;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;margin-top:16px;">Read Message</a></div>` }
 }
 
 export function getAdminBroadcastEmailTemplate(title: string, message: string) {
-  return {
-    subject: `[Gametable] ${title}`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #1a1a1a;">${title}</h2>
-        <p style="color: #4a4a4a; line-height: 1.6;">${message}</p>
-        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://gametable.app'}" style="display:inline-block;background:#d4af37;color:#1a1a1a;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;margin-top:16px;">Visit Gametable</a>
-      </div>
-    `,
-  }
+  return { subject: `[Gametable] ${title}`, html: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;"><h2 style="color: #1a1a1a;">${title}</h2><p style="color: #4a4a4a; line-height: 1.6;">${message}</p><a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://gametable.app'}" style="display:inline-block;background:#d4af37;color:#1a1a1a;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;margin-top:16px;">Visit Gametable</a></div>` }
 }
