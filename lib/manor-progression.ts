@@ -1,8 +1,8 @@
 /**
  * Canonical Manor progression data and pure entitlement helpers.
  *
- * This module is intentionally not wired to theme activation yet. The current
- * app keeps unfinished rooms/themes behind the existing WIP lock.
+ * This module owns progression/entitlement decisions. Theme activation remains
+ * a separate user choice and is never performed by XP alone.
  */
 
 export type ManorRoomState = "locked" | "opened_empty" | "complete"
@@ -63,6 +63,14 @@ export function getNextManorThreshold(xp: number) {
 
 export function isManorThresholdReached(xp: number, requiredXp: number): boolean {
   return Math.max(0, xp) >= requiredXp
+}
+
+/**
+ * Shared entitlement predicate for room/theme consumers.
+ * XP may grant access, but it must not activate the selected theme.
+ */
+export function isManorRoomEntitled(xp: number, requiredXp: number): boolean {
+  return isManorThresholdReached(xp, requiredXp)
 }
 
 /**
