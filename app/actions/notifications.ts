@@ -83,8 +83,6 @@ export async function createNotification(params: {
 }): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
 
-  // Notification creation is a server-side system action: the caller is authenticated
-  // before reaching this function, while the SECURITY DEFINER RPC handles the cross-user insert.
   const { error } = await supabase.rpc("create_notification_server", {
     p_user_id: params.user_id,
     p_type: params.type,
@@ -133,7 +131,7 @@ function mapNotificationTypeToEmailType(type: Notification["type"]): EmailNotifi
 function getEmailTemplate(type: EmailNotificationType, params: { title: string; body?: string; data?: Record<string, any> }) {
   switch (type) {
     case "friend_request":
-      return getFriendRequestEmailTemplate(params.data?.sender_name || "Someone")
+      return getFriendRequestEmailTemplate(params.data?.sender_name || "Someone", params.data?.requester_id)
     case "badge_earned":
       return getBadgeEarnedEmailTemplate(params.data?.badge_name || "a new badge")
     case "event_rsvp":
