@@ -14,8 +14,6 @@ export interface RoomTheme {
   unlockLevel: number
   category: "Ground Floor" | "Second Floor" | "Basement"
   isActive?: boolean
-  isUnlocked?: boolean
-  canUnlock?: boolean
 }
 
 export const roomThemes: RoomTheme[] = [
@@ -32,10 +30,9 @@ export const roomThemes: RoomTheme[] = [
     },
     description: "The grand entrance with burgundy elegance and golden accents",
     atmosphere: "Majestic and welcoming",
-    unlockLevel: 5,
+    unlockLevel: 1,
     category: "Ground Floor",
     isActive: true,
-    isUnlocked: true,
   },
   {
     id: "library",
@@ -52,7 +49,6 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 10,
     category: "Ground Floor",
     isActive: false,
-    isUnlocked: false, // Not yet opened — theme page shows the locked state
   },
   {
     id: "conservatory",
@@ -69,8 +65,6 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 15,
     category: "Ground Floor",
     isActive: false,
-    isUnlocked: true, // Temporarily unlocked for testing
-    canUnlock: true,
   },
   {
     id: "fireside-lounge",
@@ -87,8 +81,6 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 20,
     category: "Ground Floor",
     isActive: false,
-    isUnlocked: true, // Temporarily unlocked for testing
-    canUnlock: true,
   },
   {
     id: "bar",
@@ -105,8 +97,6 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 25,
     category: "Ground Floor",
     isActive: false,
-    isUnlocked: true, // Temporarily unlocked for testing
-    canUnlock: true,
   },
   {
     id: "spa",
@@ -123,8 +113,6 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 30,
     category: "Ground Floor",
     isActive: false,
-    isUnlocked: true, // Temporarily unlocked for testing
-    canUnlock: true,
   },
   {
     id: "gallery",
@@ -141,8 +129,6 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 35,
     category: "Ground Floor",
     isActive: false,
-    isUnlocked: true, // Temporarily unlocked for testing
-    canUnlock: true,
   },
 
   // Second Floor Rooms
@@ -161,8 +147,6 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 45,
     category: "Second Floor",
     isActive: false,
-    isUnlocked: true,
-    canUnlock: true,
   },
   {
     id: "map-room",
@@ -179,8 +163,6 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 50,
     category: "Second Floor",
     isActive: false,
-    isUnlocked: true,
-    canUnlock: true,
   },
   {
     id: "observatory",
@@ -197,8 +179,6 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 55,
     category: "Second Floor",
     isActive: false,
-    isUnlocked: true,
-    canUnlock: true,
   },
   {
     id: "theater-room",
@@ -215,8 +195,6 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 60,
     category: "Second Floor",
     isActive: false,
-    isUnlocked: true,
-    canUnlock: true,
   },
   {
     id: "clock-tower",
@@ -233,8 +211,6 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 65,
     category: "Second Floor",
     isActive: false,
-    isUnlocked: true,
-    canUnlock: true,
   },
   {
     id: "war-room",
@@ -251,8 +227,6 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 70,
     category: "Second Floor",
     isActive: false,
-    isUnlocked: true,
-    canUnlock: true,
   },
   {
     id: "artroom",
@@ -269,8 +243,6 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 40,
     category: "Second Floor",
     isActive: false,
-    isUnlocked: true,
-    canUnlock: true,
   },
 
   // Basement Rooms
@@ -289,8 +261,6 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 80,
     category: "Basement",
     isActive: false,
-    isUnlocked: true, // Unlocked for testing
-    canUnlock: true,
   },
   {
     id: "dungeon",
@@ -307,8 +277,6 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 85,
     category: "Basement",
     isActive: false,
-    isUnlocked: true, // Unlocked for testing
-    canUnlock: true,
   },
   {
     id: "underground-temple",
@@ -325,8 +293,6 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 75,
     category: "Basement",
     isActive: false,
-    isUnlocked: true, // Unlocked for testing
-    canUnlock: true,
   },
   {
     id: "crystal-cavern",
@@ -343,8 +309,6 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 90,
     category: "Basement",
     isActive: false,
-    isUnlocked: true, // Unlocked for testing
-    canUnlock: true,
   },
   {
     id: "treasure-vault",
@@ -361,8 +325,6 @@ export const roomThemes: RoomTheme[] = [
     unlockLevel: 95,
     category: "Basement",
     isActive: false,
-    isUnlocked: true, // Unlocked for testing
-    canUnlock: true,
   },
 ]
 
