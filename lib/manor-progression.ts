@@ -65,6 +65,15 @@ export function isManorThresholdReached(xp: number, requiredXp: number): boolean
   return Math.max(0, xp) >= requiredXp
 }
 
+/**
+ * Main Hall is the only room currently usable while the Manor UI remains in
+ * its WIP lock state. This keeps the temporary product lock in one place and
+ * prevents room-theme metadata from accidentally unlocking test rooms.
+ */
+export function isManorRoomCurrentlyUsable(roomId: string): boolean {
+  return roomId === "main-hall"
+}
+
 export type TreasureVaultState = {
   roomState: ManorRoomState
   artifactState: ManorArtifactState
