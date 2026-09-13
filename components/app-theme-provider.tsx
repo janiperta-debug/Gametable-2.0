@@ -4,286 +4,11 @@ import type React from "react"
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useUser } from "@/hooks/useUser"
+import { roomThemes, getRoomTheme, type RoomTheme, type AppThemeName } from "@/lib/room-themes"
 
-// Define all 20 manor theme names
-export type AppThemeName =
-  | "main-hall"
-  | "library"
-  | "conservatory"
-  | "fireside-lounge"
-  | "bar"
-  | "spa"
-  | "gallery"
-  | "ballroom"
-  | "map-room"
-  | "observatory"
-  | "theater-room"
-  | "clock-tower"
-  | "war-room"
-  | "alchemist-laboratory"
-  | "dungeon"
-  | "underground-temple"
-  | "crystal-cavern"
-  | "treasure-vault"
-  | "artroom"
-
-export interface ManorTheme {
-  id: AppThemeName
-  name: string
-  description: string
-  floor: "Ground Floor" | "Second Floor" | "Basement"
-  colors: {
-    primary: string
-    secondary: string
-    accent?: string
-  }
-  atmosphere: string
-  imageUrl?: string
-}
-
-export const MANOR_THEMES: ManorTheme[] = [
-  // Ground Floor
-  {
-    id: "main-hall",
-    name: "Main Hall",
-    description: "Grand burgundy walls adorned with golden accents and marble columns",
-    floor: "Ground Floor",
-    colors: {
-      primary: "Burgundy",
-      secondary: "Gold",
-      accent: "Cream Marble",
-    },
-    atmosphere: "Majestic and welcoming, the heart of the manor",
-    imageUrl:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Main%20hall%2001.jpg-DpsYcUHFaTwvTp9wXy5kieQgoDHKMM.jpeg",
-  },
-  {
-    id: "library",
-    name: "Library",
-    description: "Rich deep brown shelves filled with ancient tomes and golden reading lamps",
-    floor: "Ground Floor",
-    colors: {
-      primary: "Deep Brown",
-      secondary: "Gold",
-      accent: "Warm Cream",
-    },
-    atmosphere: "Scholarly and mysterious, filled with knowledge",
-  },
-  {
-    id: "conservatory",
-    name: "Conservatory",
-    description: "Forest green botanical paradise with sunlight streaming through glass",
-    floor: "Ground Floor",
-    colors: {
-      primary: "Forest Green",
-      secondary: "Sunlight",
-      accent: "Natural Light",
-    },
-    atmosphere: "Peaceful and organic, nature's sanctuary",
-  },
-  {
-    id: "fireside-lounge",
-    name: "Fireside Lounge",
-    description: "Warm terracotta walls with golden firelight and comfortable seating",
-    floor: "Ground Floor",
-    colors: {
-      primary: "Terracotta",
-      secondary: "Gold",
-      accent: "Flame Orange",
-    },
-    atmosphere: "Cozy and intimate, perfect for conversations",
-    imageUrl:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Fireside%20Lounge%2001.jpg-M3u72S7v7OEudxT8hqP812tt9gR2Jb.jpeg",
-  },
-  {
-    id: "bar",
-    name: "Bar",
-    description: "Sophisticated amber interior with brass fixtures and polished surfaces",
-    floor: "Ground Floor",
-    colors: {
-      primary: "Amber",
-      secondary: "Brass",
-      accent: "Copper",
-    },
-    atmosphere: "Elegant and refined, for distinguished guests",
-  },
-  {
-    id: "spa",
-    name: "Spa",
-    description: "Serene lavender sanctuary with amethyst spa stones and tranquil atmosphere",
-    floor: "Ground Floor",
-    colors: {
-      primary: "Deep Purple",
-      secondary: "Lavender",
-      accent: "Soft Lavender Mist",
-    },
-    atmosphere: "Peaceful and rejuvenating, a place of wellness",
-    imageUrl: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Spa_preview-0TLQfJM6yHwiWZ32UbsYaIq4Y8cB4j.jpg",
-  },
-  {
-    id: "gallery",
-    name: "Gallery",
-    description: "Royal navy walls showcasing golden-framed masterpieces",
-    floor: "Ground Floor",
-    colors: {
-      primary: "Royal Navy",
-      secondary: "Gold",
-      accent: "Ivory",
-    },
-    atmosphere: "Artistic and cultured, displaying fine art",
-    imageUrl:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gallery%2001.jpg-6ENDBJTG0rOy3yXPcrdwoNETWilXcm.jpeg",
-  },
-
-  // Second Floor
-  {
-    id: "ballroom",
-    name: "Ballroom",
-    description: "Crystal white grandeur with golden accents",
-    floor: "Second Floor",
-    colors: {
-      primary: "Crystal White",
-      secondary: "Golden",
-      accent: "Pure Gold",
-    },
-    atmosphere: "Luxurious celebration",
-  },
-  {
-    id: "map-room",
-    name: "Map Room",
-    description: "Sepia charts and brass instruments for strategic planning",
-    floor: "Second Floor",
-    colors: {
-      primary: "Burlywood",
-      secondary: "Dark Brass",
-      accent: "Golden Compass",
-    },
-    atmosphere: "Adventurous strategy",
-  },
-  {
-    id: "observatory",
-    name: "Observatory",
-    description: "Dark crimson depths with silver starlight",
-    floor: "Second Floor",
-    colors: {
-      primary: "Dark Crimson",
-      secondary: "Silver",
-      accent: "Steel Telescope",
-    },
-    atmosphere: "Cosmic contemplation",
-  },
-  {
-    id: "theater-room",
-    name: "Theater Room",
-    description: "Royal purple curtains and golden stage lights",
-    floor: "Second Floor",
-    colors: {
-      primary: "Royal Purple",
-      secondary: "Golden Stage Lights",
-      accent: "Gold Trim",
-    },
-    atmosphere: "Dramatic entertainment",
-  },
-  {
-    id: "clock-tower",
-    name: "Clock Tower",
-    description: "Ice blue precision with steel and chrome mechanisms",
-    floor: "Second Floor",
-    colors: {
-      primary: "Ice Blue",
-      secondary: "Steel",
-      accent: "Chrome",
-    },
-    atmosphere: "Mechanical precision",
-  },
-  {
-    id: "war-room",
-    name: "War Room",
-    description: "Military green strategy with bronze battle plans",
-    floor: "Second Floor",
-    colors: {
-      primary: "Hunter Green",
-      secondary: "Bronze",
-      accent: "Aged Golden Medals",
-    },
-    atmosphere: "Strategic command",
-  },
-  {
-    id: "artroom",
-    name: "Artroom",
-    description: "Creative studio with rich mustard yellow walls and charcoal drawing tools",
-    floor: "Second Floor",
-    colors: {
-      primary: "Deep Charcoal",
-      secondary: "Bright Mustard",
-      accent: "Rich Mustard Yellow",
-    },
-    atmosphere: "Artistic and inspiring, a space for creativity",
-    imageUrl: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Artroom_preview-va34f.jpg",
-  },
-
-  // Basement
-  {
-    id: "alchemist-laboratory",
-    name: "Alchemist Laboratory",
-    description: "Emerald green bottles and azure blue mystical lighting with bubbling experiments",
-    floor: "Basement",
-    colors: {
-      primary: "Emerald",
-      secondary: "Azure Blue",
-      accent: "Mystical Teal",
-    },
-    atmosphere: "Magical and experimental, where science meets mystery",
-  },
-  {
-    id: "dungeon",
-    name: "Dungeon",
-    description: "Honey-colored stone walls with bronze torch brackets and medieval charm",
-    floor: "Basement",
-    colors: {
-      primary: "Honey Stone",
-      secondary: "Bronze",
-      accent: "Torch Flame",
-    },
-    atmosphere: "Historic and atmospheric, echoing with ancient stories",
-  },
-  {
-    id: "underground-temple",
-    name: "Underground Temple",
-    description: "Sacred stone gray architecture with mystical teal illumination",
-    floor: "Basement",
-    colors: {
-      primary: "Stone Gray",
-      secondary: "Mystical Teal",
-      accent: "Sacred Blue",
-    },
-    atmosphere: "Spiritual and reverent, a place of ancient worship",
-  },
-  {
-    id: "crystal-cavern",
-    name: "Crystal Cavern",
-    description: "Rose quartz formations with amethyst lighting and crystalline beauty",
-    floor: "Basement",
-    colors: {
-      primary: "Rose Quartz",
-      secondary: "Amethyst",
-      accent: "Crystal Clear",
-    },
-    atmosphere: "Ethereal and magical, sparkling with natural wonder",
-  },
-  {
-    id: "treasure-vault",
-    name: "Treasure Vault",
-    description: "Golden walls lined with emerald accents and precious gem lighting",
-    floor: "Basement",
-    colors: {
-      primary: "Gold",
-      secondary: "Emerald",
-      accent: "Precious Gems",
-    },
-    atmosphere: "Luxurious and secure, housing the manor's greatest treasures",
-  },
-]
+export type { AppThemeName }
+export type ManorTheme = RoomTheme
+export const MANOR_THEMES = roomThemes
 
 interface AppThemeContextType {
   currentAppTheme: AppThemeName
@@ -295,13 +20,8 @@ interface AppThemeContextType {
 const APP_THEME_STORAGE_KEY = "gametable-app-theme"
 const DEFAULT_THEME: AppThemeName = "main-hall"
 
-// TEMPORARY: theme work in progress — only Main Hall is available.
-// While locked, force every previously-saved theme back to Main Hall so no
-// locked room leaks from the database or localStorage during the demo.
-const THEMES_LOCKED = true
-const isThemeAllowed = (theme: AppThemeName) => !THEMES_LOCKED || theme === "main-hall"
-
-// Create the context with a default value
+// WP-005: room access is governed by Manor progression, not by a second
+// theme catalog. The provider owns only the currently selected theme.
 const AppThemeContext = createContext<AppThemeContextType | undefined>(undefined)
 
 interface AppThemeProviderProps {
@@ -313,14 +33,12 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
   const [isLoadedFromDB, setIsLoadedFromDB] = useState(false)
   const { user, profile } = useUser()
 
-  // Load theme from database when user logs in
   useEffect(() => {
     if (user && profile?.preferred_theme && !isLoadedFromDB) {
       const dbTheme = profile.preferred_theme as AppThemeName
-      if (MANOR_THEMES.some((theme) => theme.id === dbTheme) && isThemeAllowed(dbTheme)) {
+      if (getRoomTheme(dbTheme)?.id === dbTheme) {
         setCurrentAppTheme(dbTheme)
         setIsLoadedFromDB(true)
-        // Also update localStorage
         try {
           localStorage.setItem(APP_THEME_STORAGE_KEY, dbTheme)
         } catch (error) {
@@ -330,13 +48,12 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
     }
   }, [user, profile, isLoadedFromDB])
 
-  // Load theme from localStorage on initial mount (for non-logged in users)
   useEffect(() => {
     if (!user) {
       try {
-        const saved = localStorage.getItem(APP_THEME_STORAGE_KEY)
-        if (saved && MANOR_THEMES.some((theme) => theme.id === saved) && isThemeAllowed(saved as AppThemeName)) {
-          setCurrentAppTheme(saved as AppThemeName)
+        const saved = localStorage.getItem(APP_THEME_STORAGE_KEY) as AppThemeName | null
+        if (saved && getRoomTheme(saved)?.id === saved) {
+          setCurrentAppTheme(saved)
         }
       } catch (error) {
         console.warn("Failed to load theme from localStorage", error)
@@ -345,19 +62,16 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
   }, [user])
 
   const setAppTheme = async (theme: AppThemeName) => {
-    // TEMPORARY: ignore attempts to switch to locked themes during the demo.
-    if (!isThemeAllowed(theme)) return
+    if (!getRoomTheme(theme)) return
 
     setCurrentAppTheme(theme)
-    
-    // Save to localStorage
+
     try {
       localStorage.setItem(APP_THEME_STORAGE_KEY, theme)
     } catch (error) {
       console.warn("Failed to save theme to localStorage", error)
     }
-    
-    // Save to database if user is logged in
+
     if (user) {
       const supabase = createClient()
       await supabase
@@ -367,15 +81,9 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
     }
   }
 
-  const getThemeData = (themeId: AppThemeName) => {
-    return MANOR_THEMES.find((theme) => theme.id === themeId)
-  }
-
   useEffect(() => {
-    // Apply the theme to the document's data-theme attribute
     document.documentElement.dataset.theme = currentAppTheme
 
-    // Apply background pattern for main-hall theme
     if (currentAppTheme === "main-hall") {
       document.body.classList.add("manor-bg-pattern")
     } else {
@@ -388,7 +96,7 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
       value={{
         currentAppTheme,
         setAppTheme,
-        getThemeData,
+        getThemeData: getRoomTheme,
         allThemes: MANOR_THEMES,
       }}
     >
@@ -397,7 +105,6 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
   )
 }
 
-// Custom hook to use the AppThemeContext
 export const useAppTheme = (): AppThemeContextType => {
   const context = useContext(AppThemeContext)
   if (context === undefined) {
