@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { useAppTheme } from "@/components/app-theme-provider"
 import type { RoomTheme } from "@/lib/room-themes"
 import { updateActiveRoom } from "@/app/actions/xp"
+import { isManorRoomCurrentlyUsable } from "@/lib/manor-progression"
 import { Loader2 } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 
@@ -17,21 +18,20 @@ export function ThemeSelector({ room }: ThemeSelectorProps) {
   const [saving, setSaving] = useState(false)
   const t = useTranslations()
 
-  // TEMPORARY: All themes locked except Main Hall (theme work in progress).
-  // Ignores profile/XP unlock data on purpose so only Main Hall is usable.
-  const isRoomUnlocked = room.id === "main-hall"
+  // Canonical temporary product lock: only Main Hall is usable during WIP.
+  const isRoomUnlocked = isManorRoomCurrentlyUsable(room.id)
 
   const isCurrentTheme = currentAppTheme === room.id
   const canUseTheme = isRoomUnlocked
 
   const handleThemeChange = async () => {
     if (!canUseTheme || isCurrentTheme || saving) return
-    
+
     setSaving(true)
     try {
       // Update local state immediately for responsiveness
       setAppTheme(room.id)
-      
+
       // Persist to database
       const result = await updateActiveRoom(room.id)
       if (!result.success) {
