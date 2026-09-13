@@ -159,9 +159,11 @@ export async function deleteListing(listingId: string) {
 
 export async function getWishlists() {
   const supabase = await createClient()
-  const { data, error } = await supabase.from("user_games").select(`id, user_id, game_id, created_at, game:games(id, name, thumbnail_url, image_url), user:profiles(id, display_name, username, avatar_url, location)`).eq("status", "wishlist").order("created_at", { ascending: false })
+  const { data, error } = await supabase.from("user_games").select(`id, user_id, game_id, created_at, game:games(id, name, thumbnail_url, image_url), user:profiles(id, display_name, username, avatar_url, location, show_collection)`).eq("status", "wishlist").order("created_at", { ascending: false })
   if (error) { console.error("Error fetching wishlists:", error); return { data: [], error: error.message } }
-  const wishlists = (data || []).map(item => ({ id: item.id, user_id: item.user_id, game_id: item.game_id, priority: 3, notes: null, created_at: item.created_at, game: item.game, user: item.user }))
+  const wishlists = (data || [])
+    .filter(item => item.user?.show_collection !== false)
+    .map(item => ({ id: item.id, user_id: item.user_id, game_id: item.game_id, priority: 3, notes: null, created_at: item.created_at, game: item.game, user: item.user }))
   return { data: wishlists as WishlistEntry[], error: null }
 }
 
