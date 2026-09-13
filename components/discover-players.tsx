@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import {
   ArchiveCardButton,
@@ -14,10 +14,9 @@ import {
 } from "@/components/archive-frame"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, MapPin, Users, Loader2, UserPlus, UserCheck, Clock, UserX } from "lucide-react"
+import { Search, MapPin, Users, Loader2, UserPlus, UserCheck, Clock } from "lucide-react"
 import { searchUsers, sendFriendRequest, removeFriend, type DiscoverUser } from "@/app/actions/friends"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "@/lib/i18n"
@@ -62,8 +61,7 @@ export function DiscoverPlayers() {
       toast({ title: t("common.error"), description: result.error, variant: "destructive" })
     } else {
       toast({ title: t("common.success"), description: t("community.requestSent") })
-      // Update local state
-      setPlayers(prev => prev.map(p => 
+      setPlayers(prev => prev.map(p =>
         p.id === player.id ? { ...p, friendship_status: "pending" } : p
       ))
     }
@@ -78,14 +76,12 @@ export function DiscoverPlayers() {
       toast({ title: t("common.error"), description: result.error, variant: "destructive" })
     } else {
       toast({ title: t("common.success"), description: t("community.requestCancelled") })
-      setPlayers(prev => prev.map(p => 
+      setPlayers(prev => prev.map(p =>
         p.id === player.id ? { ...p, friendship_status: null, friendship_id: null } : p
       ))
     }
     setActionLoading(null)
   }
-
-  // Don't load users until search is initiated - users should search first
 
   return (
     <div className="space-y-8">
@@ -98,7 +94,6 @@ export function DiscoverPlayers() {
         </ArchiveCardHeader>
         <ArchiveCardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Location Filter */}
             <div className="space-y-2">
               <label className="text-sm font-cinzel text-accent-gold">{t("community.location")}</label>
               <div className="relative">
@@ -112,7 +107,6 @@ export function DiscoverPlayers() {
               </div>
             </div>
 
-            {/* Game Title Filter */}
             <div className="space-y-2">
               <label className="text-sm font-cinzel text-accent-gold">{t("community.searchByGameTitle")}</label>
               <div className="relative">
@@ -126,7 +120,6 @@ export function DiscoverPlayers() {
               </div>
             </div>
 
-            {/* Game Type Filter */}
             <div className="space-y-2">
               <label className="text-sm font-cinzel text-accent-gold">{t("community.preferredGameType")}</label>
               <Select value={gameTypeFilter} onValueChange={setGameTypeFilter}>
@@ -134,10 +127,10 @@ export function DiscoverPlayers() {
                   <SelectValue placeholder={t("community.anyGameType")} />
                 </SelectTrigger>
                 <SelectContent className={archiveSelectContent}>
-                  <SelectItem value="board-games" className={archiveSelectItem}>{t("community.boardGames")}</SelectItem>
-                  <SelectItem value="rpgs" className={archiveSelectItem}>{t("community.rpgs")}</SelectItem>
-                  <SelectItem value="miniatures" className={archiveSelectItem}>{t("community.miniatures")}</SelectItem>
-                  <SelectItem value="trading-cards" className={archiveSelectItem}>{t("community.tradingCards")}</SelectItem>
+                  <SelectItem value="board_game" className={archiveSelectItem}>{t("community.boardGames")}</SelectItem>
+                  <SelectItem value="rpg" className={archiveSelectItem}>{t("community.rpgs")}</SelectItem>
+                  <SelectItem value="miniature" className={archiveSelectItem}>{t("community.miniatures")}</SelectItem>
+                  <SelectItem value="trading_card" className={archiveSelectItem}>{t("community.tradingCards")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -155,7 +148,6 @@ export function DiscoverPlayers() {
         </ArchiveCardContent>
       </ArchiveCard>
 
-      {/* Players Grid */}
       {loading ? (
         <div className="flex justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
@@ -173,7 +165,7 @@ export function DiscoverPlayers() {
           {players.map((player) => {
             const displayName = player.display_name || player.username || "Unknown"
             const initials = displayName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
-            
+
             return (
               <ArchiveCard key={player.id}>
                 <ArchiveCardContent className="p-6">
@@ -208,12 +200,7 @@ export function DiscoverPlayers() {
                       </ArchiveCardButton>
 
                       {player.friendship_status === "accepted" ? (
-                        <ArchiveCardButton
-                          fullWidth
-                          className="flex-1"
-                          icon={<UserCheck className="h-4 w-4" />}
-                          disabled
-                        >
+                        <ArchiveCardButton fullWidth className="flex-1" icon={<UserCheck className="h-4 w-4" />} disabled>
                           {t("community.friends")}
                         </ArchiveCardButton>
                       ) : player.friendship_status === "pending" ? (
@@ -222,13 +209,7 @@ export function DiscoverPlayers() {
                           className="flex-1"
                           onClick={() => handleCancelRequest(player)}
                           disabled={actionLoading === player.id}
-                          icon={
-                            actionLoading === player.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Clock className="h-4 w-4" />
-                            )
-                          }
+                          icon={actionLoading === player.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Clock className="h-4 w-4" />}
                         >
                           {t("community.pending")}
                         </ArchiveCardButton>
@@ -239,13 +220,7 @@ export function DiscoverPlayers() {
                           className="flex-1"
                           onClick={() => handleConnect(player)}
                           disabled={actionLoading === player.id}
-                          icon={
-                            actionLoading === player.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <UserPlus className="h-4 w-4" />
-                            )
-                          }
+                          icon={actionLoading === player.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
                         >
                           {t("community.connect")}
                         </ArchiveCardButton>
