@@ -82,7 +82,7 @@ export async function updateActiveRoom(
 
   const { error: updateError } = await supabase
     .from("profiles")
-    .update({ theme: roomId })
+    .update({ preferred_theme: roomId })
     .eq("id", user.id)
 
   if (updateError) {
