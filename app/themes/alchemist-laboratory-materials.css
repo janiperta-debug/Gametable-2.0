@@ -1,0 +1,80 @@
+/* Alchemist's Laboratory palette — emerald glass, oxidized brass and deep laboratory stone. */
+[data-theme="alchemist-laboratory"] {
+  --background: 160 18% 5%;
+  --foreground: 42 42% 88%;
+  --card: 160 14% 8%;
+  --card-foreground: 42 42% 88%;
+  --popover: 160 14% 8%;
+  --popover-foreground: 42 42% 88%;
+  --primary: 160 55% 42%;
+  --primary-foreground: 160 18% 5%;
+  --secondary: 166 24% 18%;
+  --secondary-foreground: 42 42% 88%;
+  --tertiary: 42 42% 86%;
+  --tertiary-foreground: 160 18% 5%;
+  --accent-gold: 42 64% 48%;
+  --accent-gold-foreground: 160 18% 5%;
+  --accent-copper: 32 35% 30%;
+  --accent-copper-foreground: 42 42% 88%;
+  --surface-dark: 160 18% 3%;
+  --surface-dark-foreground: 42 42% 88%;
+  --surface-light: 42 42% 91%;
+  --surface-light-foreground: 160 18% 5%;
+  --muted: 160 12% 13%;
+  --muted-foreground: 155 20% 68%;
+  --accent: 163 28% 22%;
+  --accent-foreground: 42 42% 88%;
+  --border: 163 24% 23%;
+  --input: 160 12% 13%;
+  --ring: 160 55% 42%;
+
+  --archive-metal-highlight: #d8e6df;
+  --archive-metal-light: #8fa99b;
+  --archive-metal-mid: #527567;
+  --archive-metal-dark: #29483d;
+  --archive-metal-deep: #10231d;
+  --archive-gold: #bfa45a;
+
+  --archive-wood-base: #101c19;
+  --archive-wood-top: #07100e;
+  --archive-wood-mid: #1b3029;
+  --archive-wood-bottom: #0b1512;
+
+  --archive-surface-sheen: rgba(112, 231, 190, 0.07);
+  --archive-surface-shade: rgba(0, 0, 0, 0.78);
+  --archive-ink-strong: #8ce0c0;
+  --archive-ink-soft: #a7bfae;
+  --archive-ink-faint: #527d6b;
+  --archive-inset-bg: rgba(13, 31, 25, 0.94);
+
+  --alchemist-emerald: #159b70;
+  --alchemist-emerald-dark: #073c2d;
+  --alchemist-glass: #12352f;
+  --alchemist-brass: #a98a45;
+  --alchemist-brass-dark: #3d3018;
+}
+
+[data-theme="alchemist-laboratory"] [data-archive-essence="true"] {
+  background-image:
+    linear-gradient(135deg, rgba(121, 229, 190, 0.035), transparent 45%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.014) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg, rgba(32, 105, 78, 0.08), transparent 55%);
+}
+
+[data-theme="alchemist-laboratory"] [data-artroom-material="canvas"] {
+  background-color: var(--archive-wood-base);
+}
+
+[data-theme="alchemist-laboratory"] [data-artroom-material="bronze"] {
+  background-color: var(--alchemist-brass-dark);
+  background-image: linear-gradient(135deg, rgba(224, 204, 137, 0.16), transparent 38%), linear-gradient(180deg, var(--alchemist-brass), var(--alchemist-brass-dark));
+}
+
+[data-theme="alchemist-laboratory"] [data-artroom-material="button"],
+[data-theme="alchemist-laboratory"] [data-artroom-button="true"] {
+  background-color: var(--alchemist-emerald-dark);
+  background-image: linear-gradient(135deg, rgba(150, 235, 204, 0.16), transparent 42%), linear-gradient(180deg, var(--alchemist-emerald), var(--alchemist-emerald-dark));
+  color: #e4d5a3;
+  border: 1px solid var(--alchemist-brass-dark);
+  box-shadow: inset 0 0 0 1px rgba(218, 198, 125, 0.28), inset 0 1px 0 rgba(220, 245, 232, 0.3), 0 2px 0 var(--archive-metal-deep), 0 5px 10px rgba(0,0,0,0.28);
+}
