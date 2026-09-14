@@ -13,9 +13,10 @@ import { SPA_THEME_PAGE } from "@/lib/spa-theme-page"
 import { BAR_THEME_PAGE } from "@/lib/bar-theme-page"
 import { GALLERY_THEME_PAGE } from "@/lib/gallery-theme-page"
 import { BALLROOM_THEME_PAGE } from "@/lib/ballroom-theme-page"
+import { MAP_ROOM_THEME_PAGE } from "@/lib/map-room-theme-page"
 
 export function generateStaticParams() {
-  return [...Object.keys(ROOM_THEME_PAGES), "conservatory", "fireside-lounge", "spa", "bar", "gallery", "artroom", "ballroom"].map((room) => ({ room }))
+  return [...Object.keys(ROOM_THEME_PAGES), "conservatory", "fireside-lounge", "spa", "bar", "gallery", "artroom", "ballroom", "map-room"].map((room) => ({ room }))
 }
 
 export default async function RoomThemePageRoute({ params }: { params: Promise<{ room: string }> }) {
@@ -35,7 +36,9 @@ export default async function RoomThemePageRoute({ params }: { params: Promise<{
                 ? GALLERY_THEME_PAGE
                 : room === "ballroom"
                   ? BALLROOM_THEME_PAGE
-                  : getRoomThemePage(room)
+                  : room === "map-room"
+                    ? MAP_ROOM_THEME_PAGE
+                    : getRoomThemePage(room)
   if (!data) {
     notFound()
   }
