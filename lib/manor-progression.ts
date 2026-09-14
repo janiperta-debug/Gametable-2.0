@@ -74,9 +74,9 @@ export function isManorRoomEntitled(xp: number, requiredXp: number): boolean {
 }
 
 /**
- * Main Hall is the only room currently usable while the Manor UI remains in
- * its WIP lock state. This keeps the temporary product lock in one place and
- * prevents room-theme metadata from accidentally unlocking test rooms.
+ * Temporary compatibility helper. Room availability is now decided by the
+ * caller's entitlement data; this function only guarantees that Main Hall is
+ * always usable. Other rooms must be checked with isManorRoomEntitled().
  */
 export function isManorRoomCurrentlyUsable(roomId: string): boolean {
   return roomId === "main-hall"
