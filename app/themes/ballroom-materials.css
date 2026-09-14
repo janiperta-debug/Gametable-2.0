@@ -1,0 +1,78 @@
+/* Ballroom ArchiveFrame palette — candlelit champagne, ivory parchment and antique gold. */
+[data-theme="ballroom"] {
+  --archive-metal-highlight: #fff0b8;
+  --archive-metal-light: #e2bd68;
+  --archive-metal-mid: #a87928;
+  --archive-metal-dark: #674313;
+  --archive-metal-deep: #241507;
+  --archive-gold: #d4a64b;
+
+  --archive-wood-base: #eee1c5;
+  --archive-wood-top: #fff4dc;
+  --archive-wood-mid: #dfc99e;
+  --archive-wood-bottom: #c6a878;
+
+  --archive-surface-sheen: rgba(255, 249, 224, 0.34);
+  --archive-surface-shade: rgba(93, 58, 18, 0.16);
+  --archive-ink-strong: #5a3513;
+  --archive-ink-soft: #8a6330;
+  --archive-ink-faint: #a78958;
+  --archive-inset-bg: #e6d3ad;
+
+  --background: 38 34% 86%;
+  --foreground: 28 42% 16%;
+  --card: 39 40% 89%;
+  --card-foreground: 28 42% 16%;
+  --popover: 39 40% 89%;
+  --popover-foreground: 28 42% 16%;
+  --primary: 38 62% 42%;
+  --primary-foreground: 39 40% 94%;
+  --secondary: 35 30% 72%;
+  --secondary-foreground: 28 42% 16%;
+  --muted: 36 24% 78%;
+  --muted-foreground: 30 24% 35%;
+  --accent: 38 66% 48%;
+  --accent-foreground: 28 42% 16%;
+  --border: 38 45% 52%;
+  --input: 36 24% 78%;
+  --ring: 38 66% 48%;
+  --surface-dark: 30 35% 12%;
+  --surface-dark-foreground: 39 40% 89%;
+  --surface-light: 39 40% 94%;
+  --surface-light-foreground: 28 42% 16%;
+}
+
+[data-theme="ballroom"] [data-material="wood"] {
+  background-image:
+    linear-gradient(135deg, #fff0b8 0%, #e2bd68 14%, #a87928 34%, #674313 48%, #d4a64b 76%, #fff0b8 100%);
+  box-shadow:
+    0 12px 30px rgba(72, 43, 10, 0.22),
+    0 0 0 1px rgba(103, 67, 19, 0.92),
+    inset 0 0 0 1px rgba(255, 240, 184, 0.65);
+}
+
+[data-theme="ballroom"] [data-material="wood"] > div > div {
+  background-color: #eee1c5;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 244, 220, 0.5), transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(116, 76, 28, 0.08)),
+    repeating-linear-gradient(0deg, rgba(113, 76, 30, 0.035) 0 1px, transparent 1px 7px),
+    linear-gradient(180deg, #fff4dc, #c6a878);
+  box-shadow:
+    inset 0 0 0 1px rgba(167, 121, 40, 0.3),
+    inset 0 3px 18px rgba(103, 67, 19, 0.12);
+}
+
+[data-theme="ballroom"] [data-material="wood"]:has(h2) > div > div {
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(212, 166, 75, 0.18), transparent 48%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(116, 76, 28, 0.08)),
+    repeating-linear-gradient(0deg, rgba(113, 76, 30, 0.035) 0 1px, transparent 1px 9px),
+    linear-gradient(180deg, #fff4dc, #dfc99e);
+}
+
+[data-theme="ballroom"] figure > div,
+[data-theme="ballroom"] .overflow-hidden.rounded-lg.border {
+  border-color: rgba(167, 121, 40, 0.6);
+  box-shadow: inset 0 0 18px rgba(212, 166, 75, 0.14);
+}
