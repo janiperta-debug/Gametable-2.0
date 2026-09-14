@@ -1,4 +1,4 @@
-import "../conservatory-materials.css"
+import "../conservatory-materials.module.css"
 import { notFound } from "next/navigation"
 import { RoomThemeTemplate } from "@/components/room-theme-template"
 import { getRoomThemePage, ROOM_THEME_PAGES } from "@/lib/room-theme-pages"
