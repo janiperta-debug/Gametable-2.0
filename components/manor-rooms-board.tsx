@@ -7,7 +7,8 @@ import { ArchiveFrame } from "@/components/archive-frame"
 // Slots with an `href` are clickable and open that room's theme page.
 const ROOM_SLOTS: { src: string; href?: string; label?: string }[] = [
   { src: "/themes/rooms/room-1.png" },
-  { src: "/themes/rooms/room-2.png" },
+  // Spa pool — opens the Spa theme page.
+  { src: "/themes/rooms/room-2.png", href: "/themes/spa", label: "Spa" },
   { src: "/themes/rooms/room-3.png" },
   // Conservatory greenhouse — opens the Conservatory theme page.
   { src: "/themes/rooms/room-4.png", href: "/themes/conservatory", label: "Conservatory" },
