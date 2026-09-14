@@ -1,90 +1,105 @@
-/* Art Room Archive palette — derived from the Art Room hero and antique parchment PNG button reference. */
+/* Art Room Archive palette — derived from the Art Room hero and the
+   antique parchment button reference: aged parchment, antique bronze,
+   dark canvas and restrained candlelit amber. No wood-grain surfaces. */
 [data-theme="artroom"] {
-  --background: 24 16% 6%;
+  --background: 24 10% 5%;
   --foreground: 38 42% 92%;
-  --card: 24 14% 9%;
+  --card: 24 9% 8%;
   --card-foreground: 38 42% 92%;
-  --popover: 24 14% 9%;
+  --popover: 24 9% 8%;
   --popover-foreground: 38 42% 92%;
   --primary: 38 64% 45%;
-  --primary-foreground: 24 16% 6%;
-  --secondary: 28 28% 24%;
+  --primary-foreground: 24 10% 5%;
+  --secondary: 28 18% 18%;
   --secondary-foreground: 38 42% 92%;
   --tertiary: 38 44% 86%;
-  --tertiary-foreground: 24 16% 6%;
+  --tertiary-foreground: 24 10% 5%;
   --accent-gold: 38 64% 52%;
-  --accent-gold-foreground: 24 16% 6%;
-  --accent-copper: 27 42% 36%;
+  --accent-gold-foreground: 24 10% 5%;
+  --accent-copper: 27 36% 34%;
   --accent-copper-foreground: 38 42% 92%;
-  --surface-dark: 24 18% 4%;
+  --surface-dark: 24 10% 3%;
   --surface-dark-foreground: 38 42% 92%;
   --surface-light: 38 44% 91%;
-  --surface-light-foreground: 24 16% 6%;
-  --muted: 25 13% 16%;
+  --surface-light-foreground: 24 10% 5%;
+  --muted: 25 9% 13%;
   --muted-foreground: 35 24% 70%;
-  --accent: 32 45% 30%;
+  --accent: 32 28% 23%;
   --accent-foreground: 38 42% 92%;
-  --border: 32 30% 25%;
-  --input: 25 13% 16%;
+  --border: 32 24% 23%;
+  --input: 25 9% 13%;
   --ring: 38 64% 45%;
 
-  /* Antique brass: softer and browner than Main Hall's bright gold. */
-  --archive-metal-highlight: #ead08b;
-  --archive-metal-light: #b9924b;
-  --archive-metal-mid: #86652f;
-  --archive-metal-dark: #513719;
-  --archive-metal-deep: #241508;
-  --archive-gold: #b58a3d;
+  /* Antique bronze / aged-gold frame material. */
+  --archive-metal-highlight: #f0d49a;
+  --archive-metal-light: #c9a15b;
+  --archive-metal-mid: #8c6735;
+  --archive-metal-dark: #50391f;
+  --archive-metal-deep: #21170d;
+  --archive-gold: #b98a3e;
 
-  /* Warm walnut with visible horizontal grain. */
-  --archive-wood-base: #2b1a10;
-  --archive-wood-top: #160d08;
-  --archive-wood-mid: #55331d;
-  --archive-wood-bottom: #211108;
+  /* Neutral dark canvas backing — deliberately not wood. */
+  --archive-wood-base: #171514;
+  --archive-wood-top: #0b0a09;
+  --archive-wood-mid: #292522;
+  --archive-wood-bottom: #11100f;
 
-  --archive-surface-sheen: rgba(224, 181, 105, 0.075);
-  --archive-surface-shade: rgba(0, 0, 0, 0.64);
+  --archive-surface-sheen: rgba(255, 220, 160, 0.07);
+  --archive-surface-shade: rgba(0, 0, 0, 0.78);
 
-  --archive-ink-strong: #e8c98d;
-  --archive-ink-soft: #c4a875;
-  --archive-ink-faint: #8d7049;
-  --archive-inset-bg: rgba(43, 27, 16, 0.92);
+  --archive-ink-strong: #f0d39a;
+  --archive-ink-soft: #c8aa78;
+  --archive-ink-faint: #8c7049;
+  --archive-inset-bg: rgba(29, 25, 21, 0.94);
 
-  --artroom-walnut: #3b2414;
-  --artroom-walnut-light: #704a29;
-  --artroom-walnut-dark: #1d1009;
-  --artroom-canvas: #171311;
+  /* Supporting materials: parchment, dark canvas and antique bronze. */
+  --artroom-canvas: #171514;
   --artroom-parchment: #d8bd87;
   --artroom-parchment-dark: #8e6c3e;
-  --artroom-olive: #596044;
+  --artroom-bronze: #8c6735;
+  --artroom-bronze-dark: #302116;
   --artroom-amber: #b87527;
 }
 
 [data-theme="artroom"] [data-archive-essence="true"] {
-  background-image: linear-gradient(135deg, rgba(255, 222, 157, 0.035), transparent 45%), repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 4px), linear-gradient(180deg, rgba(102, 62, 28, 0.08), transparent 55%);
+  background-image:
+    linear-gradient(135deg, rgba(255, 222, 157, 0.035), transparent 45%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.014) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg, rgba(92, 70, 42, 0.06), transparent 55%);
 }
 
 [data-theme="artroom"] [data-artroom-material="canvas"] {
   background-color: var(--artroom-canvas);
-  background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 4px), repeating-linear-gradient(90deg, rgba(0,0,0,0.08) 0 1px, transparent 1px 6px);
+  background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.014) 0 1px, transparent 1px 5px);
 }
 
 [data-theme="artroom"] [data-artroom-material="parchment"] {
   background-color: var(--artroom-parchment);
   color: #2a1b0e;
-  background-image: linear-gradient(135deg, rgba(255,248,214,0.22), transparent 45%), repeating-linear-gradient(0deg, rgba(78,49,20,0.045) 0 1px, transparent 1px 5px);
+  background-image:
+    linear-gradient(135deg, rgba(255,248,214,0.22), transparent 45%),
+    repeating-linear-gradient(0deg, rgba(78,49,20,0.045) 0 1px, transparent 1px 5px);
   box-shadow: inset 0 0 0 1px rgba(91, 58, 25, 0.34), inset 0 0 22px rgba(91, 58, 25, 0.16);
 }
 
-[data-theme="artroom"] [data-artroom-material="walnut"] {
-  background-color: var(--artroom-walnut);
-  background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.20) 0 1px, transparent 1px 9px), linear-gradient(180deg, var(--artroom-walnut-light), var(--artroom-walnut-dark));
+[data-theme="artroom"] [data-artroom-material="bronze"] {
+  background-color: var(--artroom-bronze-dark);
+  background-image:
+    linear-gradient(135deg, rgba(240,212,154,0.16), transparent 38%),
+    linear-gradient(180deg, var(--artroom-bronze), var(--artroom-bronze-dark));
 }
 
 [data-theme="artroom"] [data-artroom-material="button"],
 [data-theme="artroom"] [data-artroom-button="true"] {
-  background-color: var(--artroom-walnut);
-  background-image: linear-gradient(135deg, rgba(255, 224, 151, 0.12), transparent 32%), repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 8px), linear-gradient(180deg, var(--artroom-walnut-light), var(--artroom-walnut-dark));
+  background-color: var(--artroom-parchment);
+  background-image:
+    linear-gradient(135deg, rgba(255,248,214,0.24), transparent 42%),
+    repeating-linear-gradient(0deg, rgba(78,49,20,0.045) 0 1px, transparent 1px 5px);
+  color: #2a1b0e;
   border: 1px solid var(--archive-metal-dark);
-  box-shadow: inset 0 0 0 1px rgba(224, 181, 105, 0.55), inset 0 1px 0 rgba(255, 239, 183, 0.28), 0 2px 0 var(--archive-metal-deep), 0 5px 10px rgba(0,0,0,0.28);
+  box-shadow:
+    inset 0 0 0 1px rgba(91, 58, 25, 0.34),
+    inset 0 1px 0 rgba(255, 248, 214, 0.5),
+    0 2px 0 var(--archive-metal-deep),
+    0 5px 10px rgba(0,0,0,0.28);
 }
