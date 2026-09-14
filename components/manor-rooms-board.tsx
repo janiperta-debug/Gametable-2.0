@@ -11,7 +11,8 @@ const ROOM_SLOTS: { src: string; href?: string; label?: string }[] = [
   { src: "/themes/rooms/room-3.png" },
   // Conservatory greenhouse — opens the Conservatory theme page.
   { src: "/themes/rooms/room-4.png", href: "/themes/conservatory", label: "Conservatory" },
-  { src: "/themes/rooms/room-5.png" },
+  // Fireside Lounge fireplace — opens the Fireside Lounge theme page.
+  { src: "/themes/rooms/room-5.png", href: "/themes/fireside-lounge", label: "Fireside Lounge" },
   // Library bookshelf — opens the Library theme page (room still locked).
   { src: "/themes/rooms/room-6.png", href: "/themes/library", label: "Library" },
   // Main Hall staircase — opens the Main Hall theme page.
