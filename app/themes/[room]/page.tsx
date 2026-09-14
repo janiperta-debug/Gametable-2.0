@@ -7,6 +7,7 @@ import "../map-room-materials.css"
 import "../theater-room-materials.css"
 import "../war-room-materials.css"
 import "../clock-tower-materials.css"
+import "../dungeon-room-materials.css"
 import { notFound } from "next/navigation"
 import { RoomThemeTemplate } from "@/components/room-theme-template"
 import { getRoomThemePage, ROOM_THEME_PAGES } from "@/lib/room-theme-pages"
@@ -21,9 +22,10 @@ import { MAP_ROOM_THEME_PAGE } from "@/lib/map-room-theme-page"
 import { THEATER_ROOM_THEME_PAGE } from "@/lib/theater-room-theme-page"
 import { WAR_ROOM_THEME_PAGE } from "@/lib/war-room-theme-page"
 import { CLOCK_TOWER_THEME_PAGE } from "@/lib/clock-tower-theme-page"
+import { DUNGEON_ROOM_THEME_PAGE } from "@/lib/dungeon-room-theme-page"
 
 export function generateStaticParams() {
-  return [...Object.keys(ROOM_THEME_PAGES), "conservatory", "fireside-lounge", "spa", "bar", "gallery", "artroom", "ballroom", "map-room", "theater-room", "war-room", "clock-tower"].map((room) => ({ room }))
+  return [...Object.keys(ROOM_THEME_PAGES), "conservatory", "fireside-lounge", "spa", "bar", "gallery", "artroom", "ballroom", "map-room", "theater-room", "war-room", "clock-tower", "dungeon"].map((room) => ({ room }))
 }
 
 export default async function RoomThemePageRoute({ params }: { params: Promise<{ room: string }> }) {
@@ -51,9 +53,9 @@ export default async function RoomThemePageRoute({ params }: { params: Promise<{
                         ? WAR_ROOM_THEME_PAGE
                         : room === "clock-tower"
                           ? CLOCK_TOWER_THEME_PAGE
-                          : getRoomThemePage(room)
-  if (!data) {
-    notFound()
-  }
+                          : room === "dungeon"
+                            ? DUNGEON_ROOM_THEME_PAGE
+                            : getRoomThemePage(room)
+  if (!data) notFound()
   return <RoomThemeTemplate data={data} />
 }
