@@ -1,0 +1,5 @@
+/* Each room page owns its outer background through the existing theme palette. */
+.artifact-cabinet[data-theme] {
+  background-color: hsl(var(--background));
+  background-image: none;
+}
