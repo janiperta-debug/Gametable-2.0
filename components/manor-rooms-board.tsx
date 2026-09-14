@@ -3,23 +3,27 @@
 import Link from "next/link"
 import { ArchiveFrame } from "@/components/archive-frame"
 
-// First 7 grid slots show room images; every other slot shows a lock.
-// Slots with an `href` are clickable and open that room's theme page.
+// First-floor rooms followed by the seven second-floor preview rooms.
+// The second-floor entries are temporary preview links; they will be
+// returned to locked slots once the second-floor preview work is complete.
 const ROOM_SLOTS: { src: string; href?: string; label?: string }[] = [
-  // Gallery painting — opens the Gallery theme page.
+  // First floor
   { src: "/themes/rooms/room-1.png", href: "/themes/gallery", label: "Gallery" },
-  // Spa pool — opens the Spa theme page.
   { src: "/themes/rooms/room-2.png", href: "/themes/spa", label: "Spa" },
-  // Bar — opens the Bar theme page.
   { src: "/themes/rooms/room-3.png", href: "/themes/bar", label: "Bar" },
-  // Conservatory greenhouse — opens the Conservatory theme page.
   { src: "/themes/rooms/room-4.png", href: "/themes/conservatory", label: "Conservatory" },
-  // Fireside Lounge fireplace — opens the Fireside Lounge theme page.
   { src: "/themes/rooms/room-5.png", href: "/themes/fireside-lounge", label: "Fireside Lounge" },
-  // Library bookshelf — opens the Library theme page (room still locked).
   { src: "/themes/rooms/room-6.png", href: "/themes/library", label: "Library" },
-  // Main Hall staircase — opens the Main Hall theme page.
   { src: "/themes/rooms/room-7.png", href: "/themes/main-hall", label: "Main Hall" },
+
+  // Second floor — temporary preview mode
+  { src: "/themes/ballroom-preview.png", href: "/themes/ballroom", label: "Ballroom" },
+  { src: "/themes/map-room-preview.png", href: "/themes/map-room", label: "Map Room" },
+  { src: "/themes/observatory-preview.png", href: "/themes/observatory", label: "Observatory" },
+  { src: "/themes/theater-preview.png", href: "/themes/theater-room", label: "Theater Room" },
+  { src: "/themes/clock-tower-preview.png", href: "/themes/clock-tower", label: "Clock Tower" },
+  { src: "/themes/war-room-preview.png", href: "/themes/war-room", label: "War Room" },
+  { src: "/themes/art-room-preview.png", href: "/themes/artroom", label: "Art Room" },
 ]
 
 // Total number of grid slots (matches the artifacts board layout).
