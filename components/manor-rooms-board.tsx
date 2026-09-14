@@ -27,7 +27,7 @@ const ROOM_SLOTS: { src: string; href?: string; label?: string }[] = [
 
   // Basement — preview tiles, awaiting dedicated room pages
   { src: "/themes/alchemist-laboratory-preview.png", label: "Alchemist Laboratory" },
-  { src: "/themes/dungeon-preview.png", label: "Dungeon" },
+  { src: "/themes/dungeon-preview.png", href: "/themes/dungeon", label: "Dungeon" },
   { src: "/themes/underground-temple-preview.png", label: "Underground Temple" },
   { src: "/themes/crystal-cave-preview.png", label: "Crystal Cave" },
   { src: "/themes/treasure-vault-preview.png", label: "Treasure Vault" },
