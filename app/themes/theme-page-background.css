@@ -1,48 +1,45 @@
 /*
- * Single background layer for room/theme pages.
- * The outer .app-background is the only element that paints the page backdrop.
- * All inner page wrappers remain transparent so they cannot introduce a second
- * competing background layer.
+ * ONE application-wide background layer.
+ *
+ * The active theme is written to document.documentElement[data-theme] by
+ * AppThemeProvider. The theme tokens are therefore available to the single
+ * .app-background wrapper everywhere in the application.
+ *
+ * Do not use page-level :has([data-theme]) backgrounds here. A theme page is
+ * only one child of the app shell and must not own a second background.
  */
 
-.app-background:has([data-theme="main-hall"]) {
+.app-background {
   background:
-    radial-gradient(circle at 50% 0%, hsl(45 80% 60% / 0.12), transparent 60%),
-    hsl(345 80% 10%);
+    radial-gradient(
+      circle at 50% 0%,
+      hsl(var(--accent-gold) / 0.12),
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 50% 20%,
+      hsl(var(--background)),
+      hsl(var(--surface-dark)) 80%
+    ),
+    repeating-linear-gradient(
+      45deg,
+      hsl(var(--accent-gold) / 0.03),
+      hsl(var(--accent-gold) / 0.03) 2px,
+      transparent 2px,
+      transparent 10px
+    );
 }
 
-.app-background:has([data-theme="library"]) {
-  background:
-    radial-gradient(circle at 50% 0%, hsl(0 0% 75% / 0.08), transparent 60%),
-    hsl(25 60% 8%);
-}
-
-.app-background:has([data-theme="conservatory"]) {
-  background:
-    radial-gradient(circle at 50% 0%, hsl(90 40% 35% / 0.16), transparent 60%),
-    hsl(120 35% 14%);
-}
-
-.app-background:has([data-theme="fireside-lounge"]) {
-  background:
-    radial-gradient(circle at 50% 0%, hsl(16 100% 50% / 0.12), transparent 60%),
-    hsl(0 0% 11%);
-}
-
-.app-background:has([data-theme="bar"]) {
-  background:
-    radial-gradient(circle at 50% 0%, hsl(45 80% 60% / 0.12), transparent 60%),
-    hsl(35 55% 9%);
-}
-
-/* Inner wrappers must never paint a competing page background. */
+/* Inner wrappers never paint a competing background. */
 .app-background .room-environment,
-.app-background .artifact-cabinet[data-theme] {
+.app-background .artifact-cabinet,
+.app-background main,
+.app-background section {
   background: transparent !important;
   background-image: none !important;
 }
 
-/* The document itself stays neutral; the single app-background owns the color. */
+/* The document itself stays transparent; .app-background owns the backdrop. */
 html,
 body {
   background: transparent;
