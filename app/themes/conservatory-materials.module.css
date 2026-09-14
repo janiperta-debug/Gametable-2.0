@@ -1,0 +1,39 @@
+:global([data-theme="conservatory"]) {
+  --archive-metal-highlight: #f0d39a;
+  --archive-metal-light: #c98b4b;
+  --archive-metal-mid: #a96732;
+  --archive-metal-dark: #70401f;
+  --archive-metal-deep: #3a2113;
+  --archive-gold: #d6ad62;
+  --archive-wood-base: #102b1b;
+  --archive-wood-top: #07170f;
+  --archive-wood-mid: #1b4930;
+  --archive-wood-bottom: #0b2115;
+  --archive-surface-sheen: rgba(220, 190, 120, 0.08);
+  --archive-surface-shade: rgba(0, 0, 0, 0.64);
+  --archive-ink-strong: #eadfbd;
+  --archive-ink-soft: #c6c29f;
+  --archive-ink-faint: #9eaa87;
+  --archive-inset-bg: #0a2115;
+}
+
+:global([data-theme="conservatory"] [data-material="wood"]) {
+  background-image: linear-gradient(135deg, #f0d39a 0%, #c98b4b 18%, #3a2113 44%, #70401f 66%, #a96732 82%, #f0d39a 100%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(42, 25, 12, 0.95), inset 0 0 0 1px rgba(246, 213, 150, 0.25);
+}
+
+:global([data-theme="conservatory"] [data-material="wood"] > div > div) {
+  background-color: #102b1b;
+  background-image: linear-gradient(180deg, rgba(210, 181, 112, 0.08), rgba(0, 0, 0, 0.58)), repeating-linear-gradient(90deg, rgba(255, 232, 180, 0.018) 0 1px, transparent 1px 34px), repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.20) 0 1px, transparent 1px 13px), linear-gradient(180deg, #1b4930, #0b2115);
+  box-shadow: inset 0 0 0 1px rgba(218, 177, 101, 0.38), inset 0 3px 18px rgba(0, 0, 0, 0.72);
+}
+
+:global([data-theme="conservatory"] [data-material="wood"]:has(h2) > div > div) {
+  background-image: radial-gradient(circle at 50% 0%, rgba(104, 137, 78, 0.18), transparent 48%), linear-gradient(180deg, rgba(218, 183, 112, 0.07), rgba(0, 0, 0, 0.52)), repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.18) 0 1px, transparent 1px 14px), linear-gradient(180deg, #173d28, #092016);
+}
+
+:global([data-theme="conservatory"] figure > div),
+:global([data-theme="conservatory"] .overflow-hidden.rounded-lg.border) {
+  border-color: rgba(214, 173, 98, 0.48);
+  box-shadow: inset 0 0 18px rgba(103, 145, 93, 0.16);
+}
