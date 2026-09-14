@@ -39,6 +39,28 @@ export function AppShell({ children }: { children: ReactNode }) {
   
   // Register service worker
   useServiceWorker()
+
+  // Theme preview pages must set the active theme on the document itself.
+  // The global app-background sits above the page content, so a theme set
+  // only on the nested preview element cannot update that outer background.
+  const previewTheme = pathname.startsWith("/themes/")
+    ? pathname.split("/")[2] || null
+    : null
+
+  useEffect(() => {
+    if (!previewTheme || typeof document === "undefined") return
+
+    const previousTheme = document.documentElement.dataset.theme
+    document.documentElement.dataset.theme = previewTheme
+
+    return () => {
+      if (previousTheme) {
+        document.documentElement.dataset.theme = previousTheme
+      } else {
+        delete document.documentElement.dataset.theme
+      }
+    }
+  }, [previewTheme])
   
   // For PWA, skip landing page and go directly to home
   const isLandingPage = pathname === "/" && !isPWA
