@@ -1,0 +1,66 @@
+/* Underground Temple palette — deep stone, aged bronze and restrained turquoise light. */
+[data-theme="underground-temple"] {
+  --background: 210 18% 5%;
+  --foreground: 38 34% 88%;
+  --card: 210 16% 8%;
+  --card-foreground: 38 34% 88%;
+  --popover: 210 16% 8%;
+  --popover-foreground: 38 34% 88%;
+  --primary: 37 62% 48%;
+  --primary-foreground: 210 18% 5%;
+  --secondary: 210 14% 15%;
+  --secondary-foreground: 38 34% 88%;
+  --tertiary: 38 30% 82%;
+  --tertiary-foreground: 210 18% 5%;
+  --accent-gold: 37 62% 52%;
+  --accent-gold-foreground: 210 18% 5%;
+  --accent-copper: 24 38% 30%;
+  --accent-copper-foreground: 38 34% 88%;
+  --surface-dark: 210 18% 3%;
+  --surface-dark-foreground: 38 34% 88%;
+  --surface-light: 38 30% 88%;
+  --surface-light-foreground: 210 18% 5%;
+  --muted: 210 12% 12%;
+  --muted-foreground: 35 18% 68%;
+  --accent: 190 28% 18%;
+  --accent-foreground: 38 34% 88%;
+  --border: 32 28% 24%;
+  --input: 210 12% 12%;
+  --ring: 37 62% 48%;
+
+  --archive-metal-highlight: #d9c18a;
+  --archive-metal-light: #b58b46;
+  --archive-metal-mid: #76542b;
+  --archive-metal-dark: #3c2a18;
+  --archive-metal-deep: #17120d;
+  --archive-gold: #a87832;
+
+  --archive-wood-base: #151b1c;
+  --archive-wood-top: #080d0f;
+  --archive-wood-mid: #253033;
+  --archive-wood-bottom: #0d1214;
+
+  --archive-surface-sheen: rgba(224, 193, 125, 0.06);
+  --archive-surface-shade: rgba(0, 0, 0, 0.8);
+  --archive-ink-strong: #d9c18a;
+  --archive-ink-soft: #b8a47b;
+  --archive-ink-faint: #78684e;
+  --archive-inset-bg: rgba(18, 24, 25, 0.94);
+
+  --temple-stone: #151b1c;
+  --temple-stone-light: #293538;
+  --temple-bronze: #76542b;
+  --temple-turquoise: #238b91;
+}
+
+[data-theme="underground-temple"] [data-archive-essence="true"] {
+  background-image:
+    linear-gradient(135deg, rgba(214, 191, 137, 0.035), transparent 45%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg, rgba(48, 69, 72, 0.08), transparent 55%);
+}
+
+[data-theme="underground-temple"] [data-artroom-material="canvas"] {
+  background-color: var(--temple-stone);
+  background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 5px);
+}
