@@ -11,6 +11,7 @@ import "../dungeon-room-materials.css"
 import "../crystal-cavern-room-materials.css"
 import "../alchemist-laboratory-materials.css"
 import "../underground-temple-room-materials.css"
+import "../treasure-vault-room-materials.css"
 import { notFound } from "next/navigation"
 import { RoomThemeTemplate } from "@/components/room-theme-template"
 import { getRoomThemePage, ROOM_THEME_PAGES } from "@/lib/room-theme-pages"
@@ -29,9 +30,10 @@ import { DUNGEON_ROOM_THEME_PAGE } from "@/lib/dungeon-room-theme-page"
 import { CRYSTAL_CAVERN_ROOM_THEME_PAGE } from "@/lib/crystal-cavern-room-theme-page"
 import { ALCHEMIST_LABORATORY_THEME_PAGE } from "@/lib/alchemist-laboratory-theme-page"
 import { UNDERGROUND_TEMPLE_ROOM_THEME_PAGE } from "@/lib/underground-temple-room-theme-page"
+import { TREASURE_VAULT_ROOM_THEME_PAGE } from "@/lib/treasure-vault-room-theme-page"
 
 export function generateStaticParams() {
-  return [...Object.keys(ROOM_THEME_PAGES), "conservatory", "fireside-lounge", "spa", "bar", "gallery", "artroom", "ballroom", "map-room", "theater-room", "war-room", "clock-tower", "dungeon", "crystal-cavern", "alchemist-laboratory", "underground-temple"].map((room) => ({ room }))
+  return [...Object.keys(ROOM_THEME_PAGES), "conservatory", "fireside-lounge", "spa", "bar", "gallery", "artroom", "ballroom", "map-room", "theater-room", "war-room", "clock-tower", "dungeon", "crystal-cavern", "alchemist-laboratory", "underground-temple", "treasure-vault"].map((room) => ({ room }))
 }
 
 export default async function RoomThemePageRoute({ params }: { params: Promise<{ room: string }> }) {
@@ -67,7 +69,9 @@ export default async function RoomThemePageRoute({ params }: { params: Promise<{
                                 ? ALCHEMIST_LABORATORY_THEME_PAGE
                                 : room === "underground-temple"
                                   ? UNDERGROUND_TEMPLE_ROOM_THEME_PAGE
-                                  : getRoomThemePage(room)
+                                  : room === "treasure-vault"
+                                    ? TREASURE_VAULT_ROOM_THEME_PAGE
+                                    : getRoomThemePage(room)
   if (!data) notFound()
   return <RoomThemeTemplate data={data} />
 }
