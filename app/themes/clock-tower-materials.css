@@ -1,0 +1,70 @@
+/* Clock Tower Archive palette: steel, chrome, midnight blue and warm brass. */
+[data-theme="clock-tower"] {
+  --background: 214 30% 5%;
+  --foreground: 38 42% 88%;
+  --card: 214 27% 8%;
+  --card-foreground: 38 42% 88%;
+  --popover: 214 27% 8%;
+  --popover-foreground: 38 42% 88%;
+  --primary: 202 70% 62%;
+  --primary-foreground: 214 30% 5%;
+  --secondary: 214 24% 15%;
+  --secondary-foreground: 38 42% 88%;
+  --tertiary: 210 34% 82%;
+  --tertiary-foreground: 214 30% 5%;
+  --accent-gold: 38 62% 48%;
+  --accent-gold-foreground: 214 30% 5%;
+  --accent-copper: 30 35% 28%;
+  --accent-copper-foreground: 38 42% 88%;
+  --surface-dark: 214 30% 3%;
+  --surface-dark-foreground: 38 42% 88%;
+  --surface-light: 210 28% 88%;
+  --surface-light-foreground: 214 30% 5%;
+  --muted: 214 22% 13%;
+  --muted-foreground: 205 28% 70%;
+  --accent: 205 28% 20%;
+  --accent-foreground: 38 42% 88%;
+  --border: 202 25% 25%;
+  --input: 214 22% 13%;
+  --ring: 202 70% 62%;
+
+  --archive-metal-highlight: #d9f2ff;
+  --archive-metal-light: #9fc9e6;
+  --archive-metal-mid: #547c9b;
+  --archive-metal-dark: #263d50;
+  --archive-metal-deep: #101a24;
+  --archive-gold: #b88a3d;
+
+  --archive-wood-base: #101b25;
+  --archive-wood-top: #070d14;
+  --archive-wood-mid: #1b2c3b;
+  --archive-wood-bottom: #0b131c;
+
+  --archive-surface-sheen: rgba(174, 222, 255, 0.07);
+  --archive-surface-shade: rgba(0, 0, 0, 0.8);
+  --archive-ink-strong: #b9e5ff;
+  --archive-ink-soft: #9eb9ce;
+  --archive-ink-faint: #5f7d94;
+  --archive-inset-bg: rgba(13, 25, 36, 0.94);
+
+  --clocktower-steel: #547c9b;
+  --clocktower-chrome: #b9d9ed;
+  --clocktower-brass: #b88a3d;
+  --clocktower-blue: #82c8f2;
+}
+
+[data-theme="clock-tower"] [data-archive-essence="true"] {
+  background-image:
+    linear-gradient(135deg, rgba(173, 221, 255, 0.04), transparent 45%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg, rgba(53, 83, 108, 0.08), transparent 55%);
+}
+
+[data-theme="clock-tower"] [data-clocktower-material="button"],
+[data-theme="clock-tower"] [data-clocktower-button="true"] {
+  background-color: #172a3a;
+  background-image: linear-gradient(135deg, rgba(191, 230, 255, 0.16), transparent 42%);
+  color: #d7efff;
+  border: 1px solid #6c9bbd;
+  box-shadow: inset 0 0 0 1px rgba(185, 217, 237, 0.22), 0 2px 0 #0a1118, 0 5px 10px rgba(0,0,0,0.3);
+}
