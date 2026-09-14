@@ -1,36 +1,15 @@
 /*
  * ONE application-wide background layer.
- *
- * The active theme is written to document.documentElement[data-theme] by
- * AppThemeProvider. The theme tokens are therefore available to the single
- * .app-background wrapper everywhere in the application.
- *
- * Do not use page-level :has([data-theme]) backgrounds here. A theme page is
- * only one child of the app shell and must not own a second background.
+ * The active theme is written to document.documentElement[data-theme].
  */
 
 .app-background {
   background:
-    radial-gradient(
-      circle at 50% 0%,
-      hsl(var(--accent-gold) / 0.12),
-      transparent 60%
-    ),
-    radial-gradient(
-      circle at 50% 20%,
-      hsl(var(--background)),
-      hsl(var(--surface-dark)) 80%
-    ),
-    repeating-linear-gradient(
-      45deg,
-      hsl(var(--accent-gold) / 0.03),
-      hsl(var(--accent-gold) / 0.03) 2px,
-      transparent 2px,
-      transparent 10px
-    );
+    radial-gradient(circle at 50% 0%, hsl(var(--accent-gold) / 0.12), transparent 60%),
+    radial-gradient(circle at 50% 20%, hsl(var(--background)), hsl(var(--surface-dark)) 80%),
+    repeating-linear-gradient(45deg, hsl(var(--accent-gold) / 0.03), hsl(var(--accent-gold) / 0.03) 2px, transparent 2px, transparent 10px);
 }
 
-/* Inner wrappers never paint a competing background. */
 .app-background .room-environment,
 .app-background .artifact-cabinet,
 .app-background main,
@@ -39,8 +18,48 @@
   background-image: none !important;
 }
 
-/* The document itself stays transparent; .app-background owns the backdrop. */
 html,
 body {
   background: transparent;
+}
+
+/* Fireside Lounge: obsidian, steel and ember-orange materials. */
+[data-theme="fireside-lounge"] {
+  --archive-metal-highlight: #d9dde2;
+  --archive-metal-light: #8f969e;
+  --archive-metal-mid: #555d66;
+  --archive-metal-dark: #292e34;
+  --archive-metal-deep: #101317;
+  --archive-gold: #f07828;
+  --archive-wood-base: #171a1e;
+  --archive-wood-top: #090b0e;
+  --archive-wood-mid: #292d32;
+  --archive-wood-bottom: #0d1014;
+  --archive-surface-sheen: rgba(255, 126, 42, 0.08);
+  --archive-surface-shade: rgba(0, 0, 0, 0.72);
+  --archive-ink-strong: #e5d8c5;
+  --archive-ink-soft: #c2b7a8;
+  --archive-ink-faint: #938d86;
+  --archive-inset-bg: #11151a;
+}
+
+[data-theme="fireside-lounge"] [data-material="wood"] {
+  background-image: linear-gradient(135deg, #d9dde2 0%, #8f969e 15%, #101317 42%, #292e34 68%, #555d66 84%, #d9dde2 100%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(8, 10, 12, 0.98), inset 0 0 0 1px rgba(255, 145, 70, 0.18);
+}
+
+[data-theme="fireside-lounge"] [data-material="wood"] > div > div {
+  background-color: #171a1e;
+  background-image: linear-gradient(180deg, rgba(255, 125, 42, 0.055), rgba(0, 0, 0, 0.66)), repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 34px), repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.26) 0 1px, transparent 1px 13px), linear-gradient(180deg, #292d32, #0d1014);
+  box-shadow: inset 0 0 0 1px rgba(240, 120, 40, 0.24), inset 0 3px 18px rgba(0, 0, 0, 0.78);
+}
+
+[data-theme="fireside-lounge"] [data-material="wood"]:has(h2) > div > div {
+  background-image: radial-gradient(circle at 50% 0%, rgba(255, 102, 24, 0.13), transparent 48%), linear-gradient(180deg, rgba(220, 225, 232, 0.045), rgba(0, 0, 0, 0.58)), repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.24) 0 1px, transparent 1px 14px), linear-gradient(180deg, #20252b, #0b0e12);
+}
+
+[data-theme="fireside-lounge"] figure > div,
+[data-theme="fireside-lounge"] .overflow-hidden.rounded-lg.border {
+  border-color: rgba(240, 120, 40, 0.46);
+  box-shadow: inset 0 0 18px rgba(255, 96, 24, 0.12);
 }
