@@ -6,10 +6,7 @@ export const ART_ROOM_THEME_PAGE: RoomThemePage = {
   crest: "/images/crests/art-room-crest.png",
   hero: "/images/themes/art-room-hero.jpg",
   title: { fi: "Taidehuone", en: "Art Room" },
-  tagline: {
-    fi: "Maailma muuttuu, kun muutat tapaasi nähdä se.",
-    en: "The world changes when you change how you see it.",
-  },
+  tagline: { fi: "Maailma muuttuu, kun muutat tapaasi nähdä se.", en: "The world changes when you change how you see it." },
   storyTitle: { fi: "Taidehuone", en: "The Art Room" },
   storyParagraphs: [
     { fi: "Täällä mielikuvitus saa muodon ja ideat löytävät siipensä.", en: "Here, imagination takes shape and ideas find their form." },
@@ -49,7 +46,7 @@ export const ART_ROOM_THEME_PAGE: RoomThemePage = {
     { label: { fi: "10 ainutlaatuista huonenäkymää", en: "10 Unique Room Screens" }, description: { fi: "Täydellinen matka Taidehuoneen läpi", en: "A complete journey through the Art Room" } },
     { label: { fi: "Tarinakronikka", en: "Story Chronicle" }, description: { fi: "Lore, luonnokset ja luojan ajatukset", en: "Lore, sketches and creator's thoughts" } },
     { label: { fi: "Saavutuspolku", en: "Achievement Path" }, description: { fi: "Haastavat virstanpylväät ja palkinnot", en: "Challenging milestones & rewards" } },
-    { label: { fi: "Lor e-merkintä", en: "Lore Entry" }, description: { fi: "Lisätty kartanon kirjastoon", en: "Added to your Manor Library" } },
+    { label: { fi: "Lore-merkintä", en: "Lore Entry" }, description: { fi: "Lisätty kartanon kirjastoon", en: "Added to your Manor Library" } },
   ],
   footerLine: { fi: "Jokainen mestariteos alkaa ideasta.", en: "Every masterpiece begins as an idea." },
 }
