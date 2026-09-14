@@ -63,3 +63,47 @@ body {
   border-color: rgba(240, 120, 40, 0.46);
   box-shadow: inset 0 0 18px rgba(255, 96, 24, 0.12);
 }
+
+/* Spa: ivory stone, lavender silk and warm gold. */
+[data-theme="spa"] {
+  --archive-metal-highlight: #fff4d6;
+  --archive-metal-light: #e5c878;
+  --archive-metal-mid: #b18b42;
+  --archive-metal-dark: #76552d;
+  --archive-metal-deep: #3d2b25;
+  --archive-gold: #b99ad8;
+  --archive-wood-base: #f1ece7;
+  --archive-wood-top: #d8cfc9;
+  --archive-wood-mid: #eee6df;
+  --archive-wood-bottom: #c7b9b0;
+  --archive-surface-sheen: rgba(185, 154, 216, 0.16);
+  --archive-surface-shade: rgba(83, 57, 77, 0.18);
+  --archive-ink-strong: #554064;
+  --archive-ink-soft: #76677d;
+  --archive-ink-faint: #a69aa9;
+  --archive-inset-bg: #eee8e3;
+  --background: 270 18% 91%;
+  --surface-dark: 270 14% 84%;
+  --accent-gold: 270 42% 70%;
+}
+
+[data-theme="spa"] [data-material="wood"] {
+  background-image: linear-gradient(135deg, #fff4d6 0%, #e5c878 15%, #76552d 36%, #b18b42 58%, #e5c878 82%, #fff4d6 100%);
+  box-shadow: 0 12px 30px rgba(83, 57, 77, 0.18), 0 0 0 1px rgba(118, 85, 45, 0.5), inset 0 0 0 1px rgba(255, 248, 225, 0.8);
+}
+
+[data-theme="spa"] [data-material="wood"] > div > div {
+  background-color: #f1ece7;
+  background-image: linear-gradient(180deg, rgba(185, 154, 216, 0.13), rgba(118, 85, 45, 0.05)), repeating-linear-gradient(90deg, rgba(118, 85, 45, 0.045) 0 1px, transparent 1px 34px), repeating-linear-gradient(0deg, rgba(118, 85, 45, 0.06) 0 1px, transparent 1px 13px), linear-gradient(180deg, #eee6df, #c7b9b0);
+  box-shadow: inset 0 0 0 1px rgba(185, 154, 216, 0.34), inset 0 3px 18px rgba(118, 85, 45, 0.12);
+}
+
+[data-theme="spa"] [data-material="wood"]:has(h2) > div > div {
+  background-image: radial-gradient(circle at 50% 0%, rgba(185, 154, 216, 0.22), transparent 48%), linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(118, 85, 45, 0.06)), repeating-linear-gradient(0deg, rgba(118, 85, 45, 0.05) 0 1px, transparent 1px 14px), linear-gradient(180deg, #f4eee9, #ded3cc);
+}
+
+[data-theme="spa"] figure > div,
+[data-theme="spa"] .overflow-hidden.rounded-lg.border {
+  border-color: rgba(185, 154, 216, 0.7);
+  box-shadow: inset 0 0 18px rgba(185, 154, 216, 0.16);
+}
