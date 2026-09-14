@@ -26,7 +26,7 @@ const ROOM_SLOTS: { src: string; href?: string; label?: string }[] = [
   { src: "/themes/art-room-preview.png", href: "/themes/artroom", label: "Art Room" },
 
   // Basement — preview tiles, awaiting dedicated room pages
-  { src: "/themes/alchemist-laboratory-preview.png", label: "Alchemist Laboratory" },
+  { src: "/themes/alchemist-laboratory-preview.png", href: "/themes/alchemist-laboratory", label: "Alchemist Laboratory" },
   { src: "/themes/dungeon-preview.png", href: "/themes/dungeon", label: "Dungeon" },
   { src: "/themes/underground-temple-preview.png", label: "Underground Temple" },
   { src: "/themes/crystal-cave-preview.png", href: "/themes/crystal-cavern", label: "Crystal Cavern" },
