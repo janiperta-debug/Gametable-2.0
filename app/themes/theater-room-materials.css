@@ -1,0 +1,61 @@
+/* Theater Room — royal purple velvet, antique gold and deep stage shadow. */
+[data-theme="theater-room"] {
+  --background: 270 34% 6%;
+  --foreground: 39 45% 88%;
+  --card: 270 32% 9%;
+  --card-foreground: 39 45% 88%;
+  --popover: 270 32% 9%;
+  --popover-foreground: 39 45% 88%;
+  --primary: 39 63% 48%;
+  --primary-foreground: 270 34% 6%;
+  --secondary: 278 32% 18%;
+  --secondary-foreground: 39 45% 88%;
+  --muted: 272 24% 13%;
+  --muted-foreground:  thirty 18% 68%;
+  --accent: 282 38% 24%;
+  --accent-foreground: 39 45% 88%;
+  --border: 39 35% 28%;
+  --input: 272 24% 13%;
+  --ring: 39 63% 48%;
+
+  --archive-metal-highlight: #f0c86d;
+  --archive-metal-light: #c99a3d;
+  --archive-metal-mid: #8b5b25;
+  --archive-metal-dark: #4b281d;
+  --archive-metal-deep: #1b0b16;
+  --archive-gold: #b77b32;
+
+  --archive-wood-base: #160d20;
+  --archive-wood-top: #0a0610;
+  --archive-wood-mid: #281431;
+  --archive-wood-bottom: #100817;
+
+  --archive-surface-sheen: rgba(215, 151, 255, 0.07);
+  --archive-surface-shade: rgba(0, 0, 0, 0.8);
+  --archive-ink-strong: #e9c77b;
+  --archive-ink-soft: #c59a66;
+  --archive-ink-faint: #8d668e;
+  --archive-inset-bg: rgba(24, 12, 32, 0.95);
+
+  --theater-velvet: #190b25;
+  --theater-purple: #6f2b78;
+  --theater-purple-light: #b56ab5;
+  --theater-gold: #c6923d;
+  --theater-gold-dark: #4b281d;
+}
+
+[data-theme="theater-room"] [data-archive-essence="true"] {
+  background-image:
+    linear-gradient(135deg, rgba(193, 105, 191, 0.08), transparent 45%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg, rgba(116, 55, 125, 0.08), transparent 55%);
+}
+
+[data-theme="theater-room"] [data-artroom-material="button"],
+[data-theme="theater-room"] [data-artroom-button="true"] {
+  background-color: var(--theater-purple);
+  background-image: linear-gradient(135deg, rgba(241, 190, 255, 0.12), transparent 42%);
+  color: #f1d59b;
+  border-color: var(--archive-metal-dark);
+  box-shadow: inset 0 0 0 1px rgba(240, 200, 109, 0.24), 0 2px 0 var(--archive-metal-deep), 0 5px 10px rgba(0,0,0,0.3);
+}
