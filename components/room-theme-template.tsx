@@ -8,6 +8,7 @@ import { useAppTheme, type AppThemeName } from "@/components/app-theme-provider"
 import { getRoomTheme } from "@/lib/room-themes"
 import type { Localized, RoomThemePage } from "@/lib/room-theme-pages"
 import conservatoryStyles from "@/app/themes/conservatory-materials.module.css"
+import spaContrastStyles from "@/app/themes/spa-contrast.module.css"
 
 /** Floor → roman level shown in the status badge (the floor gates progression). */
 const FLOOR_LEVEL: Record<string, string> = {
@@ -46,7 +47,7 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
   return (
     <main
       data-theme={data.id as AppThemeName}
-      className={`artifact-cabinet min-h-screen px-3 py-5 sm:px-6 sm:py-8 ${data.id === "conservatory" ? conservatoryStyles.conservatoryMaterials : ""}`}
+      className={`artifact-cabinet min-h-screen px-3 py-5 sm:px-6 sm:py-8 ${data.id === "conservatory" ? conservatoryStyles.conservatoryMaterials : ""} ${data.id === "spa" ? spaContrastStyles.spaContrast : ""}`}
       style={{
         // The page background is part of the room theme itself. All theme
         // palettes already define --background, so the shared template does
