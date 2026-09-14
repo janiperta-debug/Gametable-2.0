@@ -107,3 +107,47 @@ body {
   border-color: rgba(185, 154, 216, 0.7);
   box-shadow: inset 0 0 18px rgba(185, 154, 216, 0.16);
 }
+
+/* Bar: dark walnut, aged brass and warm amber. */
+[data-theme="bar"] {
+  --archive-metal-highlight: #f7d58a;
+  --archive-metal-light: #c88a32;
+  --archive-metal-mid: #8d4f1e;
+  --archive-metal-dark: #4b2414;
+  --archive-metal-deep: #1c100b;
+  --archive-gold: #d89432;
+  --archive-wood-base: #24150f;
+  --archive-wood-top: #0d0907;
+  --archive-wood-mid: #4a2919;
+  --archive-wood-bottom: #1b100b;
+  --archive-surface-sheen: rgba(216, 148, 50, 0.09);
+  --archive-surface-shade: rgba(0, 0, 0, 0.76);
+  --archive-ink-strong: #f0d6a3;
+  --archive-ink-soft: #c9aa78;
+  --archive-ink-faint: #9c7950;
+  --archive-inset-bg: #1a100b;
+  --background: 25 28% 8%;
+  --surface-dark: 22 32% 5%;
+  --accent-gold: 34 64% 52%;
+}
+
+[data-theme="bar"] [data-material="wood"] {
+  background-image: linear-gradient(135deg, #f7d58a 0%, #c88a32 15%, #1c100b 38%, #4b2414 60%, #8d4f1e 82%, #f7d58a 100%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.78), 0 0 0 1px rgba(28, 14, 8, 0.98), inset 0 0 0 1px rgba(247, 213, 138, 0.28);
+}
+
+[data-theme="bar"] [data-material="wood"] > div > div {
+  background-color: #24150f;
+  background-image: linear-gradient(180deg, rgba(216, 148, 50, 0.08), rgba(0, 0, 0, 0.72)), repeating-linear-gradient(90deg, rgba(255, 220, 145, 0.018) 0 1px, transparent 1px 34px), repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.3) 0 1px, transparent 1px 13px), linear-gradient(180deg, #4a2919, #1b100b);
+  box-shadow: inset 0 0 0 1px rgba(216, 148, 50, 0.3), inset 0 3px 18px rgba(0, 0, 0, 0.82);
+}
+
+[data-theme="bar"] [data-material="wood"]:has(h2) > div > div {
+  background-image: radial-gradient(circle at 50% 0%, rgba(216, 148, 50, 0.14), transparent 48%), linear-gradient(180deg, rgba(247, 213, 138, 0.055), rgba(0, 0, 0, 0.64)), repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.27) 0 1px, transparent 1px 14px), linear-gradient(180deg, #3b2115, #160c08);
+}
+
+[data-theme="bar"] figure > div,
+[data-theme="bar"] .overflow-hidden.rounded-lg.border {
+  border-color: rgba(216, 148, 50, 0.52);
+  box-shadow: inset 0 0 18px rgba(216, 104, 24, 0.14);
+}
