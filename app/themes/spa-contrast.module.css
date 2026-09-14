@@ -1,0 +1,8 @@
+/* Spa text contrast: keep lavender for subtle accents, not for primary text. */
+.spaContrast[data-theme="spa"] {
+  --archive-gold: #4b2f55 !important;
+  --archive-ink-strong: #302235 !important;
+  --archive-ink-soft: #46384b !important;
+  --archive-ink-faint: #625566 !important;
+  --archive-surface-sheen: rgba(75, 47, 85, 0.08) !important;
+}
