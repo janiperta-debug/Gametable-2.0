@@ -5,7 +5,6 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { createClient } from "@/lib/supabase/client"
 import { useUser } from "@/hooks/useUser"
 import { roomThemes, getRoomTheme, type RoomTheme, type AppThemeName } from "@/lib/room-themes"
-import { isManorRoomCurrentlyUsable } from "@/lib/manor-progression"
 
 export type { AppThemeName }
 export type ManorTheme = RoomTheme
@@ -21,8 +20,9 @@ interface AppThemeContextType {
 const APP_THEME_STORAGE_KEY = "gametable-app-theme"
 const DEFAULT_THEME: AppThemeName = "main-hall"
 
-// WP-005: one room catalog; access is checked by Manor progression, while this
-// provider owns only the currently selected visual theme.
+// Theme selection is separate from Manor progression. The Themes page owns
+// the presentation of locked/unlocked rooms; this provider only persists the
+// user's selected visual theme.
 const AppThemeContext = createContext<AppThemeContextType | undefined>(undefined)
 
 interface AppThemeProviderProps {
@@ -37,7 +37,7 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
   useEffect(() => {
     if (user && profile?.preferred_theme && !isLoadedFromDB) {
       const dbTheme = profile.preferred_theme as AppThemeName
-      if (getRoomTheme(dbTheme) && isManorRoomCurrentlyUsable(dbTheme)) {
+      if (getRoomTheme(dbTheme)) {
         setCurrentAppTheme(dbTheme)
         setIsLoadedFromDB(true)
         try {
@@ -53,7 +53,7 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
     if (!user) {
       try {
         const saved = localStorage.getItem(APP_THEME_STORAGE_KEY) as AppThemeName | null
-        if (saved && getRoomTheme(saved) && isManorRoomCurrentlyUsable(saved)) {
+        if (saved && getRoomTheme(saved)) {
           setCurrentAppTheme(saved)
         }
       } catch (error) {
@@ -63,7 +63,7 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
   }, [user])
 
   const setAppTheme = async (theme: AppThemeName) => {
-    if (!getRoomTheme(theme) || !isManorRoomCurrentlyUsable(theme)) return
+    if (!getRoomTheme(theme)) return
 
     setCurrentAppTheme(theme)
 
