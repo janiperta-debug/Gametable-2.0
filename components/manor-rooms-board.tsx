@@ -6,7 +6,8 @@ import { ArchiveFrame } from "@/components/archive-frame"
 // First 7 grid slots show room images; every other slot shows a lock.
 // Slots with an `href` are clickable and open that room's theme page.
 const ROOM_SLOTS: { src: string; href?: string; label?: string }[] = [
-  { src: "/themes/rooms/room-1.png" },
+  // Gallery painting — opens the Gallery theme page.
+  { src: "/themes/rooms/room-1.png", href: "/themes/gallery", label: "Gallery" },
   // Spa pool — opens the Spa theme page.
   { src: "/themes/rooms/room-2.png", href: "/themes/spa", label: "Spa" },
   // Bar — opens the Bar theme page.
