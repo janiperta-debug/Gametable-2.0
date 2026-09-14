@@ -42,3 +42,67 @@
     radial-gradient(circle at 50% 0%, rgba(216, 177, 90, 0.10), transparent 58%),
     linear-gradient(180deg, #101f30 0%, #07121d 52%, #030a11 100%);
 }
+
+/* Observatory theme: midnight blue, antique brass, silver instruments and
+   a restrained celestial-red accent. */
+[data-theme="observatory"] {
+  --background: 210 28% 7%;
+  --foreground: 38 35% 88%;
+  --card: 210 26% 10%;
+  --card-foreground: 38 35% 88%;
+  --popover: 210 26% 10%;
+  --popover-foreground: 38 35% 88%;
+  --primary: 38 48% 52%;
+  --primary-foreground: 210 28% 7%;
+  --secondary: 210 24% 16%;
+  --secondary-foreground: 38 35% 88%;
+  --muted: 210 20% 14%;
+  --muted-foreground: 210 16% 65%;
+  --accent: 352 58% 30%;
+  --accent-foreground: 38 35% 92%;
+  --border: 210 20% 25%;
+  --input: 210 20% 14%;
+  --ring: 38 48% 52%;
+  --surface-dark: 210 30% 4%;
+  --surface-dark-foreground: 38 35% 88%;
+  --surface-light: 38 30% 88%;
+  --surface-light-foreground: 210 28% 7%;
+
+  --archive-metal-highlight: #e7e0d2;
+  --archive-metal-light: #a9a49a;
+  --archive-metal-mid: #665f55;
+  --archive-metal-dark: #302a25;
+  --archive-metal-deep: #100f10;
+  --archive-gold: #c49a55;
+  --archive-wood-base: #101b24;
+  --archive-wood-top: #071018;
+  --archive-wood-mid: #1b2b38;
+  --archive-wood-bottom: #0a131b;
+  --archive-surface-sheen: rgba(196, 154, 85, 0.075);
+  --archive-surface-shade: rgba(0, 0, 0, 0.78);
+  --archive-ink-strong: #e8d8b8;
+  --archive-ink-soft: #c0c8ce;
+  --archive-ink-faint: #8293a1;
+  --archive-inset-bg: #0b151e;
+}
+
+[data-theme="observatory"] [data-material="wood"] {
+  background-image: linear-gradient(135deg, #e7e0d2 0%, #a9a49a 12%, #302a25 30%, #100f10 46%, #665f55 72%, #c49a55 88%, #e7e0d2 100%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.78), 0 0 0 1px rgba(16, 15, 16, 0.98), inset 0 0 0 1px rgba(231, 224, 210, 0.22);
+}
+
+[data-theme="observatory"] [data-material="wood"] > div > div {
+  background-color: #101b24;
+  background-image: radial-gradient(ellipse at 50% 0%, rgba(196, 154, 85, 0.09), transparent 55%), linear-gradient(180deg, rgba(231, 224, 210, 0.025), rgba(0, 0, 0, 0.62)), repeating-linear-gradient(0deg, rgba(176, 194, 207, 0.018) 0 1px, transparent 1px 12px), linear-gradient(180deg, #1b2b38, #0a131b);
+  box-shadow: inset 0 0 0 1px rgba(196, 154, 85, 0.28), inset 0 3px 18px rgba(0, 0, 0, 0.82);
+}
+
+[data-theme="observatory"] [data-material="wood"]:has(h2) > div > div {
+  background-image: radial-gradient(circle at 50% 0%, rgba(196, 154, 85, 0.13), transparent 48%), linear-gradient(180deg, rgba(231, 224, 210, 0.035), rgba(0, 0, 0, 0.64)), repeating-linear-gradient(0deg, rgba(176, 194, 207, 0.018) 0 1px, transparent 1px 14px), linear-gradient(180deg, #172733, #09131c);
+}
+
+[data-theme="observatory"] figure > div,
+[data-theme="observatory"] .overflow-hidden.rounded-lg.border {
+  border-color: rgba(196, 154, 85, 0.5);
+  box-shadow: inset 0 0 18px rgba(196, 154, 85, 0.1);
+}
