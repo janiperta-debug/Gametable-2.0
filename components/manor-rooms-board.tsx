@@ -9,7 +9,8 @@ const ROOM_SLOTS: { src: string; href?: string; label?: string }[] = [
   { src: "/themes/rooms/room-1.png" },
   // Spa pool — opens the Spa theme page.
   { src: "/themes/rooms/room-2.png", href: "/themes/spa", label: "Spa" },
-  { src: "/themes/rooms/room-3.png" },
+  // Bar — opens the Bar theme page.
+  { src: "/themes/rooms/room-3.png", href: "/themes/bar", label: "Bar" },
   // Conservatory greenhouse — opens the Conservatory theme page.
   { src: "/themes/rooms/room-4.png", href: "/themes/conservatory", label: "Conservatory" },
   // Fireside Lounge fireplace — opens the Fireside Lounge theme page.
