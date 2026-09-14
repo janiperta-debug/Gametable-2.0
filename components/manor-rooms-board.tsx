@@ -3,9 +3,9 @@
 import Link from "next/link"
 import { ArchiveFrame } from "@/components/archive-frame"
 
-// First-floor rooms followed by the seven second-floor preview rooms.
-// The second-floor entries are temporary preview links; they will be
-// returned to locked slots once the second-floor preview work is complete.
+// First-floor rooms followed by the second-floor preview rooms and the
+// five basement preview slots. Basement rooms become linked when their
+// dedicated preview pages are implemented.
 const ROOM_SLOTS: { src: string; href?: string; label?: string }[] = [
   // First floor
   { src: "/themes/rooms/room-1.png", href: "/themes/gallery", label: "Gallery" },
@@ -16,7 +16,7 @@ const ROOM_SLOTS: { src: string; href?: string; label?: string }[] = [
   { src: "/themes/rooms/room-6.png", href: "/themes/library", label: "Library" },
   { src: "/themes/rooms/room-7.png", href: "/themes/main-hall", label: "Main Hall" },
 
-  // Second floor — temporary preview mode
+  // Second floor — preview mode
   { src: "/themes/ballroom-preview.png", href: "/themes/ballroom", label: "Ballroom" },
   { src: "/themes/map-room-preview.png", href: "/themes/map-room", label: "Map Room" },
   { src: "/themes/observatory-preview.png", href: "/themes/observatory", label: "Observatory" },
@@ -24,6 +24,13 @@ const ROOM_SLOTS: { src: string; href?: string; label?: string }[] = [
   { src: "/themes/clock-tower-preview.png", href: "/themes/clock-tower", label: "Clock Tower" },
   { src: "/themes/war-room-preview.png", href: "/themes/war-room", label: "War Room" },
   { src: "/themes/art-room-preview.png", href: "/themes/artroom", label: "Art Room" },
+
+  // Basement — preview tiles, awaiting dedicated room pages
+  { src: "/themes/alchemist-laboratory-preview.png", label: "Alchemist Laboratory" },
+  { src: "/themes/dungeon-preview.png", label: "Dungeon" },
+  { src: "/themes/underground-temple-preview.png", label: "Underground Temple" },
+  { src: "/themes/crystal-cave-preview.png", label: "Crystal Cave" },
+  { src: "/themes/treasure-vault-preview.png", label: "Treasure Vault" },
 ]
 
 // Total number of grid slots (matches the artifacts board layout).
@@ -64,7 +71,11 @@ export function ManorRoomsBoard() {
           )
         }
 
-        return <div key={i}>{tile}</div>
+        return (
+          <div key={i} aria-label={slot.label ?? "Room preview"}>
+            {tile}
+          </div>
+        )
       })}
     </div>
   )
