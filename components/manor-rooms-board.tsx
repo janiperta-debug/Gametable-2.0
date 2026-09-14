@@ -9,7 +9,8 @@ const ROOM_SLOTS: { src: string; href?: string; label?: string }[] = [
   { src: "/themes/rooms/room-1.png" },
   { src: "/themes/rooms/room-2.png" },
   { src: "/themes/rooms/room-3.png" },
-  { src: "/themes/rooms/room-4.png" },
+  // Conservatory greenhouse — opens the Conservatory theme page.
+  { src: "/themes/rooms/room-4.png", href: "/themes/conservatory", label: "Conservatory" },
   { src: "/themes/rooms/room-5.png" },
   // Library bookshelf — opens the Library theme page (room still locked).
   { src: "/themes/rooms/room-6.png", href: "/themes/library", label: "Library" },
