@@ -1,4 +1,6 @@
-/* Art Room Archive palette: antique gold, blackened canvas, warm parchment. */
+/* Art Room Archive palette — derived from the Art Room hero:
+   antique gilded relief, dark walnut/mahogany, blackened canvas,
+   warm parchment, olive velvet and candlelit amber. */
 [data-theme="artroom"] {
   --background: 24 16% 6%;
   --foreground: 38 42% 92%;
@@ -28,24 +30,61 @@
   --input: 25 13% 16%;
   --ring: 38 78% 48%;
 
-  --archive-metal-highlight: #fff0b8;
-  --archive-metal-light: #e7bd61;
-  --archive-metal-mid: #c18a2d;
-  --archive-metal-dark: #8c5b16;
-  --archive-metal-deep: #4b2b08;
-  --archive-gold: #d9a441;
-  --archive-wood-base: #17120e;
-  --archive-wood-top: #0c0907;
-  --archive-wood-mid: #302016;
-  --archive-wood-bottom: #120d09;
-  --archive-surface-sheen: rgba(255, 224, 166, 0.07);
-  --archive-surface-shade: rgba(0, 0, 0, 0.68);
-  --archive-ink-strong: #f0d7a0;
-  --archive-ink-soft: #c9b18a;
-  --archive-ink-faint: #8f795b;
-  --archive-inset-bg: rgba(38, 27, 18, 0.86);
+  /* Antique gilded metal: bright worn edges, warm midtone, dark patina. */
+  --archive-metal-highlight: #f8df9a;
+  --archive-metal-light: #d6a94b;
+  --archive-metal-mid: #a87524;
+  --archive-metal-dark: #704611;
+  --archive-metal-deep: #321b06;
+  --archive-gold: #c99535;
+
+  /* Dark walnut / mahogany, matching the hero's furniture and shelves. */
+  --archive-wood-base: #21150d;
+  --archive-wood-top: #100a06;
+  --archive-wood-mid: #4a2b16;
+  --archive-wood-bottom: #170d08;
+
+  /* Candlelit relief over a blackened canvas surface. */
+  --archive-surface-sheen: rgba(255, 205, 125, 0.095);
+  --archive-surface-shade: rgba(0, 0, 0, 0.72);
+
+  /* Warm parchment/ink values used by Art Room content panels. */
+  --archive-ink-strong: #f0d39a;
+  --archive-ink-soft: #c8aa78;
+  --archive-ink-faint: #8c7049;
+  --archive-inset-bg: rgba(31, 20, 12, 0.9);
+
+  /* Art Room-specific supporting materials. */
+  --artroom-walnut: #3a2112;
+  --artroom-walnut-light: #6b4324;
+  --artroom-canvas: #171311;
+  --artroom-parchment: #d8bd87;
+  --artroom-parchment-dark: #8e6c3e;
+  --artroom-olive: #596044;
+  --artroom-amber: #b87527;
 }
 
 [data-theme="artroom"] [data-archive-essence="true"] {
-  background-image: linear-gradient(135deg, rgba(255, 222, 157, 0.035), transparent 45%), repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 4px);
+  background-image:
+    linear-gradient(135deg, rgba(255, 222, 157, 0.045), transparent 45%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 4px),
+    linear-gradient(180deg, rgba(102, 62, 28, 0.08), transparent 55%);
+}
+
+/* Optional material hooks for Art Room surfaces. They remain theme-scoped so
+   the other rooms keep their own Archive material treatment. */
+[data-theme="artroom"] [data-artroom-material="canvas"] {
+  background-color: var(--artroom-canvas);
+  background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 4px);
+}
+
+[data-theme="artroom"] [data-artroom-material="parchment"] {
+  background-color: var(--artroom-parchment);
+  color: #2a1b0e;
+  background-image: linear-gradient(135deg, rgba(255,248,214,0.22), transparent 45%), repeating-linear-gradient(0deg, rgba(78,49,20,0.045) 0 1px, transparent 1px 5px);
+}
+
+[data-theme="artroom"] [data-artroom-material="walnut"] {
+  background-color: var(--artroom-walnut);
+  background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 9px), linear-gradient(180deg, var(--artroom-walnut-light), var(--artroom-walnut));
 }
