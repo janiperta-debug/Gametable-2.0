@@ -1,0 +1,61 @@
+/* Treasure Vault palette — dark archive, aged parchment, antique gold and warm lantern amber. */
+[data-theme="treasure-vault"] {
+  --background: 28 18% 5%;
+  --foreground: 38 38% 88%;
+  --card: 28 15% 8%;
+  --card-foreground: 38 38% 88%;
+  --popover: 28 15% 8%;
+  --popover-foreground: 38 38% 88%;
+  --primary: 38 68% 48%;
+  --primary-foreground: 28 18% 5%;
+  --secondary: 28 20% 15%;
+  --secondary-foreground: 38 38% 88%;
+  --tertiary: 38 34% 82%;
+  --tertiary-foreground: 28 18% 5%;
+  --accent-gold: 38 68% 54%;
+  --accent-gold-foreground: 28 18% 5%;
+  --accent-copper: 22 42% 29%;
+  --accent-copper-foreground: 38 38% 88%;
+  --surface-dark: 28 18% 3%;
+  --surface-dark-foreground: 38 38% 88%;
+  --surface-light: 38 34% 88%;
+  --surface-light-foreground: 28 18% 5%;
+  --muted: 28 14% 12%;
+  --muted-foreground: 35 22% 68%;
+  --accent: 30 28% 19%;
+  --accent-foreground: 38 38% 88%;
+  --border: 31 30% 24%;
+  --input: 28 14% 12%;
+  --ring: 38 68% 48%;
+
+  --archive-metal-highlight: #f0c978;
+  --archive-metal-light: #c18a32;
+  --archive-metal-mid: #80551f;
+  --archive-metal-dark: #432b13;
+  --archive-metal-deep: #1b1008;
+  --archive-gold: #b47a28;
+
+  --archive-wood-base: #171310;
+  --archive-wood-top: #090706;
+  --archive-wood-mid: #2a2119;
+  --archive-wood-bottom: #100c09;
+
+  --archive-surface-sheen: rgba(255, 214, 133, 0.065);
+  --archive-surface-shade: rgba(0, 0, 0, 0.82);
+  --archive-ink-strong: #e4bd72;
+  --archive-ink-soft: #bd9a60;
+  --archive-ink-faint: #80633b;
+  --archive-inset-bg: rgba(27, 20, 14, 0.95);
+
+  --vault-archive: #171310;
+  --vault-parchment: #b99760;
+  --vault-gold: #c18a32;
+  --vault-amber: #b87527;
+}
+
+[data-theme="treasure-vault"] [data-archive-essence="true"] {
+  background-image:
+    linear-gradient(135deg, rgba(255, 214, 133, 0.04), transparent 45%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg, rgba(92, 62, 28, 0.08), transparent 55%);
+}
