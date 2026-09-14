@@ -1,6 +1,4 @@
-/* Art Room Archive palette — derived from the Art Room hero:
-   antique gilded relief, dark walnut/mahogany, blackened canvas,
-   warm parchment, olive velvet and candlelit amber. */
+/* Art Room Archive palette — derived from the Art Room hero and antique parchment PNG button reference. */
 [data-theme="artroom"] {
   --background: 24 16% 6%;
   --foreground: 38 42% 92%;
@@ -8,15 +6,15 @@
   --card-foreground: 38 42% 92%;
   --popover: 24 14% 9%;
   --popover-foreground: 38 42% 92%;
-  --primary: 38 78% 48%;
+  --primary: 38 64% 45%;
   --primary-foreground: 24 16% 6%;
   --secondary: 28 28% 24%;
   --secondary-foreground: 38 42% 92%;
   --tertiary: 38 44% 86%;
   --tertiary-foreground: 24 16% 6%;
-  --accent-gold: 38 78% 58%;
+  --accent-gold: 38 64% 52%;
   --accent-gold-foreground: 24 16% 6%;
-  --accent-copper: 27 48% 42%;
+  --accent-copper: 27 42% 36%;
   --accent-copper-foreground: 38 42% 92%;
   --surface-dark: 24 18% 4%;
   --surface-dark-foreground: 38 42% 92%;
@@ -28,35 +26,33 @@
   --accent-foreground: 38 42% 92%;
   --border: 32 30% 25%;
   --input: 25 13% 16%;
-  --ring: 38 78% 48%;
+  --ring: 38 64% 45%;
 
-  /* Antique gilded metal: bright worn edges, warm midtone, dark patina. */
-  --archive-metal-highlight: #f8df9a;
-  --archive-metal-light: #d6a94b;
-  --archive-metal-mid: #a87524;
-  --archive-metal-dark: #704611;
-  --archive-metal-deep: #321b06;
-  --archive-gold: #c99535;
+  /* Antique brass: softer and browner than Main Hall's bright gold. */
+  --archive-metal-highlight: #ead08b;
+  --archive-metal-light: #b9924b;
+  --archive-metal-mid: #86652f;
+  --archive-metal-dark: #513719;
+  --archive-metal-deep: #241508;
+  --archive-gold: #b58a3d;
 
-  /* Dark walnut / mahogany, matching the hero's furniture and shelves. */
-  --archive-wood-base: #21150d;
-  --archive-wood-top: #100a06;
-  --archive-wood-mid: #4a2b16;
-  --archive-wood-bottom: #170d08;
+  /* Warm walnut with visible horizontal grain. */
+  --archive-wood-base: #2b1a10;
+  --archive-wood-top: #160d08;
+  --archive-wood-mid: #55331d;
+  --archive-wood-bottom: #211108;
 
-  /* Candlelit relief over a blackened canvas surface. */
-  --archive-surface-sheen: rgba(255, 205, 125, 0.095);
-  --archive-surface-shade: rgba(0, 0, 0, 0.72);
+  --archive-surface-sheen: rgba(224, 181, 105, 0.075);
+  --archive-surface-shade: rgba(0, 0, 0, 0.64);
 
-  /* Warm parchment/ink values used by Art Room content panels. */
-  --archive-ink-strong: #f0d39a;
-  --archive-ink-soft: #c8aa78;
-  --archive-ink-faint: #8c7049;
-  --archive-inset-bg: rgba(31, 20, 12, 0.9);
+  --archive-ink-strong: #e8c98d;
+  --archive-ink-soft: #c4a875;
+  --archive-ink-faint: #8d7049;
+  --archive-inset-bg: rgba(43, 27, 16, 0.92);
 
-  /* Art Room-specific supporting materials. */
-  --artroom-walnut: #3a2112;
-  --artroom-walnut-light: #6b4324;
+  --artroom-walnut: #3b2414;
+  --artroom-walnut-light: #704a29;
+  --artroom-walnut-dark: #1d1009;
   --artroom-canvas: #171311;
   --artroom-parchment: #d8bd87;
   --artroom-parchment-dark: #8e6c3e;
@@ -65,26 +61,30 @@
 }
 
 [data-theme="artroom"] [data-archive-essence="true"] {
-  background-image:
-    linear-gradient(135deg, rgba(255, 222, 157, 0.045), transparent 45%),
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 4px),
-    linear-gradient(180deg, rgba(102, 62, 28, 0.08), transparent 55%);
+  background-image: linear-gradient(135deg, rgba(255, 222, 157, 0.035), transparent 45%), repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 4px), linear-gradient(180deg, rgba(102, 62, 28, 0.08), transparent 55%);
 }
 
-/* Optional material hooks for Art Room surfaces. They remain theme-scoped so
-   the other rooms keep their own Archive material treatment. */
 [data-theme="artroom"] [data-artroom-material="canvas"] {
   background-color: var(--artroom-canvas);
-  background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 4px);
+  background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 4px), repeating-linear-gradient(90deg, rgba(0,0,0,0.08) 0 1px, transparent 1px 6px);
 }
 
 [data-theme="artroom"] [data-artroom-material="parchment"] {
   background-color: var(--artroom-parchment);
   color: #2a1b0e;
   background-image: linear-gradient(135deg, rgba(255,248,214,0.22), transparent 45%), repeating-linear-gradient(0deg, rgba(78,49,20,0.045) 0 1px, transparent 1px 5px);
+  box-shadow: inset 0 0 0 1px rgba(91, 58, 25, 0.34), inset 0 0 22px rgba(91, 58, 25, 0.16);
 }
 
 [data-theme="artroom"] [data-artroom-material="walnut"] {
   background-color: var(--artroom-walnut);
-  background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 9px), linear-gradient(180deg, var(--artroom-walnut-light), var(--artroom-walnut));
+  background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.20) 0 1px, transparent 1px 9px), linear-gradient(180deg, var(--artroom-walnut-light), var(--artroom-walnut-dark));
+}
+
+[data-theme="artroom"] [data-artroom-material="button"],
+[data-theme="artroom"] [data-artroom-button="true"] {
+  background-color: var(--artroom-walnut);
+  background-image: linear-gradient(135deg, rgba(255, 224, 151, 0.12), transparent 32%), repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 8px), linear-gradient(180deg, var(--artroom-walnut-light), var(--artroom-walnut-dark));
+  border: 1px solid var(--archive-metal-dark);
+  box-shadow: inset 0 0 0 1px rgba(224, 181, 105, 0.55), inset 0 1px 0 rgba(255, 239, 183, 0.28), 0 2px 0 var(--archive-metal-deep), 0 5px 10px rgba(0,0,0,0.28);
 }
