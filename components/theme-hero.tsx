@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useMemo, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { useAppTheme } from "@/components/app-theme-provider"
 import { getPageHeroCandidates } from "@/lib/theme-assets"
 
@@ -38,6 +38,10 @@ export function ThemeHero({ page, mode = "banner", title, subtitle, children, cl
   const { currentAppTheme } = useAppTheme()
   const candidates = useMemo(() => getPageHeroCandidates(page, currentAppTheme), [page, currentAppTheme])
   const idxRef = useRef(0)
+
+  useEffect(() => {
+    idxRef.current = 0
+  }, [candidates])
 
   const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget
