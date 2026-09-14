@@ -30,7 +30,7 @@ const ROOM_SLOTS: { src: string; href?: string; label?: string }[] = [
   { src: "/themes/dungeon-preview.png", href: "/themes/dungeon", label: "Dungeon" },
   { src: "/themes/underground-temple-preview.png", href: "/themes/underground-temple", label: "Underground Temple" },
   { src: "/themes/crystal-cave-preview.png", href: "/themes/crystal-cavern", label: "Crystal Cavern" },
-  { src: "/themes/treasure-vault-preview.png", label: "Treasure Vault" },
+  { src: "/themes/treasure-vault-preview.png", href: "/themes/treasure-vault", label: "Treasure Vault" },
 ]
 
 // Total number of grid slots (matches the artifacts board layout).
