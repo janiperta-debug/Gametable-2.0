@@ -1,0 +1,48 @@
+/* Gallery theme: deep navy, aged gold, ivory and museum-stone surfaces. */
+
+.galleryMaterialsScope {
+  display: contents;
+}
+
+:global([data-theme="gallery"]) {
+  /* Application surfaces */
+  --background: 215 45% 7%;
+  --foreground: 42 35% 92%;
+  --card: 215 42% 10%;
+  --card-foreground: 42 35% 92%;
+  --popover: 215 42% 10%;
+  --popover-foreground: 42 35% 92%;
+  --primary: 215 45% 12%;
+  --primary-foreground: 42 35% 92%;
+  --secondary: 42 34% 62%;
+  --secondary-foreground: 215 45% 7%;
+  --tertiary: 42 32% 91%;
+  --tertiary-foreground: 215 45% 7%;
+  --accent: 215 55% 30%;
+  --accent-foreground: 42 35% 92%;
+  --muted: 215 28% 18%;
+  --muted-foreground: 42 22% 76%;
+  --border: 42 45% 38%;
+  --input: 215 28% 18%;
+  --ring: 42 65% 58%;
+
+  /* ArchiveFrame material layers */
+  --archive-metal-highlight: #f3df9c;
+  --archive-metal-light: #d9b866;
+  --archive-metal-mid: #a8792f;
+  --archive-metal-dark: #684719;
+  --archive-metal-deep: #241708;
+  --archive-wood-base: #07121d;
+  --archive-wood-top: #102638;
+  --archive-wood-mid: #0b1c2b;
+  --archive-wood-bottom: #030a11;
+  --archive-surface-sheen: rgba(226, 207, 157, 0.09);
+  --archive-surface-shade: rgba(0, 0, 0, 0.30);
+  --archive-gold: #d8b15a;
+}
+
+:global([data-theme="gallery"] .app-background) {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(216, 177, 90, 0.10), transparent 58%),
+    linear-gradient(180deg, #101f30 0%, #07121d 52%, #030a11 100%);
+}
