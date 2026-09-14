@@ -1,25 +1,59 @@
-/* Each room page owns its outer background through the existing theme palette. */
-.artifact-cabinet[data-theme] {
-  background-color: hsl(var(--background));
-  background-image: none;
+/* Theme pages own the full visual background, including the AppShell backdrop. */
+
+/* The theme marker lives on the page main, so :has() propagates the active
+   room palette to the document-level layers that sit above it. */
+html:has([data-theme="main-hall"]) {
+  background-color: hsl(345 80% 10%);
 }
 
-/* Preview pages are nested inside the global app shell. The page-local
-   data-theme cannot style its parents through CSS variables, so mirror the
-   active preview background onto the shell when a room preview is present. */
-.app-background:has(.artifact-cabinet[data-theme="conservatory"]) {
+html:has([data-theme="library"]) {
+  background-color: hsl(25 60% 8%);
+}
+
+html:has([data-theme="conservatory"]) {
+  background-color: hsl(120 60% 8%);
+}
+
+html:has([data-theme="fireside-lounge"]) {
+  background-color: hsl(0 0% 11%);
+}
+
+html:has([data-theme="bar"]) {
+  background-color: hsl(35 55% 9%);
+}
+
+.app-background:has([data-theme="main-hall"]) {
   background:
-    radial-gradient(circle at 50% 0%, rgba(112, 92, 38, 0.16), transparent 42%),
-    radial-gradient(circle at 50% 28%, #173d28 0%, #0b2115 54%, #06130c 100%) !important;
+    radial-gradient(circle at 50% 0%, hsl(45 80% 60% / 0.12), transparent 60%),
+    radial-gradient(circle at 50% 20%, hsl(345 80% 10%), hsl(345 80% 8%) 80%);
 }
 
-.room-environment:has(.artifact-cabinet[data-theme="conservatory"]) {
-  background: transparent !important;
+.app-background:has([data-theme="library"]) {
+  background:
+    radial-gradient(circle at 50% 0%, hsl(0 0% 75% / 0.08), transparent 60%),
+    radial-gradient(circle at 50% 20%, hsl(25 60% 8%), hsl(25 60% 6%) 80%);
 }
 
-.artifact-cabinet[data-theme="conservatory"] {
-  background-color: #0b2115 !important;
-  background-image:
-    radial-gradient(circle at 50% 0%, rgba(112, 92, 38, 0.14), transparent 38%),
-    linear-gradient(180deg, #173d28 0%, #0b2115 42%, #06130c 100%) !important;
+.app-background:has([data-theme="conservatory"]) {
+  background:
+    radial-gradient(circle at 50% 0%, hsl(90 40% 35% / 0.16), transparent 60%),
+    radial-gradient(circle at 50% 20%, hsl(120 60% 8%), hsl(120 60% 6%) 80%);
+}
+
+.app-background:has([data-theme="fireside-lounge"]) {
+  background:
+    radial-gradient(circle at 50% 0%, hsl(16 100% 50% / 0.12), transparent 60%),
+    radial-gradient(circle at 50% 20%, hsl(0 0% 11%), hsl(0 0% 8%) 80%);
+}
+
+.app-background:has([data-theme="bar"]) {
+  background:
+    radial-gradient(circle at 50% 0%, hsl(45 80% 60% / 0.12), transparent 60%),
+    radial-gradient(circle at 50% 20%, hsl(35 55% 9%), hsl(35 55% 7%) 80%);
+}
+
+/* The page itself remains transparent so the shell background is visible. */
+.artifact-cabinet[data-theme] {
+  background-color: transparent;
+  background-image: none;
 }
