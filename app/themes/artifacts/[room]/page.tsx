@@ -4,6 +4,9 @@ import { getRoomThemePage } from "@/lib/room-theme-pages"
 import { CONSERVATORY_THEME_PAGE } from "@/lib/conservatory-theme-page"
 import { FIRESIDE_LOUNGE_THEME_PAGE } from "@/lib/fireside-lounge-theme-page"
 import { BAR_THEME_PAGE } from "@/lib/bar-theme-page"
+import { SPA_THEME_PAGE } from "@/lib/spa-theme-page"
+import { GALLERY_THEME_PAGE } from "@/lib/gallery-theme-page"
+import { ART_ROOM_THEME_PAGE } from "@/lib/art-room-theme-page"
 import { getArtifactPage, ARTIFACT_PAGES } from "@/lib/artifact-pages"
 
 export function generateStaticParams() {
@@ -21,7 +24,13 @@ export default async function ArtifactPageRoute({ params }: { params: Promise<{ 
         ? FIRESIDE_LOUNGE_THEME_PAGE
         : room === "bar"
           ? BAR_THEME_PAGE
-          : undefined)
+          : room === "spa"
+            ? SPA_THEME_PAGE
+            : room === "gallery"
+              ? GALLERY_THEME_PAGE
+              : room === "artroom"
+                ? ART_ROOM_THEME_PAGE
+                : undefined)
   if (!page || !theme) {
     notFound()
   }
