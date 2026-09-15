@@ -134,6 +134,26 @@ export const ARTIFACT_PAGES: Record<string, ArtifactPage> = {
       achievement: { fi: "Maljat ja tarinat", en: "Tales & Toasts" },
     },
   },
+  spa: {
+    id: "spa",
+    subtitle: { fi: "Pyhäkkö keholle, mielelle ja hengelle.", en: "A sanctuary for body, mind, and spirit." },
+    heroCaption: { fi: "Hengitä syvään. Päästä irti siitä, mikä painaa sinua. Virkisty, pohdi ja löydä tasapainosi uudelleen. Et voi ammentaa tyhjästä kupista.", en: "Take a breath. Let go of what weighs you down. Rejuvenate, reflect, and realign. You cannot pour from an empty cup." },
+    lore: {
+      title: { fi: "Hyvinvointipäiväkirja", en: "The Wellness Journal" },
+      text: [
+        { fi: "Kylpylässä vieraita muistutetaan siitä, että todellinen voima tulee sisältä.", en: "In the Spa, guests are reminded that true strength comes from within." },
+        { fi: "Keho palautuu. Mieli rauhoittuu. Henki virkistyy.", en: "Body restored. Mind quieted. Spirit refreshed." },
+        { fi: "Vain itsestään huolehtivat kestävät suurimmat matkat.", en: "Only those who care for themselves can endure the greatest journeys." },
+      ],
+    },
+    unlocks: {
+      theme: { fi: "Kylpylä", en: "Spa" },
+      roomAccess: { fi: "Kylpylä", en: "Spa" },
+      lore: { fi: "Hyvinvointipäiväkirja", en: "The Wellness Journal" },
+      artefact: { fi: "Rauhan pullo", en: "Vial of Tranquility" },
+      achievement: { fi: "Sisäinen tasapaino", en: "Inner Balance" },
+    },
+  },
 }
 
 export function getArtifactPage(roomId: string): ArtifactPage | undefined {
