@@ -8,29 +8,20 @@
  */
 
 .app-background {
-  background:
-    radial-gradient(
-      circle at 50% 0%,
-      hsl(var(--accent-gold) / 0.12),
-      transparent 58%
-    ),
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, hsl(var(--background)) 72%, #000 28%) 0%,
-      color-mix(in srgb, hsl(var(--surface-dark)) 88%, #000 12%) 78%,
-      color-mix(in srgb, hsl(var(--surface-dark)) 96%, #000 4%) 100%
-    ),
-    repeating-linear-gradient(
-      45deg,
-      hsl(var(--accent-gold) / 0.025),
-      hsl(var(--accent-gold) / 0.025) 2px,
-      transparent 2px,
-      transparent 10px
-    );
+  min-height: 100vh;
+  background-color: hsl(var(--surface-dark, 345 80% 8%));
+  background-image: none;
 }
 
-/* Keep the document canvas itself aligned with the active theme as well. */
+/* The document canvas and iOS safe-area must never fall back to white. */
 html,
 body {
-  background: hsl(var(--surface-dark));
+  min-height: 100%;
+  margin: 0;
+  background-color: hsl(var(--surface-dark, 345 80% 8%));
+}
+
+/* Keep the root wrapper theme-driven without adding another visual layer. */
+.app-background {
+  background-color: hsl(var(--surface-dark, 345 80% 8%));
 }
