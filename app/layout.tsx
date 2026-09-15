@@ -87,17 +87,18 @@ export default function RootLayout({
     >
       <head>
         <link rel="apple-touch-icon" href="/images/gametable-logo.png" />
-        {/* Inline script to apply theme from localStorage before React hydrates - prevents flash */}
+        {/* Apply the persisted theme immediately; Main Hall is the mandatory default. */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
                 try {
-                  var theme = localStorage.getItem('gametable-app-theme');
-                  if (theme) {
-                    document.documentElement.dataset.theme = theme;
-                  }
-                } catch (e) {}
+                  var savedTheme = localStorage.getItem('gametable-app-theme');
+                  var theme = savedTheme || 'main-hall';
+                  document.documentElement.dataset.theme = theme;
+                } catch (e) {
+                  document.documentElement.dataset.theme = 'main-hall';
+                }
               })();
             `,
           }}
