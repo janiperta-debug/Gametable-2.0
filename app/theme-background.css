@@ -1,0 +1,36 @@
+/*
+ * Theme-driven application background.
+ *
+ * The page shell must not use one fixed brown value. The active room theme
+ * already exposes --background, --surface-dark and --accent-gold; this layer
+ * derives the global background from those variables and keeps it darker than
+ * the cards/panels that sit above it.
+ */
+
+.app-background {
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      hsl(var(--accent-gold) / 0.12),
+      transparent 58%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, hsl(var(--background)) 72%, #000 28%) 0%,
+      color-mix(in srgb, hsl(var(--surface-dark)) 88%, #000 12%) 78%,
+      color-mix(in srgb, hsl(var(--surface-dark)) 96%, #000 4%) 100%
+    ),
+    repeating-linear-gradient(
+      45deg,
+      hsl(var(--accent-gold) / 0.025),
+      hsl(var(--accent-gold) / 0.025) 2px,
+      transparent 2px,
+      transparent 10px
+    );
+}
+
+/* Keep the document canvas itself aligned with the active theme as well. */
+html,
+body {
+  background: hsl(var(--surface-dark));
+}
