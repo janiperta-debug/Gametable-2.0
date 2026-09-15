@@ -1,9 +1,9 @@
 /* Main Hall: deep burgundy archive surfaces instead of wood brown. */
 [data-theme="main-hall"] {
-  --archive-wood-base: #321015;
-  --archive-wood-top: #46151d;
-  --archive-wood-mid: #5a1b27;
-  --archive-wood-bottom: #210b11;
-  --archive-surface-sheen: rgba(190, 90, 105, 0.07);
-  --archive-surface-shade: rgba(0, 0, 0, 0.58);
+  --archive-wood-base: #220b12;
+  --archive-wood-top: #351018;
+  --archive-wood-mid: #46131d;
+  --archive-wood-bottom: #16070c;
+  --archive-surface-sheen: rgba(150, 55, 70, 0.06);
+  --archive-surface-shade: rgba(0, 0, 0, 0.68);
 }
