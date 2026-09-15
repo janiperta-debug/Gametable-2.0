@@ -71,7 +71,7 @@ export default async function RoomThemePageRoute({ params }: { params: Promise<{
                                 : room === "underground-temple"
                                   ? UNDERGROUND_TEMPLE_ROOM_THEME_PAGE
                                   : room === "treasure-vault"
-                                    ? TREASURE_VAULT_THEME_PAGE
+                                    ? TREASURE_VAULT_ROOM_THEME_PAGE
                                     : getRoomThemePage(room)
   if (!data) notFound()
   return <RoomThemeTemplate data={data} />
