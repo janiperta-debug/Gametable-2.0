@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter, Charm, Cinzel, Marcellus, Merriweather, Cormorant_Garamond, DM_Sans, Crimson_Pro } from "next/font/google"
 import "./globals.css"
+import "./theme-background.css"
 import { AppShell } from "@/components/app-shell"
 import { I18nProvider } from "@/lib/i18n"
 
@@ -81,7 +82,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`bg-[#120d09] ${inter.variable} ${charm.variable} ${cinzel.variable} ${marcellus.variable} ${merriweather.variable} ${cormorantGaramond.variable} ${dmSans.variable}`}
+      className={`${inter.variable} ${charm.variable} ${cinzel.variable} ${marcellus.variable} ${merriweather.variable} ${cormorantGaramond.variable} ${dmSans.variable}`}
     >
       <head>
         <link rel="apple-touch-icon" href="/images/gametable-logo.png" />
