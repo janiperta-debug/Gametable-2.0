@@ -211,14 +211,11 @@ export function ArchiveFrame({
             backgroundImage: [
               // soft top-down sheen (shade var lets light/parchment themes avoid a dark falloff)
               "linear-gradient(180deg, var(--archive-surface-sheen, rgba(255,225,180,0.10)) 0%, var(--archive-surface-shade, rgba(0,0,0,0.55)) 100%)",
-              // fine HORIZONTAL grain hairlines
-              "repeating-linear-gradient(0deg, rgba(0,0,0,0.22) 0px, rgba(0,0,0,0.22) 1px, rgba(255,235,200,0.025) 2px, rgba(255,235,200,0) 9px)",
-              // broader HORIZONTAL plank streaks for depth
-              "repeating-linear-gradient(0deg, rgba(0,0,0,0.10) 0px, rgba(0,0,0,0) 14px, rgba(120,80,40,0.12) 22px, rgba(0,0,0,0) 30px)",
-              // deep plank tone falloff
-              "linear-gradient(0deg, var(--archive-wood-top, #1f1107) 0%, var(--archive-wood-mid, #4a2c16) 50%, var(--archive-wood-bottom, #23140a) 100%)",
+              // soft vertical tonal variation keeps the material warm without a
+              // regular plank or panel rhythm
+              "linear-gradient(180deg, var(--archive-wood-top, #1f1107) 0%, var(--archive-wood-mid, #4a2c16) 50%, var(--archive-wood-bottom, #23140a) 100%)",
             ].join(","),
-            backgroundBlendMode: "overlay, overlay, soft-light, normal",
+            backgroundBlendMode: "overlay, normal",
             boxShadow: "inset 0 0 0 1px rgba(231,212,154,0.5), inset 0 3px 16px rgba(0,0,0,0.65)",
           }}
         >
