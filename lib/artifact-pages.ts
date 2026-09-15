@@ -73,6 +73,53 @@ export const ARTIFACT_PAGES: Record<string, ArtifactPage> = {
       achievement: { fi: "Ei sovellettavissa", en: "Not applicable" },
     },
   },
+  library: {
+    id: "library",
+    subtitle: {
+      fi: "Tiedon vartija. Etsi, opi, muista.",
+      en: "The keeper of knowledge. Seek, learn, remember.",
+    },
+    heroCaption: {
+      fi: "Näiden seinien sisällä säilytetään lukemattomia tarinoita. Tieto on avain, joka avaa jokaisen muun oven. Mitä sinä löydät?",
+      en: "Within these walls, countless stories are preserved. Knowledge is the key that unlocks every other door. What will you discover?",
+    },
+    lore: {
+      title: {
+        fi: "Arkistonhoitajan muistiinpanot",
+        en: "The Archivist's Notes",
+      },
+      text: [
+        {
+          fi: "Kartanon arkistonhoitajat ovat omistaneet elämänsä tiedon keräämiselle jokaisesta valtakunnasta.",
+          en: "The Archivists of the Manor have dedicated their lives to gathering knowledge from every realm.",
+        },
+        {
+          fi: "Jotkin totuudet on kirjoitettu kirjoihin. Toiset on kirjoitettu ihmisiin.",
+          en: "Some truths are written in books. Others are written in people.",
+        },
+        {
+          fi: "Lue. Pohdi. Muista.",
+          en: "Read. Reflect. Remember.",
+        },
+      ],
+    },
+    unlocks: {
+      theme: { fi: "Kirjasto", en: "Library" },
+      roomAccess: { fi: "Kirjasto", en: "Library" },
+      lore: {
+        fi: "Arkistonhoitajan muistiinpanot",
+        en: "The Archivist's Notes",
+      },
+      artefact: {
+        fi: "Arkistonhoitajan sulkakynä",
+        en: "Archivist's Quill",
+      },
+      achievement: {
+        fi: "Tiedon etsijä",
+        en: "Seeker of Knowledge",
+      },
+    },
+  },
 }
 
 export function getArtifactPage(roomId: string): ArtifactPage | undefined {
