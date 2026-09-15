@@ -74,12 +74,12 @@ export function isManorRoomEntitled(xp: number, requiredXp: number): boolean {
 }
 
 /**
- * Temporary compatibility helper. Room availability is now decided by the
- * caller's entitlement data; this function only guarantees that Main Hall is
- * always usable. Other rooms must be checked with isManorRoomEntitled().
+ * TEMPORARY ARTIFACT-PAGE VERIFICATION OVERRIDE.
+ * Keep every room usable while the 18 missing artifact pages are built.
+ * Restore the normal entitlement-based implementation afterwards.
  */
-export function isManorRoomCurrentlyUsable(roomId: string): boolean {
-  return roomId === "main-hall"
+export function isManorRoomCurrentlyUsable(_roomId: string): boolean {
+  return true
 }
 
 export type TreasureVaultState = {
