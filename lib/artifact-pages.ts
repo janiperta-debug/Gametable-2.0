@@ -154,6 +154,26 @@ export const ARTIFACT_PAGES: Record<string, ArtifactPage> = {
       achievement: { fi: "Sisäinen tasapaino", en: "Inner Balance" },
     },
   },
+  gallery: {
+    id: "gallery",
+    subtitle: { fi: "Inspiraation, kauneuden ja näkökulmien sali.", en: "A hall of inspiration, beauty, and perspective." },
+    heroCaption: { fi: "Jokainen taideteos kantaa tuhatta tarinaa. Jokainen näkökulma paljastaa uuden totuuden. Katso lähempää. Tunne syvemmin. Näe pidemmälle. Galleriassa inspiraatio on kaikkialla.", en: "Every piece of art holds a thousand stories. Every perspective reveals a new truth. Look closer. Feel deeper. See beyond. In the Gallery, inspiration is everywhere." },
+    lore: {
+      title: { fi: "Kuraattorin muistiinpanot", en: "The Curator's Notes" },
+      text: [
+        { fi: "Kuraattori matkustaa kauas ja laajalle etsien kauneutta, merkitystä ja muistamisen arvoisia hetkiä.", en: "The Curator travels far and wide, seeking beauty, meaning, and moments worth remembering." },
+        { fi: "Taide puhuu ilman sanoja. Se haastaa. Se lohduttaa. Se yhdistää meidät maailmoihin, joita emme ehkä koskaan näe, mutta jotenkin ymmärrämme.", en: "Art speaks without words. It challenges. It comforts. It connects us to worlds we may never see, yet somehow understand." },
+        { fi: "Avaa mielesi. Pidä sydämesi avoinna. Galleria on niille, jotka etsivät.", en: "Open your mind. Keep your heart open. The Gallery is for those who seek." },
+      ],
+    },
+    unlocks: {
+      theme: { fi: "Galleria", en: "Gallery" },
+      roomAccess: { fi: "Galleria", en: "Gallery" },
+      lore: { fi: "Kuraattorin muistiinpanot", en: "The Curator's Notes" },
+      artefact: { fi: "Oivalluksen linssi", en: "Lens of Insight" },
+      achievement: { fi: "Inspiroitunut mieli", en: "Inspired Mind" },
+    },
+  },
 }
 
 export function getArtifactPage(roomId: string): ArtifactPage | undefined {
