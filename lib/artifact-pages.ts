@@ -18,18 +18,10 @@
 import type { Localized } from "@/lib/room-theme-pages"
 
 export interface ArtifactPage {
-  /** Room id, matches roomThemes / artifact slot / theme page id. */
   id: string
-  /** Subtitle under the title, e.g. "The heart of the Manor. Your journey begins here." */
   subtitle: Localized
-  /** Caption overlaid on the hero image. */
   heroCaption: Localized
-  /** Lore entry block. */
-  lore: {
-    title: Localized
-    text: Localized[]
-  }
-  /** Unlocks rows — labels come from i18n, these are the values. */
+  lore: { title: Localized; text: Localized[] }
   unlocks: {
     theme: Localized
     roomAccess: Localized
@@ -42,27 +34,15 @@ export interface ArtifactPage {
 export const ARTIFACT_PAGES: Record<string, ArtifactPage> = {
   "main-hall": {
     id: "main-hall",
-    subtitle: {
-      fi: "Kartanon sydän. Matkasi alkaa täältä.",
-      en: "The heart of the Manor. Your journey begins here.",
-    },
-    heroCaption: {
-      fi: "Jokainen vieras astuu kartanoon näiden ovien kautta. Tervetulon, tarinoiden ja loputtomien mahdollisuuksien paikka.",
-      en: "Every guest enters the Manor through these doors. A place of welcome, stories, and endless possibilities.",
-    },
+    subtitle: { fi: "Kartanon sydän. Matkasi alkaa täältä.", en: "The heart of the Manor. Your journey begins here." },
+    heroCaption: { fi: "Jokainen vieras astuu kartanoon näiden ovien kautta. Tervetulon, tarinoiden ja loputtomien mahdollisuuksien paikka.", en: "Every guest enters the Manor through these doors. A place of welcome, stories, and endless possibilities." },
     lore: {
       title: { fi: "Kutsu", en: "The Invitation" },
       text: [
-        {
-          fi: "Jokainen matka kartanon läpi alkaa samalla tavalla.",
-          en: "Every journey through the Manor begins the same way.",
-        },
+        { fi: "Jokainen matka kartanon läpi alkaa samalla tavalla.", en: "Every journey through the Manor begins the same way." },
         { fi: "Tervetulo.", en: "A welcome." },
         { fi: "Sirpale.", en: "A fragment." },
-        {
-          fi: "Ja kysymys, jota kukaan ei vielä osaa esittää.",
-          en: "And a question no one yet knows to ask.",
-        },
+        { fi: "Ja kysymys, jota kukaan ei vielä osaa esittää.", en: "And a question no one yet knows to ask." },
       ],
     },
     unlocks: {
@@ -75,14 +55,8 @@ export const ARTIFACT_PAGES: Record<string, ArtifactPage> = {
   },
   library: {
     id: "library",
-    subtitle: {
-      fi: "Tiedon vartija. Etsi, opi, muista.",
-      en: "The keeper of knowledge. Seek, learn, remember.",
-    },
-    heroCaption: {
-      fi: "Näiden seinien sisällä säilytetään lukemattomia tarinoita. Tieto on avain, joka avaa jokaisen muun oven. Mitä sinä löydät?",
-      en: "Within these walls, countless stories are preserved. Knowledge is the key that unlocks every other door. What will you discover?",
-    },
+    subtitle: { fi: "Tiedon vartija. Etsi, opi, muista.", en: "The keeper of knowledge. Seek, learn, remember." },
+    heroCaption: { fi: "Näiden seinien sisällä säilytetään lukemattomia tarinoita. Tieto on avain, joka avaa jokaisen muun oven. Mitä sinä löydät?", en: "Within these walls, countless stories are preserved. Knowledge is the key that unlocks every other door. What will you discover?" },
     lore: {
       title: { fi: "Arkistonhoitajan muistiinpanot", en: "The Archivist's Notes" },
       text: [
@@ -137,6 +111,27 @@ export const ARTIFACT_PAGES: Record<string, ArtifactPage> = {
       lore: { fi: "Oleskelusalin kronikat", en: "The Lounge Chronicles" },
       artefact: { fi: "Toveruuden hiillos", en: "Ember of Camaraderie" },
       achievement: { fi: "Ystävyyden kipinä", en: "Kindled Bonds" },
+    },
+  },
+  bar: {
+    id: "bar",
+    subtitle: { fi: "Naurun, maljojen ja legendojen paikka.", en: "A place of laughter, toasts, and legends." },
+    heroCaption: { fi: "Nosta malja. Jaa tarina. Juhli voittoja, naura epäonnistumisille ja nauti seurasta. Baarissa jokainen seikkailija kuuluu joukkoon.", en: "Raise a glass. Share a tale. Celebrate the wins, laugh at the fails, and enjoy the company. In the Bar, every adventurer belongs." },
+    lore: {
+      title: { fi: "Baarimestarin merkinnät", en: "The Bartender's Records" },
+      text: [
+        { fi: "Baarimestari on nähnyt kaiken.", en: "The bartender has seen it all." },
+        { fi: "Sankareita ja ensikertalaisia. Voittoja ja katastrofeja. Uusia ystävyyksiä ja vanhoja kiistoja.", en: "Heroes and rookies. Victories and disasters. New friendships and old rivalries." },
+        { fi: "Kaikki on kirjoitettu tänne, hyvässä hengessä.", en: "All are written here, in good spirit." },
+        { fi: "Nosta malja ja tule osaksi tarinaa.", en: "Raise a glass and become part of the story." },
+      ],
+    },
+    unlocks: {
+      theme: { fi: "Baari", en: "The Bar" },
+      roomAccess: { fi: "Baari", en: "The Bar" },
+      lore: { fi: "Baarimestarin merkinnät", en: "The Bartender's Records" },
+      artefact: { fi: "Baarimestarin lokikirja", en: "Bartender's Ledger" },
+      achievement: { fi: "Maljat ja tarinat", en: "Tales & Toasts" },
     },
   },
 }
