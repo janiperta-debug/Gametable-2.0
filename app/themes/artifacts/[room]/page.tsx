@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import { ArtifactPageTemplate } from "@/components/artifact-page-template"
 import { getRoomThemePage } from "@/lib/room-theme-pages"
+import { CONSERVATORY_THEME_PAGE } from "@/lib/conservatory-theme-page"
 import { getArtifactPage, ARTIFACT_PAGES } from "@/lib/artifact-pages"
 
 export function generateStaticParams() {
@@ -10,7 +11,7 @@ export function generateStaticParams() {
 export default async function ArtifactPageRoute({ params }: { params: Promise<{ room: string }> }) {
   const { room } = await params
   const page = getArtifactPage(room)
-  const theme = getRoomThemePage(room)
+  const theme = getRoomThemePage(room) ?? (room === "conservatory" ? CONSERVATORY_THEME_PAGE : undefined)
   if (!page || !theme) {
     notFound()
   }
