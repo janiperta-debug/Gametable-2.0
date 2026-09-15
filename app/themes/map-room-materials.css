@@ -1,84 +1,85 @@
-/* Map Room Archive palette — dark wood frame, light aged parchment and antique cartography. */
+/* Map Room Archive palette — patinated leather, aged steel and antique cartography. */
 [data-theme="map-room"] {
   --background: 30 28% 6%;
-  --foreground: 38 46% 84%;
+  --foreground: 38 20% 84%;
   --card: 30 22% 9%;
-  --card-foreground: 38 46% 84%;
+  --card-foreground: 38 20% 84%;
   --popover: 30 22% 9%;
-  --popover-foreground: 38 46% 84%;
-  --primary: 35 72% 43%;
+  --popover-foreground: 38 20% 84%;
+  --primary: 35 28% 58%;
   --primary-foreground: 30 28% 6%;
-  --secondary: 30 24% 17%;
-  --secondary-foreground: 38 46% 84%;
-  --tertiary: 36 44% 78%;
+  --secondary: 30 20% 17%;
+  --secondary-foreground: 38 20% 84%;
+  --tertiary: 36 18% 78%;
   --tertiary-foreground: 30 28% 6%;
-  --accent-gold: 38 78% 52%;
+  --accent-gold: 38 42% 52%;
   --accent-gold-foreground: 30 28% 6%;
-  --accent-copper: 29 48% 32%;
-  --accent-copper-foreground: 38 46% 84%;
+  --accent-copper: 29 22% 32%;
+  --accent-copper-foreground: 38 20% 84%;
   --surface-dark: 30 30% 3%;
-  --surface-dark-foreground: 38 46% 84%;
-  --surface-light: 38 42% 86%;
+  --surface-dark-foreground: 38 20% 84%;
+  --surface-light: 38 22% 86%;
   --surface-light-foreground: 30 28% 6%;
   --muted: 30 18% 12%;
-  --muted-foreground: 35 28% 65%;
-  --accent: 31 35% 21%;
-  --accent-foreground: 38 46% 84%;
-  --border: 34 38% 25%;
+  --muted-foreground: 35 16% 65%;
+  --accent: 31 22% 21%;
+  --accent-foreground: 38 20% 84%;
+  --border: 34 22% 25%;
   --input: 30 18% 12%;
-  --ring: 38 78% 52%;
+  --ring: 38 42% 52%;
 
-  /* Dark walnut / aged bronze frame inspired by the reference plaque. */
-  --archive-metal-highlight: #c8a16a;
-  --archive-metal-light: #9a6d3e;
-  --archive-metal-mid: #6b4528;
-  --archive-metal-dark: #3b2415;
-  --archive-metal-deep: #1d1009;
-  --archive-gold: #b88945;
+  /* Aged steel / gunmetal frame with restrained cool highlights. */
+  --archive-metal-highlight: #c0c7c4;
+  --archive-metal-light: #929d99;
+  --archive-metal-mid: #626e6a;
+  --archive-metal-dark: #3b4643;
+  --archive-metal-deep: #1d2725;
+  --archive-gold: #9a9b87;
 
-  /* Clearly lighter aged parchment interior: warm, matte and lightly weathered. */
-  --archive-wood-base: #ead8b2;
-  --archive-wood-top: #f4e6c9;
-  --archive-wood-mid: #e8d3a8;
-  --archive-wood-bottom: #d1b27b;
+  /* Patinated map leather: matte, weathered and clearly distinct from parchment. */
+  --archive-wood-base: #55483a;
+  --archive-wood-top: #302c26;
+  --archive-wood-mid: #746653;
+  --archive-wood-bottom: #3b332b;
 
-  --archive-surface-sheen: rgba(255, 248, 225, 0.14);
-  --archive-surface-shade: rgba(78, 45, 20, 0.14);
-  --archive-ink-strong: #292824;
-  --archive-ink-soft: #4a463f;
-  --archive-ink-faint: #756b5b;
-  --archive-inset-bg: rgba(240, 223, 189, 0.94);
+  --archive-surface-sheen: rgba(220, 211, 190, 0.055);
+  --archive-surface-shade: rgba(20, 24, 22, 0.42);
+  --archive-ink-strong: #252b2a;
+  --archive-ink-soft: #414744;
+  --archive-ink-faint: #66645b;
+  --archive-inset-bg: rgba(86, 76, 62, 0.94);
 
-  --maproom-parchment: #ead8b2;
-  --maproom-parchment-light: #f5e8cc;
-  --maproom-brass: #b78332;
-  --maproom-brass-dark: #4c2d12;
+  --maproom-parchment: #746653;
+  --maproom-parchment-light: #8b7d68;
+  --maproom-brass: #8f958d;
+  --maproom-brass-dark: #303b38;
 }
 
 [data-theme="map-room"] [data-archive-essence="true"] {
   background-image:
-    linear-gradient(135deg, rgba(226, 190, 111, 0.055), transparent 46%),
-    radial-gradient(circle at 50% 35%, rgba(255, 239, 192, 0.08), transparent 70%),
-    linear-gradient(180deg, rgba(92, 63, 26, 0.08), transparent 58%);
+    linear-gradient(135deg, rgba(205, 211, 202, 0.035), transparent 46%),
+    radial-gradient(circle at 50% 35%, rgba(170, 178, 166, 0.07), transparent 70%),
+    linear-gradient(180deg, rgba(42, 51, 47, 0.12), transparent 58%);
 }
 
 [data-theme="map-room"] [data-artroom-material="parchment"],
 [data-theme="map-room"] [data-archive-variant="parchment"] {
   background-color: var(--maproom-parchment);
-  color: #292824;
+  color: var(--archive-ink-strong);
   background-image:
-    linear-gradient(135deg, rgba(255, 247, 215, 0.2), transparent 45%),
-    radial-gradient(circle at 55% 35%, rgba(255, 252, 235, 0.12), transparent 72%);
-  box-shadow: inset 0 0 0 1px rgba(91, 58, 25, 0.34), inset 0 0 22px rgba(91, 58, 25, 0.12);
+    linear-gradient(135deg, rgba(214, 204, 181, 0.055), transparent 45%),
+    radial-gradient(circle at 55% 35%, rgba(190, 181, 160, 0.08), transparent 72%),
+    linear-gradient(180deg, rgba(28, 31, 29, 0.08), transparent 65%);
+  box-shadow: inset 0 0 0 1px rgba(35, 43, 40, 0.42), inset 0 0 22px rgba(20, 25, 23, 0.22);
 }
 
 [data-theme="map-room"] [data-artroom-material="button"],
 [data-theme="map-room"] [data-artroom-button="true"] {
   background-color: var(--maproom-parchment);
   background-image:
-    linear-gradient(135deg, rgba(255,247,215,0.22), transparent 42%),
-    radial-gradient(circle at 50% 35%, rgba(255, 252, 235, 0.10), transparent 72%);
-  color: #292824;
+    linear-gradient(135deg, rgba(214, 204, 181, 0.07), transparent 42%),
+    radial-gradient(circle at 50% 35%, rgba(190, 181, 160, 0.06), transparent 72%);
+  color: var(--archive-ink-strong);
   border: 1px solid var(--archive-metal-dark);
-  box-shadow: inset 0 0 0 1px rgba(91,58,25,0.34), inset 0 1px 0 rgba(255,248,214,0.45), 0 2px 0 var(--archive-metal-deep), 0 5px 10px rgba(0,0,0,0.3);
+  box-shadow: inset 0 0 0 1px rgba(35, 43, 40, 0.42), inset 0 1px 0 rgba(220, 224, 214, 0.18), 0 2px 0 var(--archive-metal-deep), 0 5px 10px rgba(0,0,0,0.3);
 }
