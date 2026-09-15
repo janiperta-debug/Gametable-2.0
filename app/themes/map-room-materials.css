@@ -44,9 +44,9 @@
 
   --archive-surface-sheen: rgba(220, 211, 190, 0.055);
   --archive-surface-shade: rgba(20, 24, 22, 0.42);
-  --archive-ink-strong: #252b2a;
-  --archive-ink-soft: #343a37;
-  --archive-ink-faint: #4b4c46;
+  --archive-ink-strong: #e1d8c6;
+  --archive-ink-soft: #c5bcab;
+  --archive-ink-faint: #9b9487;
   --archive-inset-bg: rgba(86, 76, 62, 0.94);
 
   --maproom-parchment: #746653;
