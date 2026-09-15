@@ -52,9 +52,9 @@ const WEIGHT_STYLE: Record<
   ArchiveWeight,
   { pad: string; outerRadius: string; channelInset: number; channelRadius: string; surfaceRadius: string }
 > = {
-  regular: { pad: "p-[5px]", outerRadius: "rounded-xl", channelInset: 2, channelRadius: "rounded-[0.62rem]", surfaceRadius: "rounded-[0.5rem]" },
-  thin: { pad: "p-[3px]", outerRadius: "rounded-lg", channelInset: 1, channelRadius: "rounded-[0.5rem]", surfaceRadius: "rounded-[0.4rem]" },
-  hairline: { pad: "p-[2px]", outerRadius: "rounded-md", channelInset: 1, channelRadius: "rounded-[0.4rem]", surfaceRadius: "rounded-[0.3rem]" },
+  regular: { pad: "p-[3px]", outerRadius: "rounded-xl", channelInset: 2, channelRadius: "rounded-[0.62rem]", surfaceRadius: "rounded-[0.5rem]" },
+  thin: { pad: "p-[2px]", outerRadius: "rounded-lg", channelInset: 1, channelRadius: "rounded-[0.5rem]", surfaceRadius: "rounded-[0.4rem]" },
+  hairline: { pad: "p-[1px]", outerRadius: "rounded-md", channelInset: 1, channelRadius: "rounded-[0.4rem]", surfaceRadius: "rounded-[0.3rem]" },
 }
 
 /**
@@ -227,13 +227,13 @@ export function ArchiveFrame({
             className={cn(
               "pointer-events-none absolute border border-[var(--archive-gold,#d9b65c)]/45",
               round ? "rounded-full" : "rounded-[0.4rem]",
-              weight === "regular" ? "inset-[3px]" : weight === "thin" ? "inset-[2px]" : "inset-[1.5px]",
+              weight === "regular" ? "inset-[2px]" : weight === "thin" ? "inset-[1px]" : "inset-[1px]",
             )}
           />
           {weight === "regular" && (
             <div
               className={cn(
-                "pointer-events-none absolute inset-[5px] border border-black/30",
+                "pointer-events-none absolute inset-[3px] border border-black/30",
                 round ? "rounded-full" : "rounded-[0.34rem]",
               )}
             />
