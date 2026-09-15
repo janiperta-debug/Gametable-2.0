@@ -120,6 +120,53 @@ export const ARTIFACT_PAGES: Record<string, ArtifactPage> = {
       },
     },
   },
+  conservatory: {
+    id: "conservatory",
+    subtitle: {
+      fi: "Elämän, kasvun ja yhteyden pyhäkkö.",
+      en: "A sanctuary of life, growth, and connection.",
+    },
+    heroCaption: {
+      fi: "Täällä monien maailmojen luontoa vaalitaan ja jaetaan. Jokainen siemen, jokainen kukka, jokainen kosketus muistuttaa meitä siitä, että kasvamme vahvemmiksi yhdessä.",
+      en: "Here, nature from many worlds is nurtured and shared. Every seed, every bloom, every touch is a reminder that we grow stronger together.",
+    },
+    lore: {
+      title: {
+        fi: "Puutarhurin muistiinpanot",
+        en: "The Gardener's Notes",
+      },
+      text: [
+        {
+          fi: "Puutarhuri huolehtii muustakin kuin kasveista.",
+          en: "The Gardener tends to more than plants.",
+        },
+        {
+          fi: "Hän viljelee ymmärrystä, kärsivällisyyttä ja huolenpitoa.",
+          en: "They cultivate understanding, patience, and care.",
+        },
+        {
+          fi: "Vaali sitä, mitä rakastat, ja katso sen kukoistavan.",
+          en: "Nurture what you love, and watch it flourish.",
+        },
+      ],
+    },
+    unlocks: {
+      theme: { fi: "Talvipuutarha", en: "Conservatory" },
+      roomAccess: { fi: "Talvipuutarha", en: "Conservatory" },
+      lore: {
+        fi: "Puutarhurin muistiinpanot",
+        en: "The Gardener's Notes",
+      },
+      artefact: {
+        fi: "Harmonian siemen",
+        en: "Seed of Harmony",
+      },
+      achievement: {
+        fi: "Viljelijä",
+        en: "Cultivator",
+      },
+    },
+  },
 }
 
 export function getArtifactPage(roomId: string): ArtifactPage | undefined {
