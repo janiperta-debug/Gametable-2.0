@@ -22,6 +22,18 @@ interface AppThemeContextType {
 const APP_THEME_STORAGE_KEY = "gametable-app-theme"
 const DEFAULT_THEME: AppThemeName = "main-hall"
 
+const getStoredTheme = (): AppThemeName => {
+  if (typeof window === "undefined") return DEFAULT_THEME
+
+  try {
+    const saved = localStorage.getItem(APP_THEME_STORAGE_KEY) as AppThemeName | null
+    return saved && getRoomTheme(saved) ? saved : DEFAULT_THEME
+  } catch (error) {
+    console.warn("Failed to load theme from localStorage", error)
+    return DEFAULT_THEME
+  }
+}
+
 const AppThemeContext = createContext<AppThemeContextType | undefined>(undefined)
 
 interface AppThemeProviderProps {
@@ -29,7 +41,10 @@ interface AppThemeProviderProps {
 }
 
 export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) => {
-  const [currentAppTheme, setCurrentAppTheme] = useState<AppThemeName>(DEFAULT_THEME)
+  // Hydrate from localStorage immediately so the selected theme is active
+  // before the user visits the Themes page. The database may override it
+  // once the authenticated profile has loaded.
+  const [currentAppTheme, setCurrentAppTheme] = useState<AppThemeName>(getStoredTheme)
   const [isLoadedFromDB, setIsLoadedFromDB] = useState(false)
   const { user, profile } = useUser()
 
@@ -39,30 +54,26 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
   }
 
   useEffect(() => {
-    if (user && profile?.preferred_theme && !isLoadedFromDB) {
-      const dbTheme = profile.preferred_theme as AppThemeName
-      const validTheme = canUseTheme(dbTheme) ? dbTheme : DEFAULT_THEME
-      setCurrentAppTheme(validTheme)
-      setIsLoadedFromDB(true)
-      try {
-        localStorage.setItem(APP_THEME_STORAGE_KEY, validTheme)
-      } catch (error) {
-        console.warn("Failed to save theme to localStorage", error)
-      }
+    if (!user || isLoadedFromDB || !profile) return
+
+    const dbTheme = profile.preferred_theme as AppThemeName | null
+    const validTheme = dbTheme && canUseTheme(dbTheme) ? dbTheme : getStoredTheme()
+    const resolvedTheme = canUseTheme(validTheme) ? validTheme : DEFAULT_THEME
+
+    setCurrentAppTheme(resolvedTheme)
+    setIsLoadedFromDB(true)
+
+    try {
+      localStorage.setItem(APP_THEME_STORAGE_KEY, resolvedTheme)
+    } catch (error) {
+      console.warn("Failed to save theme to localStorage", error)
     }
   }, [user, profile, isLoadedFromDB])
 
   useEffect(() => {
-    if (!user) {
-      try {
-        const saved = localStorage.getItem(APP_THEME_STORAGE_KEY) as AppThemeName | null
-        if (saved && canUseTheme(saved)) setCurrentAppTheme(saved)
-        else setCurrentAppTheme(DEFAULT_THEME)
-      } catch (error) {
-        console.warn("Failed to load theme from localStorage", error)
-      }
-    }
-  }, [user, profile])
+    if (user) return
+    setCurrentAppTheme(getStoredTheme())
+  }, [user])
 
   const setAppTheme = async (theme: AppThemeName) => {
     if (!canUseTheme(theme)) return
