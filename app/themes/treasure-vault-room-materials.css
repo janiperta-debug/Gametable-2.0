@@ -1,4 +1,4 @@
-/* Treasure Vault palette — dark archive, aged parchment, antique gold and warm lantern amber. */
+/* Treasure Vault palette — warm walnut wood, antique gold and deep archive tones. */
 [data-theme="treasure-vault"] {
   --background: 28 18% 5%;
   --foreground: 38 38% 88%;
@@ -35,19 +35,20 @@
   --archive-metal-deep: #1b1008;
   --archive-gold: #b47a28;
 
-  --archive-wood-base: #171310;
-  --archive-wood-top: #090706;
-  --archive-wood-mid: #2a2119;
-  --archive-wood-bottom: #100c09;
+  /* Warm walnut interior inspired by the supplied reference. */
+  --archive-wood-base: #4a2414;
+  --archive-wood-top: #2a1209;
+  --archive-wood-mid: #6a3520;
+  --archive-wood-bottom: #32170d;
 
-  --archive-surface-sheen: rgba(255, 214, 133, 0.065);
-  --archive-surface-shade: rgba(0, 0, 0, 0.82);
+  --archive-surface-sheen: rgba(255, 214, 133, 0.10);
+  --archive-surface-shade: rgba(0, 0, 0, 0.38);
   --archive-ink-strong: #e4bd72;
   --archive-ink-soft: #bd9a60;
   --archive-ink-faint: #80633b;
-  --archive-inset-bg: rgba(27, 20, 14, 0.95);
+  --archive-inset-bg: rgba(50, 24, 13, 0.95);
 
-  --vault-archive: #171310;
+  --vault-archive: #4a2414;
   --vault-parchment: #b99760;
   --vault-gold: #c18a32;
   --vault-amber: #b87527;
@@ -55,7 +56,6 @@
 
 [data-theme="treasure-vault"] [data-archive-essence="true"] {
   background-image:
-    linear-gradient(135deg, rgba(255, 214, 133, 0.04), transparent 45%),
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 5px),
-    linear-gradient(180deg, rgba(92, 62, 28, 0.08), transparent 55%);
+    linear-gradient(135deg, rgba(255, 214, 133, 0.055), transparent 45%),
+    linear-gradient(180deg, rgba(92, 42, 20, 0.10), transparent 55%);
 }
