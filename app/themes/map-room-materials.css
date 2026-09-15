@@ -1,4 +1,4 @@
-/* Map Room Archive palette — dark wood frame, aged parchment and antique cartography. */
+/* Map Room Archive palette — dark wood frame, light aged parchment and antique cartography. */
 [data-theme="map-room"] {
   --background: 30 28% 6%;
   --foreground: 38 46% 84%;
@@ -36,21 +36,21 @@
   --archive-metal-deep: #1d1009;
   --archive-gold: #b88945;
 
-  /* Aged parchment interior: warm, matte and lightly weathered. */
-  --archive-wood-base: #cdb184;
-  --archive-wood-top: #e4cfaa;
-  --archive-wood-mid: #d5bd91;
-  --archive-wood-bottom: #b28d5c;
+  /* Clearly lighter aged parchment interior: warm, matte and lightly weathered. */
+  --archive-wood-base: #ead8b2;
+  --archive-wood-top: #f4e6c9;
+  --archive-wood-mid: #e8d3a8;
+  --archive-wood-bottom: #d1b27b;
 
-  --archive-surface-sheen: rgba(255, 244, 210, 0.16);
-  --archive-surface-shade: rgba(78, 45, 20, 0.20);
-  --archive-ink-strong: #3a2414;
-  --archive-ink-soft: #684829;
-  --archive-ink-faint: #9a7950;
-  --archive-inset-bg: rgba(225, 204, 164, 0.94);
+  --archive-surface-sheen: rgba(255, 248, 225, 0.14);
+  --archive-surface-shade: rgba(78, 45, 20, 0.14);
+  --archive-ink-strong: #292824;
+  --archive-ink-soft: #4a463f;
+  --archive-ink-faint: #756b5b;
+  --archive-inset-bg: rgba(240, 223, 189, 0.94);
 
-  --maproom-parchment: #c9a875;
-  --maproom-parchment-light: #e0c99c;
+  --maproom-parchment: #ead8b2;
+  --maproom-parchment-light: #f5e8cc;
   --maproom-brass: #b78332;
   --maproom-brass-dark: #4c2d12;
 }
@@ -65,20 +65,20 @@
 [data-theme="map-room"] [data-artroom-material="parchment"],
 [data-theme="map-room"] [data-archive-variant="parchment"] {
   background-color: var(--maproom-parchment);
-  color: #2b1b0b;
+  color: #292824;
   background-image:
-    linear-gradient(135deg, rgba(255, 239, 192, 0.2), transparent 45%),
-    radial-gradient(circle at 55% 35%, rgba(255, 247, 215, 0.10), transparent 72%);
-  box-shadow: inset 0 0 0 1px rgba(91, 58, 25, 0.34), inset 0 0 22px rgba(91, 58, 25, 0.16);
+    linear-gradient(135deg, rgba(255, 247, 215, 0.2), transparent 45%),
+    radial-gradient(circle at 55% 35%, rgba(255, 252, 235, 0.12), transparent 72%);
+  box-shadow: inset 0 0 0 1px rgba(91, 58, 25, 0.34), inset 0 0 22px rgba(91, 58, 25, 0.12);
 }
 
 [data-theme="map-room"] [data-artroom-material="button"],
 [data-theme="map-room"] [data-artroom-button="true"] {
   background-color: var(--maproom-parchment);
   background-image:
-    linear-gradient(135deg, rgba(255,239,192,0.22), transparent 42%),
-    radial-gradient(circle at 50% 35%, rgba(255, 247, 215, 0.08), transparent 72%);
-  color: #2b1b0b;
+    linear-gradient(135deg, rgba(255,247,215,0.22), transparent 42%),
+    radial-gradient(circle at 50% 35%, rgba(255, 252, 235, 0.10), transparent 72%);
+  color: #292824;
   border: 1px solid var(--archive-metal-dark);
   box-shadow: inset 0 0 0 1px rgba(91,58,25,0.34), inset 0 1px 0 rgba(255,248,214,0.45), 0 2px 0 var(--archive-metal-deep), 0 5px 10px rgba(0,0,0,0.3);
 }
