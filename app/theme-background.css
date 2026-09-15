@@ -21,6 +21,11 @@ body {
   background-color: hsl(var(--surface-dark, 345 80% 8%));
 }
 
+/* Keep the status-bar safe area in the same themed canvas as the app. */
+body {
+  padding-top: env(safe-area-inset-top);
+}
+
 /* Keep the root wrapper theme-driven without adding another visual layer. */
 .app-background {
   background-color: hsl(var(--surface-dark, 345 80% 8%));
