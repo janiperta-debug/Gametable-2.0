@@ -1,6 +1,5 @@
-/* Art Room Archive palette — derived from the Art Room hero and the
-   antique parchment button reference: aged parchment, antique bronze,
-   dark canvas and restrained candlelit amber. No wood-grain surfaces. */
+/* Art Room Archive palette — light wood frame, warm parchment interior,
+   antique-gold details and restrained studio warmth. */
 [data-theme="artroom"] {
   --background: 24 10% 5%;
   --foreground: 38 42% 92%;
@@ -30,47 +29,48 @@
   --input: 25 9% 13%;
   --ring: 38 64% 45%;
 
-  /* Antique bronze / aged-gold frame material. */
-  --archive-metal-highlight: #f0d49a;
-  --archive-metal-light: #c9a15b;
-  --archive-metal-mid: #8c6735;
-  --archive-metal-dark: #50391f;
-  --archive-metal-deep: #21170d;
-  --archive-gold: #b98a3e;
+  /* Light antique wood frame: honey, oak and walnut shadows. */
+  --archive-metal-highlight: #f1d39a;
+  --archive-metal-light: #d2a96a;
+  --archive-metal-mid: #a8753f;
+  --archive-metal-dark: #6b4526;
+  --archive-metal-deep: #382313;
+  --archive-gold: #c3944f;
 
-  /* Neutral dark canvas backing — deliberately not wood. */
-  --archive-wood-base: #171514;
-  --archive-wood-top: #0b0a09;
-  --archive-wood-mid: #292522;
-  --archive-wood-bottom: #11100f;
+  /* Warm parchment interior inspired by the original Art Room panel.
+     Keep the surface soft and matte rather than metallic or green. */
+  --archive-wood-base: #b99662;
+  --archive-wood-top: #d7bd8b;
+  --archive-wood-mid: #c5a873;
+  --archive-wood-bottom: #987447;
 
-  --archive-surface-sheen: rgba(255, 220, 160, 0.07);
-  --archive-surface-shade: rgba(0, 0, 0, 0.78);
+  --archive-surface-sheen: rgba(255, 244, 207, 0.18);
+  --archive-surface-shade: rgba(74, 43, 18, 0.18);
 
-  --archive-ink-strong: #f0d39a;
-  --archive-ink-soft: #c8aa78;
-  --archive-ink-faint: #8c7049;
-  --archive-inset-bg: rgba(29, 25, 21, 0.94);
+  --archive-ink-strong: #4a2d16;
+  --archive-ink-soft: #73502d;
+  --archive-ink-faint: #9b7950;
+  --archive-inset-bg: rgba(235, 213, 168, 0.92);
 
-  /* Supporting materials: parchment, dark canvas and antique bronze. */
+  /* Supporting Art Room materials. */
   --artroom-canvas: #171514;
   --artroom-parchment: #d8bd87;
   --artroom-parchment-dark: #8e6c3e;
-  --artroom-bronze: #8c6735;
-  --artroom-bronze-dark: #302116;
+  --artroom-bronze: #a8753f;
+  --artroom-bronze-dark: #4b301b;
   --artroom-amber: #b87527;
 }
 
 [data-theme="artroom"] [data-archive-essence="true"] {
   background-image:
-    linear-gradient(135deg, rgba(255, 222, 157, 0.035), transparent 45%),
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.014) 0 1px, transparent 1px 5px),
-    linear-gradient(180deg, rgba(92, 70, 42, 0.06), transparent 55%);
+    linear-gradient(135deg, rgba(255, 238, 190, 0.16), transparent 48%),
+    radial-gradient(circle at 50% 20%, rgba(255, 244, 207, 0.08), transparent 68%),
+    linear-gradient(180deg, rgba(92, 70, 42, 0.08), transparent 55%);
 }
 
 [data-theme="artroom"] [data-artroom-material="canvas"] {
   background-color: var(--artroom-canvas);
-  background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.014) 0 1px, transparent 1px 5px);
+  background-image: linear-gradient(135deg, rgba(255,255,255,0.025), transparent 55%);
 }
 
 [data-theme="artroom"] [data-artroom-material="parchment"] {
@@ -78,7 +78,7 @@
   color: #2a1b0e;
   background-image:
     linear-gradient(135deg, rgba(255,248,214,0.22), transparent 45%),
-    repeating-linear-gradient(0deg, rgba(78,49,20,0.045) 0 1px, transparent 1px 5px);
+    radial-gradient(circle at 50% 35%, rgba(255,245,205,0.10), transparent 70%);
   box-shadow: inset 0 0 0 1px rgba(91, 58, 25, 0.34), inset 0 0 22px rgba(91, 58, 25, 0.16);
 }
 
@@ -92,9 +92,7 @@
 [data-theme="artroom"] [data-artroom-material="button"],
 [data-theme="artroom"] [data-artroom-button="true"] {
   background-color: var(--artroom-parchment);
-  background-image:
-    linear-gradient(135deg, rgba(255,248,214,0.24), transparent 42%),
-    repeating-linear-gradient(0deg, rgba(78,49,20,0.045) 0 1px, transparent 1px 5px);
+  background-image: linear-gradient(135deg, rgba(255,248,214,0.24), transparent 42%);
   color: #2a1b0e;
   border: 1px solid var(--archive-metal-dark);
   box-shadow:
@@ -104,14 +102,10 @@
     0 5px 10px rgba(0,0,0,0.28);
 }
 
-/* ArchiveButton currently reuses ArchiveFrame's shared surface markup.
-   Scope the parchment treatment to the actual button frame only; cards,
-   panels and the rest of the shared ArchiveFrame remain on the room canvas. */
+/* ArchiveButton reuses ArchiveFrame's shared surface markup. */
 [data-theme="artroom"] button > [data-material="wood"] > div > div {
   background-color: var(--artroom-parchment) !important;
-  background-image:
-    linear-gradient(135deg, rgba(255,248,214,0.24), transparent 42%),
-    repeating-linear-gradient(0deg, rgba(78,49,20,0.045) 0 1px, transparent 1px 5px) !important;
+  background-image: linear-gradient(135deg, rgba(255,248,214,0.24), transparent 42%) !important;
   color: #2a1b0e;
   box-shadow:
     inset 0 0 0 1px rgba(91, 58, 25, 0.34),
