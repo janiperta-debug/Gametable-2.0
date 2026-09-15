@@ -84,87 +84,59 @@ export const ARTIFACT_PAGES: Record<string, ArtifactPage> = {
       en: "Within these walls, countless stories are preserved. Knowledge is the key that unlocks every other door. What will you discover?",
     },
     lore: {
-      title: {
-        fi: "Arkistonhoitajan muistiinpanot",
-        en: "The Archivist's Notes",
-      },
+      title: { fi: "Arkistonhoitajan muistiinpanot", en: "The Archivist's Notes" },
       text: [
-        {
-          fi: "Kartanon arkistonhoitajat ovat omistaneet elämänsä tiedon keräämiselle jokaisesta valtakunnasta.",
-          en: "The Archivists of the Manor have dedicated their lives to gathering knowledge from every realm.",
-        },
-        {
-          fi: "Jotkin totuudet on kirjoitettu kirjoihin. Toiset on kirjoitettu ihmisiin.",
-          en: "Some truths are written in books. Others are written in people.",
-        },
-        {
-          fi: "Lue. Pohdi. Muista.",
-          en: "Read. Reflect. Remember.",
-        },
+        { fi: "Kartanon arkistonhoitajat ovat omistaneet elämänsä tiedon keräämiselle jokaisesta valtakunnasta.", en: "The Archivists of the Manor have dedicated their lives to gathering knowledge from every realm." },
+        { fi: "Jotkin totuudet on kirjoitettu kirjoihin. Toiset on kirjoitettu ihmisiin.", en: "Some truths are written in books. Others are written in people." },
+        { fi: "Lue. Pohdi. Muista.", en: "Read. Reflect. Remember." },
       ],
     },
     unlocks: {
       theme: { fi: "Kirjasto", en: "Library" },
       roomAccess: { fi: "Kirjasto", en: "Library" },
-      lore: {
-        fi: "Arkistonhoitajan muistiinpanot",
-        en: "The Archivist's Notes",
-      },
-      artefact: {
-        fi: "Arkistonhoitajan sulkakynä",
-        en: "Archivist's Quill",
-      },
-      achievement: {
-        fi: "Tiedon etsijä",
-        en: "Seeker of Knowledge",
-      },
+      lore: { fi: "Arkistonhoitajan muistiinpanot", en: "The Archivist's Notes" },
+      artefact: { fi: "Arkistonhoitajan sulkakynä", en: "Archivist's Quill" },
+      achievement: { fi: "Tiedon etsijä", en: "Seeker of Knowledge" },
     },
   },
   conservatory: {
     id: "conservatory",
-    subtitle: {
-      fi: "Elämän, kasvun ja yhteyden pyhäkkö.",
-      en: "A sanctuary of life, growth, and connection.",
-    },
-    heroCaption: {
-      fi: "Täällä monien maailmojen luontoa vaalitaan ja jaetaan. Jokainen siemen, jokainen kukka, jokainen kosketus muistuttaa meitä siitä, että kasvamme vahvemmiksi yhdessä.",
-      en: "Here, nature from many worlds is nurtured and shared. Every seed, every bloom, every touch is a reminder that we grow stronger together.",
-    },
+    subtitle: { fi: "Elämän, kasvun ja yhteyden pyhäkkö.", en: "A sanctuary of life, growth, and connection." },
+    heroCaption: { fi: "Täällä monien maailmojen luontoa vaalitaan ja jaetaan. Jokainen siemen, jokainen kukka, jokainen kosketus muistuttaa meitä siitä, että kasvamme vahvemmiksi yhdessä.", en: "Here, nature from many worlds is nurtured and shared. Every seed, every bloom, every touch is a reminder that we grow stronger together." },
     lore: {
-      title: {
-        fi: "Puutarhurin muistiinpanot",
-        en: "The Gardener's Notes",
-      },
+      title: { fi: "Puutarhurin muistiinpanot", en: "The Gardener's Notes" },
       text: [
-        {
-          fi: "Puutarhuri huolehtii muustakin kuin kasveista.",
-          en: "The Gardener tends to more than plants.",
-        },
-        {
-          fi: "Hän viljelee ymmärrystä, kärsivällisyyttä ja huolenpitoa.",
-          en: "They cultivate understanding, patience, and care.",
-        },
-        {
-          fi: "Vaali sitä, mitä rakastat, ja katso sen kukoistavan.",
-          en: "Nurture what you love, and watch it flourish.",
-        },
+        { fi: "Puutarhuri huolehtii muustakin kuin kasveista.", en: "The Gardener tends to more than plants." },
+        { fi: "Hän viljelee ymmärrystä, kärsivällisyyttä ja huolenpitoa.", en: "They cultivate understanding, patience, and care." },
+        { fi: "Vaali sitä, mitä rakastat, ja katso sen kukoistavan.", en: "Nurture what you love, and watch it flourish." },
       ],
     },
     unlocks: {
       theme: { fi: "Talvipuutarha", en: "Conservatory" },
       roomAccess: { fi: "Talvipuutarha", en: "Conservatory" },
-      lore: {
-        fi: "Puutarhurin muistiinpanot",
-        en: "The Gardener's Notes",
-      },
-      artefact: {
-        fi: "Harmonian siemen",
-        en: "Seed of Harmony",
-      },
-      achievement: {
-        fi: "Viljelijä",
-        en: "Cultivator",
-      },
+      lore: { fi: "Puutarhurin muistiinpanot", en: "The Gardener's Notes" },
+      artefact: { fi: "Harmonian siemen", en: "Seed of Harmony" },
+      achievement: { fi: "Viljelijä", en: "Cultivator" },
+    },
+  },
+  "fireside-lounge": {
+    id: "fireside-lounge",
+    subtitle: { fi: "Lämmön, tarinoiden ja ystävyyden paikka.", en: "A place of warmth, stories, and friendship." },
+    heroCaption: { fi: "Vedä tuoli lähemmäs, jaa tarina ja kuuntele. Tulen lämmössä tuntemattomista tulee ystäviä ja seikkailut saavat muistonsa.", en: "Pull up a chair, share a story, and listen. In the warmth of the fire, strangers become friends and adventures are remembered." },
+    lore: {
+      title: { fi: "Oleskelusalin kronikat", en: "The Lounge Chronicles" },
+      text: [
+        { fi: "Monet tarinat alkavat oleskelusalista.", en: "Many tales begin in the Lounge." },
+        { fi: "Voittoja juhlitaan. Tappioista selvitään. Suunnitelmia tehdään. Unelmia jaetaan.", en: "Victories celebrated. Defeats survived. Plans made. Dreams shared." },
+        { fi: "Tuli muistaa jokaisen äänen.", en: "The fire remembers every voice." },
+      ],
+    },
+    unlocks: {
+      theme: { fi: "Takkahuone", en: "Fireside Lounge" },
+      roomAccess: { fi: "Takkahuone", en: "Fireside Lounge" },
+      lore: { fi: "Oleskelusalin kronikat", en: "The Lounge Chronicles" },
+      artefact: { fi: "Toveruuden hiillos", en: "Ember of Camaraderie" },
+      achievement: { fi: "Ystävyyden kipinä", en: "Kindled Bonds" },
     },
   },
 }
