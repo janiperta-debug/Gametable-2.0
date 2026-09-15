@@ -9,14 +9,14 @@ import type { ReactNode } from "react"
 // Check if running as installed PWA
 function useIsPWA() {
   const [isPWA, setIsPWA] = useState(false)
-  
+
   useEffect(() => {
     // Check if running in standalone mode (installed PWA)
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches ||
       (window.navigator as any).standalone === true
     setIsPWA(isStandalone)
   }, [])
-  
+
   return isPWA
 }
 
@@ -36,46 +36,43 @@ function useServiceWorker() {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const isPWA = useIsPWA()
-  
+
   // Register service worker
   useServiceWorker()
 
-  // Theme preview pages must set the active theme on the document itself.
-  // The global app-background sits above the page content, so a theme set
-  // only on the nested preview element cannot update that outer background.
-  const previewTheme = pathname.startsWith("/themes/")
-    ? pathname.split("/")[2] || null
-    : null
+  // The active theme is owned by AppThemeProvider, which writes
+  // document.documentElement.dataset.theme for the whole application.
+  // Do not derive the global background from the current route: the route
+  // is not the selected application theme.
 
-  useEffect(() => {
-    if (!previewTheme || typeof document === "undefined") return
-
-    const previousTheme = document.documentElement.dataset.theme
-    document.documentElement.dataset.theme = previewTheme
-
-    return () => {
-      if (previousTheme) {
-        document.documentElement.dataset.theme = previousTheme
-      } else {
-        delete document.documentElement.dataset.theme
-      }
-    }
-  }, [previewTheme])
-  
   // For PWA, skip landing page and go directly to home
   const isLandingPage = pathname === "/" && !isPWA
-  
+
   // Home page has its own full background, no room-environment needed
   const isHomePage = pathname === "/home"
 
   if (isLandingPage) {
     return <>{children}</>
   }
-  
-  // Home page - no room-environment background, content extends behind nav
+
+  // Home page - keep the single app-background layer from app/layout.tsx.
   if (isHomePage) {
     return (
       <AppThemeProvider>
+        <style>{`
+          .app-background {
+            background: hsl(var(--surface-dark)) !important;
+            background-image: none !important;
+          }
+
+          .room-environment,
+          .room-environment::before,
+          .room-environment::after,
+          .manor-bg-pattern {
+            background: transparent !important;
+            background-image: none !important;
+          }
+        `}</style>
         <div className="min-h-screen">
           <Navigation />
           <main className="pb-28 md:pb-32">{children}</main>
@@ -83,12 +80,26 @@ export function AppShell({ children }: { children: ReactNode }) {
       </AppThemeProvider>
     )
   }
-  
+
   // If on landing page but running as PWA, redirect to home
   if (pathname === "/" && isPWA) {
     return (
       <AppThemeProvider>
-        <div className="min-h-screen room-environment">
+        <style>{`
+          .app-background {
+            background: hsl(var(--surface-dark)) !important;
+            background-image: none !important;
+          }
+
+          .room-environment,
+          .room-environment::before,
+          .room-environment::after,
+          .manor-bg-pattern {
+            background: transparent !important;
+            background-image: none !important;
+          }
+        `}</style>
+        <div className="min-h-screen">
           <Navigation />
           <main className="pb-28 md:pb-32">{children}</main>
         </div>
@@ -98,7 +109,21 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <AppThemeProvider>
-      <div className="min-h-screen room-environment">
+      <style>{`
+        .app-background {
+          background: hsl(var(--surface-dark)) !important;
+          background-image: none !important;
+        }
+
+        .room-environment,
+        .room-environment::before,
+        .room-environment::after,
+        .manor-bg-pattern {
+          background: transparent !important;
+          background-image: none !important;
+        }
+      `}</style>
+      <div className="min-h-screen">
         <Navigation />
         <main className="pb-28 md:pb-32">{children}</main>
       </div>
