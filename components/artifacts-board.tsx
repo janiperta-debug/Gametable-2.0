@@ -4,7 +4,7 @@ import Link from "next/link"
 import { ArchiveFrame } from "@/components/archive-frame"
 import { useTranslations } from "@/lib/i18n"
 import { getArtifactSlots } from "@/lib/artifacts"
-import { ARTIFACT_PAGES } from "@/lib/artifact-pages"
+import { getArtifactPage } from "@/lib/artifact-pages"
 import { isManorRoomCurrentlyUsable } from "@/lib/manor-progression"
 
 const camelId = (id: string) => id.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase())
@@ -19,7 +19,7 @@ export function ArtifactsBoard() {
         const earned = isManorRoomCurrentlyUsable(slot.roomId)
         const name = t(`rooms.${camelId(slot.roomId)}.name`) || slot.roomName
         // Earned artifacts whose detail page exists are clickable.
-        const href = earned && ARTIFACT_PAGES[slot.roomId] ? `/themes/artifacts/${slot.roomId}` : undefined
+        const href = earned && getArtifactPage(slot.roomId) ? `/themes/artifacts/${slot.roomId}` : undefined
 
         const artwork = earned ? (
           <img
