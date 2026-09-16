@@ -5,10 +5,7 @@ export const SPA_THEME_PAGE: RoomThemePage = {
   crest: "/images/spa-crest.png",
   hero: "/images/heroes/spa-hero.jpg",
   title: { fi: "Spa", en: "Spa" },
-  tagline: {
-    fi: "Lepo ei ole ylellisyyttä. Se on välttämättömyys.",
-    en: "Rest is not a luxury. It is a necessity.",
-  },
+  tagline: { fi: "Lepo ei ole ylellisyyttä. Se on välttämättömyys.", en: "Rest is not a luxury. It is a necessity." },
   storyTitle: { fi: "Spa", en: "The Spa" },
   storyParagraphs: [
     { fi: "Näiden ovien takana aika hidastuu.", en: "Behind these doors, time slows down." },
@@ -40,14 +37,14 @@ export const SPA_THEME_PAGE: RoomThemePage = {
     { image: "/images/heroes/discover/spa.jpg", caption: { fi: "Hoitohuone", en: "The Treatment Room" } },
   ],
   artifact: {
-    name: { fi: "Tasapainon sinetti", en: "The Seal of Balance" },
+    name: { fi: "Rauhan pullo", en: "Vial of Tranquility" },
     image: "/themes/artifacts/spa.png",
-    description: [{ fi: "Hienovarainen amuletti, joka muistuttaa levon ja palautumisen voimasta.", en: "A delicate amulet that reminds its bearer of the power of rest and restoration." }],
+    description: [{ fi: "Hienovarainen amuletti, joka muistuttaa levon ja palautumisen voimasta.", en: "A vial of calming essence from distant springs. It soothes the mind and restores balance. Its power is subtle, but its effects are lasting." }],
   },
   unlocks: [
     { label: { fi: "Spa-teema", en: "Spa Theme" }, description: { fi: "Täysi visuaalinen teema GameTablelle", en: "Full visual theme for the GameTable" } },
     { label: { fi: "10 ainutlaatuista huonenäkymää", en: "10 Unique Room Screens" }, description: { fi: "Täydellinen matka Span läpi", en: "A complete journey through the Spa" } },
-    { label: { fi: "Tarinakronikka", en: "Story Chronicle" }, description: { fi: "Hyvinvoinnin tarinoita ja rauhallisia hetkiä", en: "Wellness stories & mindful moments" } },
+    { label: { fi: "Tarinakronikka", en: "Story Chronicle" }, description: { fi: "Wellness stories & mindful moments", en: "Wellness stories & mindful moments" } },
     { label: { fi: "Saavutuspolku", en: "Achievement Path" }, description: { fi: "Haastavia virstanpylväitä ja palkintoja", en: "Challenging milestones & rewards" } },
     { label: { fi: "Tarustomerkintä", en: "Lore Entry" }, description: { fi: "Lisätty kartanon kirjastoon", en: "Added to your Manor Library" } },
   ],
