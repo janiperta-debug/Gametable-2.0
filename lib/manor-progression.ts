@@ -75,11 +75,12 @@ export function isManorRoomEntitled(xp: number, requiredXp: number): boolean {
 
 /**
  * TEMPORARY ARTIFACT-PAGE VERIFICATION OVERRIDE.
- * Keep every room usable while the 18 missing artifact pages are built.
+ * All rooms remain usable except Underground Temple, which is intentionally
+ * held back so Treasure Vault can be tested in its incomplete state.
  * Restore the normal entitlement-based implementation afterwards.
  */
-export function isManorRoomCurrentlyUsable(_roomId: string): boolean {
-  return true
+export function isManorRoomCurrentlyUsable(roomId: string): boolean {
+  return roomId !== "underground-temple"
 }
 
 export type TreasureVaultState = {
