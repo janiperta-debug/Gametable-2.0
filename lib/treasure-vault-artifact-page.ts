@@ -1,19 +1,10 @@
 import type { ArtifactPage } from "@/lib/artifact-pages"
 
-/**
- * Treasure Vault is the only artifact page whose artifact is assembled from
- * the other 18 artifacts. The visual state is handled by ArtifactPageTemplate.
- */
+/** Treasure Vault uses a conditional artifact presentation assembled from the other 18 artifacts. */
 export const TREASURE_VAULT_ARTIFACT_PAGE: ArtifactPage = {
   id: "treasure-vault",
-  subtitle: {
-    fi: "Viimeinen huone. Viimeinen oppitunti.",
-    en: "The final room. The final lesson.",
-  },
-  heroCaption: {
-    fi: "Tämä paikka säilyttää sen, mitä ei voi ottaa mukaan — vain ymmärtää. Lopullinen aarre ei löydy täältä. Se syntyy muualla.",
-    en: "This place holds what cannot be taken—only understood. The final treasure cannot be found here. It is forged elsewhere.",
-  },
+  subtitle: { fi: "Viimeinen huone. Viimeinen oppitunti.", en: "The final room. The final lesson." },
+  heroCaption: { fi: "Tämä paikka säilyttää sen, mitä ei voi ottaa mukaan — vain ymmärtää. Lopullinen aarre ei löydy täältä. Se syntyy muualla.", en: "This place holds what cannot be taken—only understood. The final treasure cannot be found here. It is forged elsewhere." },
   lore: {
     title: { fi: "Kuraattorin merkinnät", en: "The Curator’s Records" },
     text: [
@@ -31,5 +22,4 @@ export const TREASURE_VAULT_ARTIFACT_PAGE: ArtifactPage = {
     artefact: { fi: "Palautettu holvin avain", en: "The Restored Vault Key" },
     achievement: { fi: "Holvin mestari", en: "Vault Master" },
   },
-  kind: "treasure-vault",
 }
