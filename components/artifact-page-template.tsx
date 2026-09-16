@@ -71,10 +71,7 @@ export function ArtifactPageTemplate({ theme, page }: { theme: RoomThemePage; pa
             </ArchiveFrame>
 
             <ArchiveFrame weight="thin" cornerSize="sm" className="rounded-xl">
-              <div className="space-y-2 p-4 sm:p-5">
-                <h2 className={`font-cinzel text-sm font-bold uppercase tracking-[0.16em] ${goldText}/80`}>
-                  {t("themes.artifactPage.heroCaption")}
-                </h2>
+              <div className="p-4 sm:p-5">
                 <p className="font-body leading-relaxed text-foreground/85 text-pretty">
                   {L(page.heroCaption)}
                 </p>
