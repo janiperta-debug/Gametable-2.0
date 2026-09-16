@@ -16,21 +16,21 @@ const ROOM_SLOTS: { src: string; href?: string; label?: string }[] = [
   { src: "/themes/rooms/room-6.png", href: "/themes/library", label: "Library" },
   { src: "/themes/rooms/room-7.png", href: "/themes/main-hall", label: "Main Hall" },
 
-  // Second floor — preview mode
-  { src: "/themes/ballroom-preview.png", href: "/themes/ballroom", label: "Ballroom" },
-  { src: "/themes/map-room-preview.png", href: "/themes/map-room", label: "Map Room" },
-  { src: "/themes/observatory-preview.png", href: "/themes/observatory", label: "Observatory" },
-  { src: "/themes/theater-preview.png", href: "/themes/theater-room", label: "Theater Room" },
-  { src: "/themes/clock-tower-preview.png", href: "/themes/clock-tower", label: "Clock Tower" },
-  { src: "/themes/war-room-preview.png", href: "/themes/war-room", label: "War Room" },
-  { src: "/themes/art-room-preview.png", href: "/themes/artroom", label: "Art Room" },
+  // Second floor — numbered room previews
+  { src: "/themes/rooms/room-8.png", href: "/themes/ballroom", label: "Ballroom" },
+  { src: "/themes/rooms/room-9.png", href: "/themes/map-room", label: "Map Room" },
+  { src: "/themes/rooms/room-10.png", href: "/themes/observatory", label: "Observatory" },
+  { src: "/themes/rooms/room-11.png", href: "/themes/theater-room", label: "Theater Room" },
+  { src: "/themes/rooms/room-12.png", href: "/themes/clock-tower", label: "Clock Tower" },
+  { src: "/themes/rooms/room-13.png", href: "/themes/war-room", label: "War Room" },
+  { src: "/themes/rooms/room-14.png", href: "/themes/artroom", label: "Art Room" },
 
-  // Basement — preview tiles, awaiting dedicated room pages
-  { src: "/themes/alchemist-laboratory-preview.png", href: "/themes/alchemist-laboratory", label: "Alchemist Laboratory" },
-  { src: "/themes/dungeon-preview.png", href: "/themes/dungeon", label: "Dungeon" },
-  { src: "/themes/underground-temple-preview.png", href: "/themes/underground-temple", label: "Underground Temple" },
-  { src: "/themes/crystal-cave-preview.png", href: "/themes/crystal-cavern", label: "Crystal Cavern" },
-  { src: "/themes/treasure-vault-preview.png", href: "/themes/treasure-vault", label: "Treasure Vault" },
+  // Basement — numbered room previews
+  { src: "/themes/rooms/room-15.png", href: "/themes/alchemist-laboratory", label: "Alchemist Laboratory" },
+  { src: "/themes/rooms/room-16.png", href: "/themes/dungeon", label: "Dungeon" },
+  { src: "/themes/rooms/room-17.png", href: "/themes/underground-temple", label: "Underground Temple" },
+  { src: "/themes/rooms/room-18.png", href: "/themes/crystal-cavern", label: "Crystal Cavern" },
+  { src: "/themes/rooms/room-19.png", href: "/themes/treasure-vault", label: "Treasure Vault" },
 ]
 
 // Total number of grid slots (matches the artifacts board layout).
