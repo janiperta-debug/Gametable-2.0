@@ -59,7 +59,7 @@ export function TreasureVaultArtifactPage({ theme, page }: { theme: RoomThemePag
             <ArchiveFrame weight="thin" cornerSize="sm" className="rounded-xl">
               <div className="space-y-2 p-4 sm:p-5">
                 <h2 className={`font-cinzel text-sm font-bold uppercase tracking-[0.16em] ${goldText}`}>
-                  {t("themes.artifactPage.heroCaption")}
+                  {locale === "fi" ? "Kuvaus" : "Description"}
                 </h2>
                 <p className="font-body leading-relaxed text-foreground/85 text-pretty">
                   {L(page.heroCaption)}
