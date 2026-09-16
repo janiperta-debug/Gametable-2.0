@@ -35,9 +35,9 @@ export const MAP_ROOM_THEME_PAGE: RoomThemePage = {
     { image: "/images/heroes/discover/map-room.jpg", caption: { fi: "Tuntematon kartalle", en: "Chart the Unknown" } },
   ],
   artifact: {
-    name: { fi: "Kartantekijän päiväkirja", en: "Cartographer’s Journal" },
+    name: { fi: "Ohjauksen kompassi", en: "Compass of Guidance" },
     image: "/themes/artifacts/map-room.png",
-    description: [{ fi: "Vanha päiväkirja, joka muistuttaa, että jokainen reitti alkaa siitä, missä seisot.", en: "An old journal reminding us that every route begins where you stand." }],
+    description: [{ fi: "Kompassi, jonka sanotaan osoittavan aina kohti sitä, millä on eniten merkitystä.", en: "A compass said to always point toward what matters most." }],
   },
   unlocks: [
     { label: { fi: "Karttahuone-teema", en: "Map Room Theme" }, description: { fi: "Täysi visuaalinen teema GameTablelle", en: "Full visual theme for the GameTable" } },
