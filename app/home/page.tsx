@@ -32,7 +32,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="h-screen flex flex-col px-4 md:px-8 lg:px-16 pt-8 md:pt-6 pb-28 md:pb-32 relative overflow-hidden">
+    <div className="h-screen flex flex-col px-4 md:px-8 lg:px-16 pt-[62px] md:pt-6 pb-28 md:pb-32 relative overflow-hidden">
       {/* Full hero background image - no overlay, displayed in full glory */}
       <div className="fixed inset-0 z-0">
         <Image
