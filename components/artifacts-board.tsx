@@ -6,6 +6,7 @@ import { useTranslations } from "@/lib/i18n"
 import { getArtifactSlots } from "@/lib/artifacts"
 import { getArtifactPage } from "@/lib/artifact-pages"
 import { WAR_ROOM_ARTIFACT_PAGE } from "@/lib/war-room-artifact-page"
+import { CLOCK_TOWER_ARTIFACT_PAGE } from "@/lib/clock-tower-artifact-page"
 import { isManorRoomCurrentlyUsable } from "@/lib/manor-progression"
 
 const camelId = (id: string) => id.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase())
@@ -20,7 +21,12 @@ export function ArtifactsBoard() {
         const earned = isManorRoomCurrentlyUsable(slot.roomId)
         const name = t(`rooms.${camelId(slot.roomId)}.name`) || slot.roomName
         // Earned artifacts whose detail page exists are clickable.
-        const page = slot.roomId === "war-room" ? WAR_ROOM_ARTIFACT_PAGE : getArtifactPage(slot.roomId)
+        const page =
+          slot.roomId === "war-room"
+            ? WAR_ROOM_ARTIFACT_PAGE
+            : slot.roomId === "clock-tower"
+              ? CLOCK_TOWER_ARTIFACT_PAGE
+              : getArtifactPage(slot.roomId)
         const href = earned && page ? `/themes/artifacts/${slot.roomId}` : undefined
 
         const artwork = earned ? (
