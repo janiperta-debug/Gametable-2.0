@@ -9,15 +9,17 @@ import { GALLERY_THEME_PAGE } from "@/lib/gallery-theme-page"
 import { ART_ROOM_THEME_PAGE } from "@/lib/art-room-theme-page"
 import { MAP_ROOM_THEME_PAGE } from "@/lib/map-room-theme-page"
 import { BALLROOM_THEME_PAGE } from "@/lib/ballroom-theme-page"
+import { THEATER_ROOM_THEME_PAGE } from "@/lib/theater-room-theme-page"
+import { THEATER_ROOM_ARTIFACT_PAGE } from "@/lib/theater-room-artifact-page"
 import { getArtifactPage, ARTIFACT_PAGES } from "@/lib/artifact-pages"
 
 export function generateStaticParams() {
-  return Object.keys(ARTIFACT_PAGES).map((room) => ({ room }))
+  return [...new Set([...Object.keys(ARTIFACT_PAGES), "theater-room"])].map((room) => ({ room }))
 }
 
 export default async function ArtifactPageRoute({ params }: { params: Promise<{ room: string }> }) {
   const { room } = await params
-  const page = getArtifactPage(room)
+  const page = room === "theater-room" ? THEATER_ROOM_ARTIFACT_PAGE : getArtifactPage(room)
   const theme =
     getRoomThemePage(room) ??
     (room === "conservatory"
@@ -36,7 +38,9 @@ export default async function ArtifactPageRoute({ params }: { params: Promise<{ 
                   ? MAP_ROOM_THEME_PAGE
                   : room === "ballroom"
                     ? BALLROOM_THEME_PAGE
-                    : undefined)
+                    : room === "theater-room"
+                      ? THEATER_ROOM_THEME_PAGE
+                      : undefined)
   if (!page || !theme) {
     notFound()
   }
