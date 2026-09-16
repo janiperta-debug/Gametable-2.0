@@ -12,14 +12,9 @@ import type { ArtifactPage } from "@/lib/artifact-pages"
  * Hall artifact mockup. The two crossed-out mockup sections ("In Your Collection"
  * and "The Vault Key Restored") are intentionally omitted.
  *
- * Shared assets (crest, hero, title, artefact name/image/description) are reused
- * from the room's theme page; only artifact-page-unique copy comes from `page`.
+ * Shared assets (crest, hero, title, subtitle and artifact image) are reused
+ * from the room's theme page; artifact-page copy comes from `page`.
  * All copy is bilingual; shared chrome lives in i18n under `themes.artifactPage`.
- *
- * Sections:
- *   Back to Artifacts
- *   → [crest + title + subtitle + hero w/ caption] | [Artefact: name, image, desc]
- *   → [Lore Entry: title, text, note]             | [Unlocks: 5 rows]
  */
 export function ArtifactPageTemplate({ theme, page }: { theme: RoomThemePage; page: ArtifactPage }) {
   const { t, locale } = useTranslation()
@@ -39,7 +34,6 @@ export function ArtifactPageTemplate({ theme, page }: { theme: RoomThemePage; pa
   return (
     <main className="artifact-cabinet min-h-screen px-3 py-5 sm:px-6 sm:py-8">
       <div className="mx-auto max-w-5xl space-y-6">
-        {/* Back to Artifacts */}
         <Link
           href="/themes?tab=artifacts"
           className={`inline-flex min-h-11 items-center gap-2 font-cinzel text-sm uppercase tracking-wide ${goldText} drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] transition-opacity hover:opacity-80`}
@@ -49,7 +43,6 @@ export function ArtifactPageTemplate({ theme, page }: { theme: RoomThemePage; pa
         </Link>
 
         <div className="grid gap-5 lg:grid-cols-2">
-          {/* Left: crest + title + subtitle + hero */}
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <img
@@ -80,19 +73,18 @@ export function ArtifactPageTemplate({ theme, page }: { theme: RoomThemePage; pa
             </ArchiveFrame>
           </div>
 
-          {/* Right: Artefact */}
           <ArchiveFrame className="rounded-xl">
             <div className="flex h-full flex-col items-center justify-center space-y-4 p-5 sm:p-6">
               <h2 className={`text-center font-cinzel text-sm font-bold uppercase tracking-[0.2em] ${goldText}/80`}>
                 {t("themes.artifactPage.artefact")}
               </h2>
               <h3 className={`text-center font-cinzel text-2xl font-bold uppercase ${goldText}`}>
-                {L(theme.artifact.name)}
+                {L(page.unlocks.artefact)}
               </h3>
               <div className="flex justify-center py-2">
                 <img
                   src={theme.artifact.image || "/placeholder.svg"}
-                  alt={L(theme.artifact.name)}
+                  alt={L(page.unlocks.artefact)}
                   className="h-44 w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)]"
                 />
               </div>
@@ -108,7 +100,6 @@ export function ArtifactPageTemplate({ theme, page }: { theme: RoomThemePage; pa
         </div>
 
         <div className="grid gap-5 lg:grid-cols-2">
-          {/* Lore Entry */}
           <ArchiveFrame className="rounded-xl">
             <div className="space-y-4 p-5 sm:p-6">
               <h2 className={`text-center font-cinzel text-sm font-bold uppercase tracking-[0.2em] ${goldText}/80`}>
@@ -133,7 +124,6 @@ export function ArtifactPageTemplate({ theme, page }: { theme: RoomThemePage; pa
             </div>
           </ArchiveFrame>
 
-          {/* Unlocks */}
           <ArchiveFrame className="rounded-xl">
             <div className="space-y-4 p-5 sm:p-6">
               <h2 className={`text-center font-cinzel text-sm font-bold uppercase tracking-[0.2em] ${goldText}/80`}>
