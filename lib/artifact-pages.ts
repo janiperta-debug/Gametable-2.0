@@ -110,6 +110,18 @@ export const ARTIFACT_PAGES: Record<string, ArtifactPage> = {
     ] },
     unlocks: { theme: { fi: "Taidehuone", en: "Artroom" }, roomAccess: { fi: "Taidehuone", en: "Artroom" }, lore: { fi: "Taiteilijan luonnoskirja", en: "The Artist's Sketchbook" }, artefact: { fi: "Inspiraation sivellin", en: "Brush of Inspiration" }, achievement: { fi: "Luova kipinä", en: "Creative Spark" } },
   },
+  observatory: {
+    id: "observatory",
+    subtitle: { fi: "Ihmeiden, löytöjen ja näkökulmien paikka.", en: "A place of wonder, discovery, and perspective." },
+    heroCaption: { fi: "Katso ylös. Aina on enemmän nähtävää. Piilotettuja kuvioita. Yhteyksiä, jotka odottavat. Tähdet eivät puhu kovaa, mutta ne eivät koskaan lakkaa kertomasta tarinaansa. Observatoriossa uteliaisuus löytää tiensä.", en: "Look up. There is always more to see. Patterns hidden. Connections waiting. The stars do not speak loudly, but they never stop telling their story. In the Observatory, curiosity finds its way." },
+    lore: { title: { fi: "Taivaalliset muistiinpanot", en: "The Celestial Notes" }, text: [
+      { fi: "Tähdet ovat olleet tarkkailun kohteena kauan ennen saapumistamme, ja ne elävät kauemmin kuin me kaikki.", en: "The stars have been observed long before we arrived, and they will outlast us all." },
+      { fi: "Nämä muistiinpanot eivät ole vastauksia — ne ovat kutsuja.", en: "These notes are not answers—they are invitations." },
+      { fi: "Ihmettele. Kyseenalaista. Etsi.", en: "To wonder. To question. To seek." },
+      { fi: "Taivas on valtava, ja niin on myös se, mitä emme tiedä.", en: "The sky is vast, and so is what we do not know." },
+    ] },
+    unlocks: { theme: { fi: "Observatorio", en: "Observatory" }, roomAccess: { fi: "Observatorio", en: "Observatory" }, lore: { fi: "Taivaalliset muistiinpanot", en: "The Celestial Notes" }, artefact: { fi: "Tähtikartan sirpale", en: "Star Chart Fragment" }, achievement: { fi: "Tähtien tarkkailija", en: "Stargazer" } },
+  },
   "map-room": {
     id: "map-room",
     subtitle: { fi: "Tiedon, suunnittelun ja reittien kammio.", en: "A chamber of knowledge, planning, and paths." },
