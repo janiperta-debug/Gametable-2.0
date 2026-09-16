@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import { ArtifactPageTemplate } from "@/components/artifact-page-template"
 import { TreasureVaultArtifactPage } from "@/components/treasure-vault-artifact-page"
 import { getRoomThemePage } from "@/lib/room-theme-pages"
+import { ROOM_IDS } from "@/lib/room-registry"
 import { CONSERVATORY_THEME_PAGE } from "@/lib/conservatory-theme-page"
 import { FIRESIDE_LOUNGE_THEME_PAGE } from "@/lib/fireside-lounge-theme-page"
 import { BAR_THEME_PAGE } from "@/lib/bar-theme-page"
@@ -26,13 +27,10 @@ import { DUNGEON_ARTIFACT_PAGE } from "@/lib/dungeon-artifact-page"
 import { CRYSTAL_CAVERN_ARTIFACT_PAGE } from "@/lib/crystal-cavern-artifact-page"
 import { UNDERGROUND_TEMPLE_ARTIFACT_PAGE } from "@/lib/underground-temple-artifact-page"
 import { TREASURE_VAULT_ARTIFACT_PAGE } from "@/lib/treasure-vault-artifact-page"
-import { getArtifactPage, ARTIFACT_PAGES } from "@/lib/artifact-pages"
+import { getArtifactPage } from "@/lib/artifact-pages"
 
 export function generateStaticParams() {
-  return [...new Set([
-    ...Object.keys(ARTIFACT_PAGES),
-    "theater-room", "war-room", "clock-tower", "alchemist-laboratory", "dungeon", "crystal-cavern", "underground-temple", "treasure-vault",
-  ])].map((room) => ({ room }))
+  return ROOM_IDS.map((room) => ({ room }))
 }
 
 export default async function ArtifactPageRoute({ params }: { params: Promise<{ room: string }> }) {
