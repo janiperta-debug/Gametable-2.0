@@ -1,9 +1,37 @@
 import { roomThemes } from "@/lib/room-themes"
+import { isManorRoomCurrentlyUsable } from "@/lib/manor-progression"
+
+export const PREVIOUS_ARTIFACTS = [
+  "observatory",
+  "library",
+  "ballroom",
+  "conservatory",
+  "dungeon",
+  "war-room",
+  "main-hall",
+  "spa",
+  "clock-tower",
+  "underground-temple",
+  "gallery",
+  "map-room",
+  "alchemist-laboratory",
+  "fireside-lounge",
+  "theater-room",
+  "crystal-cavern",
+  "bar",
+  "artroom",
+] as const
+
+export function isTreasureVaultComplete(): boolean {
+  return PREVIOUS_ARTIFACTS.every((roomId) => isManorRoomCurrentlyUsable(roomId))
+}
 
 /** Centralized artifact asset path convention. */
 export function getArtifactAssetPath(roomId: string): string {
   if (roomId === "treasure-vault") {
-    return "/themes/artifacts/treasure-vault-key.png"
+    return isTreasureVaultComplete()
+      ? "/themes/artifacts/treasure-vault-key.png"
+      : "/themes/artifacts/treasure-vault-empty.png"
   }
 
   return `/themes/artifacts/${roomId}.png`
