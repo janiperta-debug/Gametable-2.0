@@ -37,9 +37,9 @@ export const ART_ROOM_THEME_PAGE: RoomThemePage = {
     { image: "/images/heroes/discover/art-room.jpg", caption: { fi: "Työpöytä", en: "The Worktable" } },
   ],
   artifact: {
-    name: { fi: "Taiteilijan luonnoskirja", en: "Artist's Sketchbook" },
+    name: { fi: "Inspiraation sivellin", en: "Brush of Inspiration" },
     image: "/themes/artifacts/artroom.png",
-    description: [{ fi: "Luonnoskirja ensimmäisille ideoille, muistiinpanoille ja keskeneräisille mestariteoksille.", en: "A sketchbook for first ideas, notes, and unfinished masterpieces." }],
+    description: [{ fi: "Sivellin, jonka sanotaan kantavan muusien kuiskauksia. Se vastaa tunteeseen, ei ohjeisiin. Sen avulla epävarmakin voi luoda ja tavallisesta voi tulla unohtumatonta.", en: "A brush said to carry the whispers of muses. It responds to feeling, not instruction. With it, even the unsure can create, and even the ordinary can become something unforgettable." }],
   },
   unlocks: [
     { label: { fi: "Taidehuone-teema", en: "Art Room Theme" }, description: { fi: "Täysi visuaalinen teema GameTablelle", en: "Full visual theme for the GameTable" } },
