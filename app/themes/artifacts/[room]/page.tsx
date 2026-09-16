@@ -10,6 +10,13 @@ import { ART_ROOM_THEME_PAGE } from "@/lib/art-room-theme-page"
 import { MAP_ROOM_THEME_PAGE } from "@/lib/map-room-theme-page"
 import { BALLROOM_THEME_PAGE } from "@/lib/ballroom-theme-page"
 import { THEATER_ROOM_THEME_PAGE } from "@/lib/theater-room-theme-page"
+import { WAR_ROOM_THEME_PAGE } from "@/lib/war-room-theme-page"
+import { CLOCK_TOWER_THEME_PAGE } from "@/lib/clock-tower-theme-page"
+import { DUNGEON_ROOM_THEME_PAGE } from "@/lib/dungeon-room-theme-page"
+import { CRYSTAL_CAVERN_ROOM_THEME_PAGE } from "@/lib/crystal-cavern-room-theme-page"
+import { ALCHEMIST_LABORATORY_THEME_PAGE } from "@/lib/alchemist-laboratory-theme-page"
+import { UNDERGROUND_TEMPLE_ROOM_THEME_PAGE } from "@/lib/underground-temple-room-theme-page"
+import { TREASURE_VAULT_ROOM_THEME_PAGE } from "@/lib/treasure-vault-room-theme-page"
 import { THEATER_ROOM_ARTIFACT_PAGE } from "@/lib/theater-room-artifact-page"
 import { WAR_ROOM_ARTIFACT_PAGE } from "@/lib/war-room-artifact-page"
 import { CLOCK_TOWER_ARTIFACT_PAGE } from "@/lib/clock-tower-artifact-page"
@@ -20,7 +27,16 @@ import { UNDERGROUND_TEMPLE_ARTIFACT_PAGE } from "@/lib/underground-temple-artif
 import { getArtifactPage, ARTIFACT_PAGES } from "@/lib/artifact-pages"
 
 export function generateStaticParams() {
-  return [...new Set([...Object.keys(ARTIFACT_PAGES), "theater-room", "war-room", "clock-tower", "alchemist-laboratory", "dungeon", "crystal-cavern", "underground-temple"])].map((room) => ({ room }))
+  return [...new Set([
+    ...Object.keys(ARTIFACT_PAGES),
+    "theater-room",
+    "war-room",
+    "clock-tower",
+    "alchemist-laboratory",
+    "dungeon",
+    "crystal-cavern",
+    "underground-temple",
+  ])].map((room) => ({ room }))
 }
 
 export default async function ArtifactPageRoute({ params }: { params: Promise<{ room: string }> }) {
@@ -61,7 +77,21 @@ export default async function ArtifactPageRoute({ params }: { params: Promise<{ 
                     ? BALLROOM_THEME_PAGE
                     : room === "theater-room"
                       ? THEATER_ROOM_THEME_PAGE
-                      : undefined)
+                      : room === "war-room"
+                        ? WAR_ROOM_THEME_PAGE
+                        : room === "clock-tower"
+                          ? CLOCK_TOWER_THEME_PAGE
+                          : room === "dungeon"
+                            ? DUNGEON_ROOM_THEME_PAGE
+                            : room === "crystal-cavern"
+                              ? CRYSTAL_CAVERN_ROOM_THEME_PAGE
+                              : room === "alchemist-laboratory"
+                                ? ALCHEMIST_LABORATORY_THEME_PAGE
+                                : room === "underground-temple"
+                                  ? UNDERGROUND_TEMPLE_ROOM_THEME_PAGE
+                                  : room === "treasure-vault"
+                                    ? TREASURE_VAULT_ROOM_THEME_PAGE
+                                    : undefined)
   if (!page || !theme) {
     notFound()
   }
