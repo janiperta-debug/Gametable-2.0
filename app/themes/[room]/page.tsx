@@ -16,6 +16,7 @@ import "../treasure-vault-room-materials.css"
 import { notFound } from "next/navigation"
 import { RoomThemeTemplate } from "@/components/room-theme-template"
 import { getRoomThemePage, ROOM_THEME_PAGES } from "@/lib/room-theme-pages"
+import { ROOM_IDS } from "@/lib/room-registry"
 import { ART_ROOM_THEME_PAGE } from "@/lib/art-room-theme-page"
 import { CONSERVATORY_THEME_PAGE } from "@/lib/conservatory-theme-page"
 import { FIRESIDE_LOUNGE_THEME_PAGE } from "@/lib/fireside-lounge-theme-page"
@@ -34,7 +35,7 @@ import { UNDERGROUND_TEMPLE_ROOM_THEME_PAGE } from "@/lib/underground-temple-roo
 import { TREASURE_VAULT_ROOM_THEME_PAGE } from "@/lib/treasure-vault-room-theme-page"
 
 export function generateStaticParams() {
-  return [...Object.keys(ROOM_THEME_PAGES), "conservatory", "fireside-lounge", "spa", "bar", "gallery", "artroom", "ballroom", "map-room", "theater-room", "war-room", "clock-tower", "dungeon", "crystal-cavern", "alchemist-laboratory", "underground-temple", "treasure-vault"].map((room) => ({ room }))
+  return ROOM_IDS.map((room) => ({ room }))
 }
 
 export default async function RoomThemePageRoute({ params }: { params: Promise<{ room: string }> }) {
