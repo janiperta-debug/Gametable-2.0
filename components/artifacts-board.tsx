@@ -10,6 +10,7 @@ import { CLOCK_TOWER_ARTIFACT_PAGE } from "@/lib/clock-tower-artifact-page"
 import { ALCHEMIST_LABORATORY_ARTIFACT_PAGE } from "@/lib/alchemist-laboratory-artifact-page"
 import { DUNGEON_ARTIFACT_PAGE } from "@/lib/dungeon-artifact-page"
 import { CRYSTAL_CAVERN_ARTIFACT_PAGE } from "@/lib/crystal-cavern-artifact-page"
+import { UNDERGROUND_TEMPLE_ARTIFACT_PAGE } from "@/lib/underground-temple-artifact-page"
 import { isManorRoomCurrentlyUsable } from "@/lib/manor-progression"
 
 const camelId = (id: string) => id.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase())
@@ -35,7 +36,9 @@ export function ArtifactsBoard() {
                   ? DUNGEON_ARTIFACT_PAGE
                   : slot.roomId === "crystal-cavern"
                     ? CRYSTAL_CAVERN_ARTIFACT_PAGE
-                    : getArtifactPage(slot.roomId)
+                    : slot.roomId === "underground-temple"
+                      ? UNDERGROUND_TEMPLE_ARTIFACT_PAGE
+                      : getArtifactPage(slot.roomId)
         const href = earned && page ? `/themes/artifacts/${slot.roomId}` : undefined
 
         const artwork = earned ? (
