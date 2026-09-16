@@ -42,11 +42,11 @@ export const GALLERY_THEME_PAGE: RoomThemePage = {
     { image: "/images/heroes/discover/gallery.jpg", caption: { fi: "Veistossiipi", en: "The Sculpture Wing" } },
   ],
   artifact: {
-    name: { fi: "Kuraattorin muistiinpanot", en: "Curator’s Notes" },
+    name: { fi: "Oivalluksen linssi", en: "Lens of Insight" },
     image: "/themes/artifacts/gallery.png",
     description: [
-      { fi: "Kokoelma havaintoja, luonnoksia ja taidehistoriaa.", en: "A collection of observations, sketches, and art history." },
-      { fi: "Kauneus löytyy usein siitä, mitä pysähdymme katsomaan.", en: "Beauty is often found in what we stop to notice." },
+      { fi: "Tuntemattomien käsien valmistama linssi paljastaa sen, mikä usein jää huomaamatta — piilotetut yksityiskohdat, syvemmät merkitykset ja kauneuden odottamattomissa paikoissa.", en: "A lens crafted by unknown hands. It reveals what is often overlooked—hidden details, deeper meanings, and beauty in unexpected places." },
+      { fi: "Sen suurin voima ei ole nähdä enemmän, vaan ymmärtää paremmin.", en: "Its greatest power lies not in seeing more, but in understanding better." },
     ],
   },
   unlocks: [
