@@ -19,6 +19,9 @@ export function TreasureVaultArtifactPage({ theme, page }: { theme: RoomThemePag
   const artifactName = complete
     ? { fi: "Palautettu holvin avain", en: "The Restored Vault Key" }
     : { fi: "Tyhjä vitriini", en: "The Empty Reliquary" }
+  const artifactImage = complete
+    ? "/themes/artifacts/treasure-vault-key.png"
+    : "/themes/artifacts/treasure-vault-empty.png"
   const artifactDescription = complete
     ? {
         fi: ["Jokainen oppitunti on opittu.", "Jokainen sirpale on löytänyt paikkansa.", "Holvin avain on palautettu."],
@@ -58,7 +61,7 @@ export function TreasureVaultArtifactPage({ theme, page }: { theme: RoomThemePag
             <div className="flex h-full flex-col items-center justify-center space-y-4 p-5 sm:p-6">
               <h2 className={`text-center font-cinzel text-sm font-bold uppercase tracking-[0.2em] ${goldText}`}>{t("themes.artifactPage.artefact")}</h2>
               <h3 className={`text-center font-cinzel text-2xl font-bold uppercase ${goldText}`}>{L(artifactName)}</h3>
-              <img src={theme.artifact.image || "/placeholder.svg"} alt={L(artifactName)} className="h-44 w-auto object-contain" />
+              <img src={artifactImage} alt={L(artifactName)} className="h-44 w-auto object-contain" />
               <div className="space-y-1 text-center">
                 {artifactDescription[locale === "fi" ? "fi" : "en"].map((line) => <p key={line} className="font-body leading-relaxed text-foreground/80">{line}</p>)}
               </div>
