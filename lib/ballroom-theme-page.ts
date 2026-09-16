@@ -43,7 +43,7 @@ export const BALLROOM_THEME_PAGE: RoomThemePage = {
     { image: "/images/heroes/events/ballroom.jpg", caption: { fi: "Tanssilattia", en: "The Dance Floor" } },
     { image: "/images/heroes/discover/ballroom.jpg", caption: { fi: "Salonki", en: "The Lounge" } },
   ],
-  artifact: { name: { fi: "Isännän kutsu", en: "Host's Invitation" }, image: "/themes/artifacts/ballroom.png", description: [{ fi: "Kutsu iltaan, jossa syntyy hyviä seurueita, jaettuja tarinoita ja kestäviä muistoja.", en: "An invitation to an evening of good company, shared stories, and lasting memories." }] },
+  artifact: { name: { fi: "Harmonian rintaneula", en: "Brooch of Harmony" }, image: "/themes/artifacts/ballroom.png", description: [{ fi: "Rintaneula, joka yhdistää ja inspiroi. Se symboloi ymmärrystä, kunnioitusta ja erilaisuuksien kauneutta, jotka kohtaavat.", en: "A brooch crafted to unite and inspire. It symbolizes understanding, respect, and the beauty of differences coming together." }] },
   unlocks: sharedUnlocks("Juhlasali-teema", "Täydellinen matka juhlasalin läpi", "Vieraita, juhlia ja rakkaita muistoja"),
   footerLine: { fi: "Suurimmat muistot jaetaan yhdessä.", en: "The greatest memories are shared." },
 }
