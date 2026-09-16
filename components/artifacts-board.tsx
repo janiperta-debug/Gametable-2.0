@@ -8,6 +8,8 @@ import { getArtifactPage } from "@/lib/artifact-pages"
 import { WAR_ROOM_ARTIFACT_PAGE } from "@/lib/war-room-artifact-page"
 import { CLOCK_TOWER_ARTIFACT_PAGE } from "@/lib/clock-tower-artifact-page"
 import { ALCHEMIST_LABORATORY_ARTIFACT_PAGE } from "@/lib/alchemist-laboratory-artifact-page"
+import { DUNGEON_ARTIFACT_PAGE } from "@/lib/dungeon-artifact-page"
+import { CRYSTAL_CAVERN_ARTIFACT_PAGE } from "@/lib/crystal-cavern-artifact-page"
 import { isManorRoomCurrentlyUsable } from "@/lib/manor-progression"
 
 const camelId = (id: string) => id.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase())
@@ -21,7 +23,7 @@ export function ArtifactsBoard() {
       {slots.map((slot) => {
         const earned = isManorRoomCurrentlyUsable(slot.roomId)
         const name = t(`rooms.${camelId(slot.roomId)}.name`) || slot.roomName
-        // Earned artifacts whose detail page exists are clickable.
+        // Every room with a dedicated artifact page must resolve to that page.
         const page =
           slot.roomId === "war-room"
             ? WAR_ROOM_ARTIFACT_PAGE
@@ -29,7 +31,11 @@ export function ArtifactsBoard() {
               ? CLOCK_TOWER_ARTIFACT_PAGE
               : slot.roomId === "alchemist-laboratory"
                 ? ALCHEMIST_LABORATORY_ARTIFACT_PAGE
-                : getArtifactPage(slot.roomId)
+                : slot.roomId === "dungeon"
+                  ? DUNGEON_ARTIFACT_PAGE
+                  : slot.roomId === "crystal-cavern"
+                    ? CRYSTAL_CAVERN_ARTIFACT_PAGE
+                    : getArtifactPage(slot.roomId)
         const href = earned && page ? `/themes/artifacts/${slot.roomId}` : undefined
 
         const artwork = earned ? (
