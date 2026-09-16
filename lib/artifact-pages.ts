@@ -134,6 +134,17 @@ export const ARTIFACT_PAGES: Record<string, ArtifactPage> = {
     ] },
     unlocks: { theme: { fi: "Karttahuone", en: "Maproom" }, roomAccess: { fi: "Karttahuone", en: "Maproom" }, lore: { fi: "Kartografin lokikirja", en: "The Cartographer's Log" }, artefact: { fi: "Ohjauksen kompassi", en: "Compass of Guidance" }, achievement: { fi: "Tiennäyttäjä", en: "Pathfinder" } },
   },
+  ballroom: {
+    id: "ballroom",
+    subtitle: { fi: "Eleganssin, juhlan ja yhteyden sali.", en: "A hall of elegance, celebration, and connection." },
+    heroCaption: { fi: "Armo ei ole suuruutta, vaan läsnäoloa. Tanssi. Puhu. Kuuntele. Yhdistäydy. Jokaisessa askeleessa jaetaan tarina. Jokaisessa katseessa rakennetaan silta. Juhlasalissa juhlimme sitä, mitä merkitsee tulla nähdyksi ja kuulua joukkoon.", en: "Grace is not in grandeur, but in presence. Dance. Speak. Listen. Connect. In every step, a story is shared. In every glance, a bridge is built. In the Ballroom, we celebrate what it means to be seen and to belong." },
+    lore: { title: { fi: "Kokoontumisten kronikka", en: "The Chronicle of Gatherings" }, text: [
+      { fi: "Kautta historian suurimmat liittoumat eivät syntyneet taistelussa, vaan keskustelussa.", en: "Throughout history, the greatest alliances were not born in battle, but in conversation." },
+      { fi: "Tämä kronikka sisältää juhlia, tansseja, lupauksia ja ystävyyksiä, jotka muovasivat maailmaa hiljaa mutta ikuisesti.", en: "This chronicle holds the tales of feasts, dances, promises, and friendships that shaped the world quietly, yet forever." },
+      { fi: "Kokoonnumme paitsi iloitsemaan myös muistamaan, että olemme yhdessä vahvempia.", en: "We gather not just to rejoice, but to remember that we are stronger together." },
+    ] },
+    unlocks: { theme: { fi: "Juhlasali", en: "Ballroom" }, roomAccess: { fi: "Juhlasali", en: "Ballroom" }, lore: { fi: "Kokoontumisten kronikka", en: "The Chronicle of Gatherings" }, artefact: { fi: "Harmonian rintaneula", en: "Brooch of Harmony" }, achievement: { fi: "Sosiaalinen armo", en: "Social Grace" } },
+  },
 }
 
 export function getArtifactPage(roomId: string): ArtifactPage | undefined {
