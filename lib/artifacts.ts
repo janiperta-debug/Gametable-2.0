@@ -2,6 +2,10 @@ import { roomThemes } from "@/lib/room-themes"
 
 /** Centralized artifact asset path convention. */
 export function getArtifactAssetPath(roomId: string): string {
+  if (roomId === "treasure-vault") {
+    return "/themes/artifacts/treasure-vault-key.png"
+  }
+
   return `/themes/artifacts/${roomId}.png`
 }
 
