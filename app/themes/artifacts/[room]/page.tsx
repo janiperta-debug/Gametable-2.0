@@ -8,6 +8,7 @@ import { SPA_THEME_PAGE } from "@/lib/spa-theme-page"
 import { GALLERY_THEME_PAGE } from "@/lib/gallery-theme-page"
 import { ART_ROOM_THEME_PAGE } from "@/lib/art-room-theme-page"
 import { MAP_ROOM_THEME_PAGE } from "@/lib/map-room-theme-page"
+import { BALLROOM_THEME_PAGE } from "@/lib/ballroom-theme-page"
 import { getArtifactPage, ARTIFACT_PAGES } from "@/lib/artifact-pages"
 
 export function generateStaticParams() {
@@ -33,7 +34,9 @@ export default async function ArtifactPageRoute({ params }: { params: Promise<{ 
                 ? ART_ROOM_THEME_PAGE
                 : room === "map-room"
                   ? MAP_ROOM_THEME_PAGE
-                  : undefined)
+                  : room === "ballroom"
+                    ? BALLROOM_THEME_PAGE
+                    : undefined)
   if (!page || !theme) {
     notFound()
   }
