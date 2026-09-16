@@ -16,7 +16,7 @@ import spaContrastStyles from "@/app/themes/spa-contrast.module.css"
 const FLOOR_LEVEL: Record<string, string> = {
   "Ground Floor": "I",
   "Second Floor": "II",
-  Basement: "III,
+  Basement: "III",
 }
 
 /**
