@@ -65,6 +65,15 @@ export function getRegisteredArtifactPage(roomId: string) {
   return ARTIFACT_PAGE_BY_ID[roomId as keyof typeof ARTIFACT_PAGE_BY_ID] ?? getArtifactPage(roomId)
 }
 
+/** Centralized hero and crest asset access for every registered room. */
+export function getRoomThemeAssets(roomId: string) {
+  const page = getRegisteredRoomThemePage(roomId)
+  return {
+    hero: page?.hero ?? "/placeholder.svg",
+    crest: page?.crest ?? "/placeholder.svg",
+  }
+}
+
 /** Review helpers: expose incomplete registrations without changing runtime behavior. */
 export function getMissingRoomThemePageIds(): RoomId[] {
   return ROOM_IDS.filter((roomId) => !getRegisteredRoomThemePage(roomId))
