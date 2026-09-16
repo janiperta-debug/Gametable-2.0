@@ -114,7 +114,7 @@ export const ARTIFACT_PAGES: Record<string, ArtifactPage> = {
     id: "observatory",
     subtitle: { fi: "Ihmeiden, löytöjen ja näkökulmien paikka.", en: "A place of wonder, discovery, and perspective." },
     heroCaption: { fi: "Katso ylös. Aina on enemmän nähtävää. Piilotettuja kuvioita. Yhteyksiä, jotka odottavat. Tähdet eivät puhu kovaa, mutta ne eivät koskaan lakkaa kertomasta tarinaansa. Observatoriossa uteliaisuus löytää tiensä.", en: "Look up. There is always more to see. Patterns hidden. Connections waiting. The stars do not speak loudly, but they never stop telling their story. In the Observatory, curiosity finds its way." },
-    lore: { title: { fi: "Taivaalliset muistiinpanot", en: "The Celestial Notes" }, text: [
+    lore: { title: { fi: "Tähtitieteilijän muistiinpanot", en: "The Celestial Notes" }, text: [
       { fi: "Tähdet ovat olleet tarkkailun kohteena kauan ennen saapumistamme, ja ne elävät kauemmin kuin me kaikki.", en: "The stars have been observed long before we arrived, and they will outlast us all." },
       { fi: "Nämä muistiinpanot eivät ole vastauksia — ne ovat kutsuja.", en: "These notes are not answers—they are invitations." },
       { fi: "Ihmettele. Kyseenalaista. Etsi.", en: "To wonder. To question. To seek." },
@@ -144,6 +144,18 @@ export const ARTIFACT_PAGES: Record<string, ArtifactPage> = {
       { fi: "Kokoonnumme paitsi iloitsemaan myös muistamaan, että olemme yhdessä vahvempia.", en: "We gather not just to rejoice, but to remember that we are stronger together." },
     ] },
     unlocks: { theme: { fi: "Juhlasali", en: "Ballroom" }, roomAccess: { fi: "Juhlasali", en: "Ballroom" }, lore: { fi: "Kokoontumisten kronikka", en: "The Chronicle of Gatherings" }, artefact: { fi: "Harmonian rintaneula", en: "Brooch of Harmony" }, achievement: { fi: "Sosiaalinen armo", en: "Social Grace" } },
+  },
+  "theater-room": {
+    id: "theater-room",
+    subtitle: { fi: "Näyttämö tarinoille, tunteille ja empatialle.", en: "A stage for stories, emotions, and empathy." },
+    heroCaption: { fi: "Tarinat muovaavat meitä. Empatia yhdistää meidät. Esitys paljastaa meidät. Teatterissa astumme toisen sieluun. Opimme näkemään maailman lukemattomien silmien kautta.", en: "Stories shape us. Empathy connects us. Performance reveals us. On stage, we step into another's soul. In the Theater, we learn to see the world through countless eyes." },
+    lore: { title: { fi: "Näytelmäkirjailijan päiväkirja", en: "The Playwright's Journal" }, text: [
+      { fi: "Näille sivuille on kirjoitettu kaikenlaisia näytelmiä — komediaa, tragediaa, romantiikkaa ja eepoksia.", en: "Within these pages are plays of every kind—comedy, tragedy, romance, and epic." },
+      { fi: "Jokainen käsikirjoitus on kirjoitettu elettäväksi, ei vain luettavaksi.", en: "Each script was written to be lived, not just read." },
+      { fi: "Näytellä tarkoittaa ymmärtämistä. Ymmärtäminen tarkoittaa yhteyttä.", en: "To perform is to understand. To understand is to connect." },
+      { fi: "Astu näyttämölle. Esirippu nousee.", en: "Take the stage. The curtain rises." },
+    ] },
+    unlocks: { theme: { fi: "Teatteri", en: "Theater" }, roomAccess: { fi: "Teatteri", en: "Theater" }, lore: { fi: "Näytelmäkirjailijan päiväkirja", en: "The Playwright's Journal" }, artefact: { fi: "Tuhansien kasvojen naamio", en: "Mask of a Thousand Faces" }, achievement: { fi: "Seisovat aplodit", en: "Standing Ovation" } },
   },
 }
 
