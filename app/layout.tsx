@@ -104,7 +104,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={merriweather.className}>
+      <body className={`${marcellus.className} font-body`}>
         <div className="app-background min-h-screen">
           <I18nProvider>
             <AppShell>{children}</AppShell>
