@@ -15,7 +15,7 @@ const steps = [
 
 export const ALCHEMIST_LABORATORY_THEME_PAGE: RoomThemePage = {
   id: "alchemist-laboratory",
-  crest: "/images/crests/alchemist-crest.png",
+  crest: "/images/crests/alchemist-laboratory-crest.png",
   hero: "/images/themes/alchemist-laboratory-hero.jpg",
   title: { fi: "Alkemistin laboratorio", en: "Alchemist's Laboratory" },
   tagline: { fi: "Jokainen löytö alkaa kokeesta.", en: "Every discovery begins as an experiment." },
