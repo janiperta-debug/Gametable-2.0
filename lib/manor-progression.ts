@@ -74,13 +74,18 @@ export function isManorRoomEntitled(xp: number, requiredXp: number): boolean {
 }
 
 /**
+ * Temporary manual lock used to verify the locked-room and incomplete-vault
+ * states before the real progression state is wired back in.
+ * Remove this override after the visual verification is complete.
+ */
+const TEMPORARILY_LOCKED_ROOM_IDS = new Set(["gallery"])
+
+/**
  * Normal room usability predicate.
  * Room access is determined by the caller's entitlement/progression state.
- * This function remains a conservative default until the real user state is
- * supplied by the progression layer.
  */
-export function isManorRoomCurrentlyUsable(_roomId: string): boolean {
-  return true
+export function isManorRoomCurrentlyUsable(roomId: string): boolean {
+  return !TEMPORARILY_LOCKED_ROOM_IDS.has(roomId)
 }
 
 export type TreasureVaultState = {
