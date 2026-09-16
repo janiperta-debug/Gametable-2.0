@@ -3,40 +3,26 @@
 import Image from "next/image"
 import { useAppTheme } from "@/components/app-theme-provider"
 import { useTranslation } from "@/lib/i18n"
-import { getRoomThemePage } from "@/lib/room-theme-pages"
+import { getRegisteredRoomThemePage } from "@/lib/room-page-registry"
 
 export default function HomePage() {
   const { currentAppTheme } = useAppTheme()
   const { t, locale } = useTranslation()
 
-  // Pull the full description from the ACTIVE theme's room page so the home
-  // screen always reflects the current room. Falls back to the generic i18n
-  // copy for themes that don't have a filled theme page yet.
-  const themePage = getRoomThemePage(currentAppTheme)
+  // Pull the full description and hero image from the ACTIVE theme's room page
+  // so the home screen always reflects the current room. Falls back to the
+  // generic i18n copy and Main Hall hero for incomplete theme data.
+  const themePage = getRegisteredRoomThemePage(currentAppTheme)
   const welcomeParagraphs =
     themePage?.storyParagraphs.map((p) => p[locale]) ?? [t("home.description")]
-
-  // Get hero image for current theme (default to main-hall)
-  const getHeroImage = (theme: string) => {
-    const heroMap: { [key: string]: string } = {
-      "main-hall": "/images/themes/main-hall-hero.jpg",
-      "library": "/images/heroes/library-hero.jpg",
-      "conservatory": "/images/heroes/conservatory-hero.jpg",
-      "fireside-lounge": "/images/heroes/fireside-lounge-hero.jpg",
-      "spa": "/images/heroes/spa-hero.jpg",
-      "bar": "/images/heroes/bar-hero.jpg",
-      "gallery": "/images/heroes/gallery-hero.jpg",
-      // Add more theme heroes here as they become available
-    }
-    return heroMap[theme] || "/images/themes/main-hall-hero.jpg"
-  }
+  const heroImage = themePage?.hero ?? "/images/themes/main-hall-hero.jpg"
 
   return (
     <div className="h-screen flex flex-col px-4 md:px-8 lg:px-16 pt-[62px] md:pt-6 pb-28 md:pb-32 relative overflow-hidden">
       {/* Full hero background image - no overlay, displayed in full glory */}
       <div className="fixed inset-0 z-0">
         <Image
-          src={getHeroImage(currentAppTheme)}
+          src={heroImage}
           alt=""
           fill
           className="object-cover"
