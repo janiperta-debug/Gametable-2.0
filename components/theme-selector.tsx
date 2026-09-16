@@ -18,7 +18,8 @@ export function ThemeSelector({ room }: ThemeSelectorProps) {
   const [saving, setSaving] = useState(false)
   const t = useTranslations()
 
-  // Canonical temporary product lock: only Main Hall is usable during WIP.
+  // Temporary WIP mode: every room is usable until all theme assets are ready.
+  // The real XP/entitlement gate will be enabled after the full theme review.
   const isRoomUnlocked = isManorRoomCurrentlyUsable(room.id)
 
   const isCurrentTheme = currentAppTheme === room.id
