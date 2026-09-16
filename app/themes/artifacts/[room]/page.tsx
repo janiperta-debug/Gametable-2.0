@@ -13,10 +13,11 @@ import { THEATER_ROOM_THEME_PAGE } from "@/lib/theater-room-theme-page"
 import { THEATER_ROOM_ARTIFACT_PAGE } from "@/lib/theater-room-artifact-page"
 import { WAR_ROOM_ARTIFACT_PAGE } from "@/lib/war-room-artifact-page"
 import { CLOCK_TOWER_ARTIFACT_PAGE } from "@/lib/clock-tower-artifact-page"
+import { ALCHEMIST_LABORATORY_ARTIFACT_PAGE } from "@/lib/alchemist-laboratory-artifact-page"
 import { getArtifactPage, ARTIFACT_PAGES } from "@/lib/artifact-pages"
 
 export function generateStaticParams() {
-  return [...new Set([...Object.keys(ARTIFACT_PAGES), "theater-room", "war-room", "clock-tower"])].map((room) => ({ room }))
+  return [...new Set([...Object.keys(ARTIFACT_PAGES), "theater-room", "war-room", "clock-tower", "alchemist-laboratory"])].map((room) => ({ room }))
 }
 
 export default async function ArtifactPageRoute({ params }: { params: Promise<{ room: string }> }) {
@@ -28,7 +29,9 @@ export default async function ArtifactPageRoute({ params }: { params: Promise<{ 
         ? WAR_ROOM_ARTIFACT_PAGE
         : room === "clock-tower"
           ? CLOCK_TOWER_ARTIFACT_PAGE
-          : getArtifactPage(room)
+          : room === "alchemist-laboratory"
+            ? ALCHEMIST_LABORATORY_ARTIFACT_PAGE
+            : getArtifactPage(room)
   const theme =
     getRoomThemePage(room) ??
     (room === "conservatory"
