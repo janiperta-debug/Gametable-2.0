@@ -3,7 +3,7 @@
 import Image from "next/image"
 import { useAppTheme } from "@/components/app-theme-provider"
 import { useTranslation } from "@/lib/i18n"
-import { getRegisteredRoomThemePage } from "@/lib/room-page-registry"
+import { getRegisteredRoomThemePage, getRoomThemeAssets } from "@/lib/room-page-registry"
 
 export default function HomePage() {
   const { currentAppTheme } = useAppTheme()
@@ -11,11 +11,11 @@ export default function HomePage() {
 
   // Pull the full description and hero image from the ACTIVE theme's room page
   // so the home screen always reflects the current room. Falls back to the
-  // generic i18n copy and Main Hall hero for incomplete theme data.
+  // generic i18n copy and the centralized placeholder asset for incomplete data.
   const themePage = getRegisteredRoomThemePage(currentAppTheme)
   const welcomeParagraphs =
     themePage?.storyParagraphs.map((p) => p[locale]) ?? [t("home.description")]
-  const heroImage = themePage?.hero ?? "/images/themes/main-hall-hero.jpg"
+  const heroImage = getRoomThemeAssets(currentAppTheme).hero
 
   return (
     <div className="h-screen flex flex-col px-4 md:px-8 lg:px-16 pt-[62px] md:pt-6 pb-28 md:pb-32 relative overflow-hidden">
