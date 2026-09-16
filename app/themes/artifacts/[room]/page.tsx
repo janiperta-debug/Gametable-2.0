@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import { ArtifactPageTemplate } from "@/components/artifact-page-template"
 import { TreasureVaultArtifactPage } from "@/components/treasure-vault-artifact-page"
+import { TREASURE_VAULT_ARTIFACT_PAGE } from "@/lib/treasure-vault-artifact-page"
 import { ROOM_IDS } from "@/lib/room-registry"
 import { getRegisteredRoomThemePage, getRegisteredArtifactPage } from "@/lib/room-page-registry"
 
@@ -15,7 +16,7 @@ export default async function ArtifactPageRoute({ params }: { params: Promise<{ 
   if (!theme) notFound()
 
   if (room === "treasure-vault") {
-    return <TreasureVaultArtifactPage theme={theme} page={getRegisteredArtifactPage(room)} />
+    return <TreasureVaultArtifactPage theme={theme} page={TREASURE_VAULT_ARTIFACT_PAGE} />
   }
 
   const page = getRegisteredArtifactPage(room)
