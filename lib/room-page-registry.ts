@@ -1,3 +1,4 @@
+import { ROOM_IDS, type RoomId } from "@/lib/room-registry"
 import { ROOM_THEME_PAGES } from "@/lib/room-theme-pages"
 import { ART_ROOM_THEME_PAGE } from "@/lib/art-room-theme-page"
 import { CONSERVATORY_THEME_PAGE } from "@/lib/conservatory-theme-page"
@@ -62,4 +63,13 @@ export function getRegisteredRoomThemePage(roomId: string) {
 
 export function getRegisteredArtifactPage(roomId: string) {
   return ARTIFACT_PAGE_BY_ID[roomId as keyof typeof ARTIFACT_PAGE_BY_ID] ?? getArtifactPage(roomId)
+}
+
+/** Review helpers: expose incomplete registrations without changing runtime behavior. */
+export function getMissingRoomThemePageIds(): RoomId[] {
+  return ROOM_IDS.filter((roomId) => !getRegisteredRoomThemePage(roomId))
+}
+
+export function getMissingArtifactPageIds(): RoomId[] {
+  return ROOM_IDS.filter((roomId) => !getRegisteredArtifactPage(roomId))
 }
