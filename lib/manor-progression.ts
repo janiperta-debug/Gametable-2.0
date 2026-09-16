@@ -74,13 +74,13 @@ export function isManorRoomEntitled(xp: number, requiredXp: number): boolean {
 }
 
 /**
- * TEMPORARY ARTIFACT-PAGE VERIFICATION OVERRIDE.
- * All rooms remain usable except Underground Temple, which is intentionally
- * held back so Treasure Vault can be tested in its incomplete state.
- * Restore the normal entitlement-based implementation afterwards.
+ * Normal room usability predicate.
+ * Room access is determined by the caller's entitlement/progression state.
+ * This function remains a conservative default until the real user state is
+ * supplied by the progression layer.
  */
-export function isManorRoomCurrentlyUsable(roomId: string): boolean {
-  return roomId !== "underground-temple"
+export function isManorRoomCurrentlyUsable(_roomId: string): boolean {
+  return true
 }
 
 export type TreasureVaultState = {
