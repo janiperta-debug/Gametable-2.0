@@ -59,6 +59,7 @@ export function ArtifactPageTemplate({ theme, page }: { theme: RoomThemePage; pa
                 </p>
               </div>
             </div>
+
             <ArchiveFrame weight="thin" cornerSize="sm" className="overflow-hidden rounded-xl">
               <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[0.4rem]">
                 <img
@@ -66,7 +67,15 @@ export function ArtifactPageTemplate({ theme, page }: { theme: RoomThemePage; pa
                   alt={`${title} interior`}
                   className="absolute inset-0 h-full w-full object-cover"
                 />
-                <p className="font-body absolute inset-x-0 bottom-0 bg-black/55 p-3 text-sm leading-relaxed text-foreground/90 text-pretty">
+              </div>
+            </ArchiveFrame>
+
+            <ArchiveFrame weight="thin" cornerSize="sm" className="rounded-xl">
+              <div className="space-y-2 p-4 sm:p-5">
+                <h2 className={`font-cinzel text-sm font-bold uppercase tracking-[0.16em] ${goldText}/80`}>
+                  {t("themes.artifactPage.heroCaption")}
+                </h2>
+                <p className="font-body leading-relaxed text-foreground/85 text-pretty">
                   {L(page.heroCaption)}
                 </p>
               </div>
