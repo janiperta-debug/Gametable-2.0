@@ -110,6 +110,18 @@ export const ARTIFACT_PAGES: Record<string, ArtifactPage> = {
     ] },
     unlocks: { theme: { fi: "Taidehuone", en: "Artroom" }, roomAccess: { fi: "Taidehuone", en: "Artroom" }, lore: { fi: "Taiteilijan luonnoskirja", en: "The Artist's Sketchbook" }, artefact: { fi: "Inspiraation sivellin", en: "Brush of Inspiration" }, achievement: { fi: "Luova kipinä", en: "Creative Spark" } },
   },
+  "map-room": {
+    id: "map-room",
+    subtitle: { fi: "Tiedon, suunnittelun ja reittien kammio.", en: "A chamber of knowledge, planning, and paths." },
+    heroCaption: { fi: "Jokainen matka alkaa valinnasta. Jokainen valinta alkaa tiedosta. Täällä kartat ovat enemmän kuin piirroksia — ne ovat mahdollisuuksia, riskejä ja unelmia. Maproomissa suunnitelmat saavat muodon ja määränpäät tulevat lähemmäs.", en: "Every journey begins with a choice. Every choice begins with knowledge. Here, maps are more than drawings—they are possibilities, risks, and dreams. In the Maproom, plans take shape and destinations come closer." },
+    lore: { title: { fi: "Kartografin lokikirja", en: "The Cartographer's Log" }, text: [
+      { fi: "Maailma on laaja, eikä yksikään kartta ole koskaan valmis.", en: "The world is vast, and no map is ever complete." },
+      { fi: "Silti keskeneräiset kartat voivat johdattaa rohkeita.", en: "Yet even incomplete maps can guide the brave." },
+      { fi: "Viisaat eivät etsi karttaa, joka näyttää kaiken — he etsivät karttaa, joka näyttää sen, mitä on niiden tuolla puolen.", en: "The wise do not seek a map that shows everything—they seek one that shows what lies beyond." },
+      { fi: "Piirrä polkusi. Kulje sitten sitä.", en: "Draw your path. Then walk it." },
+    ] },
+    unlocks: { theme: { fi: "Karttahuone", en: "Maproom" }, roomAccess: { fi: "Karttahuone", en: "Maproom" }, lore: { fi: "Kartografin lokikirja", en: "The Cartographer's Log" }, artefact: { fi: "Ohjauksen kompassi", en: "Compass of Guidance" }, achievement: { fi: "Tiennäyttäjä", en: "Pathfinder" } },
+  },
 }
 
 export function getArtifactPage(roomId: string): ArtifactPage | undefined {
