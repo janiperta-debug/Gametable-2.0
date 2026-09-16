@@ -75,7 +75,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         `}</style>
         <div className="min-h-screen">
           <Navigation />
-          <main className="pt-16 pb-28 md:pt-0 md:pb-32">{children}</main>
+          <main className="pt-24 pb-28 md:pt-0 md:pb-32">{children}</main>
         </div>
       </AppThemeProvider>
     )
@@ -101,7 +101,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         `}</style>
         <div className="min-h-screen">
           <Navigation />
-          <main className="pt-16 pb-28 md:pt-0 md:pb-32">{children}</main>
+          <main className="pt-24 pb-28 md:pt-0 md:pb-32">{children}</main>
         </div>
       </AppThemeProvider>
     )
@@ -125,7 +125,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       `}</style>
       <div className="min-h-screen">
         <Navigation />
-        <main className="pt-16 pb-28 md:pt-0 md:pb-32">{children}</main>
+        <main className="pt-24 pb-28 md:pt-0 md:pb-32">{children}</main>
       </div>
     </AppThemeProvider>
   )
