@@ -42,7 +42,7 @@ export const THEATER_ROOM_THEME_PAGE: RoomThemePage = {
     { image: "/images/heroes/events/theater-room.jpg", caption: { fi: "Katsomo", en: "The Auditorium" } },
     { image: "/images/heroes/discover/theater-room.jpg", caption: { fi: "Kulissien takana", en: "Backstage" } },
   ],
-  artifact: { name: { fi: "Näytelmäkirjailijan käsikirjoitus", en: "Playwright’s Script" }, image: "/themes/artifacts/theater-room.png", description: [{ fi: "Käsikirjoitus, joka säilyttää tarinan kolme näytöstä ja niiden opetukset.", en: "A script preserving three acts of story and the lessons within them." }] },
+  artifact: { name: { fi: "Tuhansien kasvojen naamio", en: "Mask of a Thousand Faces" }, image: "/themes/artifacts/theater-room.png", description: [{ fi: "Naamio, jonka avulla vanhat näyttelijät saattoivat todella muuttua toiseksi — edes hetkeksi.", en: "A mask once used by actors of old to truly become another, if only for a while." }] },
   unlocks: sharedUnlocks("Teatteri-teema", "Täydellinen matka teatterin läpi", "Tarinoita, käsikirjoituksia ja kulissien takaisia muistiinpanoja"),
   footerLine: { fi: "Jokainen tarina jättää jotakin jälkeensä.", en: "Every story leaves something behind." },
 }
