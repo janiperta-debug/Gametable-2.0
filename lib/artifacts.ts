@@ -1,5 +1,10 @@
 import { roomThemes } from "@/lib/room-themes"
 
+/** Centralized artifact asset path convention. */
+export function getArtifactAssetPath(roomId: string): string {
+  return `/themes/artifacts/${roomId}.png`
+}
+
 /**
  * Artifacts board: a 19-slot grid where each slot is permanently bound to one
  * room. When a room is unlocked, its artifact appears in that slot. The slot
@@ -48,7 +53,7 @@ export function getArtifactSlots(): ArtifactSlot[] {
     return {
       roomId,
       roomName: room?.name ?? roomId,
-      image: `/themes/artifacts/${roomId}.png`,
+      image: getArtifactAssetPath(roomId),
     }
   })
 }
