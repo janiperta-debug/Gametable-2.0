@@ -4,7 +4,7 @@ import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ChevronDown, BookOpen } from "lucide-react"
-import { ArchiveCard, ArchiveCardButton } from "@/components/archive-frame"
+import { ArchiveCard, ArchiveCardButton } from "@/components/archive"
 import type { CollectionCardItem } from "@/lib/types/collection"
 
 interface RPGCollectionGroupProps {
@@ -20,63 +20,35 @@ export function RPGCollectionGroup({
   ownedItemCount,
   items,
 }: RPGCollectionGroupProps) {
-  const [expanded, setExpanded] = useState(true)
+  const [expanded, setExpanded] = useState(false)
 
   return (
-    <ArchiveCard corners={false} centerOrnaments={false} className="group">
-      <div className="p-4">
-        <button
-          type="button"
-          onClick={() => setExpanded((value) => !value)}
-          aria-expanded={expanded}
-          className="flex w-full items-center gap-3 text-left"
-        >
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-accent-gold/30 bg-surface/50 text-accent-gold">
-            <BookOpen className="h-6 w-6" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="font-heading font-semibold text-xl truncate">{name}</h3>
-            <p className="font-body text-sm text-muted-foreground">
-              {ownedItemCount} / {totalItemCount}
-            </p>
-          </div>
-          <ChevronDown className={`h-5 w-5 shrink-0 text-accent-gold transition-transform ${expanded ? "rotate-180" : ""}`} />
-        </button>
-
-        {expanded && (
-          <div className="mt-4 space-y-2 border-t border-accent-gold/15 pt-3">
-            {items.map(({ entry, card }) => (
-              <div
-                key={entry.ownershipId}
-                className="flex items-center gap-3 rounded-lg border border-accent-gold/10 bg-surface/30 p-2"
-              >
-                <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded bg-surface/50">
-                  <Image
-                    src={card.image || "/placeholder.svg"}
-                    alt={card.title}
-                    fill
-                    sizes="48px"
-                    className="object-cover"
-                  />
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <div className="font-heading text-sm font-semibold line-clamp-2">{card.title}</div>
-                  {card.yearPublished > 0 && (
-                    <div className="font-body text-xs text-muted-foreground">{card.yearPublished}</div>
-                  )}
-                </div>
-
-                {entry.detailTarget && (card.owned || card.wishlist) && (
-                  <ArchiveCardButton asChild className="shrink-0">
-                    <Link href={entry.detailTarget}>Avaa</Link>
-                  </ArchiveCardButton>
-                )}
+    <ArchiveCard corners={false} centerOrnaments={false} className="overflow-hidden">
+      <button type="button" onClick={() => setExpanded((value) => !value)} className="flex w-full items-center justify-between gap-3 p-4 text-left">
+        <span className="flex min-w-0 items-center gap-3">
+          <BookOpen className="h-5 w-5 shrink-0 text-accent-gold" />
+          <span className="min-w-0">
+            <span className="block truncate font-heading font-semibold">{name}</span>
+            <span className="text-sm text-muted-foreground">{ownedItemCount} / {totalItemCount}</span>
+          </span>
+        </span>
+        <ChevronDown className={`h-5 w-5 shrink-0 transition-transform ${expanded ? "rotate-180" : ""}`} />
+      </button>
+      {expanded && (
+        <div className="grid gap-3 border-t border-accent-gold/20 p-4 sm:grid-cols-2">
+          {items.map(({ card, entry }) => (
+            <div key={entry.ownershipId} className="flex gap-3">
+              <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded bg-surface/50">
+                <Image src={card.image || "/placeholder.svg"} alt={card.title} fill className="object-cover" />
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+              <div className="min-w-0 flex-1">
+                <div className="font-medium">{card.title}</div>
+                {entry.detailTarget && <ArchiveCardButton asChild className="mt-2"><Link href={entry.detailTarget}>Avaa</Link></ArchiveCardButton>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </ArchiveCard>
   )
 }
