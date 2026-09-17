@@ -43,7 +43,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <AppThemeProvider>
       <style>{`
         .app-background {
-          background: hsl(var(--surface-dark)) !important;
+          background: var(--app-background, #d0bda0) !important;
           background-image: none !important;
         }
 
