@@ -14,7 +14,7 @@ import { CLOCK_TOWER_THEME_PAGE } from "@/lib/clock-tower-theme-page"
 import { DUNGEON_ROOM_THEME_PAGE } from "@/lib/dungeon-room-theme-page"
 import { CRYSTAL_CAVERN_ROOM_THEME_PAGE } from "@/lib/crystal-cavern-room-theme-page"
 import { ALCHEMIST_LABORATORY_THEME_PAGE } from "@/lib/alchemist-laboratory-theme-page"
-import { UNDERGROUND_TEMPLE_ROOM_THEME_PAGE } from "@/lib/underground-temple-room-theme-page"
+import { UNDERGROUND_TEMPLE_ROOM_THEME_PAGE } from "@/lib/underground-temple-theme-page"
 import { TREASURE_VAULT_ROOM_THEME_PAGE } from "@/lib/treasure-vault-room-theme-page"
 import { THEATER_ROOM_ARTIFACT_PAGE } from "@/lib/theater-room-artifact-page"
 import { WAR_ROOM_ARTIFACT_PAGE } from "@/lib/war-room-artifact-page"
@@ -25,6 +25,7 @@ import { CRYSTAL_CAVERN_ARTIFACT_PAGE } from "@/lib/crystal-cavern-artifact-page
 import { UNDERGROUND_TEMPLE_ARTIFACT_PAGE } from "@/lib/underground-temple-artifact-page"
 import { TREASURE_VAULT_ARTIFACT_PAGE } from "@/lib/treasure-vault-artifact-page"
 import { getArtifactPage } from "@/lib/artifact-pages"
+import { isTreasureVaultComplete } from "@/lib/artifacts"
 
 const withArtifactName = (page: RoomThemePage, name: { fi: string; en: string }): RoomThemePage => ({
   ...page,
@@ -51,7 +52,7 @@ export const ROOM_THEME_PAGE_BY_ID = {
   "crystal-cavern": withArtifactName(CRYSTAL_CAVERN_ROOM_THEME_PAGE, { fi: "Tutkijan päiväkirja", en: "Explorer's Journal" }),
   "alchemist-laboratory": ALCHEMIST_LABORATORY_THEME_PAGE,
   "underground-temple": withArtifactName(UNDERGROUND_TEMPLE_ROOM_THEME_PAGE, { fi: "Temppelin kirjoitus", en: "Temple Inscription" }),
-  "treasure-vault": withArtifactName(TREASURE_VAULT_ROOM_THEME_PAGE, { fi: "Palautettu holvin avain", en: "The Restored Vault Key" }),
+  "treasure-vault": TREASURE_VAULT_ROOM_THEME_PAGE,
 } as const
 
 export const ARTIFACT_PAGE_BY_ID = {
@@ -70,7 +71,21 @@ export function getRegisteredRoomThemePage(roomId: string) {
 }
 
 export function getRegisteredArtifactPage(roomId: string) {
-  return ARTIFACT_PAGE_BY_ID[roomId as keyof typeof ARTIFACT_PAGE_BY_ID] ?? getArtifactPage(roomId)
+  const page = ARTIFACT_PAGE_BY_ID[roomId as keyof typeof ARTIFACT_PAGE_BY_ID] ?? getArtifactPage(roomId)
+
+  if (roomId === "treasure-vault") {
+    return {
+      ...page,
+      unlocks: {
+        ...page.unlocks,
+        artefact: isTreasureVaultComplete()
+          ? { fi: "Palautettu holvin avain", en: "The Restored Vault Key" }
+          : { fi: "Tyhjä vitriini", en: "The Empty Reliquary" },
+      },
+    }
+  }
+
+  return page
 }
 
 /** Centralized hero and crest asset access for every registered room. */
