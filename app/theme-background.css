@@ -5,11 +5,17 @@
  * All global material palettes are loaded here so the active theme's
  * --archive-* variables are available on every route.
  *
+ * The legacy theme-page stylesheet is also loaded globally for the three
+ * remaining palettes (Fireside Lounge, Spa and Bar) that still live there.
+ * The solid app-background rules below intentionally override its older
+ * decorative page-only background layer.
+ *
  * Conservatory remains a CSS Module because its component selectors are
  * intentionally scoped. Its shared palette variables are mirrored below
  * under the active theme selector.
  */
 
+@import "./themes/theme-page-background.css";
 @import "./themes/main-hall-materials.css";
 @import "./themes/gallery-materials.css";
 @import "./themes/artroom-materials.css";
