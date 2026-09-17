@@ -1,0 +1,67 @@
+/*
+ * Global Archive typography layer.
+ *
+ * ArchiveFrame already owns the themed surface and frame. This layer makes
+ * the content inside every ArchiveFrame inherit the same themed ink and
+ * typography instead of falling back to page-level foreground utilities.
+ */
+
+[data-material="wood"] {
+  color: var(--archive-ink-strong, var(--foreground));
+  font-family: var(--font-marcellus), serif;
+}
+
+[data-material="wood"] :where(h1, h2, h3, h4, h5, h6) {
+  color: var(--archive-ink-strong, var(--foreground));
+  font-family: var(--font-cinzel), serif;
+  text-shadow: var(--archive-text-shadow, 0 1px 1px rgba(0, 0, 0, 0.22));
+}
+
+[data-material="wood"] :where(p, span, label, li, dt, dd, small) {
+  color: var(--archive-ink-strong, var(--foreground));
+  font-family: var(--font-marcellus), serif;
+}
+
+[data-material="wood"] :where(button, a, input, textarea, select, option) {
+  font-family: var(--font-marcellus), serif;
+}
+
+[data-material="wood"] :where(button, a) {
+  color: var(--archive-ink-strong, var(--foreground));
+}
+
+[data-material="wood"] :where(input, textarea, select) {
+  color: var(--archive-ink-strong, var(--foreground));
+  background-color: var(--archive-inset-bg, transparent);
+  border-color: var(--archive-gold, currentColor);
+}
+
+[data-material="wood"] :where(input, textarea, select)::placeholder {
+  color: var(--archive-ink-soft, var(--foreground));
+  opacity: 1;
+}
+
+[data-material="wood"] .archive-heading {
+  color: var(--archive-ink-strong, var(--foreground));
+  font-family: var(--font-cinzel), serif;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+}
+
+[data-material="wood"] .archive-body,
+[data-material="wood"] .archive-text {
+  color: var(--archive-ink-strong, var(--foreground));
+  font-family: var(--font-marcellus), serif;
+}
+
+[data-material="wood"] .archive-label {
+  color: var(--archive-ink-soft, var(--foreground));
+  font-family: var(--font-cinzel), serif;
+  letter-spacing: 0.04em;
+}
+
+[data-material="wood"] .text-muted-foreground,
+[data-material="wood"] .text-white,
+[data-material="wood"] .text-foreground {
+  color: var(--archive-ink-strong, var(--foreground));
+}
