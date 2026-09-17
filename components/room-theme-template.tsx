@@ -33,7 +33,7 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
   const roomTheme = getRoomTheme(data.id)
   const assets = getRoomThemeAssets(data.id)
   const artifactPage = getRegisteredArtifactPage(data.id)
-  const artifactName = artifactPage?.unlocks.artefact ?? data.artifact.name
+  const artifactName = L(artifactPage?.unlocks.artefact ?? data.artifact.name)
   const artifactImage = data.id === "treasure-vault" ? getArtifactAssetPath(data.id) : data.artifact.image
   const isActive = currentAppTheme === data.id
   const isUnlocked = isManorRoomCurrentlyUsable(data.id)
