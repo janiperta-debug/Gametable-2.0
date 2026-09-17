@@ -5,12 +5,17 @@ export interface ThemeEntitlementProfile {
   unlocked_themes?: string[] | null
 }
 
+// Temporary QA switch for the theme/background verification pass.
+// Set this back to false when visual testing is complete to restore XP-based access.
+export const THEME_ACCESS_TEST_MODE = true
+
 /**
  * One source of truth for visual-theme access.
- * Explicit profile grants are respected; otherwise the existing level gate
- * from the room registry is used. Registration alone never grants access.
+ * During QA every theme is selectable; normal XP and explicit grants remain
+ * below and are restored by switching THEME_ACCESS_TEST_MODE to false.
  */
 export function isThemeUnlocked(theme: RoomTheme, profile?: ThemeEntitlementProfile | null): boolean {
+  if (THEME_ACCESS_TEST_MODE) return true
   if (theme.id === "main-hall") return true
 
   const explicitGrants = profile?.unlocked_themes ?? []
