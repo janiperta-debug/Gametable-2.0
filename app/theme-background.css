@@ -49,6 +49,15 @@
   --archive-inset-bg: #30352a;
 }
 
+/* ArchiveFrame uses this layer as a visual shade over the material gradient.
+ * Keep it transparent: the material's own top/mid/bottom palette already
+ * provides the intended depth, while this extra black veil makes cards muddy
+ * and unreadable on light themes and on Conservatory. */
+:root,
+[data-theme] {
+  --archive-surface-shade: transparent;
+}
+
 html,
 body {
   min-height: 100%;
