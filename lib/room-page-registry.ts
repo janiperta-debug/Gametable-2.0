@@ -26,24 +26,32 @@ import { UNDERGROUND_TEMPLE_ARTIFACT_PAGE } from "@/lib/underground-temple-artif
 import { TREASURE_VAULT_ARTIFACT_PAGE } from "@/lib/treasure-vault-artifact-page"
 import { getArtifactPage } from "@/lib/artifact-pages"
 
+const withArtifactName = (page: (typeof ROOM_THEME_PAGES)[keyof typeof ROOM_THEME_PAGES], name: { fi: string; en: string }) => ({
+  ...page,
+  artifact: {
+    ...page.artifact,
+    name,
+  },
+})
+
 export const ROOM_THEME_PAGE_BY_ID = {
   ...ROOM_THEME_PAGES,
-  "artroom": ART_ROOM_THEME_PAGE,
-  "conservatory": CONSERVATORY_THEME_PAGE,
+  artroom: ART_ROOM_THEME_PAGE,
+  conservatory: CONSERVATORY_THEME_PAGE,
   "fireside-lounge": FIRESIDE_LOUNGE_THEME_PAGE,
-  "spa": SPA_THEME_PAGE,
-  "bar": BAR_THEME_PAGE,
-  "gallery": GALLERY_THEME_PAGE,
-  "ballroom": BALLROOM_THEME_PAGE,
+  spa: SPA_THEME_PAGE,
+  bar: BAR_THEME_PAGE,
+  gallery: GALLERY_THEME_PAGE,
+  ballroom: BALLROOM_THEME_PAGE,
   "map-room": MAP_ROOM_THEME_PAGE,
   "theater-room": THEATER_ROOM_THEME_PAGE,
-  "war-room": WAR_ROOM_THEME_PAGE,
-  "clock-tower": CLOCK_TOWER_THEME_PAGE,
-  "dungeon": DUNGEON_ROOM_THEME_PAGE,
-  "crystal-cavern": CRYSTAL_CAVERN_ROOM_THEME_PAGE,
+  "war-room": withArtifactName(WAR_ROOM_THEME_PAGE, { fi: "Komentajan muistio", en: "Commander’s Brief" }),
+  "clock-tower": withArtifactName(CLOCK_TOWER_THEME_PAGE, { fi: "Kellosepän muistiinpanot", en: "Clockmaker’s Notes" }),
+  dungeon: withArtifactName(DUNGEON_ROOM_THEME_PAGE, { fi: "Seikkailijan vala", en: "Adventurer's Oath" }),
+  "crystal-cavern": withArtifactName(CRYSTAL_CAVERN_ROOM_THEME_PAGE, { fi: "Tutkijan päiväkirja", en: "Explorer's Journal" }),
   "alchemist-laboratory": ALCHEMIST_LABORATORY_THEME_PAGE,
-  "underground-temple": UNDERGROUND_TEMPLE_ROOM_THEME_PAGE,
-  "treasure-vault": TREASURE_VAULT_ROOM_THEME_PAGE,
+  "underground-temple": withArtifactName(UNDERGROUND_TEMPLE_ROOM_THEME_PAGE, { fi: "Temppelin kirjoitus", en: "Temple Inscription" }),
+  "treasure-vault": withArtifactName(TREASURE_VAULT_ROOM_THEME_PAGE, { fi: "Palautettu holvin avain", en: "The Restored Vault Key" }),
 } as const
 
 export const ARTIFACT_PAGE_BY_ID = {
@@ -51,7 +59,7 @@ export const ARTIFACT_PAGE_BY_ID = {
   "war-room": WAR_ROOM_ARTIFACT_PAGE,
   "clock-tower": CLOCK_TOWER_ARTIFACT_PAGE,
   "alchemist-laboratory": ALCHEMIST_LABORATORY_ARTIFACT_PAGE,
-  "dungeon": DUNGEON_ARTIFACT_PAGE,
+  dungeon: DUNGEON_ARTIFACT_PAGE,
   "crystal-cavern": CRYSTAL_CAVERN_ARTIFACT_PAGE,
   "underground-temple": UNDERGROUND_TEMPLE_ARTIFACT_PAGE,
   "treasure-vault": TREASURE_VAULT_ARTIFACT_PAGE,
