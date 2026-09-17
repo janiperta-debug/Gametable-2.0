@@ -1,30 +1,23 @@
 /*
- * Theme-driven application background.
- *
- * The active room theme publishes --app-background from its palette. The
- * global canvas must use that value instead of the legacy fixed brown or the
- * nearly-black --surface-dark fallback.
+ * Single application-wide theme background.
+ * The active theme publishes --app-background from its palette.
  */
 
 @import "./themes/main-hall-materials.css";
-
-.app-background {
-  min-height: 100vh;
-  background-color: var(--app-background, #d0bda0);
-  background-image: none;
-}
 
 html,
 body {
   min-height: 100%;
   margin: 0;
-  background-color: var(--app-background, #d0bda0);
+  background-color: var(--app-background, #d0bda0) !important;
+}
+
+.app-background {
+  min-height: 100vh;
+  background: var(--app-background, #d0bda0) !important;
+  background-image: none !important;
 }
 
 body {
   padding-top: env(safe-area-inset-top);
-}
-
-.app-background {
-  background-color: var(--app-background, #d0bda0);
 }
