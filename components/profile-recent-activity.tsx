@@ -1,5 +1,4 @@
-import { ArchiveFrame } from "@/components/archive-frame"
-import { ArchiveButton } from "@/components/archive-button"
+import { ArchiveFrame, ArchiveButton } from "@/components/archive"
 import { ExternalLink } from "lucide-react"
 
 const activities: any[] = []
@@ -12,7 +11,7 @@ export function RecentActivity() {
           <h2 id="recent-activity-title" className="archive-heading text-2xl font-bold">
             Recent Activity
           </h2>
-          <ArchiveButton type="button" onClick={() => undefined}>
+          <ArchiveButton type="button" disabled>
             <span className="archive-body">View All</span>
             <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />
           </ArchiveButton>
@@ -33,7 +32,7 @@ export function RecentActivity() {
                     <p className="archive-body text-sm font-medium">{activity.title}</p>
                     <p className="archive-body text-sm opacity-80">{activity.description}</p>
                   </div>
-                  <ArchiveButton type="button" className="text-xs">
+                  <ArchiveButton type="button" disabled className="text-xs">
                     <span className="archive-body">{activity.action}</span>
                   </ArchiveButton>
                 </div>
