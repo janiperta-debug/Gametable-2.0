@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter, Charm, Cinzel, Marcellus, Merriweather, Cormorant_Garamond, DM_Sans, Crimson_Pro } from "next/font/google"
 import "./globals.css"
 import "./theme-background.css"
+import "./archive-typography.css"
 import { AppShell } from "@/components/app-shell"
 import { I18nProvider } from "@/lib/i18n"
 
@@ -112,5 +113,5 @@ export default function RootLayout({
         </div>
       </body>
     </html>
-  )
+  }
 }
