@@ -1,37 +1,30 @@
 /*
  * Theme-driven application background.
  *
- * The page shell must not use one fixed brown value. The active room theme
- * already exposes --background, --surface-dark and --accent-gold; this layer
- * derives the global background from those variables and keeps it darker than
- * the cards/panels that sit above it.
+ * The active room theme publishes --app-background from its palette. The
+ * global canvas must use that value instead of the legacy fixed brown or the
+ * nearly-black --surface-dark fallback.
  */
 
-/* Main Hall is the mandatory application default. Its ArchiveFrame material
- * variables must be available on every route, not only on the theme preview
- * route. */
 @import "./themes/main-hall-materials.css";
 
 .app-background {
   min-height: 100vh;
-  background-color: hsl(var(--surface-dark, 345 80% 8%));
+  background-color: var(--app-background, #d0bda0);
   background-image: none;
 }
 
-/* The document canvas and iOS safe-area must never fall back to white. */
 html,
 body {
   min-height: 100%;
   margin: 0;
-  background-color: hsl(var(--surface-dark, 345 80% 8%));
+  background-color: var(--app-background, #d0bda0);
 }
 
-/* Keep the status-bar safe area in the same themed canvas as the app. */
 body {
   padding-top: env(safe-area-inset-top);
 }
 
-/* Keep the root wrapper theme-driven without adding another visual layer. */
 .app-background {
-  background-color: hsl(var(--surface-dark, 345 80% 8%));
+  background-color: var(--app-background, #d0bda0);
 }
