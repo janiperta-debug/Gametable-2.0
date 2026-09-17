@@ -45,6 +45,32 @@ const darkenHex = (hex: string, factor = 0.84): string => {
   return `#${channels.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`
 }
 
+const hexToHsl = (hex: string): string | null => {
+  const normalized = hex.replace("#", "")
+  if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return null
+
+  const r = Number.parseInt(normalized.slice(0, 2), 16) / 255
+  const g = Number.parseInt(normalized.slice(2, 4), 16) / 255
+  const b = Number.parseInt(normalized.slice(4, 6), 16) / 255
+  const max = Math.max(r, g, b)
+  const min = Math.min(r, g, b)
+  const delta = max - min
+  const lightness = (max + min) / 2
+
+  if (delta === 0) return `0 0% ${Math.round(lightness * 100)}%`
+
+  const saturation = delta / (1 - Math.abs(2 * lightness - 1))
+  let hue = 0
+
+  if (max === r) hue = 60 * (((g - b) / delta) % 6)
+  else if (max === g) hue = 60 * ((b - r) / delta + 2)
+  else hue = 60 * ((r - g) / delta + 4)
+
+  if (hue < 0) hue += 360
+
+  return `${Math.round(hue)} ${Math.round(saturation * 100)}% ${Math.round(lightness * 100)}%`
+}
+
 const AppThemeContext = createContext<AppThemeContextType | undefined>(undefined)
 
 interface AppThemeProviderProps {
@@ -105,21 +131,20 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
 
   useEffect(() => {
     const theme = getRoomTheme(currentAppTheme) ?? getRoomTheme(DEFAULT_THEME)
-    const themeFill = theme?.colors.background ?? "#F5F5DC"
-    const appBackground = darkenHex(themeFill)
+    const frameFill = theme?.colors.primary ?? "#8B1538"
+    const appBackground = darkenHex(frameFill)
+    const appBackgroundHsl = hexToHsl(appBackground)
 
     document.documentElement.dataset.theme = currentAppTheme
-    document.documentElement.style.setProperty("--app-theme-fill", themeFill)
+    document.documentElement.style.setProperty("--app-theme-fill", frameFill)
     document.documentElement.style.setProperty("--app-background", appBackground)
 
-    // Publish the resolved colour directly as well. This prevents legacy CSS
-    // rules that set html/body to transparent, white, or surface-dark from
-    // breaking the theme-derived canvas.
+    if (appBackgroundHsl) {
+      document.documentElement.style.setProperty("--background", appBackgroundHsl)
+    }
+
     document.documentElement.style.backgroundColor = appBackground
     document.body.style.backgroundColor = appBackground
-
-    if (currentAppTheme === "main-hall") document.body.classList.add("manor-bg-pattern")
-    else document.body.classList.remove("manor-bg-pattern")
   }, [currentAppTheme])
 
   return (
