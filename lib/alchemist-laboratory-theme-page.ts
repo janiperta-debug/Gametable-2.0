@@ -37,7 +37,7 @@ export const ALCHEMIST_LABORATORY_THEME_PAGE: RoomThemePage = {
     { image: "/images/heroes/discover/alchemist-laboratory.jpg", caption: { fi: "Tutkimuspöytä", en: "Seek Counsel" } },
   ],
   artifact: {
-    name: { fi: "Tutkimuspäiväkirja", en: "Research Log" },
+    name: { fi: "Muodonmuutoksen retortti", en: "Retort of Transfiguration" },
     image: "/themes/artifacts/alchemist-laboratory.png",
     description: [{ fi: "Jokainen epäonnistunut koe kaventaa tietä kohti ymmärrystä.", en: "Every failed experiment narrows the path to understanding." }],
   },
