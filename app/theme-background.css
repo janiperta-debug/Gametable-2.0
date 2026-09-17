@@ -1,9 +1,26 @@
 /*
  * Single application-wide theme background.
  * The active theme publishes --app-background from its palette.
+ *
+ * All theme material palettes are loaded globally so the active theme's
+ * --archive-* variables are available on every route, not only on the
+ * individual room preview pages.
  */
 
 @import "./themes/main-hall-materials.css";
+@import "./themes/conservatory-materials.module.css";
+@import "./themes/gallery-materials.css";
+@import "./themes/artroom-materials.css";
+@import "./themes/ballroom-materials.css";
+@import "./themes/map-room-materials.css";
+@import "./themes/theater-room-materials.css";
+@import "./themes/war-room-materials.css";
+@import "./themes/clock-tower-materials.css";
+@import "./themes/dungeon-room-materials.css";
+@import "./themes/crystal-cavern-room-materials.css";
+@import "./themes/alchemist-laboratory-materials.css";
+@import "./themes/underground-temple-room-materials.css";
+@import "./themes/treasure-vault-room-materials.css";
 
 html,
 body {
