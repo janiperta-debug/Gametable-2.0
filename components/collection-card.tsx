@@ -1,6 +1,6 @@
 "use client"
 
-import { ArchiveCard, ArchiveCardButton, ArchiveIconButton } from "@/components/archive-frame"
+import { ArchiveCard, ArchiveCardButton, ArchiveIconButton } from "@/components/archive"
 import { Badge } from "@/components/ui/badge"
 import { Star, Users, Clock, Heart, ShoppingBag, Store, Puzzle, ChevronDown, Layers } from "lucide-react"
 import Image from "next/image"
@@ -228,19 +228,11 @@ export function CollectionCard({
               {expanded && (
                 <ul className="mt-2 space-y-1 border-l border-accent-gold/20 pl-3">
                   {expansions.map((exp) => (
-                    <li
-                      key={exp.id}
-                      className={`flex items-center gap-2 py-1 ${exp.owned ? "" : "opacity-40"}`}
-                    >
+                    <li key={exp.id} className={`flex items-center gap-2 py-1 ${exp.owned ? "" : "opacity-40"}`}>
                       <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded bg-surface/50">
-                        <Image
-                          src={exp.image_url || "/placeholder.svg"}
-                          alt={exp.name}
-                          fill
-                          className={`object-cover ${exp.owned ? "" : "grayscale"}`}
-                        />
+                        <Image src={exp.image_url || "/placeholder.svg"} alt={exp.name} fill className={`object-cover ${exp.owned ? "" : "grayscale"}`} />
                       </div>
-                      <span className="font-body text-sm text-foreground/90 line-clamp-2">{exp.name}</span>
+                      <span className="text-sm truncate">{exp.name}</span>
                     </li>
                   ))}
                 </ul>
