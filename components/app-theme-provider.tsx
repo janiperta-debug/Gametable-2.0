@@ -34,6 +34,17 @@ const getStoredTheme = (): AppThemeName => {
   }
 }
 
+const darkenHex = (hex: string, factor = 0.84): string => {
+  const normalized = hex.replace("#", "")
+  if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return hex
+
+  const channels = [0, 2, 4].map((offset) =>
+    Math.max(0, Math.min(255, Math.round(Number.parseInt(normalized.slice(offset, offset + 2), 16) * factor)))
+  )
+
+  return `#${channels.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`
+}
+
 const AppThemeContext = createContext<AppThemeContextType | undefined>(undefined)
 
 interface AppThemeProviderProps {
@@ -41,9 +52,6 @@ interface AppThemeProviderProps {
 }
 
 export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) => {
-  // Hydrate from localStorage immediately so the selected theme is active
-  // before the user visits the Themes page. The database may override it
-  // once the authenticated profile has loaded.
   const [currentAppTheme, setCurrentAppTheme] = useState<AppThemeName>(getStoredTheme)
   const [isLoadedFromDB, setIsLoadedFromDB] = useState(false)
   const { user, profile } = useUser()
@@ -96,7 +104,13 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
   }
 
   useEffect(() => {
+    const theme = getRoomTheme(currentAppTheme) ?? getRoomTheme(DEFAULT_THEME)
+    const themeFill = theme?.colors.background ?? "#F5F5DC"
+    const appBackground = darkenHex(themeFill)
+
     document.documentElement.dataset.theme = currentAppTheme
+    document.documentElement.style.setProperty("--app-theme-fill", themeFill)
+    document.documentElement.style.setProperty("--app-background", appBackground)
 
     if (currentAppTheme === "main-hall") document.body.classList.add("manor-bg-pattern")
     else document.body.classList.remove("manor-bg-pattern")
