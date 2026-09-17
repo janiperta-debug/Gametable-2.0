@@ -2,13 +2,15 @@
  * Single application-wide theme background.
  * The active theme publishes --app-background from its palette.
  *
- * All theme material palettes are loaded globally so the active theme's
- * --archive-* variables are available on every route, not only on the
- * individual room preview pages.
+ * All global material palettes are loaded here so the active theme's
+ * --archive-* variables are available on every route.
+ *
+ * Conservatory remains a CSS Module because its component selectors are
+ * intentionally scoped. Its shared palette variables are mirrored below
+ * under the active theme selector.
  */
 
 @import "./themes/main-hall-materials.css";
-@import "./themes/conservatory-materials.module.css";
 @import "./themes/gallery-materials.css";
 @import "./themes/artroom-materials.css";
 @import "./themes/ballroom-materials.css";
@@ -21,6 +23,25 @@
 @import "./themes/alchemist-laboratory-materials.css";
 @import "./themes/underground-temple-room-materials.css";
 @import "./themes/treasure-vault-room-materials.css";
+
+[data-theme="conservatory"] {
+  --archive-metal-highlight: #d6c08a;
+  --archive-metal-light: #b69a61;
+  --archive-metal-mid: #7d7350;
+  --archive-metal-dark: #4d4935;
+  --archive-metal-deep: #292b22;
+  --archive-gold: #c9aa62;
+  --archive-wood-base: #62634b;
+  --archive-wood-top: #3d4031;
+  --archive-wood-mid: #77765a;
+  --archive-wood-bottom: #34382b;
+  --archive-surface-sheen: rgba(218, 205, 160, 0.06);
+  --archive-surface-shade: rgba(0, 0, 0, 0.48);
+  --archive-ink-strong: #e7dfc5;
+  --archive-ink-soft: #c8c5aa;
+  --archive-ink-faint: #a5aa8d;
+  --archive-inset-bg: #30352a;
+}
 
 html,
 body {
