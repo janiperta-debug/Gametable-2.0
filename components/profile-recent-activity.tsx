@@ -1,45 +1,48 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { BookOpen, Calendar, Trophy, Users, Star, ExternalLink } from "lucide-react"
+import { ArchiveFrame } from "@/components/archive-frame"
+import { ArchiveButton } from "@/components/archive-button"
+import { ExternalLink } from "lucide-react"
 
 const activities: any[] = []
 
 export function RecentActivity() {
   return (
-    <Card className="room-furniture">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="ornate-text font-heading text-2xl font-bold">Recent Activity</CardTitle>
-        <Button variant="ghost" size="sm">
-          <span className="font-body">View All</span>
-          <ExternalLink className="h-4 w-4 ml-2" />
-        </Button>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
+    <ArchiveFrame className="w-full" weight="regular">
+      <section className="p-5 sm:p-6" aria-labelledby="recent-activity-title">
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="recent-activity-title" className="archive-heading text-2xl font-bold">
+            Recent Activity
+          </h2>
+          <ArchiveButton type="button" onClick={() => undefined}>
+            <span className="archive-body">View All</span>
+            <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />
+          </ArchiveButton>
+        </header>
+
+        <div className="mt-5 space-y-4">
           {activities.map((activity) => (
             <div
               key={activity.id}
-              className="flex items-start space-x-4 p-4 rounded-lg border bg-card/50 hover:bg-card transition-colors"
+              className="archive-content flex items-start gap-4 rounded-lg border border-[var(--archive-gold)]/40 bg-black/20 p-4 transition-colors"
             >
-              <div className={`p-2 rounded-full ${activity.color} flex-shrink-0`}>
+              <div className={`flex-shrink-0 rounded-full p-2 ${activity.color}`}>
                 <activity.icon className="h-4 w-4" />
               </div>
-              <div className="flex-1 space-y-1">
-                <div className="flex items-start justify-between">
+              <div className="min-w-0 flex-1 space-y-1">
+                <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-medium text-sm font-body">{activity.title}</p>
-                    <p className="text-sm text-muted-foreground font-body">{activity.description}</p>
+                    <p className="archive-body text-sm font-medium">{activity.title}</p>
+                    <p className="archive-body text-sm opacity-80">{activity.description}</p>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-xs">
-                    <span className="font-body">{activity.action}</span>
-                  </Button>
+                  <ArchiveButton type="button" className="text-xs">
+                    <span className="archive-body">{activity.action}</span>
+                  </ArchiveButton>
                 </div>
-                <p className="text-xs text-muted-foreground font-body">{activity.time}</p>
+                <p className="archive-label text-xs">{activity.time}</p>
               </div>
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      </section>
+    </ArchiveFrame>
   )
 }
