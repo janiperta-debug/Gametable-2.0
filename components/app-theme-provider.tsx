@@ -112,6 +112,12 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
     document.documentElement.style.setProperty("--app-theme-fill", themeFill)
     document.documentElement.style.setProperty("--app-background", appBackground)
 
+    // Publish the resolved colour directly as well. This prevents legacy CSS
+    // rules that set html/body to transparent, white, or surface-dark from
+    // breaking the theme-derived canvas.
+    document.documentElement.style.backgroundColor = appBackground
+    document.body.style.backgroundColor = appBackground
+
     if (currentAppTheme === "main-hall") document.body.classList.add("manor-bg-pattern")
     else document.body.classList.remove("manor-bg-pattern")
   }, [currentAppTheme])
