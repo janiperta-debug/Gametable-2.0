@@ -34,7 +34,10 @@ function ThemesPageContent() {
   // global shell or other routes.
   if (tab === "manor") {
     return (
-      <main className="artifact-cabinet min-h-screen px-3 pb-6 pt-14 sm:px-6 sm:pb-10 sm:pt-16">
+      <main
+        className="artifact-cabinet min-h-screen bg-transparent px-3 pb-6 pt-14 sm:px-6 sm:pb-10 sm:pt-16"
+        style={{ backgroundColor: "transparent", backgroundImage: "none" }}
+      >
         <div className="mx-auto max-w-5xl space-y-8">
           {tabs}
           <header className="text-center">
@@ -50,7 +53,10 @@ function ThemesPageContent() {
   }
 
   return (
-    <main className="artifact-cabinet min-h-screen px-3 pb-6 pt-14 sm:px-6 sm:pb-10 sm:pt-16">
+    <main
+      className="artifact-cabinet min-h-screen bg-transparent px-3 pb-6 pt-14 sm:px-6 sm:pb-10 sm:pt-16"
+      style={{ backgroundColor: "transparent", backgroundImage: "none" }}
+    >
       <div className="mx-auto max-w-5xl space-y-8">
         {tabs}
         <header className="text-center">
