@@ -34,7 +34,7 @@ const getStoredTheme = (): AppThemeName => {
   }
 }
 
-const darkenHex = (hex: string, factor = 0.84): string => {
+const darkenHex = (hex: string, factor = 0.9): string => {
   const normalized = hex.replace("#", "")
   if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return hex
 
@@ -131,11 +131,18 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
 
   useEffect(() => {
     const theme = getRoomTheme(currentAppTheme) ?? getRoomTheme(DEFAULT_THEME)
-    const frameFill = theme?.colors.primary ?? "#8B1538"
+
+    document.documentElement.dataset.theme = currentAppTheme
+
+    // The material CSS is the single source of truth for the frame/panel fill.
+    // Main Hall, for example, defines --archive-wood-base as deep burgundy.
+    const materialFill = getComputedStyle(document.documentElement)
+      .getPropertyValue("--archive-wood-base")
+      .trim()
+    const frameFill = materialFill || theme?.colors.primary || "#220b12"
     const appBackground = darkenHex(frameFill)
     const appBackgroundHsl = hexToHsl(appBackground)
 
-    document.documentElement.dataset.theme = currentAppTheme
     document.documentElement.style.setProperty("--app-theme-fill", frameFill)
     document.documentElement.style.setProperty("--app-background", appBackground)
 
