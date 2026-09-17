@@ -41,23 +41,6 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <AppThemeProvider>
-      <style>{`
-        html,
-        body,
-        .app-background {
-          background: var(--app-background, #d0bda0) !important;
-          background-color: var(--app-background, #d0bda0) !important;
-          background-image: none !important;
-        }
-
-        .room-environment,
-        .room-environment::before,
-        .room-environment::after,
-        .manor-bg-pattern {
-          background: transparent !important;
-          background-image: none !important;
-        }
-      `}</style>
       <div className="min-h-screen">
         <Navigation />
         <main className="pb-28 md:pb-32">{children}</main>
