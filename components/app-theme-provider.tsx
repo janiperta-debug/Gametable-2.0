@@ -34,7 +34,7 @@ const getStoredTheme = (): AppThemeName => {
   }
 }
 
-const darkenHex = (hex: string, factor = 0.9): string => {
+const darkenHex = (hex: string, factor = 0.86): string => {
   const normalized = hex.replace("#", "")
   if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return hex
 
