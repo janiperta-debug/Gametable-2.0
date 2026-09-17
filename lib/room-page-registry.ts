@@ -1,5 +1,5 @@
 import { ROOM_IDS, type RoomId } from "@/lib/room-registry"
-import { ROOM_THEME_PAGES } from "@/lib/room-theme-pages"
+import { ROOM_THEME_PAGES, type RoomThemePage } from "@/lib/room-theme-pages"
 import { ART_ROOM_THEME_PAGE } from "@/lib/art-room-theme-page"
 import { CONSERVATORY_THEME_PAGE } from "@/lib/conservatory-theme-page"
 import { FIRESIDE_LOUNGE_THEME_PAGE } from "@/lib/fireside-lounge-theme-page"
@@ -26,7 +26,7 @@ import { UNDERGROUND_TEMPLE_ARTIFACT_PAGE } from "@/lib/underground-temple-artif
 import { TREASURE_VAULT_ARTIFACT_PAGE } from "@/lib/treasure-vault-artifact-page"
 import { getArtifactPage } from "@/lib/artifact-pages"
 
-const withArtifactName = (page: (typeof ROOM_THEME_PAGES)[keyof typeof ROOM_THEME_PAGES], name: { fi: string; en: string }) => ({
+const withArtifactName = (page: RoomThemePage, name: { fi: string; en: string }): RoomThemePage => ({
   ...page,
   artifact: {
     ...page.artifact,
