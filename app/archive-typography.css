@@ -1,9 +1,8 @@
 /*
  * Global Archive typography layer.
  *
- * ArchiveFrame already owns the themed surface and frame. This layer makes
- * the content inside every ArchiveFrame inherit the same themed ink and
- * typography instead of falling back to page-level foreground utilities.
+ * ArchiveFrame owns the themed surface and frame. This layer keeps content
+ * inside Archive surfaces on the same themed ink and typography system.
  */
 
 [data-material="wood"] {
@@ -14,12 +13,15 @@
 [data-material="wood"] :where(h1, h2, h3, h4, h5, h6) {
   color: var(--archive-ink-strong, var(--foreground));
   font-family: var(--font-cinzel), serif;
-  text-shadow: var(--archive-text-shadow, 0 1px 1px rgba(0, 0, 0, 0.22));
+  text-shadow: none;
+  filter: none;
 }
 
 [data-material="wood"] :where(p, span, label, li, dt, dd, small) {
   color: var(--archive-ink-strong, var(--foreground));
   font-family: var(--font-marcellus), serif;
+  text-shadow: none;
+  filter: none;
 }
 
 [data-material="wood"] :where(button, a, input, textarea, select, option) {
@@ -28,12 +30,14 @@
 
 [data-material="wood"] :where(button, a) {
   color: var(--archive-ink-strong, var(--foreground));
+  text-shadow: none;
 }
 
 [data-material="wood"] :where(input, textarea, select) {
   color: var(--archive-ink-strong, var(--foreground));
   background-color: var(--archive-inset-bg, transparent);
   border-color: var(--archive-gold, currentColor);
+  text-shadow: none;
 }
 
 [data-material="wood"] :where(input, textarea, select)::placeholder {
@@ -46,22 +50,37 @@
   font-family: var(--font-cinzel), serif;
   font-weight: 700;
   letter-spacing: 0.025em;
+  text-shadow: none;
 }
 
 [data-material="wood"] .archive-body,
 [data-material="wood"] .archive-text {
   color: var(--archive-ink-strong, var(--foreground));
   font-family: var(--font-marcellus), serif;
+  text-shadow: none;
 }
 
 [data-material="wood"] .archive-label {
   color: var(--archive-ink-soft, var(--foreground));
   font-family: var(--font-cinzel), serif;
   letter-spacing: 0.04em;
+  text-shadow: none;
 }
 
-[data-material="wood"] .text-muted-foreground,
-[data-material="wood"] .text-white,
-[data-material="wood"] .text-foreground {
+/* Legacy utility classes must not reintroduce white/muted text or glow. */
+[data-material="wood"] :where(.text-muted-foreground, .text-white, .text-foreground) {
   color: var(--archive-ink-strong, var(--foreground));
+  text-shadow: none;
+  filter: none;
+}
+
+[data-material="wood"] :where(.ornate-text, .font-heading, .font-body) {
+  text-shadow: none;
+  filter: none;
+}
+
+/* Keep decorative shadows limited to actual metal/ornament elements. */
+[data-material="wood"] :where(.archive-frame-content, .archive-content) {
+  text-shadow: none;
+  filter: none;
 }
