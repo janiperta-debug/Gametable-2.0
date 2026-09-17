@@ -44,7 +44,7 @@ export function CollectionCard({
       <ArchiveCard corners={false} centerOrnaments={false} className="group">
         <div className="p-4">
           <div className="relative mb-4">
-            <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-surface/50">
+            <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-archive-wood/40">
               <Image src={card.image} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
             </div>
           </div>
@@ -73,7 +73,7 @@ export function CollectionCard({
       <ArchiveCard corners={false} centerOrnaments={false} className="group">
         <div className="p-4">
           <div className="relative mb-4">
-            <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-surface/50">
+            <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-archive-wood/40">
               <Image src={card.image} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
               {entry.status === 'wishlist' && (
                 <div className="absolute top-2 right-2">
@@ -131,7 +131,7 @@ export function CollectionCard({
     <ArchiveCard corners={false} centerOrnaments={false} className="group">
       <div className="p-4">
         <div className="relative mb-4">
-          <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-surface/50">
+          <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-archive-wood/40">
             <Image
               src={card.image || "/placeholder.svg"}
               alt={card.title}
@@ -216,7 +216,7 @@ export function CollectionCard({
                 type="button"
                 onClick={() => setExpanded((value) => !value)}
                 aria-expanded={expanded}
-                className="flex w-full items-center justify-between gap-2 rounded-md border border-accent-gold/20 bg-surface/40 px-3 py-2 text-sm font-body text-accent-gold transition-colors hover:bg-surface/70 min-h-11"
+                className="flex w-full items-center justify-between gap-2 rounded-md border border-accent-gold/20 bg-archive-wood/30 px-3 py-2 text-sm font-body text-accent-gold transition-colors hover:bg-accent-gold/10 min-h-11"
               >
                 <span className="flex items-center gap-2">
                   <Puzzle className="h-4 w-4" />
@@ -229,7 +229,7 @@ export function CollectionCard({
                 <ul className="mt-2 space-y-1 border-l border-accent-gold/20 pl-3">
                   {expansions.map((exp) => (
                     <li key={exp.id} className={`flex items-center gap-2 py-1 ${exp.owned ? "" : "opacity-40"}`}>
-                      <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded bg-surface/50">
+                      <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded bg-archive-wood/40">
                         <Image src={exp.image_url || "/placeholder.svg"} alt={exp.name} fill className={`object-cover ${exp.owned ? "" : "grayscale"}`} />
                       </div>
                       <span className="text-sm truncate">{exp.name}</span>
