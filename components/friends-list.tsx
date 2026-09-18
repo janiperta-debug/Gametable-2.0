@@ -184,7 +184,7 @@ export function FriendsList() {
                   </div>
                   <div className="flex gap-2">
                     <ArchiveCardButton asChild fullWidth>
-                      <Link href={`/users/${friend.username}`}>
+                      <Link href={`/users/${friend.username || friend.id}`}>
                         {t("profile.viewProfile")}
                       </Link>
                     </ArchiveCardButton>
