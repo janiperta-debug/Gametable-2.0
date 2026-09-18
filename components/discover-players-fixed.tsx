@@ -70,7 +70,7 @@ export function DiscoverPlayersFixed() {
               <div className="min-w-0 flex-1">
                 <Link href={`/users/${player.username || player.id}`} className="font-semibold truncate hover:text-accent-gold transition-colors">{name}</Link>
                 {player.location ? <p className="text-sm text-muted-foreground">{player.location}</p> : null}
-                <p className="text-sm text-muted-foreground">{player.games_count} peliä kokoelmassa</p>
+                <p className="text-sm text-muted-foreground">{player.games_count} t("collection.gameCountLabel") + " kokoelmassa"</p>
               </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Link
