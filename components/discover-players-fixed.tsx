@@ -67,33 +67,36 @@ export function DiscoverPlayersFixed() {
           const status = player.friendship_status
           return (
             <div key={player.id}> 
-              <article className="flex items-center gap-4 px-1 py-4">
-              <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center font-semibold">{initials}</div>
-              <div className="min-w-0 flex-1">
-                <Link href={`/users/${player.username || player.id}`} className="font-semibold truncate hover:text-accent-gold transition-colors">{name}</Link>
-                {player.location ? <p className="text-sm text-muted-foreground">{player.location}</p> : null}
-                <p className="text-sm text-muted-foreground">{player.games_count} {t("collection.gameCountLabel")} kokoelmassa</p>
-              </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <ArchiveCardButton asChild>
-                    <Link href={`/users/${player.username || player.id}`}>
-                      {t("profile.viewProfile")}
-                    </Link>
-                  </ArchiveCardButton>
-                  <ArchiveCardButton
-                    disabled={busy === player.id || status === "accepted"}
-                    onClick={() => handleFriendAction(player)}
-                  >
-                    {status === "accepted"
-                      ? "Ystävä"
-                      : status === "pending"
-                        ? "Peru pyyntö"
-                        : busy === player.id
-                          ? "…"
-                          : "Lisää ystävä"}
-                  </ArchiveCardButton>
+              <article className="px-1 py-4">
+              <div className="flex items-start gap-4">
+                <div className="h-12 w-12 shrink-0 rounded-full bg-muted flex items-center justify-center font-semibold">{initials}</div>
+                <div className="min-w-0 flex-1">
+                  <Link href={`/users/${player.username || player.id}`} className="block truncate font-semibold hover:text-accent-gold transition-colors">{name}</Link>
+                  {player.location ? <p className="truncate text-sm text-muted-foreground">{player.location}</p> : null}
+                  <p className="text-sm text-muted-foreground">{player.games_count} {t("collection.gameCountLabel")} kokoelmassa</p>
                 </div>
-              </article>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <ArchiveCardButton asChild className="w-full">
+                  <Link href={`/users/${player.username || player.id}`}>
+                    {t("profile.viewProfile")}
+                  </Link>
+                </ArchiveCardButton>
+                <ArchiveCardButton
+                  className="w-full"
+                  disabled={busy === player.id || status === "accepted"}
+                  onClick={() => handleFriendAction(player)}
+                >
+                  {status === "accepted"
+                    ? "Ystävä"
+                    : status === "pending"
+                      ? "Peru pyyntö"
+                      : busy === player.id
+                        ? "…"
+                        : "Lisää ystävä"}
+                </ArchiveCardButton>
+              </div>
+            </article>
               {index < players.length - 1 && <ArchiveDivider className="my-1" />}
             </div>
           )
