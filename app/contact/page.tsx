@@ -240,8 +240,8 @@ export default function ContactPage() {
               <div className="grid gap-6 md:grid-cols-2 mb-8">
                 <ArchiveCard>
                   <ArchiveCardContent className="pt-6 text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent-gold/20 mb-4">
-                      <Shield className="h-8 w-8 text-accent-gold" />
+                    <div className="flex h-24 items-center justify-center mb-4">
+                      <img src="/contact-assets/privacy-policy.png" alt="" aria-hidden="true" className="h-24 w-auto object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.35)]" />
                     </div>
                     <h3 className="text-xl font-bold mb-2">{t("contact.privacyPolicy")}</h3>
                     <p className="text-sm text-muted-foreground mb-4">{t("contact.privacyDesc")}</p>
@@ -253,8 +253,8 @@ export default function ContactPage() {
 
                 <ArchiveCard>
                   <ArchiveCardContent className="pt-6 text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent-gold/20 mb-4">
-                      <FileText className="h-8 w-8 text-accent-gold" />
+                    <div className="flex h-24 items-center justify-center mb-4">
+                      <img src="/contact-assets/terms-of-service.png" alt="" aria-hidden="true" className="h-24 w-auto object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.35)]" />
                     </div>
                     <h3 className="text-xl font-bold mb-2">{t("contact.termsOfService")}</h3>
                     <p className="text-sm text-muted-foreground mb-4">{t("contact.termsDesc")}</p>
