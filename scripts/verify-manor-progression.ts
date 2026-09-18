@@ -46,54 +46,54 @@ assert.deepEqual(mainHall, {
   unlockXp: 0,
 })
 
-const sampleRoom = roomThemes.find((room) => room.id !== "main-hall")
-assert.ok(sampleRoom, "At least one non-default room is required for state tests")
+for (const room of roomThemes) {
+  const entitlement = getManorRoomEntitlement(room.id)!
 
-const sampleEntitlement = getManorRoomEntitlement(sampleRoom!.id)!
-const beforeThreshold = Math.max(0, sampleEntitlement.unlockXp - 1)
+  if (room.id === "main-hall") {
+    assert.equal(isManorRoomUnlocked(room.id, { xp: 0, unlocked_themes: [] }), true)
+    assert.equal(canUnlockManorRoom(room.id, { xp: 0, unlocked_themes: [] }), false)
+    continue
+  }
 
-const lockedProfile = { xp: beforeThreshold, unlocked_themes: [] as string[] }
-assert.equal(
-  isManorRoomUnlocked(sampleRoom!.id, lockedProfile),
-  false,
-  `${sampleRoom!.id}: must be locked before explicit unlock`,
-)
-assert.equal(
-  canUnlockManorRoom(sampleRoom!.id, lockedProfile),
-  false,
-  `${sampleRoom!.id}: must not be unlockable below threshold`,
-)
+  const beforeThreshold = Math.max(0, entitlement.unlockXp - 1)
+  const lockedProfile = { xp: beforeThreshold, unlocked_themes: [] as string[] }
+  const unlockableProfile = { xp: entitlement.unlockXp, unlocked_themes: [] as string[] }
+  const unlockedProfile = {
+    xp: entitlement.unlockXp,
+    unlocked_themes: [room.id],
+  }
 
-const unlockableProfile = { xp: sampleEntitlement.unlockXp, unlocked_themes: [] as string[] }
-assert.equal(
-  canUnlockManorRoom(sampleRoom!.id, unlockableProfile),
-  true,
-  `${sampleRoom!.id}: must be unlockable at threshold`,
-)
-assert.deepEqual(
-  getManorUnlockableRoomIds(unlockableProfile),
-  [sampleRoom!.id],
-  `${sampleRoom!.id}: unlockable list must contain exactly the threshold room in the sample state`,
-)
-
-const unlockedProfile = {
-  xp: sampleEntitlement.unlockXp,
-  unlocked_themes: [sampleRoom!.id],
+  assert.equal(
+    isManorRoomUnlocked(room.id, lockedProfile),
+    false,
+    `${room.id}: locked state failed`,
+  )
+  assert.equal(
+    canUnlockManorRoom(room.id, lockedProfile),
+    false,
+    `${room.id}: below-threshold state failed`,
+  )
+  assert.equal(
+    canUnlockManorRoom(room.id, unlockableProfile),
+    true,
+    `${room.id}: threshold must be unlockable`,
+  )
+  assert.equal(
+    isManorRoomUnlocked(room.id, unlockedProfile),
+    true,
+    `${room.id}: explicit unlocked state failed`,
+  )
+  assert.equal(
+    canUnlockManorRoom(room.id, unlockedProfile),
+    false,
+    `${room.id}: must stop being unlockable after explicit grant`,
+  )
 }
-assert.equal(
-  isManorRoomUnlocked(sampleRoom!.id, unlockedProfile),
-  true,
-  `${sampleRoom!.id}: must be unlocked after explicit grant`,
-)
-assert.equal(
-  canUnlockManorRoom(sampleRoom!.id, unlockedProfile),
-  false,
-  `${sampleRoom!.id}: must not remain unlockable after explicit grant`,
-)
+
 assert.deepEqual(
-  getManorUnlockedRoomIds(unlockedProfile),
-  ["main-hall", sampleRoom!.id],
-  "Unlocked room list must always include Main Hall",
+  getManorUnlockedRoomIds({ xp: 0, unlocked_themes: [] }),
+  ["main-hall"],
+  "Fresh profile must have only Main Hall explicitly unlocked",
 )
 
 assert.equal(getManorLevelFromXp(0), 1)
