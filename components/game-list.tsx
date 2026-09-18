@@ -141,58 +141,56 @@ function GameListItem({ item }: { item: CollectionCardItem }) {
   const totalCount = card.totalExpansionCount ?? expansions.length
 
   return (
-    <div className="group">
-      <div className="flex gap-4 p-4">
-        <div className="relative w-24 h-32 flex-shrink-0">
-          <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-surface/50 w-full h-full">
+    <div className="group min-w-0">
+      <div className="flex flex-col gap-4 p-3 sm:flex-row sm:p-4">
+        <div className="relative h-28 w-20 shrink-0 sm:h-32 sm:w-24">
+          <div className="relative h-full w-full overflow-hidden rounded-lg bg-surface/50">
             <Image src={card.image || "/placeholder.svg"} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col justify-between">
-          <div>
-            <div className="flex items-start justify-between mb-2">
-              <div>
-                <h3 className="font-heading font-semibold text-xl mb-1">{card.title}</h3>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold">
-                    {card.category}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start gap-2">
+            <div className="min-w-0 flex-1">
+              <h3 className="mb-1 truncate font-heading text-xl font-semibold">{card.title}</h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold">
+                  {card.category}
+                </Badge>
+                {card.wishlist && !card.owned && (
+                  <Badge variant="secondary" className="bg-accent-gold/90 text-background text-xs">
+                    <Heart className="mr-1 h-3 w-3 fill-current" />
+                    Wishlist
                   </Badge>
-                  {card.wishlist && !card.owned && (
-                    <Badge variant="secondary" className="bg-accent-gold/90 text-background text-xs">
-                      <Heart className="h-3 w-3 mr-1 fill-current" />
-                      Wishlist
-                    </Badge>
-                  )}
-                </div>
+                )}
               </div>
-              <ArchiveIconButton icon={<MoreVertical className="h-4 w-4" />} aria-label="Lisää toimintoja" />
             </div>
-
-            <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 fill-accent-gold text-accent-gold" />
-                <span className="font-medium">{card.rating}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Users className="h-4 w-4" />
-                <span>{card.playerCount} players</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Clock className="h-4 w-4" />
-                <span>{card.playTime} min</span>
-              </div>
-              <span>Published: {card.yearPublished}</span>
-            </div>
+            <ArchiveIconButton icon={<MoreVertical className="h-4 w-4" />} aria-label="Lisää toimintoja" />
           </div>
 
-          <div className="flex gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Star className="h-4 w-4 shrink-0 fill-accent-gold text-accent-gold" />
+              <span className="font-medium">{card.rating}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Users className="h-4 w-4 shrink-0" />
+              <span>{card.playerCount} players</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Clock className="h-4 w-4 shrink-0" />
+              <span>{card.playTime} min</span>
+            </div>
+            <span>Published: {card.yearPublished}</span>
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:flex">
             {entry.detailTarget && (card.owned || card.wishlist) ? (
-              <ArchiveCardButton asChild fullWidth className="flex-1">
+              <ArchiveCardButton asChild fullWidth className="sm:flex-1">
                 <Link href={entry.detailTarget}>View details</Link>
               </ArchiveCardButton>
             ) : (
-              <ArchiveCardButton active fullWidth className="flex-1">
+              <ArchiveCardButton active fullWidth className="sm:flex-1">
                 Add to collection
               </ArchiveCardButton>
             )}
@@ -209,13 +207,13 @@ function GameListItem({ item }: { item: CollectionCardItem }) {
                 type="button"
                 onClick={() => undefined}
                 aria-expanded={false}
-                className="flex w-full items-center justify-between gap-2 rounded-md border border-accent-gold/20 bg-surface/40 px-3 py-2 text-sm font-body text-accent-gold transition-colors hover:bg-surface/70 min-h-11"
+                className="flex min-h-11 w-full items-center justify-between gap-2 rounded-md border border-accent-gold/20 bg-surface/40 px-3 py-2 text-sm font-body text-accent-gold transition-colors hover:bg-surface/70"
               >
-                <span className="flex items-center gap-2">
-                  <Puzzle className="h-4 w-4" />
-                  {ownedCount}/{totalCount} expansions owned
+                <span className="flex min-w-0 items-center gap-2">
+                  <Puzzle className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{ownedCount}/{totalCount} expansions owned</span>
                 </span>
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className="h-4 w-4 shrink-0" />
               </button>
             </div>
           )}
@@ -223,4 +221,3 @@ function GameListItem({ item }: { item: CollectionCardItem }) {
       </div>
     </div>
   )
-}
