@@ -9,7 +9,7 @@ import { useAppTheme } from "@/components/app-theme-provider"
 import { useTranslations } from "@/lib/i18n"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { ArchiveFrame } from "@/components/archive-frame"
-import { NAV_ICONS, NAV_ICON_IMAGES } from "@/components/nav-icons"
+import { NAV_ICONS, NAV_ICON_IMAGES, MOBILE_NAV_ROUTES, type MobileNavRoute } from "@/components/nav-icons"
 import { useUser } from "@/hooks/useUser"
 import { createClient } from "@/lib/supabase/client"
 import { getUnreadCount } from "@/app/actions/messages"
@@ -40,7 +40,7 @@ export function Navigation() {
   const t = useTranslations()
   const router = useRouter()
   const pathname = usePathname()
-  const { user, profile, loading } = useUser()
+  const { user, profile, loading, refetch } = useUser()
   const hasUnreadNotifications = unreadNotificationCount > 0
 
   useEffect(() => {
@@ -59,6 +59,12 @@ export function Navigation() {
   }, [user])
 
   useEffect(() => {
+    const handleNavigationUpdate = () => { refetch() }
+    window.addEventListener("gametable-navigation-updated", handleNavigationUpdate)
+    return () => window.removeEventListener("gametable-navigation-updated", handleNavigationUpdate)
+  }, [user])
+
+  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => { if (isCrestMenuOpen && !(e.target as Element).closest('.crest-menu-container')) setIsCrestMenuOpen(false) }
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
@@ -70,7 +76,30 @@ export function Navigation() {
   const handleLogout = async () => { const supabase = createClient(); await supabase.auth.signOut(); try { localStorage.removeItem("gametable-app-theme") } catch (e) {} setIsUserDropdownOpen(false); setIsCrestMenuOpen(false); router.push("/"); router.refresh() }
   const desktopNavItemsLeft = [{ href: "/collection", label: t("nav.collection") }, { href: "/discover", label: t("nav.community") }, { href: "/events", label: t("nav.events") }, { href: "/marketplace", label: t("nav.marketplace") }]
   const desktopNavItemsRight = [{ href: "/themes", label: t("nav.manor") }, { href: "/messages", label: t("nav.messages") }, { href: "/trophies", label: t("nav.trophies") }, { href: "/contact", label: t("nav.contact") }]
-  const mobileNavItems = [{ href: "/collection", label: t("nav.collection") }, { href: "/discover", label: t("nav.community") }, { href: "/events", label: t("nav.events") }, { href: "/themes", label: t("nav.themes") }]
+  const defaultMobileNavRoutes: MobileNavRoute[] = ["/collection", "/discover", "/events", "/themes"]
+  const savedMobileNavRoutes = (() => {
+    const navigation = profile?.preferences?.navigation
+    if (!navigation || typeof navigation !== "object" || Array.isArray(navigation)) return defaultMobileNavRoutes
+    const saved = (navigation as Record<string, unknown>).mobileBottomSlots
+    if (!Array.isArray(saved)) return defaultMobileNavRoutes
+    const valid = saved.filter((value): value is MobileNavRoute =>
+      typeof value === "string" && (MOBILE_NAV_ROUTES as readonly string[]).includes(value)
+    )
+    return valid.length === 4 && new Set(valid).size === 4 ? valid : defaultMobileNavRoutes
+  })()
+  const mobileNavItems = savedMobileNavRoutes.map(href => ({
+    href,
+    label: ({
+      "/collection": t("nav.collection"),
+      "/discover": t("nav.community"),
+      "/events": t("nav.events"),
+      "/themes": t("nav.themes"),
+      "/marketplace": t("nav.marketplace"),
+      "/messages": t("nav.messages"),
+      "/trophies": t("nav.trophies"),
+      "/contact": t("nav.contact"),
+    } as Record<MobileNavRoute, string>)[href],
+  }))
   const crestMenuItems = [{ href: "/home", label: t("nav.home"), icon: Home }, { href: "/marketplace", label: t("nav.marketplace"), icon: ShoppingBag }, { href: "/messages", label: t("nav.messages"), icon: MessageCircle, badge: unreadMessageCount }, { href: "/trophies", label: t("nav.trophies"), icon: Award }, { href: "/contact", label: t("nav.contact"), icon: Mail }]
   const getCrestImage = (theme: string) => { const crestMap: { [key: string]: string } = { "main-hall": "/images/mainhall-crest-original.png", library: "/images/crests/library-crest.png", bar: "/images/bar-crest.png", "fireside-lounge": "/images/fireside-lounge-crest.png", spa: "/crests/spa-crest.png", conservatory: "/images/conservatory-crest.png", gallery: "/images/gallery-crest.png", artroom: "/crests/artroom-crest.png", ballroom: "/images/ballroom-crest.png", "map-room": "/images/map-room-crest.png", observatory: "/images/observatory-crest.png", "theater-room": "/images/theater-room-crest.png", "clock-tower": "/images/clock-tower-crest.png", "war-room": "/images/war-room-crest.png", "alchemist-laboratory": "/crests/alchemist-crest.png", dungeon: "/crests/dungeon-crest.png", "underground-temple": "/crests/temple-crest.png", "crystal-cavern": "/crests/crystal-crest.png", "treasure-vault": "/crests/treasure-crest.png" }; return crestMap[theme] || crestMap["main-hall"] }
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
