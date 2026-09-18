@@ -3,9 +3,10 @@
 import { useState } from "react"
 import { searchUsers } from "@/app/actions/search-users"
 import { sendFriendRequest, removeFriend, type DiscoverUser } from "@/app/actions/friends"
-import { ArchiveCard } from "@/components/archive-frame"
+import { ArchiveCard, ArchiveCardButton } from "@/components/archive-frame"
 import { ArchiveDivider } from "@/components/archive-divider"
 import Link from "next/link"
+import { useTranslations } from "@/lib/i18n"
 
 export function DiscoverPlayersFixed() {
   const [location, setLocation] = useState("")
@@ -15,6 +16,7 @@ export function DiscoverPlayersFixed() {
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
   const [busy, setBusy] = useState<string | null>(null)
+  const t = useTranslations()
 
   async function handleSearch() {
     setLoading(true)
@@ -70,18 +72,26 @@ export function DiscoverPlayersFixed() {
               <div className="min-w-0 flex-1">
                 <Link href={`/users/${player.username || player.id}`} className="font-semibold truncate hover:text-accent-gold transition-colors">{name}</Link>
                 {player.location ? <p className="text-sm text-muted-foreground">{player.location}</p> : null}
-                <p className="text-sm text-muted-foreground">{player.games_count} t("collection.gameCountLabel") + " kokoelmassa"</p>
+                <p className="text-sm text-muted-foreground">{player.games_count} {t("collection.gameCountLabel")} kokoelmassa</p>
               </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <Link
-                    href={`/users/${player.username || player.id}`}
-                    className="rounded-md border border-accent-gold/40 px-3 py-2 text-sm text-accent-gold hover:bg-accent-gold/10 transition-colors"
+                  <ArchiveCardButton asChild>
+                    <Link href={`/users/${player.username || player.id}`}>
+                      {t("profile.viewProfile")}
+                    </Link>
+                  </ArchiveCardButton>
+                  <ArchiveCardButton
+                    disabled={busy === player.id || status === "accepted"}
+                    onClick={() => handleFriendAction(player)}
                   >
-                    Näytä profiili
-                  </Link>
-                  <button className="rounded-md border px-3 py-2 text-sm disabled:opacity-50" disabled={busy === player.id || status === "accepted"} onClick={() => handleFriendAction(player)}>
-                    {status === "accepted" ? "Ystävä" : status === "pending" ? "Peru pyyntö" : busy === player.id ? "…" : "Lisää ystävä"}
-                  </button>
+                    {status === "accepted"
+                      ? "Ystävä"
+                      : status === "pending"
+                        ? "Peru pyyntö"
+                        : busy === player.id
+                          ? "…"
+                          : "Lisää ystävä"}
+                  </ArchiveCardButton>
                 </div>
               </article>
               {index < players.length - 1 && <ArchiveDivider className="my-1" />}
