@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { useTranslations } from "@/lib/i18n"
-import { ArchiveCard, ArchiveCardButton, ArchiveDivider } from "@/components/archive-frame"
+import { ArchiveCard, ArchiveCardButton } from "@/components/archive-frame"
+import { ArchiveDivider } from "@/components/archive-divider"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { sendFriendRequest as sendFriendRequestServer, acceptFriendRequest as acceptFriendRequestServer } from "@/app/actions/friends"
