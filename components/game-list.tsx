@@ -221,3 +221,4 @@ function GameListItem({ item }: { item: CollectionCardItem }) {
       </div>
     </div>
   )
+}
