@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { searchUsers } from "@/app/actions/search-users"
 import { sendFriendRequest, removeFriend, type DiscoverUser } from "@/app/actions/friends"
-import { ArchiveCard, ArchiveCardButton } from "@/components/archive-frame"
+import { ArchiveButton, ArchiveCard, ArchiveCardButton } from "@/components/archive-frame"
 import { ArchiveDivider } from "@/components/archive-divider"
 import Link from "next/link"
 import { useTranslations } from "@/lib/i18n"
@@ -52,9 +52,9 @@ export function DiscoverPlayersFixed() {
             <option value="trading_card">Keräilykorttipelit</option>
           </select>
           </div>
-          <button className="rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50" onClick={handleSearch} disabled={loading}>
+          <ArchiveButton onClick={handleSearch} disabled={loading} active>
             {loading ? "Haetaan…" : "Hae pelaajia"}
-          </button>
+          </ArchiveButton>
         </div>
       </ArchiveCard>
 
