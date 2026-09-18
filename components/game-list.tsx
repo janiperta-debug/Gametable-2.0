@@ -90,19 +90,19 @@ function GameListItem({ item }: { item: CollectionCardItem }) {
     const set = [card.setName, card.setCode ? `(${card.setCode})` : null].filter(Boolean).join(' ')
 
     return (
-      <div className="group">
-        <div className="flex gap-4 p-4">
-          <div className="relative w-24 h-32 flex-shrink-0">
-            <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-surface/50 w-full h-full">
+      <div className="group min-w-0">
+        <div className="flex flex-col gap-4 p-3 sm:flex-row sm:p-4">
+          <div className="relative h-28 w-20 shrink-0 sm:h-32 sm:w-24">
+            <div className="relative h-full w-full overflow-hidden rounded-lg bg-surface/50">
               <Image src={card.image} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
             </div>
           </div>
-          <div className="flex-1">
-            <h3 className="font-heading font-semibold text-xl mb-1">{card.title}</h3>
+          <div className="min-w-0 flex-1">
+            <h3 className="mb-1 truncate font-heading text-xl font-semibold">{card.title}</h3>
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               {card.tcgSystem && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold">{card.tcgSystem}</Badge>}
               {card.rarity && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold">{card.rarity}</Badge>}
-              {set && <span>{set}</span>}
+              {set && <span className="break-words">{set}</span>}
               <span>Quantity: {card.quantity}</span>
             </div>
           </div>
@@ -112,15 +112,15 @@ function GameListItem({ item }: { item: CollectionCardItem }) {
   }
   if (card.kind === 'miniature') {
     return (
-      <div className="group">
-        <div className="flex gap-4 p-4">
-          <div className="relative w-24 h-32 flex-shrink-0">
-            <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-surface/50 w-full h-full">
+      <div className="group min-w-0">
+        <div className="flex flex-col gap-4 p-3 sm:flex-row sm:p-4">
+          <div className="relative h-28 w-20 shrink-0 sm:h-32 sm:w-24">
+            <div className="relative h-full w-full overflow-hidden rounded-lg bg-surface/50">
               <Image src={card.image} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
             </div>
           </div>
-          <div className="flex-1">
-            <h3 className="font-heading font-semibold text-xl mb-1">{card.title}</h3>
+          <div className="min-w-0 flex-1">
+            <h3 className="mb-1 truncate font-heading text-xl font-semibold">{card.title}</h3>
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               {card.system && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold">{card.system}</Badge>}
               {card.faction && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold">{card.faction}</Badge>}
