@@ -107,15 +107,24 @@ export function ProfileNavigationSettings() {
         },
       }
 
-      const { error } = await supabase
+      const { data: savedProfile, error } = await supabase
         .from("profiles")
         .update({ preferences: nextPreferences })
         .eq("id", profile.id)
+        .select("preferences")
+        .single()
 
       if (error) throw error
 
+      const savedRoutes = readMobileNavRoutes(savedProfile?.preferences as Record<string, unknown> | null)
+      if (JSON.stringify(savedRoutes) !== JSON.stringify(routes)) {
+        throw new Error("Saved navigation preferences could not be verified.")
+      }
+
       await refetch()
-      window.dispatchEvent(new Event("gametable-navigation-updated"))
+      window.dispatchEvent(new CustomEvent("gametable-navigation-updated", {
+        detail: { routes: savedRoutes },
+      }))
       setStatus(t("profile.mobileNavigationSaved"))
     } catch (error) {
       console.error("Error saving mobile navigation:", error)
