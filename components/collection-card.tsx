@@ -29,7 +29,7 @@ interface CollectionCardProps {
 /** Shared visual skeleton for every Collection card variant. */
 function CollectionCardShell({ children }: { children: React.ReactNode }) {
   return (
-    <ArchiveCard corners={false} centerOrnaments={false} className="group h-full">
+    <ArchiveCard className="group h-full">
       <div className="flex h-full flex-col p-4">{children}</div>
     </ArchiveCard>
   )
