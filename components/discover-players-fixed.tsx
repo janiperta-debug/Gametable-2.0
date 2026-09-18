@@ -36,8 +36,9 @@ export function DiscoverPlayersFixed() {
 
   return (
     <section className="space-y-6">
-      <ArchiveCard className="p-5 space-y-4">
-        <div className="grid gap-4 md:grid-cols-3">
+      <ArchiveCard>
+        <div className="space-y-4 p-5">
+          <div className="grid gap-4 md:grid-cols-3">
           <input className="rounded-md border bg-background px-3 py-2" placeholder="Sijainti" value={location} onChange={(e) => setLocation(e.target.value)} />
           <input className="rounded-md border bg-background px-3 py-2" placeholder="Pelin nimi" value={gameTitle} onChange={(e) => setGameTitle(e.target.value)} />
           <select className="rounded-md border bg-background px-3 py-2" value={gameType} onChange={(e) => setGameType(e.target.value)}>
@@ -47,10 +48,11 @@ export function DiscoverPlayersFixed() {
             <option value="miniature">Miniatyyripelit</option>
             <option value="trading_card">Keräilykorttipelit</option>
           </select>
+          </div>
+          <button className="rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50" onClick={handleSearch} disabled={loading}>
+            {loading ? "Haetaan…" : "Hae pelaajia"}
+          </button>
         </div>
-        <button className="rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50" onClick={handleSearch} disabled={loading}>
-          {loading ? "Haetaan…" : "Hae pelaajia"}
-        </button>
       </ArchiveCard>
 
       {searched && players.length === 0 ? <p className="text-center text-muted-foreground">Pelaajia ei löytynyt näillä hakuehdoilla.</p> : null}
