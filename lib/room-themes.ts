@@ -333,10 +333,6 @@ export function getRoomTheme(roomId: string): RoomTheme | undefined {
   return roomThemes.find((room) => room.id === roomId)
 }
 
-export function getActiveTheme(): RoomTheme {
-  return roomThemes.find((room) => room.isActive) || roomThemes[0]
-}
-
 export function getRoomsByCategory(category: RoomTheme["category"]): RoomTheme[] {
   return roomThemes.filter((room) => room.category === category)
 }
