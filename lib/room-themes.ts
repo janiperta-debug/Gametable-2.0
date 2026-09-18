@@ -13,7 +13,6 @@ export interface RoomTheme {
   atmosphere: string
   unlockLevel: number
   category: "Ground Floor" | "Second Floor" | "Basement"
-  isActive?: boolean
 }
 
 export const roomThemes: RoomTheme[] = [
@@ -32,7 +31,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Majestic and welcoming",
     unlockLevel: 1,
     category: "Ground Floor",
-    isActive: true,
   },
   {
     id: "library",
@@ -48,7 +46,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Scholarly and contemplative",
     unlockLevel: 10,
     category: "Ground Floor",
-    isActive: false,
   },
   {
     id: "conservatory",
@@ -333,9 +330,6 @@ export function getRoomTheme(roomId: string): RoomTheme | undefined {
   return roomThemes.find((room) => room.id === roomId)
 }
 
-export function getRoomsByCategory(category: RoomTheme["category"]): RoomTheme[] {
-  return roomThemes.filter((room) => room.category === category)
-}
 
 export type AppThemeName =
   | "main-hall"
