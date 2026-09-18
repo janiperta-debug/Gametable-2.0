@@ -7,7 +7,7 @@ import {
   canUnlockManorRoom,
   isManorRoomUnlocked,
 } from "@/lib/manor-progression"
-import { THEME_ACCESS_TEST_MODE } from "@/lib/theme-entitlements"
+import { THEME_ACCESS_TEST_MODE } from "@/lib/manor-progression"
 
 // The board is the visual 19-room Manor map. Entitlement state comes from the
 // canonical Manor progression helpers; the QA switch intentionally keeps every
