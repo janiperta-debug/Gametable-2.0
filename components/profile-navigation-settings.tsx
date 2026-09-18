@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Compass, Loader2, Menu, Navigation, Save } from "lucide-react"
+import { Loader2, Menu, Navigation, Save } from "lucide-react"
 import { ArchiveButton, ArchiveCard, ArchiveCardContent } from "@/components/archive-frame"
 import { NAV_ICONS, NAV_ICON_IMAGES, MOBILE_NAV_ROUTES, type MobileNavRoute } from "@/components/nav-icons"
 import { useTranslations } from "@/lib/i18n"
