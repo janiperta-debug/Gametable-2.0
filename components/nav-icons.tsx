@@ -145,6 +145,20 @@ export const NAV_ICONS: Record<string, (props: IconProps) => JSX.Element> = {
  * the image as the whole tile (no extra ArchiveFrame wrapper). Routes without an
  * entry fall back to the flat SVG glyph.
  */
+/** Routes available for the four persistent mobile bottom-bar shortcuts. */
+export const MOBILE_NAV_ROUTES = [
+  "/collection",
+  "/discover",
+  "/events",
+  "/themes",
+  "/marketplace",
+  "/messages",
+  "/trophies",
+  "/contact",
+] as const
+
+export type MobileNavRoute = typeof MOBILE_NAV_ROUTES[number]
+
 export const NAV_ICON_IMAGES: Record<string, string> = {
   "/collection": "/nav-icons/collection.png",
   "/discover": "/nav-icons/discover.png",
