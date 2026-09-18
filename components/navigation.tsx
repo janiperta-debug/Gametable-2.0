@@ -41,7 +41,7 @@ export function Navigation() {
   const t = useTranslations()
   const router = useRouter()
   const pathname = usePathname()
-  const { user, profile, loading, refetch } = useUser()
+  const { user, profile, loading } = useUser()
   const hasUnreadNotifications = unreadNotificationCount > 0
 
   useEffect(() => {
@@ -76,11 +76,10 @@ export function Navigation() {
     const handleNavigationUpdate = (event: Event) => {
       const customEvent = event as CustomEvent<{ routes?: MobileNavRoute[] }>
       if (customEvent.detail?.routes) setMobileNavRoutes(customEvent.detail.routes)
-      else refetch()
     }
     window.addEventListener("gametable-navigation-updated", handleNavigationUpdate)
     return () => window.removeEventListener("gametable-navigation-updated", handleNavigationUpdate)
-  }, [profile?.preferences, refetch])
+  }, [profile?.preferences])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => { if (isCrestMenuOpen && !(e.target as Element).closest('.crest-menu-container')) setIsCrestMenuOpen(false) }
