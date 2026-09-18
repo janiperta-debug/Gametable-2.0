@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { Button } from "@/components/ui/button"
+import { ArchiveCard } from "@/components/archive-frame"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -70,7 +71,7 @@ export default function NewGamePage() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Left Column - Game Image */}
             <div className="lg:col-span-1">
-              <Card className="picture-frame overflow-hidden sticky top-8">
+              <ArchiveCard className="overflow-hidden sticky top-8">
                 <div className="aspect-[3/4] relative bg-surface/50">
                   <img
                     src={formData.image || "/placeholder.svg"}
@@ -90,7 +91,7 @@ export default function NewGamePage() {
                     className="mt-2"
                   />
                 </CardContent>
-              </Card>
+              </ArchiveCard>
             </div>
 
             {/* Right Column - Game Details */}
