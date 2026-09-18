@@ -65,18 +65,20 @@ export function GameList({ games, cards }: GameListProps) {
   }
 
   return (
-    <div className="min-w-0">
-      {resolvedCards.map((item, index) => (
-        <div key={item.entry.ownershipId}>
-          <CollectionCard
-            item={item}
-            variant="list"
-            showMarketplaceButton={false}
-            showWishlistButton={true}
-          />
-          {index < resolvedCards.length - 1 && <ArchiveDivider className="my-0" />}
-        </div>
-      ))}
-    </div>
+    <ArchiveFrame className="w-full">
+      <div className="min-w-0 px-3 sm:px-4">
+        {resolvedCards.map((item, index) => (
+          <div key={item.entry.ownershipId}>
+            <CollectionCard
+              item={item}
+              variant="list"
+              showMarketplaceButton={false}
+              showWishlistButton={true}
+            />
+            {index < resolvedCards.length - 1 && <ArchiveDivider className="my-0" />}
+          </div>
+        ))}
+      </div>
+    </ArchiveFrame>
   )
 }
