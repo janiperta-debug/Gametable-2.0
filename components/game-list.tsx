@@ -2,6 +2,7 @@
 
 import { CollectionCard } from "@/components/collection-card"
 import { ArchiveDivider } from "@/components/archive-divider"
+import { ArchiveFrame } from "@/components/archive-frame"
 import type { Game } from "@/lib/mock-games"
 import type { CollectionCardItem } from "@/lib/types/collection"
 
