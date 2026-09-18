@@ -226,6 +226,7 @@
     "myCollection": "My Collection",
     "moreGames": "more games",
     "games": {
+      "gameCountLabel": "games",
       "title": "Games",
       "categories": {
         "strategy": "Strategy",
@@ -496,6 +497,7 @@
   },
   "community": {
     "title": "Community",
+    "gameCountLabel": "games",
     "subtitle": "Connect with fellow gamers and stay updated with your gaming circle",
     "tabActivity": "Recent Activity",
     "tabSearch": "Find Players",
