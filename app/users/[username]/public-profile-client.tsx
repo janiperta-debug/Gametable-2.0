@@ -203,9 +203,9 @@ export function PublicProfileClient({
                 {gameInterests && gameInterests.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-4">
                     {gameInterests.map((interest) => (
-                      <Badge key={interest} variant="outline" className="border-accent-gold/50 bg-accent-gold/10 text-accent-gold">
+                      <span key={interest} className="rounded-full border border-accent-gold/50 bg-accent-gold/10 px-3 py-1 text-sm text-accent-gold">
                         {INTEREST_LABELS[interest] ? t(INTEREST_LABELS[interest]) : interest}
-                      </Badge>
+                      </span>
                     ))}
                   </div>
                 )}
@@ -214,53 +214,43 @@ export function PublicProfileClient({
                 {!isOwnProfile && currentUserId && (
                   <div className="mt-4">
                     {friendshipStatus === "none" && (
-                      <Button
+                      <ArchiveButton
                         onClick={handleSendFriendRequest}
                         disabled={loading}
-                        className="bg-accent-gold hover:bg-accent-gold/90 text-background"
+                        active
+                        icon={loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
                       >
-                        {loading ? (
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        ) : (
-                          <UserPlus className="h-4 w-4 mr-2" />
-                        )}
                         {t("friends.sendRequest")}
-                      </Button>
+                      </ArchiveButton>
                     )}
                     {friendshipStatus === "pending" && (
-                      <Button variant="outline" disabled className="border-accent-gold/30">
-                        <Clock className="h-4 w-4 mr-2" />
+                      <ArchiveButton disabled icon={<Clock className="h-4 w-4" />}>
                         {t("friends.requestPending")}
-                      </Button>
+                      </ArchiveButton>
                     )}
                     {friendshipStatus === "incoming" && (
-                      <Button
+                      <ArchiveButton
                         onClick={handleAcceptFriendRequest}
                         disabled={loading}
-                        className="bg-accent-gold hover:bg-accent-gold/90 text-background"
+                        active
+                        icon={loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserCheck className="h-4 w-4" />}
                       >
-                        {loading ? (
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        ) : (
-                          <UserCheck className="h-4 w-4 mr-2" />
-                        )}
                         {t("friends.acceptRequest")}
-                      </Button>
+                      </ArchiveButton>
                     )}
                     {friendshipStatus === "accepted" && (
-                      <Button variant="outline" disabled className="border-accent-gold/30 text-accent-gold">
-                        <UserCheck className="h-4 w-4 mr-2" />
+                      <ArchiveButton disabled active icon={<UserCheck className="h-4 w-4" />}>
                         {t("friends.alreadyFriends")}
-                      </Button>
+                      </ArchiveButton>
                     )}
                   </div>
                 )}
 
                 {isOwnProfile && (
                   <Link href="/profile">
-                    <Button variant="outline" className="border-accent-gold/30 mt-4">
+                    <ArchiveButton className="mt-4">
                       {t("profile.editProfile")}
-                    </Button>
+                    </ArchiveButton>
                   </Link>
                 )}
               </div>
