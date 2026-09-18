@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button"
 import { useAppTheme } from "@/components/app-theme-provider"
 import type { RoomTheme } from "@/lib/room-themes"
 import { unlockManorRoom, updateActiveRoom } from "@/app/actions/xp"
-import { canUnlockManorRoom } from "@/lib/manor-progression"
-import { THEME_ACCESS_TEST_MODE } from "@/lib/manor-progression"
+import { canUnlockManorRoom, isManorRoomUnlocked, THEME_ACCESS_TEST_MODE } from "@/lib/manor-progression"
 import { useUser } from "@/hooks/useUser"
 import { Loader2 } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
@@ -22,9 +21,7 @@ export function ThemeSelector({ room }: ThemeSelectorProps) {
   const t = useTranslations()
 
   const isCurrentTheme = currentAppTheme === room.id
-  const isUnlocked = THEME_ACCESS_TEST_MODE
-    ? true
-    : room.id === "main-hall" || (profile?.unlocked_themes ?? []).includes(room.id)
+  const isUnlocked = THEME_ACCESS_TEST_MODE || isManorRoomUnlocked(room.id, profile)
   const canUnlock = !THEME_ACCESS_TEST_MODE && canUnlockManorRoom(room.id, profile)
   const canUseTheme = isUnlocked
 
