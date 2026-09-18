@@ -36,6 +36,7 @@ export function Navigation() {
   const [isCrestMenuOpen, setIsCrestMenuOpen] = useState(false)
   const [unreadMessageCount, setUnreadMessageCount] = useState(0)
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
+  const [mobileNavRoutes, setMobileNavRoutes] = useState<MobileNavRoute[]>(["/collection", "/discover", "/events", "/themes"])
   const { currentAppTheme } = useAppTheme()
   const t = useTranslations()
   const router = useRouter()
@@ -59,10 +60,27 @@ export function Navigation() {
   }, [user])
 
   useEffect(() => {
-    const handleNavigationUpdate = () => { refetch() }
+    const readRoutes = (preferences: Record<string, unknown> | null | undefined): MobileNavRoute[] => {
+      const navigation = preferences?.navigation
+      if (!navigation || typeof navigation !== "object" || Array.isArray(navigation)) return ["/collection", "/discover", "/events", "/themes"]
+      const saved = (navigation as Record<string, unknown>).mobileBottomSlots
+      if (!Array.isArray(saved)) return ["/collection", "/discover", "/events", "/themes"]
+      const valid = saved.filter((value): value is MobileNavRoute =>
+        typeof value === "string" && (MOBILE_NAV_ROUTES as readonly string[]).includes(value)
+      )
+      return valid.length === 4 && new Set(valid).size === 4 ? valid : ["/collection", "/discover", "/events", "/themes"]
+    }
+
+    setMobileNavRoutes(readRoutes(profile?.preferences))
+
+    const handleNavigationUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent<{ routes?: MobileNavRoute[] }>
+      if (customEvent.detail?.routes) setMobileNavRoutes(customEvent.detail.routes)
+      else refetch()
+    }
     window.addEventListener("gametable-navigation-updated", handleNavigationUpdate)
     return () => window.removeEventListener("gametable-navigation-updated", handleNavigationUpdate)
-  }, [user])
+  }, [profile?.preferences, refetch])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => { if (isCrestMenuOpen && !(e.target as Element).closest('.crest-menu-container')) setIsCrestMenuOpen(false) }
@@ -76,18 +94,7 @@ export function Navigation() {
   const handleLogout = async () => { const supabase = createClient(); await supabase.auth.signOut(); try { localStorage.removeItem("gametable-app-theme") } catch (e) {} setIsUserDropdownOpen(false); setIsCrestMenuOpen(false); router.push("/"); router.refresh() }
   const desktopNavItemsLeft = [{ href: "/collection", label: t("nav.collection") }, { href: "/discover", label: t("nav.community") }, { href: "/events", label: t("nav.events") }, { href: "/marketplace", label: t("nav.marketplace") }]
   const desktopNavItemsRight = [{ href: "/themes", label: t("nav.manor") }, { href: "/messages", label: t("nav.messages") }, { href: "/trophies", label: t("nav.trophies") }, { href: "/contact", label: t("nav.contact") }]
-  const defaultMobileNavRoutes: MobileNavRoute[] = ["/collection", "/discover", "/events", "/themes"]
-  const savedMobileNavRoutes = (() => {
-    const navigation = profile?.preferences?.navigation
-    if (!navigation || typeof navigation !== "object" || Array.isArray(navigation)) return defaultMobileNavRoutes
-    const saved = (navigation as Record<string, unknown>).mobileBottomSlots
-    if (!Array.isArray(saved)) return defaultMobileNavRoutes
-    const valid = saved.filter((value): value is MobileNavRoute =>
-      typeof value === "string" && (MOBILE_NAV_ROUTES as readonly string[]).includes(value)
-    )
-    return valid.length === 4 && new Set(valid).size === 4 ? valid : defaultMobileNavRoutes
-  })()
-  const mobileNavItems = savedMobileNavRoutes.map(href => ({
+  const mobileNavItems = mobileNavRoutes.map(href => ({
     href,
     label: ({
       "/collection": t("nav.collection"),
