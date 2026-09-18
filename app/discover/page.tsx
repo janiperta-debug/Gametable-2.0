@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { DiscoverPlayersFixed } from "@/components/discover-players-fixed"
 import { ThemeHero } from "@/components/theme-hero"
 import { ArchiveCard, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle, ArchiveToggle } from "@/components/archive-frame"
+import { ArchiveDivider } from "@/components/archive-divider"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Clock, Loader2, Gamepad2, Calendar } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
@@ -81,13 +82,13 @@ export default function CommunityPage() {
               ) : activity.length === 0 ? (
                 <p className="text-center text-muted-foreground font-body py-8">{t("community.noFriendActivity")}</p>
               ) : (
-                <div className="space-y-4">
-                  {activity.map((item) => {
+                <div className="space-y-0">
+                  {activity.map((item, index) => {
                     const userName = item.user?.display_name || "Unknown"
                     const initials = userName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
                     const timeAgo = formatDistanceToNow(new Date(item.created_at), { addSuffix: true })
                     return (
-                      <div key={item.id} className="flex items-center space-x-4 p-4 rounded-lg picture-frame hover:bg-accent-gold/5 transition-colors">
+                      <div key={item.id} className="flex items-center space-x-4 px-1 py-4 transition-colors hover:bg-accent-gold/5">
                         <Avatar className="h-10 w-10">
                           <AvatarImage src={item.user?.avatar_url || "/placeholder.svg"} alt={userName} />
                           <AvatarFallback className="font-cinzel">{initials}</AvatarFallback>
@@ -98,6 +99,7 @@ export default function CommunityPage() {
                         </div>
                         {item.type === "game_added" ? <Gamepad2 className="h-5 w-5 text-accent-gold" /> : <Calendar className="h-5 w-5 text-accent-gold" />}
                       </div>
+                      {index < activity.length - 1 && <ArchiveDivider className="my-1" />}
                     )
                   })}
                 </div>
