@@ -18,17 +18,17 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { ArrowLeft, Globe, UserCheck, Lock, Loader2, Calendar, Search, X, Dices, Swords, Trophy, Sparkles, UserPlus, Check } from "lucide-react"
+import { ArrowLeft, Globe, UserCheck, Lock, Loader2, Calendar, Search, X, UserPlus, Check } from "lucide-react"
 import { createEvent, inviteToEvent, type EventType, type EventPrivacy } from "@/app/actions/events"
 import { getUserFriendsList } from "@/app/actions/friends"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 
-const eventTypes: { value: EventType; icon: React.ElementType }[] = [
-  { value: "board_game_night", icon: Dices },
-  { value: "rpg_session", icon: Swords },
-  { value: "tournament", icon: Trophy },
-  { value: "custom", icon: Sparkles },
+const eventTypes: { value: EventType; image: string }[] = [
+  { value: "board_game_night", image: "/images/category-board-games.png" },
+  { value: "rpg_session", image: "/images/category-rpg.png" },
+  { value: "tournament", image: "/images/category-tcg.png" },
+  { value: "custom", image: "/images/category-miniatures.png" },
 ]
 import { getUserGames } from "@/app/actions/games"
 import { useToast } from "@/hooks/use-toast"
@@ -282,21 +282,31 @@ export default function CreateEventPage() {
                 <div className="space-y-4">
                   <Label className="font-body text-accent-gold">{t("events.eventType")}</Label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {eventTypes.map(({ value, icon: Icon }) => (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => setEventType(value)}
-                        className={`flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${
-                          eventType === value
-                            ? "border-accent-gold bg-accent-gold/10 text-accent-gold"
-                            : "border-border bg-transparent hover:border-accent-gold/50"
-                        }`}
-                      >
-                        <Icon className="h-6 w-6" />
-                        <span className="text-sm font-body text-center">{t(`events.types.${value}`)}</span>
-                      </button>
-                    ))}
+                    {eventTypes.map(({ value, image }) => {
+                      const label = t(`events.types.${value}`)
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          aria-pressed={eventType === value}
+                          onClick={() => setEventType(value)}
+                          className={`group relative flex min-h-[150px] flex-col items-center justify-center rounded-xl px-3 py-4 text-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--archive-gold,#d9b65c)]/70 ${
+                            eventType === value
+                              ? "bg-[var(--archive-gold,#d9b65c)]/10 ring-2 ring-[var(--archive-gold,#d9b65c)]/80 shadow-[0_0_24px_rgba(217,182,92,0.22)]"
+                              : "bg-black/10 ring-1 ring-[var(--archive-gold,#d9b65c)]/20 hover:bg-[var(--archive-gold,#d9b65c)]/5 hover:ring-[var(--archive-gold,#d9b65c)]/45"
+                          }`}
+                        >
+                          <img
+                            src={image}
+                            alt={label}
+                            className="h-24 w-full object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.35)] transition-transform duration-200 group-hover:scale-105"
+                          />
+                          <span className="mt-2 font-cinzel text-sm font-semibold text-foreground">
+                            {label}
+                          </span>
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
 
