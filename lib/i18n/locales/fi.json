@@ -226,6 +226,7 @@
     "findGames": "Etsi pelejä",
     "myCollection": "Kokoelmani",
     "games": "peliä",
+    "gameCountLabel": "peliä",
     "moreGames": "peliä lisää",
     "allItems": "Kaikki",
     "allCategories": "Kaikki kategoriat",
@@ -484,6 +485,7 @@
   },
   "community": {
     "title": "Yhteisö",
+    "gameCountLabel": "peliä",
     "subtitle": "Yhdistä muihin pelaajiin ja seuraa pelipiiriäsi",
     "tabActivity": "Viimeaikainen toiminta",
     "tabSearch": "Etsi pelaajia",
