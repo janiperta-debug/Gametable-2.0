@@ -1,13 +1,8 @@
 "use client"
 
-import { ArchiveCard, ArchiveCardButton, ArchiveIconButton } from "@/components/archive-frame"
-import { ArchiveDivider } from "@/components/archive-divider"
-import { Badge } from "@/components/ui/badge"
-import { Star, Users, Clock, Heart, MoreVertical, Puzzle, ChevronDown } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
+import { CollectionCard } from "@/components/collection-card"
 import type { Game } from "@/lib/mock-games"
-import { assertUnreachableCollectionCard, type CollectionCardItem } from "@/lib/types/collection"
+import type { CollectionCardItem } from "@/lib/types/collection"
 
 interface GameListProps {
   games?: Game[]
@@ -17,23 +12,21 @@ interface GameListProps {
 function legacyGameToCollectionCardItem(game: Game): CollectionCardItem {
   const entryDomain = game.category === "rpg" ? "rpg" : "board_game"
 
-  const entry = {
-    domain: entryDomain,
-    catalogId: game.id,
-    ownershipId: game.userGameId || game.id,
-    displayName: game.title,
-    image: game.image || null,
-    status: game.owned ? "owned" : game.wishlist ? "wishlist" : "previously_owned",
-    detailTarget: `/game/${game.id}`,
-    metadata: {
-      category: game.category,
-      year: game.yearPublished,
-      rating: game.rating,
-    },
-  }
-
   return {
-    entry,
+    entry: {
+      domain: entryDomain,
+      catalogId: game.id,
+      ownershipId: game.userGameId || game.id,
+      displayName: game.title,
+      image: game.image || null,
+      status: game.owned ? "owned" : game.wishlist ? "wishlist" : "previously_owned",
+      detailTarget: `/game/${game.id}`,
+      metadata: {
+        category: game.category,
+        year: game.yearPublished,
+        rating: game.rating,
+      },
+    },
     card: {
       kind: "board-rpg",
       id: game.id,
@@ -64,161 +57,23 @@ export function GameList({ games, cards }: GameListProps) {
 
   if (resolvedCards.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground font-body text-lg">No games found matching your criteria.</p>
+      <div className="py-12 text-center">
+        <p className="font-body text-lg text-muted-foreground">No games found matching your criteria.</p>
       </div>
     )
   }
 
   return (
-    <ArchiveCard>
-      <div className="space-y-0">
-        {resolvedCards.map((item, index) => (
-          <div key={item.entry.ownershipId}>
-            <GameListItem item={item} />
-            {index < resolvedCards.length - 1 && <ArchiveDivider className="my-1" />}
-          </div>
-        ))}
-      </div>
-    </ArchiveCard>
-  )
-}
-
-function GameListItem({ item }: { item: CollectionCardItem }) {
-  const { card, entry } = item
-  if (card.kind === 'tcg') {
-    const set = [card.setName, card.setCode ? `(${card.setCode})` : null].filter(Boolean).join(' ')
-
-    return (
-      <div className="group min-w-0">
-        <div className="flex flex-col gap-4 p-3 sm:flex-row sm:p-4">
-          <div className="relative h-28 w-20 shrink-0 sm:h-32 sm:w-24">
-            <div className="relative h-full w-full overflow-hidden rounded-lg bg-surface/50">
-              <Image src={card.image} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-            </div>
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="mb-1 truncate font-heading text-xl font-semibold">{card.title}</h3>
-            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              {card.tcgSystem && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold">{card.tcgSystem}</Badge>}
-              {card.rarity && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold">{card.rarity}</Badge>}
-              {set && <span className="break-words">{set}</span>}
-              <span>Quantity: {card.quantity}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-  if (card.kind === 'miniature') {
-    return (
-      <div className="group min-w-0">
-        <div className="flex flex-col gap-4 p-3 sm:flex-row sm:p-4">
-          <div className="relative h-28 w-20 shrink-0 sm:h-32 sm:w-24">
-            <div className="relative h-full w-full overflow-hidden rounded-lg bg-surface/50">
-              <Image src={card.image} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-            </div>
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="mb-1 truncate font-heading text-xl font-semibold">{card.title}</h3>
-            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              {card.system && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold">{card.system}</Badge>}
-              {card.faction && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold">{card.faction}</Badge>}
-              {card.paintStatus && <span>{card.paintStatus}</span>}
-              {card.modelCount != null && <span>Models: {card.modelCount}</span>}
-              {card.pointsTotal != null && <span>Points: {card.pointsTotal}</span>}
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-  if (card.kind !== 'board-rpg') {
-    return assertUnreachableCollectionCard(card)
-  }
-  const expansions = card.expansions || []
-  const ownedCount = card.ownedExpansionCount ?? expansions.filter((exp) => exp.owned).length
-  const totalCount = card.totalExpansionCount ?? expansions.length
-
-  return (
-    <div className="group min-w-0">
-      <div className="flex flex-col gap-4 p-3 sm:flex-row sm:p-4">
-        <div className="relative h-28 w-20 shrink-0 sm:h-32 sm:w-24">
-          <div className="relative h-full w-full overflow-hidden rounded-lg bg-surface/50">
-            <Image src={card.image || "/placeholder.svg"} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-          </div>
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start gap-2">
-            <div className="min-w-0 flex-1">
-              <h3 className="mb-1 truncate font-heading text-xl font-semibold">{card.title}</h3>
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold">
-                  {card.category}
-                </Badge>
-                {card.wishlist && !card.owned && (
-                  <Badge variant="secondary" className="bg-accent-gold/90 text-background text-xs">
-                    <Heart className="mr-1 h-3 w-3 fill-current" />
-                    Wishlist
-                  </Badge>
-                )}
-              </div>
-            </div>
-            <ArchiveIconButton icon={<MoreVertical className="h-4 w-4" />} aria-label="Lisää toimintoja" />
-          </div>
-
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Star className="h-4 w-4 shrink-0 fill-accent-gold text-accent-gold" />
-              <span className="font-medium">{card.rating}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Users className="h-4 w-4 shrink-0" />
-              <span>{card.playerCount} players</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Clock className="h-4 w-4 shrink-0" />
-              <span>{card.playTime} min</span>
-            </div>
-            <span>Published: {card.yearPublished}</span>
-          </div>
-
-          <div className="mt-3 grid grid-cols-1 gap-2 sm:flex">
-            {entry.detailTarget && (card.owned || card.wishlist) ? (
-              <ArchiveCardButton asChild fullWidth className="sm:flex-1">
-                <Link href={entry.detailTarget}>View details</Link>
-              </ArchiveCardButton>
-            ) : (
-              <ArchiveCardButton active fullWidth className="sm:flex-1">
-                Add to collection
-              </ArchiveCardButton>
-            )}
-            <ArchiveIconButton
-              icon={<Heart className={`h-4 w-4 ${card.wishlist ? "fill-current" : ""}`} />}
-              active={card.wishlist}
-              aria-label="Wishlist"
-            />
-          </div>
-
-          {totalCount > 0 && (
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={() => undefined}
-                aria-expanded={false}
-                className="flex min-h-11 w-full items-center justify-between gap-2 rounded-md border border-accent-gold/20 bg-surface/40 px-3 py-2 text-sm font-body text-accent-gold transition-colors hover:bg-surface/70"
-              >
-                <span className="flex min-w-0 items-center gap-2">
-                  <Puzzle className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{ownedCount}/{totalCount} expansions owned</span>
-                </span>
-                <ChevronDown className="h-4 w-4 shrink-0" />
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
+    <div className="min-w-0 space-y-3">
+      {resolvedCards.map((item) => (
+        <CollectionCard
+          key={item.entry.ownershipId}
+          item={item}
+          variant="list"
+          showMarketplaceButton={false}
+          showWishlistButton={true}
+        />
+      ))}
     </div>
   )
 }
