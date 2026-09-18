@@ -29,6 +29,7 @@ import Link from "next/link"
 import { getGameById, updateGame, removeGameFromCollection, type GameCategory } from "@/app/actions/games"
 import { GameExpansions } from "@/components/game-expansions"
 import { useTranslations } from "@/lib/i18n"
+import { ArchiveCard } from "@/components/archive-frame"
 
 const CATEGORIES: { value: GameCategory; label: string }[] = [
   { value: "board_game", label: "Lautapeli" },
@@ -238,8 +239,9 @@ export default function GameDetailPage() {
         </div>
 
         {/* Game Content */}
-        <div className="manor-card p-6">
-          <div className="flex flex-col md:flex-row gap-6">
+        <ArchiveCard>
+          <div className="p-6">
+            <div className="flex flex-col md:flex-row gap-6">
             {/* Image */}
             <div className="w-full md:w-1/3">
               <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-surface/50">
@@ -438,8 +440,9 @@ export default function GameDetailPage() {
                 </>
               )}
             </div>
+            </div>
           </div>
-        </div>
+        </ArchiveCard>
       </div>
     </div>
   )
