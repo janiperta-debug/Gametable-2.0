@@ -142,8 +142,7 @@ export const NAV_ICONS: Record<string, (props: IconProps) => JSX.Element> = {
 /**
  * Pre-framed raster (PNG) tiles per route — full gold Archive frame + wood
  * background baked into the artwork. Used by the mobile bottom bar, which renders
- * the image as the whole tile (no extra ArchiveFrame wrapper). Routes without an
- * entry fall back to the flat SVG glyph.
+ * the image as the whole tile (no extra ArchiveFrame wrapper).
  */
 /** Routes available for the four persistent mobile bottom-bar shortcuts. */
 export const MOBILE_NAV_ROUTES = [
@@ -164,4 +163,8 @@ export const NAV_ICON_IMAGES: Record<string, string> = {
   "/discover": "/nav-icons/discover.png",
   "/events": "/nav-icons/events.png",
   "/themes": "/nav-icons/themes.png",
+  "/marketplace": "/nav-icons/marketplace.png",
+  "/messages": "/nav-icons/messages.png",
+  "/trophies": "/nav-icons/trophies.png",
+  "/contact": "/nav-icons/contact.png",
 }
