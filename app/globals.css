@@ -935,30 +935,6 @@
       hsl(var(--accent-gold) / 0.2), inset 0 1px 0 hsl(var(--accent-gold) / 0.2);
   }
 
-  /* Also update picture-frame for consistency */
-  .picture-frame {
-    position: relative;
-    padding: 1rem;
-    border-radius: 0; /* Straight corners */
-    background: hsl(var(--card));
-    /* Standardized border width to 4px to match room-furniture */
-    border: 4px solid hsl(var(--accent-gold) / 0.4);
-    /* Enhanced picture frame shadow */
-    box-shadow: 0 3px 10px hsl(var(--surface-dark) / 0.25), 0 1px 4px hsl(var(--surface-dark) / 0.15), inset 0 1px 0
-      hsl(var(--accent-gold) / 0.1);
-    transition: all 0.3s ease;
-  }
-
-  .picture-frame:hover {
-    transform: translateY(-2px);
-    /* Standardized hover border to 2px to match room-furniture */
-    border-width: 2px;
-    border-color: hsl(var(--accent-gold) / 0.6);
-    /* Enhanced hover shadow for picture frame effect */
-    box-shadow: 0 8px 24px hsl(var(--surface-dark) / 0.35), 0 4px 12px hsl(var(--surface-dark) / 0.25), inset 0 1px 0
-      hsl(var(--accent-gold) / 0.15);
-  }
-
   /* PROPER MANOR BACKGROUND PATTERNS - From Attachment */
 
   /* Main Hall Background Pattern - Subtle Diagonal Wallpaper */
