@@ -429,17 +429,18 @@ export function ArchiveToggle<T extends string>({ options, value, onChange, clas
 
 /**
  * ArchiveCard — a content card built on the full-weight ArchiveFrame so it
- * shares the manor language with ArchivePanel. A faint inner scrim sits over
- * the wood so body text and form controls stay legible without flattening the
- * material. Pairs with ArchiveCardHeader / ArchiveCardTitle / ArchiveCardContent
+ * shares the manor language with ArchivePanel. The ArchiveFrame surface is
+ * authoritative: cards do NOT add an extra dark overlay by default. An
+ * explicit scrim can still be requested for exceptional content that needs it.
+ * Pairs with ArchiveCardHeader / ArchiveCardTitle / ArchiveCardContent
  * (a drop-in shape for shadcn's Card subcomponents).
  */
 interface ArchiveCardProps extends Omit<ArchiveFrameProps, "weight"> {
-  /** Dim the wood behind the content for legibility. Defaults to true. */
+  /** Optional content scrim for exceptional cases. Defaults to false. */
   scrim?: boolean
 }
 
-export function ArchiveCard({ scrim = true, className, children, ...props }: ArchiveCardProps) {
+export function ArchiveCard({ scrim = false, className, children, ...props }: ArchiveCardProps) {
   return (
     <ArchiveFrame className={cn("rounded-xl", className)} {...props}>
       <div className="relative">
