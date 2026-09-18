@@ -923,8 +923,9 @@ export default function AddGamePage() {
                           {searchResults.map((game, index) => {
                             const card = game as TCGSearchResult
                             return (
-                              <button
-                                key={game.id}
+                              <div key={game.id}>
+                                <button
+                                  key={game.id}
                                 onClick={() => handleSelectGame(game.id)}
                                 className="group relative rounded-lg border border-accent-gold/20 hover:border-accent-gold/50 transition-colors overflow-hidden bg-surface/30 text-left"
                               >
@@ -961,8 +962,9 @@ export default function AddGamePage() {
                                     <p className="text-xs text-green-500 mt-1 font-body">${card.price.toFixed(2)}</p>
                                   )}
                                 </div>
-                              </button>
-                            {index < searchResults.length - 1 && <ArchiveDivider className="my-1" />}
+                                </button>
+                                {index < searchResults.length - 1 && <ArchiveDivider className="my-1" />}
+                              </div>
                             )
                           })}
                         </div>
@@ -1016,7 +1018,8 @@ export default function AddGamePage() {
                                 </ul>
                               )}
                             </div>
-                            {index < groupBoardResults(searchResults as BGGSearchResult[]).length - 1 && <ArchiveDivider className="my-1" />}
+                              {index < groupBoardResults(searchResults as BGGSearchResult[]).length - 1 && <ArchiveDivider className="my-1" />}
+                            </div>
                           ))}
                         </div>
                       ) : (
