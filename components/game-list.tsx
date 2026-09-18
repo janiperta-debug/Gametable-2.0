@@ -1,6 +1,7 @@
 "use client"
 
 import { CollectionCard } from "@/components/collection-card"
+import { ArchiveDivider } from "@/components/archive-divider"
 import type { Game } from "@/lib/mock-games"
 import type { CollectionCardItem } from "@/lib/types/collection"
 
@@ -64,15 +65,17 @@ export function GameList({ games, cards }: GameListProps) {
   }
 
   return (
-    <div className="min-w-0 space-y-3">
-      {resolvedCards.map((item) => (
-        <CollectionCard
-          key={item.entry.ownershipId}
-          item={item}
-          variant="list"
-          showMarketplaceButton={false}
-          showWishlistButton={true}
-        />
+    <div className="min-w-0">
+      {resolvedCards.map((item, index) => (
+        <div key={item.entry.ownershipId}>
+          <CollectionCard
+            item={item}
+            variant="list"
+            showMarketplaceButton={false}
+            showWishlistButton={true}
+          />
+          {index < resolvedCards.length - 1 && <ArchiveDivider className="my-0" />}
+        </div>
       ))}
     </div>
   )
