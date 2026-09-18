@@ -75,43 +75,52 @@ function CollectionCardList({
   const [expanded, setExpanded] = useState(false)
   const { card, entry } = item
 
+  const media = (
+    <div className="relative h-24 w-16 shrink-0 overflow-hidden rounded-md bg-archive-wood/40 sm:h-32 sm:w-24">
+      <Image
+        src={card.image || "/placeholder.svg"}
+        alt={card.title}
+        fill
+        sizes="(min-width: 640px) 96px, 64px"
+        className="object-cover transition-transform duration-300 group-hover:scale-105"
+      />
+    </div>
+  )
+
   if (card.kind === "tcg") {
     const set = [card.setName, card.setCode ? `(${card.setCode})` : null].filter(Boolean).join(" ")
+
     return (
-      <ArchiveCard corners={false} centerOrnaments={false} className="group w-full min-w-0">
-        <div className="flex min-w-0 flex-col gap-4 p-4 sm:flex-row">
-          <div className="relative h-28 w-20 shrink-0 overflow-hidden rounded-lg bg-archive-wood/40 sm:h-32 sm:w-24">
-            <Image src={card.image || "/placeholder.svg"} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-          </div>
+      <article className="group min-w-0 py-3 sm:py-4">
+        <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+          {media}
           <div className="min-w-0 flex-1">
-            <h3 className="truncate font-heading text-xl font-semibold">{card.title}</h3>
-            <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              {card.tcgSystem && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">{card.tcgSystem}</Badge>}
-              {card.rarity && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">{card.rarity}</Badge>}
+            <h3 className="break-words font-heading text-lg font-semibold sm:text-xl">{card.title}</h3>
+            <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+              {card.tcgSystem && <span className="text-accent-gold">{card.tcgSystem}</span>}
+              {card.rarity && <span className="text-accent-gold">{card.rarity}</span>}
               {set && <span className="break-words">{set}</span>}
-              <span className="shrink-0">Quantity: {card.quantity}</span>
+              <span className="shrink-0">×{card.quantity}</span>
             </div>
           </div>
         </div>
-      </ArchiveCard>
+      </article>
     )
   }
 
   if (card.kind === "miniature") {
     return (
-      <ArchiveCard corners={false} centerOrnaments={false} className="group w-full min-w-0">
-        <div className="flex min-w-0 flex-col gap-4 p-4 sm:flex-row">
-          <div className="relative h-28 w-20 shrink-0 overflow-hidden rounded-lg bg-archive-wood/40 sm:h-32 sm:w-24">
-            <Image src={card.image || "/placeholder.svg"} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-          </div>
+      <article className="group min-w-0 py-3 sm:py-4">
+        <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+          {media}
           <div className="min-w-0 flex-1">
-            <h3 className="truncate font-heading text-xl font-semibold">{card.title}</h3>
-            <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              {card.system && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">{card.system}</Badge>}
-              {card.faction && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">{card.faction}</Badge>}
+            <h3 className="break-words font-heading text-lg font-semibold sm:text-xl">{card.title}</h3>
+            <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+              {card.system && <span className="text-accent-gold">{card.system}</span>}
+              {card.faction && <span className="text-accent-gold">{card.faction}</span>}
               {card.paintStatus && <span>{card.paintStatus}</span>}
-              {card.modelCount != null && <span>Models: {card.modelCount}</span>}
-              {card.pointsTotal != null && <span>Points: {card.pointsTotal}</span>}
+              {card.modelCount != null && <span>{card.modelCount} models</span>}
+              {card.pointsTotal != null && <span>{card.pointsTotal} pts</span>}
             </div>
             {showWishlistButton && (
               <div className="mt-3 flex justify-end">
@@ -126,7 +135,7 @@ function CollectionCardList({
             )}
           </div>
         </div>
-      </ArchiveCard>
+      </article>
     )
   }
 
@@ -137,42 +146,56 @@ function CollectionCardList({
   const totalCount = card.totalExpansionCount ?? expansions.length
 
   return (
-    <ArchiveCard corners={false} centerOrnaments={false} className="group w-full min-w-0">
-      <div className="flex min-w-0 flex-col gap-4 p-4 sm:flex-row">
-        <div className="relative h-40 w-full shrink-0 overflow-hidden rounded-lg bg-archive-wood/40 sm:h-32 sm:w-24">
-          <Image src={card.image || "/placeholder.svg"} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-        </div>
+    <article className="group min-w-0 py-3 sm:py-4">
+      <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+        {media}
 
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-start gap-2">
             <div className="min-w-0 flex-1">
-              <h3 className="truncate font-heading text-xl font-semibold">{card.title}</h3>
-              <div className="mt-1 flex flex-wrap items-center gap-2">
-                <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">{CATEGORY_LABELS[card.category] || card.category}</Badge>
+              <h3 className="break-words font-heading text-lg font-semibold sm:text-xl">{card.title}</h3>
+              <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                <span className="text-accent-gold">{CATEGORY_LABELS[card.category] || card.category}</span>
                 {card.wishlist && !card.owned && (
-                  <Badge variant="secondary" className="bg-accent-gold/90 text-background text-xs">
-                    <Heart className="mr-1 h-3 w-3 fill-current" />{t("collection.wishlist")}
-                  </Badge>
+                  <span className="text-accent-gold">
+                    <Heart className="mr-1 inline h-3 w-3 fill-current" />
+                    {t("collection.wishlist")}
+                  </span>
                 )}
               </div>
             </div>
-            <ArchiveIconButton icon={<Layers className="h-4 w-4" />} aria-label={t("collection.viewDetails")} />
+            <ArchiveIconButton
+              icon={<Layers className="h-4 w-4" />}
+              aria-label={t("collection.viewDetails")}
+              title={t("collection.viewDetails")}
+            />
           </div>
 
-          <div className="mt-3 flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1 shrink-0"><Star className="h-4 w-4 fill-accent-gold text-accent-gold" />{card.rating}</span>
-            <span className="flex items-center gap-1 shrink-0"><Users className="h-4 w-4" />{card.playerCount}</span>
-            <span className="flex items-center gap-1 shrink-0"><Clock className="h-4 w-4" />{card.playTime}m</span>
-            <span className="shrink-0">Published: {card.yearPublished}</span>
+          <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground sm:gap-x-4">
+            <span className="flex items-center gap-1 shrink-0">
+              <Star className="h-4 w-4 fill-accent-gold text-accent-gold" />
+              {card.rating}
+            </span>
+            <span className="flex items-center gap-1 shrink-0">
+              <Users className="h-4 w-4" />
+              {card.playerCount}
+            </span>
+            <span className="flex items-center gap-1 shrink-0">
+              <Clock className="h-4 w-4" />
+              {card.playTime}m
+            </span>
+            <span className="shrink-0">{card.yearPublished}</span>
           </div>
 
-          <div className="mt-3 grid min-w-0 grid-cols-1 gap-2 sm:flex">
+          <div className="mt-3 flex min-w-0 flex-wrap items-center gap-2">
             {entry.detailTarget && (card.owned || card.wishlist) ? (
-              <ArchiveCardButton asChild fullWidth className="sm:flex-1">
+              <ArchiveCardButton asChild className="min-w-0 flex-1 sm:flex-none">
                 <Link href={entry.detailTarget}>{t("collection.viewDetails")}</Link>
               </ArchiveCardButton>
             ) : (
-              <ArchiveCardButton active fullWidth className="sm:flex-1">{t("collection.addToCollection")}</ArchiveCardButton>
+              <ArchiveCardButton active className="min-w-0 flex-1 sm:flex-none">
+                {t("collection.addToCollection")}
+              </ArchiveCardButton>
             )}
             {showMarketplaceButton && card.owned && (
               <ArchiveIconButton
@@ -188,6 +211,7 @@ function CollectionCardList({
                 active={card.wishlist}
                 onClick={() => onToggleWishlist?.(card.id, entry.domain)}
                 aria-label={t("collection.wishlist")}
+                title={t("collection.wishlist")}
               />
             )}
           </div>
@@ -198,7 +222,7 @@ function CollectionCardList({
                 type="button"
                 onClick={() => setExpanded((value) => !value)}
                 aria-expanded={expanded}
-                className="flex min-h-11 w-full min-w-0 items-center justify-between gap-2 rounded-md border border-accent-gold/20 bg-archive-wood/30 px-3 py-2 text-sm font-body text-accent-gold transition-colors hover:bg-accent-gold/10"
+                className="flex min-h-10 w-full min-w-0 items-center justify-between gap-2 border border-accent-gold/20 bg-archive-wood/30 px-3 py-2 text-sm font-body text-accent-gold transition-colors hover:bg-accent-gold/10"
               >
                 <span className="flex min-w-0 items-center gap-2">
                   <Puzzle className="h-4 w-4 shrink-0" />
@@ -211,7 +235,7 @@ function CollectionCardList({
                   {expansions.map((exp) => (
                     <li key={exp.id} className={`flex min-w-0 items-center gap-2 py-1 ${exp.owned ? "" : "opacity-40"}`}>
                       <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded bg-archive-wood/40">
-                        <Image src={exp.image_url || "/placeholder.svg"} alt={exp.name} fill className={`object-cover ${exp.owned ? "" : "grayscale"}`} />
+                        <Image src={exp.image_url || "/placeholder.svg"} alt={exp.name} fill className={exp.owned ? "object-cover" : "object-cover grayscale"} />
                       </div>
                       <span className="truncate text-sm">{exp.name}</span>
                     </li>
@@ -222,7 +246,7 @@ function CollectionCardList({
           )}
         </div>
       </div>
-    </ArchiveCard>
+    </article>
   )
 }
 
