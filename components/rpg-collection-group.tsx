@@ -23,7 +23,7 @@ export function RPGCollectionGroup({
   const [expanded, setExpanded] = useState(true)
 
   return (
-    <ArchiveCard corners={false} centerOrnaments={false} className="group">
+    <ArchiveCard className="group">
       <div className="p-4">
         <button
           type="button"
