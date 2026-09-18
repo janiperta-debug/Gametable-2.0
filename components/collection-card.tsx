@@ -23,6 +23,7 @@ interface CollectionCardProps {
   onToggleWishlist?: (gameId: string, domain: CollectionCardItem["entry"]["domain"]) => void
   showMarketplaceButton?: boolean
   showWishlistButton?: boolean
+  variant?: "grid" | "list"
 }
 
 /** Shared visual skeleton for every Collection card variant. */
@@ -63,13 +64,186 @@ function CollectionCardHeading({ children, badge }: { children: React.ReactNode;
   )
 }
 
+function CollectionCardList({
+  item,
+  onToggleWishlist,
+  showMarketplaceButton,
+  showWishlistButton,
+}: Pick<CollectionCardProps, "item" | "onToggleWishlist" | "showMarketplaceButton" | "showWishlistButton">) {
+  const t = useTranslations()
+  const router = useRouter()
+  const [expanded, setExpanded] = useState(false)
+  const { card, entry } = item
+
+  if (card.kind === "tcg") {
+    const set = [card.setName, card.setCode ? `(${card.setCode})` : null].filter(Boolean).join(" ")
+    return (
+      <ArchiveCard corners={false} centerOrnaments={false} className="group w-full min-w-0">
+        <div className="flex min-w-0 flex-col gap-4 p-4 sm:flex-row">
+          <div className="relative h-28 w-20 shrink-0 overflow-hidden rounded-lg bg-archive-wood/40 sm:h-32 sm:w-24">
+            <Image src={card.image || "/placeholder.svg"} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate font-heading text-xl font-semibold">{card.title}</h3>
+            <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              {card.tcgSystem && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">{card.tcgSystem}</Badge>}
+              {card.rarity && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">{card.rarity}</Badge>}
+              {set && <span className="break-words">{set}</span>}
+              <span className="shrink-0">Quantity: {card.quantity}</span>
+            </div>
+          </div>
+        </div>
+      </ArchiveCard>
+    )
+  }
+
+  if (card.kind === "miniature") {
+    return (
+      <ArchiveCard corners={false} centerOrnaments={false} className="group w-full min-w-0">
+        <div className="flex min-w-0 flex-col gap-4 p-4 sm:flex-row">
+          <div className="relative h-28 w-20 shrink-0 overflow-hidden rounded-lg bg-archive-wood/40 sm:h-32 sm:w-24">
+            <Image src={card.image || "/placeholder.svg"} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate font-heading text-xl font-semibold">{card.title}</h3>
+            <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              {card.system && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">{card.system}</Badge>}
+              {card.faction && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">{card.faction}</Badge>}
+              {card.paintStatus && <span>{card.paintStatus}</span>}
+              {card.modelCount != null && <span>Models: {card.modelCount}</span>}
+              {card.pointsTotal != null && <span>Points: {card.pointsTotal}</span>}
+            </div>
+            {showWishlistButton && (
+              <div className="mt-3 flex justify-end">
+                <ArchiveIconButton
+                  icon={<Heart className={`h-4 w-4 ${entry.status === "wishlist" ? "fill-current" : ""}`} />}
+                  active={entry.status === "wishlist"}
+                  onClick={() => onToggleWishlist?.(card.id, entry.domain)}
+                  aria-label={t("collection.wishlist")}
+                  title={t("collection.wishlist")}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </ArchiveCard>
+    )
+  }
+
+  if (card.kind !== "board-rpg") return assertUnreachableCollectionCard(card)
+
+  const expansions = card.expansions || []
+  const ownedCount = card.ownedExpansionCount ?? expansions.filter((exp) => exp.owned).length
+  const totalCount = card.totalExpansionCount ?? expansions.length
+
+  return (
+    <ArchiveCard corners={false} centerOrnaments={false} className="group w-full min-w-0">
+      <div className="flex min-w-0 flex-col gap-4 p-4 sm:flex-row">
+        <div className="relative h-40 w-full shrink-0 overflow-hidden rounded-lg bg-archive-wood/40 sm:h-32 sm:w-24">
+          <Image src={card.image || "/placeholder.svg"} alt={card.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 items-start gap-2">
+            <div className="min-w-0 flex-1">
+              <h3 className="truncate font-heading text-xl font-semibold">{card.title}</h3>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">{CATEGORY_LABELS[card.category] || card.category}</Badge>
+                {card.wishlist && !card.owned && (
+                  <Badge variant="secondary" className="bg-accent-gold/90 text-background text-xs">
+                    <Heart className="mr-1 h-3 w-3 fill-current" />{t("collection.wishlist")}
+                  </Badge>
+                )}
+              </div>
+            </div>
+            <ArchiveIconButton icon={<Layers className="h-4 w-4" />} aria-label={t("collection.viewDetails")} />
+          </div>
+
+          <div className="mt-3 flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1 shrink-0"><Star className="h-4 w-4 fill-accent-gold text-accent-gold" />{card.rating}</span>
+            <span className="flex items-center gap-1 shrink-0"><Users className="h-4 w-4" />{card.playerCount}</span>
+            <span className="flex items-center gap-1 shrink-0"><Clock className="h-4 w-4" />{card.playTime}m</span>
+            <span className="shrink-0">Published: {card.yearPublished}</span>
+          </div>
+
+          <div className="mt-3 grid min-w-0 grid-cols-1 gap-2 sm:flex">
+            {entry.detailTarget && (card.owned || card.wishlist) ? (
+              <ArchiveCardButton asChild fullWidth className="sm:flex-1">
+                <Link href={entry.detailTarget}>{t("collection.viewDetails")}</Link>
+              </ArchiveCardButton>
+            ) : (
+              <ArchiveCardButton active fullWidth className="sm:flex-1">{t("collection.addToCollection")}</ArchiveCardButton>
+            )}
+            {showMarketplaceButton && card.owned && (
+              <ArchiveIconButton
+                icon={<Store className="h-4 w-4" />}
+                onClick={() => router.push(`/marketplace/create?gameId=${card.userGameId || entry.catalogId}`)}
+                title={t("marketplace.listOnMarketplace")}
+                aria-label={t("marketplace.listOnMarketplace")}
+              />
+            )}
+            {showWishlistButton && (
+              <ArchiveIconButton
+                icon={<Heart className={`h-4 w-4 ${card.wishlist ? "fill-current" : ""}`} />}
+                active={card.wishlist}
+                onClick={() => onToggleWishlist?.(card.id, entry.domain)}
+                aria-label={t("collection.wishlist")}
+              />
+            )}
+          </div>
+
+          {totalCount > 0 && (
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => setExpanded((value) => !value)}
+                aria-expanded={expanded}
+                className="flex min-h-11 w-full min-w-0 items-center justify-between gap-2 rounded-md border border-accent-gold/20 bg-archive-wood/30 px-3 py-2 text-sm font-body text-accent-gold transition-colors hover:bg-accent-gold/10"
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  <Puzzle className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{t("game.expansionsProgress", { owned: ownedCount, total: totalCount })}</span>
+                </span>
+                <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${expanded ? "rotate-180" : ""}`} />
+              </button>
+              {expanded && (
+                <ul className="mt-2 space-y-1 border-l border-accent-gold/20 pl-3">
+                  {expansions.map((exp) => (
+                    <li key={exp.id} className={`flex min-w-0 items-center gap-2 py-1 ${exp.owned ? "" : "opacity-40"}`}>
+                      <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded bg-archive-wood/40">
+                        <Image src={exp.image_url || "/placeholder.svg"} alt={exp.name} fill className={`object-cover ${exp.owned ? "" : "grayscale"}`} />
+                      </div>
+                      <span className="truncate text-sm">{exp.name}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </ArchiveCard>
+  )
+}
+
 export function CollectionCard({
   item,
   onToggleForTrade,
   onToggleWishlist,
   showMarketplaceButton = false,
   showWishlistButton = false,
+  variant = "grid",
 }: CollectionCardProps) {
+  if (variant === "list") {
+    return (
+      <CollectionCardList
+        item={item}
+        onToggleWishlist={onToggleWishlist}
+        showMarketplaceButton={showMarketplaceButton}
+        showWishlistButton={showWishlistButton}
+      />
+    )
+  }
   const t = useTranslations()
   const router = useRouter()
   const [expanded, setExpanded] = useState(false)
