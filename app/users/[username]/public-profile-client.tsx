@@ -2,11 +2,8 @@
 
 import { useState } from "react"
 import { useTranslations } from "@/lib/i18n"
-import { ArchiveButton, ArchiveCard, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle, ArchiveDivider } from "@/components/archive-frame"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { MapPin, Gamepad2, Star, UserPlus, UserCheck, Clock, Loader2, ArrowLeft } from "lucide-react"
+import { ArchiveCard, ArchiveCardButton, ArchiveDivider } from "@/components/archive-frame"
 import Link from "next/link"
-import Image from "next/image"
 import { useToast } from "@/hooks/use-toast"
 import { sendFriendRequest as sendFriendRequestServer, acceptFriendRequest as acceptFriendRequestServer } from "@/app/actions/friends"
 
@@ -78,7 +75,6 @@ export function PublicProfileClient({
   const isOwnProfile = currentUserId === profile.id
   const displayName = profile.display_name || profile.username || "Anonymous"
 
-  // Helper to categorize a game
   function getGameCategory(game: Game): string {
     const cat = game.category?.toLowerCase() || ""
     if (cat.includes("rpg") || cat.includes("role")) return "rpg"
@@ -87,20 +83,15 @@ export function PublicProfileClient({
     return "boardGames"
   }
 
-  // Filter games by category
-  const filteredGames = categoryFilter 
-    ? games.filter(game => getGameCategory(game) === categoryFilter)
+  const filteredGames = categoryFilter
+    ? games.filter((game) => getGameCategory(game) === categoryFilter)
     : games
-  
-  // Show limited or all games
   const displayedGames = showAllGames ? filteredGames : filteredGames.slice(0, 20)
 
   async function handleSendFriendRequest() {
     if (!currentUserId) return
-    
     setLoading(true)
     const result = await sendFriendRequestServer(profile.id)
-    
     if (result.error) {
       toast({
         title: t("common.error"),
@@ -119,10 +110,8 @@ export function PublicProfileClient({
 
   async function handleAcceptFriendRequest() {
     if (!currentUserId || !friendshipId) return
-    
     setLoading(true)
     const result = await acceptFriendRequestServer(friendshipId)
-    
     if (result.error) {
       toast({
         title: t("common.error"),
@@ -139,248 +128,205 @@ export function PublicProfileClient({
     setLoading(false)
   }
 
+  const buttonClass = "w-full sm:w-auto"
+
   return (
     <div className="min-h-screen room-environment">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Back Button */}
-        <ArchiveButton
-          className="mb-4"
-          onClick={() => window.history.back()}
-          icon={<ArrowLeft className="h-4 w-4" />}
-        >
-          {t("common.back")}
-        </ArchiveButton>
+      <div className="container mx-auto max-w-4xl px-4 py-8">
+        <Link href="/discover" className="mb-4 inline-block">
+          <ArchiveCardButton>← {t("common.back")}</ArchiveCardButton>
+        </Link>
 
-        {/* Profile Header */}
         <ArchiveCard className="mb-6">
-          <ArchiveCardContent className="p-6">
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-              <Avatar className="h-24 w-24 border-2 border-accent-gold">
-                <AvatarImage src={profile.avatar_url || undefined} alt={displayName} />
-                <AvatarFallback className="bg-accent-gold/20 text-accent-gold text-2xl">
-                  {displayName.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              
-              <div className="flex-1 text-center sm:text-left">
-                <h1 className="text-2xl font-heading text-accent-gold mb-1">
-                  {displayName}
-                </h1>
-                {profile.username && profile.display_name && (
-                  <p className="text-muted-foreground text-sm mb-2">@{profile.username}</p>
+          <div className="p-6">
+            <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
+              <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-accent-gold bg-accent-gold/10 text-2xl font-semibold text-accent-gold">
+                {profile.avatar_url ? (
+                  <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  displayName.charAt(0).toUpperCase()
                 )}
-                
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm text-muted-foreground mb-3">
-                  {profile.location && (
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
-                      {profile.location}
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1">
-                    <Star className="h-4 w-4 text-accent-gold" />
-                    {t("profile.level")} {profile.level || 1}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Gamepad2 className="h-4 w-4" />
-                    {gameCount} {t("collection.gameCountLabel")}
-                  </span>
+              </div>
+
+              <div className="min-w-0 flex-1 text-center sm:text-left">
+                <h1 className="mb-1 font-heading text-2xl text-accent-gold">{displayName}</h1>
+                {profile.username && profile.display_name && (
+                  <p className="mb-2 text-sm text-muted-foreground">@{profile.username}</p>
+                )}
+
+                <div className="mb-3 flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground sm:justify-start">
+                  {profile.location && <span>{profile.location}</span>}
+                  <span>{t("profile.level")} {profile.level || 1}</span>
+                  <span>{gameCount} {t("collection.gameCountLabel")}</span>
                 </div>
 
-                {profile.bio && (
-                  <p className="text-foreground/80 mb-4">{profile.bio}</p>
-                )}
+                {profile.bio && <p className="mb-4 text-foreground/80">{profile.bio}</p>}
 
-                {/* Game Interests */}
                 {gameInterests && gameInterests.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="mb-4 flex flex-wrap justify-center gap-2 sm:justify-start">
                     {gameInterests.map((interest) => (
-                      <span key={interest} className="rounded-full border border-accent-gold/50 bg-accent-gold/10 px-3 py-1 text-sm text-accent-gold">
+                      <span
+                        key={interest}
+                        className="rounded-full border border-accent-gold/50 bg-accent-gold/10 px-3 py-1 text-sm text-accent-gold"
+                      >
                         {INTEREST_LABELS[interest] ? t(INTEREST_LABELS[interest]) : interest}
                       </span>
                     ))}
                   </div>
                 )}
 
-                {/* Friend Actions */}
                 {!isOwnProfile && currentUserId && (
-                  <div className="mt-4">
+                  <div className="mt-4 flex justify-center sm:justify-start">
                     {friendshipStatus === "none" && (
-                      <ArchiveButton
-                        onClick={handleSendFriendRequest}
-                        disabled={loading}
+                      <ArchiveCardButton
+                        className={buttonClass}
                         active
-                        icon={loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+                        disabled={loading}
+                        onClick={handleSendFriendRequest}
                       >
-                        {t("friends.sendRequest")}
-                      </ArchiveButton>
+                        {loading ? "…" : t("friends.sendRequest")}
+                      </ArchiveCardButton>
                     )}
                     {friendshipStatus === "pending" && (
-                      <ArchiveButton disabled icon={<Clock className="h-4 w-4" />}>
+                      <ArchiveCardButton className={buttonClass} disabled>
                         {t("friends.requestPending")}
-                      </ArchiveButton>
+                      </ArchiveCardButton>
                     )}
                     {friendshipStatus === "incoming" && (
-                      <ArchiveButton
-                        onClick={handleAcceptFriendRequest}
-                        disabled={loading}
+                      <ArchiveCardButton
+                        className={buttonClass}
                         active
-                        icon={loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserCheck className="h-4 w-4" />}
+                        disabled={loading}
+                        onClick={handleAcceptFriendRequest}
                       >
-                        {t("friends.acceptRequest")}
-                      </ArchiveButton>
+                        {loading ? "…" : t("friends.acceptRequest")}
+                      </ArchiveCardButton>
                     )}
                     {friendshipStatus === "accepted" && (
-                      <ArchiveButton disabled active icon={<UserCheck className="h-4 w-4" />}>
+                      <ArchiveCardButton className={buttonClass} disabled active>
                         {t("friends.alreadyFriends")}
-                      </ArchiveButton>
+                      </ArchiveCardButton>
                     )}
                   </div>
                 )}
 
                 {isOwnProfile && (
-                  <Link href="/profile">
-                    <ArchiveButton className="mt-4">
-                      {t("profile.editProfile")}
-                    </ArchiveButton>
+                  <Link href="/profile" className="mt-4 inline-block">
+                    <ArchiveCardButton>{t("profile.editProfile")}</ArchiveCardButton>
                   </Link>
                 )}
               </div>
             </div>
-          </ArchiveCardContent>
+          </div>
         </ArchiveCard>
 
-        {/* Category Breakdown */}
         {profile.show_collection !== false && games.length > 0 && (
           <ArchiveCard className="mb-6">
-            <ArchiveCardHeader>
-              <ArchiveCardTitle className="flex items-center gap-2">
-                <Gamepad2 className="h-5 w-5" />
-                {t("collection.title")} ({gameCount})
-              </ArchiveCardTitle>
-            </ArchiveCardHeader>
-            <ArchiveCardContent>
-              {/* Category filter badges */}
-              <div className="flex flex-wrap gap-2 mb-6">
-                <button
-                  onClick={() => { setCategoryFilter(null); setShowAllGames(false); }}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                    categoryFilter === null 
-                      ? "bg-accent-gold text-background" 
-                      : "bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20"
-                  }`}
+            <div className="p-5">
+              <div className="mb-4 flex items-center gap-2">
+                <h2 className="font-cinzel text-lg font-bold uppercase tracking-wide text-[var(--archive-gold,#d9b65c)]">
+                  {t("collection.title")} ({gameCount})
+                </h2>
+              </div>
+
+              <div className="mb-6 flex flex-wrap gap-2">
+                <ArchiveCardButton
+                  active={categoryFilter === null}
+                  onClick={() => {
+                    setCategoryFilter(null)
+                    setShowAllGames(false)
+                  }}
                 >
                   {t("collection.allItems")} ({games.length})
-                </button>
+                </ArchiveCardButton>
                 {categoryCounts.boardGames > 0 && (
-                  <button
-                    onClick={() => { setCategoryFilter("boardGames"); setShowAllGames(false); }}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                      categoryFilter === "boardGames" 
-                        ? "bg-accent-gold text-background" 
-                        : "bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20"
-                    }`}
+                  <ArchiveCardButton
+                    active={categoryFilter === "boardGames"}
+                    onClick={() => {
+                      setCategoryFilter("boardGames")
+                      setShowAllGames(false)
+                    }}
                   >
                     {t("profile.boardAndCardGames")} ({categoryCounts.boardGames})
-                  </button>
+                  </ArchiveCardButton>
                 )}
                 {categoryCounts.rpg > 0 && (
-                  <button
-                    onClick={() => { setCategoryFilter("rpg"); setShowAllGames(false); }}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                      categoryFilter === "rpg" 
-                        ? "bg-accent-gold text-background" 
-                        : "bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20"
-                    }`}
+                  <ArchiveCardButton
+                    active={categoryFilter === "rpg"}
+                    onClick={() => {
+                      setCategoryFilter("rpg")
+                      setShowAllGames(false)
+                    }}
                   >
                     {t("profile.roleplayingGames")} ({categoryCounts.rpg})
-                  </button>
+                  </ArchiveCardButton>
                 )}
                 {categoryCounts.miniatures > 0 && (
-                  <button
-                    onClick={() => { setCategoryFilter("miniatures"); setShowAllGames(false); }}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                      categoryFilter === "miniatures" 
-                        ? "bg-accent-gold text-background" 
-                        : "bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20"
-                    }`}
+                  <ArchiveCardButton
+                    active={categoryFilter === "miniatures"}
+                    onClick={() => {
+                      setCategoryFilter("miniatures")
+                      setShowAllGames(false)
+                    }}
                   >
                     {t("profile.otherMiniatureGames")} ({categoryCounts.miniatures})
-                  </button>
+                  </ArchiveCardButton>
                 )}
                 {categoryCounts.tradingCards > 0 && (
-                  <button
-                    onClick={() => { setCategoryFilter("tradingCards"); setShowAllGames(false); }}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                      categoryFilter === "tradingCards" 
-                        ? "bg-accent-gold text-background" 
-                        : "bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20"
-                    }`}
+                  <ArchiveCardButton
+                    active={categoryFilter === "tradingCards"}
+                    onClick={() => {
+                      setCategoryFilter("tradingCards")
+                      setShowAllGames(false)
+                    }}
                   >
                     {t("profile.tradingCards")} ({categoryCounts.tradingCards})
-                  </button>
+                  </ArchiveCardButton>
                 )}
               </div>
 
-              {/* Game list view */}
               <div className={`${showAllGames ? "max-h-[70vh]" : "max-h-[400px]"} overflow-y-auto`}>
                 {displayedGames.map((game, index) => (
                   <div key={game.id}>
                     <div className="flex items-center gap-3 py-3">
-                    <div className="relative w-12 h-12 flex-shrink-0 rounded overflow-hidden bg-accent-gold/10">
-                      {game.thumbnail_url ? (
-                        <Image
-                          src={game.thumbnail_url}
-                          alt={game.name}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Gamepad2 className="h-5 w-5 text-accent-gold/50" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{game.name}</p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        {game.min_players && game.max_players && (
-                          <span>{game.min_players}-{game.max_players} {t("game.players")}</span>
-                        )}
-                        {game.year && (
-                          <span>{game.year}</span>
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded bg-accent-gold/10 text-xs text-accent-gold/70">
+                        {game.thumbnail_url ? (
+                          <img src={game.thumbnail_url} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          "GT"
                         )}
                       </div>
-                    </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">{game.name}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          {game.min_players && game.max_players && (
+                            <span>{game.min_players}-{game.max_players} {t("game.players")}</span>
+                          )}
+                          {game.year && <span>{game.year}</span>}
+                        </div>
+                      </div>
                     </div>
                     {index < displayedGames.length - 1 && <ArchiveDivider className="my-1" />}
                   </div>
                 ))}
               </div>
-              
-              {/* Show more/less button */}
+
               {filteredGames.length > 20 && (
                 <div className="mt-4 text-center">
-                  <ArchiveButton
-                    onClick={() => setShowAllGames(!showAllGames)}
-                  >
-                    {showAllGames 
+                  <ArchiveCardButton onClick={() => setShowAllGames(!showAllGames)}>
+                    {showAllGames
                       ? t("common.showLess")
-                      : `${t("common.showAll")} (+${filteredGames.length - 20} ${t("collection.moreGames")})`
-                    }
-                  </ArchiveButton>
+                      : `${t("common.showAll")} (+${filteredGames.length - 20} ${t("collection.moreGames")})`}
+                  </ArchiveCardButton>
                 </div>
               )}
-            </ArchiveCardContent>
+            </div>
           </ArchiveCard>
         )}
 
-        {/* No Collection Message */}
         {profile.show_collection === false && (
           <ArchiveCard>
-            <ArchiveCardContent className="py-8 text-center text-muted-foreground">
-              {t("profile.collectionHidden")}
-            </ArchiveCardContent>
+            <div className="p-8 text-center text-muted-foreground">{t("profile.collectionHidden")}</div>
           </ArchiveCard>
         )}
       </div>
