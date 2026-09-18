@@ -8,6 +8,7 @@ import { getBadgesWithProgress, type BadgeWithProgress } from "@/app/actions/bad
 import { useUser } from "@/hooks/useUser"
 import { ThemeHero } from "@/components/theme-hero"
 import { ArchiveCard, ArchiveCardContent } from "@/components/archive-frame"
+import { ArchiveDivider } from "@/components/archive-divider"
 import Image from "next/image"
 import { formatDistanceToNow } from "date-fns"
 
@@ -184,7 +185,7 @@ export default function TrophiesPage() {
               <ArchiveCard key={series}>
                 <ArchiveCardContent>
                 {/* Series Header */}
-                <div className="flex items-center justify-between mb-6 pb-4 border-b border-accent-gold/20">
+                <div className="flex items-center justify-between mb-5">
                   <div>
                     <h2 className="text-2xl text-accent-gold mb-1">{seriesNameTranslated}</h2>
                     <p className="text-sm font-merriweather text-muted-foreground">
@@ -193,10 +194,11 @@ export default function TrophiesPage() {
                   </div>
                   <BadgeIcon className="h-6 w-6 text-accent-gold/60" />
                 </div>
+                <ArchiveDivider variant="ornate" className="mb-1" />
 
                 {/* Badge Tiers */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {seriesBadges.map((badge) => {
+                <div className="space-y-0">
+                  {seriesBadges.map((badge, badgeIndex) => {
                     const isEarned = badge.earned
                     const progress = badge.current_progress
                     const required = badge.requirement_value || 0
@@ -214,10 +216,8 @@ export default function TrophiesPage() {
                         }`}
                       >
                         <div
-                          className={`relative p-6 rounded-lg border-2 transition-all duration-300 ${
-                            isEarned
-                              ? "bg-gradient-to-br from-accent-gold/10 to-accent-gold/5 border-accent-gold/40 shadow-lg shadow-accent-gold/20"
-                              : "bg-background/30 border-border/50"
+                          className={`relative py-7 sm:py-8 transition-all duration-300 ${
+                            isEarned ? "" : "opacity-75"
                           }`}
                         >
                           {/* Badge Image */}
@@ -286,11 +286,8 @@ export default function TrophiesPage() {
                             </div>
                           </div>
 
-                          {/* Earned Badge Glow Effect */}
-                          {isEarned && (
-                            <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-accent-gold/5 to-transparent pointer-events-none" />
-                          )}
                         </div>
+                        {badgeIndex < seriesBadges.length - 1 && <ArchiveDivider variant="ornate" />}
                       </div>
                     )
                   })}
