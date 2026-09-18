@@ -34,7 +34,7 @@ export function DiscoverPlayersFixed() {
 
   return (
     <section className="space-y-6">
-      <div className="picture-frame rounded-lg p-5 space-y-4">
+      <ArchiveCard className="p-5 space-y-4">
         <div className="grid gap-4 md:grid-cols-3">
           <input className="rounded-md border bg-background px-3 py-2" placeholder="Sijainti" value={location} onChange={(e) => setLocation(e.target.value)} />
           <input className="rounded-md border bg-background px-3 py-2" placeholder="Pelin nimi" value={gameTitle} onChange={(e) => setGameTitle(e.target.value)} />
@@ -49,16 +49,17 @@ export function DiscoverPlayersFixed() {
         <button className="rounded-md bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50" onClick={handleSearch} disabled={loading}>
           {loading ? "Haetaan…" : "Hae pelaajia"}
         </button>
-      </div>
+      </ArchiveCard>
 
       {searched && players.length === 0 ? <p className="text-center text-muted-foreground">Pelaajia ei löytynyt näillä hakuehdoilla.</p> : null}
-      <div className="grid gap-4 md:grid-cols-2">
-        {players.map((player) => {
+      <ArchiveCard>
+        <div className="space-y-0">
+        {players.map((player, index) => {
           const name = player.display_name || player.username || "Pelaaja"
           const initials = name.slice(0, 2).toUpperCase()
           const status = player.friendship_status
           return (
-            <article key={player.id} className="picture-frame rounded-lg p-4 flex items-center gap-4">
+            <article key={player.id} className="flex items-center gap-4 px-1 py-4">
               <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center font-semibold">{initials}</div>
               <div className="min-w-0 flex-1">
                 <h3 className="font-semibold truncate">{name}</h3>
@@ -69,9 +70,11 @@ export function DiscoverPlayersFixed() {
                 {status === "accepted" ? "Ystävä" : status === "pending" ? "Peru pyyntö" : busy === player.id ? "…" : "Lisää ystävä"}
               </button>
             </article>
+          {index < players.length - 1 && <ArchiveDivider className="my-1" />}
           )
         })}
-      </div>
+        </div>
+      </ArchiveCard>
     </section>
   )
 }
