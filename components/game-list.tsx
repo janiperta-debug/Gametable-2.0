@@ -1,6 +1,7 @@
 "use client"
 
 import { ArchiveCard, ArchiveCardButton, ArchiveIconButton } from "@/components/archive-frame"
+import { ArchiveDivider } from "@/components/archive-divider"
 import { Badge } from "@/components/ui/badge"
 import { Star, Users, Clock, Heart, MoreVertical, Puzzle, ChevronDown } from "lucide-react"
 import Image from "next/image"
@@ -70,11 +71,16 @@ export function GameList({ games, cards }: GameListProps) {
   }
 
   return (
-    <div className="space-y-4">
-      {resolvedCards.map((item) => (
-        <GameListItem key={item.entry.ownershipId} item={item} />
-      ))}
-    </div>
+    <ArchiveCard>
+      <div className="space-y-0">
+        {resolvedCards.map((item, index) => (
+          <div key={item.entry.ownershipId}>
+            <GameListItem item={item} />
+            {index < resolvedCards.length - 1 && <ArchiveDivider className="my-1" />}
+          </div>
+        ))}
+      </div>
+    </ArchiveCard>
   )
 }
 
@@ -84,7 +90,7 @@ function GameListItem({ item }: { item: CollectionCardItem }) {
     const set = [card.setName, card.setCode ? `(${card.setCode})` : null].filter(Boolean).join(' ')
 
     return (
-      <ArchiveCard corners={false} centerOrnaments={false} className="group">
+      <div className="group">
         <div className="flex gap-4 p-4">
           <div className="relative w-24 h-32 flex-shrink-0">
             <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-surface/50 w-full h-full">
@@ -101,12 +107,12 @@ function GameListItem({ item }: { item: CollectionCardItem }) {
             </div>
           </div>
         </div>
-      </ArchiveCard>
+      </div>
     )
   }
   if (card.kind === 'miniature') {
     return (
-      <ArchiveCard corners={false} centerOrnaments={false} className="group">
+      <div className="group">
         <div className="flex gap-4 p-4">
           <div className="relative w-24 h-32 flex-shrink-0">
             <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-surface/50 w-full h-full">
@@ -124,7 +130,7 @@ function GameListItem({ item }: { item: CollectionCardItem }) {
             </div>
           </div>
         </div>
-      </ArchiveCard>
+      </div>
     )
   }
   if (card.kind !== 'board-rpg') {
@@ -135,7 +141,7 @@ function GameListItem({ item }: { item: CollectionCardItem }) {
   const totalCount = card.totalExpansionCount ?? expansions.length
 
   return (
-    <ArchiveCard corners={false} centerOrnaments={false} className="group">
+    <div className="group">
       <div className="flex gap-4 p-4">
         <div className="relative w-24 h-32 flex-shrink-0">
           <div className="aspect-[3/4] relative overflow-hidden rounded-lg bg-surface/50 w-full h-full">
@@ -215,6 +221,6 @@ function GameListItem({ item }: { item: CollectionCardItem }) {
           )}
         </div>
       </div>
-    </ArchiveCard>
+    </div>
   )
 }
