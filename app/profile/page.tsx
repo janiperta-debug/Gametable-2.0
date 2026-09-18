@@ -6,6 +6,7 @@ import { ManorCorrespondence } from "@/components/manor-correspondence"
 import { PrivacyControls } from "@/components/privacy-controls"
 import { FriendsList } from "@/components/friends-list"
 import { AccountManagement } from "@/components/account-management"
+import { ProfileNavigationSettings } from "@/components/profile-navigation-settings"
 
 export default function ProfilePage() {
   return (
@@ -17,6 +18,9 @@ export default function ProfilePage() {
         {/* Profile Content */}
         <div className="max-w-6xl mx-auto space-y-8">
           <GamingProgress />
+
+          {/* Mobile Navigation */}
+          <ProfileNavigationSettings />
 
           {/* My Notifications */}
           <ProfileNotifications />
