@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import { createServiceClient } from "@/lib/supabase/service"
 import { revalidatePath } from "next/cache"
 import { checkAndAwardBadges } from "./badges"
+import { canUnlockManorRoom } from "@/lib/manor-progression"
 
 /**
  * Award XP to a user - Server-side only, never trust client
@@ -64,6 +65,47 @@ export async function awardXP(
   }
 
   return { success: true, newXP: result.new_xp, newLevel: result.new_level }
+}
+
+/**
+ * Open a Manor room after its XP threshold has been reached.
+ *
+ * XP grants the opening right. This records the explicit opened state and
+ * intentionally leaves profiles.preferred_theme unchanged.
+ */
+export async function unlockManorRoom(roomId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) return { success: false, error: "Unauthorized" }
+  if (roomId === "main-hall") return { success: true }
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("xp, unlocked_themes")
+    .eq("id", user.id)
+    .single()
+
+  if (profileError || !profile) return { success: false, error: "Profile not found" }
+
+  if (!canUnlockManorRoom(roomId, { xp: profile.xp, unlocked_themes: profile.unlocked_themes })) {
+    return { success: false, error: "Room is not yet available to unlock" }
+  }
+
+  const unlocked = Array.from(new Set([...(profile.unlocked_themes ?? []), roomId]))
+  const { error: updateError } = await supabase
+    .from("profiles")
+    .update({ unlocked_themes: unlocked })
+    .eq("id", user.id)
+
+  if (updateError) {
+    console.error("Error unlocking Manor room:", updateError)
+    return { success: false, error: "Failed to unlock room" }
+  }
+
+  revalidatePath("/themes")
+  revalidatePath("/home")
+  return { success: true }
 }
 
 /**
