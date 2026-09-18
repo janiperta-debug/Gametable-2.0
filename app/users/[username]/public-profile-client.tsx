@@ -3,9 +3,7 @@
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useTranslations } from "@/lib/i18n"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { ArchiveButton, ArchiveCard, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle, ArchiveDivider } from "@/components/archive-frame"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { MapPin, Gamepad2, Star, UserPlus, UserCheck, Clock, Loader2, ArrowLeft } from "lucide-react"
 import Link from "next/link"
@@ -150,21 +148,20 @@ export function PublicProfileClient({
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen room-environment">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Back Button */}
-        <Button
-          variant="ghost"
-          className="mb-4 text-muted-foreground hover:text-foreground"
+        <ArchiveButton
+          className="mb-4"
           onClick={() => window.history.back()}
+          icon={<ArrowLeft className="h-4 w-4" />}
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
           {t("common.back")}
-        </Button>
+        </ArchiveButton>
 
         {/* Profile Header */}
-        <Card className="border-accent-gold/30 bg-card/50 mb-6">
-          <CardContent className="pt-6">
+        <ArchiveCard className="mb-6">
+          <ArchiveCardContent className="p-6">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               <Avatar className="h-24 w-24 border-2 border-accent-gold">
                 <AvatarImage src={profile.avatar_url || undefined} alt={displayName} />
@@ -268,19 +265,19 @@ export function PublicProfileClient({
                 )}
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </ArchiveCardContent>
+        </ArchiveCard>
 
         {/* Category Breakdown */}
         {profile.show_collection !== false && games.length > 0 && (
-          <Card className="border-accent-gold/30 bg-card/50 mb-6">
-            <CardHeader>
-              <CardTitle className="text-accent-gold font-heading flex items-center gap-2">
+          <ArchiveCard className="mb-6">
+            <ArchiveCardHeader>
+              <ArchiveCardTitle className="flex items-center gap-2">
                 <Gamepad2 className="h-5 w-5" />
                 {t("collection.title")} ({gameCount})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </ArchiveCardTitle>
+            </ArchiveCardHeader>
+            <ArchiveCardContent>
               {/* Category filter badges */}
               <div className="flex flex-wrap gap-2 mb-6">
                 <button
@@ -344,9 +341,10 @@ export function PublicProfileClient({
               </div>
 
               {/* Game list view */}
-              <div className={`space-y-2 ${showAllGames ? "max-h-[70vh]" : "max-h-[400px]"} overflow-y-auto`}>
-                {displayedGames.map((game) => (
-                  <div key={game.id} className="flex items-center gap-3 p-2 rounded-lg bg-background/30 hover:bg-background/50 transition-colors">
+              <div className={`${showAllGames ? "max-h-[70vh]" : "max-h-[400px]"} overflow-y-auto`}>
+                {displayedGames.map((game, index) => (
+                  <div key={game.id}>
+                    <div className="flex items-center gap-3 py-3">
                     <div className="relative w-12 h-12 flex-shrink-0 rounded overflow-hidden bg-accent-gold/10">
                       {game.thumbnail_url ? (
                         <Image
@@ -372,6 +370,8 @@ export function PublicProfileClient({
                         )}
                       </div>
                     </div>
+                    </div>
+                    {index < displayedGames.length - 1 && <ArchiveDivider className="my-1" />}
                   </div>
                 ))}
               </div>
@@ -379,29 +379,27 @@ export function PublicProfileClient({
               {/* Show more/less button */}
               {filteredGames.length > 20 && (
                 <div className="mt-4 text-center">
-                  <Button
-                    variant="outline"
+                  <ArchiveButton
                     onClick={() => setShowAllGames(!showAllGames)}
-                    className="border-accent-gold/30 text-accent-gold hover:bg-accent-gold/10"
                   >
                     {showAllGames 
                       ? t("common.showLess")
                       : `${t("common.showAll")} (+${filteredGames.length - 20} ${t("collection.moreGames")})`
                     }
-                  </Button>
+                  </ArchiveButton>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </ArchiveCardContent>
+          </ArchiveCard>
         )}
 
         {/* No Collection Message */}
         {profile.show_collection === false && (
-          <Card className="border-accent-gold/30 bg-card/50">
-            <CardContent className="py-8 text-center text-muted-foreground">
+          <ArchiveCard>
+            <ArchiveCardContent className="py-8 text-center text-muted-foreground">
               {t("profile.collectionHidden")}
-            </CardContent>
-          </Card>
+            </ArchiveCardContent>
+          </ArchiveCard>
         )}
       </div>
     </div>
