@@ -88,7 +88,8 @@ export default function CommunityPage() {
                     const initials = userName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
                     const timeAgo = formatDistanceToNow(new Date(item.created_at), { addSuffix: true })
                     return (
-                      <div key={item.id} className="flex items-center space-x-4 px-1 py-4 transition-colors hover:bg-accent-gold/5">
+                      <div key={item.id}>
+                        <div className="flex items-center space-x-4 px-1 py-4 transition-colors hover:bg-accent-gold/5">
                         <Avatar className="h-10 w-10">
                           <AvatarImage src={item.user?.avatar_url || "/placeholder.svg"} alt={userName} />
                           <AvatarFallback className="font-cinzel">{initials}</AvatarFallback>
@@ -97,9 +98,10 @@ export default function CommunityPage() {
                           <p className="font-merriweather text-sm"><span className="font-semibold text-accent-gold">{userName}</span>{" "}{item.type === "game_added" ? <><span className="text-muted-foreground">{t("community.addedToCollection")}</span>{" "}<span className="font-semibold">{item.game?.name}</span></> : <><span className="text-muted-foreground">{t("community.joinedEvent")}</span>{" "}<span className="font-semibold">{item.event?.title}</span></>}</p>
                           <p className="text-xs text-muted-foreground font-merriweather">{timeAgo}</p>
                         </div>
-                        {item.type === "game_added" ? <Gamepad2 className="h-5 w-5 text-accent-gold" /> : <Calendar className="h-5 w-5 text-accent-gold" />}
+                          {item.type === "game_added" ? <Gamepad2 className="h-5 w-5 text-accent-gold" /> : <Calendar className="h-5 w-5 text-accent-gold" />}
+                        </div>
+                        {index < activity.length - 1 && <ArchiveDivider className="my-1" />}
                       </div>
-                      {index < activity.length - 1 && <ArchiveDivider className="my-1" />}
                     )
                   })}
                 </div>
