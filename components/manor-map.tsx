@@ -3,6 +3,10 @@
 import { Lock } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { getRoomsByCategory, type RoomTheme } from "@/lib/room-themes"
+import {
+  getManorUnlockedRoomIds,
+  type ManorEntitlementProfile,
+} from "@/lib/manor-progression"
 
 const camelId = (id: string) => id.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase())
 
@@ -24,7 +28,6 @@ function ManorTile({ room, isActive, isUnlocked, t }: ManorTileProps) {
       } ${locked ? "manor-tile-locked" : ""}`}
       title={name}
     >
-      {/* Sketch artwork — fused into the parchment via multiply blend */}
       <img
         src={`/themes/sketches/${room.id}.png`}
         alt={name}
@@ -50,11 +53,11 @@ interface ManorFloorProps {
   label: string
   rooms: RoomTheme[]
   activeRoomId: string
-  unlockedRooms: string[]
+  unlockedRoomIds: Set<string>
   t: (key: string) => string
 }
 
-function ManorFloor({ label, rooms, activeRoomId, unlockedRooms, t }: ManorFloorProps) {
+function ManorFloor({ label, rooms, activeRoomId, unlockedRoomIds, t }: ManorFloorProps) {
   return (
     <section>
       <h2 className="manor-floor-label mb-2 font-heading text-xs font-bold uppercase tracking-[0.2em]">{label}</h2>
@@ -64,7 +67,7 @@ function ManorFloor({ label, rooms, activeRoomId, unlockedRooms, t }: ManorFloor
             key={room.id}
             room={room}
             isActive={activeRoomId === room.id}
-            isUnlocked={unlockedRooms.includes(room.id)}
+            isUnlocked={unlockedRoomIds.has(room.id)}
             t={t}
           />
         ))}
@@ -75,37 +78,37 @@ function ManorFloor({ label, rooms, activeRoomId, unlockedRooms, t }: ManorFloor
 
 interface ManorMapProps {
   activeRoomId: string
-  unlockedRooms: string[]
+  profile?: ManorEntitlementProfile | null
 }
 
-export function ManorMap({ activeRoomId, unlockedRooms }: ManorMapProps) {
+export function ManorMap({ activeRoomId, profile }: ManorMapProps) {
   const t = useTranslations()
+  const unlockedRoomIds = new Set(getManorUnlockedRoomIds(profile))
   const groundFloor = getRoomsByCategory("Ground Floor")
   const secondFloor = getRoomsByCategory("Second Floor")
   const basement = getRoomsByCategory("Basement")
 
-  // Unlock order: ground floor first, then second floor, then basement.
   return (
     <div className="space-y-6">
       <ManorFloor
         label={t("themes.groundFloor")}
         rooms={groundFloor}
         activeRoomId={activeRoomId}
-        unlockedRooms={unlockedRooms}
+        unlockedRoomIds={unlockedRoomIds}
         t={t}
       />
       <ManorFloor
         label={t("themes.secondFloor")}
         rooms={secondFloor}
         activeRoomId={activeRoomId}
-        unlockedRooms={unlockedRooms}
+        unlockedRoomIds={unlockedRoomIds}
         t={t}
       />
       <ManorFloor
         label={t("themes.basement")}
         rooms={basement}
         activeRoomId={activeRoomId}
-        unlockedRooms={unlockedRooms}
+        unlockedRoomIds={unlockedRoomIds}
         t={t}
       />
     </div>
