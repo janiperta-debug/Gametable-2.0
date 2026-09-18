@@ -17,7 +17,7 @@ import { ArchiveDivider } from "@/components/archive-divider"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Search, Loader2, Plus, Minus, Star, Users, Clock, Dices, Swords, CreditCard, Puzzle } from "lucide-react"
+import { ArrowLeft, Search, Loader2, Plus, Minus, Star, Users, Clock } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { addGameToCollection, type AddGameResult } from "@/app/actions/games"
 import { addCardToCollection } from "@/app/actions/tcg"
@@ -45,16 +45,16 @@ type GameDetails = BGGGameDetails | TCGSearchResult | MiniatureSearchResult
 
 interface CategoryConfig {
   id: GameCategory
-  icon: React.ElementType
+  image: string
   searchEndpoint: string
   detailsEndpoint: string
 }
 
 const categories: CategoryConfig[] = [
-  { id: "board_game", icon: Dices, searchEndpoint: "/api/bgg/search", detailsEndpoint: "/api/bgg/details" },
-  { id: "rpg", icon: Swords, searchEndpoint: "/api/rpgg/search", detailsEndpoint: "/api/rpgg/details" },
-  { id: "trading_card", icon: CreditCard, searchEndpoint: "/api/tcg/search", detailsEndpoint: "/api/tcg/details" },
-  { id: "miniature", icon: Puzzle, searchEndpoint: "/api/miniatures/search", detailsEndpoint: "/api/miniatures/details" },
+  { id: "board_game", image: "/images/category-board-games.png", searchEndpoint: "/api/bgg/search", detailsEndpoint: "/api/bgg/details" },
+  { id: "rpg", image: "/images/category-rpg.png", searchEndpoint: "/api/rpgg/search", detailsEndpoint: "/api/rpgg/details" },
+  { id: "trading_card", image: "/images/category-tcg.png", searchEndpoint: "/api/tcg/search", detailsEndpoint: "/api/tcg/details" },
+  { id: "miniature", image: "/images/category-miniatures.png", searchEndpoint: "/api/miniatures/search", detailsEndpoint: "/api/miniatures/details" },
 ]
 
 // A base game with its expansions nested underneath. `synthetic` means the base
@@ -608,21 +608,27 @@ export default function AddGamePage() {
             </ArchiveCardHeader>
             <ArchiveCardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {categories.map(({ id, icon: Icon }) => (
-                  <ArchiveCardButton
+                {categories.map(({ id, image }) => (
+                  <button
                     key={id}
                     type="button"
-                    fullWidth
-                    active={selectedCategory === id}
+                    aria-pressed={selectedCategory === id}
                     onClick={() => handleCategoryChange(id)}
+                    className={`group relative flex min-h-[150px] flex-col items-center justify-center rounded-xl px-3 py-4 text-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--archive-gold,#d9b65c)]/70 ${
+                      selectedCategory === id
+                        ? "bg-[var(--archive-gold,#d9b65c)]/10 ring-2 ring-[var(--archive-gold,#d9b65c)]/80 shadow-[0_0_24px_rgba(217,182,92,0.22)]"
+                        : "bg-black/10 ring-1 ring-[var(--archive-gold,#d9b65c)]/20 hover:bg-[var(--archive-gold,#d9b65c)]/5 hover:ring-[var(--archive-gold,#d9b65c)]/45"
+                    }`}
                   >
-                    <span className="flex flex-col items-center gap-2 py-2">
-                      <Icon className="h-6 w-6" />
-                      <span className="text-center normal-case">
-                        {t(`collection.${id === "board_game" ? "boardGames" : id === "rpg" ? "rpgs" : id === "trading_card" ? "tradingCards" : "miniatures"}`)}
-                      </span>
+                    <img
+                      src={image}
+                      alt={t(`collection.${id === "board_game" ? "boardGames" : id === "rpg" ? "rpgs" : id === "trading_card" ? "tradingCards" : "miniatures"}`)}
+                      className="h-24 w-full object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.35)] transition-transform duration-200 group-hover:scale-105"
+                    />
+                    <span className="mt-2 font-cinzel text-sm font-semibold text-foreground">
+                      {t(`collection.${id === "board_game" ? "boardGames" : id === "rpg" ? "rpgs" : id === "trading_card" ? "tradingCards" : "miniatures"}`)}
                     </span>
-                  </ArchiveCardButton>
+                  </button>
                 ))}
               </div>
             </ArchiveCardContent>
