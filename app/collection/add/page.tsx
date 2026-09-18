@@ -13,6 +13,7 @@ import {
   ArchiveToggle,
   archiveField,
 } from "@/components/archive-frame"
+import { ArchiveDivider } from "@/components/archive-divider"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
@@ -919,7 +920,7 @@ export default function AddGamePage() {
                         </div>
                       ) : selectedCategory === "trading_card" ? (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[500px] overflow-y-auto p-1">
-                          {searchResults.map((game) => {
+                          {searchResults.map((game, index) => {
                             const card = game as TCGSearchResult
                             return (
                               <button
@@ -961,13 +962,14 @@ export default function AddGamePage() {
                                   )}
                                 </div>
                               </button>
+                            {index < searchResults.length - 1 && <ArchiveDivider className="my-1" />}
                             )
                           })}
                         </div>
                       ) : selectedCategory === "board_game" ? (
-                        <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                          {groupBoardResults(searchResults as BGGSearchResult[]).map((host) => (
-                            <div key={host.base.id} className="rounded-lg border border-accent-gold/20 overflow-hidden">
+                        <div className="space-y-0 max-h-[400px] overflow-y-auto">
+                          {groupBoardResults(searchResults as BGGSearchResult[]).map((host, index) => (
+                            <div key={host.base.id}>
                               {/* Base game (host) */}
                               <button
                                 onClick={() => handleSelectGame(host.base.id)}
@@ -1014,17 +1016,18 @@ export default function AddGamePage() {
                                 </ul>
                               )}
                             </div>
+                            {index < groupBoardResults(searchResults as BGGSearchResult[]).length - 1 && <ArchiveDivider className="my-1" />}
                           ))}
                         </div>
                       ) : (
-                        <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                        <div className="space-y-0 max-h-[400px] overflow-y-auto">
                           {searchResults.map((game) => {
                             const resultId = getSearchResultId(game)
                             return (
                             <button
                               key={resultId}
                               onClick={() => handleSelectGame(resultId)}
-                              className="w-full flex items-center justify-between p-4 rounded-lg border border-accent-gold/20 hover:bg-accent-gold/10 hover:border-accent-gold/40 transition-colors text-left"
+                              className="w-full flex items-center justify-between p-4 hover:bg-accent-gold/10 transition-colors text-left"
                             >
                               <div className="flex-1 min-w-0">
                                 <h4 className="font-heading font-medium text-lg">{game.name}</h4>
