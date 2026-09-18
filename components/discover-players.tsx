@@ -185,7 +185,7 @@ export function DiscoverPlayers() {
                         )}
                         <div className="flex items-center text-sm text-muted-foreground">
                           <Users className="h-3 w-3 mr-1" />
-                          <span className="font-merriweather">{player.games_count} {t("community.games")}</span>
+                          <span className="font-merriweather">{player.games_count} {t("community.gameCountLabel")}</span>
                         </div>
                       </div>
                     </div>
