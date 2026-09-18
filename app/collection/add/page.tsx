@@ -1017,7 +1017,6 @@ export default function AddGamePage() {
                                   ))}
                                 </ul>
                               )}
-                            </div>
                               {index < groupBoardResults(searchResults as BGGSearchResult[]).length - 1 && <ArchiveDivider className="my-1" />}
                             </div>
                           ))}
