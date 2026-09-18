@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { useTranslations } from "@/lib/i18n"
 import { ArchiveButton, ArchiveCard, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle, ArchiveDivider } from "@/components/archive-frame"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -45,13 +44,6 @@ const INTEREST_LABELS: Record<string, string> = {
   tradingCards: "profile.tradingCards",
   miniatures: "profile.otherMiniatureGames",
   rpg: "profile.roleplayingGames",
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  board_game: "Lautapeli",
-  rpg: "Roolipeli",
-  trading_card: "Keräilykortti",
-  miniature: "Miniatyyri",
 }
 
 interface PublicProfileClientProps {
