@@ -4,16 +4,6 @@
  */
 
 /**
- * Calculate level from XP
- * Level 1: 0-99 XP
- * Level 2: 100-199 XP
- * etc.
- */
-export function calculateLevel(xp: number): number {
-  return Math.floor(xp / 100) + 1
-}
-
-/**
  * Get XP required for next level
  */
 export function xpForNextLevel(currentLevel: number): number {
