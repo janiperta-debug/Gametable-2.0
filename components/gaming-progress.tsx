@@ -1,6 +1,7 @@
 "use client"
 
 import { ArchiveButton, ArchiveCard, ArchiveCardContent } from "@/components/archive-frame"
+import { ArchiveDivider } from "@/components/archive-divider"
 import { Progress } from "@/components/ui/progress"
 import { RefreshCw, BookOpen, Users, Calendar, Trophy, Loader2 } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
@@ -173,54 +174,56 @@ export function GamingProgress() {
         <Progress value={(stats.currentXP / stats.xpToNextLevel) * 100} className="h-2.5" />
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Games Owned */}
-        <div className="space-y-3 p-4 rounded-lg bg-card/30 border border-accent-gold/10">
-          <div className="flex items-center gap-3">
-            <BookOpen className="w-5 h-5 text-blue-400" />
-            <span className="text-sm font-cinzel text-muted-foreground uppercase tracking-wide">{t("profile.gamesOwned")}</span>
+      {/* Stats — flat Archive rows, separated like the other unified lists */}
+      <div>
+        <div className="flex items-center justify-between py-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <BookOpen className="w-5 h-5 text-blue-400" />
+              <span className="text-sm font-cinzel text-accent-gold uppercase tracking-wide">{t("profile.gamesOwned")}</span>
+            </div>
+            <span className="block text-4xl font-cinzel text-accent-gold">{stats.gamesOwned.current}</span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-4xl font-cinzel text-accent-gold">{stats.gamesOwned.current}</span>
-            <span className="text-sm font-merriweather text-green-400">{stats.gamesOwned.recentChange} {t("profile.thisMonth")}</span>
-          </div>
+          <span className="text-sm font-merriweather text-green-400">{stats.gamesOwned.recentChange} {t("profile.thisMonth")}</span>
         </div>
 
-        {/* Gaming Friends */}
-        <div className="space-y-3 p-4 rounded-lg bg-card/30 border border-accent-gold/10">
-          <div className="flex items-center gap-3">
-            <Users className="w-5 h-5 text-green-400" />
-            <span className="text-sm font-cinzel text-muted-foreground uppercase tracking-wide">{t("profile.gamingFriends")}</span>
+        <ArchiveDivider />
+
+        <div className="flex items-center justify-between py-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <Users className="w-5 h-5 text-green-400" />
+              <span className="text-sm font-cinzel text-accent-gold uppercase tracking-wide">{t("profile.gamingFriends")}</span>
+            </div>
+            <span className="block text-4xl font-cinzel text-accent-gold">{stats.gamingFriends.current}</span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-4xl font-cinzel text-accent-gold">{stats.gamingFriends.current}</span>
-            <span className="text-sm font-merriweather text-green-400">{stats.gamingFriends.recentChange} {t("profile.newFriends")}</span>
-          </div>
+          <span className="text-sm font-merriweather text-green-400">{stats.gamingFriends.recentChange} {t("profile.newFriends")}</span>
         </div>
 
-        {/* Events Hosted */}
-        <div className="space-y-3 p-4 rounded-lg bg-card/30 border border-accent-gold/10">
-          <div className="flex items-center gap-3">
-            <Calendar className="w-5 h-5 text-purple-400" />
-            <span className="text-sm font-cinzel text-muted-foreground uppercase tracking-wide">{t("profile.eventsHosted")}</span>
+        <ArchiveDivider />
+
+        <div className="flex items-center justify-between py-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <Calendar className="w-5 h-5 text-purple-400" />
+              <span className="text-sm font-cinzel text-accent-gold uppercase tracking-wide">{t("profile.eventsHosted")}</span>
+            </div>
+            <span className="block text-4xl font-cinzel text-accent-gold">{stats.eventsHosted.current}</span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-4xl font-cinzel text-accent-gold">{stats.eventsHosted.current}</span>
-            <span className="text-sm font-merriweather text-green-400">{stats.eventsHosted.recentChange} {t("profile.thisMonth")}</span>
-          </div>
+          <span className="text-sm font-merriweather text-green-400">{stats.eventsHosted.recentChange} {t("profile.thisMonth")}</span>
         </div>
 
-        {/* Trophies Earned */}
-        <div className="space-y-3 p-4 rounded-lg bg-card/30 border border-accent-gold/10">
-          <div className="flex items-center gap-3">
-            <Trophy className="w-5 h-5 text-yellow-400" />
-            <span className="text-sm font-cinzel text-muted-foreground uppercase tracking-wide">{t("profile.trophiesEarned")}</span>
+        <ArchiveDivider />
+
+        <div className="flex items-center justify-between py-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <Trophy className="w-5 h-5 text-yellow-400" />
+              <span className="text-sm font-cinzel text-accent-gold uppercase tracking-wide">{t("profile.trophiesEarned")}</span>
+            </div>
+            <span className="block text-4xl font-cinzel text-accent-gold">{stats.trophiesEarned.current}</span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-4xl font-cinzel text-accent-gold">{stats.trophiesEarned.current}</span>
-            <span className="text-sm font-merriweather text-green-400">{stats.trophiesEarned.recentChange} {t("profile.thisWeek")}</span>
-          </div>
+          <span className="text-sm font-merriweather text-green-400">{stats.trophiesEarned.recentChange} {t("profile.thisWeek")}</span>
         </div>
       </div>
     </ArchiveCardContent>
