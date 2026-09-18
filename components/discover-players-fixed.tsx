@@ -3,6 +3,8 @@
 import { useState } from "react"
 import { searchUsers } from "@/app/actions/search-users"
 import { sendFriendRequest, removeFriend, type DiscoverUser } from "@/app/actions/friends"
+import { ArchiveCard } from "@/components/archive-frame"
+import { ArchiveDivider } from "@/components/archive-divider"
 
 export function DiscoverPlayersFixed() {
   const [location, setLocation] = useState("")
@@ -59,18 +61,20 @@ export function DiscoverPlayersFixed() {
           const initials = name.slice(0, 2).toUpperCase()
           const status = player.friendship_status
           return (
-            <article key={player.id} className="flex items-center gap-4 px-1 py-4">
+            <div key={player.id}> 
+              <article className="flex items-center gap-4 px-1 py-4">
               <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center font-semibold">{initials}</div>
               <div className="min-w-0 flex-1">
                 <h3 className="font-semibold truncate">{name}</h3>
                 {player.location ? <p className="text-sm text-muted-foreground">{player.location}</p> : null}
                 <p className="text-sm text-muted-foreground">{player.games_count} peliä kokoelmassa</p>
               </div>
-              <button className="rounded-md border px-3 py-2 text-sm disabled:opacity-50" disabled={busy === player.id || status === "accepted"} onClick={() => handleFriendAction(player)}>
-                {status === "accepted" ? "Ystävä" : status === "pending" ? "Peru pyyntö" : busy === player.id ? "…" : "Lisää ystävä"}
-              </button>
-            </article>
-          {index < players.length - 1 && <ArchiveDivider className="my-1" />}
+                <button className="rounded-md border px-3 py-2 text-sm disabled:opacity-50" disabled={busy === player.id || status === "accepted"} onClick={() => handleFriendAction(player)}>
+                  {status === "accepted" ? "Ystävä" : status === "pending" ? "Peru pyyntö" : busy === player.id ? "…" : "Lisää ystävä"}
+                </button>
+              </article>
+              {index < players.length - 1 && <ArchiveDivider className="my-1" />}
+            </div>
           )
         })}
         </div>
