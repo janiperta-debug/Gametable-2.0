@@ -12,6 +12,9 @@ import { roomThemes, type RoomTheme } from "@/lib/room-themes"
 export type ManorRoomState = "locked" | "opened_empty" | "complete"
 export type ManorArtifactState = "unavailable" | "in_progress" | "restored"
 
+// Temporary QA switch for theme/background verification. Remove after final visual QA.
+export const THEME_ACCESS_TEST_MODE = true
+
 export type ManorRoomEntitlement = {
   roomId: string
   unlockLevel: number
