@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ArchiveCard } from "@/components/archive-frame"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Star, ExternalLink } from "lucide-react"
@@ -55,7 +56,7 @@ export function CollectionHighlights() {
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {highlights.map((game) => (
-            <div key={game.id} className="picture-frame p-4 space-y-3">
+            <ArchiveCard key={game.id} corners={false} centerOrnaments={false} className="p-4 space-y-3">
               <div className="aspect-[3/4] bg-muted rounded-md overflow-hidden">
                 <img src={game.image || "/placeholder.svg"} alt={game.title} className="w-full h-full object-cover" />
               </div>
@@ -77,7 +78,7 @@ export function CollectionHighlights() {
                   </Badge>
                 </div>
               </div>
-            </div>
+            </ArchiveCard>
           ))}
         </div>
       </CardContent>
