@@ -36,13 +36,13 @@ export async function sendContactEmail(formData: {
 
     if (!response.ok) {
       const errorData = await response.json()
-      console.error("[v0] Resend API error:", errorData)
+      console.error("Resend API error:", errorData)
       throw new Error("Failed to send email")
     }
 
     return { success: true }
   } catch (error) {
-    console.error("[v0] Email send error:", error)
+    console.error("Email send error:", error)
     return { success: false, error: "Failed to send message" }
   }
 }
