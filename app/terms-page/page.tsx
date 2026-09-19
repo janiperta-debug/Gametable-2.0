@@ -157,9 +157,9 @@ export default function TermsPage() {
           </CardHeader>
           <CardContent className="space-y-4 font-body">
             <p>
-              GameTable integrates with third-party services, including Firebase for authentication and BoardGameGeek
-              for game data. Your use of these services is subject to their respective terms and privacy policies. We
-              are not responsible for the practices or content of third-party services.
+              GameTable integrates with third-party services, including Supabase for authentication and data storage and
+              BoardGameGeek for game data. Your use of these services is subject to their respective terms and privacy
+              policies. We are not responsible for the practices or content of third-party services.
             </p>
           </CardContent>
         </Card>
