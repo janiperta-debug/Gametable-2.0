@@ -189,7 +189,7 @@ export default function AnnouncementsPage() {
                 <p className="text-xs text-muted-foreground">{message.length}/5000</p>
               </div>
 
-              <div className="flex items-center gap-3 rounded border border-[hsl(var(--border))] bg-[hsl(var(--surface-dark)/0.45)] p-4">
+              <div className="flex items-center gap-3 rounded-lg bg-[hsl(var(--surface-dark)/0.35)] p-4">
                 <Switch
                   id="test-mode"
                   checked={testMode}
@@ -207,7 +207,7 @@ export default function AnnouncementsPage() {
                 </div>
               </div>
 
-              <div className="rounded border border-[hsl(var(--border))] bg-[hsl(var(--accent-gold)/0.06)] p-4">
+              <div className="rounded-lg bg-[hsl(var(--accent-gold)/0.06)] p-4">
                 <div className="flex gap-3">
                   <Mail className="mt-0.5 h-5 w-5 shrink-0 text-accent-gold" />
                   <div className="space-y-2 text-sm text-foreground">
