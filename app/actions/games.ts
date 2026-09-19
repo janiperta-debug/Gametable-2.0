@@ -73,7 +73,7 @@ async function addExpansionToCollection(
   isImport: boolean = false
 ): Promise<AddGameResult> {
   if (!bggDetails.baseGame) {
-    console.error('[v0] Expansion has no base game link:', bggDetails.name)
+    console.error('Expansion has no base game link:', bggDetails.name)
     return { error: 'Expansion is missing its base game' }
   }
 
@@ -99,7 +99,7 @@ async function addExpansionToCollection(
       .single()
 
     if (baseError || !newBase) {
-      console.error('[v0] Error creating base game for expansion:', baseError?.message)
+      console.error('Error creating base game for expansion:', baseError?.message)
       return { error: baseError?.message || 'Could not create base game' }
     }
     baseGameId = newBase.id
@@ -122,7 +122,7 @@ async function addExpansionToCollection(
     .single()
 
   if (expError || !expansion) {
-    console.error('[v0] Error upserting expansion:', expError?.message)
+    console.error('Error upserting expansion:', expError?.message)
     return { error: expError?.message || 'Could not save expansion' }
   }
 
@@ -134,7 +134,7 @@ async function addExpansionToCollection(
     .single()
 
   if (ownError && ownError.code !== '23505') {
-    console.error('[v0] Error marking expansion ownership:', ownError.message)
+    console.error('Error marking expansion ownership:', ownError.message)
     return { error: ownError.message }
   }
   const ownershipId = ownership?.id ?? (await supabase
@@ -158,15 +158,15 @@ export async function addGameToCollection(
   isManualEntry: boolean = false,
   isImport: boolean = false
   ): Promise<AddGameResult> {
-  console.log("[v0] addGameToCollection called:", { bggDetails, status, category, isManualEntry, isImport })
+  console.log("addGameToCollection called:", { bggDetails, status, category, isManualEntry, isImport })
   
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
-  console.log("[v0] Current user:", user?.id)
+  console.log("Current user:", user?.id)
   
   if (!user) {
-    console.log("[v0] No user authenticated")
+    console.log("No user authenticated")
     return { error: 'Not authenticated' }
   }
 
@@ -181,7 +181,7 @@ export async function addGameToCollection(
   let gameId: string
 
   if (isManualEntry) {
-    console.log("[v0] Processing manual entry for:", bggDetails.name)
+    console.log("Processing manual entry for:", bggDetails.name)
     
     // For manual entries, check by name to avoid duplicates
     const { data: existingGame, error: checkError } = await supabase
@@ -192,14 +192,14 @@ export async function addGameToCollection(
       .is('bgg_id', null)
       .single()
 
-    console.log("[v0] Existing game check:", { existingGame, checkError })
+    console.log("Existing game check:", { existingGame, checkError })
 
     if (existingGame) {
       gameId = existingGame.id
-      console.log("[v0] Using existing game ID:", gameId)
+      console.log("Using existing game ID:", gameId)
     } else {
       // Insert manual game entry
-      console.log("[v0] Inserting new manual game entry")
+      console.log("Inserting new manual game entry")
       const { data: newGame, error: gameError } = await supabase
         .from('games')
         .insert({
@@ -217,14 +217,14 @@ export async function addGameToCollection(
         .select('id')
         .single()
 
-      console.log("[v0] Insert result:", { newGame, gameError })
+      console.log("Insert result:", { newGame, gameError })
 
       if (gameError) {
-        console.error('[v0] Error inserting manual game:', gameError)
+        console.error('Error inserting manual game:', gameError)
         return { error: gameError.message }
       }
       gameId = newGame.id
-      console.log("[v0] Created new game with ID:", gameId)
+      console.log("Created new game with ID:", gameId)
     }
   } else {
     // Check if game already exists by bgg_id
@@ -330,7 +330,7 @@ export async function addGameToCollection(
         .from('game_expansions')
         .upsert(rows, { onConflict: 'bgg_id' })
       if (expError) {
-        console.error('[v0] Error upserting expansions:', expError.message)
+        console.error('Error upserting expansions:', expError.message)
       }
     }
   }
