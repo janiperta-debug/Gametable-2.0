@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     )
 
     if (!response.ok) {
-      console.log(`[v0] rpggeek.com details failed with ${response.status}, trying boardgamegeek.com`)
+      console.log(`rpggeek.com details failed with ${response.status}, trying boardgamegeek.com`)
       response = await fetch(
         `https://boardgamegeek.com/xmlapi2/thing?id=${id}&stats=1`,
         { 
@@ -41,12 +41,12 @@ export async function GET(request: NextRequest) {
     }
 
     if (!response.ok) {
-      console.error(`[v0] Both RPG details endpoints failed: ${response.status}`)
+      console.error(`Both RPG details endpoints failed: ${response.status}`)
       throw new Error(`RPG API error: ${response.status}`)
     }
 
     const xmlText = await response.text()
-    console.log("[v0] RPG details XML length:", xmlText.length, "preview:", xmlText.substring(0, 300))
+    console.log("RPG details XML length:", xmlText.length, "preview:", xmlText.substring(0, 300))
     
     const parser = new XMLParser({
       ignoreAttributes: false,
@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
         : null,
     }
 
-    console.log("[v0] RPG details parsed:", {
+    console.log("RPG details parsed:", {
       id: gameDetails.id,
       name: gameDetails.name,
       thumbnail: gameDetails.thumbnail,
