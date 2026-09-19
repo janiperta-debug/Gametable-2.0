@@ -858,8 +858,8 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    /* Add padding-top to account for fixed navbar */
-    padding-top: 4rem;
+    /* Navigation spacing is handled by AppShell so mobile safe-area and desktop layouts stay separate. */
+    padding-top: 0;
   }
 
   /* Removed h1-h6 Charm rule - headings now use Merriweather by default */
