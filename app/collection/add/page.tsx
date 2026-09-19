@@ -333,7 +333,7 @@ export default function AddGamePage() {
   }
 
   const handleManualSubmit = async () => {
-    console.log("[v0] handleManualSubmit called with:", manualForm, "category:", selectedCategory)
+    console.log("handleManualSubmit called with:", manualForm, "category:", selectedCategory)
     
     if (!manualForm.name.trim()) {
       toast({
@@ -361,9 +361,9 @@ export default function AddGamePage() {
         thumbnail: manualForm.imageUrl || null,
       }
 
-      console.log("[v0] Calling addGameToCollection with:", gameDetails)
+      console.log("Calling addGameToCollection with:", gameDetails)
       const result = await addGameToCollection(gameDetails, "owned", selectedCategory, true)
-      console.log("[v0] addGameToCollection result:", result)
+      console.log("addGameToCollection result:", result)
 
       if (result.error) {
         toast({
