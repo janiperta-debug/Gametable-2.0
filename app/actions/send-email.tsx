@@ -18,7 +18,11 @@ export async function sendContactEmail(formData: {
         from: "GameTable Contact <onboarding@resend.dev>",
         to: "info@janope.fi",
         reply_to: formData.email,
-        subject: `Contact Form: ${formData.subject}`,
+        subject: `[GameTable] Contact Form: ${formData.subject}`,
+        tags: [
+          { name: "application", value: "gametable" },
+          { name: "type", value: "contact-form" },
+        ],
         html: `
           <h2>New Contact Form Submission</h2>
           <p><strong>From:</strong> ${formData.firstName} ${formData.lastName}</p>
