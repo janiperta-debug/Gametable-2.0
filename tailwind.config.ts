@@ -110,13 +110,6 @@ const config: Config = {
           4: "hsl(var(--chart-4))",
           5: "hsl(var(--chart-5))",
         },
-        // Legacy manor colors (can be removed later)
-        manor: {
-          burgundy: "#8B1538",
-          mahogany: "#8B4513",
-          gold: "#DAA520",
-          cream: "#F5F5DC",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
