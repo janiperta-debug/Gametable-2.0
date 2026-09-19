@@ -43,7 +43,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <AppThemeProvider>
       <div className="min-h-screen">
         <Navigation />
-        <main className="pt-[calc(4rem+env(safe-area-inset-top))] pb-28 md:pt-0 md:pb-32">{children}</main>
+        <main className="pt-[calc(2.5rem+env(safe-area-inset-top))] pb-28 md:pt-0 md:pb-32">{children}</main>
       </div>
     </AppThemeProvider>
   )
