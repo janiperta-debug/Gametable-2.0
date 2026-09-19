@@ -50,8 +50,7 @@ export function ManorCorrespondence() {
   const { user, profile } = useUser()
   const { toast } = useToast()
 
-  // TODO: Replace with actual admin check from database
-  const isAdmin = true
+  const isAdmin = profile?.role === "admin"
 
   // Load existing preferences
   useEffect(() => {
