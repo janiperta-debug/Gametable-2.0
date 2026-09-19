@@ -54,6 +54,7 @@ export interface Profile {
   xp: number
   level: number
   location: string | null
+  role: string | null
   theme: string
   show_collection: boolean
   preferences: Record<string, unknown>
