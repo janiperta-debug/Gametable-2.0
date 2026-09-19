@@ -56,7 +56,6 @@ export interface Profile {
   location: string | null
   theme: string
   show_collection: boolean
-  firebase_uid: string | null
   preferences: Record<string, unknown>
   unlocked_themes: string[]
   created_at: string | null
