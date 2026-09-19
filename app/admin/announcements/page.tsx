@@ -1,16 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import { ArchiveButton, ArchiveCard, ArchiveCardContent, archiveField } from "@/components/archive-frame"
 import { sendBroadcast, checkIsAdmin, getBroadcastHistory, type BroadcastHistory } from "@/app/actions/admin"
 import { useToast } from "@/hooks/use-toast"
 import { useUser } from "@/hooks/useUser"
-import { Loader2, Send, Mail, Shield, AlertTriangle, History, Users, Clock } from "lucide-react"
+import { Loader2, Send, Mail, Shield, AlertTriangle, History, Users, Clock, Crown } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "@/lib/i18n"
 
 export default function AnnouncementsPage() {
   const [subject, setSubject] = useState("")
@@ -23,35 +24,36 @@ export default function AnnouncementsPage() {
   const { toast } = useToast()
   const { user, loading } = useUser()
   const router = useRouter()
+  const t = useTranslations()
 
-  // Check admin status
   useEffect(() => {
     async function checkAdmin() {
       if (!user) {
         setIsAdmin(false)
+        setLoadingHistory(false)
         return
       }
+
       const result = await checkIsAdmin()
       setIsAdmin(result.isAdmin)
-      
+
       if (result.isAdmin) {
-        // Load broadcast history
         const historyResult = await getBroadcastHistory()
         setHistory(historyResult.broadcasts)
-        setLoadingHistory(false)
       }
+      setLoadingHistory(false)
     }
-    
+
     if (!loading) {
-      checkAdmin()
+      void checkAdmin()
     }
   }, [user, loading])
 
   const handleSend = async () => {
     if (!subject.trim() || !message.trim()) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in both subject and message.",
+        title: t("common.error"),
+        description: t("correspondence.admin.missingInformation"),
         variant: "destructive",
       })
       return
@@ -67,28 +69,29 @@ export default function AnnouncementsPage() {
 
       if (result.success) {
         toast({
-          title: "Announcement Sent",
+          title: t("correspondence.admin.announcementSent"),
           description: testMode
-            ? "Test announcement sent to your email."
-            : `Announcement sent to ${result.recipientCount} users (${result.emailCount} emails).`,
+            ? t("correspondence.admin.testSentDescription")
+            : t("correspondence.admin.sentDescription")
+                .replace("{recipientCount}", String(result.recipientCount))
+                .replace("{emailCount}", String(result.emailCount)),
         })
         setSubject("")
         setMessage("")
-        
-        // Refresh history
+
         const historyResult = await getBroadcastHistory()
         setHistory(historyResult.broadcasts)
       } else {
         toast({
-          title: "Failed to Send",
-          description: result.error || "An error occurred while sending.",
+          title: t("correspondence.admin.failedToSend"),
+          description: result.error || t("correspondence.admin.sendError"),
           variant: "destructive",
         })
       }
-    } catch (error) {
+    } catch {
       toast({
-        title: "Error",
-        description: "Failed to send announcement. Please try again.",
+        title: t("common.error"),
+        description: t("correspondence.admin.sendError"),
         variant: "destructive",
       })
     } finally {
@@ -96,7 +99,6 @@ export default function AnnouncementsPage() {
     }
   }
 
-  // Loading state
   if (loading || isAdmin === null) {
     return (
       <div className="min-h-screen page-background flex items-center justify-center">
@@ -105,202 +107,203 @@ export default function AnnouncementsPage() {
     )
   }
 
-  // Not logged in
   if (!user) {
     return (
       <div className="min-h-screen page-background flex items-center justify-center p-6">
-        <div className="room-furniture p-8 text-center max-w-md">
-          <Shield className="w-16 h-16 text-accent-gold mx-auto mb-4" />
-          <h1 className="text-2xl font-serif text-accent-gold mb-2">Login Required</h1>
-          <p className="text-accent-gold/70 mb-4">Please log in to access the admin panel.</p>
-          <Button onClick={() => router.push("/login")} className="theme-accent-gold">
-            Go to Login
-          </Button>
-        </div>
+        <ArchiveCard className="max-w-md">
+          <ArchiveCardContent className="p-8 text-center space-y-4">
+            <Shield className="w-16 h-16 text-accent-gold mx-auto" />
+            <h1 className="text-2xl font-cinzel text-accent-gold">{t("correspondence.admin.loginRequired")}</h1>
+            <p className="text-muted-foreground">{t("correspondence.admin.loginDescription")}</p>
+            <ArchiveButton onClick={() => router.push("/login")} active>
+              {t("correspondence.admin.goToLogin")}
+            </ArchiveButton>
+          </ArchiveCardContent>
+        </ArchiveCard>
       </div>
     )
   }
 
-  // Not admin
   if (!isAdmin) {
     return (
       <div className="min-h-screen page-background flex items-center justify-center p-6">
-        <div className="room-furniture p-8 text-center max-w-md">
-          <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-serif text-accent-gold mb-2">Access Denied</h1>
-          <p className="text-accent-gold/70 mb-4">
-            You do not have administrator privileges to access this page.
-          </p>
-          <Button onClick={() => router.push("/")} variant="outline" className="border-accent-gold/40 text-accent-gold">
-            Return to Home
-          </Button>
-        </div>
+        <ArchiveCard className="max-w-md">
+          <ArchiveCardContent className="p-8 text-center space-y-4">
+            <AlertTriangle className="w-16 h-16 text-accent-gold mx-auto" />
+            <h1 className="text-2xl font-cinzel text-accent-gold">{t("correspondence.admin.accessDenied")}</h1>
+            <p className="text-muted-foreground">{t("correspondence.admin.accessDeniedDescription")}</p>
+            <ArchiveButton onClick={() => router.push("/")} variant="outline">
+              {t("correspondence.admin.returnHome")}
+            </ArchiveButton>
+          </ArchiveCardContent>
+        </ArchiveCard>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen page-background p-6">
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Composer Card */}
-        <div className="room-furniture p-8">
-          {/* Header */}
-          <div className="mb-6">
-            <div className="flex items-center gap-3 mb-2">
-              <Mail className="w-8 h-8 text-accent-gold" />
-              <h1 className="text-3xl font-serif text-accent-gold">Manor Announcement Composer</h1>
-            </div>
-            <p className="text-accent-gold/70 text-sm">
-              Create formal correspondence from the manor staff to all residents. Your message will be delivered with
-              elegant manor theming.
-            </p>
-          </div>
-
-          {/* Subject Field */}
-          <div className="mb-6">
-            <Label htmlFor="subject" className="text-accent-gold mb-2 block">
-              Subject
-            </Label>
-            <Input
-              id="subject"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value.slice(0, 200))}
-              placeholder="e.g., New Gaming Features Available, Manor Maintenance Notice..."
-              className="bg-surface-dark border-accent-gold/40 text-accent-gold placeholder:text-accent-copper"
-              maxLength={200}
-            />
-            <p className="text-xs text-accent-copper mt-1">{subject.length}/200 characters</p>
-          </div>
-
-          {/* Message Field */}
-          <div className="mb-6">
-            <Label htmlFor="message" className="text-accent-gold mb-2 block">
-              Message
-            </Label>
-            <Textarea
-              id="message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value.slice(0, 5000))}
-              placeholder="Compose your manor announcement here. This will be formatted as elegant correspondence from the manor staff..."
-              className="bg-surface-dark border-accent-gold/40 text-accent-gold placeholder:text-accent-copper min-h-[200px]"
-              maxLength={5000}
-            />
-            <p className="text-xs text-accent-copper mt-1">{message.length}/5000 characters</p>
-          </div>
-
-          {/* Test Mode Toggle */}
-          <div className="mb-6 flex items-center gap-3 p-4 bg-surface-dark border border-accent-gold/40 rounded">
-            <Switch
-              id="test-mode"
-              checked={testMode}
-              onCheckedChange={setTestMode}
-              className="data-[state=checked]:bg-accent-gold"
-            />
-            <div className="flex-1">
-              <Label htmlFor="test-mode" className="text-accent-gold font-semibold cursor-pointer">
-                Test Mode (send only to me)
-              </Label>
-              <p className="text-xs text-accent-gold/70 mt-1">
-                Safe mode: Announcement will only be sent to your email for testing
-              </p>
-            </div>
-          </div>
-
-          {/* Info Box */}
-          <div className="mb-6 p-4 bg-accent-gold/10 border border-accent-gold/40 rounded">
-            <div className="flex gap-2">
-              <Mail className="w-5 h-5 text-accent-gold flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-accent-gold">
-                <p className="mb-1">
-                  Your announcement will be formatted with manor theming and sent as{" "}
-                  <span className="font-semibold">&quot;The manor staff wishes to inform you...&quot;</span> followed by your
-                  message.
+    <div className="min-h-screen page-background px-3 py-5 sm:px-6 sm:py-8">
+      <div className="mx-auto max-w-4xl space-y-6">
+        <ArchiveCard>
+          <ArchiveCardContent className="p-5 sm:p-8 space-y-6">
+            <header className="flex items-start gap-3">
+              <Mail className="mt-1 h-7 w-7 shrink-0 text-accent-gold" />
+              <div>
+                <h1 className="font-cinzel text-2xl sm:text-3xl text-accent-gold">
+                  {t("correspondence.admin.title")}
+                </h1>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+                  {t("correspondence.admin.description")}
                 </p>
-                <p className="text-accent-gold/70">
-                  In-app notifications will be created for all users. Emails will only be sent to users who have enabled
-                  &quot;Announcements & updates&quot; in their notification preferences.
-                </p>
-                {testMode && (
-                  <p className="text-accent-gold font-semibold flex items-center gap-1 mt-2">
-                    <Shield className="w-4 h-4" />
-                    TEST MODE: Only you will receive this announcement.
-                  </p>
-                )}
               </div>
-            </div>
-          </div>
+            </header>
 
-          {/* Send Button */}
-          <Button
-            onClick={handleSend}
-            disabled={isSending || !subject.trim() || !message.trim()}
-            className="w-full theme-accent-gold font-semibold py-6 text-lg"
-          >
-            {isSending ? (
-              <span className="flex items-center gap-2">
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Sending...
-              </span>
-            ) : (
-              <span className="flex items-center gap-2">
-                <Send className="w-5 h-5" />
-                {testMode ? "Send Test Announcement" : "Send to All Users"}
-              </span>
-            )}
-          </Button>
-        </div>
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="subject" className="font-cinzel text-accent-gold">
+                  {t("correspondence.admin.subject")}
+                </Label>
+                <Input
+                  id="subject"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value.slice(0, 200))}
+                  placeholder={t("correspondence.admin.subjectPlaceholder")}
+                  className={archiveField}
+                  maxLength={200}
+                />
+                <p className="text-xs text-muted-foreground">{subject.length}/200</p>
+              </div>
 
-        {/* Broadcast History */}
-        <div className="room-furniture p-8">
-          <div className="flex items-center gap-3 mb-6">
-            <History className="w-6 h-6 text-accent-gold" />
-            <h2 className="text-2xl font-serif text-accent-gold">Broadcast History</h2>
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="message" className="font-cinzel text-accent-gold">
+                  {t("correspondence.admin.message")}
+                </Label>
+                <Textarea
+                  id="message"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value.slice(0, 5000))}
+                  placeholder={t("correspondence.admin.messagePlaceholder")}
+                  className={`${archiveField} min-h-[220px]`}
+                  maxLength={5000}
+                />
+                <p className="text-xs text-muted-foreground">{message.length}/5000</p>
+              </div>
 
-          {loadingHistory ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-accent-gold" />
-            </div>
-          ) : history.length === 0 ? (
-            <div className="text-center py-8 text-accent-gold/70">
-              <Mail className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>No broadcasts have been sent yet.</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {history.map((broadcast) => (
-                <div
-                  key={broadcast.id}
-                  className="p-4 bg-surface-dark border border-accent-gold/20 rounded-lg"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-accent-gold">{broadcast.subject}</h3>
-                    <div className="flex items-center gap-1 text-xs text-accent-gold/60">
-                      <Clock className="w-3 h-3" />
-                      {new Date(broadcast.sent_at).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </div>
-                  </div>
-                  <p className="text-sm text-accent-gold/70 line-clamp-2 mb-3">{broadcast.body}</p>
-                  <div className="flex items-center gap-4 text-xs text-accent-gold/60">
-                    <span className="flex items-center gap-1">
-                      <Users className="w-3 h-3" />
-                      {broadcast.recipient_count} recipients
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Mail className="w-3 h-3" />
-                      {broadcast.email_count} emails sent
-                    </span>
+              <div className="flex items-center gap-3 rounded border border-[hsl(var(--border))] bg-[hsl(var(--surface-dark)/0.45)] p-4">
+                <Switch
+                  id="test-mode"
+                  checked={testMode}
+                  onCheckedChange={setTestMode}
+                  className="data-[state=checked]:bg-accent-gold"
+                />
+                <div className="flex-1">
+                  <Label htmlFor="test-mode" className="flex items-center gap-2 font-cinzel text-accent-gold cursor-pointer">
+                    <Shield className="h-4 w-4" />
+                    {t("correspondence.admin.testMode")}
+                  </Label>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {t("correspondence.admin.testModeDescription")}
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded border border-[hsl(var(--border))] bg-[hsl(var(--accent-gold)/0.06)] p-4">
+                <div className="flex gap-3">
+                  <Mail className="mt-0.5 h-5 w-5 shrink-0 text-accent-gold" />
+                  <div className="space-y-2 text-sm text-foreground">
+                    <p>
+                      {t("correspondence.admin.infoFormatting")}{" "}
+                      <span className="font-semibold">{t("correspondence.admin.infoOpening")}</span>{" "}
+                      {t("correspondence.admin.infoFollowedBy")}
+                    </p>
+                    <p className="text-muted-foreground">
+                      {t("correspondence.admin.infoDelivery")}
+                    </p>
+                    {testMode && (
+                      <p className="flex items-center gap-1 font-semibold text-accent-gold">
+                        <Shield className="h-4 w-4" />
+                        {t("correspondence.admin.testModeWarning")}
+                      </p>
+                    )}
                   </div>
                 </div>
-              ))}
+              </div>
+
+              <ArchiveButton
+                onClick={handleSend}
+                disabled={isSending || !subject.trim() || !message.trim()}
+                active
+                icon={isSending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+              >
+                {isSending
+                  ? t("correspondence.admin.sending")
+                  : testMode
+                    ? t("correspondence.admin.sendTest")
+                    : t("correspondence.admin.sendAll")}
+              </ArchiveButton>
             </div>
-          )}
+          </ArchiveCardContent>
+        </ArchiveCard>
+
+        <ArchiveCard>
+          <ArchiveCardContent className="p-5 sm:p-8">
+            <div className="mb-6 flex items-center gap-3">
+              <History className="h-6 w-6 text-accent-gold" />
+              <h2 className="font-cinzel text-xl sm:text-2xl text-accent-gold">
+                {t("correspondence.admin.history")}
+              </h2>
+            </div>
+
+            {loadingHistory ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-accent-gold" />
+              </div>
+            ) : history.length === 0 ? (
+              <div className="py-8 text-center text-muted-foreground">
+                <Mail className="mx-auto mb-3 h-12 w-12 opacity-50" />
+                <p>{t("correspondence.admin.noHistory")}</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {history.map((broadcast) => (
+                  <div
+                    key={broadcast.id}
+                    className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--surface-dark)/0.45)] p-4"
+                  >
+                    <div className="mb-2 flex items-start justify-between gap-4">
+                      <h3 className="font-semibold text-accent-gold">{broadcast.subject}</h3>
+                      <div className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        {new Date(broadcast.sent_at).toLocaleDateString(undefined, {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+                    </div>
+                    <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">{broadcast.body}</p>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        {broadcast.recipient_count} {t("correspondence.admin.recipients")}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Mail className="h-3 w-3" />
+                        {broadcast.email_count} {t("correspondence.admin.emailsSent")}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </ArchiveCardContent>
+        </ArchiveCard>
+
+        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <Crown className="h-3.5 w-3.5 text-accent-gold" />
+          {t("correspondence.admin.manorStaff")}
         </div>
       </div>
     </div>
