@@ -13,6 +13,7 @@ export interface UserProfile {
   xp: number
   level: number
   location: string | null
+  role: string | null
   theme: string | null
   show_collection: boolean
   preferences: Record<string, unknown> | null
