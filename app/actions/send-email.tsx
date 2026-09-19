@@ -16,7 +16,7 @@ export async function sendContactEmail(formData: {
       },
       body: JSON.stringify({
         from: "GameTable Contact <onboarding@resend.dev>",
-        to: "jani.perta@gmail.com",
+        to: "info@janope.fi",
         reply_to: formData.email,
         subject: `Contact Form: ${formData.subject}`,
         html: `
