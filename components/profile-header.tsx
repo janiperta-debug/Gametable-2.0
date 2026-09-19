@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, type ChangeEvent } from "react"
 import { ArchiveButton, archiveField } from "@/components/archive-frame"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
@@ -44,7 +44,7 @@ export function ProfileHeader() {
     return () => URL.revokeObjectURL(previewUrl)
   }, [avatarFile])
 
-  const handleAvatarFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
 
