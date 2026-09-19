@@ -79,7 +79,7 @@ async function fetchThingMeta(
     const response = await fetch(detailsUrl, { headers, cache: 'no-store' })
     
     if (!response.ok) {
-      console.log("[v0] BGG thing batch fetch failed:", response.status)
+      console.log("BGG thing batch fetch failed:", response.status)
       return metaMap
     }
 
@@ -121,7 +121,7 @@ async function fetchThingMeta(
       metaMap.set(id, { thumbnail, type, baseGame })
     }
   } catch (error) {
-    console.error("[v0] BGG thing batch fetch error:", error)
+    console.error("BGG thing batch fetch error:", error)
   }
 
   return metaMap
