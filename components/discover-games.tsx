@@ -243,16 +243,16 @@ export function DiscoverGames() {
   const handleAddGame = async (status: 'owned' | 'wishlist') => {
     if (!selectedGame) return
     
-    console.log("[v0] handleAddGame called with:", { selectedGame, status, selectedCategory })
+    console.log("handleAddGame called with:", { selectedGame, status, selectedCategory })
     setAddingGame({ id: getSearchResultId(selectedGame), type: status === 'owned' ? 'collection' : 'wishlist' })
 
     try {
       let result: { error?: string }
 
       if (selectedCategory === "trading_card") {
-        console.log("[v0] Adding TCG card:", selectedGame)
+        console.log("Adding TCG card:", selectedGame)
         const tcgResult = await addCardToCollection(selectedGame as TCGSearchResult, tcgQuantity, status)
-        console.log("[v0] TCG result:", tcgResult)
+        console.log("TCG result:", tcgResult)
         result = tcgResult.success ? {} : { error: tcgResult.error }
       } else if (selectedCategory === "miniature") {
         const miniature = selectedGame as MiniatureSearchResult
@@ -261,13 +261,13 @@ export function DiscoverGames() {
           result = wishlistResult.success ? {} : { error: wishlistResult.error }
         } else {
           const miniResult = await addMiniatureToCollection(miniature, miniQuantity, miniPaintStatus)
-          console.log("[v0] Miniature result:", miniResult)
+          console.log("Miniature result:", miniResult)
           result = miniResult.success ? {} : { error: miniResult.error }
         }
       } else {
-        console.log("[v0] Adding board game/RPG:", selectedGame)
+        console.log("Adding board game/RPG:", selectedGame)
         result = await addGameToCollection(selectedGame as BGGGameDetails, status, selectedCategory)
-        console.log("[v0] Board game/RPG result:", result)
+        console.log("Board game/RPG result:", result)
       }
 
       if (result.error) {
