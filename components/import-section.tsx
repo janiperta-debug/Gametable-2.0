@@ -79,17 +79,17 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
   }
 
   const handleImport = async () => {
-    console.log("[v0] handleImport CLICKED - username:", username, "category:", selectedCategory)
+    console.log("handleImport CLICKED - username:", username, "category:", selectedCategory)
     
     if (!username.trim()) {
-      console.log("[v0] handleImport: Empty username, returning")
+      console.log("handleImport: Empty username, returning")
       return
     }
     
     setImporting(true)
-    console.log("[v0] handleImport: Starting import for user:", username)
+    console.log("handleImport: Starting import for user:", username)
     try {
-      console.log("[v0] Importing from", getSourceName(), "for user:", username)
+      console.log("Importing from", getSourceName(), "for user:", username)
       
       // Determine the API endpoint based on category
       const apiUrl = selectedCategory === "board-games" 
@@ -99,7 +99,7 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
       const response = await fetch(apiUrl)
       const data = await response.json()
       
-      console.log("[v0] Collection API response:", data)
+      console.log("Collection API response:", data)
       
       if (data.error) {
         throw new Error(data.error)
@@ -145,7 +145,7 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
             errorCount++
           }
         } catch (e) {
-          console.error("[v0] Error importing game:", item.name, e)
+          console.error("Error importing game:", item.name, e)
           errorCount++
         }
       }
@@ -159,7 +159,7 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
         onImportComplete()
       }
     } catch (error) {
-      console.error("[v0] Import error:", error)
+      console.error("Import error:", error)
       toast({
         title: t("common.error"),
         description: error instanceof Error ? error.message : (t("collection.importFailed") || "Import failed"),
