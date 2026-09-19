@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 
@@ -37,7 +37,7 @@ export function useUser(): UseUserReturn {
 
   const supabase = createClient()
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string) => {
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .select('*')
@@ -50,84 +50,110 @@ export function useUser(): UseUserReturn {
       console.error('Error fetching profile:', profileError)
       setProfile(null)
     }
-  }
+  }, [supabase])
 
-  const refetch = async () => {
-    if (user) {
-      await fetchProfile(user.id)
+  const refetch = useCallback(async () => {
+    const currentUser = user
+    if (currentUser) {
+      await fetchProfile(currentUser.id)
     }
-  }
+  }, [user, fetchProfile])
 
   useEffect(() => {
     let isMounted = true
+    let restoring = false
 
-    // Restore the session from local storage. getSession() reads the persisted
-    // session WITHOUT a network round-trip (and refreshes the token if needed),
-    // so it works reliably when an installed PWA resumes from the background on
-    // iOS — unlike getUser(), whose network call can fail on resume and wrongly
-    // report the user as logged out until a full app restart.
+    // Restore the persisted session whenever the app starts or returns from
+    // the background. On iOS PWAs the app can be suspended long enough for the
+    // normal refresh timer to miss its window, so a foreground restore is
+    // important.
     const restoreSession = async () => {
-      try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      if (restoring) return
+      restoring = true
 
-        if (!isMounted) return
+      try {
+        let { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
         if (sessionError) {
-          // Not authenticated - this is not an error state
-          setUser(null)
-          setProfile(null)
-          setLoading(false)
+          if (isMounted) setError(sessionError)
           return
         }
 
-        const currentUser = session?.user ?? null
-        setUser(currentUser)
+        // If the stored token is close to expiry, explicitly refresh it while
+        // the PWA is active. This covers the iOS resume case where background
+        // timers may have been suspended.
+        if (session?.expires_at && session.expires_at <= Math.floor(Date.now() / 1000) + 300) {
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
 
-        if (currentUser) {
-          await fetchProfile(currentUser.id)
+          if (refreshError) {
+            console.warn('Session refresh on app resume failed:', refreshError)
+            // Keep the persisted session if it is still present. Supabase may
+            // recover it on the next auth refresh attempt.
+          } else {
+            session = refreshData.session
+          }
         }
-      } catch (err) {
-        if (isMounted) setError(err instanceof Error ? err : new Error('Unknown error'))
-      } finally {
-        if (isMounted) setLoading(false)
-      }
-    }
 
-    restoreSession()
-
-    // Subscribe to auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
         if (!isMounted) return
+
         const currentUser = session?.user ?? null
         setUser(currentUser)
+        setError(null)
 
         if (currentUser) {
           await fetchProfile(currentUser.id)
         } else {
           setProfile(null)
         }
+      } catch (err) {
+        if (isMounted) {
+          setError(err instanceof Error ? err : new Error('Unknown error'))
+        }
+      } finally {
+        restoring = false
+        if (isMounted) setLoading(false)
+      }
+    }
+
+    void restoreSession()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (!isMounted) return
+
+        const currentUser = session?.user ?? null
+        setUser(currentUser)
+
+        if (currentUser) {
+          // Do not await Supabase work inside the auth callback. Supabase's
+          // auth lock can otherwise block token refreshes on resume.
+          void fetchProfile(currentUser.id)
+        } else {
+          setProfile(null)
+        }
       }
     )
 
-    // When the installed PWA returns to the foreground, iOS may have suspended
-    // the token-refresh timer while backgrounded. Re-read the persisted session
-    // so the UI reflects the real auth state instead of showing logged-out.
-    const handleVisibility = () => {
+    const handleAppResume = () => {
       if (document.visibilityState === 'visible') {
-        restoreSession()
+        void restoreSession()
       }
     }
-    document.addEventListener('visibilitychange', handleVisibility)
-    window.addEventListener('focus', handleVisibility)
+
+    // visibilitychange is the main signal for installed PWAs. pageshow and
+    // focus cover Safari/iOS resume paths where visibilitychange is not enough.
+    document.addEventListener('visibilitychange', handleAppResume)
+    window.addEventListener('pageshow', handleAppResume)
+    window.addEventListener('focus', handleAppResume)
 
     return () => {
       isMounted = false
       subscription.unsubscribe()
-      document.removeEventListener('visibilitychange', handleVisibility)
-      window.removeEventListener('focus', handleVisibility)
+      document.removeEventListener('visibilitychange', handleAppResume)
+      window.removeEventListener('pageshow', handleAppResume)
+      window.removeEventListener('focus', handleAppResume)
     }
-  }, [])
+  }, [fetchProfile, supabase])
 
   return { user, profile, loading, error, refetch }
 }
