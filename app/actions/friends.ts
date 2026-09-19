@@ -15,6 +15,7 @@ export interface UserProfile {
   avatar_url: string | null
   location: string | null
   bio: string | null
+  friendship_id?: string
 }
 
 export interface FriendRequest {
@@ -468,6 +469,7 @@ export async function getFriends(): Promise<{ data: UserProfile[]; error?: strin
   const { data: friendships, error } = await supabase
     .from("friendships")
     .select(`
+      id,
       requester_id,
       addressee_id,
       requester:profiles!friendships_requester_id_fkey(id, display_name, username, avatar_url, location, bio),
@@ -484,9 +486,15 @@ export async function getFriends(): Promise<{ data: UserProfile[]; error?: strin
   // Extract friend profiles (the other person in each friendship)
   const friends: UserProfile[] = friendships?.map(f => {
     if (f.requester_id === user.id) {
-      return f.addressee as unknown as UserProfile
+      return {
+        ...(f.addressee as unknown as UserProfile),
+        friendship_id: f.id,
+      }
     }
-    return f.requester as unknown as UserProfile
+    return {
+      ...(f.requester as unknown as UserProfile),
+      friendship_id: f.id,
+    }
   }) || []
 
   return { data: friends }
