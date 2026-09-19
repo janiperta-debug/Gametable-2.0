@@ -17,7 +17,7 @@ import {
 } from "@/app/actions/friends"
 import { useUser } from "@/hooks/useUser"
 import { useToast } from "@/hooks/use-toast"
-import { Loader2, UserPlus, Check, X, Users } from "lucide-react"
+import { Loader2, UserPlus, Check, X, Users, UserMinus } from "lucide-react"
 
 export function FriendsList() {
   const [friends, setFriends] = useState<UserProfile[]>([])
@@ -74,8 +74,23 @@ export function FriendsList() {
   }
 
   async function handleRemoveFriend(friendId: string) {
-    // We need to find the friendship ID - for now just refresh data
-    toast({ title: t("common.error"), description: "Remove friend not implemented yet", variant: "destructive" })
+    const friend = friends.find(f => f.id === friendId)
+    if (!friend?.friendship_id) {
+      toast({ title: t("common.error"), description: "Friendship could not be found.", variant: "destructive" })
+      return
+    }
+
+    setActionLoading(friendId)
+    const result = await removeFriend(friend.friendship_id)
+
+    if (result.error) {
+      toast({ title: t("common.error"), description: result.error, variant: "destructive" })
+    } else {
+      setFriends(prev => prev.filter(f => f.id !== friendId))
+      toast({ title: t("common.success"), description: t("profile.remove") })
+    }
+
+    setActionLoading(null)
   }
 
   if (loading) {
@@ -183,10 +198,18 @@ export function FriendsList() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <ArchiveCardButton asChild fullWidth>
+                    <ArchiveCardButton asChild className="flex-1">
                       <Link href={`/users/${friend.username || friend.id}`}>
                         {t("profile.viewProfile")}
                       </Link>
+                    </ArchiveCardButton>
+                    <ArchiveCardButton
+                      className="flex-1"
+                      onClick={() => handleRemoveFriend(friend.id)}
+                      disabled={actionLoading === friend.id}
+                      icon={actionLoading === friend.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserMinus className="h-4 w-4" />}
+                    >
+                      {t("profile.remove")}
                     </ArchiveCardButton>
                   </div>
                 </div>
