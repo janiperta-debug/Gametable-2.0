@@ -137,8 +137,8 @@ export default function PrivacyPage() {
             <div>
               <h3 className="font-heading font-semibold text-lg mb-2">With Service Providers</h3>
               <p>
-                We use third-party services like Firebase for authentication and data storage, BoardGameGeek for game
-                data, and analytics providers to help us operate our platform.
+                We use third-party services such as Supabase for authentication and data storage, BoardGameGeek for game
+                data, and other providers as needed to operate our platform.
               </p>
             </div>
 
@@ -205,7 +205,7 @@ export default function PrivacyPage() {
               <li>Encryption of data in transit and at rest</li>
               <li>Regular security assessments</li>
               <li>Access controls and authentication</li>
-              <li>Secure cloud infrastructure (Firebase)</li>
+              <li>Secure cloud infrastructure</li>
             </ul>
             <p className="mt-4">
               However, no method of transmission over the internet is 100% secure. While we strive to protect your
