@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { ArrowLeft, Check, Lock } from "lucide-react"
-import { ArchiveFrame, ArchiveButton } from "@/components/archive-frame"
+import { ArchiveFrame } from "@/components/archive-frame"
+import { ArchiveDivider } from "@/components/archive-divider"
 import { useTranslation } from "@/lib/i18n"
 import { useState } from "react"
 import { useAppTheme, type AppThemeName } from "@/components/app-theme-provider"
@@ -49,11 +50,25 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
   return (
     <main data-theme={data.id as AppThemeName} className={`artifact-cabinet min-h-screen px-3 py-5 sm:px-6 sm:py-8 ${data.id === "conservatory" ? conservatoryStyles.conservatoryMaterials : ""} ${data.id === "spa" ? spaContrastStyles.spaContrast : ""}`} style={{ backgroundColor: "hsl(var(--background))" }}>
       <div className="mx-auto max-w-5xl space-y-4">
-        <ArchiveButton asChild icon={<ArrowLeft className="h-4 w-4" aria-hidden="true" />}><Link href="/themes">{t("themes.roomPage.backToMap")}</Link></ArchiveButton>
-        <header className="flex items-center gap-4 px-1 sm:gap-5 sm:px-2">
-          <img src={assets.crest} alt={`${title} crest`} className="h-20 w-20 flex-none object-contain drop-shadow-[0_3px_10px_rgba(0,0,0,0.85)] sm:h-28 sm:w-28" />
-          <div className="min-w-0"><h1 className="logo-text text-3xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] sm:text-5xl">{title}</h1><p className="font-body mt-1 text-sm uppercase tracking-wide text-foreground/75 text-pretty sm:text-base">{L(data.tagline)}</p></div>
-        </header>
+        <ArchiveFrame weight="thin" cornerSize="sm" className="rounded-xl">
+          <div className="px-4 py-3 sm:px-6">
+            <Link
+              href="/themes"
+              className="inline-flex min-h-11 items-center gap-2 font-cinzel text-sm uppercase tracking-wide text-[var(--archive-gold,#d9b65c)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] transition-opacity hover:opacity-80"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              {t("themes.roomPage.backToMap")}
+            </Link>
+          </div>
+          <ArchiveDivider />
+          <header className="flex items-center gap-4 px-4 py-4 sm:gap-5 sm:px-6 sm:py-5">
+            <img src={assets.crest} alt={`${title} crest`} className="h-20 w-20 flex-none object-contain drop-shadow-[0_3px_10px_rgba(0,0,0,0.85)] sm:h-28 sm:w-28" />
+            <div className="min-w-0">
+              <h1 className="logo-text text-3xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] sm:text-5xl">{title}</h1>
+              <p className="font-body mt-1 text-sm uppercase tracking-wide text-foreground/75 text-pretty sm:text-base">{L(data.tagline)}</p>
+            </div>
+          </header>
+        </ArchiveFrame>
         <ArchiveFrame weight="thin" cornerSize="sm" className="overflow-hidden rounded-xl"><div className="relative aspect-[16/10] w-full overflow-hidden rounded-[0.4rem] sm:aspect-[16/7]"><img src={assets.hero} alt={`${title} interior`} className="absolute inset-0 h-full w-full object-cover" /></div></ArchiveFrame>
         <ArchiveFrame weight="thin" cornerSize="sm" className="rounded-md"><div className="flex flex-wrap items-center gap-3 p-4 sm:gap-4"><span className={`flex h-10 w-10 flex-none items-center justify-center rounded-full border border-[var(--archive-gold,#d9b65c)]/50 ${goldText}`} aria-hidden="true">{isActive ? <Check className="h-5 w-5" /> : isUnlocked ? <Check className="h-5 w-5" /> : <Lock className="h-5 w-5" />}</span><div className="min-w-0 flex-1"><p className={`font-cinzel text-sm font-bold uppercase tracking-wide ${goldText}`}>{isActive ? t("themes.roomPage.themeActive") : isUnlocked ? t("themes.roomPage.themeUnlocked") : t("themes.roomPage.themeLocked")}</p><p className="font-body text-sm leading-snug text-[var(--archive-ink-soft)] text-pretty">{isActive ? t("themes.roomPage.themeActiveDesc") : isUnlocked ? t("themes.roomPage.themeUnlockedDesc") : t("themes.roomPage.themeLockedDesc")}</p></div><span className={`flex-none rounded-md border border-[var(--archive-gold,#d9b65c)]/40 px-2.5 py-1 font-cinzel text-xs font-bold uppercase tracking-wide ${goldText}`}>{`${t("themes.roomPage.levelLabel")} ${level}`}</span>{isActive ? <span className={`inline-flex min-h-9 flex-none items-center gap-1.5 rounded-md border border-[var(--archive-gold,#d9b65c)]/50 bg-[var(--archive-gold,#d9b65c)]/15 px-3 font-cinzel text-xs font-bold uppercase tracking-wide ${goldText}`}><Check className="h-4 w-4" aria-hidden="true" />{t("themes.roomPage.inUse")}</span> : isUnlocked ? <button type="button" disabled={savingTheme} onClick={async () => { setSavingTheme(true); try { await setAppTheme(data.id as AppThemeName); await updateActiveRoom(data.id) } finally { setSavingTheme(false) } }} className={`inline-flex min-h-9 flex-none items-center rounded-md border border-[var(--archive-gold,#d9b65c)]/60 px-3 font-cinzel text-xs font-bold uppercase tracking-wide ${goldText} transition-colors hover:bg-[var(--archive-gold,#d9b65c)]/15`}>{t("themes.roomPage.useTheme")}</button> : canUnlock ? <button type="button" disabled={savingTheme} onClick={async () => { if (!user) return; setSavingTheme(true); try { const result = await unlockManorRoom(data.id); if (result.success) await refetch() } finally { setSavingTheme(false) } }} className={`inline-flex min-h-9 flex-none items-center rounded-md border border-[var(--archive-gold,#d9b65c)]/60 px-3 font-cinzel text-xs font-bold uppercase tracking-wide ${goldText} transition-colors hover:bg-[var(--archive-gold,#d9b65c)]/15`}>{t("themes.roomPage.useTheme")}</button> : null}</div></ArchiveFrame>
         <div className="grid gap-4 lg:grid-cols-2"><ArchiveFrame className="rounded-md"><div className="space-y-5 p-5 sm:p-6"><h2 className={`font-cinzel text-xl font-bold uppercase tracking-wide ${goldText}`}>{L(data.storyTitle)}</h2><div className="space-y-4">{data.storyParagraphs.map((p, i) => <p key={i} className="font-body leading-relaxed text-[var(--archive-ink-strong)] text-pretty">{L(p)}</p>)}</div><div data-archive-essence="true" className="rounded-md border border-[var(--archive-gold,#d9b65c)]/30 bg-[var(--archive-inset-bg)] p-4"><h3 className={`font-cinzel text-sm font-bold uppercase tracking-wide ${goldText}`}>{t("themes.roomPage.essence")}</h3><p className={`font-body mt-1 italic ${goldText}/90`}>{L(data.essenceTagline)}</p><div className="mt-2 space-y-1">{data.essenceText.map((line, i) => <p key={i} className="font-body leading-relaxed text-[var(--archive-ink-soft)] text-pretty">{L(line)}</p>)}</div></div></div></ArchiveFrame><ArchiveFrame className="rounded-md"><div className="space-y-4 p-5 sm:p-6"><h2 className={`font-cinzel text-xl font-bold uppercase tracking-wide ${goldText}`}>{t("themes.roomPage.journey")}</h2><ol className="grid gap-x-5 gap-y-3 sm:grid-cols-2">{data.journey.map((step, i) => <li key={i} className="flex gap-3"><span className={`flex h-7 w-7 flex-none items-center justify-center rounded-full border border-[var(--archive-gold,#d9b65c)]/50 font-cinzel text-sm font-bold ${goldText}`}>{i + 1}</span><div><p className={`font-cinzel text-sm font-semibold ${goldText}`}>{L(step.title)}</p><p className="font-body text-sm leading-snug text-[var(--archive-ink-soft)] text-pretty">{L(step.description)}</p></div></li>)}</ol></div></ArchiveFrame></div>
