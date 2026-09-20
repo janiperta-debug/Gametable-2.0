@@ -759,6 +759,12 @@ export function DiscoverGames() {
               <div className="w-24 h-24 flex-shrink-0 bg-surface/30 flex items-center justify-center border-r border-accent-gold/10 overflow-hidden">
                 {loadingDetails === getSearchResultId(game) ? (
                   <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
+                ) : selectedCategory === "miniature" && (game as MiniatureSearchResult).imageUrl ? (
+                  <img
+                    src={(game as MiniatureSearchResult).imageUrl}
+                    alt={game.name}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (game as BGGSearchResult).thumbnail ? (
                   <img 
                     src={(game as BGGSearchResult).thumbnail} 
