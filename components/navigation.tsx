@@ -138,7 +138,7 @@ export function Navigation() {
                   <div className="flex flex-col">
                     <span className="font-cinzel text-xs uppercase tracking-wide text-foreground">Lvl {userLevel}</span>
                     <div className="h-1.5 w-20 overflow-hidden rounded-full bg-background/50">
-                      <div className="h-full rounded-full bg-accent-gold transition-all" style={{ width: "${xpProgressPercent(userXp, userLevel)}%" }} />
+                      <div className="h-full rounded-full bg-accent-gold transition-all" style={{ width: `${xpProgressPercent(userXp, userLevel)}%` }} />
                     </div>
                   </div>
                 </div>
