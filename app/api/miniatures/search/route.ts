@@ -5,9 +5,9 @@ import { mapMiniatureCatalogUnit, type MiniatureSearchResult } from "../catalog"
 export type { MiniatureSearchResult } from "../catalog"
 export type MiniatureSystem = "wh40k" | "aos" | "xwing" | string
 
-// Miniatures is currently a Catalog-authoritative domain. There is no reliable
-// general-purpose external search source to merge here, so search stays local
-// rather than inventing fallback/demo results.
+// Resolve the requested system to faction IDs first, then filter mini_units
+// by faction_id. This avoids ambiguous nested relationship filters when
+// legacy system rows share the same code.
 async function searchCatalog(
   query: string,
   systemCode?: string,
@@ -15,6 +15,42 @@ async function searchCatalog(
   factionId?: string,
 ): Promise<MiniatureSearchResult[]> {
   const supabase = await createClient()
+  let resolvedFactionIds: string[] | null = null
+
+  if (factionId) {
+    resolvedFactionIds = [factionId]
+  } else if (systemId || systemCode) {
+    let systemsQuery = supabase.from("mini_systems").select("id")
+
+    if (systemId) {
+      systemsQuery = systemsQuery.eq("id", systemId)
+    } else {
+      systemsQuery = systemsQuery.eq("code", systemCode)
+    }
+
+    const { data: systems, error: systemsError } = await systemsQuery
+    if (systemsError) {
+      console.error("Miniature system resolution error:", systemsError)
+      return []
+    }
+
+    const systemIds = (systems ?? []).map((system) => system.id)
+    if (systemIds.length === 0) return []
+
+    const { data: factions, error: factionsError } = await supabase
+      .from("mini_factions")
+      .select("id")
+      .in("system_id", systemIds)
+
+    if (factionsError) {
+      console.error("Miniature faction resolution error:", factionsError)
+      return []
+    }
+
+    resolvedFactionIds = (factions ?? []).map((faction) => faction.id)
+    if (resolvedFactionIds.length === 0) return []
+  }
+
   let dbQuery = supabase
     .from("mini_units")
     .select(`
@@ -41,17 +77,8 @@ async function searchCatalog(
     .order("name")
     .limit(20)
 
-  // Prefer canonical UUID filters when supplied. `system` remains supported
-  // for the existing UI/API contract, but a system code can be ambiguous
-  // across editions, so systemId is the authoritative filter.
-  if (systemId) {
-    dbQuery = dbQuery.eq("faction.system.id", systemId)
-  } else if (systemCode) {
-    dbQuery = dbQuery.eq("faction.system.code", systemCode)
-  }
-
-  if (factionId) {
-    dbQuery = dbQuery.eq("faction.id", factionId)
+  if (resolvedFactionIds) {
+    dbQuery = dbQuery.in("faction_id", resolvedFactionIds)
   }
 
   const { data, error } = await dbQuery
@@ -82,9 +109,6 @@ export async function GET(request: Request) {
   }
 
   try {
-    // Same orchestration contract as the other Catalog-first domains:
-    // the route resolves from the local canonical Catalog and returns the
-    // normalized domain result. External ingestion is intentionally separate.
     const results = await searchCatalog(query, systemCode, systemId, factionId)
     return NextResponse.json({ results })
   } catch (error) {
