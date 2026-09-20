@@ -25,7 +25,8 @@ import { CRYSTAL_CAVERN_ARTIFACT_PAGE } from "@/lib/crystal-cavern-artifact-page
 import { UNDERGROUND_TEMPLE_ARTIFACT_PAGE } from "@/lib/underground-temple-artifact-page"
 import { TREASURE_VAULT_ARTIFACT_PAGE } from "@/lib/treasure-vault-artifact-page"
 import { getArtifactPage } from "@/lib/artifact-pages"
-import { isTreasureVaultComplete } from "@/lib/artifacts"\nimport type { ManorEntitlementProfile } from "@/lib/manor-progression"
+import { isTreasureVaultComplete } from "@/lib/artifacts"
+import type { ManorEntitlementProfile } from "@/lib/manor-progression"
 
 const withArtifactName = (page: RoomThemePage, name: { fi: string; en: string }): RoomThemePage => ({
   ...page,
