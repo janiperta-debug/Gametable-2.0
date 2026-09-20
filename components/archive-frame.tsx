@@ -388,11 +388,11 @@ interface ArchiveToggleProps<T extends string> {
   value: T
   onChange: (value: T) => void
   className?: string
+  framed?: boolean
 }
 
-export function ArchiveToggle<T extends string>({ options, value, onChange, className }: ArchiveToggleProps<T>) {
-  return (
-    <ArchiveFrame weight="thin" cornerSize="sm" className={cn("inline-block max-w-full rounded-lg", className)}>
+export function ArchiveToggle<T extends string>({ options, value, onChange, className, framed = true }: ArchiveToggleProps<T>) {
+  const toggle = (
       <div
         role="tablist"
         className="flex items-center gap-1 p-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
@@ -423,7 +423,14 @@ export function ArchiveToggle<T extends string>({ options, value, onChange, clas
           )
         })}
       </div>
+    )
+
+  return framed ? (
+    <ArchiveFrame weight="thin" cornerSize="sm" className={cn("inline-block max-w-full rounded-lg", className)}>
+      {toggle}
     </ArchiveFrame>
+  ) : (
+    <div className={className}>{toggle}</div>
   )
 }
 
