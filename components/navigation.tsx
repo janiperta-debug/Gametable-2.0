@@ -120,8 +120,8 @@ export function Navigation() {
           <div className="flex items-center gap-3 lg:gap-4">
             <Link href="/notifications" aria-label={t("nav.notifications")} className="transition-transform hover:scale-105">
               <ArchiveFrame weight="thin" corners={false} className="rounded-lg">
-                <div className="relative flex h-11 w-11 items-center justify-center text-accent-gold">
-                  <Bell className="h-5 w-5" />
+                <div className="relative flex h-11 w-11 items-center justify-center text-[var(--archive-gold,#d9b65c)]">
+                  <Bell className="h-5 w-5 text-[var(--archive-gold,#d9b65c)]" />
                   {hasUnreadNotifications && <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}</span>}
                 </div>
               </ArchiveFrame>
@@ -178,7 +178,7 @@ export function Navigation() {
         </div>
       </div>
     </nav>
-    <nav className="hidden md:block fixed bottom-2 left-0 right-0 z-50 pointer-events-none"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div className="flex items-center justify-between h-20 pointer-events-auto">{desktopNavItemsLeft.map(item => <DesktopNavButton key={item.href} item={item} active={isActive(item.href)} />)}<Link href="/home" aria-label={t("nav.home")} aria-current={isActive("/home") ? "page" : undefined} className="group shrink-0 transition-transform hover:scale-105"><ArchiveFrame round weight="thin" className={`${isActive("/home") ? "brightness-125" : "brightness-95 group-hover:brightness-110"}`}><div className="flex h-[92px] w-[92px] lg:h-[104px] lg:w-[104px] items-center justify-center"><img src={getCrestImage(currentAppTheme) || "/placeholder.svg"} alt="" className="w-16 h-16 lg:w-20 lg:h-20 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]" /></div></ArchiveFrame></Link>{desktopNavItemsRight.map(item => <DesktopNavButton key={item.href} item={item} active={isActive(item.href)} />)}</div></div></nav>
+    <nav className="hidden md:block fixed bottom-4 left-0 right-0 z-50 pointer-events-none"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div className="flex items-center justify-between h-20 pointer-events-auto">{desktopNavItemsLeft.map(item => <DesktopNavButton key={item.href} item={item} active={isActive(item.href)} />)}<Link href="/home" aria-label={t("nav.home")} aria-current={isActive("/home") ? "page" : undefined} className="group shrink-0 transition-transform hover:scale-105"><ArchiveFrame round weight="thin" className={`${isActive("/home") ? "brightness-125" : "brightness-95 group-hover:brightness-110"}`}><div className="flex h-[92px] w-[92px] lg:h-[104px] lg:w-[104px] items-center justify-center"><img src={getCrestImage(currentAppTheme) || "/placeholder.svg"} alt="" className="w-16 h-16 lg:w-20 lg:h-20 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]" /></div></ArchiveFrame></Link>{desktopNavItemsRight.map(item => <DesktopNavButton key={item.href} item={item} active={isActive(item.href)} />)}</div></div></nav>
 
     <div className="md:hidden fixed left-0 right-0 z-50 px-4 pt-3 pb-2 flex items-center justify-between pointer-events-none" style={{ top: "env(safe-area-inset-top, 0px)" }}>
       <Link href="/notifications" className="relative pointer-events-auto w-14 h-14 flex items-center justify-center"><img src="/images/icons/avatar-frame.jpeg" alt="" className="absolute inset-0 w-14 h-14 object-contain" /><img src="/images/icons/bell.jpeg" alt="" className="w-9 h-9 object-contain z-10" />{hasUnreadNotifications && <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold z-20">{unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}</span>}</Link>
