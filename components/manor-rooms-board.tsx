@@ -5,6 +5,8 @@ import { ArchiveFrame } from "@/components/archive-frame"
 import { useUser } from "@/hooks/useUser"
 import {
   canUnlockManorRoom,
+  getManorFloor,
+  isManorFloorPreviewVisible,
   isManorRoomUnlocked,
 } from "@/lib/manor-progression"
 
@@ -49,37 +51,23 @@ export function ManorRoomsBoard() {
     <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4 lg:grid-cols-6 lg:gap-5">
       {ROOM_SLOTS.map((slot) => {
         const isUnlocked = isManorRoomUnlocked(slot.roomId, profile)
-
+        const floor = getManorFloor(slot.roomId)
+        const previewVisible = floor
+          ? isManorFloorPreviewVisible(floor, profile)
+          : false
         const canUnlock = canUnlockManorRoom(slot.roomId, profile)
-
-        const isAccessible = isUnlocked || canUnlock
+        const isVisible = isUnlocked || previewVisible
+        const imageSrc = isVisible ? slot.src : "/themes/rooms/lock.png"
 
         const tile = (
           <ArchiveFrame weight="thin" cornerSize="sm" className="rounded-lg">
-            <div
-              className={`relative flex aspect-square items-center justify-center p-2 ${
-                isAccessible
-                  ? ""
-                  : "opacity-60 grayscale-[0.35]"
-              }`}
-            >
+            <div className="relative flex aspect-square items-center justify-center p-2">
               <img
-                src={slot.src}
+                src={imageSrc}
                 alt=""
                 loading="lazy"
                 className="h-full w-full object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]"
               />
-
-              {!isAccessible && (
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/35"
-                >
-                  <span className="text-xl drop-shadow-md" aria-hidden="true">
-                    🔒
-                  </span>
-                </div>
-              )}
 
               {canUnlock && (
                 <div
@@ -93,7 +81,7 @@ export function ManorRoomsBoard() {
           </ArchiveFrame>
         )
 
-        if (isAccessible) {
+        if (isVisible) {
           return (
             <Link
               key={slot.roomId}
@@ -101,7 +89,9 @@ export function ManorRoomsBoard() {
               aria-label={
                 canUnlock
                   ? `${slot.label} — unlock`
-                  : slot.label
+                  : isUnlocked
+                    ? slot.label
+                    : `${slot.label} — preview`
               }
               className="block rounded-lg transition-transform hover:scale-[1.03] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--archive-gold,#d9b65c)]"
             >
