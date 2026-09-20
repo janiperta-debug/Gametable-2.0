@@ -155,7 +155,7 @@ export const MANOR_FLOOR_RULES: readonly ManorFloorRule[] = [
   },
   {
     floor: "second",
-    previewXp: 7500,
+    previewXp: 6000,
     unlockLevels: [35, 40, 45, 50, 55, 60, 65],
   },
   {
