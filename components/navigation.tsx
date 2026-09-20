@@ -114,7 +114,36 @@ export function Navigation() {
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
 
   return <>
-    <nav className="hidden md:block fixed bottom-0 left-0 right-0 z-50 pointer-events-none"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div className="flex items-center justify-between h-20 pointer-events-auto">{desktopNavItemsLeft.map(item => <DesktopNavButton key={item.href} item={item} active={isActive(item.href)} />)}<Link href="/home" aria-label={t("nav.home")} aria-current={isActive("/home") ? "page" : undefined} className="group shrink-0 transition-transform hover:scale-105"><ArchiveFrame round weight="thin" className={`${isActive("/home") ? "brightness-125" : "brightness-95 group-hover:brightness-110"}`}><div className="flex h-[92px] w-[92px] lg:h-[104px] lg:w-[104px] items-center justify-center"><img src={getCrestImage(currentAppTheme) || "/placeholder.svg"} alt="" className="w-16 h-16 lg:w-20 lg:h-20 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]" /></div></ArchiveFrame></Link>{desktopNavItemsRight.map(item => <DesktopNavButton key={item.href} item={item} active={isActive(item.href)} />)}</div></div></nav>
+    <nav className="hidden md:block fixed top-0 left-0 right-0 z-50 pointer-events-none">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20 pointer-events-auto">
+          <div className="flex items-center gap-3 lg:gap-4">
+            <Link href="/notifications" className="relative p-2 hover:bg-card/50 rounded-lg transition-colors" aria-label={t("nav.notifications")}>
+              <Bell className="w-5 h-5 text-accent-gold" />
+              {hasUnreadNotifications && <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold">{unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}</span>}
+            </Link>
+            <LanguageSwitcher />
+          </div>
+          <div className="flex items-center gap-3 lg:gap-4">
+            {user && !loading && <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-accent-gold/20">
+              <div className="w-8 h-8 rounded-full bg-accent-gold/20 border-2 border-accent-gold flex items-center justify-center"><span className="text-accent-gold font-cinzel text-sm font-bold">{userLevel}</span></div>
+              <div className="flex flex-col"><span className="text-foreground text-xs font-cinzel uppercase tracking-wide">Lvl {userLevel}</span><div className="w-20 h-1.5 bg-background/50 rounded-full overflow-hidden"><div className="h-full bg-accent-gold rounded-full transition-all" style={{ width: `${xpProgressPercent(userXp, userLevel)}%` }} /></div></div>
+            </div>}
+            {!user && !loading ? <Link href="/auth/login" className="flex items-center gap-1.5 lg:gap-2 bg-accent-gold text-background px-3 py-1.5 rounded-lg hover:bg-accent-gold/90 transition-colors font-cinzel text-xs uppercase tracking-wide"><User className="w-3.5 h-3.5" /><span>{t("nav.login")}</span></Link> : <div className="relative">
+              <button onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} aria-label={t("nav.profile")} className="flex items-center gap-2 p-1 rounded-lg hover:bg-card/50 transition-colors">
+                <div className="w-10 h-10 bg-accent-gold/20 border-2 border-accent-gold rounded-full flex items-center justify-center overflow-hidden">{profile?.avatar_url ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" /> : <User className="w-5 h-5 text-accent-gold" />}</div>
+                <svg className={"w-3 h-3 text-accent-gold transition-transform " + (isUserDropdownOpen ? "rotate-180" : "")} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </button>
+              {isUserDropdownOpen && <div className="absolute right-0 mt-2 w-48 bg-card backdrop-blur-sm rounded-lg shadow-lg border border-accent-gold/20 overflow-hidden">
+                <Link href="/profile" className="flex items-center space-x-3 px-4 py-3 hover:bg-accent-gold/10 transition-colors" onClick={() => setIsUserDropdownOpen(false)}><User className="w-4 h-4 text-accent-gold" /><span className="text-foreground font-cinzel text-sm">{t("nav.profile")}</span></Link>
+                <button className="flex items-center space-x-3 px-4 py-3 hover:bg-accent-gold/10 transition-colors w-full text-left border-t border-accent-gold/20" onClick={handleLogout}><LogOut className="w-4 h-4 text-accent-gold" /><span className="text-foreground font-cinzel text-sm">{t("nav.logout")}</span></button>
+              </div>}
+            </div>}
+          </div>
+        </div>
+      </div>
+    </nav>
+    <nav className="hidden md:block fixed bottom-2 left-0 right-0 z-50 pointer-events-none"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div className="flex items-center justify-between h-20 pointer-events-auto">{desktopNavItemsLeft.map(item => <DesktopNavButton key={item.href} item={item} active={isActive(item.href)} />)}<Link href="/home" aria-label={t("nav.home")} aria-current={isActive("/home") ? "page" : undefined} className="group shrink-0 transition-transform hover:scale-105"><ArchiveFrame round weight="thin" className={`${isActive("/home") ? "brightness-125" : "brightness-95 group-hover:brightness-110"}`}><div className="flex h-[92px] w-[92px] lg:h-[104px] lg:w-[104px] items-center justify-center"><img src={getCrestImage(currentAppTheme) || "/placeholder.svg"} alt="" className="w-16 h-16 lg:w-20 lg:h-20 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]" /></div></ArchiveFrame></Link>{desktopNavItemsRight.map(item => <DesktopNavButton key={item.href} item={item} active={isActive(item.href)} />)}</div></div></nav>
 
     <div className="md:hidden fixed left-0 right-0 z-50 px-4 pt-3 pb-2 flex items-center justify-between pointer-events-none" style={{ top: "env(safe-area-inset-top, 0px)" }}>
       <Link href="/notifications" className="relative pointer-events-auto w-14 h-14 flex items-center justify-center"><img src="/images/icons/avatar-frame.jpeg" alt="" className="absolute inset-0 w-14 h-14 object-contain" /><img src="/images/icons/bell.jpeg" alt="" className="w-9 h-9 object-contain z-10" />{hasUnreadNotifications && <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold z-20">{unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}</span>}</Link>
