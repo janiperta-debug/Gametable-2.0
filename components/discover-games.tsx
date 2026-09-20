@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   ArchiveCard,
   ArchiveCardContent,
@@ -146,8 +146,32 @@ export function DiscoverGames() {
   const [tcgGame, setTcgGame] = useState<"magic" | "pokemon" | "yugioh" | "lorcana" | "flesh-and-blood" | "one-piece">("magic")
   const [miniQuantity, setMiniQuantity] = useState(1)
   const [miniPaintStatus, setMiniPaintStatus] = useState<PaintStatus>("unpainted")
+  const [miniatureSystems, setMiniatureSystems] = useState<Array<{ id: string; name: string; code: string; edition?: string }>>([])
+  const [miniatureSystem, setMiniatureSystem] = useState("")
 
   const categoryConfig = categories.find(c => c.id === selectedCategory)!
+
+  useEffect(() => {
+    let cancelled = false
+
+    const loadMiniatureSystems = async () => {
+      try {
+        const response = await fetch("/api/miniatures/systems")
+        if (!response.ok) return
+        const data = await response.json()
+        if (!cancelled) {
+          setMiniatureSystems(data.systems || [])
+        }
+      } catch (error) {
+        console.error("Miniature systems load error:", error)
+      }
+    }
+
+    loadMiniatureSystems()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return
@@ -161,6 +185,8 @@ export function DiscoverGames() {
       let url = ""
       if (selectedCategory === "trading_card") {
         url = `${categoryConfig.searchEndpoint}?q=${encodeURIComponent(searchQuery)}&game=${tcgGame}`
+      } else if (selectedCategory === "miniature") {
+        url = `${categoryConfig.searchEndpoint}?query=${encodeURIComponent(searchQuery)}${miniatureSystem ? `&system=${encodeURIComponent(miniatureSystem)}` : ""}`
       } else {
         url = `${categoryConfig.searchEndpoint}?query=${encodeURIComponent(searchQuery)}`
       }
@@ -307,10 +333,19 @@ export function DiscoverGames() {
     setSearchResults([])
     setSelectedGame(null)
     setSearchQuery("")
+    if (category !== "miniature") {
+      setMiniatureSystem("")
+    }
   }
 
   const handleTcgGameChange = (game: typeof tcgGame) => {
     setTcgGame(game)
+    setSearchResults([])
+    setSelectedGame(null)
+  }
+
+  const handleMiniatureSystemChange = (systemCode: string) => {
+    setMiniatureSystem(systemCode)
     setSearchResults([])
     setSelectedGame(null)
   }
@@ -396,6 +431,37 @@ export function DiscoverGames() {
                   }`}
                 >
                   {game.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Miniature System Selector */}
+          {selectedCategory === "miniature" && miniatureSystems.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => handleMiniatureSystemChange("")}
+                className={`px-3 py-1.5 rounded-full text-sm font-body transition-colors ${
+                  !miniatureSystem
+                    ? "bg-accent-gold text-background"
+                    : "bg-surface/50 text-foreground hover:bg-accent-gold/20"
+                }`}
+              >
+                Kaikki
+              </button>
+              {miniatureSystems.map((system) => (
+                <button
+                  key={`${system.code}-${system.name}`}
+                  type="button"
+                  onClick={() => handleMiniatureSystemChange(system.code)}
+                  className={`px-3 py-1.5 rounded-full text-sm font-body transition-colors ${
+                    miniatureSystem === system.code
+                      ? "bg-accent-gold text-background"
+                      : "bg-surface/50 text-foreground hover:bg-accent-gold/20"
+                  }`}
+                >
+                  {system.name}
                 </button>
               ))}
             </div>
