@@ -54,7 +54,7 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
           <div className="px-4 py-3 sm:px-6">
             <Link
               href="/themes"
-              className="inline-flex min-h-11 items-center gap-2 font-cinzel text-sm uppercase tracking-wide text-[var(--archive-gold,#d9b65c)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] transition-opacity hover:opacity-80"
+              className="inline-flex min-h-11 items-center gap-2 font-cinzel text-sm uppercase tracking-wide text-[var(--archive-gold,#d9b65c)] transition-opacity hover:opacity-80"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               {t("themes.roomPage.backToMap")}
