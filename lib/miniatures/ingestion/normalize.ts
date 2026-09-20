@@ -17,6 +17,13 @@ export function normalizeKey(candidate: MiniCatalogCandidate): string {
 }
 
 export function normalizeCandidate(candidate: MiniCatalogCandidate): MiniCatalogCandidate {
+  const media = candidate.media
+    ? {
+        imageUrl: candidate.media.imageUrl?.trim() || undefined,
+        imageSourceUrl: candidate.media.imageSourceUrl?.trim() || undefined,
+      }
+    : undefined
+
   return {
     ...candidate,
     externalId: candidate.externalId?.trim() || undefined,
@@ -29,5 +36,6 @@ export function normalizeCandidate(candidate: MiniCatalogCandidate): MiniCatalog
     productName: candidate.productName ? normalizeName(candidate.productName) : undefined,
     sourceName: normalizeName(candidate.sourceName),
     sourceUrl: candidate.sourceUrl.trim(),
+    media: media && (media.imageUrl || media.imageSourceUrl) ? media : undefined,
   }
 }
