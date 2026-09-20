@@ -785,7 +785,9 @@ export function DiscoverGames() {
                     )}
                     {(game as MiniatureSearchResult).factionName && (
                       <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
-                        {(game as MiniatureSearchResult).factionName}
+                        {(game as MiniatureSearchResult).systemCode === "blood_bowl"
+                          ? `Joukkue: ${(game as MiniatureSearchResult).factionName}`
+                          : (game as MiniatureSearchResult).factionName}
                       </Badge>
                     )}
                   </div>
