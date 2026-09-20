@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { ArrowLeft, Check, Lock } from "lucide-react"
-import { ArchiveFrame } from "@/components/archive-frame"
+import { ArchiveFrame, ArchiveButton } from "@/components/archive-frame"
 import { useTranslation } from "@/lib/i18n"
 import { useState } from "react"
 import { useAppTheme, type AppThemeName } from "@/components/app-theme-provider"
@@ -49,7 +49,7 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
   return (
     <main data-theme={data.id as AppThemeName} className={`artifact-cabinet min-h-screen px-3 py-5 sm:px-6 sm:py-8 ${data.id === "conservatory" ? conservatoryStyles.conservatoryMaterials : ""} ${data.id === "spa" ? spaContrastStyles.spaContrast : ""}`} style={{ backgroundColor: "hsl(var(--background))" }}>
       <div className="mx-auto max-w-5xl space-y-4">
-        <Link href="/themes" className="inline-flex min-h-11 items-center gap-2 font-cinzel text-sm uppercase tracking-wide text-[var(--archive-gold-bright,#d9b65c)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] transition-opacity hover:opacity-80"><ArrowLeft className="h-4 w-4" aria-hidden="true" />{t("themes.roomPage.backToMap")}</Link>
+        <ArchiveButton asChild icon={<ArrowLeft className="h-4 w-4" aria-hidden="true" />}><Link href="/themes">{t("themes.roomPage.backToMap")}</Link></ArchiveButton>
         <header className="flex items-center gap-4 px-1 sm:gap-5 sm:px-2">
           <img src={assets.crest} alt={`${title} crest`} className="h-20 w-20 flex-none object-contain drop-shadow-[0_3px_10px_rgba(0,0,0,0.85)] sm:h-28 sm:w-28" />
           <div className="min-w-0"><h1 className="logo-text text-3xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)] sm:text-5xl">{title}</h1><p className="font-body mt-1 text-sm uppercase tracking-wide text-foreground/75 text-pretty sm:text-base">{L(data.tagline)}</p></div>
