@@ -761,11 +761,7 @@ export function DiscoverGames() {
                   <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
                 ) : selectedCategory === "miniature" && ((game as MiniatureSearchResult).imageUrl || (game as MiniatureSearchResult).imageSourceUrl) ? (
                   <img
-                    src={`/api/miniatures/image?url=${encodeURIComponent(
-                      (game as MiniatureSearchResult).imageUrl ||
-                      (game as MiniatureSearchResult).imageSourceUrl ||
-                      "",
-                    )}`}
+                    src={(game as MiniatureSearchResult).imageUrl || ""}
                     alt={game.name}
                     className="w-full h-full object-cover"
                   />
