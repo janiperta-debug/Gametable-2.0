@@ -6,6 +6,11 @@ export type MiniCatalogCandidateStatus =
   | "rejected"
   | "unchanged"
 
+export interface MiniCatalogMedia {
+  imageUrl?: string
+  imageSourceUrl?: string
+}
+
 export interface MiniCatalogCandidate {
   externalId?: string
   systemCode: string
@@ -18,6 +23,11 @@ export interface MiniCatalogCandidate {
   productName?: string
   sourceName: string
   sourceUrl: string
+  /**
+   * Optional presentation media supplied by the source adapter.
+   * The catalog remains fully usable when media is unavailable.
+   */
+  media?: MiniCatalogMedia
   sourcePayload?: Record<string, unknown>
 }
 
