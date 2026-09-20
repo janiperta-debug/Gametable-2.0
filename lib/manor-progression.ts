@@ -107,6 +107,14 @@ export function getManorLevelFromXp(xp: number): number {
   )
 }
 
+export function getCurrentManorThreshold(xp: number) {
+  const safeXp = Math.max(0, xp)
+  return MANOR_XP_THRESHOLDS.reduce<(typeof MANOR_XP_THRESHOLDS)[number] | null>(
+    (current, threshold) => (safeXp >= threshold.xp ? threshold : current),
+    null,
+  )
+}
+
 export function getNextManorThreshold(xp: number) {
   const safeXp = Math.max(0, xp)
   return MANOR_XP_THRESHOLDS.find((threshold) => threshold.xp > safeXp) ?? null
