@@ -1,14 +1,17 @@
 "use client"
 
 import Image from "next/image"
+import { ChevronDown, ChevronUp } from "lucide-react"
 import { useAppTheme } from "@/components/app-theme-provider"
 import { useTranslation } from "@/lib/i18n"
 import { getRegisteredRoomThemePage, getRoomThemeAssets } from "@/lib/room-page-registry"
+import { useState } from "react"
 import { ArchiveFrame } from "@/components/archive-frame"
 
 export default function HomePage() {
   const { currentAppTheme } = useAppTheme()
   const { t, locale } = useTranslation()
+  const [descriptionOpen, setDescriptionOpen] = useState(true)
 
   // Pull the full description and hero image from the ACTIVE theme's room page
   // so the home screen always reflects the current room. Falls back to the
@@ -47,21 +50,44 @@ export default function HomePage() {
           weight="thin"
           cornerSize="sm"
           className="max-w-full rounded-xl"
-
         >
-          <div className="max-h-[42vh] overflow-y-auto px-5 py-4 sm:px-6 sm:py-5">
-            <div className="flex flex-col gap-3">
-              {welcomeParagraphs.map((paragraph, i) => (
-                <p
-                  key={i}
-                  className="text-base leading-relaxed text-foreground sm:text-lg md:text-xl"
-                  style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.85), 0 0 8px rgba(0,0,0,0.55)" }}
-                >
-                  {paragraph}
-                </p>
-              ))}
+          {descriptionOpen ? (
+            <div className="relative">
+              <div className="max-h-[42vh] overflow-y-auto px-5 py-4 pr-14 sm:px-6 sm:py-5 sm:pr-16">
+                <div className="flex flex-col gap-3">
+                  {welcomeParagraphs.map((paragraph, i) => (
+                    <p
+                      key={i}
+                      className="text-base leading-relaxed text-foreground sm:text-lg md:text-xl"
+                      style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.85), 0 0 8px rgba(0,0,0,0.55)" }}
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDescriptionOpen(false)}
+                aria-label={locale === "fi" ? "Piilota kuvaus" : "Hide description"}
+                title={locale === "fi" ? "Piilota kuvaus" : "Hide description"}
+                className="absolute right-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-[var(--archive-gold,#d9b65c)]/60 bg-black/35 text-[var(--archive-gold,#d9b65c)] backdrop-blur-sm transition-colors hover:bg-[var(--archive-gold,#d9b65c)]/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--archive-gold,#d9b65c)]"
+              >
+                <ChevronUp className="h-4 w-4" aria-hidden="true" />
+              </button>
             </div>
-          </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setDescriptionOpen(true)}
+              aria-label={locale === "fi" ? "Näytä kuvaus" : "Show description"}
+              title={locale === "fi" ? "Näytä kuvaus" : "Show description"}
+              className="flex w-full items-center justify-center gap-2 px-4 py-2.5 font-cinzel text-xs font-bold uppercase tracking-[0.16em] text-[var(--archive-gold,#d9b65c)] transition-colors hover:bg-[var(--archive-gold,#d9b65c)]/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--archive-gold,#d9b65c)]"
+            >
+              <ChevronDown className="h-4 w-4" aria-hidden="true" />
+              {locale === "fi" ? "Näytä kuvaus" : "Show description"}
+            </button>
+          )}
         </ArchiveFrame>
       </div>
     </div>
