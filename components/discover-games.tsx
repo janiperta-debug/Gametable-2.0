@@ -147,7 +147,7 @@ export function DiscoverGames() {
   const [miniQuantity, setMiniQuantity] = useState(1)
   const [miniPaintStatus, setMiniPaintStatus] = useState<PaintStatus>("unpainted")
   const [miniatureSystems, setMiniatureSystems] = useState<Array<{ id: string; name: string; code: string; edition?: string }>>([])
-  const [miniatureSystem, setMiniatureSystem] = useState("")
+  const [miniatureSystemId, setMiniatureSystemId] = useState("")
 
   const categoryConfig = categories.find(c => c.id === selectedCategory)!
 
@@ -186,7 +186,7 @@ export function DiscoverGames() {
       if (selectedCategory === "trading_card") {
         url = `${categoryConfig.searchEndpoint}?q=${encodeURIComponent(searchQuery)}&game=${tcgGame}`
       } else if (selectedCategory === "miniature") {
-        url = `${categoryConfig.searchEndpoint}?query=${encodeURIComponent(searchQuery)}${miniatureSystem ? `&system=${encodeURIComponent(miniatureSystem)}` : ""}`
+        url = `${categoryConfig.searchEndpoint}?query=${encodeURIComponent(searchQuery)}${miniatureSystemId ? `&systemId=${encodeURIComponent(miniatureSystemId)}` : ""}`
       } else {
         url = `${categoryConfig.searchEndpoint}?query=${encodeURIComponent(searchQuery)}`
       }
@@ -334,7 +334,7 @@ export function DiscoverGames() {
     setSelectedGame(null)
     setSearchQuery("")
     if (category !== "miniature") {
-      setMiniatureSystem("")
+      setMiniatureSystemId("")
     }
   }
 
@@ -454,9 +454,9 @@ export function DiscoverGames() {
                 <button
                   key={`${system.code}-${system.name}`}
                   type="button"
-                  onClick={() => handleMiniatureSystemChange(system.code)}
+                  onClick={() => handleMiniatureSystemChange(system.id)}
                   className={`px-3 py-1.5 rounded-full text-sm font-body transition-colors ${
-                    miniatureSystem === system.code
+                    miniatureSystemId === system.id
                       ? "bg-accent-gold text-background"
                       : "bg-surface/50 text-foreground hover:bg-accent-gold/20"
                   }`}
