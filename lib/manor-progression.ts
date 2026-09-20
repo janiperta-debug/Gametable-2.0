@@ -128,21 +128,120 @@ export type ManorEntitlementProfile = {
   preferred_theme?: string | null
 }
 
+type ManorFloor = "ground" | "second" | "basement"
+
+type ManorFloorRule = {
+  floor: ManorFloor
+  previewXp: number
+  unlockLevels: readonly number[]
+}
+
 /**
- * Explicit room access is the persisted "opened" state.
- * Reaching the XP threshold only makes the room eligible to be opened.
+ * Manor is a floor-based choice system:
+ * - Ground Floor: always visible; Main Hall starts open, then six choices.
+ * - Level 30 reveals the Second Floor previews.
+ * - Level 35 starts Second Floor room choices.
+ * - Level 70 reveals the Basement previews.
+ * - Level 75 starts Basement room choices.
+ *
+ * XP grants a number of opening tokens. The user chooses which room to spend
+ * each token on; XP never selects a specific room automatically.
+ */
+export const MANOR_FLOOR_RULES: readonly ManorFloorRule[] = [
+  {
+    floor: "ground",
+    previewXp: 0,
+    unlockLevels: [1, 5, 10, 15, 20, 25, 30],
+  },
+  {
+    floor: "second",
+    previewXp: 7500,
+    unlockLevels: [35, 40, 45, 50, 55, 60, 65],
+  },
+  {
+    floor: "basement",
+    previewXp: 30000,
+    unlockLevels: [75, 80, 85, 90, 95],
+  },
+]
+
+function getManorFloorForRoom(roomId: string): ManorFloor | null {
+  const room = roomThemes.find((candidate) => candidate.id === roomId)
+  if (!room) return null
+
+  return ROOM_FLOOR[room.category]
+}
+
+function getFloorRule(floor: ManorFloor): ManorFloorRule {
+  return MANOR_FLOOR_RULES.find((rule) => rule.floor === floor)!
+}
+
+function getUnlockXpForLevel(level: number): number {
+  return getThresholdForLevel(level)?.xp ?? Number.POSITIVE_INFINITY
+}
+
+function getFloorPreviewXp(floor: ManorFloor): number {
+  return getFloorRule(floor).previewXp
+}
+
+function getFloorSelectionCount(xp: number, floor: ManorFloor): number {
+  const safeXp = Math.max(0, xp)
+  return getFloorRule(floor).unlockLevels.filter(
+    (level) => safeXp >= getUnlockXpForLevel(level),
+  ).length
+}
+
+function isFloorPreviewVisible(xp: number, floor: ManorFloor): boolean {
+  return Math.max(0, xp) >= getFloorPreviewXp(floor)
+}
+
+/**
+ * Returns the explicit room grants that are valid for the user's current
+ * floor/token budget. This also safely ignores legacy future-room grants.
+ */
+export function getManorUnlockedRoomIds(
+  profile?: ManorEntitlementProfile | null,
+): string[] {
+  const xp = Math.max(0, profile?.xp ?? 0)
+  const explicit = profile?.unlocked_themes ?? []
+  const seen = new Set<string>()
+  const result: string[] = ["main-hall"]
+  seen.add("main-hall")
+
+  for (const roomId of explicit) {
+    if (seen.has(roomId)) continue
+
+    const floor = getManorFloorForRoom(roomId)
+    if (!floor) continue
+    if (floor === "ground" && roomId === "main-hall") continue
+
+    const allowed = getFloorSelectionCount(xp, floor)
+    const alreadyOpened = result.filter(
+      (candidateId) => getManorFloorForRoom(candidateId) === floor,
+    ).length
+
+    if (alreadyOpened >= allowed) continue
+
+    result.push(roomId)
+    seen.add(roomId)
+  }
+
+  return result
+}
+
+/**
+ * Explicit room access is the persisted "opened" state, constrained by the
+ * current XP-earned floor/token budget. Reaching XP never auto-opens a room.
  */
 export function isManorRoomUnlocked(
   roomId: string,
   profile?: ManorEntitlementProfile | null,
 ): boolean {
-  if (roomId === "main-hall") return true
-  return (profile?.unlocked_themes ?? []).includes(roomId)
+  return getManorUnlockedRoomIds(profile).includes(roomId)
 }
 
 /**
- * XP grants the right to open/select a room, but does not open it
- * automatically and does not activate it.
+ * XP grants an opening token, not a predetermined room.
  */
 export function canUnlockManorRoom(
   roomId: string,
@@ -150,22 +249,18 @@ export function canUnlockManorRoom(
 ): boolean {
   if (roomId === "main-hall" || isManorRoomUnlocked(roomId, profile)) return false
 
-  const entitlement = getManorRoomEntitlement(roomId)
-  if (!entitlement) return false
+  const floor = getManorFloorForRoom(roomId)
+  if (!floor) return false
 
   const xp = Math.max(0, profile?.xp ?? 0)
-  return isManorThresholdReached(xp, entitlement.unlockXp)
-}
+  if (!isFloorPreviewVisible(xp, floor)) return false
 
-export function getManorUnlockedRoomIds(
-  profile?: ManorEntitlementProfile | null,
-): string[] {
-  const explicit = new Set(profile?.unlocked_themes ?? [])
-  explicit.add("main-hall")
+  const earnedSelections = getFloorSelectionCount(xp, floor)
+  const openedSelections = getManorUnlockedRoomIds(profile).filter(
+    (candidateId) => getManorFloorForRoom(candidateId) === floor,
+  ).length
 
-  return getManorProgression()
-    .map((entry) => entry.roomId)
-    .filter((roomId) => explicit.has(roomId))
+  return openedSelections < earnedSelections
 }
 
 export function getManorUnlockableRoomIds(
@@ -174,6 +269,23 @@ export function getManorUnlockableRoomIds(
   return getManorProgression()
     .map((entry) => entry.roomId)
     .filter((roomId) => canUnlockManorRoom(roomId, profile))
+}
+
+/**
+ * Returns whether a floor's room preview images should be shown.
+ */
+export function isManorFloorPreviewVisible(
+  floor: ManorFloor,
+  profile?: ManorEntitlementProfile | null,
+): boolean {
+  return isFloorPreviewVisible(Math.max(0, profile?.xp ?? 0), floor)
+}
+
+/**
+ * Returns the floor represented by a Manor room.
+ */
+export function getManorFloor(roomId: string): ManorFloor | null {
+  return getManorFloorForRoom(roomId)
 }
 
 /**
