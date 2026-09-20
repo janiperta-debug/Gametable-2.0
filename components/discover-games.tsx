@@ -759,9 +759,12 @@ export function DiscoverGames() {
               <div className="w-24 h-24 flex-shrink-0 bg-surface/30 flex items-center justify-center border-r border-accent-gold/10 overflow-hidden">
                 {loadingDetails === getSearchResultId(game) ? (
                   <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
-                ) : selectedCategory === "miniature" && (game as MiniatureSearchResult).imageUrl ? (
+                ) : selectedCategory === "miniature" && ((game as MiniatureSearchResult).imageUrl || (game as MiniatureSearchResult).imageSourceUrl) ? (
                   <img
-                    src={(game as MiniatureSearchResult).imageUrl}
+                    src={
+                      (game as MiniatureSearchResult).imageUrl ||
+                      `/api/miniatures/image?url=${encodeURIComponent((game as MiniatureSearchResult).imageSourceUrl || "")}`
+                    }
                     alt={game.name}
                     className="w-full h-full object-cover"
                   />
