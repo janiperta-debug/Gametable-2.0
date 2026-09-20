@@ -7,6 +7,7 @@ import { ArchiveDivider } from "@/components/archive-divider"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { sendFriendRequest as sendFriendRequestServer, acceptFriendRequest as acceptFriendRequestServer } from "@/app/actions/friends"
+import { getManorLevelFromXp } from "@/lib/manor-progression"
 
 interface Profile {
   id: string
@@ -157,7 +158,7 @@ export function PublicProfileClient({
 
                 <div className="mb-3 flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground sm:justify-start">
                   {profile.location && <span>{profile.location}</span>}
-                  <span>{t("profile.level")} {profile.level || 1}</span>
+                  <span>{t("profile.level")} {getManorLevelFromXp(profile.xp || 0)}</span>
                   <span>{gameCount} {t("collection.gameCountLabel")}</span>
                 </div>
 
