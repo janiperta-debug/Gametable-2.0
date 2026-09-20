@@ -54,8 +54,8 @@ assert.equal(getManorLevelFromXp(6570), 30)
 
 // Level 30: all Ground Floor selections are available and Second Floor previews appear.
 assert.equal(isManorFloorPreviewVisible("ground", { xp: 6570 }), true)
-assert.equal(isManorFloorPreviewVisible("second", { xp: 6570 }), false)
-assert.equal(isManorFloorPreviewVisible("second", { xp: 7500 }), true)
+assert.equal(isManorFloorPreviewVisible("second", { xp: 5999 }), false)
+assert.equal(isManorFloorPreviewVisible("second", { xp: 6570 }), true)
 assert.equal(canUnlockManorRoom("ballroom", { xp: 6570, unlocked_themes: [] }), false)
 assert.equal(canUnlockManorRoom("ballroom", { xp: 7500, unlocked_themes: [] }), false)
 assert.equal(canUnlockManorRoom("ballroom", { xp: 10000, unlocked_themes: [] }), true)
