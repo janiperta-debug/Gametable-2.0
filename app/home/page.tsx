@@ -59,8 +59,7 @@ export default function HomePage() {
                     <p
                       key={i}
                       className="text-base leading-relaxed text-foreground sm:text-lg md:text-xl"
-                      style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.85), 0 0 8px rgba(0,0,0,0.55)" }}
-                    >
+                        >
                       {paragraph}
                     </p>
                   ))}
