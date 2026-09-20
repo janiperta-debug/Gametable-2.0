@@ -415,7 +415,7 @@ export function ArchiveToggle<T extends string>({ options, value, onChange, clas
               {isActive && (
                 <span className="absolute inset-0 rounded-md bg-[var(--archive-gold,#d9b65c)]/12 ring-1 ring-[var(--archive-gold,#d9b65c)]/40 shadow-[inset_0_1px_4px_rgba(0,0,0,0.5)]" />
               )}
-              <span className="relative flex items-center gap-1.5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
+              <span className="relative flex items-center gap-1.5">
                 {opt.icon}
                 {opt.label}
               </span>
