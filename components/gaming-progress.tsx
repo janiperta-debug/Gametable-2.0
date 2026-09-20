@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress"
 import { RefreshCw, BookOpen, Users, Calendar, Trophy, Loader2 } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { useUser } from "@/hooks/useUser"
-import { getManorLevelFromXp, getNextManorThreshold } from "@/lib/manor-progression"
+import { getCurrentManorThreshold, getManorLevelFromXp, getNextManorThreshold } from "@/lib/manor-progression"
 import { createClient } from "@/lib/supabase/client"
 import { useState, useEffect, useCallback } from "react"
 
@@ -113,7 +113,7 @@ export function GamingProgress() {
   // Calculate XP progress from profile data
   const totalXP = profile?.xp ?? 0
   const level = getManorLevelFromXp(totalXP)
-  const currentThreshold = getNextManorThreshold(totalXP - 1)
+  const currentThreshold = getCurrentManorThreshold(totalXP)
   const nextThreshold = getNextManorThreshold(totalXP)
   const currentLevelXP = currentThreshold?.xp ?? 0
   const nextLevelXP = nextThreshold?.xp ?? currentLevelXP
