@@ -3,10 +3,11 @@
 import { useI18n, type Locale } from "@/lib/i18n"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { ArchiveFrame } from "@/components/archive-frame"
 
 interface LanguageSwitcherProps {
   className?: string
-  variant?: "default" | "compact"
+  variant?: "default" | "compact" | "archive"
 }
 
 export function LanguageSwitcher({ className, variant = "default" }: LanguageSwitcherProps) {
@@ -14,6 +15,17 @@ export function LanguageSwitcher({ className, variant = "default" }: LanguageSwi
 
   const toggleLocale = () => {
     setLocale(locale === "fi" ? "en" : "fi")
+  }
+
+  if (variant === "archive") {
+    return (
+      <ArchiveFrame weight="thin" corners={false} className={cn("rounded-lg", className)}>
+        <div className="flex items-center gap-1 px-1.5 py-1">
+          <LocaleButton targetLocale="fi" currentLocale={locale} onClick={() => setLocale("fi")} />
+          <LocaleButton targetLocale="en" currentLocale={locale} onClick={() => setLocale("en")} />
+        </div>
+      </ArchiveFrame>
+    )
   }
 
   if (variant === "compact") {
@@ -64,7 +76,7 @@ function LocaleButton({ targetLocale, currentLocale, onClick }: LocaleButtonProp
     <button
       onClick={onClick}
       className={cn(
-        "px-2.5 py-1 rounded-md text-xs font-medium tracking-wide transition-all duration-200",
+        "px-2.5 py-1 rounded-md text-xs font-medium tracking-wide transition-all duration-200 font-cinzel",
         isActive
           ? "bg-accent-gold text-background shadow-sm"
           : "text-muted-foreground hover:text-foreground hover:bg-accent-gold/10"
