@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache"
 import { awardTrustedXP } from "@/lib/xp-engine"
 import { createServiceClient } from "@/lib/supabase/service"
 import { createNotification } from "./notifications"
+import { getManorLevelFromXp } from "@/lib/manor-progression"
 
 export interface BadgeDefinition {
   id: string
@@ -90,6 +91,7 @@ export async function getUserStats(userId: string, client?: any): Promise<{
   events_hosted: number
   events_attended: number
   level: number
+  manor_level: number
   bgg_imports: number
 }> {
   const supabase = client || await createClient()
@@ -139,7 +141,7 @@ export async function getUserStats(userId: string, client?: any): Promise<{
   // Get user level
   const { data: profile } = await supabase
     .from("profiles")
-    .select("level")
+    .select("xp")
     .eq("id", userId)
     .single()
   
@@ -156,7 +158,8 @@ export async function getUserStats(userId: string, client?: any): Promise<{
     friend_count: friendCount || 0,
     events_hosted: eventsHosted || 0,
     events_attended: eventsAttended || 0,
-    level: profile?.level || 1,
+    level: getManorLevelFromXp(profile?.xp || 0),
+    manor_level: getManorLevelFromXp(profile?.xp || 0),
     bgg_imports: bggImports || 0,
   }
 }
@@ -180,7 +183,7 @@ function getProgressForRequirement(
     case "events_attended":
       return stats.events_attended
     case "level":
-      return stats.level
+      return stats.manor_level
     case "bgg_imports":
       return stats.bgg_imports
     default:
