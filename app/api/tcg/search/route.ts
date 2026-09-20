@@ -315,17 +315,29 @@ async function searchLorcana(query: string): Promise<TCGSearchResult[]> {
 
     const cards = await response.json()
     
-    // Cache all cards
-    lorcanaCache = (Array.isArray(cards) ? cards : []).map((card: Record<string, unknown>) => ({
-      id: String(card.Culture_Invariant_Id || card.id || ""),
-      name: String(card.Name || ""),
-      game: "lorcana" as TCGGame,
-      set: String(card.Set_Name || "Unknown Set"),
-      rarity: String(card.Rarity || ""),
-      imageUrl: String(card.Image || ""),
-      thumbnailUrl: String(card.Image || ""),
-      externalId: String(card.Culture_Invariant_Id || ""),
-    }))
+    // Cache all cards. The Lorcana feed can contain incomplete records;
+    // never expose a result without a canonical id because the client uses it
+    // as the React key and selection identity.
+    lorcanaCache = (Array.isArray(cards) ? cards : [])
+      .map((card: Record<string, unknown>) => {
+        const rawId = card.Culture_Invariant_Id ?? card.id
+        if (rawId === undefined || rawId === null || String(rawId).trim() === "") {
+          return null
+        }
+
+        const id = String(rawId)
+        return {
+          id,
+          name: String(card.Name || ""),
+          game: "lorcana" as TCGGame,
+          set: String(card.Set_Name || "Unknown Set"),
+          rarity: String(card.Rarity || ""),
+          imageUrl: String(card.Image || ""),
+          thumbnailUrl: String(card.Image || ""),
+          externalId: String(card.Culture_Invariant_Id || id),
+        }
+      })
+      .filter((card): card is TCGSearchResult => card !== null)
     lorcanaCacheTime = now
     
     // Filter and return
