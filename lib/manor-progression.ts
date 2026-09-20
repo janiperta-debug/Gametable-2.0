@@ -12,9 +12,6 @@ import { roomThemes, type RoomTheme } from "@/lib/room-themes"
 export type ManorRoomState = "locked" | "opened_empty" | "complete"
 export type ManorArtifactState = "unavailable" | "in_progress" | "restored"
 
-// Temporary QA switch for theme/background verification. Remove after final visual QA.
-export const THEME_ACCESS_TEST_MODE = true
-
 export type ManorRoomEntitlement = {
   roomId: string
   unlockLevel: number
@@ -185,17 +182,6 @@ export function getManorUnlockableRoomIds(
  */
 export function isManorRoomEntitled(xp: number, requiredXp: number): boolean {
   return isManorThresholdReached(xp, requiredXp)
-}
-
-/**
- * Temporary visual-QA bypass.
- *
- * This intentionally remains enabled while the theme/asset verification pass
- * is unfinished. Production entitlement helpers above must not use this
- * function to decide whether a room is actually unlocked.
- */
-export function isManorRoomCurrentlyUsable(_roomId: string): boolean {
-  return true
 }
 
 export type TreasureVaultState = {

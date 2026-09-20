@@ -1,5 +1,5 @@
 import { roomThemes } from "@/lib/room-themes"
-import { isManorRoomCurrentlyUsable } from "@/lib/manor-progression"
+import { isManorRoomUnlocked, type ManorEntitlementProfile } from "@/lib/manor-progression"
 
 export const PREVIOUS_ARTIFACTS = [
   "observatory",
@@ -27,7 +27,7 @@ export function isTreasureVaultComplete(): boolean {
 }
 
 /** Centralized artifact asset path convention. */
-export function getArtifactAssetPath(roomId: string): string {
+export function getArtifactAssetPath(roomId: string, profile?: ManorEntitlementProfile | null): string {
   if (roomId === "treasure-vault") {
     return isTreasureVaultComplete()
       ? "/themes/artifacts/treasure-vault-key.png"
@@ -79,13 +79,13 @@ export interface ArtifactSlot {
 }
 
 /** Returns the 19 artifact slots in their fixed display order. */
-export function getArtifactSlots(): ArtifactSlot[] {
+export function getArtifactSlots(profile?: ManorEntitlementProfile | null): ArtifactSlot[] {
   return ARTIFACT_SLOT_ORDER.map((roomId) => {
     const room = roomThemes.find((r) => r.id === roomId)
     return {
       roomId,
       roomName: room?.name ?? roomId,
-      image: getArtifactAssetPath(roomId),
+      image: getArtifactAssetPath(roomId, profile),
     }
   })
 }

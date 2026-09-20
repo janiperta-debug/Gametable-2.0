@@ -7,12 +7,8 @@ import {
   canUnlockManorRoom,
   isManorRoomUnlocked,
 } from "@/lib/manor-progression"
-import { THEME_ACCESS_TEST_MODE } from "@/lib/manor-progression"
 
-// The board is the visual 19-room Manor map. Entitlement state comes from the
-// canonical Manor progression helpers; the QA switch intentionally keeps every
-// room usable while visual verification is in progress.
-const ROOM_SLOTS: {
+// The board is the visual 19-room Manor map. Entitlement state comes from the\n// canonical Manor progression helpers.\nconst ROOM_SLOTS: {
   src: string
   href: string
   roomId: string
@@ -50,13 +46,9 @@ export function ManorRoomsBoard() {
   return (
     <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4 lg:grid-cols-6 lg:gap-5">
       {ROOM_SLOTS.map((slot) => {
-        const isUnlocked =
-          THEME_ACCESS_TEST_MODE ||
-          isManorRoomUnlocked(slot.roomId, profile)
+        const isUnlocked = isManorRoomUnlocked(slot.roomId, profile)
 
-        const canUnlock =
-          !THEME_ACCESS_TEST_MODE &&
-          canUnlockManorRoom(slot.roomId, profile)
+        const canUnlock = canUnlockManorRoom(slot.roomId, profile)
 
         const isAccessible = isUnlocked || canUnlock
 

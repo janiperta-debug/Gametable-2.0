@@ -10,7 +10,7 @@ import {
   getManorUnlockableRoomIds,
   isManorRoomUnlocked,
 } from "../lib/manor-progression"
-import { roomThemes } from "../lib/room-themes"
+import { roomThemes } from "../lib/room-themes"\nimport { isTreasureVaultComplete, PREVIOUS_ARTIFACTS } from "../lib/artifacts"
 
 const progression = getManorProgression()
 
@@ -104,8 +104,7 @@ assert.equal(getManorLevelFromXp(400), 5)
 const currentThreshold = getCurrentManorThreshold(6570)
 assert.equal(currentThreshold?.level, 30)
 assert.equal(currentThreshold?.xp, 6000)
-assert.equal(getManorLevelFromXp(6570), 30)
-
+assert.equal(getManorLevelFromXp(6570), 30)\n\nassert.equal(isTreasureVaultComplete({ unlocked_themes: [] }), false)\nassert.equal(\n  isTreasureVaultComplete({ unlocked_themes: [...PREVIOUS_ARTIFACTS] }),\n  true,\n  "Treasure Vault requires every previous artifact room to be unlocked",\n)\n
 console.log("Manor entitlement matrix: PASS")
 console.log(`Rooms: ${progression.length} (Ground 7 / Second 7 / Basement 5)`)
 console.log("State checks: locked -> unlockable -> unlocked")

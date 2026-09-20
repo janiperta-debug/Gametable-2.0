@@ -25,7 +25,7 @@ import { CRYSTAL_CAVERN_ARTIFACT_PAGE } from "@/lib/crystal-cavern-artifact-page
 import { UNDERGROUND_TEMPLE_ARTIFACT_PAGE } from "@/lib/underground-temple-artifact-page"
 import { TREASURE_VAULT_ARTIFACT_PAGE } from "@/lib/treasure-vault-artifact-page"
 import { getArtifactPage } from "@/lib/artifact-pages"
-import { isTreasureVaultComplete } from "@/lib/artifacts"
+import { isTreasureVaultComplete } from "@/lib/artifacts"\nimport type { ManorEntitlementProfile } from "@/lib/manor-progression"
 
 const withArtifactName = (page: RoomThemePage, name: { fi: string; en: string }): RoomThemePage => ({
   ...page,
@@ -70,7 +70,7 @@ export function getRegisteredRoomThemePage(roomId: string) {
   return ROOM_THEME_PAGE_BY_ID[roomId as keyof typeof ROOM_THEME_PAGE_BY_ID]
 }
 
-export function getRegisteredArtifactPage(roomId: string) {
+export function getRegisteredArtifactPage(roomId: string, profile?: ManorEntitlementProfile | null) {
   const page = ARTIFACT_PAGE_BY_ID[roomId as keyof typeof ARTIFACT_PAGE_BY_ID] ?? getArtifactPage(roomId)
 
   if (roomId === "treasure-vault") {
@@ -78,7 +78,7 @@ export function getRegisteredArtifactPage(roomId: string) {
       ...page,
       unlocks: {
         ...page.unlocks,
-        artefact: isTreasureVaultComplete()
+        artefact: isTreasureVaultComplete(profile)
           ? { fi: "Palautettu holvin avain", en: "The Restored Vault Key" }
           : { fi: "Tyhjä vitriini", en: "The Empty Reliquary" },
       },

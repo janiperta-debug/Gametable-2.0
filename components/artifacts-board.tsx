@@ -2,21 +2,21 @@
 
 import Link from "next/link"
 import { ArchiveFrame } from "@/components/archive-frame"
-import { useTranslations } from "@/lib/i18n"
+import { useTranslations } from "@/lib/i18n"\nimport { useUser } from "@/hooks/useUser"
 import { getArtifactSlots } from "@/lib/artifacts"
 import { getRegisteredArtifactPage } from "@/lib/room-page-registry"
-import { isManorRoomCurrentlyUsable } from "@/lib/manor-progression"
+import { isManorRoomUnlocked } from "@/lib/manor-progression"
 
 const camelId = (id: string) => id.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase())
 
 export function ArtifactsBoard() {
   const t = useTranslations()
-  const slots = getArtifactSlots()
+  const { profile } = useUser()\n  const slots = getArtifactSlots(profile)
 
   return (
     <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4 lg:grid-cols-6 lg:gap-5">
       {slots.map((slot) => {
-        const earned = isManorRoomCurrentlyUsable(slot.roomId)
+        const earned = isManorRoomUnlocked(slot.roomId, profile)
         const name = t(`rooms.${camelId(slot.roomId)}.name`) || slot.roomName
         const page = getRegisteredArtifactPage(slot.roomId)
         const href = earned && page ? `/themes/artifacts/${slot.roomId}` : undefined

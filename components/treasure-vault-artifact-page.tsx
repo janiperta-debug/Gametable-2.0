@@ -5,16 +5,17 @@ import { ArrowLeft, BookOpen, DoorOpen, Gem, Home, Trophy, LockKeyhole } from "l
 import { ArchiveFrame } from "@/components/archive-frame"
 import { useTranslation } from "@/lib/i18n"
 import { ARTIFACT_SLOT_ORDER } from "@/lib/artifacts"
-import { isManorRoomCurrentlyUsable } from "@/lib/manor-progression"
+import { useUser } from "@/hooks/useUser"
+import { isTreasureVaultComplete } from "@/lib/artifacts"
 import type { Localized, RoomThemePage } from "@/lib/room-theme-pages"
 import type { ArtifactPage } from "@/lib/artifact-pages"
 
 const PREVIOUS_ARTIFACTS = ARTIFACT_SLOT_ORDER.filter((id) => id !== "treasure-vault")
 
 export function TreasureVaultArtifactPage({ theme, page }: { theme: RoomThemePage; page: ArtifactPage }) {
-  const { t, locale } = useTranslation()
+  const { t, locale } = useTranslation()\n  const { profile } = useUser()
   const L = (value: Localized) => value[locale] ?? value.en
-  const complete = PREVIOUS_ARTIFACTS.every((roomId) => isManorRoomCurrentlyUsable(roomId))
+  const complete = isTreasureVaultComplete(profile)
   const goldText = "text-[var(--archive-gold,#d9b65c)]"
   const artifactName = complete
     ? { fi: "Palautettu holvin avain", en: "The Restored Vault Key" }

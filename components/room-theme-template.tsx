@@ -9,7 +9,7 @@ import { useAppTheme, type AppThemeName } from "@/components/app-theme-provider"
 import { getRoomTheme } from "@/lib/room-themes"
 import { getRoomThemeAssets, getRegisteredArtifactPage } from "@/lib/room-page-registry"
 import { getArtifactAssetPath } from "@/lib/artifacts"
-import { canUnlockManorRoom, isManorRoomUnlocked, THEME_ACCESS_TEST_MODE } from "@/lib/manor-progression"
+import { canUnlockManorRoom, isManorRoomUnlocked } from "@/lib/manor-progression"
 import { useUser } from "@/hooks/useUser"
 import { unlockManorRoom, updateActiveRoom } from "@/app/actions/xp"
 import type { Localized, RoomThemePage } from "@/lib/room-theme-pages"
@@ -37,12 +37,11 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
   ]
   const roomTheme = getRoomTheme(data.id)
   const assets = getRoomThemeAssets(data.id)
-  const artifactPage = getRegisteredArtifactPage(data.id)
+  const artifactPage = getRegisteredArtifactPage(data.id, profile)
   const artifactName = L(artifactPage?.unlocks.artefact ?? data.artifact.name)
-  const artifactImage = data.id === "treasure-vault" ? getArtifactAssetPath(data.id) : data.artifact.image
+  const artifactImage = data.id === "treasure-vault" ? getArtifactAssetPath(data.id, profile) : data.artifact.image
   const isActive = currentAppTheme === data.id
-  const isUnlocked = THEME_ACCESS_TEST_MODE || isManorRoomUnlocked(data.id, profile)
-  const canUnlock = !THEME_ACCESS_TEST_MODE && canUnlockManorRoom(data.id, profile)
+  const isUnlocked = isManorRoomUnlocked(data.id, profile)\n  const canUnlock = canUnlockManorRoom(data.id, profile)
   const showArtefact = data.id === "main-hall" || isUnlocked
   const level = roomTheme ? FLOOR_LEVEL[roomTheme.category] ?? "I" : "I"
 
