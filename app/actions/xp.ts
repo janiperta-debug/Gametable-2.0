@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import { createServiceClient } from "@/lib/supabase/service"
 import { revalidatePath } from "next/cache"
 import { checkAndAwardBadges } from "./badges"
-import { canUnlockManorRoom } from "@/lib/manor-progression"
+import { canUnlockManorRoom, isManorRoomUnlocked, getManorRoomEntitlement } from "@/lib/manor-progression"
 
 /**
  * Award XP to a user - Server-side only, never trust client
@@ -120,6 +120,21 @@ export async function updateActiveRoom(
   
   if (authError || !user) {
     return { success: false, error: "Unauthorized" }
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("unlocked_themes")
+    .eq("id", user.id)
+    .single()
+
+  if (profileError || !profile) return { success: false, error: "Profile not found" }
+
+  const room = getManorRoomEntitlement(roomId)
+  if (!room) return { success: false, error: "Unknown Manor room" }
+
+  if (!isManorRoomUnlocked(roomId, { unlocked_themes: profile.unlocked_themes })) {
+    return { success: false, error: "Room is not unlocked" }
   }
 
   const { error: updateError } = await supabase
