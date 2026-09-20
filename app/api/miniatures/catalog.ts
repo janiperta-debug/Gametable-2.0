@@ -13,6 +13,8 @@ export interface MiniatureSearchResult {
   basePoints?: number
   modelCountMin?: number
   modelCountMax?: number
+  imageUrl?: string
+  imageSourceUrl?: string
 }
 
 function asObject(value: unknown): Record<string, unknown> {
@@ -44,5 +46,7 @@ export function mapMiniatureCatalogUnit(unit: Record<string, any>): MiniatureSea
     basePoints: unit.base_points,
     modelCountMin: unit.model_count_min,
     modelCountMax: unit.model_count_max,
+    imageUrl: typeof unit.image_url === "string" ? unit.image_url : undefined,
+    imageSourceUrl: typeof unit.image_source_url === "string" ? unit.image_source_url : undefined,
   }
 }
