@@ -288,25 +288,19 @@ async function searchYGOProDeck(query: string): Promise<TCGSearchResult[]> {
   }
 }
 
-// Lorcana API - fetch all and filter locally
+// Lorcana API - use its server-side name search instead of /cards/all.
+// The /cards/all endpoint is paginated at 1000 cards, so filtering only the first
+// page can miss common characters such as Mickey or Donald.
 async function searchLorcana(query: string): Promise<TCGSearchResult[]> {
   try {
-    const now = Date.now()
-    
-    // Use cache if still valid
-    if (lorcanaCache && now - lorcanaCacheTime < LORCANA_CACHE_TTL) {
-      const queryLower = query.toLowerCase()
-      return lorcanaCache.filter(card => 
-        card.name.toLowerCase().includes(queryLower)
-      ).slice(0, 20)
-    }
-    
-    // Fetch all cards
-    const response = await fetch("https://api.lorcana-api.com/cards/all", {
-      headers: {
-        Accept: "application/json",
+    const response = await fetch(
+      `https://api.lorcana-api.com/cards/fetch?search=${encodeURIComponent(`name~${query}`)}&pagesize=20`,
+      {
+        headers: {
+          Accept: "application/json",
+        },
       },
-    })
+    )
 
     if (!response.ok) {
       console.error(`Lorcana API error: ${response.status}`)
@@ -314,11 +308,8 @@ async function searchLorcana(query: string): Promise<TCGSearchResult[]> {
     }
 
     const cards = await response.json()
-    
-    // Cache all cards. The Lorcana feed can contain incomplete records;
-    // never expose a result without a canonical id because the client uses it
-    // as the React key and selection identity.
-    lorcanaCache = (Array.isArray(cards) ? cards : [])
+
+    return (Array.isArray(cards) ? cards : [])
       .map((card: Record<string, unknown>) => {
         const rawId = card.Culture_Invariant_Id ?? card.id
         if (rawId === undefined || rawId === null || String(rawId).trim() === "") {
@@ -338,13 +329,7 @@ async function searchLorcana(query: string): Promise<TCGSearchResult[]> {
         }
       })
       .filter((card): card is TCGSearchResult => card !== null)
-    lorcanaCacheTime = now
-    
-    // Filter and return
-    const queryLower = query.toLowerCase()
-    return lorcanaCache.filter(card => 
-      card.name.toLowerCase().includes(queryLower)
-    ).slice(0, 20)
+      .slice(0, 20)
   } catch (error) {
     console.error("Lorcana search error:", error)
     return []
