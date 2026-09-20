@@ -3,13 +3,14 @@ import { cn } from "@/lib/utils"
 import { ArchiveFrame } from "./archive-frame"
 
 export interface ArchiveAvatarFrameProps extends React.HTMLAttributes<HTMLDivElement> {
-  size?: "sm" | "md" | "lg"
+  size?: "sm" | "md" | "lg" | "xl"
 }
 
 const sizes = {
   sm: "h-9 w-9",
   md: "h-12 w-12",
   lg: "h-24 w-24",
+  xl: "h-16 w-16",
 }
 
 /** A round avatar frame with restrained ornaments matching the Archive family. */
