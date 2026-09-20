@@ -3,6 +3,7 @@ import assert from "node:assert/strict"
 import {
   canUnlockManorRoom,
   getManorLevelFromXp,
+  getCurrentManorThreshold,
   getManorProgression,
   getManorRoomEntitlement,
   getManorUnlockedRoomIds,
@@ -100,7 +101,7 @@ assert.equal(getManorLevelFromXp(0), 1)
 assert.equal(getManorLevelFromXp(399), 1)
 assert.equal(getManorLevelFromXp(400), 5)
 
-const currentThreshold = (await import("../lib/manor-progression")).getCurrentManorThreshold(6570)
+const currentThreshold = getCurrentManorThreshold(6570)
 assert.equal(currentThreshold?.level, 30)
 assert.equal(currentThreshold?.xp, 6000)
 assert.equal(getManorLevelFromXp(6570), 30)
