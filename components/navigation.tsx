@@ -118,27 +118,62 @@ export function Navigation() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 pointer-events-auto">
           <div className="flex items-center gap-3 lg:gap-4">
-            <Link href="/notifications" className="relative p-2 hover:bg-card/50 rounded-lg transition-colors" aria-label={t("nav.notifications")}>
-              <Bell className="w-5 h-5 text-accent-gold" />
-              {hasUnreadNotifications && <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold">{unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}</span>}
+            <Link href="/notifications" aria-label={t("nav.notifications")} className="transition-transform hover:scale-105">
+              <ArchiveFrame weight="thin" corners={false} className="rounded-lg">
+                <div className="relative flex h-11 w-11 items-center justify-center text-accent-gold">
+                  <Bell className="h-5 w-5" />
+                  {hasUnreadNotifications && <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}</span>}
+                </div>
+              </ArchiveFrame>
             </Link>
-            <LanguageSwitcher />
+            <LanguageSwitcher variant="archive" />
           </div>
           <div className="flex items-center gap-3 lg:gap-4">
-            {user && !loading && <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-accent-gold/20">
-              <div className="w-8 h-8 rounded-full bg-accent-gold/20 border-2 border-accent-gold flex items-center justify-center"><span className="text-accent-gold font-cinzel text-sm font-bold">{userLevel}</span></div>
-              <div className="flex flex-col"><span className="text-foreground text-xs font-cinzel uppercase tracking-wide">Lvl {userLevel}</span><div className="w-20 h-1.5 bg-background/50 rounded-full overflow-hidden"><div className="h-full bg-accent-gold rounded-full transition-all" style={{ width: `${xpProgressPercent(userXp, userLevel)}%` }} /></div></div>
-            </div>}
-            {!user && !loading ? <Link href="/auth/login" className="flex items-center gap-1.5 lg:gap-2 bg-accent-gold text-background px-3 py-1.5 rounded-lg hover:bg-accent-gold/90 transition-colors font-cinzel text-xs uppercase tracking-wide"><User className="w-3.5 h-3.5" /><span>{t("nav.login")}</span></Link> : <div className="relative">
-              <button onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} aria-label={t("nav.profile")} className="flex items-center gap-2 p-1 rounded-lg hover:bg-card/50 transition-colors">
-                <div className="w-10 h-10 bg-accent-gold/20 border-2 border-accent-gold rounded-full flex items-center justify-center overflow-hidden">{profile?.avatar_url ? <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" /> : <User className="w-5 h-5 text-accent-gold" />}</div>
-                <svg className={"w-3 h-3 text-accent-gold transition-transform " + (isUserDropdownOpen ? "rotate-180" : "")} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-              </button>
-              {isUserDropdownOpen && <div className="absolute right-0 mt-2 w-48 bg-card backdrop-blur-sm rounded-lg shadow-lg border border-accent-gold/20 overflow-hidden">
-                <Link href="/profile" className="flex items-center space-x-3 px-4 py-3 hover:bg-accent-gold/10 transition-colors" onClick={() => setIsUserDropdownOpen(false)}><User className="w-4 h-4 text-accent-gold" /><span className="text-foreground font-cinzel text-sm">{t("nav.profile")}</span></Link>
-                <button className="flex items-center space-x-3 px-4 py-3 hover:bg-accent-gold/10 transition-colors w-full text-left border-t border-accent-gold/20" onClick={handleLogout}><LogOut className="w-4 h-4 text-accent-gold" /><span className="text-foreground font-cinzel text-sm">{t("nav.logout")}</span></button>
-              </div>}
-            </div>}
+            {user && !loading && (
+              <ArchiveFrame weight="thin" corners={false} className="rounded-lg">
+                <div className="flex h-11 items-center gap-2 px-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-accent-gold bg-accent-gold/20">
+                    <span className="font-cinzel text-sm font-bold text-accent-gold">{userLevel}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-cinzel text-xs uppercase tracking-wide text-foreground">Lvl {userLevel}</span>
+                    <div className="h-1.5 w-20 overflow-hidden rounded-full bg-background/50">
+                      <div className="h-full rounded-full bg-accent-gold transition-all" style={{ width: "${xpProgressPercent(userXp, userLevel)}%" }} />
+                    </div>
+                  </div>
+                </div>
+              </ArchiveFrame>
+            )}
+            {!user && !loading ? (
+              <ArchiveFrame weight="thin" corners={false} className="rounded-lg">
+                <Link href="/auth/login" className="flex h-11 items-center gap-2 px-3 font-cinzel text-xs uppercase tracking-wide text-accent-gold transition-transform hover:scale-105">
+                  <User className="h-4 w-4" />
+                  <span>{t("nav.login")}</span>
+                </Link>
+              </ArchiveFrame>
+            ) : (
+              <div className="relative">
+                <button onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} aria-label={t("nav.profile")} className="transition-transform hover:scale-105">
+                  <ArchiveAvatarFrame size="lg">
+                    <div className="h-10 w-10 overflow-hidden rounded-full bg-accent-gold/20">
+                      {profile?.avatar_url ? <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" /> : <User className="m-auto h-5 w-5 text-accent-gold" />}
+                    </div>
+                  </ArchiveAvatarFrame>
+                </button>
+                {isUserDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 overflow-hidden rounded-lg border border-accent-gold/20 bg-card shadow-lg backdrop-blur-sm">
+                    <Link href="/profile" className="flex items-center space-x-3 px-4 py-3 transition-colors hover:bg-accent-gold/10" onClick={() => setIsUserDropdownOpen(false)}>
+                      <User className="h-4 w-4 text-accent-gold" />
+                      <span className="font-cinzel text-sm text-foreground">{t("nav.profile")}</span>
+                    </Link>
+                    <button className="flex w-full items-center space-x-3 border-t border-accent-gold/20 px-4 py-3 text-left transition-colors hover:bg-accent-gold/10" onClick={handleLogout}>
+                      <LogOut className="h-4 w-4 text-accent-gold" />
+                      <span className="font-cinzel text-sm text-foreground">{t("nav.logout")}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
