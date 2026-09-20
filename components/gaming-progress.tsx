@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress"
 import { RefreshCw, BookOpen, Users, Calendar, Trophy, Loader2 } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { useUser } from "@/hooks/useUser"
-import { xpForNextLevel, xpForCurrentLevel } from "@/lib/xp-utils"
+import { getManorLevelFromXp, getNextManorThreshold } from "@/lib/manor-progression"
 import { createClient } from "@/lib/supabase/client"
 import { useState, useEffect, useCallback } from "react"
 
@@ -111,12 +111,14 @@ export function GamingProgress() {
   }, [fetchStats])
   
   // Calculate XP progress from profile data
-  const level = profile?.level ?? 1
   const totalXP = profile?.xp ?? 0
-  const currentLevelXP = xpForCurrentLevel(level)
-  const nextLevelXP = xpForNextLevel(level)
-  const xpInCurrentLevel = totalXP - currentLevelXP
-  const xpNeededForLevel = nextLevelXP - currentLevelXP
+  const level = getManorLevelFromXp(totalXP)
+  const currentThreshold = getNextManorThreshold(totalXP - 1)
+  const nextThreshold = getNextManorThreshold(totalXP)
+  const currentLevelXP = currentThreshold?.xp ?? 0
+  const nextLevelXP = nextThreshold?.xp ?? currentLevelXP
+  const xpInCurrentLevel = Math.max(0, totalXP - currentLevelXP)
+  const xpNeededForLevel = Math.max(0, nextLevelXP - currentLevelXP)
   
   // Stats - showing current counts and recent changes
   const stats = {
@@ -166,7 +168,7 @@ export function GamingProgress() {
       {/* XP Progress Bar */}
       <div className="space-y-2 pb-4 border-b border-accent-gold/20">
         <div className="flex items-center justify-between text-sm font-merriweather">
-          <span className="text-accent-gold">{t("profile.progressToLevel")} {stats.level + 1}</span>
+          <span className="text-accent-gold">{nextLevelXP > currentLevelXP ? `${t("profile.progressToLevel")} ${stats.level + 1}` : t("profile.maxLevel")}</span>
           <span className="text-muted-foreground">
             {stats.currentXP} / {stats.xpToNextLevel} XP
           </span>
