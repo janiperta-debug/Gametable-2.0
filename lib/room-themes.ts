@@ -61,7 +61,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Fresh and rejuvenating",
     unlockLevel: 15,
     category: "Ground Floor",
-    isActive: false,
   },
   {
     id: "fireside-lounge",
@@ -77,7 +76,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Dark and sophisticated",
     unlockLevel: 20,
     category: "Ground Floor",
-    isActive: false,
   },
   {
     id: "bar",
@@ -93,7 +91,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Lively and social",
     unlockLevel: 25,
     category: "Ground Floor",
-    isActive: false,
   },
   {
     id: "spa",
@@ -109,7 +106,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Peaceful and rejuvenating",
     unlockLevel: 30,
     category: "Ground Floor",
-    isActive: false,
   },
   {
     id: "gallery",
@@ -125,7 +121,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Refined and artistic",
     unlockLevel: 35,
     category: "Ground Floor",
-    isActive: false,
   },
 
   // Second Floor Rooms
@@ -143,7 +138,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Luxurious celebration",
     unlockLevel: 45,
     category: "Second Floor",
-    isActive: false,
   },
   {
     id: "map-room",
@@ -159,7 +153,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Adventurous strategy",
     unlockLevel: 50,
     category: "Second Floor",
-    isActive: false,
   },
   {
     id: "observatory",
@@ -175,7 +168,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Cosmic contemplation",
     unlockLevel: 55,
     category: "Second Floor",
-    isActive: false,
   },
   {
     id: "theater-room",
@@ -191,7 +183,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Dramatic entertainment",
     unlockLevel: 60,
     category: "Second Floor",
-    isActive: false,
   },
   {
     id: "clock-tower",
@@ -207,7 +198,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Mechanical precision",
     unlockLevel: 65,
     category: "Second Floor",
-    isActive: false,
   },
   {
     id: "war-room",
@@ -223,7 +213,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Strategic command",
     unlockLevel: 70,
     category: "Second Floor",
-    isActive: false,
   },
   {
     id: "artroom",
@@ -239,7 +228,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Artistic and inspiring",
     unlockLevel: 40,
     category: "Second Floor",
-    isActive: false,
   },
 
   // Basement Rooms
@@ -257,7 +245,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Magical and experimental",
     unlockLevel: 80,
     category: "Basement",
-    isActive: false,
   },
   {
     id: "dungeon",
@@ -273,7 +260,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Mysterious and ancient",
     unlockLevel: 85,
     category: "Basement",
-    isActive: false,
   },
   {
     id: "underground-temple",
@@ -289,7 +275,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Sacred and timeless",
     unlockLevel: 75,
     category: "Basement",
-    isActive: false,
   },
   {
     id: "crystal-cavern",
@@ -305,7 +290,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Ethereal and enchanting",
     unlockLevel: 90,
     category: "Basement",
-    isActive: false,
   },
   {
     id: "treasure-vault",
@@ -321,7 +305,6 @@ export const roomThemes: RoomTheme[] = [
     atmosphere: "Opulent and rewarding",
     unlockLevel: 95,
     category: "Basement",
-    isActive: false,
   },
 ]
 
