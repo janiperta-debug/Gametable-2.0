@@ -22,14 +22,14 @@ export const PREVIOUS_ARTIFACTS = [
   "artroom",
 ] as const
 
-export function isTreasureVaultComplete(): boolean {
-  return PREVIOUS_ARTIFACTS.every((roomId) => isManorRoomCurrentlyUsable(roomId))
+export function isTreasureVaultComplete(profile?: ManorEntitlementProfile | null): boolean {
+  return PREVIOUS_ARTIFACTS.every((roomId) => isManorRoomUnlocked(roomId, profile))
 }
 
 /** Centralized artifact asset path convention. */
 export function getArtifactAssetPath(roomId: string, profile?: ManorEntitlementProfile | null): string {
   if (roomId === "treasure-vault") {
-    return isTreasureVaultComplete()
+    return isTreasureVaultComplete(profile)
       ? "/themes/artifacts/treasure-vault-key.png"
       : "/themes/artifacts/treasure-vault-empty.png"
   }
