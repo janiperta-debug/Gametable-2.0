@@ -51,46 +51,77 @@ async function searchCatalog(
     if (resolvedFactionIds.length === 0) return []
   }
 
-  let dbQuery = supabase
-    .from("mini_units")
-    .select(`
+  const selectFields = `
+    id,
+    name,
+    unit_type,
+    base_points,
+    model_count_min,
+    model_count_max,
+    datasheet,
+    keywords,
+    faction:mini_factions!inner (
       id,
       name,
-      unit_type,
-      base_points,
-      model_count_min,
-      model_count_max,
-      datasheet,
-      faction:mini_factions!inner (
+      subfaction,
+      system:mini_systems!inner (
         id,
         name,
-        subfaction,
-        system:mini_systems!inner (
-          id,
-          name,
-          code,
-          edition
-        )
+        code,
+        edition
       )
-    `)
+    )
+  `
+
+  let nameQuery = supabase
+    .from("mini_units")
+    .select(selectFields)
     .ilike("name", `%${query}%`)
     .order("name")
     .limit(20)
 
   if (resolvedFactionIds) {
-    dbQuery = dbQuery.in("faction_id", resolvedFactionIds)
+    nameQuery = nameQuery.in("faction_id", resolvedFactionIds)
   }
 
-  const { data, error } = await dbQuery
-  if (error) {
-    console.error("Miniature Catalog search error:", error)
+  const { data: nameMatches, error: nameError } = await nameQuery
+  if (nameError) {
+    console.error("Miniature Catalog name search error:", nameError)
     return []
   }
 
-  return (data || []).flatMap((unit: any) => {
-    const result = mapMiniatureCatalogUnit(unit)
-    return result ? [result] : []
-  })
+  // Keywords provide aliases for canonical catalog names. For example,
+  // Blood Bowl's current High Elf team is "Caledor Dragons", while
+  // "High Elf" remains the faction/race and a useful search term.
+  let keywordQuery = supabase
+    .from("mini_units")
+    .select(selectFields)
+    .contains("keywords", [query])
+    .order("name")
+    .limit(20)
+
+  if (resolvedFactionIds) {
+    keywordQuery = keywordQuery.in("faction_id", resolvedFactionIds)
+  }
+
+  const { data: keywordMatches, error: keywordError } = await keywordQuery
+  if (keywordError) {
+    console.error("Miniature Catalog keyword search error:", keywordError)
+    return []
+  }
+
+  const seenIds = new Set<string>()
+  return [...(nameMatches || []), ...(keywordMatches || [])]
+    .filter((unit: any) => {
+      if (seenIds.has(unit.id)) return false
+      seenIds.add(unit.id)
+      return true
+    })
+    .slice(0, 20)
+    .flatMap((unit: any) => {
+      const result = mapMiniatureCatalogUnit(unit)
+      return result ? [result] : []
+    })
 }
 
 export async function GET(request: Request) {
