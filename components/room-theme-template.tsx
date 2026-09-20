@@ -41,7 +41,8 @@ export function RoomThemeTemplate({ data }: { data: RoomThemePage }) {
   const artifactName = L(artifactPage?.unlocks.artefact ?? data.artifact.name)
   const artifactImage = data.id === "treasure-vault" ? getArtifactAssetPath(data.id, profile) : data.artifact.image
   const isActive = currentAppTheme === data.id
-  const isUnlocked = isManorRoomUnlocked(data.id, profile)\n  const canUnlock = canUnlockManorRoom(data.id, profile)
+  const isUnlocked = isManorRoomUnlocked(data.id, profile)
+  const canUnlock = canUnlockManorRoom(data.id, profile)
   const showArtefact = data.id === "main-hall" || isUnlocked
   const level = roomTheme ? FLOOR_LEVEL[roomTheme.category] ?? "I" : "I"
 
