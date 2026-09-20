@@ -100,6 +100,11 @@ assert.equal(getManorLevelFromXp(0), 1)
 assert.equal(getManorLevelFromXp(399), 1)
 assert.equal(getManorLevelFromXp(400), 5)
 
+const currentThreshold = (await import("../lib/manor-progression")).getCurrentManorThreshold(6570)
+assert.equal(currentThreshold?.level, 30)
+assert.equal(currentThreshold?.xp, 6000)
+assert.equal(getManorLevelFromXp(6570), 30)
+
 console.log("Manor entitlement matrix: PASS")
 console.log(`Rooms: ${progression.length} (Ground 7 / Second 7 / Basement 5)`)
 console.log("State checks: locked -> unlockable -> unlocked")
