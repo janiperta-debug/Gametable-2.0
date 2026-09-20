@@ -5,7 +5,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { createClient } from "@/lib/supabase/client"
 import { useUser } from "@/hooks/useUser"
 import { roomThemes, getRoomTheme, type RoomTheme, type AppThemeName } from "@/lib/room-themes"
-import { isManorRoomUnlocked, THEME_ACCESS_TEST_MODE } from "@/lib/manor-progression"
+import { isManorRoomUnlocked } from "@/lib/manor-progression"
 
 export type { AppThemeName }
 export type ManorTheme = RoomTheme
@@ -84,7 +84,7 @@ export const AppThemeProvider: React.FC<AppThemeProviderProps> = ({ children }) 
 
   const canUseTheme = (themeId: AppThemeName) => {
     const theme = getRoomTheme(themeId)
-    return !!theme && (THEME_ACCESS_TEST_MODE || isManorRoomUnlocked(theme.id, profile))
+    return !!theme && isManorRoomUnlocked(theme.id, profile)
   }
 
   useEffect(() => {
