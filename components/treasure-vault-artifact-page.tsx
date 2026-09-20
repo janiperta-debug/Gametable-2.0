@@ -4,16 +4,16 @@ import Link from "next/link"
 import { ArrowLeft, BookOpen, DoorOpen, Gem, Home, Trophy, LockKeyhole } from "lucide-react"
 import { ArchiveFrame } from "@/components/archive-frame"
 import { useTranslation } from "@/lib/i18n"
-import { ARTIFACT_SLOT_ORDER } from "@/lib/artifacts"
+import { ARTIFACT_SLOT_ORDER, isTreasureVaultComplete } from "@/lib/artifacts"
 import { useUser } from "@/hooks/useUser"
-import { isTreasureVaultComplete } from "@/lib/artifacts"
 import type { Localized, RoomThemePage } from "@/lib/room-theme-pages"
 import type { ArtifactPage } from "@/lib/artifact-pages"
 
 const PREVIOUS_ARTIFACTS = ARTIFACT_SLOT_ORDER.filter((id) => id !== "treasure-vault")
 
 export function TreasureVaultArtifactPage({ theme, page }: { theme: RoomThemePage; page: ArtifactPage }) {
-  const { t, locale } = useTranslation()\n  const { profile } = useUser()
+  const { t, locale } = useTranslation()
+  const { profile } = useUser()
   const L = (value: Localized) => value[locale] ?? value.en
   const complete = isTreasureVaultComplete(profile)
   const goldText = "text-[var(--archive-gold,#d9b65c)]"
