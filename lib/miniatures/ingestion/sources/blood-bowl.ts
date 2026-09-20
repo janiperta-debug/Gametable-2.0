@@ -49,15 +49,22 @@ const TEAM_NAMES = [
 export const bloodBowlAdapter: MiniCatalogAdapter<string> = {
   source,
   extract(): MiniCatalogCandidate[] {
-    return TEAM_NAMES.map((name) => ({
-      externalId: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-      systemCode: source.systemCode,
-      systemName: "Blood Bowl",
-      groupName: name,
-      name,
-      itemType: "team",
-      sourceName: source.name,
-      sourceUrl: source.sourceUrl,
-    }))
+    return TEAM_NAMES.map((name) => {
+      const teamNames: Record<string, string> = {
+        "High Elf": "Caledor Dragons",
+      }
+      const teamName = teamNames[name] ?? name
+
+      return {
+        externalId: teamName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        systemCode: source.systemCode,
+        systemName: "Blood Bowl",
+        groupName: name,
+        name: teamName,
+        itemType: "team",
+        sourceName: source.name,
+        sourceUrl: source.sourceUrl,
+      }
+    })
   },
 }
