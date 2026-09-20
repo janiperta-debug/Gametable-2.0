@@ -5,17 +5,21 @@ export interface CanonicalAction {
   action: "create_system" | "create_faction" | "create_unit" | "skip"
   reason?: string
   factionName?: string
+  media?: MiniCatalogCandidate["media"]
 }
 
 export function planCanonicalAcceptance(
   candidates: MiniCatalogCandidate[],
 ): CanonicalAction[] {
   return candidates.map((candidate) => {
+    const media = candidate.media
+
     if (candidate.itemType === "team") {
       return {
         candidate,
         action: "create_unit",
         factionName: candidate.groupName || candidate.name,
+        media,
       }
     }
 
@@ -26,6 +30,7 @@ export function planCanonicalAcceptance(
         candidate,
         action: "skip",
         reason: "Product-level record requires miniature-level contents before canonical acceptance",
+        media,
       }
     }
 
@@ -41,6 +46,7 @@ export function planCanonicalAcceptance(
         // the unit under a neutral character group and retain all
         // affiliations in sourcePayload/keywords.
         factionName: "Characters",
+        media,
       }
     }
 
@@ -48,6 +54,7 @@ export function planCanonicalAcceptance(
       candidate,
       action: "create_unit",
       factionName: candidate.groupName,
+      media,
     }
   })
 }
