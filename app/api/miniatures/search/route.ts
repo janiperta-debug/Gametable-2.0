@@ -58,6 +58,8 @@ async function searchCatalog(
     base_points,
     model_count_min,
     model_count_max,
+    image_url,
+    image_source_url,
     datasheet,
     keywords,
     faction:mini_factions!inner (
