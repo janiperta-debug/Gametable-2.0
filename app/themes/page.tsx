@@ -48,7 +48,7 @@ function ThemesPageContent() {
               style={{ textShadow: "none", WebkitTextStroke: "0" }}>
               {t("themes.manorTitle")}
             </h1>
-            <p className="font-body mt-2 text-pretty text-foreground/80">{t("themes.manorSubtitle")}</p>
+            <p className="font-body mt-2 text-pretty text-foreground/80" style={{ textShadow: "none" }}>{t("themes.manorSubtitle")}</p>
           </header>
           <ManorRoomsBoard />
         </div>
