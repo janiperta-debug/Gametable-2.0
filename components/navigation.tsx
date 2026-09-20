@@ -28,7 +28,8 @@ function MobileNavButton({ item, active }: { item: { href: string; label: string
 }
 
 function DesktopNavButton({ item, active }: { item: { href: string; label: string }; active: boolean }) {
-  return <Link href={item.href} aria-current={active ? "page" : undefined} className="group shrink-0 transition-transform hover:scale-105"><ArchiveFrame weight="thin" cornerSize="sm" className={`rounded-xl ${active ? "brightness-125" : "brightness-95 group-hover:brightness-110"}`}><div className={`flex w-[84px] h-[80px] lg:w-[96px] lg:h-[90px] flex-col items-center justify-center px-2 ${active ? "text-accent-gold" : "text-accent-gold/85"}`}><span className="font-cinzel text-[11px] lg:text-[12px] uppercase tracking-tight text-center leading-tight text-balance break-words hyphens-auto">{item.label}</span></div></ArchiveFrame></Link>
+  const image = NAV_ICON_IMAGES[item.href]
+  return <Link href={item.href} aria-current={active ? "page" : undefined} className="group shrink-0 transition-transform hover:scale-105"><ArchiveFrame weight="thin" cornerSize="sm" className={`rounded-xl ${active ? "brightness-125" : "brightness-95 group-hover:brightness-110"}`}><div className={`flex w-[84px] h-[80px] lg:w-[96px] lg:h-[90px] flex-col items-center justify-center gap-1 px-2 ${active ? "text-accent-gold" : "text-accent-gold/85"}`}>{image && <img src={image} alt="" className="h-12 w-12 lg:h-14 lg:w-14 object-contain drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]" />}<span className="font-cinzel text-[11px] lg:text-[12px] uppercase tracking-tight text-center leading-tight text-balance break-words hyphens-auto">{item.label}</span></div></ArchiveFrame></Link>
 }
 
 export function Navigation() {
