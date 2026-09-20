@@ -35,6 +35,7 @@ interface CategoryConfig {
   detailsEndpoint: string
   sourceName: string
   sourceUrl: string
+  image: string
 }
 
 const categories: CategoryConfig[] = [
@@ -44,7 +45,8 @@ const categories: CategoryConfig[] = [
     searchEndpoint: "/api/bgg/search", 
     detailsEndpoint: "/api/bgg/details",
     sourceName: "BoardGameGeek",
-    sourceUrl: "https://boardgamegeek.com"
+    sourceUrl: "https://boardgamegeek.com",
+    image: "/images/category-board-games.png"
   },
   { 
     id: "rpg", 
@@ -52,7 +54,8 @@ const categories: CategoryConfig[] = [
     searchEndpoint: "/api/rpgg/search", 
     detailsEndpoint: "/api/rpgg/details",
     sourceName: "RPGGeek",
-    sourceUrl: "https://rpggeek.com"
+    sourceUrl: "https://rpggeek.com",
+    image: "/images/category-rpg.png"
   },
   { 
     id: "miniature", 
@@ -60,7 +63,8 @@ const categories: CategoryConfig[] = [
     searchEndpoint: "/api/miniatures/search", 
     detailsEndpoint: "/api/miniatures/details",
     sourceName: "Miniatures DB",
-    sourceUrl: "#"
+    sourceUrl: "#",
+    image: "/images/category-miniatures.png"
   },
   { 
     id: "trading_card", 
@@ -68,7 +72,8 @@ const categories: CategoryConfig[] = [
     searchEndpoint: "/api/tcg/search", 
     detailsEndpoint: "/api/tcg/details",
     sourceName: "TCG Database",
-    sourceUrl: "#"
+    sourceUrl: "#",
+    image: "/images/category-tcg.png"
   },
 ]
 
@@ -342,16 +347,30 @@ export function DiscoverGames() {
             </ArchiveCardButton>
           </div>
 
-          {/* Category Tabs */}
-          <div className="flex flex-wrap gap-2">
+          {/* Category Selector — same visual cards as Add Game */}
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             {categories.map((cat) => (
-              <ArchiveCardButton
+              <button
                 key={cat.id}
-                active={cat.id === selectedCategory}
+                type="button"
+                aria-pressed={cat.id === selectedCategory}
                 onClick={() => handleCategoryChange(cat.id)}
+                className={cn(
+                  "group relative flex min-h-[150px] flex-col items-center justify-center rounded-xl px-3 py-4 text-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--archive-gold,#d9b65c)]/70",
+                  cat.id === selectedCategory
+                    ? "bg-[var(--archive-gold,#d9b65c)]/10 ring-2 ring-[var(--archive-gold,#d9b65c)]/80 shadow-[0_0_24px_rgba(217,182,92,0.22)]"
+                    : "bg-black/10 ring-1 ring-[var(--archive-gold,#d9b65c)]/20 hover:bg-[var(--archive-gold,#d9b65c)]/5 hover:ring-[var(--archive-gold,#d9b65c)]/45",
+                )}
               >
-                {t(`collection.${cat.labelKey}`)}
-              </ArchiveCardButton>
+                <img
+                  src={cat.image}
+                  alt={t(`collection.${cat.labelKey}`)}
+                  className="h-24 w-full object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.35)] transition-transform duration-200 group-hover:scale-105"
+                />
+                <span className="mt-2 font-cinzel text-sm font-semibold text-foreground">
+                  {t(`collection.${cat.labelKey}`)}
+                </span>
+              </button>
             ))}
           </div>
 
