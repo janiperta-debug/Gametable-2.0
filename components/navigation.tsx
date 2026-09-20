@@ -155,22 +155,24 @@ export function Navigation() {
               <div className="relative">
                 <button onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} aria-label={t("nav.profile")} className="transition-transform hover:scale-105">
                   <ArchiveAvatarFrame size="lg" className="translate-y-1">
-                    <div className="absolute inset-0 overflow-hidden rounded-full bg-accent-gold/20">
-                      {profile?.avatar_url ? <img src={profile.avatar_url} alt="" className="h-full w-full object-cover object-center" /> : <User className="absolute inset-0 m-auto h-5 w-5 text-accent-gold" />}
+                    <div className="relative h-full w-full overflow-hidden rounded-full bg-accent-gold/20">
+                      {profile?.avatar_url ? <img src={profile.avatar_url} alt="" className="absolute inset-0 h-full w-full object-cover object-center" /> : <User className="absolute inset-0 m-auto h-5 w-5 text-accent-gold" />}
                     </div>
                   </ArchiveAvatarFrame>
                 </button>
                 {isUserDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 overflow-hidden rounded-lg border border-accent-gold/20 bg-card shadow-lg backdrop-blur-sm">
-                    <Link href="/profile" className="flex items-center space-x-3 px-4 py-3 transition-colors hover:bg-accent-gold/10" onClick={() => setIsUserDropdownOpen(false)}>
-                      <User className="h-4 w-4 text-accent-gold" />
-                      <span className="font-cinzel text-sm text-foreground">{t("nav.profile")}</span>
-                    </Link>
-                    <button className="flex w-full items-center space-x-3 border-t border-accent-gold/20 px-4 py-3 text-left transition-colors hover:bg-accent-gold/10" onClick={handleLogout}>
-                      <LogOut className="h-4 w-4 text-accent-gold" />
-                      <span className="font-cinzel text-sm text-foreground">{t("nav.logout")}</span>
-                    </button>
-                  </div>
+                  <ArchiveFrame weight="thin" corners={false} className="absolute right-0 mt-2 w-48 rounded-lg">
+                    <div className="overflow-hidden rounded-[0.4rem] bg-[var(--archive-wood-base,#2b190c)]/90 backdrop-blur-sm">
+                      <Link href="/profile" className="flex items-center space-x-3 px-4 py-3 transition-colors hover:bg-accent-gold/10" onClick={() => setIsUserDropdownOpen(false)}>
+                        <User className="h-4 w-4 text-accent-gold" />
+                        <span className="font-cinzel text-sm text-foreground">{t("nav.profile")}</span>
+                      </Link>
+                      <button className="flex w-full items-center space-x-3 border-t border-accent-gold/20 px-4 py-3 text-left transition-colors hover:bg-accent-gold/10" onClick={handleLogout}>
+                        <LogOut className="h-4 w-4 text-accent-gold" />
+                        <span className="font-cinzel text-sm text-foreground">{t("nav.logout")}</span>
+                      </button>
+                    </div>
+                  </ArchiveFrame>
                 )}
               </div>
             )}
