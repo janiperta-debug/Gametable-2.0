@@ -9,7 +9,7 @@ export interface ArchiveAvatarFrameProps extends React.HTMLAttributes<HTMLDivEle
 const sizes = {
   sm: "h-9 w-9",
   md: "h-12 w-12",
-  lg: "h-20 w-20",
+  lg: "h-[68px] w-[68px]",
   xl: "h-16 w-16",
 }
 
