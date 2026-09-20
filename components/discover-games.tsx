@@ -344,8 +344,8 @@ export function DiscoverGames() {
     setSelectedGame(null)
   }
 
-  const handleMiniatureSystemChange = (systemCode: string) => {
-    setMiniatureSystem(systemCode)
+  const handleMiniatureSystemChange = (systemId: string) => {
+    setMiniatureSystemId(systemId)
     setSearchResults([])
     setSelectedGame(null)
   }
@@ -443,7 +443,7 @@ export function DiscoverGames() {
                 type="button"
                 onClick={() => handleMiniatureSystemChange("")}
                 className={`px-3 py-1.5 rounded-full text-sm font-body transition-colors ${
-                  !miniatureSystem
+                  !miniatureSystemId
                     ? "bg-accent-gold text-background"
                     : "bg-surface/50 text-foreground hover:bg-accent-gold/20"
                 }`}
