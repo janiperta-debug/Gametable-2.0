@@ -154,7 +154,7 @@ export function Navigation() {
             ) : (
               <div className="relative">
                 <button onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} aria-label={t("nav.profile")} className="transition-transform hover:scale-105">
-                  <ArchiveAvatarFrame size="lg">
+                  <ArchiveAvatarFrame size="lg" className="translate-y-1">
                     <div className="h-10 w-10 overflow-hidden rounded-full bg-accent-gold/20">
                       {profile?.avatar_url ? <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" /> : <User className="m-auto h-5 w-5 text-accent-gold" />}
                     </div>
