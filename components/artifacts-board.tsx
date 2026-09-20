@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { ArchiveFrame } from "@/components/archive-frame"
-import { useTranslations } from "@/lib/i18n"\nimport { useUser } from "@/hooks/useUser"
+import { useTranslations } from "@/lib/i18n"
+import { useUser } from "@/hooks/useUser"
 import { getArtifactSlots } from "@/lib/artifacts"
 import { getRegisteredArtifactPage } from "@/lib/room-page-registry"
 import { isManorRoomUnlocked } from "@/lib/manor-progression"
@@ -11,7 +12,8 @@ const camelId = (id: string) => id.replace(/-([a-z])/g, (_, letter: string) => l
 
 export function ArtifactsBoard() {
   const t = useTranslations()
-  const { profile } = useUser()\n  const slots = getArtifactSlots(profile)
+  const { profile } = useUser()
+  const slots = getArtifactSlots(profile)
 
   return (
     <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4 lg:grid-cols-6 lg:gap-5">
