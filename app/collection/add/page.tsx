@@ -67,6 +67,13 @@ type BoardHost = {
 }
 
 function groupBoardResults(results: BGGSearchResult[]): BoardHost[] {
+  const validResults = results.filter(
+    (result): result is BGGSearchResult =>
+      Boolean(result) &&
+      Number.isFinite(result.id) &&
+      typeof result.name === "string",
+  )
+
   const hostsById = new Map<number, BoardHost>()
   const order: number[] = []
 
@@ -79,6 +86,7 @@ function groupBoardResults(results: BGGSearchResult[]): BoardHost[] {
       }
       return existing
     }
+
     const host: BoardHost = { base, synthetic, expansions: [] }
     hostsById.set(base.id, host)
     order.push(base.id)
@@ -86,31 +94,40 @@ function groupBoardResults(results: BGGSearchResult[]): BoardHost[] {
   }
 
   // First pass: real base games become hosts.
-  for (const r of results) {
-    if (r.type !== "expansion") ensureHost(r, false)
+  for (const result of validResults) {
+    if (result.type !== "expansion") ensureHost(result, false)
   }
-  // Second pass: nest expansions under their base (synthesizing a host if the
-  // base game wasn't among the results).
-  for (const r of results) {
-    if (r.type !== "expansion") continue
-    if (r.baseGame) {
-      const hadBase = hostsById.has(r.baseGame.bggId)
-      const base: BGGSearchResult = hostsById.get(r.baseGame.bggId)?.base ?? {
-        id: r.baseGame.bggId,
-        name: r.baseGame.name,
+
+  // Second pass: nest expansions under their base. If the API gives incomplete
+  // base-game metadata, keep the expansion visible as its own fallback result.
+  for (const result of validResults) {
+    if (result.type !== "expansion") continue
+
+    const baseId = result.baseGame?.bggId
+    const baseName = result.baseGame?.name
+
+    if (Number.isFinite(baseId) && typeof baseName === "string" && baseName.trim()) {
+      const hadBase = hostsById.has(baseId)
+      const base: BGGSearchResult = hostsById.get(baseId)?.base ?? {
+        id: baseId,
+        name: baseName,
         yearPublished: null,
         thumbnail: null,
         type: "base",
         baseGame: null,
       }
-      ensureHost(base, !hadBase).expansions.push(r)
+      ensureHost(base, !hadBase).expansions.push(result)
     } else {
-      // No base info at all — show the expansion as its own host as a fallback.
-      ensureHost(r, false)
+      // No usable base info — show the expansion as its own host instead of
+      // allowing malformed metadata to break the result list.
+      ensureHost(result, false)
     }
   }
 
-  return order.map((id) => hostsById.get(id)!)
+  return order.flatMap((id) => {
+    const host = hostsById.get(id)
+    return host ? [host] : []
+  })
 }
 
 export default function AddGamePage() {
@@ -164,6 +181,11 @@ export default function AddGamePage() {
   const [pendingImportRows, setPendingImportRows] = useState<ResolvedMiniatureImportRow[] | null>(null)
 
   const categoryConfig = categories.find(c => c.id === selectedCategory)!
+
+  const boardHosts =
+    selectedCategory === "board_game"
+      ? groupBoardResults(searchResults as BGGSearchResult[])
+      : []
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return
@@ -976,7 +998,7 @@ export default function AddGamePage() {
                         </div>
                       ) : selectedCategory === "board_game" ? (
                         <div className="space-y-0 max-h-[400px] overflow-y-auto">
-                          {groupBoardResults(searchResults as BGGSearchResult[]).map((host, index) => (
+                          {boardHosts.map((host, index) => (
                             <div key={host.base.id}>
                               {/* Base game (host) */}
                               <button
@@ -1023,7 +1045,7 @@ export default function AddGamePage() {
                                   ))}
                                 </ul>
                               )}
-                              {index < groupBoardResults(searchResults as BGGSearchResult[]).length - 1 && <ArchiveDivider className="my-1" />}
+                              {index < boardHosts.length - 1 && <ArchiveDivider className="my-1" />}
                             </div>
                           ))}
                         </div>
