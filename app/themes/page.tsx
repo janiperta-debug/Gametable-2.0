@@ -5,7 +5,8 @@ import { useSearchParams } from "next/navigation"
 import { Castle, Gem } from "lucide-react"
 import { ManorRoomsBoard } from "@/components/manor-rooms-board"
 import { ArtifactsBoard } from "@/components/artifacts-board"
-import { ArchiveToggle } from "@/components/archive-frame"
+import { ArchiveFrame, ArchiveToggle } from "@/components/archive-frame"
+import { ArchiveDivider } from "@/components/archive-divider"
 import { useTranslations } from "@/lib/i18n"
 import { useAppTheme } from "@/components/app-theme-provider"
 
@@ -21,6 +22,7 @@ function ThemesPageContent() {
   const tabs = (
     <div className="flex justify-center">
       <ArchiveToggle
+        framed={false}
         value={tab}
         onChange={(v) => setTab(v as ThemesTab)}
         options={[
@@ -42,36 +44,16 @@ function ThemesPageContent() {
         style={{ backgroundColor: "transparent", backgroundImage: "none" }}
       >
         <div className="mx-auto max-w-5xl space-y-8">
+        <ArchiveFrame weight="thin" cornerSize="sm" className="rounded-xl">
           {tabs}
-          <header className="text-center">
-            <h1 className="logo-text text-3xl font-bold sm:text-4xl"
-              style={{ textShadow: "none", WebkitTextStroke: "0" }}>
-              {t("themes.manorTitle")}
-            </h1>
-            <p className="font-body mt-2 text-pretty text-foreground/80" style={{ textShadow: "none" }}>{t("themes.manorSubtitle")}</p>
+          <ArchiveDivider />
+          <header className="px-4 py-4 text-center sm:px-6 sm:py-5">
+            <h1 className="logo-text text-3xl font-bold sm:text-4xl">{t("themes.artifactsTitle")}</h1>
+            <p className="font-body mt-2 text-pretty text-foreground/80">{t("themes.artifactsSubtitle")}</p>
           </header>
-          <ManorRoomsBoard />
-        </div>
-      </main>
-    )
-  }
-
-  return (
-    <main
-      data-theme={currentAppTheme}
-      className="artifact-cabinet min-h-screen bg-transparent px-3 pb-6 pt-14 sm:px-6 sm:pb-10 sm:pt-16"
-      style={{ backgroundColor: "transparent", backgroundImage: "none" }}
-    >
-      <div className="mx-auto max-w-5xl space-y-8">
-        {tabs}
-        <header className="text-center">
-          <h1 className="logo-text text-3xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] sm:text-4xl">
-            {t("themes.artifactsTitle")}
-          </h1>
-          <p className="font-body mt-2 text-pretty text-foreground/80">{t("themes.artifactsSubtitle")}</p>
-        </header>
+        </ArchiveFrame>
         <ArtifactsBoard />
-      </div>
+      </div>div>
     </main>
   )
 }
