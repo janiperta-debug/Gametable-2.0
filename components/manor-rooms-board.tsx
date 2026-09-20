@@ -8,7 +8,9 @@ import {
   isManorRoomUnlocked,
 } from "@/lib/manor-progression"
 
-// The board is the visual 19-room Manor map. Entitlement state comes from the\n// canonical Manor progression helpers.\nconst ROOM_SLOTS: {
+// The board is the visual 19-room Manor map. Entitlement state comes from the
+// canonical Manor progression helpers.
+const ROOM_SLOTS: {
   src: string
   href: string
   roomId: string
