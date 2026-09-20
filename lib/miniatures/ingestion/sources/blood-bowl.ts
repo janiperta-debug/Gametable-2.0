@@ -64,6 +64,12 @@ export const bloodBowlAdapter: MiniCatalogAdapter<string> = {
         itemType: "team",
         sourceName: source.name,
         sourceUrl: source.sourceUrl,
+        sourcePayload: teamName === "Caledor Dragons"
+          ? {
+              imageUrl: "https://assets.warhammer-community.com/sundaypreview-mar08-bb_01-highelfteam-dupnbwhuax.jpg",
+              imageSourceUrl: "https://www.warhammer-community.com/en-gb/articles/ngdxmygg/sunday-preview-black-library-celebration-and-blood-bowl-releases/",
+            }
+          : undefined,
       }
     })
   },
