@@ -1,9 +1,11 @@
 "use client"
 
 import Image from "next/image"
+import type React from "react"
 import { useAppTheme } from "@/components/app-theme-provider"
 import { useTranslation } from "@/lib/i18n"
 import { getRegisteredRoomThemePage, getRoomThemeAssets } from "@/lib/room-page-registry"
+import { ArchiveFrame } from "@/components/archive-frame"
 
 export default function HomePage() {
   const { currentAppTheme } = useAppTheme()
@@ -41,18 +43,34 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Full description - all paragraphs from the active theme's room page */}
-        <div className="flex flex-col gap-4">
-          {welcomeParagraphs.map((paragraph, i) => (
-            <p
-              key={i}
-              className="text-base sm:text-lg md:text-xl text-foreground leading-relaxed drop-shadow-lg"
-              style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5)" }}
-            >
-              {paragraph}
-            </p>
-          ))}
-        </div>
+        {/* Full description - framed over the active theme hero for stable contrast */}
+        <ArchiveFrame
+          weight="thin"
+          cornerSize="sm"
+          className="max-w-full rounded-xl"
+          style={{
+            "--archive-wood-base": "rgba(24, 12, 7, 0.68)",
+            "--archive-wood-top": "rgba(18, 9, 5, 0.58)",
+            "--archive-wood-mid": "rgba(52, 29, 15, 0.52)",
+            "--archive-wood-bottom": "rgba(16, 8, 4, 0.62)",
+            "--archive-surface-sheen": "rgba(255, 225, 180, 0.06)",
+            "--archive-surface-shade": "rgba(0, 0, 0, 0.24)",
+          } as React.CSSProperties}
+        >
+          <div className="max-h-[42vh] overflow-y-auto px-5 py-4 sm:px-6 sm:py-5">
+            <div className="flex flex-col gap-3">
+              {welcomeParagraphs.map((paragraph, i) => (
+                <p
+                  key={i}
+                  className="text-base leading-relaxed text-foreground sm:text-lg md:text-xl"
+                  style={{ textShadow: "1px 1px 3px rgba(0,0,0,0.85), 0 0 8px rgba(0,0,0,0.55)" }}
+                >
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          </div>
+        </ArchiveFrame>
       </div>
     </div>
   )
