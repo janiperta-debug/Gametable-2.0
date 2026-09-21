@@ -115,13 +115,21 @@ function CollectionCardList({
               </div>
               <div className="flex shrink-0 items-center gap-1">
                 <ArchiveIconButton icon={<Minus className="h-4 w-4" />} onClick={async () => {
-                  const result = await updateTCGCollectionQuantity(entry.ownershipId, -1)
+                  const result = await updateTCGCollectionQuantity(
+                    entry.ownershipId,
+                    -1,
+                    Array.isArray(entry.metadata.ownership_ids) ? entry.metadata.ownership_ids as string[] : [],
+                  )
                   if (result.success) onUpdateCollection?.()
                   else window.alert(result.error || "Kortin määrän muuttaminen epäonnistui.")
                 }} aria-label="Vähennä kortteja" title="Vähennä kortteja" />
                 <span className="min-w-6 text-center text-sm text-muted-foreground">×{card.quantity}</span>
                 <ArchiveIconButton icon={<Plus className="h-4 w-4" />} onClick={async () => {
-                  const result = await updateTCGCollectionQuantity(entry.ownershipId, 1)
+                  const result = await updateTCGCollectionQuantity(
+                    entry.ownershipId,
+                    1,
+                    Array.isArray(entry.metadata.ownership_ids) ? entry.metadata.ownership_ids as string[] : [],
+                  )
                   if (result.success) onUpdateCollection?.()
                   else window.alert(result.error || "Kortin määrän muuttaminen epäonnistui.")
                 }} aria-label="Lisää kortteja" title="Lisää kortteja" />
