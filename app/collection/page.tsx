@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "@/lib/i18n"
 import { useCollection } from "@/hooks/useCollection"
 import { removeMiniatureFromWishlist } from "@/app/actions/miniature-wishlist"
+import { removeCardFromCollection } from "@/app/actions/tcg"
 import { getMyListings } from "@/app/actions/marketplace"
 import { buildCollectionCardsFromEntries } from "@/lib/collection/card"
 import {
@@ -62,6 +63,24 @@ export default function Collection() {
       cancelled = true
     }
   }, [])
+
+  const handleRemoveTCGCard = async (collectionEntryId: string) => {
+    const result = await removeCardFromCollection(collectionEntryId)
+    if (!result.success) {
+      toast({
+        title: t("common.error"),
+        description: result.error || "Kortin poistaminen epäonnistui.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    await refetch()
+    toast({
+      title: t("common.updated"),
+      description: "Kortti poistettu kokoelmasta.",
+    })
+  }
 
   const handleToggleForTrade = (gameId: string) => {
     toast({
@@ -181,11 +200,12 @@ export default function Collection() {
                     cards={filteredAndSortedGames}
                     onToggleForTrade={handleToggleForTrade}
                     onToggleWishlist={handleToggleWishlist}
+                    onRemoveTCGCard={handleRemoveTCGCard}
                     showMarketplaceButton={true}
                     showWishlistButton={true}
                   />
                 ) : (
-                  <GameList cards={filteredAndSortedGames} />
+                  <GameList cards={filteredAndSortedGames} onRemoveTCGCard={handleRemoveTCGCard} />
                 )}
               </div>
             </div>
