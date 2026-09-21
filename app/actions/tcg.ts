@@ -6,6 +6,17 @@ import type { TCGSearchResult } from "@/app/api/tcg/search/route"
 
 export type TCGGame = "mtg" | "pokemon" | "lorcana" | "yugioh" | "fab" | "onepiece"
 
+type SearchTCGGame = "magic" | "pokemon" | "lorcana" | "yugioh" | "flesh-and-blood" | "one-piece"
+
+type TCGCollectionCard = TCGSearchResult & { game: SearchTCGGame }
+
+function toDbTCGSystem(game: SearchTCGGame): TCGGame {
+  if (game === "magic") return "mtg"
+  if (game === "flesh-and-blood") return "fab"
+  if (game === "one-piece") return "onepiece"
+  return game
+}
+
 export interface AddCardResult {
   success: boolean
   error?: string
@@ -14,7 +25,7 @@ export interface AddCardResult {
 }
 
 export async function addCardToCollection(
-  card: TCGSearchResult,
+  card: TCGCollectionCard,
   quantity: number = 1,
   status: "owned" | "wishlist" = "owned",
   isImport: boolean = false
@@ -27,13 +38,17 @@ export async function addCardToCollection(
   }
 
   try {
+    // The search API uses descriptive game codes while tcg_cards stores the
+    // canonical database codes (e.g. magic -> mtg).
+    const dbTcgSystem = toDbTCGSystem(card.game)
+
     // Check if card already exists in tcg_cards table
     let cardId: string
     const { data: existingCard } = await supabase
       .from("tcg_cards")
       .select("id")
       .eq("external_id", String(card.id))
-      .eq("tcg_system", card.game)
+      .eq("tcg_system", dbTcgSystem)
       .single()
 
     if (existingCard) {
@@ -45,7 +60,7 @@ export async function addCardToCollection(
         .insert({
           external_id: String(card.id),
           name: card.name,
-          tcg_system: card.game,
+          tcg_system: dbTcgSystem,
           set_name: card.set,
           set_code: card.setCode || null,
           rarity: card.rarity || null,
