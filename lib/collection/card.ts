@@ -32,6 +32,7 @@ export function buildBoardRPGCardsFromEntries(
         playTime: game?.min_playtime && game?.max_playtime ? `${game.min_playtime}-${game.max_playtime}` : '?',
         minPlayTime: game?.min_playtime ?? 30,
         maxPlayTime: game?.max_playtime ?? 60,
+        gameSystem: game?.game_system ?? null,
         category: game?.category || entry.domain,
         yearPublished: game?.year ?? 0,
         owned: entry.status === 'owned',
@@ -84,6 +85,8 @@ export function buildMiniatureCardsFromEntries(entries: CollectionEntry[]): Coll
         unitType: typeof entry.metadata.unit_type === 'string' ? entry.metadata.unit_type : null,
         faction: typeof entry.metadata.faction === 'string' ? entry.metadata.faction : null,
         system: typeof entry.metadata.system_name === 'string' ? entry.metadata.system_name : null,
+        gameName: typeof entry.metadata.game_name === 'string' ? entry.metadata.game_name : null,
+        armyName: typeof entry.metadata.army_name === 'string' ? entry.metadata.army_name : null,
         isWarlord: entry.metadata.is_warlord === true,
       }
 
