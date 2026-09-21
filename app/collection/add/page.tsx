@@ -139,6 +139,7 @@ export default function AddGamePage() {
   const [searching, setSearching] = useState(false)
   const [barcodeScanning, setBarcodeScanning] = useState(false)
   const [barcodeCandidate, setBarcodeCandidate] = useState<string | null>(null)
+  const [barcodeMappingHit, setBarcodeMappingHit] = useState(false)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [addingGameId, setAddingGameId] = useState<number | string | null>(null)
   const [selectedGame, setSelectedGame] = useState<GameDetails | null>(null)
@@ -197,6 +198,7 @@ export default function AddGamePage() {
     setSearching(true)
     setSearchResults([])
     setSelectedGame(null)
+    setBarcodeMappingHit(false)
 
     try {
       // TCG API uses 'q' parameter and needs 'game', BGG/RPGG use 'query'
@@ -272,6 +274,7 @@ export default function AddGamePage() {
   const handleBarcodeDetected = useCallback(async (barcode: string) => {
     setBarcodeScanning(false)
     setBarcodeCandidate(barcode)
+    setBarcodeMappingHit(false)
     setSearching(true)
 
     try {
@@ -285,6 +288,10 @@ export default function AddGamePage() {
       const data = await response.json()
 
       if (data.resolved && data.externalGameId) {
+        if (data.source === "mapping") {
+          setBarcodeCandidate(null)
+          setBarcodeMappingHit(true)
+        }
         await handleSelectGame(data.externalGameId)
         return
       }
@@ -465,6 +472,8 @@ export default function AddGamePage() {
     setSearchResults([])
     setSelectedGame(null)
     setSearchQuery("")
+    setBarcodeCandidate(null)
+    setBarcodeMappingHit(false)
     setParsedItems([])
     setBulkText("")
   }
@@ -797,6 +806,15 @@ export default function AddGamePage() {
                       />
                     </div>
                   </div>
+
+                  {barcodeMappingHit && selectedGame && (selectedCategory === "board_game" || selectedCategory === "rpg") && (
+                    <div className="mt-3 flex items-center gap-2 rounded-lg border border-accent-gold/20 bg-accent-gold/5 px-3 py-2">
+                      <span className="text-sm text-accent-gold" aria-hidden="true">✓</span>
+                      <p className="text-xs text-muted-foreground font-body">
+                        Viivakoodi tunnistettu GameTablen omasta varmistetusta tunnistuksesta.
+                      </p>
+                    </div>
+                  )}
 
                   {barcodeCandidate && selectedGame && (selectedCategory === "board_game" || selectedCategory === "rpg") && (
                     <div className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-accent-gold/20 bg-accent-gold/5 px-3 py-2">
