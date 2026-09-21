@@ -172,3 +172,96 @@ export function getMiniatureSystemOptions(entries: readonly CollectionEntry[]): 
   }
   return Array.from(byId, ([id, name]) => ({ id, name })).sort((left, right) => left.name.localeCompare(right.name))
 }
+
+
+export interface CollectionSpecificFilters {
+  maxPlayers: number
+  maxPlayTime: number
+  rpgSystem: string
+  miniatureGame: string
+  miniatureArmy: string
+  miniaturePaintStatus: string
+}
+
+export const DEFAULT_COLLECTION_SPECIFIC_FILTERS: CollectionSpecificFilters = {
+  maxPlayers: 8,
+  maxPlayTime: 240,
+  rpgSystem: '',
+  miniatureGame: '',
+  miniatureArmy: '',
+  miniaturePaintStatus: '',
+}
+
+export function getRPGSystemOptions(cards: readonly CollectionCardItem[]): string[] {
+  return Array.from(new Set(
+    cards
+      .filter((item) => item.card.kind === 'board-rpg' && item.entry.domain === 'rpg')
+      .map((item) => item.card.gameSystem)
+      .filter((value): value is string => Boolean(value && value.trim()))
+      .map((value) => value.trim()),
+  )).sort((left, right) => left.localeCompare(right))
+}
+
+export function getMiniatureGameOptions(cards: readonly CollectionCardItem[]): string[] {
+  return Array.from(new Set(
+    cards
+      .filter((item) => item.card.kind === 'miniature')
+      .map((item) => item.card.gameName)
+      .filter((value): value is string => Boolean(value && value.trim()))
+      .map((value) => value.trim()),
+  )).sort((left, right) => left.localeCompare(right))
+}
+
+export function getMiniatureArmyOptions(cards: readonly CollectionCardItem[], gameName = ''): string[] {
+  return Array.from(new Set(
+    cards
+      .filter((item) => item.card.kind === 'miniature')
+      .filter((item) => !gameName || item.card.gameName === gameName)
+      .map((item) => item.card.armyName)
+      .filter((value): value is string => Boolean(value && value.trim()))
+      .map((value) => value.trim()),
+  )).sort((left, right) => left.localeCompare(right))
+}
+
+export function getMiniaturePaintStatusOptions(cards: readonly CollectionCardItem[]): string[] {
+  return Array.from(new Set(
+    cards
+      .filter((item) => item.card.kind === 'miniature')
+      .map((item) => item.card.paintStatus)
+      .filter((value): value is string => Boolean(value && value.trim()))
+      .map((value) => value.trim()),
+  )).sort((left, right) => left.localeCompare(right))
+}
+
+export function filterCardsBySpecificFilters(
+  cards: readonly CollectionCardItem[],
+  category: CollectionCategoryFilter,
+  filters: CollectionSpecificFilters,
+): CollectionCardItem[] {
+  if (category === 'board-games') {
+    return cards.filter((item) => {
+      if (item.card.kind !== 'board-rpg') return false
+      return item.card.maxPlayers <= filters.maxPlayers && item.card.minPlayTime <= filters.maxPlayTime
+    })
+  }
+
+  if (category === 'rpgs') {
+    return cards.filter((item) => {
+      if (item.card.kind !== 'board-rpg') return false
+      if (filters.rpgSystem && item.card.gameSystem !== filters.rpgSystem) return false
+      return item.card.maxPlayers <= filters.maxPlayers && item.card.minPlayTime <= filters.maxPlayTime
+    })
+  }
+
+  if (category === 'miniatures') {
+    return cards.filter((item) => {
+      if (item.card.kind !== 'miniature') return false
+      if (filters.miniatureGame && item.card.gameName !== filters.miniatureGame) return false
+      if (filters.miniatureArmy && item.card.armyName !== filters.miniatureArmy) return false
+      if (filters.miniaturePaintStatus && item.card.paintStatus !== filters.miniaturePaintStatus) return false
+      return true
+    })
+  }
+
+  return [...cards]
+}
