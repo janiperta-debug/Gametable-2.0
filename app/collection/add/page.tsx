@@ -225,6 +225,7 @@ export default function AddGamePage() {
         description: t("collection.searchFailed"),
         variant: "destructive",
       })
+      return []
     } finally {
       setSearching(false)
     }
