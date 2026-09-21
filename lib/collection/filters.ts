@@ -124,6 +124,40 @@ export function hasVisibleCategory(category: CollectionCategoryFilter, count: nu
   return category === 'all' || count > 0
 }
 
+
+export interface TCGGameOption { id: string; name: string }
+
+const TCG_GAME_NAMES: Record<string, string> = {
+  mtg: 'Magic: The Gathering',
+  pokemon: 'Pokémon',
+  yugioh: 'Yu-Gi-Oh!',
+  lorcana: 'Disney Lorcana',
+  fab: 'Flesh & Blood',
+  onepiece: 'One Piece',
+  riftbound: 'Riftbound',
+  digimon: 'Digimon Card Game',
+  gundam: 'Gundam Card Game',
+  'star-wars-unlimited': 'Star Wars: Unlimited',
+  'dragon-ball-fusion-world': 'Dragon Ball Super: Fusion World',
+}
+
+export function getTCGGameOptions(cards: readonly CollectionCardItem[]): TCGGameOption[] {
+  const systems = new Set<string>()
+  for (const item of cards) {
+    if (item.card.kind !== 'tcg' || !item.card.tcgSystem) continue
+    systems.add(item.card.tcgSystem)
+  }
+
+  return Array.from(systems)
+    .map((id) => ({ id, name: TCG_GAME_NAMES[id] ?? id }))
+    .sort((left, right) => left.name.localeCompare(right.name))
+}
+
+export function filterCardsByTCGGame(cards: readonly CollectionCardItem[], tcgGame: string): CollectionCardItem[] {
+  if (!tcgGame) return [...cards]
+  return cards.filter((item) => item.card.kind === 'tcg' && item.card.tcgSystem === tcgGame)
+}
+
 export interface MiniatureSystemOption { id: string; name: string }
 
 export function getMiniatureSystemOptions(entries: readonly CollectionEntry[]): MiniatureSystemOption[] {
