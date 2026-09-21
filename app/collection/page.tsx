@@ -26,6 +26,9 @@ import {
   type CollectionCategoryFilter,
   filterCardsByTCGGame,
   getTCGGameOptions,
+  DEFAULT_COLLECTION_SPECIFIC_FILTERS,
+  filterCardsBySpecificFilters,
+  type CollectionSpecificFilters,
 } from "@/lib/collection/filters"
 import type { CollectionDomain } from "@/lib/types/collection"
 
@@ -46,6 +49,7 @@ export default function Collection() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
   const [sortBy, setSortBy] = useState<SortOption>("name-asc")
   const [selectedTCGGame, setSelectedTCGGame] = useState("")
+  const [specificFilters, setSpecificFilters] = useState<CollectionSpecificFilters>(DEFAULT_COLLECTION_SPECIFIC_FILTERS)
 
   useEffect(() => {
     let cancelled = false
@@ -120,6 +124,10 @@ export default function Collection() {
     else if (selectedTCGGame && !tcgGameOptions.some((game) => game.id === selectedTCGGame)) setSelectedTCGGame("")
   }, [selectedCategory, selectedTCGGame, tcgGameOptions])
 
+  useEffect(() => {
+    setSpecificFilters(DEFAULT_COLLECTION_SPECIFIC_FILTERS)
+  }, [selectedCategory])
+
   const filteredAndSortedGames = useMemo(() => {
     const categoryFiltered = applyCollectionControls(collectionCards, {
       category: selectedCategory,
@@ -127,10 +135,11 @@ export default function Collection() {
       searchQuery,
       sortBy,
     })
+    const specificFiltered = filterCardsBySpecificFilters(categoryFiltered, selectedCategory, specificFilters)
     return selectedCategory === "trading-cards" && selectedTCGGame
-      ? filterCardsByTCGGame(categoryFiltered, selectedTCGGame)
-      : categoryFiltered
-  }, [collectionCards, searchQuery, selectedCategory, selectedTCGGame, statusFilter, sortBy])
+      ? filterCardsByTCGGame(specificFiltered, selectedTCGGame)
+      : specificFiltered
+  }, [collectionCards, searchQuery, selectedCategory, selectedTCGGame, specificFilters, statusFilter, sortBy])
 
   const statusCounts = useMemo(() => getStatusCounts(collectionCards), [collectionCards])
 
@@ -210,7 +219,12 @@ export default function Collection() {
             <div className="grid gap-6 lg:grid-cols-4">
               {showFilters && (
                 <div className="lg:col-span-1">
-                  <CollectionFilters />
+                  <CollectionFilters
+                    category={selectedCategory}
+                    cards={collectionCards}
+                    filters={specificFilters}
+                    onFiltersChange={setSpecificFilters}
+                  />
                 </div>
               )}
               <div className={showFilters ? "lg:col-span-3" : "lg:col-span-4"}>
