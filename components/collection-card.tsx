@@ -167,7 +167,7 @@ function CollectionCardList({
                   }} aria-label="Lisää malleja" title="Lisää malleja" />
                 </span>
               )}
-              {card.pointsTotal != null && <span>{card.pointsTotal} pts</span>
+              {card.pointsTotal != null && <span>{card.pointsTotal} pts</span>}
             </div>
             {showWishlistButton && (
               <div className="mt-3 flex justify-end">
