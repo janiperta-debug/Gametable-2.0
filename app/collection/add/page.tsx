@@ -133,7 +133,7 @@ function groupBoardResults(results: BGGSearchResult[]): BoardHost[] {
 
 export default function AddGamePage() {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<"search" | "manual" | "bulk">("search")
+  const [activeTab, setActiveTab] = useState<"manual" | "bulk">("manual")
   const [selectedCategory, setSelectedCategory] = useState<GameCategory>("board_game")
   const [searchQuery, setSearchQuery] = useState("")
   const [searching, setSearching] = useState(false)
@@ -191,9 +191,9 @@ export default function AddGamePage() {
       ? groupBoardResults(searchResults as BGGSearchResult[])
       : []
 
-  const handleSearch = async (queryOverride?: string) => {
+  const handleSearch = async (queryOverride?: string): Promise<SearchResult[]> => {
     const query = (queryOverride ?? searchQuery).trim()
-    if (!query) return
+    if (!query) return []
 
     setSearching(true)
     setSearchResults([])
@@ -215,7 +215,9 @@ export default function AddGamePage() {
         throw new Error(data.error)
       }
 
-      setSearchResults(data.results || [])
+      const results = (data.results || []) as SearchResult[]
+      setSearchResults(results)
+      return results
     } catch (error) {
       console.error("Search error:", error)
       toast({
@@ -299,8 +301,12 @@ export default function AddGamePage() {
       const suggestedQuery = data.suggestedQuery || data.providerResult?.name
       if (suggestedQuery) {
         setSearchQuery(suggestedQuery)
-        await handleSearch(suggestedQuery)
-        return
+        const results = await handleSearch(suggestedQuery)
+        const firstResult = results[0]
+        if (firstResult) {
+          await handleSelectGame(getSearchResultId(firstResult))
+          return
+        }
       }
 
       setSearchQuery(barcode)
@@ -472,6 +478,7 @@ export default function AddGamePage() {
     setSearchResults([])
     setSelectedGame(null)
     setSearchQuery("")
+    setActiveTab("manual")
     setBarcodeCandidate(null)
     setBarcodeMappingHit(false)
     setParsedItems([])
@@ -716,99 +723,27 @@ export default function AddGamePage() {
           {/* Search/Manual Tabs */}
           <ArchiveCard>
             <ArchiveCardContent className="pt-6">
-              <div className="mb-6 flex justify-center">
-                <ArchiveToggle
-                  value={activeTab}
-                  onChange={(v) => setActiveTab(v)}
-                  options={[
-                    { value: "search", label: t("collection.searchDatabase") },
-                    { value: "manual", label: t("collection.manualEntry") },
-                    ...(selectedCategory === "trading_card" || selectedCategory === "miniature"
-                      ? [{ value: "bulk" as const, label: t("collection.bulkImport") }]
-                      : []),
-                  ]}
-                />
-              </div>
+              {/* Physical game identification */}
+              {(selectedCategory === "board_game" || selectedCategory === "rpg") && (
+                <div className="space-y-4">
+                  {!barcodeScanning ? (
+                    <ArchiveButton
+                      type="button"
+                      onClick={() => setBarcodeScanning(true)}
+                      icon={<ScanLine className="h-4 w-4" />}
+                      fullWidth
+                    >
+                      Skannaa viivakoodi
+                    </ArchiveButton>
+                  ) : (
+                    <BarcodeScanner
+                      onDetected={handleBarcodeDetected}
+                      onClose={() => setBarcodeScanning(false)}
+                    />
+                  )}
 
-              {/* Search Tab */}
-              {activeTab === "search" && (
-                <div className="space-y-6">
-                  <div>
-                    <p className="font-body text-muted-foreground text-sm mb-4">
-                      {t(`collection.search${selectedCategory === "board_game" ? "BGG" : selectedCategory === "rpg" ? "RPGG" : selectedCategory === "trading_card" ? "TCG" : "Mini"}Description`)}
-                    </p>
-                    
-                    {/* TCG Game Selector */}
-                    {selectedCategory === "trading_card" && (
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {[
-                          { id: "magic", label: "Magic: The Gathering" },
-                          { id: "pokemon", label: "Pokemon" },
-                          { id: "yugioh", label: "Yu-Gi-Oh!" },
-                          { id: "lorcana", label: "Lorcana" },
-                          { id: "flesh-and-blood", label: "Flesh & Blood" },
-                          { id: "one-piece", label: "One Piece" },
-                        ].map((game) => (
-                          <ArchiveCardButton
-                            key={game.id}
-                            type="button"
-                            active={tcgGame === game.id}
-                            onClick={() => {
-                              setTcgGame(game.id as typeof tcgGame)
-                              setSearchResults([])
-                              setSelectedGame(null)
-                            }}
-                          >
-                            <span className="normal-case">{game.label}</span>
-                          </ArchiveCardButton>
-                        ))}
-                      </div>
-                    )}
-                    
-                    {/* Barcode scanner */}
-                    {(selectedCategory === "board_game" || selectedCategory === "rpg") && (
-                      <div className="mb-4">
-                        {!barcodeScanning ? (
-                          <ArchiveButton
-                            type="button"
-                            onClick={() => setBarcodeScanning(true)}
-                            icon={<ScanLine className="h-4 w-4" />}
-                            fullWidth
-                          >
-                            Skannaa viivakoodi
-                          </ArchiveButton>
-                        ) : (
-                          <BarcodeScanner
-                            onDetected={handleBarcodeDetected}
-                            onClose={() => setBarcodeScanning(false)}
-                          />
-                        )}
-                      </div>
-                    )}
-
-                    {/* Search Input */}
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder={t("collection.searchPlaceholder")}
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                          className="pl-10 font-body"
-                        />
-                      </div>
-                      <ArchiveIconButton
-                        onClick={handleSearch}
-                        disabled={searching || !searchQuery.trim()}
-                        aria-label={t("collection.search")}
-                        icon={searching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                      />
-                    </div>
-                  </div>
-
-                  {barcodeMappingHit && selectedGame && (selectedCategory === "board_game" || selectedCategory === "rpg") && (
-                    <div className="mt-3 flex items-center gap-2 rounded-lg border border-accent-gold/20 bg-accent-gold/5 px-3 py-2">
+                  {barcodeMappingHit && selectedGame && (
+                    <div className="flex items-center gap-2 rounded-lg border border-accent-gold/20 bg-accent-gold/5 px-3 py-2">
                       <span className="text-sm text-accent-gold" aria-hidden="true">✓</span>
                       <p className="text-xs text-muted-foreground font-body">
                         Viivakoodi tunnistettu GameTablen omasta varmistetusta tunnistuksesta.
@@ -816,8 +751,8 @@ export default function AddGamePage() {
                     </div>
                   )}
 
-                  {barcodeCandidate && selectedGame && (selectedCategory === "board_game" || selectedCategory === "rpg") && (
-                    <div className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-accent-gold/20 bg-accent-gold/5 px-3 py-2">
+                  {barcodeCandidate && selectedGame && (
+                    <div className="flex items-center justify-between gap-3 rounded-lg border border-accent-gold/20 bg-accent-gold/5 px-3 py-2">
                       <p className="text-xs text-muted-foreground font-body">
                         Löytyikö tämä peli viivakoodilla? Vahvista tunnistus, jotta GameTable muistaa yhdistelmän jatkossa.
                       </p>
@@ -852,355 +787,24 @@ export default function AddGamePage() {
                       </ArchiveButton>
                     </div>
                   )}
-
-                  {/* Selected Game Preview */}
-                  {selectedGame && (
-                    <div className="p-4 rounded-lg border border-accent-gold/30 bg-accent-gold/5">
-                      <div className="flex gap-4">
-                        {(selectedGame as BGGGameDetails).thumbnail || (selectedGame as TCGSearchResult).thumbnailUrl ? (
-                          <img
-                            src={(selectedGame as BGGGameDetails).thumbnail || (selectedGame as TCGSearchResult).thumbnailUrl || ""}
-                            alt={selectedGame.name}
-                            className="w-24 h-24 object-cover rounded"
-                          />
-                        ) : null}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-heading font-semibold text-xl text-accent-gold">{selectedGame.name}</h3>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {/* Board game / RPG specific badges */}
-                            {selectedCategory !== "trading_card" && (selectedGame as BGGGameDetails).yearPublished && (
-                              <Badge variant="outline" className="text-xs border-accent-gold/30">
-                                {(selectedGame as BGGGameDetails).yearPublished}
-                              </Badge>
-                            )}
-                            {selectedCategory !== "trading_card" && (selectedGame as BGGGameDetails).rating && (
-                              <Badge variant="outline" className="text-xs border-accent-gold/30">
-                                <Star className="h-3 w-3 mr-1 fill-accent-gold text-accent-gold" />
-                                {(selectedGame as BGGGameDetails).rating}
-                              </Badge>
-                            )}
-                            {selectedCategory !== "trading_card" && (selectedGame as BGGGameDetails).minPlayers && (selectedGame as BGGGameDetails).maxPlayers && (
-                              <Badge variant="outline" className="text-xs border-accent-gold/30">
-                                <Users className="h-3 w-3 mr-1" />
-                                {(selectedGame as BGGGameDetails).minPlayers}-{(selectedGame as BGGGameDetails).maxPlayers}
-                              </Badge>
-                            )}
-                            {selectedCategory !== "trading_card" && (selectedGame as BGGGameDetails).minPlaytime && (
-                              <Badge variant="outline" className="text-xs border-accent-gold/30">
-                                <Clock className="h-3 w-3 mr-1" />
-                                {(selectedGame as BGGGameDetails).minPlaytime}-{(selectedGame as BGGGameDetails).maxPlaytime || (selectedGame as BGGGameDetails).minPlaytime}m
-                              </Badge>
-                            )}
-                            {/* TCG specific badges */}
-                            {selectedCategory === "trading_card" && (selectedGame as TCGSearchResult).set && (
-                              <Badge variant="outline" className="text-xs border-accent-gold/30">
-                                {(selectedGame as TCGSearchResult).set}
-                              </Badge>
-                            )}
-                            {selectedCategory === "trading_card" && (selectedGame as TCGSearchResult).rarity && (
-                              <Badge variant="outline" className="text-xs border-accent-gold/30">
-                                {(selectedGame as TCGSearchResult).rarity}
-                              </Badge>
-                            )}
-                            {selectedCategory === "trading_card" && (selectedGame as TCGSearchResult).type && (
-                              <Badge variant="outline" className="text-xs border-accent-gold/30">
-                                {(selectedGame as TCGSearchResult).type}
-                              </Badge>
-                            )}
-                            {selectedCategory === "trading_card" && (selectedGame as TCGSearchResult).price && (
-                              <Badge variant="outline" className="text-xs border-accent-gold/30 text-green-500">
-                                ${(selectedGame as TCGSearchResult).price?.toFixed(2)}
-                              </Badge>
-                            )}
-                            {/* Miniature specific badges */}
-                            {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).factionName && (
-                              <Badge variant="outline" className="text-xs border-accent-gold/30">
-                                {(selectedGame as MiniatureSearchResult).factionName}
-                              </Badge>
-                            )}
-                            {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).systemName && (
-                              <Badge variant="outline" className="text-xs border-accent-gold/30">
-                                {(selectedGame as MiniatureSearchResult).systemName}
-                              </Badge>
-                            )}
-                            {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).basePoints && (
-                              <Badge variant="outline" className="text-xs border-accent-gold/30">
-                                {(selectedGame as MiniatureSearchResult).basePoints} pts
-                              </Badge>
-                            )}
-                            {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).modelCountMin && (
-                              <Badge variant="outline" className="text-xs border-accent-gold/30">
-                                {(selectedGame as MiniatureSearchResult).modelCountMin} models
-                              </Badge>
-                            )}
-                          </div>
-                          {selectedGame.description && (
-                            <p className="mt-3 text-sm text-muted-foreground line-clamp-3 font-body">
-                              {selectedGame.description.replace(/<[^>]*>/g, '')}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      {/* Quantity selector for TCG */}
-                      {selectedCategory === "trading_card" && (
-                        <div className="flex items-center gap-3 mt-4 pt-4 border-t border-accent-gold/20">
-                          <Label className="text-accent-gold font-cinzel text-sm">{t("collection.quantity") || "Quantity"}:</Label>
-                          <div className="flex items-center gap-2">
-                            <ArchiveIconButton
-                              type="button"
-                              aria-label={t("collection.decrease") || "Decrease"}
-                              onClick={() => setTcgQuantity(Math.max(1, tcgQuantity - 1))}
-                              icon={<Minus className="h-4 w-4" />}
-                            />
-                            <Input
-                              type="number"
-                              min="1"
-                              value={tcgQuantity}
-                              onChange={(e) => setTcgQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                              className="w-16 h-8 text-center"
-                            />
-                            <ArchiveIconButton
-                              type="button"
-                              aria-label={t("collection.increase") || "Increase"}
-                              onClick={() => setTcgQuantity(tcgQuantity + 1)}
-                              icon={<Plus className="h-4 w-4" />}
-                            />
-                          </div>
-                        </div>
-                      )}
-                      {/* Miniature quantity and paint status */}
-                      {selectedCategory === "miniature" && (
-                        <div className="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-accent-gold/20">
-                          <div className="flex items-center gap-2">
-                            <Label className="text-accent-gold font-cinzel text-sm">{t("collection.quantity") || "Quantity"}:</Label>
-                            <div className="flex items-center gap-1">
-                              <ArchiveIconButton
-                                type="button"
-                                aria-label={t("collection.decrease") || "Decrease"}
-                                onClick={() => setMiniQuantity(Math.max(1, miniQuantity - 1))}
-                                icon={<Minus className="h-4 w-4" />}
-                              />
-                              <Input
-                                type="number"
-                                min="1"
-                                value={miniQuantity}
-                                onChange={(e) => setMiniQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                                className="w-16 h-8 text-center"
-                              />
-                              <ArchiveIconButton
-                                type="button"
-                                aria-label={t("collection.increase") || "Increase"}
-                                onClick={() => setMiniQuantity(miniQuantity + 1)}
-                                icon={<Plus className="h-4 w-4" />}
-                              />
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Label className="text-accent-gold font-cinzel text-sm">{t("collection.paintStatus") || "Paint Status"}:</Label>
-                            <select
-                              value={miniPaintStatus}
-                              onChange={(e) => setMiniPaintStatus(e.target.value as PaintStatus)}
-                              className="h-8 rounded-md border border-input bg-background px-2 text-sm font-body"
-                            >
-                              <option value="unpainted">{t("collection.unpainted") || "Unpainted"}</option>
-                              <option value="primed">{t("collection.primed") || "Primed"}</option>
-                              <option value="in_progress">{t("collection.inProgress") || "In Progress"}</option>
-                              <option value="painted">{t("collection.painted") || "Painted"}</option>
-                              <option value="based">{t("collection.based") || "Based"}</option>
-                            </select>
-                          </div>
-                        </div>
-                      )}
-                      {selectedCategory === "miniature" && armyMode !== "idle" && (
-                        <div className="mt-4 rounded border border-accent-gold/20 p-3 space-y-2">
-                          {armyMode === "select" ? (
-                            <>
-                              <Label className="text-accent-gold font-cinzel text-sm">Army context</Label>
-                              <select
-                                value={selectedArmy?.id ?? ""}
-                                onChange={(event) => setSelectedArmy(miniatureArmies.find((army) => army.id === event.target.value) ?? null)}
-                                className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
-                              >
-                                <option value="">Select an Army</option>
-                                {miniatureArmies.map((army) => <option key={army.id} value={army.id}>{army.name}</option>)}
-                              </select>
-                            </>
-                          ) : (
-                            <>
-                              <Label className="text-accent-gold font-cinzel text-sm">Create Army context</Label>
-                              <div className="flex gap-2">
-                                <Input value={armyName} onChange={(event) => setArmyName(event.target.value)} placeholder="Army name" />
-                                <ArchiveButton type="button" onClick={handleCreateMiniatureArmy} disabled={armyLoading || !armyName.trim()}>
-                                  {armyLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create"}
-                                </ArchiveButton>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      )}
-                      <div className={`flex justify-end gap-3 mt-4 ${selectedCategory !== "trading_card" && selectedCategory !== "miniature" ? "pt-4 border-t border-accent-gold/20" : ""}`}>
-                        <ArchiveButton onClick={() => setSelectedGame(null)}>
-                          {t("common.cancel")}
-                        </ArchiveButton>
-                        <ArchiveButton
-                          onClick={handleAddGame}
-                          disabled={addingGameId === getSearchResultId(selectedGame) || (selectedCategory === "miniature" && armyMode !== "idle" && !selectedArmy)}
-                          icon={
-                            addingGameId === getSearchResultId(selectedGame) ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Plus className="h-4 w-4" />
-                            )
-                          }
-                        >
-                          {t("collection.addToCollection")}
-                        </ArchiveButton>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Search Results */}
-                  {!selectedGame && (
-                    <div className="space-y-2">
-                      {searching || loadingDetails ? (
-                        <div className="flex items-center justify-center py-12">
-                          <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
-                        </div>
-                      ) : searchResults.length === 0 ? (
-                        <div className="text-center py-12 text-muted-foreground font-body">
-                          {searchQuery ? t("collection.noResults") : t("collection.searchPrompt")}
-                        </div>
-                      ) : selectedCategory === "trading_card" ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[500px] overflow-y-auto p-1">
-                          {searchResults.map((game, index) => {
-                            const card = game as TCGSearchResult
-                            return (
-                              <div key={game.id}>
-                                <button
-                                  key={game.id}
-                                onClick={() => handleSelectGame(game.id)}
-                                className="group relative rounded-lg border border-accent-gold/20 hover:border-accent-gold/50 transition-colors overflow-hidden bg-surface/30 text-left"
-                              >
-                                <div className="relative aspect-[2.5/3.5] bg-surface/50">
-                                  {card.imageUrl ? (
-                                    <img 
-                                      src={card.imageUrl} 
-                                      alt={card.name}
-                                      className="w-full h-full object-contain"
-                                    />
-                                  ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                                      <span className="text-xs text-center p-2">{t("common.noImage")}</span>
-                                    </div>
-                                  )}
-                                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                  <Plus className="absolute bottom-2 right-2 h-5 w-5 text-accent-gold opacity-0 group-hover:opacity-100 transition-opacity" />
-                                </div>
-                                <div className="p-2">
-                                  <h4 className="font-body font-medium text-sm truncate">{card.name}</h4>
-                                  <div className="flex flex-wrap gap-1 mt-1">
-                                    {card.set && (
-                                      <Badge variant="outline" className="text-[10px] border-accent-gold/30 text-accent-gold px-1 py-0">
-                                        {card.set}
-                                      </Badge>
-                                    )}
-                                    {card.rarity && (
-                                      <Badge variant="outline" className="text-[10px] border-purple-500/30 text-purple-400 px-1 py-0">
-                                        {card.rarity}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  {card.price && (
-                                    <p className="text-xs text-green-500 mt-1 font-body">${card.price.toFixed(2)}</p>
-                                  )}
-                                </div>
-                                </button>
-                                {index < searchResults.length - 1 && <ArchiveDivider className="my-1" />}
-                              </div>
-                            )
-                          })}
-                        </div>
-                      ) : selectedCategory === "board_game" ? (
-                        <div className="space-y-0 max-h-[400px] overflow-y-auto">
-                          {boardHosts.map((host, index) => (
-                            <div key={host.base.id}>
-                              {/* Base game (host) */}
-                              <button
-                                onClick={() => handleSelectGame(host.base.id)}
-                                className="w-full flex items-center justify-between p-4 hover:bg-accent-gold/10 transition-colors text-left"
-                              >
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="font-heading font-medium text-lg truncate">{host.base.name}</h4>
-                                  <div className="flex flex-wrap items-center gap-2 mt-1">
-                                    {host.base.yearPublished && (
-                                      <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
-                                        {host.base.yearPublished}
-                                      </Badge>
-                                    )}
-                                    {host.expansions.length > 0 && (
-                                      <span className="flex items-center gap-1 text-xs text-muted-foreground font-body">
-                                        <Puzzle className="h-3 w-3" />
-                                        {t("game.expansionsOwnedShort", { count: host.expansions.length })}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                                <Plus className="h-5 w-5 text-accent-gold ml-4 flex-shrink-0" />
-                              </button>
-
-                              {/* Nested expansions */}
-                              {host.expansions.length > 0 && (
-                                <ul className="border-t border-accent-gold/15 bg-surface/20">
-                                  {host.expansions.map((exp) => (
-                                    <li key={exp.id}>
-                                      <button
-                                        onClick={() => handleSelectGame(exp.id)}
-                                        className="w-full flex items-center justify-between py-2.5 pl-8 pr-4 hover:bg-accent-gold/10 transition-colors text-left border-l-2 border-accent-gold/20"
-                                      >
-                                        <div className="flex-1 min-w-0">
-                                          <span className="font-body text-sm text-foreground/90 line-clamp-1">{exp.name}</span>
-                                          {exp.yearPublished && (
-                                            <span className="ml-2 text-xs text-muted-foreground">{exp.yearPublished}</span>
-                                          )}
-                                        </div>
-                                        <Plus className="h-4 w-4 text-accent-gold ml-3 flex-shrink-0" />
-                                      </button>
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
-                              {index < boardHosts.length - 1 && <ArchiveDivider className="my-1" />}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="space-y-0 max-h-[400px] overflow-y-auto">
-                          {searchResults.map((game) => {
-                            const resultId = getSearchResultId(game)
-                            return (
-                            <button
-                              key={resultId}
-                              onClick={() => handleSelectGame(resultId)}
-                              className="w-full flex items-center justify-between p-4 hover:bg-accent-gold/10 transition-colors text-left"
-                            >
-                              <div className="flex-1 min-w-0">
-                                <h4 className="font-heading font-medium text-lg">{game.name}</h4>
-                                {(game as BGGSearchResult).yearPublished && (
-                                  <Badge variant="outline" className="mt-1 text-xs border-accent-gold/30 text-accent-gold">
-                                    {(game as BGGSearchResult).yearPublished}
-                                  </Badge>
-                                )}
-                              </div>
-                              <Plus className="h-5 w-5 text-accent-gold ml-4 flex-shrink-0" />
-                            </button>
-                            )
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  )}
                 </div>
               )}
+
+              {/* Import / manual are the only Add Game entry methods. External search lives on Etsi peli. */}
+              <div className="mb-6 flex justify-center">
+                <ArchiveToggle
+                  value={activeTab}
+                  onChange={(v) => setActiveTab(v)}
+                  options={[
+                    { value: "manual", label: t("collection.manualEntry") },
+                    ...(selectedCategory === "trading_card" || selectedCategory === "miniature"
+                      ? [{ value: "bulk" as const, label: t("collection.bulkImport") }]
+                      : []),
+                  ]}
+                />
+              </div>
+
+              {previewBlock}
 
               {/* Manual Entry Tab */}
               {activeTab === "manual" && (
