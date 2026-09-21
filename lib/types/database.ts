@@ -11,6 +11,7 @@ export interface Game {
   min_playtime: number | null
   max_playtime: number | null
   bgg_rating: number | null
+  game_system: string | null
   image_url: string | null
   thumbnail_url: string | null
   description: string | null
