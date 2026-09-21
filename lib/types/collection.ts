@@ -24,6 +24,7 @@ export interface BoardRPGCollectionCardData {
   playTime: string
   minPlayTime: number
   maxPlayTime: number
+  gameSystem: string | null
   category: string
   yearPublished: number
   owned: boolean
@@ -60,6 +61,8 @@ export interface MiniatureCollectionCardData {
   unitType: string | null
   faction: string | null
   system: string | null
+  gameName: string | null
+  armyName: string | null
   isWarlord: boolean
 }
 
