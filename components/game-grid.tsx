@@ -9,6 +9,7 @@ interface GameGridProps {
   onToggleForTrade?: (gameId: string) => void
   onToggleWishlist?: (gameId: string, domain: CollectionCardItem["entry"]["domain"]) => void
   onRemoveTCGCard?: (collectionEntryId: string) => void
+  onUpdateCollection?: () => void
   showMarketplaceButton?: boolean
   showWishlistButton?: boolean
 }
@@ -73,6 +74,7 @@ export function GameGrid({
   onToggleForTrade,
   onToggleWishlist,
   onRemoveTCGCard,
+  onUpdateCollection,
   showMarketplaceButton = false,
   showWishlistButton = false,
 }: GameGridProps) {
@@ -108,6 +110,7 @@ export function GameGrid({
           onToggleForTrade={onToggleForTrade}
           onToggleWishlist={onToggleWishlist}
           onRemoveTCGCard={onRemoveTCGCard}
+          onUpdateCollection={onUpdateCollection}
           showMarketplaceButton={showMarketplaceButton}
           showWishlistButton={showWishlistButton}
         />
