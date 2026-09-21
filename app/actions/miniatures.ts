@@ -290,6 +290,50 @@ export async function parseArmyList(text: string): Promise<Array<{ name: string;
   return parsed
 }
 
+export async function updateMiniatureModelCount(
+  collectionEntryId: string,
+  delta: number,
+): Promise<{ success: boolean; error?: string }> {
+  if (!Number.isInteger(delta) || delta === 0) {
+    return { success: false, error: "Invalid model count change" }
+  }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: "Not authenticated" }
+
+  const { data: row, error: fetchError } = await supabase
+    .from("mini_army_units")
+    .select("id, model_count")
+    .eq("id", collectionEntryId)
+    .eq("user_id", user.id)
+    .eq("owned", true)
+    .maybeSingle()
+
+  if (fetchError) return { success: false, error: fetchError.message }
+  if (!row) return { success: false, error: "Miniature collection entry not found" }
+
+  const nextCount = (row.model_count ?? 1) + delta
+  if (nextCount <= 0) {
+    const { error } = await supabase
+      .from("mini_army_units")
+      .delete()
+      .eq("id", row.id)
+      .eq("user_id", user.id)
+    if (error) return { success: false, error: error.message }
+    return { success: true }
+  }
+
+  const { error } = await supabase
+    .from("mini_army_units")
+    .update({ model_count: nextCount })
+    .eq("id", row.id)
+    .eq("user_id", user.id)
+
+  if (error) return { success: false, error: error.message }
+  return { success: true }
+}
+
 export async function getUserMiniatureCollection(system?: MiniatureSystem) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
