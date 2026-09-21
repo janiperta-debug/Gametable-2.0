@@ -168,6 +168,33 @@ export async function addCardToCollection(
   }
 }
 
+export interface RemoveCardResult {
+  success: boolean
+  error?: string
+}
+
+export async function removeCardFromCollection(collectionEntryId: string): Promise<RemoveCardResult> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, error: "Not authenticated" }
+  }
+
+  const { error } = await supabase
+    .from("tcg_collection")
+    .delete()
+    .eq("id", collectionEntryId)
+    .eq("user_id", user.id)
+
+  if (error) {
+    console.error("Error removing TCG card from collection:", error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true }
+}
+
 export async function bulkAddCards(
   cards: Array<{ card: TCGSearchResult; quantity: number }>,
   status: "owned" | "wishlist" = "owned"
