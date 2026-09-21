@@ -64,17 +64,7 @@ export default function Collection() {
     }
   }, [])
 
-  const handleRemoveTCGCard = async (collectionEntryId: string) => {
-    const result = await removeCardFromCollection(collectionEntryId)
-    if (!result.success) {
-      toast({
-        title: t("common.error"),
-        description: result.error || "Kortin poistaminen epäonnistui.",
-        variant: "destructive",
-      })
-      return
-    }
-
+  const handleRemoveTCGCard = async (_collectionEntryId: string) => {
     await refetch()
     toast({
       title: t("common.updated"),
