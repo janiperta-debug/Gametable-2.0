@@ -118,7 +118,9 @@ export async function addCardToCollection(
       .select("id, quantity")
       .eq("user_id", user.id)
       .eq("card_id", cardId)
-      .single()
+      .eq("condition", "near_mint")
+      .eq("foil", false)
+      .maybeSingle()
 
     if (existingCollectionEntry) {
       // Update quantity
