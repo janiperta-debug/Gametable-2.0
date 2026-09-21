@@ -10,19 +10,22 @@ type Props = {
 
 export function BarcodeScanner({ onDetected, onClose }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const readerRef = useRef<BrowserMultiFormatReader | null>(null)
+  const onDetectedRef = useRef(onDetected)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    onDetectedRef.current = onDetected
+  }, [onDetected])
+
+  useEffect(() => {
     const reader = new BrowserMultiFormatReader()
-    readerRef.current = reader
     let active = true
 
     reader.decodeFromVideoDevice(undefined, videoRef.current!, (result, error) => {
       if (!active) return
       if (result) {
         active = false
-        onDetected(result.getText())
+        onDetectedRef.current(result.getText())
         reader.reset()
       } else if (error && error.name !== "NotFoundException") {
         setError("Kameran käynnistäminen tai viivakoodin lukeminen epäonnistui.")
@@ -34,9 +37,8 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
     return () => {
       active = false
       reader.reset()
-      readerRef.current = null
     }
-  }, [onDetected])
+  }, [])
 
   return (
     <div className="rounded-lg border border-accent-gold/30 bg-background/70 p-4 space-y-3">
