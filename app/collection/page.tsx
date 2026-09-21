@@ -126,6 +126,7 @@ export default function Collection() {
 
   useEffect(() => {
     setSpecificFilters(DEFAULT_COLLECTION_SPECIFIC_FILTERS)
+    setShowFilters(false)
   }, [selectedCategory])
 
   const filteredAndSortedGames = useMemo(() => {
@@ -189,24 +190,7 @@ export default function Collection() {
               statusCounts={statusCounts}
             />
 
-            {selectedCategory === "trading-cards" && tcgGameOptions.length > 0 && (
-              <div className="mb-6 flex items-center justify-center gap-3">
-                <span className="font-body text-sm text-muted-foreground">Korttipeli</span>
-                <Select value={selectedTCGGame || "all"} onValueChange={(value) => setSelectedTCGGame(value === "all" ? "" : value)}>
-                  <SelectTrigger className="w-full max-w-xs">
-                    <SelectValue placeholder="Kaikki korttipelit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Kaikki korttipelit</SelectItem>
-                    {tcgGameOptions.map((game) => (
-                      <SelectItem key={game.id} value={game.id}>{game.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {selectedCategory !== "all" && selectedCategory !== "trading-cards" && (
+            {selectedCategory !== "all" && (
               <div className="mb-8">
                 <ArchiveButton onClick={() => setShowFilters(!showFilters)}>
                   {showFilters ? t("collection.hideFilters") : t("collection.showFilters")}
