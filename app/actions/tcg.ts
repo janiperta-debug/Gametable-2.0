@@ -195,6 +195,7 @@ export async function removeCardFromCollection(collectionEntryId: string): Promi
 export async function updateTCGCollectionQuantity(
   collectionEntryId: string,
   delta: number,
+  alternateEntryIds: string[] = [],
 ): Promise<{ success: boolean; error?: string }> {
   if (!Number.isInteger(delta) || delta === 0) {
     return { success: false, error: "Invalid quantity change" }
@@ -204,12 +205,28 @@ export async function updateTCGCollectionQuantity(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: "Not authenticated" }
 
-  const { data: row, error: fetchError } = await supabase
-    .from("tcg_collection")
-    .select("id, quantity")
-    .eq("id", collectionEntryId)
-    .eq("user_id", user.id)
-    .maybeSingle()
+  const candidateIds = [collectionEntryId, ...alternateEntryIds.filter((id) => id !== collectionEntryId)]
+  let row: { id: string; quantity: number | null } | null = null
+  let fetchError: { message: string } | null = null
+
+  for (const candidateId of candidateIds) {
+    const result = await supabase
+      .from("tcg_collection")
+      .select("id, quantity")
+      .eq("id", candidateId)
+      .eq("user_id", user.id)
+      .maybeSingle()
+
+    if (result.error) {
+      fetchError = result.error
+      break
+    }
+
+    if (result.data) {
+      row = result.data
+      break
+    }
+  }
 
   if (fetchError) return { success: false, error: fetchError.message }
   if (!row) return { success: false, error: "Card collection entry not found" }
