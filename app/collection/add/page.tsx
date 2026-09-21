@@ -138,6 +138,7 @@ export default function AddGamePage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [searching, setSearching] = useState(false)
   const [barcodeScanning, setBarcodeScanning] = useState(false)
+  const [barcodeCandidate, setBarcodeCandidate] = useState<string | null>(null)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [addingGameId, setAddingGameId] = useState<number | string | null>(null)
   const [selectedGame, setSelectedGame] = useState<GameDetails | null>(null)
@@ -270,6 +271,7 @@ export default function AddGamePage() {
 
   const handleBarcodeDetected = useCallback(async (barcode: string) => {
     setBarcodeScanning(false)
+    setBarcodeCandidate(barcode)
     setSearching(true)
 
     try {
@@ -795,6 +797,43 @@ export default function AddGamePage() {
                       />
                     </div>
                   </div>
+
+                  {barcodeCandidate && selectedGame && (selectedCategory === "board_game" || selectedCategory === "rpg") && (
+                    <div className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-accent-gold/20 bg-accent-gold/5 px-3 py-2">
+                      <p className="text-xs text-muted-foreground font-body">
+                        Löytyikö tämä peli viivakoodilla? Vahvista tunnistus, jotta GameTable muistaa yhdistelmän jatkossa.
+                      </p>
+                      <ArchiveButton
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            const response = await fetch("/api/barcode/confirm", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                barcode: barcodeCandidate,
+                                category: selectedCategory,
+                                externalGameId: String((selectedGame as BGGGameDetails).id),
+                              }),
+                            })
+                            const data = await response.json()
+                            if (!response.ok) throw new Error(data.error || "Vahvistus epäonnistui")
+                            setBarcodeCandidate(null)
+                            toast({ title: t("common.success"), description: "Viivakoodiyhdistelmä tallennettu." })
+                          } catch (error) {
+                            toast({
+                              title: t("common.error"),
+                              description: error instanceof Error ? error.message : "Viivakoodiyhdistelmän tallennus epäonnistui.",
+                              variant: "destructive",
+                            })
+                          }
+                        }}
+                        className="shrink-0"
+                      >
+                        Vahvista
+                      </ArchiveButton>
+                    </div>
+                  )}
 
                   {/* Selected Game Preview */}
                   {selectedGame && (
