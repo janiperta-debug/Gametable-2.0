@@ -7,39 +7,15 @@ const ALLOWED_PAGE_HOSTS = new Set([
   "warhammer-community.com",
   "www.wahapedia.ru",
   "wahapedia.ru",
-  "www.adeptusars.com",
-  "adeptusars.com",
 ])
 
 const ALLOWED_IMAGE_HOSTS = new Set([
   "cdn.svc.asmodee.net",
   "assets.warhammer-community.com",
-  "www.adeptusars.com",
 ])
 
 function isAllowedWahapediaHost(hostname: string) {
   return hostname === "wahapedia.ru" || hostname.endsWith(".wahapedia.ru")
-}
-
-function resolveAdeptusArsImage(html: string, pageUrl: URL) {
-  const ogMatch =
-    html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) ??
-    html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i)
-
-  if (!ogMatch?.[1]) return null
-
-  try {
-    const imageUrl = new URL(ogMatch[1], pageUrl)
-    if (
-      imageUrl.protocol !== "https:" ||
-      (imageUrl.hostname !== "adeptusars.com" && imageUrl.hostname !== "www.adeptusars.com")
-    ) {
-      return null
-    }
-    return imageUrl
-  } catch {
-    return null
-  }
 }
 
 function resolveWahapediaImage(html: string, pageUrl: URL) {
@@ -125,11 +101,8 @@ export async function GET(request: NextRequest) {
     if (!response.ok) return new NextResponse("Image source unavailable", { status: 502 })
 
     const html = await response.text()
-    const imageUrl =
-      url.hostname === "adeptusars.com" || url.hostname === "www.adeptusars.com"
-        ? resolveAdeptusArsImage(html, url)
-        : resolveWahapediaImage(html, url)
-    if (!imageUrl) return new NextResponse("No miniature image found", { status: 404 })
+    const imageUrl = resolveWahapediaImage(html, url)
+    if (!imageUrl) return new NextResponse("No Wahapedia image found", { status: 404 })
 
     const image = await fetchImage(imageUrl.toString())
     if (!image) return new NextResponse("Image unavailable", { status: 502 })
