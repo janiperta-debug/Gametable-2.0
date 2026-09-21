@@ -72,6 +72,10 @@ export default function Collection() {
     })
   }
 
+  const handleUpdateCollection = async () => {
+    await refetch()
+  }
+
   const handleToggleForTrade = (gameId: string) => {
     toast({
       title: t("common.updated"),
@@ -191,11 +195,12 @@ export default function Collection() {
                     onToggleForTrade={handleToggleForTrade}
                     onToggleWishlist={handleToggleWishlist}
                     onRemoveTCGCard={handleRemoveTCGCard}
+                    onUpdateCollection={handleUpdateCollection}
                     showMarketplaceButton={true}
                     showWishlistButton={true}
                   />
                 ) : (
-                  <GameList cards={filteredAndSortedGames} onRemoveTCGCard={handleRemoveTCGCard} />
+                  <GameList cards={filteredAndSortedGames} onRemoveTCGCard={handleRemoveTCGCard} onUpdateCollection={handleUpdateCollection} />
                 )}
               </div>
             </div>
