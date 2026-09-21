@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { useTranslations } from "@/lib/i18n"
 import { ArchiveCard, ArchiveCardButton } from "@/components/archive-frame"
 import { ArchiveDivider } from "@/components/archive-divider"
@@ -67,6 +68,7 @@ export function PublicProfileClient({
   initialFriendshipId,
 }: PublicProfileClientProps) {
   const t = useTranslations()
+  const router = useRouter()
   const { toast } = useToast()
   const [friendshipStatus, setFriendshipStatus] = useState(initialFriendshipStatus)
   const [friendshipId] = useState(initialFriendshipId)
@@ -135,9 +137,9 @@ export function PublicProfileClient({
   return (
     <div className="min-h-screen room-environment">
       <div className="container mx-auto max-w-4xl px-4 py-8">
-        <Link href="/discover" className="mb-4 inline-block">
-          <ArchiveCardButton>← {t("common.back")}</ArchiveCardButton>
-        </Link>
+        <ArchiveCardButton onClick={() => router.back()} className="mb-4">
+          ← {t("common.back")}
+        </ArchiveCardButton>
 
         <ArchiveCard className="mb-6">
           <div className="p-6">
