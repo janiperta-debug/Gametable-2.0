@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   ArchiveCard,
@@ -17,7 +17,7 @@ import { ArchiveDivider } from "@/components/archive-divider"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Search, Loader2, Plus, Minus, Star, Users, Clock, Puzzle } from "lucide-react"
+import { ArrowLeft, Search, ScanLine, Loader2, Plus, Minus, Star, Users, Clock, Puzzle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { addGameToCollection, type AddGameResult } from "@/app/actions/games"
 import { addCardToCollection } from "@/app/actions/tcg"
@@ -36,6 +36,7 @@ import type { BGGSearchResult, BGGGameDetails } from "@/lib/types/database"
 import type { TCGSearchResult } from "@/app/api/tcg/search/route"
 import type { MiniatureSearchResult } from "@/app/api/miniatures/search/route"
 import { getSearchResultId } from "@/lib/search-result-id"
+import { BarcodeScanner } from "@/components/barcode-scanner"
 
 type GameCategory = "board_game" | "rpg" | "trading_card" | "miniature"
 
@@ -136,6 +137,7 @@ export default function AddGamePage() {
   const [selectedCategory, setSelectedCategory] = useState<GameCategory>("board_game")
   const [searchQuery, setSearchQuery] = useState("")
   const [searching, setSearching] = useState(false)
+  const [barcodeScanning, setBarcodeScanning] = useState(false)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [addingGameId, setAddingGameId] = useState<number | string | null>(null)
   const [selectedGame, setSelectedGame] = useState<GameDetails | null>(null)
@@ -187,8 +189,9 @@ export default function AddGamePage() {
       ? groupBoardResults(searchResults as BGGSearchResult[])
       : []
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return
+  const handleSearch = async (queryOverride?: string) => {
+    const query = (queryOverride ?? searchQuery).trim()
+    if (!query) return
 
     setSearching(true)
     setSearchResults([])
@@ -198,7 +201,7 @@ export default function AddGamePage() {
       // TCG API uses 'q' parameter and needs 'game', BGG/RPGG use 'query'
       let url = ""
       if (selectedCategory === "trading_card") {
-        url = `${categoryConfig.searchEndpoint}?q=${encodeURIComponent(searchQuery)}&game=${tcgGame}`
+        url = `${categoryConfig.searchEndpoint}?q=${encodeURIComponent(query)}&game=${tcgGame}`
       } else {
         url = `${categoryConfig.searchEndpoint}?query=${encodeURIComponent(searchQuery)}`
       }
@@ -264,6 +267,49 @@ export default function AddGamePage() {
       setLoadingDetails(false)
     }
   }
+
+  const handleBarcodeDetected = useCallback(async (barcode: string) => {
+    setBarcodeScanning(false)
+    setSearching(true)
+
+    try {
+      if (selectedCategory !== "board_game" && selectedCategory !== "rpg") {
+        return
+      }
+
+      const response = await fetch(
+        `/api/barcode/resolve?barcode=${encodeURIComponent(barcode)}&category=${selectedCategory}`,
+      )
+      const data = await response.json()
+
+      if (data.resolved && data.externalGameId) {
+        await handleSelectGame(data.externalGameId)
+        return
+      }
+
+      const suggestedQuery = data.suggestedQuery || data.providerResult?.name
+      if (suggestedQuery) {
+        setSearchQuery(suggestedQuery)
+        await handleSearch(suggestedQuery)
+        return
+      }
+
+      setSearchQuery(barcode)
+      toast({
+        title: "Viivakoodi tunnistettu",
+        description: "Peliä ei löytynyt suoraan. Haku voidaan tehdä viivakoodin perusteella.",
+      })
+    } catch (error) {
+      console.error("Barcode resolve error:", error)
+      toast({
+        title: t("common.error"),
+        description: "Viivakoodin käsittely epäonnistui. Voit hakea pelin nimellä.",
+        variant: "destructive",
+      })
+    } finally {
+      setSearching(false)
+    }
+  }, [handleSearch, handleSelectGame, selectedCategory, t, toast])
 
   const handleCreateMiniatureArmy = async () => {
     const miniature = selectedGame as MiniatureSearchResult | null
@@ -708,6 +754,27 @@ export default function AddGamePage() {
                       </div>
                     )}
                     
+                    {/* Barcode scanner */}
+                    {(selectedCategory === "board_game" || selectedCategory === "rpg") && (
+                      <div className="mb-4">
+                        {!barcodeScanning ? (
+                          <ArchiveButton
+                            type="button"
+                            onClick={() => setBarcodeScanning(true)}
+                            icon={<ScanLine className="h-4 w-4" />}
+                            fullWidth
+                          >
+                            Skannaa viivakoodi
+                          </ArchiveButton>
+                        ) : (
+                          <BarcodeScanner
+                            onDetected={handleBarcodeDetected}
+                            onClose={() => setBarcodeScanning(false)}
+                          />
+                        )}
+                      </div>
+                    )}
+
                     {/* Search Input */}
                     <div className="flex gap-2">
                       <div className="relative flex-1">
