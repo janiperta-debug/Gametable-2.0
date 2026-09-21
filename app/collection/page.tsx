@@ -11,6 +11,7 @@ import { ImportSection } from "@/components/import-section"
 import { ThemeHero } from "@/components/theme-hero"
 import { ArchiveButton, ArchiveToggle } from "@/components/archive-frame"
 import { Loader2 } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "@/lib/i18n"
 import { useCollection } from "@/hooks/useCollection"
@@ -23,6 +24,8 @@ import {
   getCategoryCounts,
   getStatusCounts,
   type CollectionCategoryFilter,
+  filterCardsByTCGGame,
+  getTCGGameOptions,
 } from "@/lib/collection/filters"
 import type { CollectionDomain } from "@/lib/types/collection"
 
@@ -42,6 +45,7 @@ export default function Collection() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>("all")
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
   const [sortBy, setSortBy] = useState<SortOption>("name-asc")
+  const [selectedTCGGame, setSelectedTCGGame] = useState("")
 
   useEffect(() => {
     let cancelled = false
@@ -76,6 +80,11 @@ export default function Collection() {
     await refetch()
   }
 
+  useEffect(() => {
+    if (selectedCategory !== "trading-cards") setSelectedTCGGame("")
+    else if (selectedTCGGame && !tcgGameOptions.some((game) => game.id === selectedTCGGame)) setSelectedTCGGame("")
+  }, [selectedCategory, selectedTCGGame, tcgGameOptions])
+
   const handleToggleForTrade = (gameId: string) => {
     toast({
       title: t("common.updated"),
@@ -109,16 +118,19 @@ export default function Collection() {
     [collectionEntries, userGames, activeMarketplaceGameIds],
   )
 
-  const filteredAndSortedGames = useMemo(
-    () =>
-      applyCollectionControls(collectionCards, {
-        category: selectedCategory,
-        status: statusFilter,
-        searchQuery,
-        sortBy,
-      }),
-    [collectionCards, searchQuery, selectedCategory, statusFilter, sortBy],
-  )
+  const tcgGameOptions = useMemo(() => getTCGGameOptions(collectionCards), [collectionCards])
+
+  const filteredAndSortedGames = useMemo(() => {
+    const categoryFiltered = applyCollectionControls(collectionCards, {
+      category: selectedCategory,
+      status: statusFilter,
+      searchQuery,
+      sortBy,
+    })
+    return selectedCategory === "trading-cards" && selectedTCGGame
+      ? filterCardsByTCGGame(categoryFiltered, selectedTCGGame)
+      : categoryFiltered
+  }, [collectionCards, searchQuery, selectedCategory, selectedTCGGame, statusFilter, sortBy])
 
   const statusCounts = useMemo(() => getStatusCounts(collectionCards), [collectionCards])
 
@@ -167,6 +179,23 @@ export default function Collection() {
               categoryCounts={categoryCounts}
               statusCounts={statusCounts}
             />
+
+            {selectedCategory === "trading-cards" && tcgGameOptions.length > 0 && (
+              <div className="mb-6 flex items-center justify-center gap-3">
+                <span className="font-body text-sm text-muted-foreground">Korttipeli</span>
+                <Select value={selectedTCGGame || "all"} onValueChange={(value) => setSelectedTCGGame(value === "all" ? "" : value)}>
+                  <SelectTrigger className="w-full max-w-xs">
+                    <SelectValue placeholder="Kaikki korttipelit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Kaikki korttipelit</SelectItem>
+                    {tcgGameOptions.map((game) => (
+                      <SelectItem key={game.id} value={game.id}>{game.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <div className="mb-8">
               <ArchiveButton onClick={() => setShowFilters(!showFilters)}>
