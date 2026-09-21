@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 
 export type TCGGame = "magic" | "pokemon" | "lorcana" | "yugioh" | "flesh-and-blood" | "one-piece"
+type DBTCGSystem = "mtg" | "pokemon" | "lorcana" | "yugioh" | "flesh-and-blood" | "one-piece"
+
+function toDbTCGSystem(game: TCGGame): DBTCGSystem {
+  return game === "magic" ? "mtg" : game
+}
+
+function fromDbTCGSystem(game: DBTCGSystem): TCGGame {
+  return game === "mtg" ? "magic" : game
+}
 
 // Map old game codes to new tcg_system values
 const gameSystemMap: Record<string, TCGGame> = {
@@ -35,7 +44,7 @@ export interface TCGSearchResult {
 interface TCGCard {
   id: string
   name: string
-  tcg_system: TCGGame
+  tcg_system: DBTCGSystem
   external_id: string | null
   set_code: string | null
   set_name: string | null
@@ -55,13 +64,14 @@ const LORCANA_CACHE_TTL = 60 * 60 * 1000 // 1 hour
 
 // Query Supabase tcg_cards table first
 async function searchSupabase(query: string, tcgSystem: TCGGame): Promise<TCGSearchResult[]> {
+  const dbTcgSystem = toDbTCGSystem(tcgSystem)
   try {
     const supabase = await createClient()
     
     const { data, error } = await supabase
       .from("tcg_cards")
       .select("*")
-      .eq("tcg_system", tcgSystem)
+      .eq("tcg_system", dbTcgSystem)
       .ilike("name", `%${query}%`)
       .limit(20)
     
@@ -73,7 +83,7 @@ async function searchSupabase(query: string, tcgSystem: TCGGame): Promise<TCGSea
     return (data || []).map((card: TCGCard) => ({
       id: card.id,
       name: card.name,
-      game: card.tcg_system,
+      game: fromDbTCGSystem(card.tcg_system),
       set: card.set_name || "Unknown Set",
       setCode: card.set_code || undefined,
       rarity: card.rarity || undefined,
@@ -112,6 +122,7 @@ function mergeSearchResults(catalogResults: TCGSearchResult[], externalResults: 
 // Save external API results to Supabase
 async function saveToSupabase(cards: TCGSearchResult[], tcgSystem: TCGGame): Promise<void> {
   if (cards.length === 0) return
+  const dbTcgSystem = toDbTCGSystem(tcgSystem)
   
   try {
     const supabase = await createClient()
@@ -121,14 +132,14 @@ async function saveToSupabase(cards: TCGSearchResult[], tcgSystem: TCGGame): Pro
       const { data: existing } = await supabase
         .from("tcg_cards")
         .select("id")
-        .eq("tcg_system", tcgSystem)
+        .eq("tcg_system", dbTcgSystem)
         .eq("external_id", card.externalId || card.id)
         .single()
       
       if (!existing) {
         await supabase.from("tcg_cards").insert({
           name: card.name,
-          tcg_system: tcgSystem,
+          tcg_system: dbTcgSystem,
           external_id: card.externalId || card.id,
           set_code: card.setCode || null,
           set_name: card.set || null,
