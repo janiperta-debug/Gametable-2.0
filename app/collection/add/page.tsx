@@ -791,6 +791,41 @@ export default function AddGamePage() {
                 </div>
               )}
 
+              {/* TCG game selector */}
+              {selectedCategory === "trading_card" && (
+                <div className="mb-6 space-y-3">
+                  <p className="font-body text-sm text-muted-foreground">Valitse korttipeli</p>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { id: "magic", label: "Magic: The Gathering" },
+                      { id: "pokemon", label: "Pokémon" },
+                      { id: "yugioh", label: "Yu-Gi-Oh!" },
+                      { id: "lorcana", label: "Disney Lorcana" },
+                      { id: "flesh-and-blood", label: "Flesh & Blood" },
+                      { id: "one-piece", label: "One Piece" },
+                      { id: "riftbound", label: "Riftbound" },
+                      { id: "digimon", label: "Digimon Card Game" },
+                      { id: "gundam", label: "Gundam Card Game" },
+                      { id: "star-wars-unlimited", label: "Star Wars: Unlimited" },
+                      { id: "dragon-ball-fusion-world", label: "Dragon Ball Super: Fusion World" },
+                    ].map((game) => (
+                      <ArchiveCardButton
+                        key={game.id}
+                        type="button"
+                        active={tcgGame === game.id}
+                        onClick={() => {
+                          setTcgGame(game.id as typeof tcgGame)
+                          setSearchResults([])
+                          setSelectedGame(null)
+                        }}
+                      >
+                        <span className="normal-case">{game.label}</span>
+                      </ArchiveCardButton>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Import / manual are the only Add Game entry methods. External search lives on Etsi peli. */}
               <div className="mb-6 flex justify-center">
                 <ArchiveToggle
