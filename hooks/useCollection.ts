@@ -205,7 +205,7 @@ export function useCollection() {
 
     const miniatureRows = miniResult.data || []
     const armyIds = [...new Set(miniatureRows.map((row) => row.army_id).filter(Boolean))]
-    const armiesById = new Map<string, string>()
+    const armiesById = new Map<string, { name: string; gameId: string | null; gameName: string | null }>()
     if (armyIds.length > 0) {
       const { data: armies } = await supabase
         .from('mini_armies')
@@ -214,19 +214,22 @@ export function useCollection() {
         .in('id', armyIds)
 
       for (const army of armies || []) {
-        armiesById.set(army.id, army.name)
+        const game = Array.isArray(army.game) ? army.game[0] : army.game
+        armiesById.set(army.id, {
+          name: army.name,
+          gameId: army.game_id ?? null,
+          gameName: game?.name ?? null,
+        })
       }
     }
 
     const miniatureCollection = miniatureRows.map((row) => {
       const army = row.army_id ? armiesById.get(row.army_id) ?? null : null
-      const rawArmy = (row as unknown as { army_id: string | null }).army_id
-      const relatedArmy = armiesById.get(rawArmy ?? '') ?? null
       return {
         ...row,
-        army_name: army,
-        game_id: (row as unknown as { game_id?: string | null }).game_id ?? null,
-        game_name: relatedArmy ? null : null,
+        army_name: army?.name ?? null,
+        game_id: army?.gameId ?? null,
+        game_name: army?.gameName ?? null,
       }
     })
 
