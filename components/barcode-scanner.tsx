@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { BrowserMultiFormatReader } from "@zxing/browser"
+import { BrowserMultiFormatReader, type IScannerControls } from "@zxing/browser"
 
 type Props = {
   onDetected: (barcode: string) => void
@@ -10,6 +10,7 @@ type Props = {
 
 export function BarcodeScanner({ onDetected, onClose }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null)
+  const controlsRef = useRef<IScannerControls | null>(null)
   const onDetectedRef = useRef(onDetected)
   const [error, setError] = useState<string | null>(null)
 
@@ -21,22 +22,57 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
     const reader = new BrowserMultiFormatReader()
     let active = true
 
-    reader.decodeFromVideoDevice(undefined, videoRef.current!, (result, error) => {
-      if (!active) return
-      if (result) {
-        active = false
-        onDetectedRef.current(result.getText())
-        reader.reset()
-      } else if (error && error.name !== "NotFoundException") {
-        setError("Kameran käynnistäminen tai viivakoodin lukeminen epäonnistui.")
+    const startScanner = async () => {
+      if (!videoRef.current) return
+
+      try {
+        const controls = await reader.decodeFromVideoDevice(
+          undefined,
+          videoRef.current,
+          (result, error, callbackControls) => {
+            if (!active) {
+              callbackControls.stop()
+              return
+            }
+
+            if (result) {
+              active = false
+              callbackControls.stop()
+              onDetectedRef.current(result.getText())
+            } else if (error && error.name !== "NotFoundException") {
+              setError("Kameran käynnistäminen tai viivakoodin lukeminen epäonnistui.")
+            }
+          },
+        )
+
+        if (!active) {
+          controls.stop()
+          return
+        }
+
+        controlsRef.current = controls
+      } catch {
+        if (active) {
+          setError("Kameran käyttö ei onnistunut. Tarkista selaimen kameraoikeus.")
+        }
       }
-    }).catch(() => {
-      if (active) setError("Kameran käyttö ei onnistunut. Tarkista selaimen kameraoikeus.")
-    })
+    }
+
+    void startScanner()
 
     return () => {
       active = false
-      reader.reset()
+
+      const controls = controlsRef.current
+      controlsRef.current = null
+
+      if (controls) {
+        try {
+          controls.stop()
+        } catch {
+          // The scanner may already have been stopped by a successful detection.
+        }
+      }
     }
   }, [])
 
