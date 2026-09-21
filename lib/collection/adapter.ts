@@ -12,6 +12,7 @@ interface GameRowLike {
   min_playtime?: number | null
   max_playtime?: number | null
   bgg_rating?: number | null
+  game_system?: string | null
 }
 
 interface UserGameRowLike {
@@ -81,6 +82,8 @@ interface MiniatureCollectionRowLike {
   id: string
   army_id?: string | null
   army_name?: string | null
+  game_id?: string | null
+  game_name?: string | null
   unit_id?: string | null
   owned?: boolean | null
   model_count?: number | null
@@ -137,6 +140,7 @@ function buildGameMetadata(game: GameRowLike | null | undefined): CollectionMeta
     }
   }
   if (game.bgg_rating != null) metadata.rating = game.bgg_rating
+  if (game.game_system) metadata.game_system = game.game_system
 
   return metadata
 }
@@ -200,6 +204,8 @@ function buildMiniatureMetadata(row: MiniatureCollectionRowLike | MiniatureWishl
   if ('paint_status' in row && row.paint_status) metadata.paint_status = row.paint_status
   if ('army_id' in row && row.army_id) metadata.army_id = row.army_id
   if ('army_name' in row && row.army_name) metadata.army_name = row.army_name
+  if ('game_id' in row && row.game_id) metadata.game_id = row.game_id
+  if ('game_name' in row && row.game_name) metadata.game_name = row.game_name
   if ('custom_name' in row && row.custom_name) metadata.custom_name = row.custom_name
   if ('upgrades' in row && row.upgrades != null) metadata.upgrades = row.upgrades
   if ('is_warlord' in row && row.is_warlord != null) metadata.is_warlord = row.is_warlord
