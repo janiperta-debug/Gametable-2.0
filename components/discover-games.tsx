@@ -425,59 +425,53 @@ export function DiscoverGames() {
 
           {/* TCG Game Selector */}
           {selectedCategory === "trading_card" && (
-            <div className="flex flex-wrap gap-2 pt-2">
-              {[
-                { id: "magic", label: "Magic: The Gathering" },
-                { id: "pokemon", label: "Pokemon" },
-                { id: "yugioh", label: "Yu-Gi-Oh!" },
-                { id: "lorcana", label: "Lorcana" },
-                { id: "flesh-and-blood", label: "Flesh & Blood" },
-                { id: "one-piece", label: "One Piece" },
-              ].map((game) => (
-                <button
-                  key={game.id}
-                  type="button"
-                  onClick={() => handleTcgGameChange(game.id as typeof tcgGame)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-body transition-colors ${
-                    tcgGame === game.id
-                      ? "bg-accent-gold text-background"
-                      : "bg-surface/50 text-foreground hover:bg-accent-gold/20"
-                  }`}
-                >
-                  {game.label}
-                </button>
-              ))}
+            <div className="pt-2">
+              <label className="sr-only" htmlFor="tcg-game-selector">
+                Valitse korttipeli
+              </label>
+              <select
+                id="tcg-game-selector"
+                value={tcgGame}
+                onChange={(e) => handleTcgGameChange(e.target.value as typeof tcgGame)}
+                className={cn(
+                  "h-10 w-full rounded-md px-3 text-sm font-body",
+                  archiveField,
+                  "bg-background/40 text-foreground"
+                )}
+              >
+                <option value="magic">Magic: The Gathering</option>
+                <option value="pokemon">Pokemon</option>
+                <option value="yugioh">Yu-Gi-Oh!</option>
+                <option value="lorcana">Lorcana</option>
+                <option value="flesh-and-blood">Flesh & Blood</option>
+                <option value="one-piece">One Piece</option>
+              </select>
             </div>
           )}
 
           {/* Miniature System Selector */}
           {selectedCategory === "miniature" && miniatureSystems.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => handleMiniatureSystemChange("")}
-                className={`px-3 py-1.5 rounded-full text-sm font-body transition-colors ${
-                  !miniatureSystemId
-                    ? "bg-accent-gold text-background"
-                    : "bg-surface/50 text-foreground hover:bg-accent-gold/20"
-                }`}
+            <div className="pt-2">
+              <label className="sr-only" htmlFor="miniature-system-selector">
+                Valitse miniatyyripeli
+              </label>
+              <select
+                id="miniature-system-selector"
+                value={miniatureSystemId}
+                onChange={(e) => handleMiniatureSystemChange(e.target.value)}
+                className={cn(
+                  "h-10 w-full rounded-md px-3 text-sm font-body",
+                  archiveField,
+                  "bg-background/40 text-foreground"
+                )}
               >
-                Kaikki
-              </button>
-              {miniatureSystems.map((system) => (
-                <button
-                  key={`${system.code}-${system.name}`}
-                  type="button"
-                  onClick={() => handleMiniatureSystemChange(system.id)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-body transition-colors ${
-                    miniatureSystemId === system.id
-                      ? "bg-accent-gold text-background"
-                      : "bg-surface/50 text-foreground hover:bg-accent-gold/20"
-                  }`}
-                >
-                  {system.name}
-                </button>
-              ))}
+                <option value="">Kaikki miniatyyripelit</option>
+                {miniatureSystems.map((system) => (
+                  <option key={`${system.code}-${system.name}`} value={system.id}>
+                    {system.name}
+                  </option>
+                ))}
+              </select>
             </div>
           )}
 
