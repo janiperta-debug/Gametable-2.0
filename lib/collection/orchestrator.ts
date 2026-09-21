@@ -238,8 +238,17 @@ export function getCollectionEntries({
   // with an aggregate quantity.
   const tcgGroups = new Map<string, typeof tcgCollection[number][]>()
   for (const row of tcgCollection) {
+    // Prefer the card's catalog identity, but fall back to stable card
+    // attributes as the catalog can contain duplicate rows for the same
+    // printed card (for example, imported from different providers).
+    const cardIdentity = [
+      row.card?.tcg_system ?? 'unknown',
+      (row.card?.name ?? '').trim().toLocaleLowerCase(),
+      row.card?.set_code ?? row.card?.set_name ?? 'unknown-set',
+      row.card?.rarity ?? '',
+    ].join('|')
     const key = [
-      row.card_id ?? row.card?.id ?? row.card?.external_id ?? row.id,
+      cardIdentity,
       row.condition ?? 'near_mint',
       row.foil ? 'foil' : 'nonfoil',
     ].join(':')
