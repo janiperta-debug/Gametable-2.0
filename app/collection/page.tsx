@@ -11,7 +11,6 @@ import { ImportSection } from "@/components/import-section"
 import { ThemeHero } from "@/components/theme-hero"
 import { ArchiveButton, ArchiveToggle } from "@/components/archive-frame"
 import { Loader2 } from "lucide-react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "@/lib/i18n"
 import { useCollection } from "@/hooks/useCollection"
@@ -24,8 +23,6 @@ import {
   getCategoryCounts,
   getStatusCounts,
   type CollectionCategoryFilter,
-  filterCardsByTCGGame,
-  getTCGGameOptions,
   DEFAULT_COLLECTION_SPECIFIC_FILTERS,
   filterCardsBySpecificFilters,
   type CollectionSpecificFilters,
@@ -48,7 +45,6 @@ export default function Collection() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryType>("all")
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
   const [sortBy, setSortBy] = useState<SortOption>("name-asc")
-  const [selectedTCGGame, setSelectedTCGGame] = useState("")
   const [specificFilters, setSpecificFilters] = useState<CollectionSpecificFilters>(DEFAULT_COLLECTION_SPECIFIC_FILTERS)
 
   useEffect(() => {
@@ -117,13 +113,6 @@ export default function Collection() {
     [collectionEntries, userGames, activeMarketplaceGameIds],
   )
 
-  const tcgGameOptions = useMemo(() => getTCGGameOptions(collectionCards), [collectionCards])
-
-  useEffect(() => {
-    if (selectedCategory !== "trading-cards") setSelectedTCGGame("")
-    else if (selectedTCGGame && !tcgGameOptions.some((game) => game.id === selectedTCGGame)) setSelectedTCGGame("")
-  }, [selectedCategory, selectedTCGGame, tcgGameOptions])
-
   useEffect(() => {
     setSpecificFilters(DEFAULT_COLLECTION_SPECIFIC_FILTERS)
     setShowFilters(false)
@@ -137,10 +126,8 @@ export default function Collection() {
       sortBy,
     })
     const specificFiltered = filterCardsBySpecificFilters(categoryFiltered, selectedCategory, specificFilters)
-    return selectedCategory === "trading-cards" && selectedTCGGame
-      ? filterCardsByTCGGame(specificFiltered, selectedTCGGame)
-      : specificFiltered
-  }, [collectionCards, searchQuery, selectedCategory, selectedTCGGame, specificFilters, statusFilter, sortBy])
+    return specificFiltered
+  }, [collectionCards, searchQuery, selectedCategory, specificFilters, statusFilter, sortBy])
 
   const statusCounts = useMemo(() => getStatusCounts(collectionCards), [collectionCards])
 
