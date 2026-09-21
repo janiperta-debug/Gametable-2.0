@@ -11,7 +11,7 @@ interface GameListProps {
   onUpdateCollection?: () => void
 }
 
-export function GameList({ cards, onRemoveTCGCard }: GameListProps) {
+export function GameList({ cards, onRemoveTCGCard, onUpdateCollection }: GameListProps) {
   const resolvedCards = cards ?? []
 
   if (resolvedCards.length === 0) {
