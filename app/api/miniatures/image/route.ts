@@ -5,12 +5,42 @@ const ALLOWED_PAGE_HOSTS = new Set([
   "atomicmassgames.com",
   "www.warhammer-community.com",
   "warhammer-community.com",
+  "www.wahapedia.ru",
+  "wahapedia.ru",
 ])
 
 const ALLOWED_IMAGE_HOSTS = new Set([
   "cdn.svc.asmodee.net",
   "assets.warhammer-community.com",
 ])
+
+function isAllowedWahapediaHost(hostname: string) {
+  return hostname === "wahapedia.ru" || hostname.endsWith(".wahapedia.ru")
+}
+
+function resolveWahapediaImage(html: string, pageUrl: URL) {
+  const ogMatch =
+    html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) ??
+    html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i)
+
+  const h1Index = html.search(/<h1\b/i)
+  const contentHtml = h1Index >= 0 ? html.slice(h1Index) : html
+  const imgMatch =
+    contentHtml.match(/<img[^>]+(?:src|data-src)=["']([^"']+)["']/i)
+
+  const candidate = ogMatch?.[1] ?? imgMatch?.[1]
+  if (!candidate || candidate.startsWith("data:")) return null
+
+  try {
+    const imageUrl = new URL(candidate, pageUrl)
+    if (imageUrl.protocol !== "https:" || !isAllowedWahapediaHost(imageUrl.hostname)) {
+      return null
+    }
+    return imageUrl
+  } catch {
+    return null
+  }
+}
 
 async function fetchImage(imageUrl: string) {
   const response = await fetch(imageUrl, {
@@ -71,16 +101,8 @@ export async function GET(request: NextRequest) {
     if (!response.ok) return new NextResponse("Image source unavailable", { status: 502 })
 
     const html = await response.text()
-    const match =
-      html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) ??
-      html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i)
-
-    if (!match?.[1]) return new NextResponse("No og:image found", { status: 404 })
-
-    const imageUrl = new URL(match[1], url)
-    if (imageUrl.protocol !== "https:" || !ALLOWED_IMAGE_HOSTS.has(imageUrl.hostname)) {
-      return new NextResponse("Invalid image source", { status: 502 })
-    }
+    const imageUrl = resolveWahapediaImage(html, url)
+    if (!imageUrl) return new NextResponse("No Wahapedia image found", { status: 404 })
 
     const image = await fetchImage(imageUrl.toString())
     if (!image) return new NextResponse("Image unavailable", { status: 502 })
