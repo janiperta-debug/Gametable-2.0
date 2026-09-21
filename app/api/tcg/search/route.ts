@@ -288,10 +288,73 @@ async function searchYGOProDeck(query: string): Promise<TCGSearchResult[]> {
   }
 }
 
-// Lorcana API - use its server-side name search instead of /cards/all.
-// The /cards/all endpoint is paginated at 1000 cards, so filtering only the first
-// page can miss common characters such as Mickey or Donald.
-async function searchLorcana(query: string): Promise<TCGSearchResult[]> {
+// Lorcast is the primary external Lorcana search source.
+// It provides full-text search, stable card IDs, set metadata, rarity and images.
+// We keep lorcana-api.com as a fallback so an outage or API change does not
+// make Lorcana searching completely unavailable.
+async function searchLorcast(query: string): Promise<TCGSearchResult[]> {
+  try {
+    const response = await fetch(
+      `https://api.lorcast.com/v0/cards/search?q=${encodeURIComponent(query)}&unique=prints`,
+      {
+        headers: {
+          Accept: "application/json",
+        },
+      },
+    )
+
+    if (!response.ok) {
+      console.error(`Lorcast API error: ${response.status}`)
+      return []
+    }
+
+    const data = await response.json()
+    const cards = Array.isArray(data?.results) ? data.results : []
+
+    return cards
+      .map((card: Record<string, unknown>) => {
+        const imageUris = card.image_uris as
+          | { digital?: { small?: string; normal?: string } }
+          | undefined
+        const set = card.set as
+          | { id?: string; code?: string; name?: string }
+          | undefined
+
+        const id = String(card.id || "").trim()
+        const baseName = String(card.name || "").trim()
+        const version = String(card.version || "").trim()
+
+        if (!id || !baseName) return null
+
+        return {
+          id,
+          name: version ? `${baseName} - ${version}` : baseName,
+          game: "lorcana" as TCGGame,
+          set: String(set?.name || "Unknown Set"),
+          setCode: String(set?.code || set?.id || ""),
+          rarity: String(card.rarity || ""),
+          imageUrl: imageUris?.digital?.normal || "",
+          thumbnailUrl: imageUris?.digital?.small || imageUris?.digital?.normal || "",
+          price: (() => {
+            const prices = card.prices as { usd?: string | null } | undefined
+            const value = prices?.usd ? Number.parseFloat(prices.usd) : Number.NaN
+            return Number.isFinite(value) ? value : undefined
+          })(),
+          externalId: id,
+        }
+      })
+      .filter((card): card is TCGSearchResult => card !== null)
+      .slice(0, 20)
+  } catch (error) {
+    console.error("Lorcast search error:", error)
+    return []
+  }
+}
+
+// Legacy/open Lorcana API fallback.
+// Its documented response does not require Culture_Invariant_Id, so use the
+// stable set/card number combination when that field is not present.
+async function searchLorcanaApi(query: string): Promise<TCGSearchResult[]> {
   try {
     const response = await fetch(
       `https://api.lorcana-api.com/cards/fetch?search=${encodeURIComponent(`name~${query}`)}&pagesize=20`,
@@ -303,7 +366,7 @@ async function searchLorcana(query: string): Promise<TCGSearchResult[]> {
     )
 
     if (!response.ok) {
-      console.error(`Lorcana API error: ${response.status}`)
+      console.error(`Lorcana API fallback error: ${response.status}`)
       return []
     }
 
@@ -311,29 +374,43 @@ async function searchLorcana(query: string): Promise<TCGSearchResult[]> {
 
     return (Array.isArray(cards) ? cards : [])
       .map((card: Record<string, unknown>) => {
-        const rawId = card.Culture_Invariant_Id ?? card.id
-        if (rawId === undefined || rawId === null || String(rawId).trim() === "") {
-          return null
-        }
+        const explicitId = card.Culture_Invariant_Id ?? card.id
+        const setId = String(card.Set_ID || "").trim()
+        const cardNum = String(card.Card_Num || "").trim()
+        const fallbackId = setId && cardNum ? `${setId}:${cardNum}` : ""
+        const id = String(explicitId || fallbackId).trim()
 
-        const id = String(rawId)
+        if (!id) return null
+
         return {
           id,
           name: String(card.Name || ""),
           game: "lorcana" as TCGGame,
           set: String(card.Set_Name || "Unknown Set"),
+          setCode: setId || undefined,
           rarity: String(card.Rarity || ""),
           imageUrl: String(card.Image || ""),
           thumbnailUrl: String(card.Image || ""),
-          externalId: String(card.Culture_Invariant_Id || id),
+          externalId: id,
         }
       })
       .filter((card): card is TCGSearchResult => card !== null)
       .slice(0, 20)
   } catch (error) {
-    console.error("Lorcana search error:", error)
+    console.error("Lorcana API fallback search error:", error)
     return []
   }
+}
+
+async function searchLorcana(query: string): Promise<TCGSearchResult[]> {
+  const lorcastResults = await searchLorcast(query)
+
+  if (lorcastResults.length > 0) {
+    return lorcastResults
+  }
+
+  console.warn("Lorcast returned no Lorcana results; using lorcana-api.com fallback")
+  return searchLorcanaApi(query)
 }
 
 export async function GET(request: NextRequest) {
