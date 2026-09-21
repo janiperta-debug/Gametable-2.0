@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { createNotification } from "@/app/actions/notifications"
 
 export interface Message {
   id: string
@@ -141,6 +142,30 @@ export async function sendMessage(conversationId: string, content: string): Prom
     return { data: null, error: "Message cannot be empty" }
   }
 
+  const { data: conversation } = await supabase
+    .from("conversations")
+    .select("participants")
+    .eq("id", conversationId)
+    .contains("participants", [user.id])
+    .maybeSingle()
+
+  if (!conversation) {
+    return { data: null, error: "Conversation not found" }
+  }
+
+  const recipientId = (conversation.participants as string[]).find((id) => id !== user.id)
+  if (!recipientId) {
+    return { data: null, error: "Conversation recipient not found" }
+  }
+
+  const { data: senderProfile } = await supabase
+    .from("profiles")
+    .select("display_name, username")
+    .eq("id", user.id)
+    .single()
+
+  const senderName = senderProfile?.display_name || senderProfile?.username || "Someone"
+
   const { data: message, error } = await supabase
     .from("messages")
     .insert({
@@ -155,6 +180,18 @@ export async function sendMessage(conversationId: string, content: string): Prom
     console.error("Error sending message:", error)
     return { data: null, error: error.message }
   }
+
+  await createNotification({
+    user_id: recipientId,
+    type: "message",
+    title: "New Message",
+    body: `${senderName} sent you a message`,
+    data: {
+      sender_id: user.id,
+      sender_name: senderName,
+      conversation_id: conversationId,
+    },
+  })
 
   return { data: message, error: null }
 }
