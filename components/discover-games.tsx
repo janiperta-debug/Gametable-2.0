@@ -375,27 +375,6 @@ export function DiscoverGames() {
           </p>
         </ArchiveCardHeader>
         <ArchiveCardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={`${t("discover.searchIn")} ${categoryConfig.sourceName}...`}
-                className={cn("pl-10 font-body", archiveField)}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              />
-            </div>
-            <ArchiveCardButton
-              onClick={handleSearch}
-              disabled={isSearching || !searchQuery.trim()}
-              active
-              icon={isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
-            >
-              {isSearching ? t("common.searching") : t("common.search")}
-            </ArchiveCardButton>
-          </div>
-
           {/* Category Selector — same visual cards as Add Game */}
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             {categories.map((cat) => (
@@ -421,6 +400,27 @@ export function DiscoverGames() {
                 </span>
               </button>
             ))}
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={`${t("discover.searchIn")} ${categoryConfig.sourceName}...`}
+                className={cn("pl-10 font-body", archiveField)}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              />
+            </div>
+            <ArchiveCardButton
+              onClick={handleSearch}
+              disabled={isSearching || !searchQuery.trim()}
+              active
+              icon={isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
+            >
+              {isSearching ? t("common.searching") : t("common.search")}
+            </ArchiveCardButton>
           </div>
 
           {/* TCG Game Selector */}
