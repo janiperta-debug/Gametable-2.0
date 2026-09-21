@@ -39,10 +39,10 @@ interface CategoryConfig {
 }
 
 const CATEGORY_FALLBACK_IMAGES: Record<GameCategory, string> = {
-  board_game: "/images/fallbacks/board-games-fallback.webp",
-  rpg: "/images/fallbacks/rpg-fallback.webp",
-  miniature: "/images/fallbacks/miniatures-fallback.webp",
-  trading_card: "/images/fallbacks/tcg-fallback.webp",
+  board_game: "/images/fallbacks/board-games-fallback.png",
+  rpg: "/images/fallbacks/rpg-fallback.png",
+  miniature: "/images/fallbacks/miniatures-fallback.png",
+  trading_card: "/images/fallbacks/tcg-fallback.png",
 }
 
 function handleFallbackImage(event: SyntheticEvent<HTMLImageElement>, fallback: string) {
