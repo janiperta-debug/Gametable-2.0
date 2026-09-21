@@ -32,10 +32,11 @@ export async function lookupGameUpc(barcode: string): Promise<BarcodeProviderRes
     const data = await response.json() as Record<string, unknown>
     const info = Array.isArray(data.bgg_info) ? data.bgg_info : []
     const first = info[0] as Record<string, unknown> | undefined
+    const status = firstString(data.bgg_info_status)
 
     return {
       provider: "gameupc",
-      externalGameId: first ? firstString(first.id) : null,
+      externalGameId: status === "verified" && first ? firstString(first.id) : null,
       name: firstString(first?.name) || firstString(data.name),
       year: null,
       thumbnail: firstString(first?.thumbnail_url),
