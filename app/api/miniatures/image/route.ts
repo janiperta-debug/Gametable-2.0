@@ -5,8 +5,6 @@ const ALLOWED_PAGE_HOSTS = new Set([
   "atomicmassgames.com",
   "www.warhammer-community.com",
   "warhammer-community.com",
-  "www.wahapedia.ru",
-  "wahapedia.ru",
 ])
 
 const ALLOWED_IMAGE_HOSTS = new Set([
@@ -14,26 +12,16 @@ const ALLOWED_IMAGE_HOSTS = new Set([
   "assets.warhammer-community.com",
 ])
 
-function isAllowedWahapediaHost(hostname: string) {
-  return hostname === "wahapedia.ru" || hostname.endsWith(".wahapedia.ru")
-}
-
-function resolveWahapediaImage(html: string, pageUrl: URL) {
+function resolveOfficialPageImage(html: string, pageUrl: URL) {
   const ogMatch =
     html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) ??
     html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i)
 
-  const h1Index = html.search(/<h1\b/i)
-  const contentHtml = h1Index >= 0 ? html.slice(h1Index) : html
-  const imgMatch =
-    contentHtml.match(/<img[^>]+(?:src|data-src)=["']([^"']+)["']/i)
-
-  const candidate = ogMatch?.[1] ?? imgMatch?.[1]
-  if (!candidate || candidate.startsWith("data:")) return null
+  if (!ogMatch?.[1]) return null
 
   try {
-    const imageUrl = new URL(candidate, pageUrl)
-    if (imageUrl.protocol !== "https:" || !isAllowedWahapediaHost(imageUrl.hostname)) {
+    const imageUrl = new URL(ogMatch[1], pageUrl)
+    if (imageUrl.protocol !== "https:" || !ALLOWED_IMAGE_HOSTS.has(imageUrl.hostname)) {
       return null
     }
     return imageUrl
@@ -101,8 +89,8 @@ export async function GET(request: NextRequest) {
     if (!response.ok) return new NextResponse("Image source unavailable", { status: 502 })
 
     const html = await response.text()
-    const imageUrl = resolveWahapediaImage(html, url)
-    if (!imageUrl) return new NextResponse("No Wahapedia image found", { status: 404 })
+    const imageUrl = resolveOfficialPageImage(html, url)
+    if (!imageUrl) return new NextResponse("No official miniature image found", { status: 404 })
 
     const image = await fetchImage(imageUrl.toString())
     if (!image) return new NextResponse("Image unavailable", { status: 502 })
