@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, type SyntheticEvent } from "react"
 import {
   ArchiveCard,
   ArchiveCardContent,
@@ -45,7 +45,7 @@ const CATEGORY_FALLBACK_IMAGES: Record<GameCategory, string> = {
   trading_card: "/images/fallbacks/tcg-fallback.webp",
 }
 
-function handleFallbackImage(event: React.SyntheticEvent<HTMLImageElement>, fallback: string) {
+function handleFallbackImage(event: SyntheticEvent<HTMLImageElement>, fallback: string) {
   const image = event.currentTarget
   if (image.dataset.fallbackApplied === "true") return
   image.dataset.fallbackApplied = "true"
@@ -492,11 +492,21 @@ export function DiscoverGames() {
         <ArchiveCard>
           <ArchiveCardContent className="pt-6">
             <div className="flex gap-4">
-              {((selectedGame as BGGGameDetails).thumbnail || (selectedGame as TCGSearchResult).imageUrl || (selectedGame as TCGSearchResult).thumbnailUrl) && (
+              {selectedCategory === "miniature" ? (
+                <img
+                  src={(selectedGame as MiniatureSearchResult).imageUrl
+                    ? `/api/miniatures/image?url=${encodeURIComponent((selectedGame as MiniatureSearchResult).imageUrl || "")}`
+                    : CATEGORY_FALLBACK_IMAGES.miniature}
+                  alt={selectedGame.name}
+                  className="w-32 h-32 object-cover rounded"
+                  onError={(event) => handleFallbackImage(event, CATEGORY_FALLBACK_IMAGES.miniature)}
+                />
+              ) : ((selectedGame as BGGGameDetails).thumbnail || (selectedGame as TCGSearchResult).imageUrl || (selectedGame as TCGSearchResult).thumbnailUrl) && (
                 <img
                   src={(selectedGame as BGGGameDetails).thumbnail || (selectedGame as TCGSearchResult).imageUrl || (selectedGame as TCGSearchResult).thumbnailUrl || ""}
                   alt={selectedGame.name}
                   className="w-32 h-32 object-contain rounded"
+                  onError={(event) => handleFallbackImage(event, CATEGORY_FALLBACK_IMAGES[selectedCategory])}
                 />
               )}
               <div className="flex-1 min-w-0">
