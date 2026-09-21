@@ -7,9 +7,10 @@ import type { CollectionCardItem } from "@/lib/types/collection"
 
 interface GameListProps {
   cards?: CollectionCardItem[]
+  onRemoveTCGCard?: (collectionEntryId: string) => void
 }
 
-export function GameList({ games, cards }: GameListProps) {
+export function GameList({ cards, onRemoveTCGCard }: GameListProps) {
   const resolvedCards = cards ?? []
 
   if (resolvedCards.length === 0) {
@@ -30,6 +31,7 @@ export function GameList({ games, cards }: GameListProps) {
               variant="list"
               showMarketplaceButton={false}
               showWishlistButton={true}
+              onRemoveTCGCard={onRemoveTCGCard}
             />
             {index < resolvedCards.length - 1 && <ArchiveDivider className="my-0" />}
           </div>
