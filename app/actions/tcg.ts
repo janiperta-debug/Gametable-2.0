@@ -173,27 +173,49 @@ export interface RemoveCardResult {
   error?: string
 }
 
-export async function removeCardFromCollection(collectionEntryId: string): Promise<RemoveCardResult> {
-  const supabase = await createClient()
+export async function updateTCGCollectionQuantity(
+  collectionEntryId: string,
+  delta: number,
+): Promise<{ success: boolean; error?: string }> {
+  if (!Number.isInteger(delta) || delta === 0) {
+    return { success: false, error: "Invalid quantity change" }
+  }
 
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return { success: false, error: "Not authenticated" }
+  if (!user) return { success: false, error: "Not authenticated" }
+
+  const { data: row, error: fetchError } = await supabase
+    .from("tcg_collection")
+    .select("id, quantity")
+    .eq("id", collectionEntryId)
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+  if (fetchError) return { success: false, error: fetchError.message }
+  if (!row) return { success: false, error: "Card collection entry not found" }
+
+  const nextQuantity = (row.quantity ?? 1) + delta
+  if (nextQuantity <= 0) {
+    const { error } = await supabase
+      .from("tcg_collection")
+      .delete()
+      .eq("id", row.id)
+      .eq("user_id", user.id)
+    if (error) return { success: false, error: error.message }
+    return { success: true }
   }
 
   const { error } = await supabase
     .from("tcg_collection")
-    .delete()
-    .eq("id", collectionEntryId)
+    .update({ quantity: nextQuantity })
+    .eq("id", row.id)
     .eq("user_id", user.id)
 
-  if (error) {
-    console.error("Error removing TCG card from collection:", error)
-    return { success: false, error: error.message }
-  }
-
+  if (error) return { success: false, error: error.message }
   return { success: true }
 }
+
 
 export async function bulkAddCards(
   cards: Array<{ card: TCGSearchResult; quantity: number }>,
