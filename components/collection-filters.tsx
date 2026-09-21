@@ -24,7 +24,7 @@ interface CollectionFiltersProps {
 export function CollectionFilters({ category, cards, filters, onFiltersChange }: CollectionFiltersProps) {
   const t = useTranslations()
 
-  if (category === "trading-cards") {
+  if (category === "all" || category === "trading-cards") {
     return null
   }
 
