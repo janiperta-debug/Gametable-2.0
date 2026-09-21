@@ -260,7 +260,7 @@ export async function sendFriendRequest(addresseeId: string): Promise<{ success:
     type: "friend_request",
     title: "New Friend Request",
     body: `${requesterName} wants to connect with you`,
-    data: { requester_id: user.id, friendship_id: friendship?.id }
+    data: { requester_id: user.id, friendship_id: friendship?.id, sender_name: requesterName }
   })
 
   revalidatePath("/discover")
