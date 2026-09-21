@@ -2,13 +2,14 @@
 
 import { ArchiveCard, ArchiveCardButton, ArchiveIconButton } from "@/components/archive"
 import { Badge } from "@/components/ui/badge"
-import { Star, Users, Clock, Heart, ShoppingBag, Store, Puzzle, ChevronDown, Layers } from "lucide-react"
+import { Star, Users, Clock, Heart, ShoppingBag, Store, Puzzle, ChevronDown, Layers, Trash2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useTranslations } from "@/lib/i18n"
 import { assertUnreachableCollectionCard, type CollectionCardItem } from "@/lib/types/collection"
+import { removeCardFromCollection } from "@/app/actions/tcg"
 
 const CATEGORY_LABELS: Record<string, string> = {
   board_game: "Lautapeli",
@@ -21,6 +22,7 @@ interface CollectionCardProps {
   item: CollectionCardItem
   onToggleForTrade?: (gameId: string) => void
   onToggleWishlist?: (gameId: string, domain: CollectionCardItem["entry"]["domain"]) => void
+  onRemoveTCGCard?: (collectionEntryId: string) => void
   showMarketplaceButton?: boolean
   showWishlistButton?: boolean
   variant?: "grid" | "list"
@@ -69,7 +71,8 @@ function CollectionCardList({
   onToggleWishlist,
   showMarketplaceButton,
   showWishlistButton,
-}: Pick<CollectionCardProps, "item" | "onToggleWishlist" | "showMarketplaceButton" | "showWishlistButton">) {
+  onRemoveTCGCard,
+}: Pick<CollectionCardProps, "item" | "onToggleWishlist" | "onRemoveTCGCard" | "showMarketplaceButton" | "showWishlistButton">) {
   const t = useTranslations()
   const router = useRouter()
   const [expanded, setExpanded] = useState(false)
@@ -95,12 +98,28 @@ function CollectionCardList({
         <div className="flex min-w-0 items-start gap-3 sm:gap-4">
           {media}
           <div className="min-w-0 flex-1">
-            <h3 className="break-words font-heading text-lg font-semibold sm:text-xl">{card.title}</h3>
-            <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-              {card.tcgSystem && <span className="text-accent-gold">{card.tcgSystem}</span>}
-              {card.rarity && <span className="text-accent-gold">{card.rarity}</span>}
-              {set && <span className="break-words">{set}</span>}
-              <span className="shrink-0">×{card.quantity}</span>
+            <div className="flex items-start gap-2">
+              <div className="min-w-0 flex-1">
+                <h3 className="break-words font-heading text-lg font-semibold sm:text-xl">{card.title}</h3>
+                <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                  {card.tcgSystem && <span className="text-accent-gold">{card.tcgSystem}</span>}
+                  {card.rarity && <span className="text-accent-gold">{card.rarity}</span>}
+                  {set && <span className="break-words">{set}</span>}
+                  <span className="shrink-0">×{card.quantity}</span>
+                </div>
+              </div>
+              <ArchiveIconButton
+                icon={<Trash2 className="h-4 w-4" />}
+                onClick={async () => {
+                  const confirmed = window.confirm("Poistetaanko kortti kokoelmasta?")
+                  if (!confirmed) return
+                  const result = await removeCardFromCollection(entry.ownershipId)
+                  if (result.success) onRemoveTCGCard?.(entry.ownershipId)
+                  else window.alert(result.error || "Kortin poistaminen epäonnistui.")
+                }}
+                aria-label="Poista kokoelmasta"
+                title="Poista kokoelmasta"
+              />
             </div>
           </div>
         </div>
@@ -280,16 +299,30 @@ export function CollectionCard({
       <CollectionCardShell>
         <CollectionCardMedia src={card.image} alt={card.title} />
         <div className="flex flex-1 flex-col space-y-3">
-          <CollectionCardHeading
-            badge={
-              <div className="flex flex-wrap gap-2">
-                {card.tcgSystem && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">{card.tcgSystem}</Badge>}
-                {card.rarity && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">{card.rarity}</Badge>}
-              </div>
-            }
-          >
-            {card.title}
-          </CollectionCardHeading>
+          <div className="flex items-start gap-2">
+            <CollectionCardHeading
+              badge={
+                <div className="flex flex-wrap gap-2">
+                  {card.tcgSystem && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">{card.tcgSystem}</Badge>}
+                  {card.rarity && <Badge variant="outline" className="text-xs border-accent-gold/20 text-accent-gold font-body">{card.rarity}</Badge>}
+                </div>
+              }
+            >
+              {card.title}
+            </CollectionCardHeading>
+            <ArchiveIconButton
+              icon={<Trash2 className="h-4 w-4" />}
+              onClick={async () => {
+                const confirmed = window.confirm("Poistetaanko kortti kokoelmasta?")
+                if (!confirmed) return
+                const result = await removeCardFromCollection(entry.ownershipId)
+                if (result.success) onRemoveTCGCard?.(entry.ownershipId)
+                else window.alert(result.error || "Kortin poistaminen epäonnistui.")
+              }}
+              aria-label="Poista kokoelmasta"
+              title="Poista kokoelmasta"
+            />
+          </div>
           {(set || card.quantity > 0) && (
             <div className="flex items-center justify-between text-sm text-muted-foreground">
               {set && <span className="truncate">{set}</span>}
