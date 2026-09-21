@@ -31,6 +31,7 @@ import type { CollectionDomain } from "@/lib/types/collection"
 
 type CategoryType = CollectionCategoryFilter
 
+// Category-specific filters are deployed with the collection page.
 export default function Collection() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<"my-games" | "find-games">("my-games")
