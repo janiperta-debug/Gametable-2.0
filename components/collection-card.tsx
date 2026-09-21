@@ -2,14 +2,15 @@
 
 import { ArchiveCard, ArchiveCardButton, ArchiveIconButton } from "@/components/archive"
 import { Badge } from "@/components/ui/badge"
-import { Star, Users, Clock, Heart, ShoppingBag, Store, Puzzle, ChevronDown, Layers, Trash2 } from "lucide-react"
+import { Star, Users, Clock, Heart, ShoppingBag, Store, Puzzle, ChevronDown, Layers, Trash2, Minus, Plus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useTranslations } from "@/lib/i18n"
 import { assertUnreachableCollectionCard, type CollectionCardItem } from "@/lib/types/collection"
-import { removeCardFromCollection } from "@/app/actions/tcg"
+import { removeCardFromCollection, updateTCGCollectionQuantity } from "@/app/actions/tcg"
+import { updateMiniatureModelCount } from "@/app/actions/miniatures"
 
 const CATEGORY_LABELS: Record<string, string> = {
   board_game: "Lautapeli",
@@ -23,6 +24,7 @@ interface CollectionCardProps {
   onToggleForTrade?: (gameId: string) => void
   onToggleWishlist?: (gameId: string, domain: CollectionCardItem["entry"]["domain"]) => void
   onRemoveTCGCard?: (collectionEntryId: string) => void
+  onUpdateCollection?: () => void
   showMarketplaceButton?: boolean
   showWishlistButton?: boolean
   variant?: "grid" | "list"
@@ -72,7 +74,8 @@ function CollectionCardList({
   showMarketplaceButton,
   showWishlistButton,
   onRemoveTCGCard,
-}: Pick<CollectionCardProps, "item" | "onToggleWishlist" | "onRemoveTCGCard" | "showMarketplaceButton" | "showWishlistButton">) {
+  onUpdateCollection,
+}: Pick<CollectionCardProps, "item" | "onToggleWishlist" | "onRemoveTCGCard" | "onUpdateCollection" | "showMarketplaceButton" | "showWishlistButton">) {
   const t = useTranslations()
   const router = useRouter()
   const [expanded, setExpanded] = useState(false)
@@ -108,18 +111,29 @@ function CollectionCardList({
                   <span className="shrink-0">×{card.quantity}</span>
                 </div>
               </div>
-              <ArchiveIconButton
-                icon={<Trash2 className="h-4 w-4" />}
-                onClick={async () => {
-                  const confirmed = window.confirm("Poistetaanko kortti kokoelmasta?")
+              <div className="flex shrink-0 items-center gap-1">
+                <ArchiveIconButton icon={<Minus className="h-4 w-4" />} onClick={async () => {
+                  const result = await updateTCGCollectionQuantity(entry.ownershipId, -1)
+                  if (result.success) onUpdateCollection?.()
+                  else window.alert(result.error || "Kortin määrän muuttaminen epäonnistui.")
+                }} aria-label="Vähennä kortteja" title="Vähennä kortteja" />
+                <span className="min-w-6 text-center text-sm text-muted-foreground">×{card.quantity}</span>
+                <ArchiveIconButton icon={<Plus className="h-4 w-4" />} onClick={async () => {
+                  const result = await updateTCGCollectionQuantity(entry.ownershipId, 1)
+                  if (result.success) onUpdateCollection?.()
+                  else window.alert(result.error || "Kortin määrän muuttaminen epäonnistui.")
+                }} aria-label="Lisää kortteja" title="Lisää kortteja" />
+                <ArchiveIconButton icon={<Trash2 className="h-4 w-4" />} onClick={async () => {
+                  const confirmed = window.confirm("Poistetaanko kaikki tämän kortin kappaleet kokoelmasta?")
                   if (!confirmed) return
-                  const result = await removeCardFromCollection(entry.ownershipId)
-                  if (result.success) onRemoveTCGCard?.(entry.ownershipId)
-                  else window.alert(result.error || "Kortin poistaminen epäonnistui.")
-                }}
-                aria-label="Poista kokoelmasta"
-                title="Poista kokoelmasta"
-              />
+                  const ids = Array.isArray(entry.metadata.ownership_ids) ? entry.metadata.ownership_ids as string[] : [entry.ownershipId]
+                  for (const id of ids) {
+                    const result = await removeCardFromCollection(id)
+                    if (!result.success) { window.alert(result.error || "Kortin poistaminen epäonnistui."); return }
+                  }
+                  onRemoveTCGCard?.(entry.ownershipId)
+                }} aria-label="Poista kaikki kortit" title="Poista kaikki kortit" />
+              </div>
             </div>
           </div>
         </div>
@@ -138,8 +152,22 @@ function CollectionCardList({
               {card.system && <span className="text-accent-gold">{card.system}</span>}
               {card.faction && <span className="text-accent-gold">{card.faction}</span>}
               {card.paintStatus && <span>{card.paintStatus}</span>}
-              {card.modelCount != null && <span>{card.modelCount} models</span>}
-              {card.pointsTotal != null && <span>{card.pointsTotal} pts</span>}
+              {card.modelCount != null && (
+                <span className="flex items-center gap-1">
+                  <ArchiveIconButton icon={<Minus className="h-3 w-3" />} onClick={async () => {
+                    const result = await updateMiniatureModelCount(entry.ownershipId, -1)
+                    if (result.success) onUpdateCollection?.()
+                    else window.alert(result.error || "Mallimäärän muuttaminen epäonnistui.")
+                  }} aria-label="Vähennä malleja" title="Vähennä malleja" />
+                  <span>{card.modelCount} models</span>
+                  <ArchiveIconButton icon={<Plus className="h-3 w-3" />} onClick={async () => {
+                    const result = await updateMiniatureModelCount(entry.ownershipId, 1)
+                    if (result.success) onUpdateCollection?.()
+                    else window.alert(result.error || "Mallimäärän muuttaminen epäonnistui.")
+                  }} aria-label="Lisää malleja" title="Lisää malleja" />
+                </span>
+              )}
+              {card.pointsTotal != null && <span>{card.pointsTotal} pts</span>
             </div>
             {showWishlistButton && (
               <div className="mt-3 flex justify-end">
@@ -310,18 +338,19 @@ export function CollectionCard({
             >
               {card.title}
             </CollectionCardHeading>
-            <ArchiveIconButton
-              icon={<Trash2 className="h-4 w-4" />}
-              onClick={async () => {
-                const confirmed = window.confirm("Poistetaanko kortti kokoelmasta?")
-                if (!confirmed) return
-                const result = await removeCardFromCollection(entry.ownershipId)
-                if (result.success) onRemoveTCGCard?.(entry.ownershipId)
-                else window.alert(result.error || "Kortin poistaminen epäonnistui.")
-              }}
-              aria-label="Poista kokoelmasta"
-              title="Poista kokoelmasta"
-            />
+            <div className="flex shrink-0 items-center gap-1">
+              <ArchiveIconButton icon={<Minus className="h-4 w-4" />} onClick={async () => {
+                const result = await updateTCGCollectionQuantity(entry.ownershipId, -1)
+                if (result.success) onUpdateCollection?.()
+                else window.alert(result.error || "Kortin määrän muuttaminen epäonnistui.")
+              }} aria-label="Vähennä kortteja" title="Vähennä kortteja" />
+              <span className="min-w-6 text-center text-sm text-muted-foreground">×{card.quantity}</span>
+              <ArchiveIconButton icon={<Plus className="h-4 w-4" />} onClick={async () => {
+                const result = await updateTCGCollectionQuantity(entry.ownershipId, 1)
+                if (result.success) onUpdateCollection?.()
+                else window.alert(result.error || "Kortin määrän muuttaminen epäonnistui.")
+              }} aria-label="Lisää kortteja" title="Lisää kortteja" />
+            </div>
           </div>
           {(set || card.quantity > 0) && (
             <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -364,7 +393,21 @@ export function CollectionCard({
             {card.paintStatus && <span className="truncate">{card.paintStatus}</span>}
             <span className="flex shrink-0 items-center gap-1">
               {card.modelCount != null && <Layers className="h-4 w-4" />}
-              {card.modelCount != null && card.modelCount}
+              {card.modelCount != null && (
+                <>
+                  <ArchiveIconButton icon={<Minus className="h-3 w-3" />} onClick={async () => {
+                    const result = await updateMiniatureModelCount(entry.ownershipId, -1)
+                    if (result.success) onUpdateCollection?.()
+                    else window.alert(result.error || "Mallimäärän muuttaminen epäonnistui.")
+                  }} aria-label="Vähennä malleja" title="Vähennä malleja" />
+                  <span>{card.modelCount}</span>
+                  <ArchiveIconButton icon={<Plus className="h-3 w-3" />} onClick={async () => {
+                    const result = await updateMiniatureModelCount(entry.ownershipId, 1)
+                    if (result.success) onUpdateCollection?.()
+                    else window.alert(result.error || "Mallimäärän muuttaminen epäonnistui.")
+                  }} aria-label="Lisää malleja" title="Lisää malleja" />
+                </>
+              )}
               {card.pointsTotal != null && ` (${card.pointsTotal} pts)`}
             </span>
           </div>
