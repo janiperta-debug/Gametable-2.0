@@ -38,6 +38,20 @@ interface CategoryConfig {
   image: string
 }
 
+const CATEGORY_FALLBACK_IMAGES: Record<GameCategory, string> = {
+  board_game: "/images/fallbacks/board-games-fallback.webp",
+  rpg: "/images/fallbacks/rpg-fallback.webp",
+  miniature: "/images/fallbacks/miniatures-fallback.webp",
+  trading_card: "/images/fallbacks/tcg-fallback.webp",
+}
+
+function handleFallbackImage(event: React.SyntheticEvent<HTMLImageElement>, fallback: string) {
+  const image = event.currentTarget
+  if (image.dataset.fallbackApplied === "true") return
+  image.dataset.fallbackApplied = "true"
+  image.src = fallback
+}
+
 const categories: CategoryConfig[] = [
   { 
     id: "board_game", 
@@ -764,19 +778,22 @@ export function DiscoverGames() {
                     src={`/api/miniatures/image?url=${encodeURIComponent((game as MiniatureSearchResult).imageUrl || "")}`}
                     alt={game.name}
                     className="w-full h-full object-cover"
+                    onError={(event) => handleFallbackImage(event, CATEGORY_FALLBACK_IMAGES.miniature)}
                   />
                 ) : (game as BGGSearchResult).thumbnail ? (
-                  <img 
-                    src={(game as BGGSearchResult).thumbnail} 
+                  <img
+                    src={(game as BGGSearchResult).thumbnail}
                     alt={game.name}
                     className="w-full h-full object-cover"
+                    onError={(event) => handleFallbackImage(event, CATEGORY_FALLBACK_IMAGES[selectedCategory])}
                   />
-                ) : selectedCategory === "rpg" ? (
-                  <BookOpen className="h-10 w-10 text-accent-gold/40 group-hover:text-accent-gold/60 transition-colors" />
-                ) : selectedCategory === "miniature" ? (
-                  <Swords className="h-10 w-10 text-accent-gold/40 group-hover:text-accent-gold/60 transition-colors" />
                 ) : (
-                  <Dices className="h-10 w-10 text-accent-gold/40 group-hover:text-accent-gold/60 transition-colors" />
+                  <img
+                    src={CATEGORY_FALLBACK_IMAGES[selectedCategory]}
+                    alt=""
+                    aria-hidden="true"
+                    className="w-full h-full object-cover"
+                  />
                 )}
               </div>
               {/* Content */}
