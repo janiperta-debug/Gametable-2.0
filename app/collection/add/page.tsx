@@ -804,7 +804,213 @@ export default function AddGamePage() {
                 />
               </div>
 
-              {previewBlock}
+                  {/* Selected Game Preview */}
+                  {selectedGame && (
+                    <div className="p-4 rounded-lg border border-accent-gold/30 bg-accent-gold/5">
+                      <div className="flex gap-4">
+                        {(selectedGame as BGGGameDetails).thumbnail || (selectedGame as TCGSearchResult).thumbnailUrl ? (
+                          <img
+                            src={(selectedGame as BGGGameDetails).thumbnail || (selectedGame as TCGSearchResult).thumbnailUrl || ""}
+                            alt={selectedGame.name}
+                            className="w-24 h-24 object-cover rounded"
+                          />
+                        ) : null}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-heading font-semibold text-xl text-accent-gold">{selectedGame.name}</h3>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {/* Board game / RPG specific badges */}
+                            {selectedCategory !== "trading_card" && (selectedGame as BGGGameDetails).yearPublished && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30">
+                                {(selectedGame as BGGGameDetails).yearPublished}
+                              </Badge>
+                            )}
+                            {selectedCategory !== "trading_card" && (selectedGame as BGGGameDetails).rating && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30">
+                                <Star className="h-3 w-3 mr-1 fill-accent-gold text-accent-gold" />
+                                {(selectedGame as BGGGameDetails).rating}
+                              </Badge>
+                            )}
+                            {selectedCategory !== "trading_card" && (selectedGame as BGGGameDetails).minPlayers && (selectedGame as BGGGameDetails).maxPlayers && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30">
+                                <Users className="h-3 w-3 mr-1" />
+                                {(selectedGame as BGGGameDetails).minPlayers}-{(selectedGame as BGGGameDetails).maxPlayers}
+                              </Badge>
+                            )}
+                            {selectedCategory !== "trading_card" && (selectedGame as BGGGameDetails).minPlaytime && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30">
+                                <Clock className="h-3 w-3 mr-1" />
+                                {(selectedGame as BGGGameDetails).minPlaytime}-{(selectedGame as BGGGameDetails).maxPlaytime || (selectedGame as BGGGameDetails).minPlaytime}m
+                              </Badge>
+                            )}
+                            {/* TCG specific badges */}
+                            {selectedCategory === "trading_card" && (selectedGame as TCGSearchResult).set && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30">
+                                {(selectedGame as TCGSearchResult).set}
+                              </Badge>
+                            )}
+                            {selectedCategory === "trading_card" && (selectedGame as TCGSearchResult).rarity && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30">
+                                {(selectedGame as TCGSearchResult).rarity}
+                              </Badge>
+                            )}
+                            {selectedCategory === "trading_card" && (selectedGame as TCGSearchResult).type && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30">
+                                {(selectedGame as TCGSearchResult).type}
+                              </Badge>
+                            )}
+                            {selectedCategory === "trading_card" && (selectedGame as TCGSearchResult).price && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30 text-green-500">
+                                ${(selectedGame as TCGSearchResult).price?.toFixed(2)}
+                              </Badge>
+                            )}
+                            {/* Miniature specific badges */}
+                            {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).factionName && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30">
+                                {(selectedGame as MiniatureSearchResult).factionName}
+                              </Badge>
+                            )}
+                            {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).systemName && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30">
+                                {(selectedGame as MiniatureSearchResult).systemName}
+                              </Badge>
+                            )}
+                            {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).basePoints && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30">
+                                {(selectedGame as MiniatureSearchResult).basePoints} pts
+                              </Badge>
+                            )}
+                            {selectedCategory === "miniature" && (selectedGame as MiniatureSearchResult).modelCountMin && (
+                              <Badge variant="outline" className="text-xs border-accent-gold/30">
+                                {(selectedGame as MiniatureSearchResult).modelCountMin} models
+                              </Badge>
+                            )}
+                          </div>
+                          {selectedGame.description && (
+                            <p className="mt-3 text-sm text-muted-foreground line-clamp-3 font-body">
+                              {selectedGame.description.replace(/<[^>]*>/g, '')}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      {/* Quantity selector for TCG */}
+                      {selectedCategory === "trading_card" && (
+                        <div className="flex items-center gap-3 mt-4 pt-4 border-t border-accent-gold/20">
+                          <Label className="text-accent-gold font-cinzel text-sm">{t("collection.quantity") || "Quantity"}:</Label>
+                          <div className="flex items-center gap-2">
+                            <ArchiveIconButton
+                              type="button"
+                              aria-label={t("collection.decrease") || "Decrease"}
+                              onClick={() => setTcgQuantity(Math.max(1, tcgQuantity - 1))}
+                              icon={<Minus className="h-4 w-4" />}
+                            />
+                            <Input
+                              type="number"
+                              min="1"
+                              value={tcgQuantity}
+                              onChange={(e) => setTcgQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                              className="w-16 h-8 text-center"
+                            />
+                            <ArchiveIconButton
+                              type="button"
+                              aria-label={t("collection.increase") || "Increase"}
+                              onClick={() => setTcgQuantity(tcgQuantity + 1)}
+                              icon={<Plus className="h-4 w-4" />}
+                            />
+                          </div>
+                        </div>
+                      )}
+                      {/* Miniature quantity and paint status */}
+                      {selectedCategory === "miniature" && (
+                        <div className="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-accent-gold/20">
+                          <div className="flex items-center gap-2">
+                            <Label className="text-accent-gold font-cinzel text-sm">{t("collection.quantity") || "Quantity"}:</Label>
+                            <div className="flex items-center gap-1">
+                              <ArchiveIconButton
+                                type="button"
+                                aria-label={t("collection.decrease") || "Decrease"}
+                                onClick={() => setMiniQuantity(Math.max(1, miniQuantity - 1))}
+                                icon={<Minus className="h-4 w-4" />}
+                              />
+                              <Input
+                                type="number"
+                                min="1"
+                                value={miniQuantity}
+                                onChange={(e) => setMiniQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                                className="w-16 h-8 text-center"
+                              />
+                              <ArchiveIconButton
+                                type="button"
+                                aria-label={t("collection.increase") || "Increase"}
+                                onClick={() => setMiniQuantity(miniQuantity + 1)}
+                                icon={<Plus className="h-4 w-4" />}
+                              />
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Label className="text-accent-gold font-cinzel text-sm">{t("collection.paintStatus") || "Paint Status"}:</Label>
+                            <select
+                              value={miniPaintStatus}
+                              onChange={(e) => setMiniPaintStatus(e.target.value as PaintStatus)}
+                              className="h-8 rounded-md border border-input bg-background px-2 text-sm font-body"
+                            >
+                              <option value="unpainted">{t("collection.unpainted") || "Unpainted"}</option>
+                              <option value="primed">{t("collection.primed") || "Primed"}</option>
+                              <option value="in_progress">{t("collection.inProgress") || "In Progress"}</option>
+                              <option value="painted">{t("collection.painted") || "Painted"}</option>
+                              <option value="based">{t("collection.based") || "Based"}</option>
+                            </select>
+                          </div>
+                        </div>
+                      )}
+                      {selectedCategory === "miniature" && armyMode !== "idle" && (
+                        <div className="mt-4 rounded border border-accent-gold/20 p-3 space-y-2">
+                          {armyMode === "select" ? (
+                            <>
+                              <Label className="text-accent-gold font-cinzel text-sm">Army context</Label>
+                              <select
+                                value={selectedArmy?.id ?? ""}
+                                onChange={(event) => setSelectedArmy(miniatureArmies.find((army) => army.id === event.target.value) ?? null)}
+                                className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+                              >
+                                <option value="">Select an Army</option>
+                                {miniatureArmies.map((army) => <option key={army.id} value={army.id}>{army.name}</option>)}
+                              </select>
+                            </>
+                          ) : (
+                            <>
+                              <Label className="text-accent-gold font-cinzel text-sm">Create Army context</Label>
+                              <div className="flex gap-2">
+                                <Input value={armyName} onChange={(event) => setArmyName(event.target.value)} placeholder="Army name" />
+                                <ArchiveButton type="button" onClick={handleCreateMiniatureArmy} disabled={armyLoading || !armyName.trim()}>
+                                  {armyLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create"}
+                                </ArchiveButton>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      )}
+                      <div className={`flex justify-end gap-3 mt-4 ${selectedCategory !== "trading_card" && selectedCategory !== "miniature" ? "pt-4 border-t border-accent-gold/20" : ""}`}>
+                        <ArchiveButton onClick={() => setSelectedGame(null)}>
+                          {t("common.cancel")}
+                        </ArchiveButton>
+                        <ArchiveButton
+                          onClick={handleAddGame}
+                          disabled={addingGameId === getSearchResultId(selectedGame) || (selectedCategory === "miniature" && armyMode !== "idle" && !selectedArmy)}
+                          icon={
+                            addingGameId === getSearchResultId(selectedGame) ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Plus className="h-4 w-4" />
+                            )
+                          }
+                        >
+                          {t("collection.addToCollection")}
+                        </ArchiveButton>
+                      </div>
+                    </div>
+                  )}
+
+
 
               {/* Manual Entry Tab */}
               {activeTab === "manual" && (
