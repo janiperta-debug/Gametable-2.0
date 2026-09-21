@@ -206,11 +206,13 @@ export default function Collection() {
               </div>
             )}
 
-            <div className="mb-8">
-              <ArchiveButton onClick={() => setShowFilters(!showFilters)}>
-                {showFilters ? t("collection.hideFilters") : t("collection.showFilters")}
-              </ArchiveButton>
-            </div>
+            {selectedCategory !== "all" && selectedCategory !== "trading-cards" && (
+              <div className="mb-8">
+                <ArchiveButton onClick={() => setShowFilters(!showFilters)}>
+                  {showFilters ? t("collection.hideFilters") : t("collection.showFilters")}
+                </ArchiveButton>
+              </div>
+            )}
 
             {selectedCategory !== "all" && (
               <ImportSection selectedCategory={selectedCategory as Exclude<CategoryType, "all">} />
