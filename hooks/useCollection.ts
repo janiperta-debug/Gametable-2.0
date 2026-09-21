@@ -209,7 +209,7 @@ export function useCollection() {
     if (armyIds.length > 0) {
       const { data: armies } = await supabase
         .from('mini_armies')
-        .select('id, name')
+        .select('id, name, game_id, game:games(id, name)')
         .eq('user_id', user.id)
         .in('id', armyIds)
 
@@ -218,10 +218,17 @@ export function useCollection() {
       }
     }
 
-    const miniatureCollection = miniatureRows.map((row) => ({
-      ...row,
-      army_name: row.army_id ? armiesById.get(row.army_id) ?? null : null,
-    }))
+    const miniatureCollection = miniatureRows.map((row) => {
+      const army = row.army_id ? armiesById.get(row.army_id) ?? null : null
+      const rawArmy = (row as unknown as { army_id: string | null }).army_id
+      const relatedArmy = armiesById.get(rawArmy ?? '') ?? null
+      return {
+        ...row,
+        army_name: army,
+        game_id: (row as unknown as { game_id?: string | null }).game_id ?? null,
+        game_name: relatedArmy ? null : null,
+      }
+    })
 
     setGames(mergedRows)
     setCollectionEntries(
