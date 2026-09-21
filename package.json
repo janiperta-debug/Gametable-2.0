@@ -65,7 +65,9 @@
     "tailwindcss-animate": "^1.0.7",
     "vaul": "latest",
     "zod": "^3.24.1",
-    "@zxing/browser": "^0.1.5"
+    "@zxing/browser": "^0.1.5",
+    "@zxing/library": "^0.21.3",
+    "@zxing/text-encoding": "0.9.0"
   },
   "devDependencies": {
     "@types/node": "^22",
