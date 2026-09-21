@@ -8,6 +8,6 @@ alter table public.tcg_cards
     'pokemon'::text,
     'yugioh'::text,
     'lorcana'::text,
-    'flesh-and-blood'::text,
-    'one-piece'::text
+    'fab'::text,
+    'onepiece'::text
   ]));
