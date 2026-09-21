@@ -1,92 +1,153 @@
 "use client"
 
-import { useState } from "react"
 import { ArchiveCard, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle } from "@/components/archive-frame"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Slider } from "@/components/ui/slider"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useTranslations } from "@/lib/i18n"
+import type { CollectionCardItem } from "@/lib/types/collection"
+import type { CollectionCategoryFilter, CollectionSpecificFilters } from "@/lib/collection/filters"
+import {
+  getMiniatureArmyOptions,
+  getMiniatureGameOptions,
+  getMiniaturePaintStatusOptions,
+  getRPGSystemOptions,
+} from "@/lib/collection/filters"
 
-export function CollectionFilters() {
+interface CollectionFiltersProps {
+  category: CollectionCategoryFilter
+  cards: readonly CollectionCardItem[]
+  filters: CollectionSpecificFilters
+  onFiltersChange: (filters: CollectionSpecificFilters) => void
+}
+
+export function CollectionFilters({ category, cards, filters, onFiltersChange }: CollectionFiltersProps) {
   const t = useTranslations()
-  
-  // Sliders start at max value (right side) and filter DOWN
-  const [maxPlayers, setMaxPlayers] = useState(8)
-  const [maxPlayTime, setMaxPlayTime] = useState(240)
-  
-  const mechanics = [
-    { id: "worker-placement", labelKey: "collection.filters.workerPlacement", count: 23 },
-    { id: "deck-building", labelKey: "collection.filters.deckBuilding", count: 18 },
-    { id: "area-control", labelKey: "collection.filters.areaControl", count: 15 },
-    { id: "cooperative", labelKey: "collection.filters.cooperative", count: 12 },
-    { id: "engine-building", labelKey: "collection.filters.engineBuilding", count: 19 },
-  ]
 
+  if (category === "trading-cards") {
+    return null
+  }
+
+  if (category === "miniatures") {
+    const gameOptions = getMiniatureGameOptions(cards)
+    const armyOptions = getMiniatureArmyOptions(cards, filters.miniatureGame)
+    const paintOptions = getMiniaturePaintStatusOptions(cards)
+
+    return (
+      <div className="space-y-6">
+        <ArchiveCard>
+          <ArchiveCardHeader><ArchiveCardTitle>Peli</ArchiveCardTitle></ArchiveCardHeader>
+          <ArchiveCardContent>
+            <Select
+              value={filters.miniatureGame || "all"}
+              onValueChange={(value) => onFiltersChange({ ...filters, miniatureGame: value === "all" ? "" : value, miniatureArmy: "" })}
+            >
+              <SelectTrigger><SelectValue placeholder="Kaikki pelit" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Kaikki pelit</SelectItem>
+                {gameOptions.map((game) => <SelectItem key={game} value={game}>{game}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </ArchiveCardContent>
+        </ArchiveCard>
+
+        <ArchiveCard>
+          <ArchiveCardHeader><ArchiveCardTitle>Armeija</ArchiveCardTitle></ArchiveCardHeader>
+          <ArchiveCardContent>
+            <Select
+              value={filters.miniatureArmy || "all"}
+              onValueChange={(value) => onFiltersChange({ ...filters, miniatureArmy: value === "all" ? "" : value })}
+              disabled={armyOptions.length === 0}
+            >
+              <SelectTrigger><SelectValue placeholder="Kaikki armeijat" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Kaikki armeijat</SelectItem>
+                {armyOptions.map((army) => <SelectItem key={army} value={army}>{army}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </ArchiveCardContent>
+        </ArchiveCard>
+
+        <ArchiveCard>
+          <ArchiveCardHeader><ArchiveCardTitle>Maalaus</ArchiveCardTitle></ArchiveCardHeader>
+          <ArchiveCardContent>
+            <Select
+              value={filters.miniaturePaintStatus || "all"}
+              onValueChange={(value) => onFiltersChange({ ...filters, miniaturePaintStatus: value === "all" ? "" : value })}
+              disabled={paintOptions.length === 0}
+            >
+              <SelectTrigger><SelectValue placeholder="Kaikki" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Kaikki</SelectItem>
+                {paintOptions.map((status) => <SelectItem key={status} value={status}>{status}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </ArchiveCardContent>
+        </ArchiveCard>
+      </div>
+    )
+  }
+
+  if (category === "rpgs") {
+    const systems = getRPGSystemOptions(cards)
+
+    return (
+      <div className="space-y-6">
+        <ArchiveCard>
+          <ArchiveCardHeader><ArchiveCardTitle>Järjestelmä</ArchiveCardTitle></ArchiveCardHeader>
+          <ArchiveCardContent>
+            <Select
+              value={filters.rpgSystem || "all"}
+              onValueChange={(value) => onFiltersChange({ ...filters, rpgSystem: value === "all" ? "" : value })}
+            >
+              <SelectTrigger><SelectValue placeholder="Kaikki järjestelmät" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Kaikki järjestelmät</SelectItem>
+                {systems.map((system) => <SelectItem key={system} value={system}>{system}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </ArchiveCardContent>
+        </ArchiveCard>
+
+        <ArchiveCard>
+          <ArchiveCardHeader><ArchiveCardTitle>{t("collection.filters.playerCount")}</ArchiveCardTitle></ArchiveCardHeader>
+          <ArchiveCardContent>
+            <Label className="text-sm font-body">
+              {t("collection.filters.upToPlayers").replace("{count}", filters.maxPlayers.toString())}{filters.maxPlayers === 8 ? "+" : ""}
+            </Label>
+            <Slider value={[filters.maxPlayers]} onValueChange={(value) => onFiltersChange({ ...filters, maxPlayers: value[0] })} max={8} min={1} step={1} className="mt-2" />
+          </ArchiveCardContent>
+        </ArchiveCard>
+
+        <ArchiveCard>
+          <ArchiveCardHeader><ArchiveCardTitle>{t("collection.filters.playTime")}</ArchiveCardTitle></ArchiveCardHeader>
+          <ArchiveCardContent>
+            <Label className="text-sm font-body">{t("collection.filters.upToMinutes").replace("{count}", filters.maxPlayTime.toString())}</Label>
+            <Slider value={[filters.maxPlayTime]} onValueChange={(value) => onFiltersChange({ ...filters, maxPlayTime: value[0] })} max={240} min={15} step={15} className="mt-2" />
+          </ArchiveCardContent>
+        </ArchiveCard>
+      </div>
+    )
+  }
+
+  // Board games retain the existing player count and play time filters.
   return (
     <div className="space-y-6">
       <ArchiveCard>
-        <ArchiveCardHeader>
-          <ArchiveCardTitle>
-            {t("collection.filters.playerCount")}
-          </ArchiveCardTitle>
-        </ArchiveCardHeader>
-        <ArchiveCardContent className="space-y-4">
-          <div>
-            <Label className="text-sm font-body">
-              {t("collection.filters.upToPlayers").replace("{count}", maxPlayers.toString())}
-              {maxPlayers === 8 ? "+" : ""}
-            </Label>
-            <Slider 
-              value={[maxPlayers]} 
-              onValueChange={(value) => setMaxPlayers(value[0])}
-              max={8} 
-              min={1} 
-              step={1} 
-              className="mt-2" 
-            />
-          </div>
+        <ArchiveCardHeader><ArchiveCardTitle>{t("collection.filters.playerCount")}</ArchiveCardTitle></ArchiveCardHeader>
+        <ArchiveCardContent>
+          <Label className="text-sm font-body">
+            {t("collection.filters.upToPlayers").replace("{count}", filters.maxPlayers.toString())}{filters.maxPlayers === 8 ? "+" : ""}
+          </Label>
+          <Slider value={[filters.maxPlayers]} onValueChange={(value) => onFiltersChange({ ...filters, maxPlayers: value[0] })} max={8} min={1} step={1} className="mt-2" />
         </ArchiveCardContent>
       </ArchiveCard>
 
       <ArchiveCard>
-        <ArchiveCardHeader>
-          <ArchiveCardTitle>
-            {t("collection.filters.playTime")}
-          </ArchiveCardTitle>
-        </ArchiveCardHeader>
-        <ArchiveCardContent className="space-y-4">
-          <div>
-            <Label className="text-sm font-body">
-              {t("collection.filters.upToMinutes").replace("{count}", maxPlayTime.toString())}
-            </Label>
-            <Slider 
-              value={[maxPlayTime]} 
-              onValueChange={(value) => setMaxPlayTime(value[0])}
-              max={240} 
-              min={15} 
-              step={15} 
-              className="mt-2" 
-            />
-          </div>
-        </ArchiveCardContent>
-      </ArchiveCard>
-
-      <ArchiveCard>
-        <ArchiveCardHeader>
-          <ArchiveCardTitle>
-            {t("collection.filters.mechanics")}
-          </ArchiveCardTitle>
-        </ArchiveCardHeader>
-        <ArchiveCardContent className="space-y-3">
-          {mechanics.map((mechanic) => (
-            <div key={mechanic.id} className="flex items-center space-x-2">
-              <Checkbox id={mechanic.id} />
-              <Label htmlFor={mechanic.id} className="flex-1 text-sm font-body">
-                {t(mechanic.labelKey)}
-              </Label>
-              <span className="text-xs text-muted-foreground font-body">({mechanic.count})</span>
-            </div>
-          ))}
+        <ArchiveCardHeader><ArchiveCardTitle>{t("collection.filters.playTime")}</ArchiveCardTitle></ArchiveCardHeader>
+        <ArchiveCardContent>
+          <Label className="text-sm font-body">{t("collection.filters.upToMinutes").replace("{count}", filters.maxPlayTime.toString())}</Label>
+          <Slider value={[filters.maxPlayTime]} onValueChange={(value) => onFiltersChange({ ...filters, maxPlayTime: value[0] })} max={240} min={15} step={15} className="mt-2" />
         </ArchiveCardContent>
       </ArchiveCard>
     </div>
