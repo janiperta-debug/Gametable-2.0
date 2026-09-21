@@ -80,11 +80,6 @@ export default function Collection() {
     await refetch()
   }
 
-  useEffect(() => {
-    if (selectedCategory !== "trading-cards") setSelectedTCGGame("")
-    else if (selectedTCGGame && !tcgGameOptions.some((game) => game.id === selectedTCGGame)) setSelectedTCGGame("")
-  }, [selectedCategory, selectedTCGGame, tcgGameOptions])
-
   const handleToggleForTrade = (gameId: string) => {
     toast({
       title: t("common.updated"),
@@ -119,6 +114,11 @@ export default function Collection() {
   )
 
   const tcgGameOptions = useMemo(() => getTCGGameOptions(collectionCards), [collectionCards])
+
+  useEffect(() => {
+    if (selectedCategory !== "trading-cards") setSelectedTCGGame("")
+    else if (selectedTCGGame && !tcgGameOptions.some((game) => game.id === selectedTCGGame)) setSelectedTCGGame("")
+  }, [selectedCategory, selectedTCGGame, tcgGameOptions])
 
   const filteredAndSortedGames = useMemo(() => {
     const categoryFiltered = applyCollectionControls(collectionCards, {
