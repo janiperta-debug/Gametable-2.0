@@ -1,0 +1,82 @@
+-- Seed the next broad catalog wave: Adeptus Titanicus Legios,
+-- Star Wars: Shatterpoint squad packs, and major Infinity sectorials.
+
+insert into public.mini_factions (system_id, name, subfaction)
+values
+  ('adeptus_titanicus', 'Legio Ignatum', null),
+  ('adeptus_titanicus', 'Legio Mortis', null),
+  ('adeptus_titanicus', 'Legio Tempestus', null),
+  ('adeptus_titanicus', 'Legio Metalica', null),
+  ('adeptus_titanicus', 'Legio Gryphonicus', null),
+  ('adeptus_titanicus', 'Legio Vulpa', null),
+  ('adeptus_titanicus', 'Legio Atarus', null),
+  ('adeptus_titanicus', 'Legio Fureans', null),
+  ('adeptus_titanicus', 'Legio Crucius', null),
+  ('adeptus_titanicus', 'Legio Fortitdus', null),
+  ('adeptus_titanicus', 'Titanicus Traitoris', null),
+  ('star_wars_shatterpoint', 'Plans and Preparations', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Twice the Pride', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Appetite for Destruction', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Hello There', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Witches of Dathomir', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'This Party’s Over', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Fistful of Credits', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'That’s Good Business', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Lead By Example', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Jedi Hunters', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'This Is the Way', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Fear and Dead Men', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Fearless and Inventive', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Certified Guild', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'We Don’t Need Their Scum', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'You Have Something I Want', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Ee Chee Wa Maa!', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Not Accepting Surrenders', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Stronger Than Fear', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'All The Way', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Today The Rebellion Dies', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Real Quiet Like', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Good Soldiers Follow Orders', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Requesting Your Surrender', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Clone Force 99', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Yub Nub', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'This Is Some Rescue!', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Make The Impossible Possible', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Maximum Firepower', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'What Have We Here', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Wisdom of the Council', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Deploy the Garrison', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'This Is Rogue One', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Delta Squad, Form Up', 'Squad Pack'),
+  ('star_wars_shatterpoint', 'Terror from Below', 'Squad Pack'),
+  ('infinity', 'Military Orders', 'PanOceania'),
+  ('infinity', 'Varuna Immediate Reaction Division', 'PanOceania'),
+  ('infinity', 'WinterFor', 'PanOceania'),
+  ('infinity', 'Invincible Army', 'Yu Jing'),
+  ('infinity', 'White Banner', 'Yu Jing'),
+  ('infinity', 'Imperial Service', 'Yu Jing'),
+  ('infinity', 'Kosmoflot', 'Ariadna'),
+  ('infinity', 'Tartary Army Corps', 'Ariadna'),
+  ('infinity', 'Ramah Taskforce', 'Haqqislam'),
+  ('infinity', 'Hassassin Bahram', 'Haqqislam'),
+  ('infinity', 'Corregidor Jurisdictional Command', 'Nomads'),
+  ('infinity', 'Bakunin Observance', 'Nomads'),
+  ('infinity', 'Tunguska Jurisdictional Command', 'Nomads'),
+  ('infinity', 'Morat Aggression Force', 'Combined Army'),
+  ('infinity', 'Shasvastii Expeditionary Force', 'Combined Army'),
+  ('infinity', 'Onyx Contact Force', 'Combined Army'),
+  ('infinity', 'Steel Phalanx', 'ALEPH'),
+  ('infinity', 'Operations Subsection of the SSS', 'ALEPH'),
+  ('infinity', 'Torchlight Brigade', 'O-12'),
+  ('infinity', 'Starmada', 'O-12'),
+  ('infinity', 'Bureau Aegis', 'O-12')
+on conflict (system_id, name, subfaction) do nothing;
+
+insert into public.mini_units (faction_id, name, unit_type, model_count_min, model_count_max)
+select f.id, f.name, 'team', 1, 1
+from public.mini_factions f
+where f.system_id in ('adeptus_titanicus', 'star_wars_shatterpoint', 'infinity')
+  and not exists (
+    select 1 from public.mini_units u
+    where u.faction_id = f.id and u.name = f.name
+  );
