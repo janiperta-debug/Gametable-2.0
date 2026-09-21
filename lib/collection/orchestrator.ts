@@ -233,15 +233,62 @@ export function getCollectionEntries({
     pushIfUnique(enrichRPGEntry(mapped, rpgGroupsByGameId.get(row.game_id) ?? []))
   }
 
+  // TCG ownership rows can represent multiple physical copies of the same
+  // card. Group identical card variants so the collection shows one entry
+  // with an aggregate quantity.
+  const tcgGroups = new Map<string, typeof tcgCollection[number][]>()
   for (const row of tcgCollection) {
-    pushIfUnique(mapTCGCollectionToCollectionEntry(row))
+    const key = [
+      row.card_id ?? row.card?.id ?? row.card?.external_id ?? row.id,
+      row.condition ?? 'near_mint',
+      row.foil ? 'foil' : 'nonfoil',
+    ].join(':')
+    const group = tcgGroups.get(key) ?? []
+    group.push(row)
+    tcgGroups.set(key, group)
   }
 
-  for (const row of miniatureCollection) {
-    if (row.owned !== true) {
-      continue
+  for (const rows of tcgGroups.values()) {
+    const first = rows[0]
+    const mapped = mapTCGCollectionToCollectionEntry({
+      ...first,
+      quantity: rows.reduce((sum, row) => sum + (row.quantity ?? 1), 0),
+    })
+    mapped.metadata = {
+      ...mapped.metadata,
+      ownership_ids: rows.map((row) => row.id),
     }
-    pushIfUnique(mapMiniatureCollectionToCollectionEntry(row))
+    pushIfUnique(mapped)
+  }
+
+  // Miniatures can also have multiple ownership rows for the same unit.
+  // Keep different armies and paint states separate, but aggregate copies
+  // within the same army/state.
+  const miniatureGroups = new Map<string, typeof miniatureCollection[number][]>()
+  for (const row of miniatureCollection) {
+    if (row.owned !== true) continue
+    const key = [
+      row.unit_id ?? row.unit?.id ?? row.id,
+      row.army_id ?? 'no-army',
+      row.paint_status ?? 'unpainted',
+    ].join(':')
+    const group = miniatureGroups.get(key) ?? []
+    group.push(row)
+    miniatureGroups.set(key, group)
+  }
+
+  for (const rows of miniatureGroups.values()) {
+    const first = rows[0]
+    const mapped = mapMiniatureCollectionToCollectionEntry({
+      ...first,
+      model_count: rows.reduce((sum, row) => sum + (row.model_count ?? 1), 0),
+      points_total: rows.reduce((sum, row) => sum + (row.points_total ?? 0), 0),
+    })
+    mapped.metadata = {
+      ...mapped.metadata,
+      ownership_ids: rows.map((row) => row.id),
+    }
+    pushIfUnique(mapped)
   }
 
   for (const row of miniatureWishlist) {
