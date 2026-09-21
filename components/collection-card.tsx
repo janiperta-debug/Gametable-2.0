@@ -1,5 +1,7 @@
 "use client"
 
+// Collection card variants and quantity controls
+
 import { ArchiveCard, ArchiveCardButton, ArchiveIconButton } from "@/components/archive"
 import { Badge } from "@/components/ui/badge"
 import { Star, Users, Clock, Heart, ShoppingBag, Store, Puzzle, ChevronDown, Layers, Trash2, Minus, Plus } from "lucide-react"
