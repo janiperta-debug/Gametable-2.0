@@ -12,6 +12,7 @@ import {
   getMiniatureGameOptions,
   getMiniaturePaintStatusOptions,
   getRPGSystemOptions,
+  getTCGGameOptions,
 } from "@/lib/collection/filters"
 
 interface CollectionFiltersProps {
@@ -24,8 +25,34 @@ interface CollectionFiltersProps {
 export function CollectionFilters({ category, cards, filters, onFiltersChange }: CollectionFiltersProps) {
   const t = useTranslations()
 
-  if (category === "all" || category === "trading-cards") {
+  if (category === "all") {
     return null
+  }
+
+  if (category === "trading-cards") {
+    const games = getTCGGameOptions(cards)
+
+    return (
+      <div className="space-y-6">
+        <ArchiveCard>
+          <ArchiveCardHeader><ArchiveCardTitle>Korttipeli</ArchiveCardTitle></ArchiveCardHeader>
+          <ArchiveCardContent>
+            <Select
+              value={filters.tcgGame || "all"}
+              onValueChange={(value) => onFiltersChange({ ...filters, tcgGame: value === "all" ? "" : value })}
+            >
+              <SelectTrigger><SelectValue placeholder="Kaikki korttipelit" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Kaikki korttipelit</SelectItem>
+                {games.map((game) => (
+                  <SelectItem key={game.id} value={game.id}>{game.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </ArchiveCardContent>
+        </ArchiveCard>
+      </div>
+    )
   }
 
   if (category === "miniatures") {
