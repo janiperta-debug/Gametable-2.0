@@ -181,6 +181,7 @@ export interface CollectionSpecificFilters {
   miniatureGame: string
   miniatureArmy: string
   miniaturePaintStatus: string
+  tcgGame: string
 }
 
 export const DEFAULT_COLLECTION_SPECIFIC_FILTERS: CollectionSpecificFilters = {
@@ -190,6 +191,7 @@ export const DEFAULT_COLLECTION_SPECIFIC_FILTERS: CollectionSpecificFilters = {
   miniatureGame: '',
   miniatureArmy: '',
   miniaturePaintStatus: '',
+  tcgGame: '',
 }
 
 export function getRPGSystemOptions(cards: readonly CollectionCardItem[]): string[] {
@@ -250,6 +252,14 @@ export function filterCardsBySpecificFilters(
       if (item.card.kind !== 'board-rpg') return false
       if (filters.rpgSystem && item.card.gameSystem !== filters.rpgSystem) return false
       return item.card.maxPlayers <= filters.maxPlayers && item.card.minPlayTime <= filters.maxPlayTime
+    })
+  }
+
+  if (category === 'trading-cards') {
+    return cards.filter((item) => {
+      if (item.card.kind !== 'tcg') return false
+      if (filters.tcgGame && item.card.tcgSystem !== filters.tcgGame) return false
+      return true
     })
   }
 
