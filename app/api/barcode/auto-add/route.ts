@@ -17,12 +17,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unsupported category" }, { status: 400 })
     }
 
-    // Reuse the existing resolver so mappings/provider fallbacks stay in one place.
+    // Forward the authenticated browser cookies when the server-side auto-add
+    // calls the resolver. The resolver uses the user's Supabase session.
     const resolveUrl = new URL("/api/barcode/resolve", request.url)
     resolveUrl.searchParams.set("barcode", barcode)
     resolveUrl.searchParams.set("category", category)
 
-    const resolvedResponse = await fetch(resolveUrl, { cache: "no-store" })
+    const resolvedResponse = await fetch(resolveUrl, {
+      cache: "no-store",
+      headers: {
+        cookie: request.headers.get("cookie") || "",
+      },
+    })
     const resolved = await resolvedResponse.json()
 
     if (!resolvedResponse.ok || !resolved.resolved || !resolved.externalGameId) {
@@ -38,7 +44,12 @@ export async function POST(request: NextRequest) {
     const detailsUrl = new URL(detailsPath, request.url)
     detailsUrl.searchParams.set("id", String(resolved.externalGameId))
 
-    const detailsResponse = await fetch(detailsUrl, { cache: "no-store" })
+    const detailsResponse = await fetch(detailsUrl, {
+      cache: "no-store",
+      headers: {
+        cookie: request.headers.get("cookie") || "",
+      },
+    })
     const details = await detailsResponse.json()
 
     if (!detailsResponse.ok || !details?.id || !details?.name) {
