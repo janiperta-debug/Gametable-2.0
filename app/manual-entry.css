@@ -1,25 +1,24 @@
-/* A single-option ArchiveToggle is informational, not an interactive control. */
-div.relative.isolate:has([role="tablist"] > button:only-child) {
+/* Manual entry is a section heading, not an interactive control. */
+div.relative.isolate:has(> div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide) {
+  width: 100% !important;
+  margin: 0 0 0.75rem !important;
+  padding: 0 !important;
   background-image: none !important;
   box-shadow: none !important;
-  padding: 0 !important;
 }
 
-div.relative.isolate:has([role="tablist"] > button:only-child) > div,
-div.relative.isolate:has([role="tablist"] > button:only-child) > div > div {
+div.relative.isolate:has(> div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide) > div,
+div.relative.isolate:has(> div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide) > div > div,
+div.relative.isolate:has(> div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide) > div > div > div {
   background: transparent !important;
   box-shadow: none !important;
-}
-
-div.relative.isolate:has([role="tablist"] > button:only-child) [role="tablist"] {
   padding: 0 !important;
 }
 
-div.relative.isolate:has([role="tablist"] > button:only-child) [role="tab"] {
+div.relative.isolate:has(> div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide) > div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide {
   padding: 0 !important;
-  pointer-events: none;
-}
-
-div.relative.isolate:has([role="tablist"] > button:only-child) [role="tab"] > span.absolute {
-  display: none !important;
+  font-size: 1rem !important;
+  line-height: 1.5rem !important;
+  letter-spacing: 0.08em !important;
+  text-align: left !important;
 }
