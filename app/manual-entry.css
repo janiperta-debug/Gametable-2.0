@@ -1,0 +1,25 @@
+/* A single-option ArchiveToggle is informational, not an interactive control. */
+.archive-manual-only-shell:has([role="tablist"] > button:only-child) {
+  background-image: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.archive-manual-only-shell:has([role="tablist"] > button:only-child) > div,
+.archive-manual-only-shell:has([role="tablist"] > button:only-child) > div > div {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.archive-manual-only-shell:has([role="tablist"] > button:only-child) [role="tablist"] {
+  padding: 0 !important;
+}
+
+.archive-manual-only-shell:has([role="tablist"] > button:only-child) [role="tab"] {
+  padding: 0 !important;
+  pointer-events: none;
+}
+
+.archive-manual-only-shell:has([role="tablist"] > button:only-child) [role="tab"] > span.absolute {
+  display: none !important;
+}
