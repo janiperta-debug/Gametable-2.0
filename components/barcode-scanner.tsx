@@ -60,7 +60,7 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
               const barcode = result.getText()
               toast({
                 title: "✓ Skannaus onnistui",
-                description: "Viivakoodi luettu. Peliä lisätään kokoelmaan...",
+                description: "Viivakoodi luettu. Tunnistetaan peliä...",
               })
 
               void (async () => {
@@ -78,16 +78,29 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
                       title: "✓ Peli lisätty kokoelmaan",
                       description: data.game?.name || "Peli lisättiin kokoelmaan.",
                     })
-                    onCloseRef.current()
+                    // Keep the scanner mounted briefly so the success feedback
+                    // is actually visible before the scanner closes.
+                    window.setTimeout(() => onCloseRef.current(), 700)
                     return
                   }
 
-                  // Preserve the existing resolver/search flow as a fallback
-                  // when automatic collection add cannot complete.
-                  onDetectedRef.current(barcode)
+                  const reason = data?.error || "Peliä ei voitu lisätä automaattisesti."
+                  toast({
+                    title: "Viivakoodi luettu",
+                    description: `${reason} Voit hakea pelin nimellä tai tarkistaa tunnistuksen.`,
+                    variant: "destructive",
+                  })
+
+                  // Preserve the normal resolver/search flow as a fallback.
+                  window.setTimeout(() => onDetectedRef.current(barcode), 250)
                 } catch (autoAddError) {
                   console.error("Barcode auto-add error:", autoAddError)
-                  onDetectedRef.current(barcode)
+                  toast({
+                    title: "Viivakoodi luettu",
+                    description: "Automaattinen lisäys ei onnistunut. Voit hakea pelin nimellä.",
+                    variant: "destructive",
+                  })
+                  window.setTimeout(() => onDetectedRef.current(barcode), 250)
                 }
               })()
             } else if (error && error.name !== "NotFoundException") {
