@@ -4,6 +4,7 @@ import { Inter, Charm, Cinzel, Marcellus, Merriweather, Cormorant_Garamond, DM_S
 import "./globals.css"
 import "./theme-background.css"
 import "./archive-typography.css"
+import "./manual-entry.css"
 import { AppShell } from "@/components/app-shell"
 import { I18nProvider } from "@/lib/i18n"
 
