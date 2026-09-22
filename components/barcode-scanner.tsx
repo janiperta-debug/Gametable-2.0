@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { BrowserMultiFormatReader, type IScannerControls } from "@zxing/browser"
+import { useToast } from "@/hooks/use-toast"
 
 type Props = {
   onDetected: (barcode: string) => void
@@ -13,6 +14,7 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
   const controlsRef = useRef<IScannerControls | null>(null)
   const onDetectedRef = useRef(onDetected)
   const [error, setError] = useState<string | null>(null)
+  const { toast } = useToast()
 
   useEffect(() => {
     onDetectedRef.current = onDetected
@@ -38,6 +40,10 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
             if (result) {
               active = false
               callbackControls.stop()
+              toast({
+                title: "✓ Skannaus onnistui",
+                description: "Viivakoodi luettu. Peliä käsitellään...",
+              })
               onDetectedRef.current(result.getText())
             } else if (error && error.name !== "NotFoundException") {
               setError("Kameran käynnistäminen tai viivakoodin lukeminen epäonnistui.")
@@ -74,7 +80,7 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
         }
       }
     }
-  }, [])
+  }, [toast])
 
   return (
     <div className="rounded-lg border border-accent-gold/30 bg-background/70 p-4 space-y-3">
