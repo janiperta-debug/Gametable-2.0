@@ -9,32 +9,16 @@ type Props = {
   onClose: () => void
 }
 
-function inferCategoryFromPage(): "board_game" | "rpg" {
-  const pressedButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('button[aria-pressed="true"]'))
-  const categoryButton = pressedButtons.find((button) => {
-    const label = button.textContent?.trim() || ""
-    return /Lautapelit|Board Games?|Roolipelit|Role[- ]?playing|RPG/i.test(label)
-  })
-
-  const label = categoryButton?.textContent?.trim() || ""
-  return /Roolipelit|Role[- ]?playing|RPG/i.test(label) ? "rpg" : "board_game"
-}
-
 export function BarcodeScanner({ onDetected, onClose }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const controlsRef = useRef<IScannerControls | null>(null)
   const onDetectedRef = useRef(onDetected)
-  const onCloseRef = useRef(onClose)
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
     onDetectedRef.current = onDetected
   }, [onDetected])
-
-  useEffect(() => {
-    onCloseRef.current = onClose
-  }, [onClose])
 
   useEffect(() => {
     const reader = new BrowserMultiFormatReader()
@@ -63,49 +47,16 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
                 description: "Viivakoodi luettu. Tunnistetaan peliä...",
               })
 
-              void (async () => {
-                try {
-                  const category = inferCategoryFromPage()
-                  const response = await fetch("/api/barcode/auto-add", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ barcode, category }),
-                  })
-                  const data = await response.json()
-
-                  if (response.ok && data.success) {
-                    toast({
-                      title: "✓ Peli lisätty kokoelmaan",
-                      description: data.game?.name || "Peli lisättiin kokoelmaan.",
-                    })
-                    // Keep the scanner mounted briefly so the success feedback
-                    // is actually visible before the scanner closes.
-                    window.setTimeout(() => onCloseRef.current(), 700)
-                    return
-                  }
-
-                  const reason = data?.error || "Peliä ei voitu lisätä automaattisesti."
-                  toast({
-                    title: "Viivakoodi luettu",
-                    description: `${reason} Voit hakea pelin nimellä tai tarkistaa tunnistuksen.`,
-                    variant: "destructive",
-                  })
-
-                  // Preserve the normal resolver/search flow as a fallback.
-                  window.setTimeout(() => onDetectedRef.current(barcode), 250)
-                } catch (autoAddError) {
-                  console.error("Barcode auto-add error:", autoAddError)
-                  toast({
-                    title: "Viivakoodi luettu",
-                    description: "Automaattinen lisäys ei onnistunut. Voit hakea pelin nimellä.",
-                    variant: "destructive",
-                  })
-                  window.setTimeout(() => onDetectedRef.current(barcode), 250)
-                }
-              })()
-            } else if (error && error.name !== "NotFoundException") {
-              setError("Kameran käynnistäminen tai viivakoodin lukeminen epäonnistui.")
+              // The scanner only scans. The add page owns the complete
+              // resolve -> details -> addGameToCollection flow.
+              onDetectedRef.current(barcode)
+              return
             }
+
+            // ZXing emits normal per-frame decode misses as errors while the
+            // camera is running. They are not scanner failures and should not
+            // be shown to the user. Startup/camera failures are handled below.
+            void error
           },
         )
 
@@ -115,7 +66,8 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
         }
 
         controlsRef.current = controls
-      } catch {
+      } catch (scannerError) {
+        console.error("Barcode scanner startup error:", scannerError)
         if (active) {
           setError("Kameran käyttö ei onnistunut. Tarkista selaimen kameraoikeus.")
         }
@@ -134,7 +86,7 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
         try {
           controls.stop()
         } catch {
-          // The scanner may already have been stopped by a successful detection.
+          // The scanner may already have been stopped after a successful read.
         }
       }
     }
