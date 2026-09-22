@@ -1,0 +1,87 @@
+name: One-time manual entry heading fix
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply UI fix
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('app/collection/add/page.tsx')
+          text = path.read_text()
+
+          old = '''              {/* Import / manual are the only Add Game entry methods. External search lives on Etsi peli. */}
+              <div className="mb-6 flex justify-center">
+                <ArchiveToggle
+                  value={activeTab}
+                  onChange={(v) => setActiveTab(v)}
+                  options={[
+                    { value: "manual", label: t("collection.manualEntry") },
+                    ...(selectedCategory === "trading_card" || selectedCategory === "miniature"
+                      ? [{ value: "bulk" as const, label: t("collection.bulkImport") }]
+                      : []),
+                  ]}
+                />
+              </div>
+'''
+
+          new = '''              {/* Bulk import is the only alternate entry method for TCG and Miniatures. */}
+              {(selectedCategory === "trading_card" || selectedCategory === "miniature") && (
+                <div className="mb-6 flex justify-center">
+                  <ArchiveToggle
+                    value={activeTab}
+                    onChange={(v) => setActiveTab(v)}
+                    options={[
+                      { value: "manual", label: t("collection.manualEntry") },
+                      { value: "bulk", label: t("collection.bulkImport") },
+                    ]}
+                  />
+                </div>
+              )}
+'''
+
+          if old not in text:
+              raise SystemExit('Expected ArchiveToggle block was not found; aborting.')
+
+          text = text.replace(old, new, 1)
+
+          old_manual = '''              {activeTab === "manual" && (
+                <div className="space-y-6">
+                  <p className="font-body text-muted-foreground text-sm">
+'''
+
+          new_manual = '''              {activeTab === "manual" && (
+                <div className="space-y-6">
+                  <h2 className="font-heading text-xl font-semibold text-accent-gold uppercase tracking-wider">
+                    {t("collection.manualEntry")}
+                  </h2>
+                  <p className="font-body text-muted-foreground text-sm">
+'''
+
+          if old_manual not in text:
+              raise SystemExit('Expected manual entry section was not found; aborting.')
+
+          text = text.replace(old_manual, new_manual, 1)
+          path.write_text(text)
+          PY
+
+      - name: Commit UI fix and remove one-time workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/collection/add/page.tsx
+          git rm .github/workflows/one-time-manual-entry-heading-fix.yml
+          git commit -m "Remove redundant manual entry button"
+          git push
