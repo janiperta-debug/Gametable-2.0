@@ -11,8 +11,15 @@ div.relative.isolate:has(> div > div > div.font-cinzel.text-xs.font-semibold.upp
 div.relative.isolate:has(> div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide) > div > div,
 div.relative.isolate:has(> div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide) > div > div > div {
   background: transparent !important;
+  background-image: none !important;
   box-shadow: none !important;
   padding: 0 !important;
+  border: 0 !important;
+}
+
+div.relative.isolate:has(> div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide) > div > div > div.pointer-events-none,
+div.relative.isolate:has(> div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide) > svg {
+  display: none !important;
 }
 
 div.relative.isolate:has(> div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide) > div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide {
