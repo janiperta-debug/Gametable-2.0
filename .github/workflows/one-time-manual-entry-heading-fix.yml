@@ -1,15 +1,16 @@
 name: One-time manual entry heading fix
 
 on:
-  issue_comment:
-    types: [created]
+  pull_request_target:
+    types: [opened]
+    branches: [main]
 
 permissions:
   contents: write
 
 jobs:
   fix:
-    if: github.event.comment.body == '/apply-manual-fix' && github.event.issue.pull_request == null
+    if: github.head_ref == 'temp-manual-ui-fix'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -84,4 +85,4 @@ jobs:
           git add app/collection/add/page.tsx
           git rm .github/workflows/one-time-manual-entry-heading-fix.yml
           git commit -m "Remove redundant manual entry button"
-          git push
+          git push origin main
