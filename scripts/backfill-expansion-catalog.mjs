@@ -1,100 +1,136 @@
 import { createClient } from '@supabase/supabase-js'
+import { XMLParser } from 'fast-xml-parser'
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
-const BGG_API_URL = process.env.BGG_API_URL || 'https://boardgamegeek.com/xmlapi2/thing'
+const DRY_RUN = process.env.DRY_RUN === '1'
+const BGG_BATCH = 20
+const BGG_DELAY_MS = 1500
+const BGG_TOKEN = process.env.BGG_API_TOKEN || ''
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')
-}
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+  { auth: { autoRefreshToken: false, persistSession: false } }
+)
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
-
+const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' })
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-async function fetchBggThing(bggId) {
-  const url = new URL(BGG_API_URL)
-  url.searchParams.set('id', String(bggId))
-  url.searchParams.set('type', 'boardgame')
-  url.searchParams.set('stats', '1')
+async function fetchBggBatch(bggIds) {
+  const url = `https://boardgamegeek.com/xmlapi2/thing?id=${bggIds.join(',')}`
 
-  const response = await fetch(url, {
-    headers: { Accept: 'application/xml' },
-  })
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const headers = { Accept: 'application/xml, */*' }
+    if (BGG_TOKEN) headers.Authorization = `Bearer ${BGG_TOKEN}`
 
-  if (!response.ok) {
-    throw new Error(`BGG request failed for ${bggId}: ${response.status}`)
+    const response = await fetch(url, { headers })
+
+    if (response.status === 202) {
+      console.log('  BGG is still processing; retrying in 5s…')
+      await sleep(5000)
+      continue
+    }
+
+    if (!response.ok) throw new Error(`BGG request failed: ${response.status}`)
+
+    const parsed = parser.parse(await response.text())
+    const rawItems = parsed?.items?.item
+    const items = Array.isArray(rawItems) ? rawItems : rawItems ? [rawItems] : []
+    return new Map(items.map((item) => [Number(item['@_id']), item]))
   }
 
-  return response.text()
+  throw new Error(`BGG request did not complete after 3 attempts for ${bggIds.join(',')}`)
 }
 
-function extractExpansions(xml) {
-  const links = [...xml.matchAll(/<link\s+[^>]*type="boardgameexpansion"[^>]*>/g)]
-  return links
-    .map(([tag]) => {
-      const id = tag.match(/\bid="(\d+)"/)
-      const value = tag.match(/<link\s+[^>]*value="([^"]+)"/)
-      return id && value ? { bgg_id: Number(id[1]), name: value[1] } : null
-    })
-    .filter(Boolean)
+function asArray(value) {
+  if (!value) return []
+  return Array.isArray(value) ? value : [value]
 }
 
-async function run() {
-  const { data: games, error } = await supabase
+async function main() {
+  console.log(`=== Expansion catalog backfill ${DRY_RUN ? '[DRY RUN]' : '[LIVE]'} ===`)
+
+  // Existing base games only. This never changes user ownership.
+  const { data: games, error: gamesError } = await supabase
     .from('games')
-    .select('id, name, bgg_id')
+    .select('id, bgg_id, name')
+    .eq('category', 'board_game')
     .not('bgg_id', 'is', null)
+    .or('is_expansion.is.null,is_expansion.eq.false')
 
-  if (error) throw error
+  if (gamesError) throw gamesError
 
   let processed = 0
-  let inserted = 0
+  let catalogued = 0
   let skipped = 0
   let failed = 0
 
-  for (const game of games ?? []) {
-    processed += 1
+  for (let offset = 0; offset < games.length; offset += BGG_BATCH) {
+    const batch = games.slice(offset, offset + BGG_BATCH)
+    const bggMap = await fetchBggBatch(batch.map((game) => game.bgg_id))
 
-    try {
-      const xml = await fetchBggThing(game.bgg_id)
-      const expansions = extractExpansions(xml)
+    for (const game of batch) {
+      processed += 1
+      const item = bggMap.get(Number(game.bgg_id))
 
-      if (!expansions.length) {
+      if (!item) {
+        failed += 1
+        console.error(`[${processed}] ${game.name}: BGG item missing`)
+        continue
+      }
+
+      const links = asArray(item.link).filter(
+        (link) => link['@_type'] === 'boardgameexpansion'
+      )
+
+      if (!links.length) {
         skipped += 1
         console.log(`[${processed}] ${game.name}: no expansions reported by BGG`)
         continue
       }
 
-      for (const expansion of expansions) {
-        // Never change ownership here. This script only fills the catalog.
-        const { error: upsertError } = await supabase
+      for (const link of links) {
+        const bggId = Number(link['@_id'])
+        const name = String(link['@_value'] || '').trim()
+        if (!bggId || !name) continue
+
+        // Preserve existing catalog rows. Only missing entries are added.
+        const { data: existing, error: lookupError } = await supabase
           .from('game_expansions')
-          .upsert(
-            {
-              base_game_id: game.id,
-              bgg_id: expansion.bgg_id,
-              name: expansion.name,
-            },
-            { onConflict: 'base_game_id,bgg_id', ignoreDuplicates: true },
-          )
+          .select('id')
+          .eq('bgg_id', bggId)
+          .maybeSingle()
 
-        if (upsertError) throw upsertError
-        inserted += 1
+        if (lookupError) throw lookupError
+        if (existing) continue
+
+        if (DRY_RUN) {
+          console.log(`  WOULD ADD: ${game.name} → ${name} (${bggId})`)
+          catalogued += 1
+          continue
+        }
+
+        const { error: insertError } = await supabase
+          .from('game_expansions')
+          .insert({
+            bgg_id: bggId,
+            base_game_id: game.id,
+            name,
+            sort_order: 9999,
+          })
+
+        if (insertError) throw insertError
+        catalogued += 1
+        console.log(`  ADD: ${game.name} → ${name} (${bggId})`)
       }
-
-      console.log(`[${processed}] ${game.name}: ${expansions.length} expansions catalogued`)
-      await sleep(250)
-    } catch (err) {
-      failed += 1
-      console.error(`[${processed}] ${game.name}: FAILED`, err)
     }
+
+    if (offset + BGG_BATCH < games.length) await sleep(BGG_DELAY_MS)
   }
 
-  console.log({ processed, inserted, skipped, failed })
+  console.log({ processed, catalogued, skipped, failed })
 }
 
-run().catch((error) => {
-  console.error(error)
+main().catch((error) => {
+  console.error('Fatal:', error)
   process.exit(1)
 })
