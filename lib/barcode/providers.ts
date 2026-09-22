@@ -30,13 +30,18 @@ export async function lookupGameUpc(barcode: string): Promise<BarcodeProviderRes
     if (!response.ok) return null
 
     const data = await response.json() as Record<string, unknown>
-    const info = Array.isArray(data.bgg_info) ? data.bgg_info : []
+    const rawInfo = data.bgg_info
+    const info = Array.isArray(rawInfo) ? rawInfo : rawInfo ? [rawInfo] : []
     const first = info[0] as Record<string, unknown> | undefined
     const status = firstString(data.bgg_info_status)
+    const externalGameId = firstString(first?.id)
 
+    // GameUPC can return a usable BGG id even when its status field is not
+    // exactly "verified". The id itself is the useful resolver result, so do
+    // not discard it solely because of that status label.
     return {
       provider: "gameupc",
-      externalGameId: status === "verified" && first ? firstString(first.id) : null,
+      externalGameId: externalGameId || (status === "verified" ? firstString(data.bgg_id) : null),
       name: firstString(first?.name) || firstString(data.name),
       year: null,
       thumbnail: firstString(first?.thumbnail_url),
