@@ -1,0 +1,1 @@
+Temporary trigger file. The one-time workflow will apply the requested UI cleanup to main.
