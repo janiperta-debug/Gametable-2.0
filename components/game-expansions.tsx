@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, type SyntheticEvent } from "react"
 import Image from "next/image"
 import { Check, Loader2, Puzzle } from "lucide-react"
 import { getGameExpansions, toggleGameExpansionOwnership } from "@/app/actions/games"
@@ -13,6 +13,15 @@ interface Expansion {
   year: number | null
   image_url: string | null
   owned: boolean
+}
+
+const EXPANSION_FALLBACK_IMAGE = "/images/fallbacks/board-games-fallback.png"
+
+function handleExpansionImageError(event: SyntheticEvent<HTMLImageElement>) {
+  const image = event.currentTarget
+  if (image.dataset.fallbackApplied === "true") return
+  image.dataset.fallbackApplied = "true"
+  image.src = EXPANSION_FALLBACK_IMAGE
 }
 
 export function GameExpansions({ gameId }: { gameId: string }) {
@@ -104,11 +113,12 @@ export function GameExpansions({ gameId }: { gameId: string }) {
               >
                 <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded bg-surface/50">
                   <Image
-                    src={expansion.image_url || "/placeholder.svg"}
+                    src={expansion.image_url || EXPANSION_FALLBACK_IMAGE}
                     alt=""
                     fill
                     className="object-cover"
                     sizes="48px"
+                    onError={handleExpansionImageError}
                   />
                 </div>
                 <div className="min-w-0 max-w-full flex-1 overflow-hidden">
