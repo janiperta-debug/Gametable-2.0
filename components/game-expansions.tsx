@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Check, Loader2, Puzzle } from "lucide-react"
 import { getGameExpansions, toggleGameExpansionOwnership } from "@/app/actions/games"
+import { repairExpansionImages } from "@/app/actions/expansion-images"
 import { useTranslations } from "@/lib/i18n"
 
 interface Expansion {
@@ -24,7 +25,12 @@ export function GameExpansions({ gameId }: { gameId: string }) {
     let active = true
     async function load() {
       setLoading(true)
+
+      // Older catalog rows may have been created before BGG image enrichment
+      // was batched correctly. Repair those rows once, then load the catalog.
+      await repairExpansionImages(gameId)
       const result = await getGameExpansions(gameId)
+
       if (active) {
         setExpansions((result.expansions as Expansion[]) || [])
         setLoading(false)
