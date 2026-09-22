@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, type SyntheticEvent } from "react"
-import Image from "next/image"
 import { Check, Loader2, Puzzle } from "lucide-react"
 import { getGameExpansions, toggleGameExpansionOwnership } from "@/app/actions/games"
 import { repairExpansionImages } from "@/app/actions/expansion-images"
@@ -54,13 +53,11 @@ export function GameExpansions({ gameId }: { gameId: string }) {
   const handleToggle = async (expansion: Expansion) => {
     const nextOwned = !expansion.owned
     setTogglingId(expansion.id)
-    // Optimistic update
     setExpansions((prev) =>
       prev.map((e) => (e.id === expansion.id ? { ...e, owned: nextOwned } : e)),
     )
     const result = await toggleGameExpansionOwnership(expansion.id, nextOwned, gameId)
     if (result.error) {
-      // Revert on failure
       setExpansions((prev) =>
         prev.map((e) => (e.id === expansion.id ? { ...e, owned: !nextOwned } : e)),
       )
@@ -76,7 +73,6 @@ export function GameExpansions({ gameId }: { gameId: string }) {
     )
   }
 
-  // Nothing to show if the catalog has no expansions for this game.
   if (expansions.length === 0) {
     return null
   }
@@ -112,12 +108,11 @@ export function GameExpansions({ gameId }: { gameId: string }) {
                 }`}
               >
                 <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded bg-surface/50">
-                  <Image
+                  <img
                     src={expansion.image_url || EXPANSION_FALLBACK_IMAGE}
                     alt=""
-                    fill
-                    className="object-cover"
-                    sizes="48px"
+                    className="h-full w-full object-cover"
+                    loading="lazy"
                     onError={handleExpansionImageError}
                   />
                 </div>
