@@ -24,12 +24,17 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const controlsRef = useRef<IScannerControls | null>(null)
   const onDetectedRef = useRef(onDetected)
+  const onCloseRef = useRef(onClose)
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
     onDetectedRef.current = onDetected
   }, [onDetected])
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
 
   useEffect(() => {
     const reader = new BrowserMultiFormatReader()
@@ -73,7 +78,7 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
                       title: "✓ Peli lisätty kokoelmaan",
                       description: data.game?.name || "Peli lisättiin kokoelmaan.",
                     })
-                    onClose()
+                    onCloseRef.current()
                     return
                   }
 
@@ -120,7 +125,7 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
         }
       }
     }
-  }, [onClose, toast])
+  }, [toast])
 
   return (
     <div className="rounded-lg border border-accent-gold/30 bg-background/70 p-4 space-y-3">
