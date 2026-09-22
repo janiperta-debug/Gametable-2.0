@@ -84,13 +84,13 @@ export function GameExpansions({ gameId }: { gameId: string }) {
         {expansions.map((expansion) => {
           const isToggling = togglingId === expansion.id
           return (
-            <li key={expansion.id}>
+            <li key={expansion.id} className="min-w-0 max-w-full">
               <button
                 type="button"
                 onClick={() => handleToggle(expansion)}
                 disabled={isToggling}
                 aria-pressed={expansion.owned}
-                className={`flex w-full items-center gap-3 rounded-lg border p-2 text-left transition-colors min-h-[44px] ${
+                className={`flex w-full max-w-full min-w-0 items-center gap-3 overflow-hidden rounded-lg border p-2 text-left transition-colors min-h-[44px] ${
                   expansion.owned
                     ? "border-accent-gold bg-accent-gold/10"
                     : "border-border bg-transparent hover:border-accent-gold/50"
@@ -105,8 +105,10 @@ export function GameExpansions({ gameId }: { gameId: string }) {
                     sizes="48px"
                   />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-body text-sm text-foreground">{expansion.name}</p>
+                <div className="min-w-0 max-w-full flex-1 overflow-hidden">
+                  <p className="whitespace-normal break-words font-body text-sm leading-snug text-foreground">
+                    {expansion.name}
+                  </p>
                   {expansion.year ? (
                     <p className="text-xs text-muted-foreground">{expansion.year}</p>
                   ) : null}
