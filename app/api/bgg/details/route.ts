@@ -32,44 +32,67 @@ function primaryName(nameData: unknown): string {
 
 type Expansion = { bggId: number; name: string; year: number | null; image: string | null }
 
-/** Fetch year + image for a batch of expansion ids via a single `thing` call. */
+/** Fetch year + image for expansion ids in BGG's maximum 20-id batches. */
 async function enrichExpansions(
   base: { bggId: number; name: string }[],
 ): Promise<Expansion[]> {
   if (base.length === 0) return []
-  // Cap the batch to keep the BGG request reasonable.
+
+  // BGG XML API2 accepts at most 20 ids per /thing request. The old code sent
+  // up to 60 ids in one request, which caused large expansion catalogs (such as
+  // Dixit and Boss Monster) to fail enrichment completely and left every image
+  // as null. Keep the catalog capped for a single details request, but process
+  // it in valid batches.
   const capped = base.slice(0, 60)
-  try {
-    const ids = capped.map((e) => e.bggId).join(',')
-    const res = await fetch(`https://boardgamegeek.com/xmlapi2/thing?id=${ids}`, {
-      headers: bggHeaders(),
-      cache: 'no-store',
-    })
-    if (!res.ok) {
-      return capped.map((e) => ({ ...e, year: null, image: null }))
-    }
-    const parsed = parser.parse(await res.text())
-    const items = parsed?.items?.item
-    const list = Array.isArray(items) ? items : items ? [items] : []
-    const byId = new Map<number, Record<string, unknown>>()
-    for (const it of list) {
-      byId.set(parseInt(String((it as Record<string, unknown>)['@_id']), 10), it as Record<string, unknown>)
-    }
-    return capped.map((e) => {
-      const it = byId.get(e.bggId)
-      const year = it?.yearpublished
-        ? parseInt(String((it.yearpublished as Record<string, unknown>)['@_value']), 10)
-        : null
-      return {
-        bggId: e.bggId,
-        name: e.name,
-        year: Number.isNaN(year as number) ? null : year,
-        image: it?.image ? String(it.image) : it?.thumbnail ? String(it.thumbnail) : null,
+  const results: Expansion[] = []
+
+  for (let start = 0; start < capped.length; start += 20) {
+    const batch = capped.slice(start, start + 20)
+    const ids = batch.map((e) => e.bggId).join(',')
+
+    try {
+      const res = await fetch(`https://boardgamegeek.com/xmlapi2/thing?id=${ids}`, {
+        headers: bggHeaders(),
+        cache: 'no-store',
+      })
+
+      if (!res.ok) {
+        results.push(...batch.map((e) => ({ ...e, year: null, image: null })))
+        continue
       }
-    })
-  } catch {
-    return capped.map((e) => ({ ...e, year: null, image: null }))
+
+      const parsed = parser.parse(await res.text())
+      const items = parsed?.items?.item
+      const list = Array.isArray(items) ? items : items ? [items] : []
+      const byId = new Map<number, Record<string, unknown>>()
+
+      for (const it of list) {
+        byId.set(
+          parseInt(String((it as Record<string, unknown>)['@_id']), 10),
+          it as Record<string, unknown>,
+        )
+      }
+
+      results.push(
+        ...batch.map((e) => {
+          const it = byId.get(e.bggId)
+          const year = it?.yearpublished
+            ? parseInt(String((it.yearpublished as Record<string, unknown>)['@_value']), 10)
+            : null
+          return {
+            bggId: e.bggId,
+            name: e.name,
+            year: Number.isNaN(year as number) ? null : year,
+            image: it?.image ? String(it.image) : it?.thumbnail ? String(it.thumbnail) : null,
+          }
+        }),
+      )
+    } catch {
+      results.push(...batch.map((e) => ({ ...e, year: null, image: null })))
+    }
   }
+
+  return results
 }
 
 export async function GET(request: NextRequest) {
