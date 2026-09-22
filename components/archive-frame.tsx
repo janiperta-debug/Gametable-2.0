@@ -305,6 +305,29 @@ interface ArchiveToggleProps<T extends string> {
 }
 
 export function ArchiveToggle<T extends string>({ options, value, onChange, className, framed = true }: ArchiveToggleProps<T>) {
+  const manualOnlyToggle = options.length === 1 && options[0]?.value === "manual"
+
+  if (manualOnlyToggle) {
+    const label = options[0]?.label ?? ""
+    const heading = (
+      <div className="px-7 py-2.5 font-cinzel text-xs font-semibold uppercase tracking-wide text-[var(--archive-gold,#d9b65c)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
+        {label}
+      </div>
+    )
+
+    return framed ? (
+      <ArchiveFrame
+        weight="thin"
+        cornerSize="sm"
+        className={cn("inline-block max-w-full rounded-lg", className)}
+      >
+        {heading}
+      </ArchiveFrame>
+    ) : (
+      <div className={className}>{heading}</div>
+    )
+  }
+
   const toggle = (
     <div
       role="tablist"
@@ -338,13 +361,11 @@ export function ArchiveToggle<T extends string>({ options, value, onChange, clas
     </div>
   )
 
-  const manualOnlyToggle = options.length === 1 && options[0]?.value === "manual"
-
   return framed ? (
     <ArchiveFrame
       weight="thin"
       cornerSize="sm"
-      className={cn("inline-block max-w-full rounded-lg", manualOnlyToggle && "mt-4", className)}
+      className={cn("inline-block max-w-full rounded-lg", className)}
     >
       {toggle}
     </ArchiveFrame>
