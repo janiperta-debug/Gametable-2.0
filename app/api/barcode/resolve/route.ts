@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
+import { XMLParser } from "fast-xml-parser"
 import { createClient } from "@/lib/supabase/server"
 import { lookupBarcodeProvider } from "@/lib/barcode/providers"
 
 type BarcodeCategory = "board_game" | "rpg"
 
 const BARCODE_TYPES = new Set(["ean13", "ean8", "upc", "isbn10", "isbn13", "ean"])
+const BGG_API_TOKEN = process.env.BGG_API_TOKEN
 
 function normalizeBarcode(value: string): string {
   return value.replace(/[\s-]/g, "").trim()
@@ -22,6 +24,46 @@ function inferBarcodeType(barcode: string): string {
 
 function isValidBarcode(barcode: string): boolean {
   return /^(?:\d{8}|\d{10}|\d{12}|\d{13})$/.test(barcode)
+}
+
+async function resolveBggByName(name: string): Promise<{ id: string; name: string } | null> {
+  try {
+    const headers: Record<string, string> = { Accept: "application/xml, text/xml, */*" }
+    if (BGG_API_TOKEN) headers.Authorization = `Bearer ${BGG_API_TOKEN}`
+
+    const response = await fetch(
+      `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(name)}&type=boardgame`,
+      { headers, cache: "no-store" },
+    )
+
+    if (!response.ok) return null
+
+    const xmlText = await response.text()
+    const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" })
+    const parsed = parser.parse(xmlText) as Record<string, any>
+    const items = Array.isArray(parsed.items?.item)
+      ? parsed.items.item
+      : parsed.items?.item
+        ? [parsed.items.item]
+        : []
+
+    const first = items[0] as Record<string, any> | undefined
+    if (!first?.["@_id"]) return null
+
+    const nameData = first.name
+    let resolvedName = name
+    if (Array.isArray(nameData)) {
+      const primary = nameData.find((item: Record<string, unknown>) => item["@_type"] === "primary")
+      resolvedName = String(primary?.["@_value"] || nameData[0]?.["@_value"] || name)
+    } else if (nameData && typeof nameData === "object") {
+      resolvedName = String(nameData["@_value"] || name)
+    }
+
+    return { id: String(first["@_id"]), name: resolvedName }
+  } catch (error) {
+    console.error("BGG barcode name resolution failed:", error)
+    return null
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -120,6 +162,29 @@ export async function GET(request: NextRequest) {
           confidence: provider.confidence,
           confirmedByUser: false,
         })
+      }
+
+      // The provider can identify the game by name even when the game is not
+      // already present in our local catalog. Resolve that name against BGG here
+      // so the barcode flow can continue without relying on the client-side
+      // search state after the scanner closes.
+      if (category === "board_game") {
+        const bggMatch = await resolveBggByName(provider.name)
+        if (bggMatch) {
+          return NextResponse.json({
+            resolved: true,
+            source: "bgg-name-search",
+            barcode,
+            barcodeType,
+            category,
+            externalGameId: bggMatch.id,
+            name: bggMatch.name,
+            thumbnail: provider.thumbnail,
+            sourceUrl: provider.sourceUrl,
+            confidence: provider.confidence,
+            confirmedByUser: false,
+          })
+        }
       }
     }
 
