@@ -1,31 +1,5 @@
-/* Manual entry is a section heading, not an interactive control. */
-div.relative.isolate:has(> div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide) {
-  width: 100% !important;
-  margin: 0 0 0.75rem !important;
-  padding: 0 !important;
-  background-image: none !important;
-  box-shadow: none !important;
-}
-
-div.relative.isolate:has(> div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide) > div,
-div.relative.isolate:has(> div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide) > div > div,
-div.relative.isolate:has(> div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide) > div > div > div {
-  background: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  border: 0 !important;
-}
-
-div.relative.isolate:has(> div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide) > div > div > div.pointer-events-none,
-div.relative.isolate:has(> div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide) > svg {
-  display: none !important;
-}
-
-div.relative.isolate:has(> div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide) > div > div > div.font-cinzel.text-xs.font-semibold.uppercase.tracking-wide {
-  padding: 0 !important;
-  font-size: 1rem !important;
-  line-height: 1.5rem !important;
-  letter-spacing: 0.08em !important;
-  text-align: left !important;
-}
+/* Manual entry heading and collection list cleanup. */
+div.mb-6.flex.justify-center:has([role="tablist"]) { display: none !important; }
+.space-y-6 > p.font-body.text-muted-foreground.text-sm:first-child::before { content: "MANUAALINEN LISÄYS"; display: block; margin-bottom: .75rem; color: hsl(var(--accent-gold)); font-family: var(--font-cinzel), serif; font-size: 1rem; line-height: 1.5rem; font-weight: 600; letter-spacing: .08em; }
+article.group.min-w-0.py-3 > div > div.min-w-0.flex-1 > div.flex.min-w-0.items-start.gap-2 > button,
+article.group.min-w-0.py-3 > div > div.min-w-0.flex-1 > div.mt-3.flex.min-w-0.flex-wrap.items-center.gap-2 > button:last-child { display: none !important; }
