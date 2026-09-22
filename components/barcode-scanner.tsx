@@ -9,6 +9,17 @@ type Props = {
   onClose: () => void
 }
 
+function inferCategoryFromPage(): "board_game" | "rpg" {
+  const pressedButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('button[aria-pressed="true"]'))
+  const categoryButton = pressedButtons.find((button) => {
+    const label = button.textContent?.trim() || ""
+    return /Lautapelit|Board Games?|Roolipelit|Role[- ]?playing|RPG/i.test(label)
+  })
+
+  const label = categoryButton?.textContent?.trim() || ""
+  return /Roolipelit|Role[- ]?playing|RPG/i.test(label) ? "rpg" : "board_game"
+}
+
 export function BarcodeScanner({ onDetected, onClose }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const controlsRef = useRef<IScannerControls | null>(null)
@@ -40,11 +51,40 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
             if (result) {
               active = false
               callbackControls.stop()
+
+              const barcode = result.getText()
               toast({
                 title: "✓ Skannaus onnistui",
-                description: "Viivakoodi luettu. Peliä käsitellään...",
+                description: "Viivakoodi luettu. Peliä lisätään kokoelmaan...",
               })
-              onDetectedRef.current(result.getText())
+
+              void (async () => {
+                try {
+                  const category = inferCategoryFromPage()
+                  const response = await fetch("/api/barcode/auto-add", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ barcode, category }),
+                  })
+                  const data = await response.json()
+
+                  if (response.ok && data.success) {
+                    toast({
+                      title: "✓ Peli lisätty kokoelmaan",
+                      description: data.game?.name || "Peli lisättiin kokoelmaan.",
+                    })
+                    onClose()
+                    return
+                  }
+
+                  // Preserve the existing resolver/search flow as a fallback
+                  // when automatic collection add cannot complete.
+                  onDetectedRef.current(barcode)
+                } catch (autoAddError) {
+                  console.error("Barcode auto-add error:", autoAddError)
+                  onDetectedRef.current(barcode)
+                }
+              })()
             } else if (error && error.name !== "NotFoundException") {
               setError("Kameran käynnistäminen tai viivakoodin lukeminen epäonnistui.")
             }
@@ -80,7 +120,7 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
         }
       }
     }
-  }, [toast])
+  }, [onClose, toast])
 
   return (
     <div className="rounded-lg border border-accent-gold/30 bg-background/70 p-4 space-y-3">
