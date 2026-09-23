@@ -40,6 +40,16 @@ import { BarcodeScanner } from "@/components/barcode-scanner"
 
 type GameCategory = "board_game" | "rpg" | "trading_card" | "miniature"
 
+async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit = {}, timeoutMs = 12000) {
+  const controller = new AbortController()
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    return await fetch(input, { ...init, signal: controller.signal })
+  } finally {
+    window.clearTimeout(timeout)
+  }
+}
+
 // Union type for search results from different APIs
 type SearchResult = BGGSearchResult | TCGSearchResult | MiniatureSearchResult
 type GameDetails = BGGGameDetails | TCGSearchResult | MiniatureSearchResult
@@ -287,8 +297,10 @@ export default function AddGamePage() {
         throw new Error("Viivakoodiskannaus toimii tällä hetkellä lautapeleille ja roolipeleille.")
       }
 
-      const resolveResponse = await fetch(
+      const resolveResponse = await fetchWithTimeout(
         `/api/barcode/resolve?barcode=${encodeURIComponent(barcode)}&category=${selectedCategory}`,
+        {},
+        12000,
       )
       const resolved = await resolveResponse.json()
 
@@ -324,8 +336,10 @@ export default function AddGamePage() {
       const config = categories.find((category) => category.id === selectedCategory)
       if (!config) throw new Error("Pelikategoriaa ei löytynyt.")
 
-      const detailsResponse = await fetch(
+      const detailsResponse = await fetchWithTimeout(
         `${config.detailsEndpoint}?id=${encodeURIComponent(String(gameId))}`,
+        {},
+        15000,
       )
       const details = await detailsResponse.json()
 
@@ -355,9 +369,15 @@ export default function AddGamePage() {
       router.push("/collection")
     } catch (error) {
       console.error("Barcode add error:", error)
+      const message =
+        error instanceof DOMException && error.name === "AbortError"
+          ? "Viivakoodin tunnistuspalvelu ei vastannut ajoissa. Yritä uudelleen tai hae peli nimellä."
+          : error instanceof Error
+            ? error.message
+            : "Viivakoodin käsittely epäonnistui."
       toast({
         title: t("common.error"),
-        description: error instanceof Error ? error.message : "Viivakoodin käsittely epäonnistui.",
+        description: message,
         variant: "destructive",
       })
     } finally {
