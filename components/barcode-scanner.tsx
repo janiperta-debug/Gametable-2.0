@@ -9,6 +9,7 @@ import type { BGGGameDetails } from "@/lib/types/database"
 type Props = {
   onDetected: (barcode: string) => void
   onClose: () => void
+  externalStatus?: string | null
 }
 
 function inferCategoryFromPage(): "board_game" | "rpg" {
@@ -22,7 +23,7 @@ function inferCategoryFromPage(): "board_game" | "rpg" {
   return /Roolipelit|Role[- ]?playing|RPG/i.test(label) ? "rpg" : "board_game"
 }
 
-export function BarcodeScanner({ onDetected, onClose }: Props) {
+export function BarcodeScanner({ onDetected, onClose, externalStatus }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const controlsRef = useRef<IScannerControls | null>(null)
   const onDetectedRef = useRef(onDetected)
@@ -124,7 +125,7 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
         <video ref={videoRef} className="h-full w-full object-cover" muted playsInline />
         <div className="pointer-events-none absolute inset-x-8 top-1/2 h-px bg-accent-gold shadow-[0_0_12px_rgba(212,175,55,0.8)]" />
         <div className="pointer-events-none absolute inset-x-4 bottom-3 rounded bg-black/70 px-3 py-2 text-center text-xs text-white">
-          {status}
+          {externalStatus || status}
         </div>
       </div>
 
