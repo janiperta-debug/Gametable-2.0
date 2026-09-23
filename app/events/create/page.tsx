@@ -48,6 +48,13 @@ export default function CreateEventPage() {
   const [gameSelection, setGameSelection] = useState("collection")
   const [eventType, setEventType] = useState<EventType>("game_night")
   const [privacy, setPrivacy] = useState<EventPrivacy>("public")
+  const [eventConfig, setEventConfig] = useState({
+    format: "",
+    rounds: "",
+    scoring: "",
+    tiebreaker: "",
+    organizerNotes: "",
+  })
   const [saving, setSaving] = useState(false)
   const [userGames, setUserGames] = useState<UserGame[]>([])
   const [loadingGames, setLoadingGames] = useState(true)
@@ -116,6 +123,13 @@ export default function CreateEventPage() {
         location: formData.location.trim() || undefined,
         starts_at: startsAt.toISOString(),
         max_players: formData.maxPlayers ? parseInt(formData.maxPlayers) : undefined,
+        event_config: {
+          format: eventConfig.format.trim() || undefined,
+          rounds: eventConfig.rounds.trim() || undefined,
+          scoring: eventConfig.scoring.trim() || undefined,
+          tiebreaker: eventConfig.tiebreaker.trim() || undefined,
+          organizerNotes: eventConfig.organizerNotes.trim() || undefined,
+        },
       })
 
       if (result.error) {
@@ -309,6 +323,77 @@ export default function CreateEventPage() {
                     })}
                   </div>
                 </div>
+
+                {/* Organizer-defined event structure */}
+                {eventType !== "game_night" && (
+                  <div className="space-y-4 rounded-xl border border-accent-gold/20 bg-black/10 p-4">
+                    <div>
+                      <h3 className="font-heading text-lg text-accent-gold">Järjestäjän asetukset</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Määritä tapahtuman rakenne oman pelisi sääntöjen mukaan. GameTable ei määrää pisteytystä tai formaattia.
+                      </p>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="event-format" className="font-body text-accent-gold">Formaatti</Label>
+                        <Input
+                          id="event-format"
+                          placeholder={eventType === "campaign" ? "Esim. viikoittainen kampanja" : "Esim. Swiss, round robin..."}
+                          value={eventConfig.format}
+                          onChange={(e) => setEventConfig({ ...eventConfig, format: e.target.value })}
+                          className={archiveField}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="event-rounds" className="font-body text-accent-gold">Kierrokset / sessiot</Label>
+                        <Input
+                          id="event-rounds"
+                          placeholder="Esim. 6"
+                          value={eventConfig.rounds}
+                          onChange={(e) => setEventConfig({ ...eventConfig, rounds: e.target.value })}
+                          className={archiveField}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="event-scoring" className="font-body text-accent-gold">Pisteytys</Label>
+                      <Input
+                        id="event-scoring"
+                        placeholder="Esim. voitto 3 p, tasapeli 1 p, tappio 0 p"
+                        value={eventConfig.scoring}
+                        onChange={(e) => setEventConfig({ ...eventConfig, scoring: e.target.value })}
+                        className={archiveField}
+                      />
+                    </div>
+
+                    {(eventType === "tournament" || eventType === "league") && (
+                      <div className="space-y-2">
+                        <Label htmlFor="event-tiebreaker" className="font-body text-accent-gold">Tasapisteiden ratkaisu</Label>
+                        <Input
+                          id="event-tiebreaker"
+                          placeholder="Esim. keskinäinen ottelu, VP-ero..."
+                          value={eventConfig.tiebreaker}
+                          onChange={(e) => setEventConfig({ ...eventConfig, tiebreaker: e.target.value })}
+                          className={archiveField}
+                        />
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <Label htmlFor="event-organizer-notes" className="font-body text-accent-gold">Järjestäjän lisätiedot</Label>
+                      <Textarea
+                        id="event-organizer-notes"
+                        placeholder="Kirjoita tähän muut järjestämiseen liittyvät säännöt, käytännöt tai huomioitavat asiat."
+                        value={eventConfig.organizerNotes}
+                        onChange={(e) => setEventConfig({ ...eventConfig, organizerNotes: e.target.value })}
+                        className={archiveField}
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Date & Time */}
                 <div className="grid grid-cols-2 gap-4">
