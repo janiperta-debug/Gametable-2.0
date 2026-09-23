@@ -674,7 +674,6 @@ export default function AddGamePage() {
               )}
 
               <div className="border-t border-accent-gold/20 pt-5">
-                <h2 className="font-heading text-xl text-accent-gold mb-3">{t("collection.manualEntry")}</h2>
                 {selectedCategory === "trading_card" && (
                   <div className="mb-5">
                     <label className="sr-only" htmlFor="add-tcg-game-selector">Valitse korttipeli</label>
