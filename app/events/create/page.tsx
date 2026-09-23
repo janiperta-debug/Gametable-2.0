@@ -25,10 +25,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 
 const eventTypes: { value: EventType; image: string }[] = [
-  { value: "board_game_night", image: "/images/category-board-games.png" },
-  { value: "rpg_session", image: "/images/category-rpg.png" },
-  { value: "tournament", image: "/images/category-tcg.png" },
-  { value: "custom", image: "/images/category-miniatures.png" },
+  { value: "board_game_night", image: "/images/fallbacks/board-games-fallback.png" },
+  { value: "rpg_session", image: "/images/fallbacks/rpg-fallback.png" },
+  { value: "tournament", image: "/images/fallbacks/tcg-fallback.png" },
+  { value: "custom", image: "/images/fallbacks/miniatures-fallback.png" },
 ]
 import { getUserGames } from "@/app/actions/games"
 import { useToast } from "@/hooks/use-toast"
