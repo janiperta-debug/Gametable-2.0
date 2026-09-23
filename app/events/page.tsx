@@ -183,7 +183,7 @@ export default function EventsPage() {
   const t = useTranslations()
   const { toast } = useToast()
   const { user } = useUser()
-  const { publicEvents, myEvents, loading, refetch } = useEvents()
+  const { publicEvents, myEvents, pastEvents, loading, refetch } = useEvents()
 
   const toggleEventType = (type: string) => {
     setSelectedTypes(prev => 
@@ -391,15 +391,45 @@ export default function EventsPage() {
           )}
 
           {activeTab === "past" && (
-            <ArchiveCard className="text-center">
-              <ArchiveCardContent className="py-12">
-                <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
-                <h3 className="ornate-text font-heading text-xl font-semibold mb-2">No Past Events</h3>
-                <p className="font-body text-muted-foreground">
-                  Your event history will appear here once you start attending gaming events.
-                </p>
-              </ArchiveCardContent>
-            </ArchiveCard>
+            <div>
+              {loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
+                </div>
+              ) : pastEvents.filter(function(event) {
+                const matchesSearch = event.title.toLowerCase().includes(query) || (event.description ? event.description.toLowerCase().includes(query) : false)
+                const matchesType = selectedTypes.length === 0 || (event.event_type && selectedTypes.includes(event.event_type))
+                return matchesSearch && matchesType
+              }).length === 0 ? (
+                <ArchiveCard className="text-center">
+                  <ArchiveCardContent className="py-12">
+                    <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
+                    <h3 className="ornate-text font-heading text-xl font-semibold mb-2">Ei menneitä tapahtumia</h3>
+                    <p className="font-body text-muted-foreground">
+                      Menneet tapahtumat, joihin sinulla on pääsy, näkyvät täällä.
+                    </p>
+                  </ArchiveCardContent>
+                </ArchiveCard>
+              ) : (
+                <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {pastEvents.filter(function(event) {
+                    const matchesSearch = event.title.toLowerCase().includes(query) || (event.description ? event.description.toLowerCase().includes(query) : false)
+                    const matchesType = selectedTypes.length === 0 || (event.event_type && selectedTypes.includes(event.event_type))
+                    return matchesSearch && matchesType
+                  }).map((event) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      onViewDetails={handleViewDetails}
+                      onRSVP={handleRSVP}
+                      t={t}
+                      isLoggedIn={!!user}
+                      currentUserId={user?.id}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
       </main>
