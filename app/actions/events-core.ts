@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
-export type EventType = "board_game_night" | "rpg_session" | "tournament" | "custom"
+export type EventType = "game_night" | "campaign" | "tournament" | "league"
 export type EventPrivacy = "public" | "friends" | "private"
 export type EventStatus = "upcoming" | "active" | "completed" | "cancelled"
 export type RSVPStatus = "invited" | "attending" | "declined" | "maybe"
@@ -20,6 +20,7 @@ export interface Event {
   ends_at: string | null
   max_players: number | null
   status: EventStatus | null
+  event_config?: Record<string, unknown> | null
   created_at: string | null
   // Joined data
   host?: {
@@ -202,6 +203,7 @@ export async function createEvent(data: {
   location?: string
   starts_at: string
   max_players?: number
+  event_config?: Record<string, unknown>
 }): Promise<{ event?: Event; error?: string }> {
   const supabase = await createClient()
 
@@ -222,6 +224,7 @@ export async function createEvent(data: {
       location: data.location || null,
       starts_at: data.starts_at,
       max_players: data.max_players || null,
+      event_config: data.event_config || {},
       status: "upcoming",
     })
     .select()
@@ -435,6 +438,7 @@ export async function updateEvent(
     starts_at?: string
     max_players?: number
     status?: EventStatus
+    event_config?: Record<string, unknown>
   }
 ): Promise<{ event?: Event; error?: string }> {
   const supabase = await createClient()
@@ -467,6 +471,7 @@ export async function updateEvent(
       starts_at: data.starts_at,
       max_players: data.max_players,
       status: data.status,
+      event_config: data.event_config,
     })
     .eq("id", eventId)
     .select()
