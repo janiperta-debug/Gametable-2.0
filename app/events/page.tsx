@@ -34,17 +34,17 @@ const statusColors: Record<string, string> = {
 }
 
 const eventTypeLabels: Record<string, string> = {
-  board_game_night: "Board Games",
-  rpg_session: "RPG",
+  game_night: "Game Night",
+  campaign: "Campaign",
   tournament: "Tournament",
-  custom: "Custom",
+  league: "League",
 }
 
 const eventTypeColors: Record<string, string> = {
-  board_game_night: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
-  rpg_session: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
+  game_night: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
+  campaign: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
   tournament: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
-  custom: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
+  league: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
 }
 
 interface EventCardProps {
@@ -88,7 +88,7 @@ function EventCard({ event, onViewDetails, onRSVP, t, isLoggedIn, currentUserId 
                 </Badge>
               )}
               {event.event_type && (
-                <Badge variant="outline" className={eventTypeColors[event.event_type] || eventTypeColors.custom}>
+                <Badge variant="outline" className={eventTypeColors[event.event_type] || eventTypeColors.game_night}>
                   {eventTypeLabels[event.event_type] || event.event_type}
                 </Badge>
               )}
@@ -172,7 +172,7 @@ function EventCard({ event, onViewDetails, onRSVP, t, isLoggedIn, currentUserId 
   )
 }
 
-const eventTypes = ["board_game_night", "rpg_session", "tournament", "custom"] as const
+const eventTypes = ["game_night", "campaign", "tournament", "league"] as const
 
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState("upcoming")
