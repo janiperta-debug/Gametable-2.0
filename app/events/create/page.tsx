@@ -46,7 +46,7 @@ interface UserGame {
 export default function CreateEventPage() {
   const router = useRouter()
   const [gameSelection, setGameSelection] = useState("collection")
-  const [eventType, setEventType] = useState<EventType>("board_game_night")
+  const [eventType, setEventType] = useState<EventType>("game_night")
   const [privacy, setPrivacy] = useState<EventPrivacy>("public")
   const [saving, setSaving] = useState(false)
   const [userGames, setUserGames] = useState<UserGame[]>([])
