@@ -202,6 +202,7 @@ export async function createEvent(data: {
   privacy: EventPrivacy
   location?: string
   starts_at: string
+  ends_at?: string
   max_players?: number
   event_config?: Record<string, unknown>
 }): Promise<{ event?: Event; error?: string }> {
@@ -223,6 +224,7 @@ export async function createEvent(data: {
       privacy: data.privacy,
       location: data.location || null,
       starts_at: data.starts_at,
+      ends_at: data.ends_at || null,
       max_players: data.max_players || null,
       event_config: data.event_config || {},
       status: "upcoming",
