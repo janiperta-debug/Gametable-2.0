@@ -27,7 +27,7 @@ interface EventDigestPrefs {
   max_distance_km: number | null
 }
 
-const EVENT_CATEGORIES = ["board_game_night", "rpg_session", "tournament", "custom"]
+const EVENT_CATEGORIES = ["game_night", "campaign", "tournament", "league"]
 const DISTANCE_OPTIONS = [
   { value: "25", label: "25 km" },
   { value: "50", label: "50 km" },
