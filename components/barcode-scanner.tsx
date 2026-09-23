@@ -70,66 +70,13 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
               setStatus(`Viivakoodi luettu: ${barcode}`)
               toast({
                 title: "✓ Skannaus onnistui",
-                description: "Viivakoodi luettu. Lisätään peliä kokoelmaan...",
+                description: "Viivakoodi luettu. Käsitellään peliä…",
               })
 
-              void (async () => {
-                try {
-                  const category = inferCategoryFromPage()
-                  const resolveResponse = await fetch(
-                    `/api/barcode/resolve?barcode=${encodeURIComponent(barcode)}&category=${category}`,
-                  )
-                  const resolved = await resolveResponse.json()
-
-                  if (!resolveResponse.ok || !resolved.resolved || !resolved.externalGameId) {
-                    setStatus("Viivakoodi luettu. Peliä ei tunnistettu automaattisesti — haetaan peliä…")
-                    onDetectedRef.current(barcode)
-                    return
-                  }
-
-                  setStatus("Peli tunnistettu. Haetaan pelin tiedot…")
-
-                  const detailsEndpoint = category === "board_game" ? "/api/bgg/details" : "/api/rpgg/details"
-                  const detailsResponse = await fetch(
-                    `${detailsEndpoint}?id=${encodeURIComponent(String(resolved.externalGameId))}`,
-                  )
-                  const details = await detailsResponse.json()
-
-                  if (!detailsResponse.ok || !details?.id || !details?.name) {
-                    throw new Error(details?.error || "Pelin tietoja ei voitu hakea.")
-                  }
-
-                  setStatus(`Lisätään “${details.name}” kokoelmaan…`)
-                  const addResult = await addGameToCollection(
-                    details as BGGGameDetails,
-                    "owned",
-                    category,
-                  )
-
-                  if (addResult.error) {
-                    throw new Error(addResult.error)
-                  }
-
-                  setStatus(`✓ ${details.name} lisätty kokoelmaan`)
-                  toast({
-                    title: "✓ Peli lisätty kokoelmaan",
-                    description: details.name,
-                  })
-                  window.setTimeout(() => onCloseRef.current(), 700)
-                } catch (autoAddError) {
-                  console.error("Barcode collection add error:", autoAddError)
-                  setStatus("Viivakoodi luettiin, mutta automaattinen lisäys epäonnistui.")
-                  toast({
-                    title: "Viivakoodi luettu",
-                    description:
-                      autoAddError instanceof Error
-                        ? autoAddError.message
-                        : "Pelin automaattinen lisäys epäonnistui. Voit tarkistaa tunnistuksen.",
-                    variant: "destructive",
-                  })
-                  window.setTimeout(() => onDetectedRef.current(barcode), 250)
-                }
-              })()
+              // The page owns the complete add flow. This keeps the scanner
+              // responsible only for camera/decode work and avoids a second
+              // collection-add implementation inside the scanner.
+              onDetectedRef.current(barcode)
               return
             }
 
