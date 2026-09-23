@@ -10,7 +10,6 @@ import {
   ArchiveCardContent,
   ArchiveCardHeader,
   ArchiveCardTitle,
-  ArchiveFrame,
   archiveField,
   archiveSelectContent,
   archiveSelectItem,
@@ -300,7 +299,7 @@ export default function CreateEventPage() {
                 </div>
 
                 {/* Event Type Selection */}
-                <ArchiveFrame weight="thin" cornerSize="sm" className="space-y-4 rounded-xl p-4">
+                <div className="space-y-4">
                   <Label className="font-body text-accent-gold">{t("events.eventType")}</Label>
                   <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                     {eventTypes.map(({ value, image }) => {
@@ -317,8 +316,8 @@ export default function CreateEventPage() {
                             "border border-[var(--archive-gold,#d9b65c)]/25",
                             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--archive-gold,#d9b65c)]/70",
                             selected
-                              ? "bg-[var(--archive-gold,#d9b65c)]/15 border-[var(--archive-gold,#d9b65c)]/75 shadow-[inset_0_0_18px_rgba(217,182,92,0.12),0_0_18px_rgba(217,182,92,0.12)]"
-                              : "bg-black/20 hover:bg-[var(--archive-gold,#d9b65c)]/7 hover:border-[var(--archive-gold,#d9b65c)]/50"
+                              ? "bg-[var(--archive-surface-shade,rgba(0,0,0,0.28))] border-[var(--archive-gold,#d9b65c)]/75 shadow-[inset_0_0_18px_rgba(217,182,92,0.10)]"
+                              : "bg-[var(--archive-surface-shade,rgba(0,0,0,0.16))] hover:bg-[var(--archive-surface-shade,rgba(0,0,0,0.24))] hover:border-[var(--archive-gold,#d9b65c)]/50"
                           )}
                         >
                           <img
@@ -336,7 +335,7 @@ export default function CreateEventPage() {
                       )
                     })}
                   </div>
-                </ArchiveFrame>
+                </div>
 
                 {/* Organizer-defined event structure */}
                 {eventType !== "game_night" && (
@@ -435,7 +434,7 @@ export default function CreateEventPage() {
                 )}
 
                 {/* Date & Time Range */}
-                <ArchiveFrame weight="thin" cornerSize="sm" className="space-y-4 rounded-xl p-4">
+                <div className="space-y-4">
                   <div className="space-y-3">
                   <Label className="font-body text-accent-gold">Ajankohta</Label>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -491,7 +490,7 @@ export default function CreateEventPage() {
                     </div>
                   </div>
                   </div>
-                </ArchiveFrame>
+                </div>
 
                 {/* Location */}
                 <div className="space-y-2">
