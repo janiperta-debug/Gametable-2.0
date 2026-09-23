@@ -73,22 +73,68 @@ export async function addEventRound(eventId: string, data: { title?: string; sta
   return { round }
 }
 
-export async function addEventMatch(eventId: string, data: { round_id: string; player_a_id?: string; player_b_id?: string }) {
+export async function addEventMatch(eventId: string, data: { round_id: string; entry_a_id?: string; entry_b_id?: string }) {
   const { supabase, error } = await requireHost(eventId)
   if (error) return { error }
+  const entryIds = [data.entry_a_id, data.entry_b_id].filter(Boolean) as string[]
+  const { data: entries } = entryIds.length
+    ? await supabase.from("event_entries").select("id, user_id").eq("event_id", eventId).eq("status", "active").in("id", entryIds)
+    : { data: [] as any[] }
+  if (entries.length !== entryIds.length) return { error: "Valittu kilpailija ei ole aktiivinen tässä tapahtumassa." }
+  const byId = new Map(entries.map((e) => [e.id, e]))
+  const a = data.entry_a_id ? byId.get(data.entry_a_id) : null
+  const b = data.entry_b_id ? byId.get(data.entry_b_id) : null
   const { data: match, error: insertError } = await supabase.from("event_matches").insert({
-    event_id: eventId, round_id: data.round_id, player_a_id: data.player_a_id || null, player_b_id: data.player_b_id || null,
+    event_id: eventId,
+    round_id: data.round_id,
+    entry_a_id: data.entry_a_id || null,
+    entry_b_id: data.entry_b_id || null,
+    player_a_id: a?.user_id || null,
+    player_b_id: b?.user_id || null,
   }).select().single()
   if (insertError) return { error: insertError.message }
   revalidatePath("/events/" + eventId)
   return { match }
 }
 
+
+export async function addEventEntry(eventId: string, userId: string, displayName?: string) {
+  const { supabase, error } = await requireHost(eventId)
+  if (error) return { error }
+  const { data: entry, error: insertError } = await supabase.from("event_entries").upsert({
+    event_id: eventId,
+    user_id: userId,
+    display_name: displayName?.trim() || null,
+    entry_type: "player",
+    status: "active",
+  }, { onConflict: "event_id,user_id" }).select().single()
+  if (insertError) return { error: insertError.message }
+  revalidatePath("/events/" + eventId)
+  return { entry }
+}
+
+export async function removeEventEntry(eventId: string, entryId: string) {
+  const { supabase, error } = await requireHost(eventId)
+  if (error) return { error }
+  const { error: updateError } = await supabase.from("event_entries")
+    .update({ status: "withdrawn" })
+    .eq("id", entryId)
+    .eq("event_id", eventId)
+  if (updateError) return { error: updateError.message }
+  revalidatePath("/events/" + eventId)
+  return { success: true }
+}
+
+
 export async function recordEventMatch(eventId: string, matchId: string, data: { winner_id?: string; score_a?: number; score_b?: number; points_a?: number; points_b?: number; result?: string }) {
   const { supabase, error } = await requireHost(eventId)
   if (error) return { error }
+  const { data: existingMatch } = await supabase.from("event_matches").select("entry_a_id, entry_b_id, player_a_id, player_b_id").eq("id", matchId).eq("event_id", eventId).single()
+  const winnerEntry = data.winner_id && existingMatch
+    ? (data.winner_id === existingMatch.player_a_id ? existingMatch.entry_a_id : data.winner_id === existingMatch.player_b_id ? existingMatch.entry_b_id : null)
+    : null
   const { data: match, error: updateError } = await supabase.from("event_matches").update({
-    winner_id: data.winner_id || null, score_a: data.score_a ?? null, score_b: data.score_b ?? null, points_a: data.points_a ?? null, points_b: data.points_b ?? null,
+    winner_id: data.winner_id || null, winner_entry_id: winnerEntry, score_a: data.score_a ?? null, score_b: data.score_b ?? null, points_a: data.points_a ?? null, points_b: data.points_b ?? null,
     result: data.result?.trim() || null, status: "completed",
   }).eq("id", matchId).eq("event_id", eventId).select().single()
   if (updateError) return { error: updateError.message }
