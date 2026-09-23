@@ -28,9 +28,10 @@ type CategoryType = "board-games" | "rpgs" | "miniatures" | "trading-cards"
 interface ImportSectionProps {
   selectedCategory: CategoryType
   onImportComplete?: () => void
+  tcgGame?: string
 }
 
-export function ImportSection({ selectedCategory, onImportComplete }: ImportSectionProps) {
+export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "mtg" }: ImportSectionProps) {
   const [username, setUsername] = useState("")
   const [importing, setImporting] = useState(false)
   
@@ -327,7 +328,7 @@ export function ImportSection({ selectedCategory, onImportComplete }: ImportSect
 
     for (const item of parsedItems) {
       try {
-        const response = await fetch(`/api/tcg/search?q=${encodeURIComponent(item.name)}&game=mtg`)
+        const response = await fetch(`/api/tcg/search?q=${encodeURIComponent(item.name)}&game=${encodeURIComponent(tcgGame)}`)
         const data = await response.json()
 
         if (data.results && data.results.length > 0) {
