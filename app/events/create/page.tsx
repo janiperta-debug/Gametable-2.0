@@ -300,36 +300,43 @@ export default function CreateEventPage() {
                 </div>
 
                 {/* Event Type Selection */}
-                <div className="space-y-4">
+                <ArchiveFrame weight="thin" cornerSize="sm" className="space-y-4 rounded-xl p-4">
                   <Label className="font-body text-accent-gold">{t("events.eventType")}</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                     {eventTypes.map(({ value, image }) => {
                       const label = t(`events.types.${value}`)
+                      const selected = eventType === value
                       return (
                         <button
                           key={value}
                           type="button"
-                          aria-pressed={eventType === value}
+                          aria-pressed={selected}
                           onClick={() => setEventType(value)}
-                          className={`group relative flex min-h-[150px] flex-col items-center justify-center rounded-xl px-3 py-4 text-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--archive-gold,#d9b65c)]/70 ${
-                            eventType === value
-                              ? "bg-[var(--archive-gold,#d9b65c)]/10 ring-2 ring-[var(--archive-gold,#d9b65c)]/80 shadow-[0_0_24px_rgba(217,182,92,0.22)]"
-                              : "bg-black/10 ring-1 ring-[var(--archive-gold,#d9b65c)]/20 hover:bg-[var(--archive-gold,#d9b65c)]/5 hover:ring-[var(--archive-gold,#d9b65c)]/45"
-                          }`}
+                          className={cn(
+                            "group relative flex min-h-[145px] flex-col items-center justify-center overflow-hidden rounded-lg px-3 py-3 text-center transition-all duration-200",
+                            "border border-[var(--archive-gold,#d9b65c)]/25",
+                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--archive-gold,#d9b65c)]/70",
+                            selected
+                              ? "bg-[var(--archive-gold,#d9b65c)]/15 border-[var(--archive-gold,#d9b65c)]/75 shadow-[inset_0_0_18px_rgba(217,182,92,0.12),0_0_18px_rgba(217,182,92,0.12)]"
+                              : "bg-black/20 hover:bg-[var(--archive-gold,#d9b65c)]/7 hover:border-[var(--archive-gold,#d9b65c)]/50"
+                          )}
                         >
                           <img
                             src={image}
-                            alt={label}
-                            className="h-24 w-full object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.35)] transition-transform duration-200 group-hover:scale-105"
+                            alt=""
+                            className="h-20 w-full object-contain drop-shadow-[0_5px_9px_rgba(0,0,0,0.45)] transition-transform duration-200 group-hover:scale-105"
                           />
-                          <span className="mt-2 font-cinzel text-sm font-semibold text-foreground">
+                          <span className={cn(
+                            "mt-2 font-cinzel text-sm font-semibold",
+                            selected ? "text-[var(--archive-gold,#d9b65c)]" : "text-foreground"
+                          )}>
                             {label}
                           </span>
                         </button>
                       )
                     })}
                   </div>
-                </div>
+                </ArchiveFrame>
 
                 {/* Organizer-defined event structure */}
                 {eventType !== "game_night" && (
@@ -428,7 +435,8 @@ export default function CreateEventPage() {
                 )}
 
                 {/* Date & Time Range */}
-                <div className="space-y-3">
+                <ArchiveFrame weight="thin" cornerSize="sm" className="space-y-4 rounded-xl p-4">
+                  <div className="space-y-3">
                   <Label className="font-body text-accent-gold">Ajankohta</Label>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
