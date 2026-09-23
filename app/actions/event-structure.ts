@@ -97,7 +97,14 @@ export async function recordEventMatch(eventId: string, matchId: string, data: {
 }
 
 export async function getEventStandings(eventId: string) {
-  const { supabase } = await requireHost(eventId).then(async (x) => x)
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: event } = await supabase.from("events").select("host_id, privacy").eq("id", eventId).single()
+  if (!event) return { standings: [], error: "Event not found" }
+  if (event.privacy === "private" && event.host_id !== user?.id) {
+    const { data: participant } = user ? await supabase.from("event_participants").select("user_id").eq("event_id", eventId).eq("user_id", user.id).maybeSingle() : { data: null }
+    if (!participant) return { standings: [], error: "Access denied" }
+  }
   const { data: matches, error } = await supabase.from("event_matches").select("*").eq("event_id", eventId).eq("status", "completed")
   if (error) return { standings: [], error: error.message }
   const { data: participants } = await supabase.from("event_participants").select("user_id, status").eq("event_id", eventId).in("status", ["attending", "maybe"])
