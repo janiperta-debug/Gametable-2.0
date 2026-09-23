@@ -40,7 +40,8 @@ export async function getEventStructure(eventId: string) {
     supabase.from("event_sessions").select("*").eq("event_id", eventId).order("session_number", { ascending: true }),
     supabase.from("event_rounds").select("*").eq("event_id", eventId).order("round_number", { ascending: true }),
   ])
-  return { sessions: sessions || [], rounds: rounds || [], error: sessionsError?.message || roundsError?.message }
+  const { data: matches, error: matchesError } = await supabase.from("event_matches").select("*").eq("event_id", eventId).order("created_at", { ascending: true })
+  return { sessions: sessions || [], rounds: rounds || [], matches: matches || [], error: sessionsError?.message || roundsError?.message || matchesError?.message }
 }
 
 export async function addEventSession(eventId: string, data: { title: string; starts_at?: string; notes?: string }) {
