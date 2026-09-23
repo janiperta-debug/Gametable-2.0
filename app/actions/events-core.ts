@@ -59,7 +59,7 @@ export async function getPublicEvents(): Promise<{ events: Event[]; error?: stri
       *,
       host:profiles!events_host_id_fkey(id, display_name, avatar_url)
     `)
-    .in("status", ["upcoming", "active"])
+    .neq("status", "cancelled")
     .order("starts_at", { ascending: true })
 
   if (error) {
@@ -67,9 +67,16 @@ export async function getPublicEvents(): Promise<{ events: Event[]; error?: stri
     return { events: [], error: error.message }
   }
 
+  const now = new Date()
+  const upcomingOrActive = (events || []).filter((event) => {
+    const start = new Date(event.starts_at)
+    const end = event.ends_at ? new Date(event.ends_at) : null
+    return start >= now || (start < now && end ? end > now : false)
+  })
+
   // Get participant counts and user RSVP status
   const eventsWithCounts = await Promise.all(
-    (events || []).map(async (event) => {
+    upcomingOrActive.map(async (event) => {
       const { count } = await supabase
         .from("event_participants")
         .select("*", { count: "exact", head: true })
@@ -118,7 +125,7 @@ export async function getMyEvents(): Promise<{ events: Event[]; error?: string }
       host:profiles!events_host_id_fkey(id, display_name, avatar_url)
     `)
     .eq("host_id", user.id)
-    .in("status", ["upcoming", "active"])
+    .neq("status", "cancelled")
     .order("starts_at", { ascending: true })
 
   if (hostError) {
@@ -148,7 +155,7 @@ export async function getMyEvents(): Promise<{ events: Event[]; error?: string }
       `)
       .in("id", participatingEventIds)
       .neq("host_id", user.id) // Exclude events user is hosting (already included)
-      .in("status", ["upcoming", "active"])
+      .neq("status", "cancelled")
       .order("starts_at", { ascending: true })
 
     if (!eventsError && events) {
@@ -159,9 +166,16 @@ export async function getMyEvents(): Promise<{ events: Event[]; error?: string }
   // Combine and deduplicate
   const allEvents = [...(hostedEvents || []), ...participatingEvents]
   
+  const now = new Date()
+  const upcomingOrActive = allEvents.filter((event) => {
+    const start = new Date(event.starts_at)
+    const end = event.ends_at ? new Date(event.ends_at) : null
+    return start >= now || (start < now && end ? end > now : false)
+  })
+
   // Get participant counts and user RSVP status
   const eventsWithCounts = await Promise.all(
-    allEvents.map(async (event) => {
+    upcomingOrActive.map(async (event) => {
       const { count } = await supabase
         .from("event_participants")
         .select("*", { count: "exact", head: true })
@@ -210,7 +224,7 @@ export async function getPastEvents(): Promise<{ events: Event[]; error?: string
       *,
       host:profiles!events_host_id_fkey(id, display_name, avatar_url)
     `)
-    .eq("status", "completed")
+    .neq("status", "cancelled")
     .order("starts_at", { ascending: false })
 
   if (error) {
@@ -218,8 +232,15 @@ export async function getPastEvents(): Promise<{ events: Event[]; error?: string
     return { events: [], error: error.message }
   }
 
+  const now = new Date()
+  const pastEvents = (events || []).filter((event) => {
+    const start = new Date(event.starts_at)
+    const end = event.ends_at ? new Date(event.ends_at) : null
+    return end ? end <= now : start < now
+  })
+
   const eventsWithCounts = await Promise.all(
-    (events || []).map(async (event) => {
+    pastEvents.map(async (event) => {
       const { count } = await supabase
         .from("event_participants")
         .select("*", { count: "exact", head: true })
