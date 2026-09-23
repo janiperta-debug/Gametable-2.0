@@ -21,7 +21,7 @@ import { useTranslations } from "@/lib/i18n"
 import { getEventById, updateRSVP, cancelEvent, getInvitableUsers, inviteToEvent, uninviteFromEvent, type Event, type EventParticipant, type RSVPStatus } from "@/app/actions/events"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
-import { addEventRound, addEventSession, getEventStructure } from "@/app/actions/event-structure"
+import { addEventRound, addEventSession, addEventMatch, recordEventMatch, getEventStructure } from "@/app/actions/event-structure"
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   game_night: "Peli-ilta",
@@ -104,7 +104,7 @@ export default function EventDetailsPage() {
   const [invitableUsers, setInvitableUsers] = useState<Array<{ id: string; display_name: string | null; avatar_url: string | null }>>([])
   const [inviting, setInviting] = useState<string | null>(null)
   const [showInviteSection, setShowInviteSection] = useState(false)
-  const [structure, setStructure] = useState<{ sessions: any[]; rounds: any[] }>({ sessions: [], rounds: [] })
+  const [structure, setStructure] = useState<{ sessions: any[]; rounds: any[]; matches: any[]; participants: any[]; profiles: any[] }>({ sessions: [], rounds: [], matches: [], participants: [], profiles: [] })
   const [structureTitle, setStructureTitle] = useState("")
   const [structureLoading, setStructureLoading] = useState(false)
 
@@ -126,12 +126,38 @@ export default function EventDetailsPage() {
       }
       
       const structureResult = await getEventStructure(eventId)
-      setStructure({ sessions: structureResult.sessions, rounds: structureResult.rounds })
+      setStructure({ sessions: structureResult.sessions, rounds: structureResult.rounds, matches: structureResult.matches || [], participants: structureResult.participants || [], profiles: structureResult.profiles || [] })
       setLoading(false)
     }
 
     loadEvent()
   }, [eventId])
+
+  const addMatch = async (roundId: string) => {
+    const selects = document.querySelectorAll<HTMLSelectElement>(`[data-round-id="${roundId}"] select`)
+    const playerA = selects[0]?.value
+    const playerB = selects[1]?.value
+    if (!playerA || !playerB || playerA === playerB) return
+    const result = await addEventMatch(eventId, { round_id: roundId, player_a_id: playerA, player_b_id: playerB })
+    if (result.error) toast({ title: t("common.error"), description: result.error, variant: "destructive" })
+    else {
+      const refreshed = await getEventStructure(eventId)
+      setStructure({ sessions: refreshed.sessions, rounds: refreshed.rounds, matches: refreshed.matches || [], participants: refreshed.participants || [], profiles: refreshed.profiles || [] })
+    }
+  }
+
+  const saveMatchResult = async (matchId: string, winnerId: string, scoreA: string, scoreB: string) => {
+    const result = await recordEventMatch(eventId, matchId, {
+      winner_id: winnerId || undefined,
+      score_a: scoreA === "" ? undefined : Number(scoreA),
+      score_b: scoreB === "" ? undefined : Number(scoreB),
+    })
+    if (result.error) toast({ title: t("common.error"), description: result.error, variant: "destructive" })
+    else {
+      const refreshed = await getEventStructure(eventId)
+      setStructure({ sessions: refreshed.sessions, rounds: refreshed.rounds, matches: refreshed.matches || [], participants: refreshed.participants || [], profiles: refreshed.profiles || [] })
+    }
+  }
 
   const addStructureItem = async () => {
     if (!structureTitle.trim()) return
@@ -144,7 +170,7 @@ export default function EventDetailsPage() {
     } else {
       setStructureTitle("")
       const refreshed = await getEventStructure(eventId)
-      setStructure({ sessions: refreshed.sessions, rounds: refreshed.rounds })
+      setStructure({ sessions: refreshed.sessions, rounds: refreshed.rounds, matches: refreshed.matches || [], participants: refreshed.participants || [], profiles: refreshed.profiles || [] })
     }
     setStructureLoading(false)
   }
@@ -356,11 +382,43 @@ export default function EventDetailsPage() {
                   {(event.event_type === "campaign" ? structure.sessions : structure.rounds).length === 0 ? (
                     <p className="text-sm text-muted-foreground">Rakennetta ei ole vielä määritelty.</p>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       {(event.event_type === "campaign" ? structure.sessions : structure.rounds).map((item: any, index: number) => (
-                        <div key={item.id} className="flex items-center gap-3 rounded-md border border-accent-gold/15 px-3 py-3">
-                          <span className="font-cinzel text-accent-gold">{item.session_number ?? item.round_number ?? index + 1}</span>
-                          <span>{item.title || "Nimetön vaihe"}</span>
+                        <div key={item.id} className="rounded-md border border-accent-gold/15 p-3 space-y-3">
+                          <div className="flex items-center gap-3">
+                            <span className="font-cinzel text-accent-gold">{item.session_number ?? item.round_number ?? index + 1}</span>
+                            <span>{item.title || "Nimetön vaihe"}</span>
+                          </div>
+                          {event.event_type !== "campaign" && (
+                            <div data-round-id={item.id} className="space-y-2">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {[0,1].map((slot) => (
+                                  <select key={slot} className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm">
+                                    <option value="">Valitse pelaaja {slot + 1}</option>
+                                    {structure.profiles.map((p: any) => <option key={p.id} value={p.id}>{p.display_name || p.username || "Pelaaja"}</option>)}
+                                  </select>
+                                ))}
+                              </div>
+                              <ArchiveCardButton onClick={() => addMatch(item.id)}>Lisää ottelu</ArchiveCardButton>
+                              {structure.matches.filter((m: any) => m.round_id === item.id).map((m: any) => {
+                                const a = structure.profiles.find((p: any) => p.id === m.player_a_id)
+                                const b = structure.profiles.find((p: any) => p.id === m.player_b_id)
+                                return (
+                                  <div key={m.id} className="rounded-md bg-background/40 border border-accent-gold/10 p-3 space-y-2">
+                                    <div className="text-sm">{a?.display_name || a?.username || "Pelaaja"} vs {b?.display_name || b?.username || "Pelaaja"}</div>
+                                    <div className="grid grid-cols-3 gap-2">
+                                      <input aria-label="Pelaaja 1 pisteet" type="number" placeholder="P1" defaultValue={m.score_a ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`score-a-${m.id}`} />
+                                      <input aria-label="Pelaaja 2 pisteet" type="number" placeholder="P2" defaultValue={m.score_b ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`score-b-${m.id}`} />
+                                      <select defaultValue={m.winner_id || ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`winner-${m.id}`}>
+                                        <option value="">Ei voittajaa</option><option value={m.player_a_id}>{a?.display_name || "Pelaaja 1"}</option><option value={m.player_b_id}>{b?.display_name || "Pelaaja 2"}</option>
+                                      </select>
+                                    </div>
+                                    <ArchiveCardButton onClick={() => saveMatchResult(m.id, (document.getElementById(`winner-${m.id}`) as HTMLSelectElement)?.value, (document.getElementById(`score-a-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`score-b-${m.id}`) as HTMLInputElement)?.value)}>Tallenna tulos</ArchiveCardButton>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
