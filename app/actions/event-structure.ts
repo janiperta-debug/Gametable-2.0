@@ -42,9 +42,13 @@ export async function getEventStructure(eventId: string) {
   ])
   const { data: matches, error: matchesError } = await supabase.from("event_matches").select("*").eq("event_id", eventId).order("created_at", { ascending: true })
   const { data: participants } = await supabase.from("event_participants").select("user_id, status").eq("event_id", eventId).in("status", ["attending", "maybe"])
-  const userIds = (participants || []).map((p) => p.user_id)
+  const { data: entries } = await supabase.from("event_entries").select("*").eq("event_id", eventId).eq("status", "active").order("created_at", { ascending: true })
+  const userIds = Array.from(new Set([
+    ...(participants || []).map((p) => p.user_id),
+    ...(entries || []).map((e) => e.user_id).filter(Boolean),
+  ]))
   const { data: profiles } = userIds.length ? await supabase.from("profiles").select("id, display_name, username").in("id", userIds) : { data: [] as any[] }
-  return { sessions: sessions || [], rounds: rounds || [], matches: matches || [], participants: participants || [], profiles: profiles || [], error: sessionsError?.message || roundsError?.message || matchesError?.message }
+  return { sessions: sessions || [], rounds: rounds || [], matches: matches || [], participants: participants || [], entries: entries || [], profiles: profiles || [], error: sessionsError?.message || roundsError?.message || matchesError?.message }
 }
 
 export async function addEventSession(eventId: string, data: { title: string; starts_at?: string; notes?: string }) {
@@ -153,16 +157,37 @@ export async function getEventStandings(eventId: string) {
   }
   const { data: matches, error } = await supabase.from("event_matches").select("*").eq("event_id", eventId).eq("status", "completed")
   if (error) return { standings: [], error: error.message }
+  const { data: entries } = await supabase.from("event_entries").select("*").eq("event_id", eventId).eq("status", "active")
   const { data: participants } = await supabase.from("event_participants").select("user_id, status").eq("event_id", eventId).in("status", ["attending", "maybe"])
-  const userIds = (participants || []).map((p) => p.user_id)
+  const userIds = Array.from(new Set([
+    ...(participants || []).map((p) => p.user_id),
+    ...(entries || []).map((e) => e.user_id).filter(Boolean),
+  ]))
   const { data: profiles } = userIds.length ? await supabase.from("profiles").select("id, display_name, username").in("id", userIds) : { data: [] as any[] }
   const rows = new Map<string, any>()
-  for (const p of profiles || []) rows.set(p.id, { user_id: p.id, name: p.display_name || p.username || "Pelaaja", played: 0, wins: 0, draws: 0, losses: 0, score_for: 0, score_against: 0, points: 0 })
+  for (const e of entries || []) {
+    const name = e.display_name || (e.user_id ? (profiles || []).find((p) => p.id === e.user_id)?.display_name : null) || (e.user_id ? (profiles || []).find((p) => p.id === e.user_id)?.username : null) || "Kilpailija"
+    rows.set(e.id, { entry_id: e.id, user_id: e.user_id, name, played: 0, wins: 0, draws: 0, losses: 0, score_for: 0, score_against: 0, points: 0 })
+  }
   for (const m of matches || []) {
     for (const side of ["a", "b"] as const) {
+      const entryId = side === "a" ? m.entry_a_id : m.entry_b_id
+      if (entryId && rows.has(entryId)) {
+        const row = rows.get(entryId)
+        row.played += 1
+        row.score_for += Number(side === "a" ? m.score_a || 0 : m.score_b || 0)
+        row.score_against += Number(side === "a" ? m.score_b || 0 : m.score_a || 0)
+        row.points += Number(side === "a" ? m.points_a || 0 : m.points_b || 0)
+        if (m.winner_entry_id === entryId) row.wins += 1
+        else if (m.winner_entry_id === null && m.score_a !== null && m.score_b !== null && Number(m.score_a) === Number(m.score_b)) row.draws += 1
+        else if (m.winner_entry_id) row.losses += 1
+        continue
+      }
       const id = side === "a" ? m.player_a_id : m.player_b_id
-      if (!id || !rows.has(id)) continue
-      const row = rows.get(id)
+      if (!id) continue
+      const legacyEntry = (entries || []).find((e) => e.user_id === id)
+      if (!legacyEntry || !rows.has(legacyEntry.id)) continue
+      const row = rows.get(legacyEntry.id)
       row.played += 1
       row.score_for += Number(side === "a" ? m.score_a || 0 : m.score_b || 0)
       row.score_against += Number(side === "a" ? m.score_b || 0 : m.score_a || 0)
