@@ -23,12 +23,10 @@ import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
-  board_game_night: "Lautapeli-ilta",
-  rpg_session: "Roolipeli",
+  game_night: "Peli-ilta",
+  campaign: "Kampanja",
   tournament: "Turnaus",
-  trading: "Vaihtokauppa",
-  meetup: "Tapaaminen",
-  other: "Muu",
+  league: "Liiga",
 }
 
 const getPrivacyIcon = (privacy: string | null) => {
