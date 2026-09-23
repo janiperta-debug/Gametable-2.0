@@ -9,7 +9,7 @@ import {
   ArchiveCardContent,
   ArchiveCardHeader,
   ArchiveCardTitle,
-  ArchiveToggle,
+  ArchiveFrame,
   archiveField,
 } from "@/components/archive-frame"
 import { cn } from "@/lib/utils"
@@ -307,15 +307,34 @@ export default function EventsPage() {
         {/* Tabs */}
         <div className="w-full">
           <div className="mb-6 md:mb-8 flex justify-center">
-            <ArchiveToggle
-              value={activeTab}
-              onChange={setActiveTab}
-              options={[
-                { value: "upcoming", label: t("events.upcomingEvents") },
-                { value: "my-events", label: t("events.myEvents") },
-                { value: "past", label: t("events.pastEvents") },
-              ]}
-            />
+            <ArchiveFrame weight="thin" cornerSize="sm" className="w-full max-w-xl rounded-lg">
+              <div role="tablist" className="grid grid-cols-3 gap-1 p-1">
+                {[
+                  { value: "upcoming", label: t("events.upcomingEvents") },
+                  { value: "my-events", label: t("events.myEvents") },
+                  { value: "past", label: t("events.pastEvents") },
+                ].map((tab) => {
+                  const active = activeTab === tab.value
+                  return (
+                    <button
+                      key={tab.value}
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      onClick={() => setActiveTab(tab.value)}
+                      className={cn(
+                        "rounded-md px-2 py-2.5 font-cinzel text-xs sm:text-sm uppercase tracking-wide transition-all",
+                        active
+                          ? "bg-[var(--archive-gold,#d9b65c)]/18 text-[var(--archive-gold,#d9b65c)] font-semibold ring-1 ring-[var(--archive-gold,#d9b65c)]/45 shadow-[inset_0_1px_4px_rgba(0,0,0,0.5)]"
+                          : "text-[var(--archive-gold,#d9b65c)]/60 hover:text-[var(--archive-gold,#d9b65c)] hover:bg-[var(--archive-gold,#d9b65c)]/8"
+                      )}
+                    >
+                      {tab.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </ArchiveFrame>
           </div>
 
           {activeTab === "upcoming" && (
