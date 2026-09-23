@@ -28,6 +28,7 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
   const onDetectedRef = useRef(onDetected)
   const onCloseRef = useRef(onClose)
   const [error, setError] = useState<string | null>(null)
+  const [status, setStatus] = useState("Kamera käynnistyy…")
   const { toast } = useToast()
 
   useEffect(() => {
@@ -46,8 +47,14 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
       if (!videoRef.current) return
 
       try {
-        const controls = await reader.decodeFromVideoDevice(
-          undefined,
+        setStatus("Kohdista viivakoodi kameran viivan kohdalle…")
+        const controls = await reader.decodeFromConstraints(
+          {
+            audio: false,
+            video: {
+              facingMode: { ideal: "environment" },
+            },
+          },
           videoRef.current,
           (result, error, callbackControls) => {
             if (!active) {
@@ -60,6 +67,7 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
               callbackControls.stop()
 
               const barcode = result.getText()
+              setStatus(`Viivakoodi luettu: ${barcode}`)
               toast({
                 title: "✓ Skannaus onnistui",
                 description: "Viivakoodi luettu. Lisätään peliä kokoelmaan...",
@@ -74,9 +82,12 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
                   const resolved = await resolveResponse.json()
 
                   if (!resolveResponse.ok || !resolved.resolved || !resolved.externalGameId) {
+                    setStatus("Viivakoodi luettu. Peliä ei tunnistettu automaattisesti — haetaan peliä…")
                     onDetectedRef.current(barcode)
                     return
                   }
+
+                  setStatus("Peli tunnistettu. Haetaan pelin tiedot…")
 
                   const detailsEndpoint = category === "board_game" ? "/api/bgg/details" : "/api/rpgg/details"
                   const detailsResponse = await fetch(
@@ -88,6 +99,7 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
                     throw new Error(details?.error || "Pelin tietoja ei voitu hakea.")
                   }
 
+                  setStatus(`Lisätään “${details.name}” kokoelmaan…`)
                   const addResult = await addGameToCollection(
                     details as BGGGameDetails,
                     "owned",
@@ -98,6 +110,7 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
                     throw new Error(addResult.error)
                   }
 
+                  setStatus(`✓ ${details.name} lisätty kokoelmaan`)
                   toast({
                     title: "✓ Peli lisätty kokoelmaan",
                     description: details.name,
@@ -105,6 +118,7 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
                   window.setTimeout(() => onCloseRef.current(), 700)
                 } catch (autoAddError) {
                   console.error("Barcode collection add error:", autoAddError)
+                  setStatus("Viivakoodi luettiin, mutta automaattinen lisäys epäonnistui.")
                   toast({
                     title: "Viivakoodi luettu",
                     description:
@@ -136,6 +150,7 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
         console.error("Barcode scanner startup error:", scannerError)
         if (active) {
           setError("Kameran käyttö ei onnistunut. Tarkista selaimen kameraoikeus.")
+          setStatus("Kameraa ei voitu käynnistää.")
         }
       }
     }
