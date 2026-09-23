@@ -472,10 +472,10 @@
     "customEventDesc": "Create your own unique gathering",
     "eventType": "Event Type",
     "types": {
-      "game_night": "Board Games",
-      "campaign": "RPG Sessions",
-      "tournament": "Tournaments",
-      "league": "Miniatures"
+      "game_night": "Game Night",
+      "campaign": "Campaign",
+      "tournament": "Tournament",
+      "league": "League"
     },
     "managementHub": "Event Management Hub",
     "managementHubDesc": "Comprehensive tools for organizing and managing your gaming events",
