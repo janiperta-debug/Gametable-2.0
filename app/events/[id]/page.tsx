@@ -21,6 +21,7 @@ import { useTranslations } from "@/lib/i18n"
 import { getEventById, updateRSVP, cancelEvent, getInvitableUsers, inviteToEvent, uninviteFromEvent, type Event, type EventParticipant, type RSVPStatus } from "@/app/actions/events"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
+import { addEventRound, addEventSession, getEventStructure } from "@/app/actions/event-structure"
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   game_night: "Peli-ilta",
@@ -103,6 +104,9 @@ export default function EventDetailsPage() {
   const [invitableUsers, setInvitableUsers] = useState<Array<{ id: string; display_name: string | null; avatar_url: string | null }>>([])
   const [inviting, setInviting] = useState<string | null>(null)
   const [showInviteSection, setShowInviteSection] = useState(false)
+  const [structure, setStructure] = useState<{ sessions: any[]; rounds: any[] }>({ sessions: [], rounds: [] })
+  const [structureTitle, setStructureTitle] = useState("")
+  const [structureLoading, setStructureLoading] = useState(false)
 
   useEffect(() => {
     const loadEvent = async () => {
@@ -121,11 +125,29 @@ export default function EventDetailsPage() {
         setEvent(result.event)
       }
       
+      const structureResult = await getEventStructure(eventId)
+      setStructure({ sessions: structureResult.sessions, rounds: structureResult.rounds })
       setLoading(false)
     }
 
     loadEvent()
   }, [eventId])
+
+  const addStructureItem = async () => {
+    if (!structureTitle.trim()) return
+    setStructureLoading(true)
+    const result = event?.event_type === "campaign"
+      ? await addEventSession(eventId, { title: structureTitle })
+      : await addEventRound(eventId, { title: structureTitle })
+    if (result.error) {
+      toast({ title: t("common.error"), description: result.error, variant: "destructive" })
+    } else {
+      setStructureTitle("")
+      const refreshed = await getEventStructure(eventId)
+      setStructure({ sessions: refreshed.sessions, rounds: refreshed.rounds })
+    }
+    setStructureLoading(false)
+  }
 
   const handleRSVP = async (status: RSVPStatus) => {
     if (!currentUserId) {
@@ -308,6 +330,45 @@ export default function EventDetailsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Event Details */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Event Structure */}
+            {event.event_type && event.event_type !== "game_night" && (
+              <ArchiveCard>
+                <ArchiveCardHeader>
+                  <ArchiveCardTitle className="text-xl normal-case">
+                    {event.event_type === "campaign" ? "Kampanjan sessiot" : "Tapahtuman kierrokset"}
+                  </ArchiveCardTitle>
+                </ArchiveCardHeader>
+                <ArchiveCardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Järjestäjä voi rakentaa tapahtuman etenemisen vaiheittain. GameTable ei määrää kierrosten tai sessioiden sisältöä.
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      value={structureTitle}
+                      onChange={(e) => setStructureTitle(e.target.value)}
+                      placeholder={event.event_type === "campaign" ? "Esim. Sessio 1 – Kaupungin portit" : "Esim. Kierros 1"}
+                      className="flex-1 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                    />
+                    <ArchiveCardButton onClick={addStructureItem} disabled={structureLoading || !structureTitle.trim()}>
+                      {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Lisää"}
+                    </ArchiveCardButton>
+                  </div>
+                  {(event.event_type === "campaign" ? structure.sessions : structure.rounds).length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Rakennetta ei ole vielä määritelty.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {(event.event_type === "campaign" ? structure.sessions : structure.rounds).map((item: any, index: number) => (
+                        <div key={item.id} className="flex items-center gap-3 rounded-md border border-accent-gold/15 px-3 py-3">
+                          <span className="font-cinzel text-accent-gold">{item.session_number ?? item.round_number ?? index + 1}</span>
+                          <span>{item.title || "Nimetön vaihe"}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </ArchiveCardContent>
+              </ArchiveCard>
+            )}
+
             {/* Main Event Info */}
             <ArchiveCard>
               <ArchiveCardHeader>
