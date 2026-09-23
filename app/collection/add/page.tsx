@@ -150,6 +150,7 @@ export default function AddGamePage() {
   const [barcodeScanning, setBarcodeScanning] = useState(false)
   const [barcodeCandidate, setBarcodeCandidate] = useState<string | null>(null)
   const [barcodeMappingHit, setBarcodeMappingHit] = useState(false)
+  const [barcodeStatus, setBarcodeStatus] = useState<string | null>(null)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [addingGameId, setAddingGameId] = useState<number | string | null>(null)
   const [selectedGame, setSelectedGame] = useState<GameDetails | null>(null)
@@ -216,9 +217,9 @@ export default function AddGamePage() {
       if (selectedCategory === "trading_card") {
         url = `${categoryConfig.searchEndpoint}?q=${encodeURIComponent(query)}&game=${tcgGame}`
       } else {
-        url = `${categoryConfig.searchEndpoint}?query=${encodeURIComponent(searchQuery)}`
+        url = `${categoryConfig.searchEndpoint}?query=${encodeURIComponent(query)}`
       }
-      const response = await fetch(url)
+      const response = await fetchWithTimeout(url, {}, 12000)
       const data = await response.json()
 
       if (data.error) {
@@ -290,6 +291,7 @@ export default function AddGamePage() {
     // after the camera successfully read the barcode.
     setBarcodeCandidate(barcode)
     setBarcodeMappingHit(false)
+    setBarcodeStatus(`Viivakoodi luettu: ${barcode}. Tarkistetaan GameTable-katalogista…`)
     setSearching(true)
 
     try {
@@ -304,9 +306,18 @@ export default function AddGamePage() {
       )
       const resolved = await resolveResponse.json()
 
+      if (!resolveResponse.ok) {
+        throw new Error(resolved?.error || "Viivakoodia ei voitu käsitellä.")
+      }
+
       let gameId: string | number | null = null
 
       if (resolved.resolved && resolved.externalGameId) {
+        setBarcodeStatus(
+          resolved.source === "mapping"
+            ? "Peli löytyi GameTable-katalogista. Haetaan pelin tiedot…"
+            : "Peli löytyi ulkoisesta lähteestä. Haetaan pelin tiedot…",
+        )
         gameId = resolved.externalGameId
 
         if (resolved.source === "mapping") {
@@ -317,6 +328,7 @@ export default function AddGamePage() {
         const suggestedQuery = resolved.suggestedQuery || resolved.providerResult?.name
 
         if (suggestedQuery) {
+          setBarcodeStatus(`Viivakoodi tunnistettiin nimellä “${suggestedQuery}”. Haetaan peliä…`)
           setSearchQuery(suggestedQuery)
           const results = await handleSearch(suggestedQuery)
           const firstResult = results[0]
@@ -327,6 +339,7 @@ export default function AddGamePage() {
       }
 
       if (gameId === null) {
+        setBarcodeStatus("Peliä ei löytynyt viivakoodilla. Voit hakea pelin nimellä.")
         setSearchQuery(barcode)
         throw new Error("Peliä ei löytynyt viivakoodin perusteella. Voit hakea pelin nimellä.")
       }
@@ -336,6 +349,7 @@ export default function AddGamePage() {
       const config = categories.find((category) => category.id === selectedCategory)
       if (!config) throw new Error("Pelikategoriaa ei löytynyt.")
 
+      setBarcodeStatus("Peli löytyi. Haetaan tarkemmat tiedot…")
       const detailsResponse = await fetchWithTimeout(
         `${config.detailsEndpoint}?id=${encodeURIComponent(String(gameId))}`,
         {},
@@ -349,6 +363,7 @@ export default function AddGamePage() {
 
       setSelectedGame(details as GameDetails)
       setLoadingDetails(false)
+      setBarcodeStatus(`“${details.name}” löytyi. Lisätään kokoelmaan…`)
 
       const result = await addGameToCollection(
         details as BGGGameDetails,
@@ -375,6 +390,7 @@ export default function AddGamePage() {
           : error instanceof Error
             ? error.message
             : "Viivakoodin käsittely epäonnistui."
+      setBarcodeStatus(message)
       toast({
         title: t("common.error"),
         description: message,
@@ -797,7 +813,11 @@ export default function AddGamePage() {
                   ) : (
                     <BarcodeScanner
                       onDetected={handleBarcodeDetected}
-                      onClose={() => setBarcodeScanning(false)}
+                      onClose={() => {
+                        setBarcodeScanning(false)
+                        setBarcodeStatus(null)
+                      }}
+                      externalStatus={barcodeStatus}
                     />
                   )}
 
