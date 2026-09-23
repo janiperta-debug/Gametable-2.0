@@ -93,6 +93,8 @@ export default function CreateEventPage() {
     game: "",
     date: "",
     time: "19:00",
+    endDate: "",
+    endTime: "22:00",
     location: "",
     maxPlayers: "",
     description: "",
@@ -108,12 +110,13 @@ export default function CreateEventPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.title.trim() || !formData.date || !formData.time) return
+    if (!formData.title.trim() || !formData.date || !formData.time || !formData.endDate || !formData.endTime) return
 
     setSaving(true)
 
     try {
       const startsAt = new Date(formData.date + "T" + formData.time + ":00")
+      const endsAt = new Date(formData.endDate + "T" + formData.endTime + ":00")
 
       const result = await createEvent({
         title: formData.title.trim(),
@@ -122,6 +125,7 @@ export default function CreateEventPage() {
         privacy: privacy,
         location: formData.location.trim() || undefined,
         starts_at: startsAt.toISOString(),
+        ends_at: endsAt.toISOString(),
         max_players: formData.maxPlayers ? parseInt(formData.maxPlayers) : undefined,
         event_config: {
           format: eventConfig.format.trim() || undefined,
@@ -337,23 +341,48 @@ export default function CreateEventPage() {
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div className="space-y-2">
                         <Label htmlFor="event-format" className="font-body text-accent-gold">Formaatti</Label>
-                        <Input
-                          id="event-format"
-                          placeholder={eventType === "campaign" ? "Esim. viikoittainen kampanja" : "Esim. Swiss, round robin..."}
+                        <Select
                           value={eventConfig.format}
-                          onChange={(e) => setEventConfig({ ...eventConfig, format: e.target.value })}
-                          className={archiveField}
-                        />
+                          onValueChange={(value) => setEventConfig({ ...eventConfig, format: value })}
+                        >
+                          <SelectTrigger id="event-format" className={archiveField}>
+                            <SelectValue placeholder="Valitse formaatti" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {eventType === "campaign" ? (
+                              <>
+                                <SelectItem value="weekly">Viikoittainen</SelectItem>
+                                <SelectItem value="biweekly">Joka toinen viikko</SelectItem>
+                                <SelectItem value="freeform">Vapaamuotoinen</SelectItem>
+                              </>
+                            ) : (
+                              <>
+                                <SelectItem value="swiss">Swiss</SelectItem>
+                                <SelectItem value="round_robin">Round robin</SelectItem>
+                                <SelectItem value="single_elimination">Single elimination</SelectItem>
+                                <SelectItem value="double_elimination">Double elimination</SelectItem>
+                                <SelectItem value="groups_playoffs">Alkulohkot + pudotuspelit</SelectItem>
+                                <SelectItem value="freeform">Vapaamuotoinen</SelectItem>
+                              </>
+                            )}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="event-rounds" className="font-body text-accent-gold">Kierrokset / sessiot</Label>
-                        <Input
-                          id="event-rounds"
-                          placeholder="Esim. 6"
+                        <Select
                           value={eventConfig.rounds}
-                          onChange={(e) => setEventConfig({ ...eventConfig, rounds: e.target.value })}
-                          className={archiveField}
-                        />
+                          onValueChange={(value) => setEventConfig({ ...eventConfig, rounds: value })}
+                        >
+                          <SelectTrigger id="event-rounds" className={archiveField}>
+                            <SelectValue placeholder="Valitse määrä" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from({ length: 20 }, (_, i) => i + 1).map((count) => (
+                              <SelectItem key={count} value={String(count)}>{count}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
 
@@ -395,33 +424,60 @@ export default function CreateEventPage() {
                   </div>
                 )}
 
-                {/* Date & Time */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="date" className="font-body text-accent-gold">
-                      {t("events.date")}
-                    </Label>
-                    <Input 
-                      id="date" 
-                      type="date" 
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      className={cn("font-body", archiveField)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="time" className="font-body text-accent-gold">
-                      {t("events.time")}
-                    </Label>
-                    <Input 
-                      id="time" 
-                      type="time" 
-                      value={formData.time}
-                      onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                      className={cn("font-body", archiveField)}
-                      required
-                    />
+                {/* Date & Time Range */}
+                <div className="space-y-3">
+                  <Label className="font-body text-accent-gold">Ajankohta</Label>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="date" className="text-sm text-muted-foreground">Alkaa</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          id="date"
+                          type="date"
+                          value={formData.date}
+                          onChange={(e) => {
+                            const nextDate = e.target.value
+                            setFormData({
+                              ...formData,
+                              date: nextDate,
+                              endDate: !formData.endDate || formData.endDate === formData.date ? nextDate : formData.endDate,
+                            })
+                          }}
+                          className={cn("font-body", archiveField)}
+                          required
+                        />
+                        <Input
+                          id="time"
+                          type="time"
+                          value={formData.time}
+                          onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                          className={cn("font-body", archiveField)}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="endDate" className="text-sm text-muted-foreground">Päättyy</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          id="endDate"
+                          type="date"
+                          value={formData.endDate}
+                          min={formData.date || undefined}
+                          onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                          className={cn("font-body", archiveField)}
+                          required
+                        />
+                        <Input
+                          id="endTime"
+                          type="time"
+                          value={formData.endTime}
+                          onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                          className={cn("font-body", archiveField)}
+                          required
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
