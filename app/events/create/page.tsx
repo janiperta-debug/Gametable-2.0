@@ -424,7 +424,7 @@ export default function CreateEventPage() {
                         rows={3}
                       />
                     </div>
-                  </div>
+                  </ArchiveFrame>
                 )}
 
                 {/* Date & Time Range */}
