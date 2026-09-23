@@ -418,7 +418,7 @@ export default function EventDetailsPage() {
                                         <option value="">Ei voittajaa</option><option value={m.player_a_id}>{a?.display_name || "Pelaaja 1"}</option><option value={m.player_b_id}>{b?.display_name || "Pelaaja 2"}</option>
                                       </select>
                                     </div>
-                                    <ArchiveCardButton onClick={() => saveMatchResult(m.id, (document.getElementById(`winner-${m.id}`) as HTMLSelectElement)?.value, (document.getElementById(`score-a-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`score-b-${m.id}`) as HTMLInputElement)?.value)}>Tallenna tulos</ArchiveCardButton>
+                                    <ArchiveCardButton onClick={() => saveMatchResult(m.id, (document.getElementById(`winner-${m.id}`) as HTMLSelectElement)?.value, (document.getElementById(`score-a-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`score-b-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`points-a-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`points-b-${m.id}`) as HTMLInputElement)?.value)}>Tallenna tulos</ArchiveCardButton>
                                   </div>
                                 )
                               })}
