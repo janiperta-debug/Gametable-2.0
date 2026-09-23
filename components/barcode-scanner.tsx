@@ -64,19 +64,17 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
 
             if (result) {
               active = false
-              callbackControls.stop()
 
               const barcode = result.getText()
-              setStatus(`Viivakoodi luettu: ${barcode}`)
+              setStatus(`Viivakoodi luettu: ${barcode}. Käsitellään…`)
               toast({
-                title: "✓ Skannaus onnistui",
-                description: "Viivakoodi luettu. Käsitellään peliä…",
+                title: "✓ Viivakoodi luettu",
+                description: "Haetaan peliä ja lisätään se kokoelmaan…",
               })
 
-              // The page owns the complete add flow. This keeps the scanner
-              // responsible only for camera/decode work and avoids a second
-              // collection-add implementation inside the scanner.
-              onDetectedRef.current(barcode)
+              // Do not stop the camera here. The parent owns the complete
+              // barcode flow and will close the scanner after success.
+              void onDetectedRef.current(barcode)
               return
             }
 
@@ -125,6 +123,9 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
       <div className="relative overflow-hidden rounded-md bg-black aspect-video">
         <video ref={videoRef} className="h-full w-full object-cover" muted playsInline />
         <div className="pointer-events-none absolute inset-x-8 top-1/2 h-px bg-accent-gold shadow-[0_0_12px_rgba(212,175,55,0.8)]" />
+        <div className="pointer-events-none absolute inset-x-4 bottom-3 rounded bg-black/70 px-3 py-2 text-center text-xs text-white">
+          {status}
+        </div>
       </div>
 
       {error && <p className="text-sm text-destructive font-body">{error}</p>}
