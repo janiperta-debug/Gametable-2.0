@@ -339,7 +339,7 @@ export default function CreateEventPage() {
 
                 {/* Organizer-defined event structure */}
                 {eventType !== "game_night" && (
-                  <ArchiveFrame weight="thin" cornerSize="sm" className="space-y-4 rounded-xl p-4">
+                  <div className="space-y-4">
                     <div>
                       <h3 className="font-heading text-lg text-accent-gold">Järjestäjän asetukset</h3>
                       <p className="mt-1 text-sm text-muted-foreground">
@@ -430,7 +430,7 @@ export default function CreateEventPage() {
                         rows={3}
                       />
                     </div>
-                  </ArchiveFrame>
+                  </div>
                 )}
 
                 {/* Date & Time Range */}
