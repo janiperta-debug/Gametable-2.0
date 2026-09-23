@@ -21,7 +21,7 @@ import { useTranslations } from "@/lib/i18n"
 import { getEventById, updateRSVP, cancelEvent, getInvitableUsers, inviteToEvent, uninviteFromEvent, type Event, type EventParticipant, type RSVPStatus } from "@/app/actions/events"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
-import { addEventRound, addEventSession, addEventMatch, recordEventMatch, getEventStructure, getEventStandings } from "@/app/actions/event-structure"
+import { addEventRound, addEventSession, addEventMatch, addEventEntry, removeEventEntry, recordEventMatch, getEventStructure, getEventStandings } from "@/app/actions/event-structure"
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   game_night: "Peli-ilta",
@@ -104,7 +104,7 @@ export default function EventDetailsPage() {
   const [invitableUsers, setInvitableUsers] = useState<Array<{ id: string; display_name: string | null; avatar_url: string | null }>>([])
   const [inviting, setInviting] = useState<string | null>(null)
   const [showInviteSection, setShowInviteSection] = useState(false)
-  const [standings, setStandings] = useState<any[]>([])\n  const [structure, setStructure] = useState<{ sessions: any[]; rounds: any[]; matches: any[]; participants: any[]; profiles: any[] }>({ sessions: [], rounds: [], matches: [], participants: [], profiles: [] })
+  const [standings, setStandings] = useState<any[]>([])\n  const [structure, setStructure] = useState<{ sessions: any[]; rounds: any[]; matches: any[]; participants: any[]; entries: any[]; profiles: any[] }>({ sessions: [], rounds: [], matches: [], participants: [], entries: [], profiles: [] })
   const [structureTitle, setStructureTitle] = useState("")
   const [structureLoading, setStructureLoading] = useState(false)
 
@@ -126,7 +126,7 @@ export default function EventDetailsPage() {
       }
       
       const structureResult = await getEventStructure(eventId)\n      const standingsResult = await getEventStandings(eventId)\n      setStandings(standingsResult.standings || [])
-      setStructure({ sessions: structureResult.sessions, rounds: structureResult.rounds, matches: structureResult.matches || [], participants: structureResult.participants || [], profiles: structureResult.profiles || [] })
+      setStructure({ sessions: structureResult.sessions, rounds: structureResult.rounds, matches: structureResult.matches || [], participants: structureResult.participants || [], entries: structureResult.entries || [], profiles: structureResult.profiles || [] })
       setLoading(false)
     }
 
@@ -135,17 +135,36 @@ export default function EventDetailsPage() {
 
   const refreshEventStructure = async () => {
     const refreshed = await getEventStructure(eventId)
-    setStructure({ sessions: refreshed.sessions, rounds: refreshed.rounds, matches: refreshed.matches || [], participants: refreshed.participants || [], profiles: refreshed.profiles || [] })
+    setStructure({ sessions: refreshed.sessions, rounds: refreshed.rounds, matches: refreshed.matches || [], participants: refreshed.participants || [], entries: refreshed.entries || [], profiles: refreshed.profiles || [] })
     const standingsResult = await getEventStandings(eventId)
     setStandings(standingsResult.standings || [])
   }
 
+  const addCompetitor = async (userId: string) => {
+    const profile = structure.profiles.find((p: any) => p.id === userId)
+    const result = await addEventEntry(eventId, userId, profile?.display_name || profile?.username || undefined)
+    if (result.error) {
+      toast({ title: t("common.error"), description: result.error, variant: "destructive" })
+    } else {
+      await refreshEventStructure()
+    }
+  }
+
+  const removeCompetitor = async (entryId: string) => {
+    const result = await removeEventEntry(eventId, entryId)
+    if (result.error) {
+      toast({ title: t("common.error"), description: result.error, variant: "destructive" })
+    } else {
+      await refreshEventStructure()
+    }
+  }
+
   const addMatch = async (roundId: string) => {
     const selects = document.querySelectorAll<HTMLSelectElement>(`[data-round-id="${roundId}"] select`)
-    const playerA = selects[0]?.value
-    const playerB = selects[1]?.value
-    if (!playerA || !playerB || playerA === playerB) return
-    const result = await addEventMatch(eventId, { round_id: roundId, player_a_id: playerA, player_b_id: playerB })
+    const entryA = selects[0]?.value
+    const entryB = selects[1]?.value
+    if (!entryA || !entryB || entryA === entryB) return
+    const result = await addEventMatch(eventId, { round_id: roundId, entry_a_id: entryA, entry_b_id: entryB })
     if (result.error) toast({ title: t("common.error"), description: result.error, variant: "destructive" })
     else {
       await refreshEventStructure()
@@ -175,7 +194,7 @@ export default function EventDetailsPage() {
     } else {
       setStructureTitle("")
       const refreshed = await getEventStructure(eventId)
-      setStructure({ sessions: refreshed.sessions, rounds: refreshed.rounds, matches: refreshed.matches || [], participants: refreshed.participants || [], profiles: refreshed.profiles || [] })
+      setStructure({ sessions: refreshed.sessions, rounds: refreshed.rounds, matches: refreshed.matches || [], participants: refreshed.participants || [], entries: refreshed.entries || [], profiles: refreshed.profiles || [] })
     }
     setStructureLoading(false)
   }
@@ -361,6 +380,60 @@ export default function EventDetailsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Event Details */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Competition Entries */}
+            {(event.event_type === "tournament" || event.event_type === "league") && (
+              <ArchiveCard>
+                <ArchiveCardHeader>
+                  <ArchiveCardTitle className="text-xl normal-case">Kilpailijat</ArchiveCardTitle>
+                </ArchiveCardHeader>
+                <ArchiveCardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    RSVP kertoo, ketkä ovat mukana tapahtumassa. Tässä valitaan erikseen ne osallistujat, jotka ovat mukana itse kilpailussa.
+                  </p>
+                  {isHost && (
+                    <div className="flex gap-2">
+                      <select id="competitor-select" className="flex-1 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm">
+                        <option value="">Valitse kilpailija</option>
+                        {structure.profiles
+                          .filter((p: any) => structure.participants.some((participant: any) => participant.user_id === p.id && participant.status === "attending"))
+                          .filter((p: any) => !structure.entries.some((e: any) => e.user_id === p.id && e.status === "active"))
+                          .map((p: any) => <option key={p.id} value={p.id}>{p.display_name || p.username || "Pelaaja"}</option>)}
+                      </select>
+                      <ArchiveCardButton onClick={() => {
+                        const select = document.getElementById("competitor-select") as HTMLSelectElement | null
+                        if (select?.value) addCompetitor(select.value)
+                      }}>
+                        Lisää
+                      </ArchiveCardButton>
+                    </div>
+                  )}
+                  {structure.entries.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Kilpailijoita ei ole vielä valittu.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {structure.entries.map((entry: any) => {
+                        const profile = structure.profiles.find((p: any) => p.id === entry.user_id)
+                        return (
+                          <div key={entry.id} className="flex items-center justify-between rounded-md border border-accent-gold/10 p-3">
+                            <span>{entry.display_name || profile?.display_name || profile?.username || "Kilpailija"}</span>
+                            {isHost && (
+                              <button
+                                className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-colors"
+                                onClick={() => removeCompetitor(entry.id)}
+                                aria-label="Poista kilpailija"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </ArchiveCardContent>
+              </ArchiveCard>
+            )}
+
             {/* Event Structure */}
             {event.event_type && event.event_type !== "game_night" && (
               <ArchiveCard>
@@ -406,22 +479,29 @@ export default function EventDetailsPage() {
                                 {[0,1].map((slot) => (
                                   <select key={slot} className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm">
                                     <option value="">Valitse pelaaja {slot + 1}</option>
-                                    {structure.profiles.map((p: any) => <option key={p.id} value={p.id}>{p.display_name || p.username || "Pelaaja"}</option>)}
+                                    {structure.entries.map((entry: any) => {
+                                      const p = structure.profiles.find((profile: any) => profile.id === entry.user_id)
+                                      return <option key={entry.id} value={entry.id}>{entry.display_name || p?.display_name || p?.username || "Kilpailija"}</option>
+                                    })}
                                   </select>
                                 ))}
                               </div>
                               {isHost && <ArchiveCardButton onClick={() => addMatch(item.id)}>Lisää ottelu</ArchiveCardButton>}
                               {structure.matches.filter((m: any) => m.round_id === item.id).map((m: any) => {
-                                const a = structure.profiles.find((p: any) => p.id === m.player_a_id)
-                                const b = structure.profiles.find((p: any) => p.id === m.player_b_id)
+                                const entryA = structure.entries.find((e: any) => e.id === m.entry_a_id)
+                                const entryB = structure.entries.find((e: any) => e.id === m.entry_b_id)
+                                const a = structure.profiles.find((p: any) => p.id === entryA?.user_id)
+                                const b = structure.profiles.find((p: any) => p.id === entryB?.user_id)
+                                const nameA = entryA?.display_name || a?.display_name || a?.username || "Kilpailija"
+                                const nameB = entryB?.display_name || b?.display_name || b?.username || "Kilpailija"
                                 return (
                                   <div key={m.id} className="rounded-md bg-background/40 border border-accent-gold/10 p-3 space-y-2">
-                                    <div className="text-sm">{a?.display_name || a?.username || "Pelaaja"} vs {b?.display_name || b?.username || "Pelaaja"}</div>
+                                    <div className="text-sm">{nameA} vs {nameB}</div>
                                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                                       <input aria-label="Pelaaja 1 pisteet" type="number" placeholder="P1" defaultValue={m.score_a ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`score-a-${m.id}`} />
                                       <input aria-label="Pelaaja 2 pisteet" type="number" placeholder="P2" defaultValue={m.score_b ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`score-b-${m.id}`} />
                                       <input aria-label="Pelaaja 1 pisteet" type="number" placeholder="Tapahtumapisteet P1" defaultValue={m.points_a ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`points-a-${m.id}`} />\n                                      <input aria-label="Pelaaja 2 pisteet" type="number" placeholder="Tapahtumapisteet P2" defaultValue={m.points_b ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`points-b-${m.id}`} />\n                                      <select defaultValue={m.winner_id || ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`winner-${m.id}`}>
-                                        <option value="">Ei voittajaa</option><option value={m.player_a_id}>{a?.display_name || "Pelaaja 1"}</option><option value={m.player_b_id}>{b?.display_name || "Pelaaja 2"}</option>
+                                        <option value="">Ei voittajaa</option><option value={m.player_a_id}>{nameA}</option><option value={m.player_b_id}>{nameB}</option>
                                       </select>
                                     </div>
                                     {isHost && <ArchiveCardButton onClick={() => saveMatchResult(m.id, (document.getElementById(`winner-${m.id}`) as HTMLSelectElement)?.value, (document.getElementById(`score-a-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`score-b-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`points-a-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`points-b-${m.id}`) as HTMLInputElement)?.value)}>Tallenna tulos</ArchiveCardButton>}
