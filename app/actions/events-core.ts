@@ -46,7 +46,7 @@ export interface EventParticipant {
 }
 
 /**
- * Get public events, ordered by start date
+ * Get accessible upcoming events, ordered by start date
  */
 export async function getPublicEvents(): Promise<{ events: Event[]; error?: string }> {
   const supabase = await createClient()
@@ -59,7 +59,6 @@ export async function getPublicEvents(): Promise<{ events: Event[]; error?: stri
       *,
       host:profiles!events_host_id_fkey(id, display_name, avatar_url)
     `)
-    .eq("privacy", "public")
     .in("status", ["upcoming", "active"])
     .order("starts_at", { ascending: true })
 
@@ -187,6 +186,59 @@ export async function getMyEvents(): Promise<{ events: Event[]; error?: string }
   // Sort by start date
   eventsWithCounts.sort((a, b) => 
     new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime()
+  )
+
+  return { events: eventsWithCounts }
+}
+
+/**
+ * Get past events accessible to the current user.
+ * RLS controls which private/friends events are visible.
+ */
+export async function getPastEvents(): Promise<{ events: Event[]; error?: string }> {
+  const supabase = await createClient()
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { events: [], error: "Unauthorized" }
+  }
+
+  const { data: events, error } = await supabase
+    .from("events")
+    .select(`
+      *,
+      host:profiles!events_host_id_fkey(id, display_name, avatar_url)
+    `)
+    .eq("status", "completed")
+    .order("starts_at", { ascending: false })
+
+  if (error) {
+    console.error("Error fetching past events:", error)
+    return { events: [], error: error.message }
+  }
+
+  const eventsWithCounts = await Promise.all(
+    (events || []).map(async (event) => {
+      const { count } = await supabase
+        .from("event_participants")
+        .select("*", { count: "exact", head: true })
+        .eq("event_id", event.id)
+        .eq("status", "attending")
+
+      const { data: rsvpData } = await supabase
+        .from("event_participants")
+        .select("status")
+        .eq("event_id", event.id)
+        .eq("user_id", user.id)
+        .single()
+
+      return {
+        ...event,
+        participant_count: count || 0,
+        user_rsvp: rsvpData?.status || null,
+      }
+    })
   )
 
   return { events: eventsWithCounts }
