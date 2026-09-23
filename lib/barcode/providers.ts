@@ -22,10 +22,22 @@ function firstNumber(value: unknown): number | null {
 
 export async function lookupGameUpc(barcode: string): Promise<BarcodeProviderResult | null> {
   try {
-    const response = await fetch(
-      "https://api.gameupc.com/test/upc/" + encodeURIComponent(barcode),
-      { headers: { Accept: "application/json" }, cache: "no-store" },
-    )
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 8000)
+
+    let response: Response
+    try {
+      response = await fetch(
+        "https://api.gameupc.com/test/upc/" + encodeURIComponent(barcode),
+        {
+          headers: { Accept: "application/json" },
+          cache: "no-store",
+          signal: controller.signal,
+        },
+      )
+    } finally {
+      clearTimeout(timeout)
+    }
 
     if (!response.ok) return null
 
