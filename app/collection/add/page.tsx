@@ -282,50 +282,85 @@ export default function AddGamePage() {
 
     try {
       if (selectedCategory !== "board_game" && selectedCategory !== "rpg") {
-        return
+        throw new Error("Viivakoodiskannaus toimii tällä hetkellä lautapeleille ja roolipeleille.")
       }
 
-      const response = await fetch(
+      const resolveResponse = await fetch(
         `/api/barcode/resolve?barcode=${encodeURIComponent(barcode)}&category=${selectedCategory}`,
       )
-      const data = await response.json()
+      const resolved = await resolveResponse.json()
 
-      if (data.resolved && data.externalGameId) {
-        if (data.source === "mapping") {
+      let gameId: string | number | null = null
+
+      if (resolved.resolved && resolved.externalGameId) {
+        gameId = resolved.externalGameId
+
+        if (resolved.source === "mapping") {
           setBarcodeCandidate(null)
           setBarcodeMappingHit(true)
         }
-        await handleSelectGame(data.externalGameId)
-        return
-      }
+      } else {
+        const suggestedQuery = resolved.suggestedQuery || resolved.providerResult?.name
 
-      const suggestedQuery = data.suggestedQuery || data.providerResult?.name
-      if (suggestedQuery) {
-        setSearchQuery(suggestedQuery)
-        const results = await handleSearch(suggestedQuery)
-        const firstResult = results[0]
-        if (firstResult) {
-          await handleSelectGame(getSearchResultId(firstResult))
-          return
+        if (suggestedQuery) {
+          setSearchQuery(suggestedQuery)
+          const results = await handleSearch(suggestedQuery)
+          const firstResult = results[0]
+          if (firstResult) {
+            gameId = getSearchResultId(firstResult)
+          }
         }
       }
 
-      setSearchQuery(barcode)
+      if (gameId === null) {
+        setSearchQuery(barcode)
+        throw new Error("Peliä ei löytynyt viivakoodin perusteella. Voit hakea pelin nimellä.")
+      }
+
+      // Keep the complete barcode flow in this page: resolve -> details -> the
+      // same server action used by the normal "Add to collection" button.
+      const config = categories.find((category) => category.id === selectedCategory)
+      if (!config) throw new Error("Pelikategoriaa ei löytynyt.")
+
+      const detailsResponse = await fetch(
+        `${config.detailsEndpoint}?id=${encodeURIComponent(String(gameId))}`,
+      )
+      const details = await detailsResponse.json()
+
+      if (!detailsResponse.ok || !details?.id || !details?.name) {
+        throw new Error(details?.error || "Pelin tietoja ei voitu hakea.")
+      }
+
+      setSelectedGame(details as GameDetails)
+      setLoadingDetails(false)
+
+      const result = await addGameToCollection(
+        details as BGGGameDetails,
+        "owned",
+        selectedCategory,
+      )
+
+      if (result.error) {
+        throw new Error(result.error)
+      }
+
+      setBarcodeCandidate(null)
       toast({
-        title: "Viivakoodi tunnistettu",
-        description: "Peliä ei löytynyt suoraan. Haku voidaan tehdä viivakoodin perusteella.",
+        title: t("common.success"),
+        description: `${details.name} ${t("collection.addedToCollection")}`,
       })
+      router.push("/collection")
     } catch (error) {
-      console.error("Barcode resolve error:", error)
+      console.error("Barcode add error:", error)
       toast({
         title: t("common.error"),
-        description: "Viivakoodin käsittely epäonnistui. Voit hakea pelin nimellä.",
+        description: error instanceof Error ? error.message : "Viivakoodin käsittely epäonnistui.",
         variant: "destructive",
       })
     } finally {
       setSearching(false)
     }
-  }, [handleSearch, handleSelectGame, selectedCategory, t, toast])
+  }, [handleSearch, selectedCategory, t, toast, router])
 
   const handleCreateMiniatureArmy = async () => {
     const miniature = selectedGame as MiniatureSearchResult | null
