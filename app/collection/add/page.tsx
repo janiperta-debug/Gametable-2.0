@@ -144,7 +144,6 @@ function groupBoardResults(results: BGGSearchResult[]): BoardHost[] {
 
 export default function AddGamePage() {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<"manual" | "bulk">("manual")
   const [selectedCategory, setSelectedCategory] = useState<GameCategory>("board_game")
   const [searchQuery, setSearchQuery] = useState("")
   const [searching, setSearching] = useState(false)
@@ -554,7 +553,6 @@ export default function AddGamePage() {
     setSearchResults([])
     setSelectedGame(null)
     setSearchQuery("")
-    setActiveTab("manual")
     setBarcodeCandidate(null)
     setBarcodeMappingHit(false)
     setParsedItems([])
@@ -796,12 +794,25 @@ export default function AddGamePage() {
             </ArchiveCardContent>
           </ArchiveCard>
 
-          {/* Search/Manual Tabs */}
           <ArchiveCard>
-            <ArchiveCardContent className="pt-6">
-              {/* Physical game identification */}
+            <ArchiveCardContent className="pt-6 space-y-6">
+              <ImportSection
+                selectedCategory={
+                  selectedCategory === "board_game"
+                    ? "board-games"
+                    : selectedCategory === "rpg"
+                      ? "rpgs"
+                      : selectedCategory === "trading_card"
+                        ? "trading-cards"
+                        : "miniatures"
+                }
+                tcgGame={tcgGame}
+                embedded
+                onImportComplete={() => router.push("/collection")}
+              />
+
               {(selectedCategory === "board_game" || selectedCategory === "rpg") && (
-                <div className="space-y-4">
+                <div className="space-y-4 border-t border-accent-gold/20 pt-5">
                   {!barcodeScanning ? (
                     <ArchiveButton
                       type="button"
@@ -870,51 +881,30 @@ export default function AddGamePage() {
                 </div>
               )}
 
-              {/* TCG game selector */}
-              {selectedCategory === "trading_card" && (
-                <div className="mb-6 space-y-3">
-                  <p className="font-body text-sm text-muted-foreground">Valitse korttipeli</p>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      { id: "magic", label: "Magic: The Gathering" },
-                      { id: "pokemon", label: "Pokémon" },
-                      { id: "yugioh", label: "Yu-Gi-Oh!" },
-                      { id: "lorcana", label: "Disney Lorcana" },
-                      { id: "flesh-and-blood", label: "Flesh & Blood" },
-                      { id: "one-piece", label: "One Piece" },
-                      { id: "riftbound", label: "Riftbound" },
-                      { id: "digimon", label: "Digimon Card Game" },
-                      { id: "gundam", label: "Gundam Card Game" },
-                      { id: "star-wars-unlimited", label: "Star Wars: Unlimited" },
-                      { id: "dragon-ball-fusion-world", label: "Dragon Ball Super: Fusion World" },
-                    ].map((game) => (
-                      <ArchiveCardButton
-                        key={game.id}
-                        type="button"
-                        active={tcgGame === game.id}
-                        onClick={() => {
-                          setTcgGame(game.id as typeof tcgGame)
-                          setSearchResults([])
-                          setSelectedGame(null)
-                        }}
-                      >
-                        <span className="normal-case">{game.label}</span>
-                      </ArchiveCardButton>
-                    ))}
+              <div className="border-t border-accent-gold/20 pt-5">
+                <h2 className="font-heading text-xl text-accent-gold mb-3">{t("collection.manualEntry")}</h2>
+                {selectedCategory === "trading_card" && (
+                  <div className="mb-5">
+                    <label className="sr-only" htmlFor="add-tcg-game-selector">Valitse korttipeli</label>
+                    <select
+                      id="add-tcg-game-selector"
+                      value={tcgGame}
+                      onChange={(e) => {
+                        setTcgGame(e.target.value as typeof tcgGame)
+                        setSearchResults([])
+                        setSelectedGame(null)
+                      }}
+                      className="h-10 w-full rounded-md px-3 text-sm font-body bg-background/40 text-foreground border border-accent-gold/20"
+                    >
+                      <option value="magic">Magic: The Gathering</option>
+                      <option value="pokemon">Pokemon</option>
+                      <option value="yugioh">Yu-Gi-Oh!</option>
+                      <option value="lorcana">Lorcana</option>
+                      <option value="flesh-and-blood">Flesh & Blood</option>
+                      <option value="one-piece">One Piece</option>
+                    </select>
                   </div>
-                </div>
-              )}
-
-              {/* Add Game entry methods. External search lives on Etsi peli. */}
-              <div className="mb-6 flex justify-center">
-                <ArchiveToggle
-                  value={activeTab}
-                  onChange={(v) => setActiveTab(v)}
-                  options={[
-                    { value: "manual", label: t("collection.manualEntry") },
-                    { value: "bulk", label: t("collection.bulkImport") },
-                  ]}
-                />
+                )}
               </div>
 
                   {/* Selected Game Preview */}
@@ -1125,8 +1115,7 @@ export default function AddGamePage() {
 
 
 
-              {/* Manual Entry Tab */}
-              {activeTab === "manual" && (
+              <div className="mt-6 border-t border-accent-gold/20 pt-5">
                 <div className="space-y-6">
                   <p className="font-body text-muted-foreground text-sm">
                     {t("collection.manualEntryDescription")}
@@ -1287,9 +1276,11 @@ export default function AddGamePage() {
                   tcgGame={tcgGame}
                   onImportComplete={() => router.push("/collection")}
                 />
-              )}
+              )
+              </div>
 
             </ArchiveCardContent>
+          </ArchiveCard>
           </ArchiveCard>
         </div>
       </main>
