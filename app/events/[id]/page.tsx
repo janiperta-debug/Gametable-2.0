@@ -104,7 +104,8 @@ export default function EventDetailsPage() {
   const [invitableUsers, setInvitableUsers] = useState<Array<{ id: string; display_name: string | null; avatar_url: string | null }>>([])
   const [inviting, setInviting] = useState<string | null>(null)
   const [showInviteSection, setShowInviteSection] = useState(false)
-  const [standings, setStandings] = useState<any[]>([])\n  const [structure, setStructure] = useState<{ sessions: any[]; rounds: any[]; matches: any[]; participants: any[]; entries: any[]; profiles: any[] }>({ sessions: [], rounds: [], matches: [], participants: [], entries: [], profiles: [] })
+  const [standings, setStandings] = useState<any[]>([])
+  const [structure, setStructure] = useState<{ sessions: any[]; rounds: any[]; matches: any[]; participants: any[]; entries: any[]; profiles: any[] }>({ sessions: [], rounds: [], matches: [], participants: [], entries: [], profiles: [] })
   const [structureTitle, setStructureTitle] = useState("")
   const [structureLoading, setStructureLoading] = useState(false)
 
@@ -125,7 +126,9 @@ export default function EventDetailsPage() {
         setEvent(result.event)
       }
       
-      const structureResult = await getEventStructure(eventId)\n      const standingsResult = await getEventStandings(eventId)\n      setStandings(standingsResult.standings || [])
+      const structureResult = await getEventStructure(eventId)
+      const standingsResult = await getEventStandings(eventId)
+      setStandings(standingsResult.standings || [])
       setStructure({ sessions: structureResult.sessions, rounds: structureResult.rounds, matches: structureResult.matches || [], participants: structureResult.participants || [], entries: structureResult.entries || [], profiles: structureResult.profiles || [] })
       setLoading(false)
     }
@@ -500,7 +503,9 @@ export default function EventDetailsPage() {
                                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                                       <input aria-label="Pelaaja 1 pisteet" type="number" placeholder="P1" defaultValue={m.score_a ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`score-a-${m.id}`} />
                                       <input aria-label="Pelaaja 2 pisteet" type="number" placeholder="P2" defaultValue={m.score_b ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`score-b-${m.id}`} />
-                                      <input aria-label="Pelaaja 1 pisteet" type="number" placeholder="Tapahtumapisteet P1" defaultValue={m.points_a ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`points-a-${m.id}`} />\n                                      <input aria-label="Pelaaja 2 pisteet" type="number" placeholder="Tapahtumapisteet P2" defaultValue={m.points_b ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`points-b-${m.id}`} />\n                                      <select defaultValue={m.winner_id || ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`winner-${m.id}`}>
+                                      <input aria-label="Pelaaja 1 pisteet" type="number" placeholder="Tapahtumapisteet P1" defaultValue={m.points_a ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`points-a-${m.id}`} />
+                                      <input aria-label="Pelaaja 2 pisteet" type="number" placeholder="Tapahtumapisteet P2" defaultValue={m.points_b ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`points-b-${m.id}`} />
+                                      <select defaultValue={m.winner_id || ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`winner-${m.id}`}>
                                         <option value="">Ei voittajaa</option><option value={m.player_a_id}>{nameA}</option><option value={m.player_b_id}>{nameB}</option>
                                       </select>
                                     </div>
