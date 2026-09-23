@@ -220,17 +220,17 @@ export default function EditEventPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className={archiveSelectContent}>
-                      <SelectItem value="board_game_night" className={archiveSelectItem}>
-                        {t("events.boardGameNight") || "Board Game Night"}
+                      <SelectItem value="game_night" className={archiveSelectItem}>
+                        {t("events.types.game_night") || "Game Night"}
                       </SelectItem>
-                      <SelectItem value="rpg_session" className={archiveSelectItem}>
-                        {t("events.rpgSession") || "RPG Session"}
+                      <SelectItem value="campaign" className={archiveSelectItem}>
+                        {t("events.types.campaign") || "Campaign"}
                       </SelectItem>
                       <SelectItem value="tournament" className={archiveSelectItem}>
-                        {t("events.tournament") || "Tournament"}
+                        {t("events.types.tournament") || "Tournament"}
                       </SelectItem>
-                      <SelectItem value="custom" className={archiveSelectItem}>
-                        {t("events.custom") || "Custom Event"}
+                      <SelectItem value="league" className={archiveSelectItem}>
+                        {t("events.types.league") || "League"}
                       </SelectItem>
                     </SelectContent>
                   </Select>
