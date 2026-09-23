@@ -460,10 +460,10 @@
     "customEventDesc": "Luo oma ainutlaatuinen kokoontuminen",
     "eventType": "Tapahtumatyyppi",
     "types": {
-      "game_night": "Lautapelit",
-      "campaign": "Roolipelisessiot",
-      "tournament": "Turnaukset",
-      "league": "Miniatyyripelit"
+      "game_night": "Peli-ilta",
+      "campaign": "Kampanja",
+      "tournament": "Turnaus",
+      "league": "Liiga"
     },
     "managementHub": "Tapahtumien hallintakeskus",
     "managementHubDesc": "Kattavat työkalut pelitapahtumien järjestämiseen ja hallintaan",
