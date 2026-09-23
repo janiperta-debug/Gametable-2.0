@@ -174,10 +174,10 @@ function getEventDigestEmailTemplate(events: Event[], userName: string | null) {
   const greeting = userName ? `Hello ${userName}` : "Hello"
 
   const eventTypeLabels: Record<string, string> = {
-    board_game_night: "Board Games",
-    rpg_session: "RPG Session",
+    game_night: "Game Night",
+    campaign: "Campaign",
     tournament: "Tournament",
-    custom: "Custom Event",
+    league: "League",
   }
 
   const eventListHtml = events
