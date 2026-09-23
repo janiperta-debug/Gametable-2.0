@@ -37,7 +37,7 @@ export default function EditEventPage() {
   // Form state
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [eventType, setEventType] = useState<EventType>("board_game_night")
+  const [eventType, setEventType] = useState<EventType>("game_night")
   const [privacy, setPrivacy] = useState<EventPrivacy>("public")
   const [location, setLocation] = useState("")
   const [startsAt, setStartsAt] = useState("")
@@ -69,7 +69,7 @@ export default function EditEventPage() {
           // Populate form
           setTitle(result.event.title)
           setDescription(result.event.description || "")
-          setEventType(result.event.event_type || "board_game_night")
+          setEventType(result.event.event_type || "game_night")
           setPrivacy(result.event.privacy || "public")
           setLocation(result.event.location || "")
           // Format date for datetime-local input
