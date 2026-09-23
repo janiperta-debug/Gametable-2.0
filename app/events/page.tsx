@@ -307,7 +307,7 @@ export default function EventsPage() {
         {/* Tabs */}
         <div className="w-full">
           <div className="mb-6 md:mb-8 flex justify-center">
-            <ArchiveFrame weight="thin" cornerSize="sm" className="w-full max-w-xl rounded-lg">
+            <ArchiveFrame weight="thin" cornerSize="sm" className="w-full max-w-xl h-[54px] rounded-lg">
               <div role="tablist" className="grid grid-cols-3 gap-1 p-1">
                 {[
                   { value: "upcoming", label: t("events.upcomingEvents") },
