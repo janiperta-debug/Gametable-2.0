@@ -373,7 +373,7 @@ export default function EventDetailsPage() {
                   <p className="text-sm text-muted-foreground">
                     Järjestäjä voi rakentaa tapahtuman etenemisen vaiheittain. GameTable ei määrää kierrosten tai sessioiden sisältöä.
                   </p>
-                  <div className="flex gap-2">
+                  {isHost && <div className="flex gap-2">
                     <input
                       value={structureTitle}
                       onChange={(e) => setStructureTitle(e.target.value)}
@@ -383,7 +383,7 @@ export default function EventDetailsPage() {
                     <ArchiveCardButton onClick={addStructureItem} disabled={structureLoading || !structureTitle.trim()}>
                       {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Lisää"}
                     </ArchiveCardButton>
-                  </div>
+                  </div>}
                   {(event.event_type === "campaign" ? structure.sessions : structure.rounds).length === 0 ? (
                     <p className="text-sm text-muted-foreground">Rakennetta ei ole vielä määritelty.</p>
                   ) : (
@@ -395,6 +395,12 @@ export default function EventDetailsPage() {
                             <span>{item.title || "Nimetön vaihe"}</span>
                           </div>
                           {event.event_type !== "campaign" && (
+                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                              <span>{structure.matches.filter((m: any) => m.round_id === item.id).length} ottelua</span>
+                              <span>{item.status === "completed" ? "Valmis" : item.status === "active" ? "Käynnissä" : "Suunniteltu"}</span>
+                            </div>
+                          )}
+                          {event.event_type !== "campaign" && (
                             <div data-round-id={item.id} className="space-y-2">
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 {[0,1].map((slot) => (
@@ -404,7 +410,7 @@ export default function EventDetailsPage() {
                                   </select>
                                 ))}
                               </div>
-                              <ArchiveCardButton onClick={() => addMatch(item.id)}>Lisää ottelu</ArchiveCardButton>
+                              {isHost && <ArchiveCardButton onClick={() => addMatch(item.id)}>Lisää ottelu</ArchiveCardButton>}
                               {structure.matches.filter((m: any) => m.round_id === item.id).map((m: any) => {
                                 const a = structure.profiles.find((p: any) => p.id === m.player_a_id)
                                 const b = structure.profiles.find((p: any) => p.id === m.player_b_id)
@@ -418,7 +424,7 @@ export default function EventDetailsPage() {
                                         <option value="">Ei voittajaa</option><option value={m.player_a_id}>{a?.display_name || "Pelaaja 1"}</option><option value={m.player_b_id}>{b?.display_name || "Pelaaja 2"}</option>
                                       </select>
                                     </div>
-                                    <ArchiveCardButton onClick={() => saveMatchResult(m.id, (document.getElementById(`winner-${m.id}`) as HTMLSelectElement)?.value, (document.getElementById(`score-a-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`score-b-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`points-a-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`points-b-${m.id}`) as HTMLInputElement)?.value)}>Tallenna tulos</ArchiveCardButton>
+                                    {isHost && <ArchiveCardButton onClick={() => saveMatchResult(m.id, (document.getElementById(`winner-${m.id}`) as HTMLSelectElement)?.value, (document.getElementById(`score-a-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`score-b-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`points-a-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`points-b-${m.id}`) as HTMLInputElement)?.value)}>Tallenna tulos</ArchiveCardButton>}
                                   </div>
                                 )
                               })}
