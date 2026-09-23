@@ -84,14 +84,40 @@ export async function addEventMatch(eventId: string, data: { round_id: string; p
   return { match }
 }
 
-export async function recordEventMatch(eventId: string, matchId: string, data: { winner_id?: string; score_a?: number; score_b?: number; result?: string }) {
+export async function recordEventMatch(eventId: string, matchId: string, data: { winner_id?: string; score_a?: number; score_b?: number; points_a?: number; points_b?: number; result?: string }) {
   const { supabase, error } = await requireHost(eventId)
   if (error) return { error }
   const { data: match, error: updateError } = await supabase.from("event_matches").update({
-    winner_id: data.winner_id || null, score_a: data.score_a ?? null, score_b: data.score_b ?? null,
+    winner_id: data.winner_id || null, score_a: data.score_a ?? null, score_b: data.score_b ?? null, points_a: data.points_a ?? null, points_b: data.points_b ?? null,
     result: data.result?.trim() || null, status: "completed",
   }).eq("id", matchId).eq("event_id", eventId).select().single()
   if (updateError) return { error: updateError.message }
   revalidatePath("/events/" + eventId)
   return { match }
+}
+
+export async function getEventStandings(eventId: string) {
+  const { supabase } = await requireHost(eventId).then(async (x) => x)
+  const { data: matches, error } = await supabase.from("event_matches").select("*").eq("event_id", eventId).eq("status", "completed")
+  if (error) return { standings: [], error: error.message }
+  const { data: participants } = await supabase.from("event_participants").select("user_id, status").eq("event_id", eventId).in("status", ["attending", "maybe"])
+  const userIds = (participants || []).map((p) => p.user_id)
+  const { data: profiles } = userIds.length ? await supabase.from("profiles").select("id, display_name, username").in("id", userIds) : { data: [] as any[] }
+  const rows = new Map<string, any>()
+  for (const p of profiles || []) rows.set(p.id, { user_id: p.id, name: p.display_name || p.username || "Pelaaja", played: 0, wins: 0, draws: 0, losses: 0, score_for: 0, score_against: 0, points: 0 })
+  for (const m of matches || []) {
+    for (const side of ["a", "b"] as const) {
+      const id = side === "a" ? m.player_a_id : m.player_b_id
+      if (!id || !rows.has(id)) continue
+      const row = rows.get(id)
+      row.played += 1
+      row.score_for += Number(side === "a" ? m.score_a || 0 : m.score_b || 0)
+      row.score_against += Number(side === "a" ? m.score_b || 0 : m.score_a || 0)
+      row.points += Number(side === "a" ? m.points_a || 0 : m.points_b || 0)
+      if (m.winner_id === id) row.wins += 1
+      else if (m.winner_id === null && m.score_a !== null && m.score_b !== null && Number(m.score_a) === Number(m.score_b)) row.draws += 1
+      else if (m.winner_id) row.losses += 1
+    }
+  }
+  return { standings: Array.from(rows.values()).sort((a,b) => b.points - a.points || b.wins - a.wins || b.score_for - a.score_for), error: undefined }
 }
