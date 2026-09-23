@@ -10,7 +10,10 @@ import {
   ArchiveCardContent,
   ArchiveCardHeader,
   ArchiveCardTitle,
+  ArchiveFrame,
   archiveField,
+  archiveSelectContent,
+  archiveSelectItem,
 } from "@/components/archive-frame"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
@@ -330,7 +333,7 @@ export default function CreateEventPage() {
 
                 {/* Organizer-defined event structure */}
                 {eventType !== "game_night" && (
-                  <div className="space-y-4 rounded-xl border border-accent-gold/20 bg-black/10 p-4">
+                  <ArchiveFrame weight="thin" cornerSize="sm" className="space-y-4 rounded-xl p-4">
                     <div>
                       <h3 className="font-heading text-lg text-accent-gold">Järjestäjän asetukset</h3>
                       <p className="mt-1 text-sm text-muted-foreground">
@@ -348,21 +351,21 @@ export default function CreateEventPage() {
                           <SelectTrigger id="event-format" className={archiveField}>
                             <SelectValue placeholder="Valitse formaatti" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className={archiveSelectContent}>
                             {eventType === "campaign" ? (
                               <>
-                                <SelectItem value="weekly">Viikoittainen</SelectItem>
-                                <SelectItem value="biweekly">Joka toinen viikko</SelectItem>
-                                <SelectItem value="freeform">Vapaamuotoinen</SelectItem>
+                                <SelectItem className={archiveSelectItem} value="weekly">Viikoittainen</SelectItem>
+                                <SelectItem className={archiveSelectItem} value="biweekly">Joka toinen viikko</SelectItem>
+                                <SelectItem className={archiveSelectItem} value="freeform">Vapaamuotoinen</SelectItem>
                               </>
                             ) : (
                               <>
-                                <SelectItem value="swiss">Swiss</SelectItem>
-                                <SelectItem value="round_robin">Round robin</SelectItem>
-                                <SelectItem value="single_elimination">Single elimination</SelectItem>
-                                <SelectItem value="double_elimination">Double elimination</SelectItem>
-                                <SelectItem value="groups_playoffs">Alkulohkot + pudotuspelit</SelectItem>
-                                <SelectItem value="freeform">Vapaamuotoinen</SelectItem>
+                                <SelectItem className={archiveSelectItem} value="swiss">Swiss</SelectItem>
+                                <SelectItem className={archiveSelectItem} value="round_robin">Round robin</SelectItem>
+                                <SelectItem className={archiveSelectItem} value="single_elimination">Single elimination</SelectItem>
+                                <SelectItem className={archiveSelectItem} value="double_elimination">Double elimination</SelectItem>
+                                <SelectItem className={archiveSelectItem} value="groups_playoffs">Alkulohkot + pudotuspelit</SelectItem>
+                                <SelectItem className={archiveSelectItem} value="freeform">Vapaamuotoinen</SelectItem>
                               </>
                             )}
                           </SelectContent>
@@ -377,9 +380,9 @@ export default function CreateEventPage() {
                           <SelectTrigger id="event-rounds" className={archiveField}>
                             <SelectValue placeholder="Valitse määrä" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className={archiveSelectContent}>
                             {Array.from({ length: 20 }, (_, i) => i + 1).map((count) => (
-                              <SelectItem key={count} value={String(count)}>{count}</SelectItem>
+                              <SelectItem className={archiveSelectItem} key={count} value={String(count)}>{count}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
