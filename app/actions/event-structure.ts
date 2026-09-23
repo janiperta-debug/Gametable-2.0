@@ -68,3 +68,26 @@ export async function addEventRound(eventId: string, data: { title?: string; sta
   revalidatePath("/events/" + eventId)
   return { round }
 }
+
+export async function addEventMatch(eventId: string, data: { round_id: string; player_a_id?: string; player_b_id?: string }) {
+  const { supabase, error } = await requireHost(eventId)
+  if (error) return { error }
+  const { data: match, error: insertError } = await supabase.from("event_matches").insert({
+    event_id: eventId, round_id: data.round_id, player_a_id: data.player_a_id || null, player_b_id: data.player_b_id || null,
+  }).select().single()
+  if (insertError) return { error: insertError.message }
+  revalidatePath("/events/" + eventId)
+  return { match }
+}
+
+export async function recordEventMatch(eventId: string, matchId: string, data: { winner_id?: string; score_a?: number; score_b?: number; result?: string }) {
+  const { supabase, error } = await requireHost(eventId)
+  if (error) return { error }
+  const { data: match, error: updateError } = await supabase.from("event_matches").update({
+    winner_id: data.winner_id || null, score_a: data.score_a ?? null, score_b: data.score_b ?? null,
+    result: data.result?.trim() || null, status: "completed",
+  }).eq("id", matchId).eq("event_id", eventId).select().single()
+  if (updateError) return { error: updateError.message }
+  revalidatePath("/events/" + eventId)
+  return { match }
+}
