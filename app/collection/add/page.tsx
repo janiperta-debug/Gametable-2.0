@@ -275,7 +275,9 @@ export default function AddGamePage() {
   }
 
   const handleBarcodeDetected = useCallback(async (barcode: string) => {
-    setBarcodeScanning(false)
+    // Keep the scanner visible while the barcode is being resolved and added.
+    // Previously we closed it immediately, which hid every error that happened
+    // after the camera successfully read the barcode.
     setBarcodeCandidate(barcode)
     setBarcodeMappingHit(false)
     setSearching(true)
@@ -349,6 +351,7 @@ export default function AddGamePage() {
         title: t("common.success"),
         description: `${details.name} ${t("collection.addedToCollection")}`,
       })
+      setBarcodeScanning(false)
       router.push("/collection")
     } catch (error) {
       console.error("Barcode add error:", error)
