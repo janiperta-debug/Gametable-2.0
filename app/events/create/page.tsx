@@ -490,7 +490,8 @@ export default function CreateEventPage() {
                       </div>
                     </div>
                   </div>
-                </div>
+                  </div>
+                </ArchiveFrame>
 
                 {/* Location */}
                 <div className="space-y-2">
