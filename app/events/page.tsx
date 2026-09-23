@@ -245,6 +245,22 @@ export default function EventsPage() {
           </div>
         </ThemeHero>
 
+        {/* Tabs */}
+        <div className="w-full mb-6 md:mb-8">
+          <div className="flex justify-center">
+            <ArchiveToggle
+              value={activeTab}
+              onChange={setActiveTab}
+              options={[
+                { value: "upcoming", label: t("events.upcomingEvents") },
+                { value: "my-events", label: t("events.myEvents") },
+                { value: "past", label: t("events.pastEvents") },
+              ]}
+              className="w-full max-w-xl"
+            />
+          </div>
+        </div>
+
         {/* Action Bar */}
         <div className="flex flex-col gap-3 mb-6 md:mb-8">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -305,21 +321,7 @@ export default function EventsPage() {
           )}
         </div>
 
-        {/* Tabs */}
         <div className="w-full">
-          <div className="mb-6 md:mb-8 flex justify-center">
-            <ArchiveToggle
-              value={activeTab}
-              onChange={setActiveTab}
-              options={[
-                { value: "upcoming", label: t("events.upcomingEvents") },
-                { value: "my-events", label: t("events.myEvents") },
-                { value: "past", label: t("events.pastEvents") },
-              ]}
-              className="w-full max-w-xl"
-            />
-          </div>
-
           {activeTab === "upcoming" && (
             <div>
               {loading ? (
