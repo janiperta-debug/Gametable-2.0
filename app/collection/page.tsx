@@ -7,7 +7,6 @@ import { CollectionFilters } from "@/components/collection-filters"
 import { GameGrid } from "@/components/game-grid"
 import { GameList } from "@/components/game-list"
 import { DiscoverGames } from "@/components/discover-games"
-import { ImportSection } from "@/components/import-section"
 import { ThemeHero } from "@/components/theme-hero"
 import { ArchiveButton, ArchiveToggle } from "@/components/archive-frame"
 import { Loader2 } from "lucide-react"
@@ -184,10 +183,6 @@ export default function Collection() {
                   {showFilters ? t("collection.hideFilters") : t("collection.showFilters")}
                 </ArchiveButton>
               </div>
-            )}
-
-            {selectedCategory !== "all" && (
-              <ImportSection selectedCategory={selectedCategory as Exclude<CategoryType, "all">} />
             )}
 
             <div className="grid gap-6 lg:grid-cols-4">
