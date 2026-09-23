@@ -37,6 +37,7 @@ import type { TCGSearchResult } from "@/app/api/tcg/search/route"
 import type { MiniatureSearchResult } from "@/app/api/miniatures/search/route"
 import { getSearchResultId } from "@/lib/search-result-id"
 import { BarcodeScanner } from "@/components/barcode-scanner"
+import { ImportSection } from "@/components/import-section"
 
 type GameCategory = "board_game" | "rpg" | "trading_card" | "miniature"
 
@@ -904,16 +905,14 @@ export default function AddGamePage() {
                 </div>
               )}
 
-              {/* Import / manual are the only Add Game entry methods. External search lives on Etsi peli. */}
+              {/* Add Game entry methods. External search lives on Etsi peli. */}
               <div className="mb-6 flex justify-center">
                 <ArchiveToggle
                   value={activeTab}
                   onChange={(v) => setActiveTab(v)}
                   options={[
                     { value: "manual", label: t("collection.manualEntry") },
-                    ...(selectedCategory === "trading_card" || selectedCategory === "miniature"
-                      ? [{ value: "bulk" as const, label: t("collection.bulkImport") }]
-                      : []),
+                    { value: "bulk", label: t("collection.bulkImport") },
                   ]}
                 />
               </div>
@@ -1273,117 +1272,23 @@ export default function AddGamePage() {
                 </div>
               )}
 
-              {/* Bulk Import Tab (only for TCG and Miniatures) */}
-              {activeTab === "bulk" && (selectedCategory === "trading_card" || selectedCategory === "miniature") && (
-                <div className="space-y-6">
-                  <p className="font-body text-muted-foreground text-sm">
-                    {t("collection.bulkImportDescription")}
-                  </p>
-
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="bulkText" className="text-accent-gold font-cinzel text-sm uppercase tracking-wider">
-                          {selectedCategory === "trading_card" ? "Deck List" : "Army List"}
-                        </Label>
-                        <textarea
-                          id="bulkText"
-                          value={bulkText}
-                          onChange={(e) => setBulkText(e.target.value)}
-                          placeholder={selectedCategory === "trading_card" 
-                            ? "4 Lightning Bolt\n2x Dark Ritual\n1 Black Lotus (LEA)"
-                            : "10 Intercessors\n5x Hellblasters\n1 Captain in Gravis Armour"
-                          }
-                          className={`mt-1 w-full min-h-[150px] rounded-md px-3 py-2 text-sm font-mono focus-visible:outline-none ${archiveField}`}
-                        />
-                      </div>
-
-                      <ArchiveButton onClick={handleParseBulk} fullWidth>
-                        {t("collection.parseList")}
-                      </ArchiveButton>
-
-                      {parsedItems.length > 0 && (
-                        <div className="space-y-3">
-                          <h4 className="font-heading text-accent-gold">{t("collection.parsedItems")} ({parsedItems.length})</h4>
-                          <div className="max-h-48 overflow-y-auto space-y-2 border border-accent-gold/20 rounded-lg p-3">
-                            {parsedItems.map((item, idx) => (
-                              <div key={idx} className="flex justify-between items-center text-sm font-body">
-                                <span>{item.name}</span>
-                                <Badge variant="outline" className="border-accent-gold/30">
-                                  x{item.quantity}
-                                </Badge>
-                              </div>
-                            ))}
-                          </div>
-
-                          <ArchiveButton
-                            onClick={handleBulkImport}
-                            disabled={importingBulk || bulkArmyMode !== "idle"}
-                            fullWidth
-                            icon={
-                              importingBulk ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Plus className="h-4 w-4" />
-                              )
-                            }
-                          >
-                            {importingBulk
-                              ? "Importing..."
-                              : `${t("collection.importAll")} (${parsedItems.length})`}
-                          </ArchiveButton>
-                        </div>
-                      )}
-
-                      {selectedCategory === "miniature" && bulkArmyMode !== "idle" && (
-                        <div className="border border-accent-gold/20 rounded-lg p-3 space-y-2">
-                          {bulkArmyMode === "select" ? (
-                            <>
-                              <Label className="text-accent-gold font-cinzel text-sm">Army context</Label>
-                              <select
-                                value={bulkSelectedArmyId}
-                                onChange={(e) => setBulkSelectedArmyId(e.target.value)}
-                                className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
-                              >
-                                <option value="">Select an Army</option>
-                                {bulkArmies.map((army) => (
-                                  <option key={army.id} value={army.id}>
-                                    {army.name}
-                                  </option>
-                                ))}
-                              </select>
-                              <ArchiveButton
-                                onClick={handleBulkArmySelect}
-                                disabled={!bulkSelectedArmyId || importingBulk}
-                                fullWidth
-                                icon={importingBulk ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                              >
-                                Import to selected Army
-                              </ArchiveButton>
-                            </>
-                          ) : (
-                            <>
-                              <Label className="text-accent-gold font-cinzel text-sm">Create Army context</Label>
-                              <div className="flex gap-2">
-                                <Input
-                                  value={bulkArmyName}
-                                  onChange={(e) => setBulkArmyName(e.target.value)}
-                                  placeholder="Army name"
-                                />
-                                <ArchiveButton
-                                  type="button"
-                                  onClick={handleBulkArmyCreate}
-                                  disabled={bulkArmyLoading || importingBulk || !bulkArmyName.trim()}
-                                >
-                                  {bulkArmyLoading || importingBulk ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create & Import"}
-                                </ArchiveButton>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                </div>
+              {/* Category-specific mass import */}
+              {activeTab === "bulk" && (
+                <ImportSection
+                  selectedCategory={
+                    selectedCategory === "board_game"
+                      ? "board-games"
+                      : selectedCategory === "rpg"
+                        ? "rpgs"
+                        : selectedCategory === "trading_card"
+                          ? "trading-cards"
+                          : "miniatures"
+                  }
+                  tcgGame={tcgGame}
+                  onImportComplete={() => router.push("/collection")}
+                />
               )}
+
             </ArchiveCardContent>
           </ArchiveCard>
         </div>
