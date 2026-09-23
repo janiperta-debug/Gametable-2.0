@@ -31,10 +31,18 @@ async function resolveBggByName(name: string): Promise<{ id: string; name: strin
     const headers: Record<string, string> = { Accept: "application/xml, text/xml, */*" }
     if (BGG_API_TOKEN) headers.Authorization = `Bearer ${BGG_API_TOKEN}`
 
-    const response = await fetch(
-      `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(name)}&type=boardgame`,
-      { headers, cache: "no-store" },
-    )
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 8000)
+
+    let response: Response
+    try {
+      response = await fetch(
+        `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(name)}&type=boardgame`,
+        { headers, cache: "no-store", signal: controller.signal },
+      )
+    } finally {
+      clearTimeout(timeout)
+    }
 
     if (!response.ok) return null
 
@@ -207,7 +215,7 @@ export async function GET(request: NextRequest) {
         fallback: "name_search",
         suggestedQuery: provider?.name || null,
       },
-      { status: 404 },
+      { status: 200 },
     )
   } catch (error) {
     console.error("Barcode resolver error:", error)
