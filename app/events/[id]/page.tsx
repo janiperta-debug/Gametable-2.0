@@ -1275,7 +1275,7 @@ export default function EventDetailsPage() {
                                     />
                                     <div className="flex flex-wrap gap-2">
                                       <ArchiveCardButton onClick={saveSessionEdit} disabled={structureLoading || !editingSessionForm.title.trim()} active>
-                                        {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Tallenna"}
+                                        {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" />  : t("common.save")}
                                       </ArchiveCardButton>
                                       <ArchiveCardButton onClick={() => setEditingSessionId(null)} disabled={structureLoading}>
                                         Peruuta
@@ -1297,7 +1297,7 @@ export default function EventDetailsPage() {
                                         </div>
                                       </div>
                                       <Badge variant="outline" className="shrink-0 border-accent-gold/30 text-accent-gold">
-                                        {session.status === "completed" ? "Valmis" : session.status === "active" ? t("eventDynamic.s22") : session.status === "cancelled" ? "Peruttu" : "Suunniteltu"}
+                                        {session.status === "completed" ? "Valmis" : session.status === "active" ? t("eventDynamic.s22") : session.status === "cancelled" ? "Peruttu"  : t("eventUi.s65")}
                                       </Badge>
                                     </div>
                                     {session.notes && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{session.notes}</p>}
@@ -1370,7 +1370,7 @@ export default function EventDetailsPage() {
                               </div>
                               <div className="flex items-center justify-between text-xs text-muted-foreground">
                                 <span>{structure.matches.filter((m: any) => m.round_id === item.id).length} ottelua</span>
-                                <span>{item.status === "completed" ? "Valmis" : item.status === "active" ? t("eventDynamic.s22") : "Suunniteltu"}</span>
+                                <span>{item.status === "completed" ? "Valmis" : item.status === "active" ? t("eventDynamic.s22")  : t("eventUi.s65")}</span>
                               </div>
                               <div data-round-id={item.id} className="space-y-2">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
