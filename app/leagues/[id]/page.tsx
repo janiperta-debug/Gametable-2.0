@@ -86,14 +86,6 @@ export default function LeaguePage() {
       try{const result=hub.isMember?await leaveLeague(id):await joinLeague(id);if(result.error)setError(result.error);else await refresh()}
       finally{setBusy(false)}
      }}>{hub.isMember?"Poistu liigasta":"Liity liigaan"}</ArchiveCardButton>}
-     {hub.results.filter(result=>result.season_id===season.id).length>0 && <div className="space-y-2">
-      <h3 className="font-heading text-lg text-accent-gold">Kirjatut ottelutulokset</h3>
-      {hub.results.filter(result=>result.season_id===season.id).map(result=><div key={result.id} className="rounded-md border border-accent-gold/20 p-3">
-       <p className="text-xs text-muted-foreground">{result.event_title}</p>
-       <p className="break-words">{result.player_a} {result.score_a!==null?result.score_a:"–"} – {result.score_b!==null?result.score_b:"–"} {result.player_b}</p>
-       {result.result && <p className="text-xs text-muted-foreground">{result.result}</p>}
-      </div>)}
-     </div>}
      {hub.isOwner && <div className="flex flex-wrap gap-2">
       <input aria-label="Lisättävän pelaajan käyttäjätunnus" placeholder="Pelaajan käyttäjätunnus" value={newMember} onChange={e=>setNewMember(e.target.value)}
        className="min-w-0 flex-1 rounded-md border border-accent-gold/30 bg-background px-3 py-2"/>
@@ -148,6 +140,14 @@ export default function LeaguePage() {
        </div>}
       <p className="text-xs text-muted-foreground">Pisteet lasketaan kirjatuista otteluista. Jos turnauksessa ei ole määritetty ottelupisteitä, voitosta saa 3 ja tasapelistä 1 pisteen. Tasapisteissä ratkaisevat voitot ja maaliero.</p>
      </section>
+     {hub.results.filter(result=>result.season_id===season.id).length>0 && <div className="space-y-2">
+      <h3 className="font-heading text-lg text-accent-gold">Kirjatut ottelutulokset</h3>
+      {hub.results.filter(result=>result.season_id===season.id).map(result=><div key={result.id} className="rounded-md border border-accent-gold/20 p-3">
+       <p className="text-xs text-muted-foreground">{result.event_title}</p>
+       <p className="break-words">{result.player_a} {result.score_a!==null?result.score_a:"–"} – {result.score_b!==null?result.score_b:"–"} {result.player_b}</p>
+       {result.result && <p className="text-xs text-muted-foreground">{result.result}</p>}
+      </div>)}
+     </div>}
      <h3 className="font-heading text-lg text-accent-gold">Kauden kilpailut ja tapahtumat</h3>
      {hub.events.filter((event) => event.season_id === season.id).length === 0 && <p className="text-sm text-muted-foreground">Tähän kauteen ei ole vielä liitetty tapahtumia.</p>}
      {hub.events.filter((event) => event.season_id === season.id).map((event) => <div key={event.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-accent-gold/20 p-3">
