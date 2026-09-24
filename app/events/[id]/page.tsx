@@ -16,7 +16,7 @@ import {
   ArrowLeft, Calendar, Clock, MapPin, Users, Globe, UserCheck, Lock, 
   Edit, Loader2, User, XCircle, CheckCircle2, UserPlus, X
 } from "lucide-react"
-import { useTranslations } from "@/lib/i18n"
+import { useTranslation } from "@/lib/i18n"
 import { getEventById, updateRSVP, cancelEvent, completeEvent, getInvitableUsers, inviteToEvent, uninviteFromEvent, type Event, type EventParticipant, type RSVPStatus } from "@/app/actions/events"
 import { useToast } from "@/hooks/use-toast"
 import { getLeagueTournaments, setTournamentLeague, getLeagueStandings, updateLeaguePlacementPoints, type LeagueStanding } from "@/app/actions/league"
@@ -64,42 +64,31 @@ const getPrivacyLabel = (privacy: string | null, t: (key: string) => string) => 
   }
 }
 
-const formatEventDate = (dateString: string) => {
+const formatEventDate = (dateString: string, locale: "fi" | "en") => {
   const date = new Date(dateString)
   const today = new Date()
   const tomorrow = new Date(today)
-  tomorrow.setDate(tomorrow.getDate() + 1)
+  tomorrow.setDate(today.getDate() + 1)
 
-  if (date.toDateString() === today.toDateString()) {
-    return "Today"
-  } else if (date.toDateString() === tomorrow.toDateString()) {
-    return "Tomorrow"
-  } else {
-    return date.toLocaleDateString(undefined, { 
-      weekday: "long", 
-      month: "long", 
-      day: "numeric" 
-    })
-  }
+  if (date.toDateString() === today.toDateString()) return locale === "fi" ? "Tänään" : "Today"
+  if (date.toDateString() === tomorrow.toDateString()) return locale === "fi" ? "Huomenna" : "Tomorrow"
+
+  return date.toLocaleDateString(locale === "fi" ? "fi-FI" : "en-GB", {
+    weekday: "long", day: "numeric", month: "long",
+  })
 }
 
-const formatEventTime = (startDate: string, endDate?: string | null) => {
-  const start = new Date(startDate)
-  const startTime = start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-  
-  if (endDate) {
-    const end = new Date(endDate)
-    const endTime = end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    return `${startTime} - ${endTime}`
-  }
-  
-  return startTime
+const formatEventTime = (startDate: string, endDate: string | null | undefined, locale: "fi" | "en") => {
+  const format = (value: string) => new Date(value).toLocaleTimeString(locale === "fi" ? "fi-FI" : "en-GB", {
+    hour: "2-digit", minute: "2-digit", hour12: false,
+  })
+  return endDate ? `${format(startDate)}–${format(endDate)}` : format(startDate)
 }
 
 export default function EventDetailsPage() {
   const params = useParams()
   const router = useRouter()
-  const t = useTranslations()
+  const { t, locale } = useTranslation()
   const { toast } = useToast()
   const eventId = params.id as string
 
@@ -1367,13 +1356,13 @@ export default function EventDetailsPage() {
                   <div className="flex items-center gap-3">
                     <Calendar className="w-5 h-5 text-accent-gold" />
                     <div>
-                      <p className="font-medium">{formatEventDate(event.starts_at)}</p>
+                      <p className="font-medium">{formatEventDate(event.starts_at, locale)}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Clock className="w-5 h-5 text-accent-gold" />
                     <div>
-                      <p className="font-medium">{formatEventTime(event.starts_at, event.ends_at)}</p>
+                      <p className="font-medium">{formatEventTime(event.starts_at, event.ends_at, locale)}</p>
                     </div>
                   </div>
                 </div>
