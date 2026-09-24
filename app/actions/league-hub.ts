@@ -69,3 +69,59 @@ export async function linkSeasonEvent(leagueId: string, seasonId: string, eventI
  if (!error) revalidatePath("/leagues/" + leagueId)
  return { error: error?.message }
 }
+
+
+export async function listLeagues() {
+ const supabase = await createClient()
+ const { data: { user } } = await supabase.auth.getUser()
+ const { data, error } = await supabase.from("leagues").select("id,name,game,privacy,owner_id,legacy_event_id,league_seasons(id,name,starts_on,ends_on)").order("created_at", { ascending: false })
+ if (error) return { leagues: [], error: error.message }
+ return { leagues: (data || []).map((league) => ({ ...league, isOwner: league.owner_id === user?.id })), error: undefined }
+}
+
+// Convert an old event-based league without deleting its entries, matches or history.
+// Repeated calls return the same destination league. Existing tournament links are
+// copied into the first season, and the original event stays available for audit.
+export async function convertLegacyLeague(eventId: string) {
+ const supabase = await createClient()
+ const { data: { user } } = await supabase.auth.getUser()
+ if (!user) return { error: "Kirjaudu sisään." }
+ const { data: source } = await supabase.from("events")
+  .select("id,host_id,title,description,privacy,starts_at,ends_at,event_type,event_config")
+  .eq("id", eventId).eq("event_type", "league").single()
+ if (!source || source.host_id !== user.id) return { error: "Vain alkuperäinen järjestäjä voi siirtää liigan." }
+ const { data: existing } = await supabase.from("leagues").select("id").eq("legacy_event_id", eventId).maybeSingle()
+ if (existing) return { id: existing.id }
+ const config = (source.event_config || {}) as Record<string, unknown>
+ const { data: league, error } = await supabase.from("leagues").insert({
+  owner_id: user.id, name: source.title, description: source.description,
+  privacy: source.privacy === "public" ? "public" : "private", legacy_event_id: eventId,
+ }).select("id").single()
+ if (error || !league) {
+  const { data: concurrent } = await supabase.from("leagues").select("id").eq("legacy_event_id", eventId).maybeSingle()
+  return concurrent ? { id: concurrent.id } : { error: error?.message || "Siirto epäonnistui." }
+ }
+ const rawPoints = Array.isArray(config.placementPoints) ? config.placementPoints : [10,7,5,3,1]
+ const points = rawPoints.filter((value): value is number => typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 1000).slice(0,20)
+ const { data: season, error: seasonError } = await supabase.from("league_seasons").insert({
+  league_id: league.id, name: "Ensimmäinen kausi",
+  starts_on: source.starts_at?.slice(0,10) || null,
+  ends_on: source.ends_at?.slice(0,10) || null,
+  placement_points: points.length ? points : [10,7,5,3,1],
+ }).select("id").single()
+ if (seasonError || !season) {
+  await supabase.from("leagues").delete().eq("id", league.id)
+  return { error: seasonError?.message || "Kauden luonti epäonnistui." }
+ }
+ const { data: tournaments, error: tournamentError } = await supabase.from("events")
+  .select("id,event_config").eq("host_id", user.id).eq("event_type", "tournament")
+ if (tournamentError) return { id: league.id, warning: "Liiga siirrettiin, mutta turnausten haku epäonnistui. Vanhat tiedot säilyvät." }
+ const linked = (tournaments || []).filter((event) => (event.event_config as Record<string, unknown> | null)?.league_id === eventId)
+ if (linked.length) {
+  const { error: linkError } = await supabase.from("league_season_events").insert(linked.map((event) => ({ season_id: season.id, event_id: event.id })))
+  if (linkError) return { id: league.id, warning: "Liiga siirrettiin, mutta turnausten liittäminen vaatii tarkistuksen. Vanhat tiedot säilyvät." }
+ }
+ revalidatePath("/events")
+ revalidatePath("/leagues/" + league.id)
+ return { id: league.id }
+}
