@@ -30,7 +30,7 @@ export async function getLeague(leagueId: string) {
  const supabase = await createClient()
  const { data: { user } } = await supabase.auth.getUser()
  const { data: league, error } = await supabase.from("leagues").select("*").eq("id", leagueId).single()
- if (error || !league) return { league: null, seasons: [], events: [], available: [], members: [], results: [], isMember: false, error: "Liigaa ei löytynyt." }
+ if (error || !league) return { league: null, seasons: [], events: [], available: [], members: [], results: [], standings: [], isMember: false, error: "Liigaa ei löytynyt." }
  const { data: seasons } = await supabase.from("league_seasons").select("*").eq("league_id", leagueId).order("created_at", { ascending: false })
  const ids = (seasons || []).map((season) => season.id)
  const { data: links } = ids.length ? await supabase.from("league_season_events").select("season_id,event_id").in("season_id", ids) : { data: [] }
@@ -62,8 +62,50 @@ export async function getLeague(leagueId: string) {
   player_b:(entryRows || []).find(e=>e.id===match.entry_b_id)?.display_name || "Pelaaja B",
   season_id:events.find(e=>e.id===match.event_id)?.season_id || "",
  }))
+ // Season standings aggregate completed matches across linked tournaments.
+ // A registered user keeps one identity across tournaments; guest entries remain event-specific.
+ const {data:allEntries} = tournamentIds.length ? await supabase.from("event_entries")
+  .select("id,event_id,user_id,display_name").in("event_id",tournamentIds) : {data:[]}
+ const {data:allMatches} = tournamentIds.length ? await supabase.from("event_matches")
+  .select("event_id,entry_a_id,entry_b_id,player_a_id,player_b_id,winner_entry_id,winner_id,score_a,score_b,points_a,points_b,status")
+  .in("event_id",tournamentIds).eq("status","completed") : {data:[]}
+ type Standing = {key:string;name:string;season_id:string;played:number;wins:number;draws:number;losses:number;points:number;score_for:number;score_against:number;events:Set<string>}
+ const standingRows=new Map<string,Standing>()
+ const allEntryById=new Map((allEntries||[]).map(entry=>[entry.id,entry]))
+ const profileById=new Map((memberProfiles||[]).map(profile=>[profile.id,profile]))
+ for(const match of allMatches||[]){
+  const event=events.find(item=>item.id===match.event_id)
+  if(!event)continue
+  const sideA=match.entry_a_id?allEntryById.get(match.entry_a_id):null
+  const sideB=match.entry_b_id?allEntryById.get(match.entry_b_id):null
+  const resolvedA=sideA?.user_id||match.player_a_id
+  const resolvedB=sideB?.user_id||match.player_b_id
+  const sides=[{entry:sideA,userId:resolvedA,score:match.score_a,opponent:match.score_b,points:match.points_a,won:match.winner_entry_id===match.entry_a_id&&!!match.entry_a_id||!!resolvedA&&match.winner_id===resolvedA},
+   {entry:sideB,userId:resolvedB,score:match.score_b,opponent:match.score_a,points:match.points_b,won:match.winner_entry_id===match.entry_b_id&&!!match.entry_b_id||!!resolvedB&&match.winner_id===resolvedB}]
+  const draw=match.score_a!==null&&match.score_b!==null&&Number(match.score_a)===Number(match.score_b)&&!match.winner_id&&!match.winner_entry_id
+  const hasWinner=!!match.winner_id||!!match.winner_entry_id
+  for(const side of sides){
+   if(!side.entry&&!side.userId)continue
+   const key=side.userId?"user:"+side.userId:"guest:"+event.id+":"+side.entry!.id
+   const rowKey=event.season_id+":"+key
+   const profile=side.userId?profileById.get(side.userId):null
+   const name=profile?.display_name||profile?.username||side.entry?.display_name||"Kilpailija"
+   let row=standingRows.get(rowKey)
+   if(!row){row={key,name,season_id:event.season_id,played:0,wins:0,draws:0,losses:0,points:0,score_for:0,score_against:0,events:new Set()};standingRows.set(rowKey,row)}
+   row.played++;row.events.add(event.id)
+   if(side.won)row.wins++
+   else if(draw)row.draws++
+   else if(hasWinner)row.losses++
+   if(side.score!==null)row.score_for+=Number(side.score)
+   if(side.opponent!==null)row.score_against+=Number(side.opponent)
+   // Use the actual points recorded for this match. Unscored matches contribute no points.
+   if(side.points!==null)row.points+=Number(side.points)
+  }
+ }
+ const standings=Array.from(standingRows.values()).map(({events:playedEvents,...row})=>({...row,tournaments:playedEvents.size}))
+  .sort((a,b)=>a.season_id.localeCompare(b.season_id)||b.points-a.points||b.wins-a.wins||(b.score_for-b.score_against)-(a.score_for-a.score_against)||a.name.localeCompare(b.name,"fi"))
  const { data: owned } = user?.id === league.owner_id ? await supabase.from("events").select("id,title,event_type,starts_at,status").eq("host_id", user.id).in("event_type", ["tournament","game_night"]).neq("status","cancelled").order("starts_at", { ascending: false }) : { data: [] }
- return { league, seasons: seasons || [], events, available: (owned || []).filter((event) => !linkedIds.includes(event.id)), members, results, isMember:!!user && memberIds.includes(user.id), isOwner: user?.id === league.owner_id, error: undefined }
+ return { league, seasons: seasons || [], events, available: (owned || []).filter((event) => !linkedIds.includes(event.id)), members, results, standings, isMember:!!user && memberIds.includes(user.id), isOwner: user?.id === league.owner_id, error: undefined }
 }
 
 export async function addLeagueSeason(leagueId: string, name: string) {
