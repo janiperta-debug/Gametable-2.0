@@ -194,7 +194,7 @@ export function EventChat({ eventId, eventTitle }: EventChatProps) {
             {messages.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <MessageCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>{t("events.noMessages") === "events.noMessages" ? "Ei vielä viestejä. Aloita keskustelu!" : t("events.noMessages")}</p>
+                <p>{t("events.noMessages")}</p>
               </div>
             ) : (
               messages.map((message, index) => {

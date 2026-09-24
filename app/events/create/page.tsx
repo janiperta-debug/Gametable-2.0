@@ -122,11 +122,11 @@ export default function CreateEventPage() {
     if (!formData.title.trim()) return
     if (eventType === "league") {
       if (!leagueSeason.name.trim()) {
-        toast({ title: "Anna ensimmäisen kauden nimi", variant: "destructive" })
+        toast({ title: t("eventDynamic.s0"), variant: "destructive" })
         return
       }
       if (leagueSeason.startsOn && leagueSeason.endsOn && leagueSeason.endsOn < leagueSeason.startsOn) {
-        toast({ title: "Kauden päättymispäivä on ennen alkua", variant: "destructive" })
+        toast({ title: t("eventDynamic.s1"), variant: "destructive" })
         return
       }
       setSaving(true)
@@ -140,10 +140,10 @@ export default function CreateEventPage() {
           startsOn: leagueSeason.startsOn,
           endsOn: leagueSeason.endsOn,
         })
-        if (result.error) toast({ title: "Liigan perustaminen epäonnistui", description: result.error, variant: "destructive" })
+        if (result.error) toast({ title: t("eventDynamic.s2"), description: result.error, variant: "destructive" })
         else if (result.id) router.push("/leagues/" + result.id)
       } catch {
-        toast({ title: "Liigan perustaminen epäonnistui", variant: "destructive" })
+        toast({ title: t("eventDynamic.s2"), variant: "destructive" })
       } finally { setSaving(false) }
       return
     }
@@ -244,7 +244,7 @@ export default function CreateEventPage() {
                   </Label>
                   <Input 
                     id="title" 
-                    placeholder={eventType === "league" ? "Esim. Hyvinkään Blood Bowl -liiga" : t("events.eventTitlePlaceholder")}
+                    placeholder={eventType === "league" ? t("eventDynamic.s3") : t("events.eventTitlePlaceholder")}
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className={cn("font-body", archiveField)}
@@ -387,8 +387,8 @@ export default function CreateEventPage() {
 
                 {eventType === "league" && (
                   <div className="rounded-lg border border-accent-gold/25 bg-background/20 p-4 space-y-2">
-                    <h3 className="font-heading text-lg text-accent-gold">Pysyvä kilpailuyhteisö</h3>
-                    <p className="text-sm text-muted-foreground">Perustat liigan, joka säilyy kaudesta toiseen. Voit liittää jokaiseen kauteen olemassa olevia tai uusia turnauksia ja peli-iltoja.</p>
+                    <h3 className="font-heading text-lg text-accent-gold">{t("eventUi.s0")}</h3>
+                    <p className="text-sm text-muted-foreground">{t("eventUi.s1")}</p>
                   </div>
                 )}
 
@@ -396,28 +396,28 @@ export default function CreateEventPage() {
                 {eventType !== "game_night" && eventType !== "league" && (
                   <div className="space-y-4">
                     <div>
-                      <h3 className="font-heading text-lg text-accent-gold">Järjestäjän asetukset</h3>
+                      <h3 className="font-heading text-lg text-accent-gold">{t("eventUi.s2")}</h3>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        Määritä tapahtuman rakenne oman pelisi sääntöjen mukaan. GameTable ei määrää pisteytystä tai formaattia.
+                        {t("eventUi.structureRules")}
                       </p>
                     </div>
 
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="event-format" className="font-body text-accent-gold">Formaatti</Label>
+                        <Label htmlFor="event-format" className="font-body text-accent-gold">{t("eventUi.s3")}</Label>
                         <Select
                           value={eventConfig.format}
                           onValueChange={(value) => setEventConfig({ ...eventConfig, format: value })}
                         >
                           <SelectTrigger id="event-format" className={archiveField}>
-                            <SelectValue placeholder="Valitse formaatti" />
+                            <SelectValue placeholder={t("eventUi.s22")} />
                           </SelectTrigger>
                           <SelectContent className={archiveSelectContent}>
                             {eventType === "campaign" ? (
                               <>
-                                <SelectItem className={archiveSelectItem} value="weekly">Viikoittainen</SelectItem>
-                                <SelectItem className={archiveSelectItem} value="biweekly">Joka toinen viikko</SelectItem>
-                                <SelectItem className={archiveSelectItem} value="freeform">Vapaamuotoinen</SelectItem>
+                                <SelectItem className={archiveSelectItem} value="weekly">{t("eventUi.s4")}</SelectItem>
+                                <SelectItem className={archiveSelectItem} value="biweekly">{t("eventUi.s5")}</SelectItem>
+                                <SelectItem className={archiveSelectItem} value="freeform">{t("eventUi.s6")}</SelectItem>
                               </>
                             ) : (
                               <>
@@ -425,8 +425,8 @@ export default function CreateEventPage() {
                                 <SelectItem className={archiveSelectItem} value="round_robin">Round robin</SelectItem>
                                 <SelectItem className={archiveSelectItem} value="single_elimination">Single elimination</SelectItem>
                                 <SelectItem className={archiveSelectItem} value="double_elimination">Double elimination</SelectItem>
-                                <SelectItem className={archiveSelectItem} value="groups_playoffs">Alkulohkot + pudotuspelit</SelectItem>
-                                <SelectItem className={archiveSelectItem} value="freeform">Vapaamuotoinen</SelectItem>
+                                <SelectItem className={archiveSelectItem} value="groups_playoffs">{t("eventUi.s7")}</SelectItem>
+                                <SelectItem className={archiveSelectItem} value="freeform">{t("eventUi.s6")}</SelectItem>
                               </>
                             )}
                           </SelectContent>
@@ -434,14 +434,14 @@ export default function CreateEventPage() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="event-rounds" className="font-body text-accent-gold">
-                          {eventType === "campaign" ? "Sessiot" : "Suunniteltu kierrosmäärä"}
+                          {eventType === "campaign" ? "Sessiot" : t("eventDynamic.s4")}
                         </Label>
                         <Select
                           value={eventConfig.rounds}
                           onValueChange={(value) => setEventConfig({ ...eventConfig, rounds: value })}
                         >
                           <SelectTrigger id="event-rounds" className={archiveField}>
-                            <SelectValue placeholder="Valitse määrä" />
+                            <SelectValue placeholder={t("eventUi.s23")} />
                           </SelectTrigger>
                           <SelectContent className={archiveSelectContent}>
                             {Array.from({ length: 20 }, (_, i) => i + 1).map((count) => (
@@ -451,7 +451,7 @@ export default function CreateEventPage() {
                         </Select>
                         {eventType !== "campaign" && (
                           <p className="text-xs text-muted-foreground">
-                            Tämä on alkuperäinen suunnitelma, ei kierrosten yläraja. Kierroksia voi lisätä myöhemmin.
+                            {t("eventUi.roundPlanNote")}
                           </p>
                         )}
                       </div>
@@ -460,9 +460,9 @@ export default function CreateEventPage() {
                     {(eventType === "tournament" || eventType === "league") && (
                     <div className="space-y-3">
                       <div>
-                        <Label className="font-body text-accent-gold">Pisteytys</Label>
+                        <Label className="font-body text-accent-gold">{t("eventUi.s8")}</Label>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Valitse pisteytys, jota käytetään ottelutulosten pisteiden laskemiseen.
+                          {t("eventUi.scoringHint")}
                         </p>
                       </div>
 
@@ -485,15 +485,15 @@ export default function CreateEventPage() {
                         }}
                       >
                         <SelectTrigger className={archiveField}>
-                          <SelectValue placeholder="Valitse pisteytysmalli" />
+                          <SelectValue placeholder={t("eventUi.s24")} />
                         </SelectTrigger>
                         <SelectContent className={archiveSelectContent}>
-                          <SelectItem className={archiveSelectItem} value="3_1_0">Voitto 3 / tasapeli 1 / tappio 0</SelectItem>
-                          <SelectItem className={archiveSelectItem} value="3_0_0">Voitto 3 / tasapeli 0 / tappio 0</SelectItem>
-                          <SelectItem className={archiveSelectItem} value="2_1_0">Voitto 2 / tasapeli 1 / tappio 0</SelectItem>
-                          <SelectItem className={archiveSelectItem} value="2_0_0">Voitto 2 / tasapeli 0 / tappio 0</SelectItem>
-                          <SelectItem className={archiveSelectItem} value="1_0_0">Voitto 1 / tasapeli 0 / tappio 0</SelectItem>
-                          <SelectItem className={archiveSelectItem} value="custom">Mukautettu</SelectItem>
+                          <SelectItem className={archiveSelectItem} value="3_1_0">{t("eventUi.s9")}</SelectItem>
+                          <SelectItem className={archiveSelectItem} value="3_0_0">{t("eventUi.s10")}</SelectItem>
+                          <SelectItem className={archiveSelectItem} value="2_1_0">{t("eventUi.s11")}</SelectItem>
+                          <SelectItem className={archiveSelectItem} value="2_0_0">{t("eventUi.s12")}</SelectItem>
+                          <SelectItem className={archiveSelectItem} value="1_0_0">{t("eventUi.s13")}</SelectItem>
+                          <SelectItem className={archiveSelectItem} value="custom">{t("eventUi.s14")}</SelectItem>
                         </SelectContent>
                       </Select>
 
@@ -528,10 +528,10 @@ export default function CreateEventPage() {
 
                     {(eventType === "tournament" || eventType === "league") && (
                       <div className="space-y-2">
-                        <Label htmlFor="event-tiebreaker" className="font-body text-accent-gold">Tasapisteiden ratkaisu</Label>
+                        <Label htmlFor="event-tiebreaker" className="font-body text-accent-gold">{t("eventUi.s15")}</Label>
                         <Input
                           id="event-tiebreaker"
-                          placeholder="Esim. keskinäinen ottelu, VP-ero..."
+                          placeholder={t("eventUi.s25")}
                           value={eventConfig.tiebreaker}
                           onChange={(e) => setEventConfig({ ...eventConfig, tiebreaker: e.target.value })}
                           className={archiveField}
@@ -540,10 +540,10 @@ export default function CreateEventPage() {
                     )}
 
                     <div className="space-y-2">
-                      <Label htmlFor="event-organizer-notes" className="font-body text-accent-gold">Järjestäjän lisätiedot</Label>
+                      <Label htmlFor="event-organizer-notes" className="font-body text-accent-gold">{t("eventUi.s16")}</Label>
                       <Textarea
                         id="event-organizer-notes"
-                        placeholder="Kirjoita tähän muut järjestämiseen liittyvät säännöt, käytännöt tai huomioitavat asiat."
+                        placeholder={t("eventUi.s26")}
                         value={eventConfig.organizerNotes}
                         onChange={(e) => setEventConfig({ ...eventConfig, organizerNotes: e.target.value })}
                         className={archiveField}
@@ -556,20 +556,20 @@ export default function CreateEventPage() {
                 {eventType === "league" && (
                   <div className="space-y-4 rounded-lg border border-accent-gold/25 p-4">
                     <div>
-                      <h3 className="font-heading text-lg text-accent-gold">Ensimmäinen kausi</h3>
-                      <p className="mt-1 text-sm text-muted-foreground">Anna ensimmäiselle kaudelle nimi. Kilpailut, ottelut ja pisteytys lisätään liigan sisällä myöhemmin.</p>
+                      <h3 className="font-heading text-lg text-accent-gold">{t("eventUi.s17")}</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">{t("eventUi.s18")}</p>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="league-season-name" className="text-accent-gold">Kauden nimi *</Label>
-                      <Input id="league-season-name" required={eventType === "league"} maxLength={120} value={leagueSeason.name} onChange={(e) => setLeagueSeason({ ...leagueSeason, name: e.target.value })} placeholder="Esim. Kausi 2027" className={archiveField} />
+                      <Label htmlFor="league-season-name" className="text-accent-gold">{t("eventUi.s19")}</Label>
+                      <Input id="league-season-name" required={eventType === "league"} maxLength={120} value={leagueSeason.name} onChange={(e) => setLeagueSeason({ ...leagueSeason, name: e.target.value })} placeholder={t("eventUi.s27")} className={archiveField} />
                     </div>
                     <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
                       <div className="min-w-0 space-y-2">
-                        <Label htmlFor="league-start" className="text-accent-gold">Kausi alkaa (valinnainen)</Label>
+                        <Label htmlFor="league-start" className="text-accent-gold">{t("eventUi.s20")}</Label>
                         <Input id="league-start" type="date" value={leagueSeason.startsOn} onChange={(e) => setLeagueSeason({ ...leagueSeason, startsOn: e.target.value })} className={cn(archiveField, "block !w-full !min-w-0 !max-w-full [min-inline-size:0]")} />
                       </div>
                       <div className="min-w-0 space-y-2">
-                        <Label htmlFor="league-end" className="text-accent-gold">Kausi päättyy (valinnainen)</Label>
+                        <Label htmlFor="league-end" className="text-accent-gold">{t("eventUi.s21")}</Label>
                         <Input id="league-end" type="date" min={leagueSeason.startsOn || undefined} value={leagueSeason.endsOn} onChange={(e) => setLeagueSeason({ ...leagueSeason, endsOn: e.target.value })} className={cn("w-full min-w-0", archiveField)} />
                       </div>
                     </div>
@@ -610,7 +610,7 @@ export default function CreateEventPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="endDate" className="text-sm text-muted-foreground">{eventType === "league" ? "Kausi päättyy (arvio)" : "Päättyy"}</Label>
+                      <Label htmlFor="endDate" className="text-sm text-muted-foreground">{eventType === "league" ? t("eventDynamic.s5") : t("eventDynamic.s6")}</Label>
                       <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 min-w-0">
                         <Input
                           id="endDate"

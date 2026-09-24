@@ -13,13 +13,12 @@
     "name": "Nimi",
     "category": "Kategoria",
     "yearPublished": "Julkaisuvuosi",
-"minPlayers": "Min. pelaajat",
-  "maxPlayers": "Max. pelaajat",
-  "players": "pelaajaa",
+    "minPlayers": "Min. pelaajat",
+    "maxPlayers": "Max. pelaajat",
+    "players": "pelaajaa",
     "minPlaytime": "Min. peliaika",
     "maxPlaytime": "Max. peliaika",
     "description": "Kuvaus",
-    "players": "pelaajaa",
     "published": "Julkaistu",
     "viewOnBGG": "Katso BoardGameGeekissä",
     "deleteTitle": "Poista kokoelmasta?",
@@ -67,12 +66,12 @@
     "minutesAgo": "minuuttia sitten",
     "justNow": "Juuri nyt",
     "new": "uutta",
-    "loading": "Ladataan...",
-    "search": "Hae",
     "searching": "Haetaan...",
     "filters": "Suodattimet",
     "hideFilters": "Piilota suodattimet",
-    "clearFilters": "Tyhjennä suodattimet"
+    "clearFilters": "Tyhjennä suodattimet",
+    "today": "Tänään",
+    "yesterday": "Eilen"
   },
   "friends": {
     "sendRequest": "Lähetä kaveripyyntö",
@@ -209,7 +208,6 @@
     "friendRequestRejected": "Kaveripyyntö hylätty",
     "unreadNotifications": "lukematonta",
     "noNotifications": "Ei uusia ilmoituksia",
-    "emailNotifications": "Sähköposti-ilmoitukset",
     "emailNotificationsDescription": "Valitse mistä ilmoituksista haluat sähköpostia.",
     "loginToManageNotifications": "Kirjaudu sisään hallitaksesi ilmoitusasetuksiasi.",
     "emailFriendRequests": "Kaveripyynnöt",
@@ -223,7 +221,8 @@
     "warhammer": "Warhammer",
     "otherMiniatureGames": "Muut miniatyyrit",
     "roleplayingGames": "Roolipelit (RPG)",
-    "tradingCards": "Keräilykortit"
+    "tradingCards": "Keräilykortit",
+    "anonymous": "Nimetön"
   },
   "collection": {
     "title": "Pelikokoelma",
@@ -311,13 +310,12 @@
     "searchBGGDescription": "Etsi lautapelejä BoardGameGeekin tietokannasta.",
     "searchRPGGDescription": "Etsi roolipelejä RPGGeekin tietokannasta.",
     "searchTCGDescription": "Etsi keräilykorttipelejä korttitietokannoista.",
-    "searchMiniDescription": "Etsi miniatyyrejä pelihahmojen tietokannoista.",
+    "searchMiniDescription": "Etsi miniatyyrejä BattleScribe-tietokannasta.",
     "searchPlaceholder": "Syötä pelin nimi...",
     "searchFailed": "Haku epäonnistui. Yritä uudelleen.",
     "detailsFailed": "Pelin tietojen haku epäonnistui. Yritä uudelleen.",
     "addFailed": "Pelin lisäys epäonnistui. Yritä uudelleen.",
     "addedToCollection": "on lisätty kokoelmaasi! (+10 XP)",
-    "addToCollection": "Lisää kokoelmaan",
     "addToWishlist": "Lisää toivelistalle",
     "quantity": "Määrä",
     "bulkImport": "Massalisäys",
@@ -333,7 +331,6 @@
     "inProgress": "Kesken",
     "painted": "Maalattu",
     "based": "Pohjustettu",
-    "searchMiniDescription": "Etsi miniatyyrejä BattleScribe-tietokannasta.",
     "bulkImportTCGDescription": "Liitä pakkalistasi tuodaksesi useita kortteja kerralla. Muoto: '4 Lightning Bolt' tai '4x Dark Ritual'",
     "bulkImportMiniDescription": "Liitä armeijalistasi tuodaksesi useita yksiköitä kerralla. Muoto: '10 Intercessors' tai '5x Hellblasters'",
     "importing": "Tuodaan...",
@@ -344,7 +341,6 @@
     "importDescription": "Tuo kokoelmasi syöttämällä käyttäjänimesi",
     "noItemsToImport": "Kokoelmastasi ei löytynyt tuotavia kohteita",
     "importingCollection": "Tuodaan kokoelmaa...",
-    "searchFailed": "Haku epäonnistui. Yritä uudelleen.",
     "bggUsernamePlaceholder": "Syötä BoardGameGeek-käyttäjänimesi",
     "rpggUsernamePlaceholder": "Syötä RPGGeek-käyttäjänimesi",
     "noResults": "Pelejä ei löytynyt. Kokeile toista hakutermiä.",
@@ -370,7 +366,7 @@
     "pastEvents": "Menneet tapahtumat",
     "myEvents": "Omat tapahtumat",
     "hosting": "Järjestän",
-    "attending": "Osallistun",
+    "attending": "osallistuu",
     "searchEvents": "Hae tapahtumia...",
     "filterByType": "Suodata tyypin mukaan",
     "eventDetails": "Tapahtuman tiedot",
@@ -395,7 +391,6 @@
     "maybe": "Ehkä",
     "confirm": "Vahvista",
     "manage": "Hallitse",
-    "attending": "osallistuu",
     "viewDetails": "Näytä tiedot",
     "noEvents": "Ei tapahtumia",
     "noEventsDesc": "Luo oma tapahtumasi tai tarkista myöhemmin!",
@@ -493,7 +488,36 @@
       "selectGame": "Valitse peli",
       "isPrivate": "Yksityinen tapahtuma",
       "requiresApproval": "Vaatii hyväksynnän"
-    }
+    },
+    "rsvpDeclined": "Kieltäydyin",
+    "participantCount": "{{count}} osallistujaa",
+    "leagueLoadFailed": "Liigojen lataaminen epäonnistui.",
+    "legacyLeague": "Vanha liigamalli",
+    "myLeaguesCampaigns": "Omat liigat ja kampanjat",
+    "myLeaguesCampaignsEmpty": "Omat liigasi ja käynnissä olevat kampanjasi näkyvät täällä.",
+    "showLess": "Näytä vähemmän",
+    "showAllCount": "Näytä kaikki ({{count}})",
+    "nextEvents": "Seuraavat tapahtumat",
+    "hideFilters": "Piilota suodattimet",
+    "filters": "Suodattimet",
+    "clear": "Tyhjennä",
+    "noMatchingUpcoming": "Ei hakua vastaavia tulevia tapahtumia.",
+    "showAllUpcoming": "Näytä kaikki tulevat tapahtumat ({{count}})",
+    "noPastEvents": "Ei menneitä tapahtumia.",
+    "showFullHistory": "Näytä koko historia",
+    "notHost": "Vain järjestäjä voi muokata tapahtumaa.",
+    "titleRequired": "Anna tapahtumalle nimi.",
+    "eventUpdated": "Tapahtuma päivitetty.",
+    "notFound": "Tapahtumaa ei löytynyt",
+    "titlePlaceholder": "Anna tapahtuman nimi...",
+    "privacy": "Näkyvyys",
+    "private": "Yksityinen",
+    "dateTime": "Päivämäärä ja kellonaika",
+    "notFoundDesc": "Etsimääsi tapahtumaa ei löytynyt.",
+    "cancelled": "Peruttu",
+    "cantAttend": "En pääse",
+    "eventCancelled": "Tapahtuma peruttu.",
+    "noMessages": "Ei vielä viestejä. Aloita keskustelu!"
   },
   "community": {
     "title": "Yhteisö",
@@ -613,47 +637,47 @@
     "everyDimensionTellsStory": "Jokainen ulottuvuus kertoo eri tarinan",
     "selectTheme": "Valitse teema",
     "applyTheme": "Käytä teemaa",
-  "currentlyActive": "Tällä hetkellä aktiivinen",
-  "enterRoom": "Siirry huoneeseen",
-  "tabManor": "Kartano",
-  "tabArtifacts": "Artefaktit",
-  "artifactsTitle": "Kartanon Artefaktit",
-  "artifactsSubtitle": "Artefaktit löytyvät. Salaisuudet säilyvät. Tarina etenee.",
-  "manorTitle": "Kartanon huoneet",
-  "manorSubtitle": "Jokainen matka alkaa ovelta.",
-  "roomPage": {
-    "backToMap": "Takaisin kartalle",
-    "essence": "Ydin",
-    "journey": "Matkasi tässä huoneessa",
-    "glimpse": "Vilkaisu sisälle",
-    "glimpseCollection": "Kokoelmat",
-    "glimpseEvents": "Tapahtumat",
-    "glimpseCommunity": "Yhteisöt",
-    "artefact": "Artefakti",
-    "whatUnlocks": "Mitä avautuu",
-    "progressSaved": "Edistymisesi tallennetaan aina.",
-    "levelLabel": "Taso",
-    "themeActive": "Teema käytössä",
-    "themeActiveDesc": "Tämä huone määrittää GameTablen ulkoasun.",
-    "themeUnlocked": "Teema avattu",
-    "themeUnlockedDesc": "Ota tämän huoneen teema käyttöön GameTablessa.",
-    "themeLocked": "Teema lukittu",
-    "themeLockedDesc": "Avaa tämä huone saadaksesi teeman käyttöösi.",
-    "useTheme": "Käytä teemaa",
-    "inUse": "Käytössä"
-  },
-  "artifactPage": {
-    "backToArtifacts": "Takaisin artefakteihin",
-    "artefact": "Artefakti",
-    "loreEntry": "Tarustomerkintä",
-    "loreNote": "Tämä merkintä lisätään tarustokokoelmaasi ja sen voi lukea milloin tahansa profiilistasi.",
-    "unlocks": "Avautuu",
-    "rowTheme": "Teema",
-    "rowRoomAccess": "Huonepääsy",
-    "rowLore": "Tarustomerkintä",
-    "rowArtefact": "Artefakti",
-    "rowAchievement": "Saavutus"
-  }
+    "currentlyActive": "Tällä hetkellä aktiivinen",
+    "enterRoom": "Siirry huoneeseen",
+    "tabManor": "Kartano",
+    "tabArtifacts": "Artefaktit",
+    "artifactsTitle": "Kartanon Artefaktit",
+    "artifactsSubtitle": "Artefaktit löytyvät. Salaisuudet säilyvät. Tarina etenee.",
+    "manorTitle": "Kartanon huoneet",
+    "manorSubtitle": "Jokainen matka alkaa ovelta.",
+    "roomPage": {
+      "backToMap": "Takaisin kartalle",
+      "essence": "Ydin",
+      "journey": "Matkasi tässä huoneessa",
+      "glimpse": "Vilkaisu sisälle",
+      "glimpseCollection": "Kokoelmat",
+      "glimpseEvents": "Tapahtumat",
+      "glimpseCommunity": "Yhteisöt",
+      "artefact": "Artefakti",
+      "whatUnlocks": "Mitä avautuu",
+      "progressSaved": "Edistymisesi tallennetaan aina.",
+      "levelLabel": "Taso",
+      "themeActive": "Teema käytössä",
+      "themeActiveDesc": "Tämä huone määrittää GameTablen ulkoasun.",
+      "themeUnlocked": "Teema avattu",
+      "themeUnlockedDesc": "Ota tämän huoneen teema käyttöön GameTablessa.",
+      "themeLocked": "Teema lukittu",
+      "themeLockedDesc": "Avaa tämä huone saadaksesi teeman käyttöösi.",
+      "useTheme": "Käytä teemaa",
+      "inUse": "Käytössä"
+    },
+    "artifactPage": {
+      "backToArtifacts": "Takaisin artefakteihin",
+      "artefact": "Artefakti",
+      "loreEntry": "Tarustomerkintä",
+      "loreNote": "Tämä merkintä lisätään tarustokokoelmaasi ja sen voi lukea milloin tahansa profiilistasi.",
+      "unlocks": "Avautuu",
+      "rowTheme": "Teema",
+      "rowRoomAccess": "Huonepääsy",
+      "rowLore": "Tarustomerkintä",
+      "rowArtefact": "Artefakti",
+      "rowAchievement": "Saavutus"
+    }
   },
   "trophies": {
     "title": "Palkintokokoelma",
@@ -668,7 +692,7 @@
     "bronze": "Pronssi",
     "silver": "Hopea",
     "gold": "Kulta",
-"locked": "Lukittu",
+    "locked": "Lukittu",
     "showcase": "Pokaalivitriini",
     "earned": "Ansaittu",
     "progress": "Edistyminen",
@@ -1023,7 +1047,6 @@
       "accessDeniedDescription": "Sinulla ei ole ylläpitäjän oikeuksia tälle sivulle.",
       "returnHome": "Palaa etusivulle"
     },
-
     "title": "Kartanon kirjeenvaihto",
     "manorAdmin": "Kartanon hallinta",
     "announcements": "Kartanon tiedotteet",
@@ -1069,25 +1092,101 @@
     "gdprInquiry": "GDPR-tiedusteluissa, lähetä sähköpostia osoitteeseen"
   },
   "rooms": {
-    "mainHall": { "name": "Pääsali", "description": "Mahtava sisäänkäynti viininpunaisella eleganssilla ja kultaisilla aksenteilla", "atmosphere": "Majesteetillinen ja vieraanvarainen" },
-    "library": { "name": "Kirjasto", "description": "Syvän mahongin hyllyt täynnä peliviisautta", "atmosphere": "Oppinut ja mietiskelevä" },
-    "conservatory": { "name": "Talvipuutarha", "description": "Vehreää vihreyttä ja luonnonvaloa rauhalliseen pelaamiseen", "atmosphere": "Raikas ja virkistävä" },
-    "firesideLounge": { "name": "Takkahuone", "description": "Dramaattinen obsidiaani ja teräs välkkyvien oranssien liekkien kanssa", "atmosphere": "Tumma ja hienostunut" },
-    "bar": { "name": "Baari", "description": "Meripihkajuomia ja messinkikalusteita sosiaaliseen pelaamiseen", "atmosphere": "Eloisa ja sosiaalinen" },
-    "spa": { "name": "Kylpylä", "description": "Rauhallinen laventelikeidas ametistiaksenteilla ja kylpylärauhalla", "atmosphere": "Rauhallinen ja virkistävä" },
-    "gallery": { "name": "Galleria", "description": "Kuninkaalliset laivastonsinisen seinät esittelevät pelimestariteoksia", "atmosphere": "Hienostunut ja taiteellinen" },
-    "ballroom": { "name": "Juhlasali", "description": "Kristallinvalkoinen loisto kultaisilla aksenteilla", "atmosphere": "Ylellinen juhla" },
-    "mapRoom": { "name": "Karttahuone", "description": "Seepianväriset kartat ja messinkivälineet strategiseen suunnitteluun", "atmosphere": "Seikkailullinen strategia" },
-    "observatory": { "name": "Observatorio", "description": "Tumman karmiininpunaisia syvyyksiä hopeisen tähtivalon kanssa", "atmosphere": "Kosminen mietiskely" },
-    "theaterRoom": { "name": "Teatteri", "description": "Kuninkaalliset purppuraisen verhot ja kultaiset näyttämövalot", "atmosphere": "Dramaattinen viihde" },
-    "clockTower": { "name": "Kellotorni", "description": "Jäänsininen tarkkuus teräs- ja kromimekanismeilla", "atmosphere": "Mekaaninen tarkkuus" },
-    "warRoom": { "name": "Sotahuone", "description": "Sotilasvihrään strategiaa pronssisilla taistelusuunnitelmilla", "atmosphere": "Strateginen komentokeskus" },
-    "artroom": { "name": "Taidehuone", "description": "Luova studio rikkailla sinapinseinillä ja hiilipiirustustyökaluilla", "atmosphere": "Taiteellinen ja inspiroiva" },
-    "alchemistLaboratory": { "name": "Alkemistin laboratorio", "description": "Smaragdinvihreät liemet ja taivaansininen mystinen energia", "atmosphere": "Maaginen ja kokeellinen" },
-    "dungeon": { "name": "Vankityrmä", "description": "Hunajanväriset kiviseinät pronssisilla soihtutelineillä", "atmosphere": "Mysteerinen ja muinainen" },
-    "undergroundTemple": { "name": "Maanalainen temppeli", "description": "Kivenharmaata pyhyyttä sinivihreillä pyhillä vesillä", "atmosphere": "Pyhä ja ajaton" },
-    "crystalCavern": { "name": "Kristalliluola", "description": "Ruusukvartsiformaatioita ja ametistiklustereita", "atmosphere": "Eteeerinen ja lumoava" },
-    "treasureVault": { "name": "Aarrekammio", "description": "Kultaiset rikkaudet ja smaragdiset aarteet yli kaiken mittaamattomia", "atmosphere": "Ylellinen ja palkitseva" }
+    "mainHall": {
+      "name": "Pääsali",
+      "description": "Mahtava sisäänkäynti viininpunaisella eleganssilla ja kultaisilla aksenteilla",
+      "atmosphere": "Majesteetillinen ja vieraanvarainen"
+    },
+    "library": {
+      "name": "Kirjasto",
+      "description": "Syvän mahongin hyllyt täynnä peliviisautta",
+      "atmosphere": "Oppinut ja mietiskelevä"
+    },
+    "conservatory": {
+      "name": "Talvipuutarha",
+      "description": "Vehreää vihreyttä ja luonnonvaloa rauhalliseen pelaamiseen",
+      "atmosphere": "Raikas ja virkistävä"
+    },
+    "firesideLounge": {
+      "name": "Takkahuone",
+      "description": "Dramaattinen obsidiaani ja teräs välkkyvien oranssien liekkien kanssa",
+      "atmosphere": "Tumma ja hienostunut"
+    },
+    "bar": {
+      "name": "Baari",
+      "description": "Meripihkajuomia ja messinkikalusteita sosiaaliseen pelaamiseen",
+      "atmosphere": "Eloisa ja sosiaalinen"
+    },
+    "spa": {
+      "name": "Kylpylä",
+      "description": "Rauhallinen laventelikeidas ametistiaksenteilla ja kylpylärauhalla",
+      "atmosphere": "Rauhallinen ja virkistävä"
+    },
+    "gallery": {
+      "name": "Galleria",
+      "description": "Kuninkaalliset laivastonsinisen seinät esittelevät pelimestariteoksia",
+      "atmosphere": "Hienostunut ja taiteellinen"
+    },
+    "ballroom": {
+      "name": "Juhlasali",
+      "description": "Kristallinvalkoinen loisto kultaisilla aksenteilla",
+      "atmosphere": "Ylellinen juhla"
+    },
+    "mapRoom": {
+      "name": "Karttahuone",
+      "description": "Seepianväriset kartat ja messinkivälineet strategiseen suunnitteluun",
+      "atmosphere": "Seikkailullinen strategia"
+    },
+    "observatory": {
+      "name": "Observatorio",
+      "description": "Tumman karmiininpunaisia syvyyksiä hopeisen tähtivalon kanssa",
+      "atmosphere": "Kosminen mietiskely"
+    },
+    "theaterRoom": {
+      "name": "Teatteri",
+      "description": "Kuninkaalliset purppuraisen verhot ja kultaiset näyttämövalot",
+      "atmosphere": "Dramaattinen viihde"
+    },
+    "clockTower": {
+      "name": "Kellotorni",
+      "description": "Jäänsininen tarkkuus teräs- ja kromimekanismeilla",
+      "atmosphere": "Mekaaninen tarkkuus"
+    },
+    "warRoom": {
+      "name": "Sotahuone",
+      "description": "Sotilasvihrään strategiaa pronssisilla taistelusuunnitelmilla",
+      "atmosphere": "Strateginen komentokeskus"
+    },
+    "artroom": {
+      "name": "Taidehuone",
+      "description": "Luova studio rikkailla sinapinseinillä ja hiilipiirustustyökaluilla",
+      "atmosphere": "Taiteellinen ja inspiroiva"
+    },
+    "alchemistLaboratory": {
+      "name": "Alkemistin laboratorio",
+      "description": "Smaragdinvihreät liemet ja taivaansininen mystinen energia",
+      "atmosphere": "Maaginen ja kokeellinen"
+    },
+    "dungeon": {
+      "name": "Vankityrmä",
+      "description": "Hunajanväriset kiviseinät pronssisilla soihtutelineillä",
+      "atmosphere": "Mysteerinen ja muinainen"
+    },
+    "undergroundTemple": {
+      "name": "Maanalainen temppeli",
+      "description": "Kivenharmaata pyhyyttä sinivihreillä pyhillä vesillä",
+      "atmosphere": "Pyhä ja ajaton"
+    },
+    "crystalCavern": {
+      "name": "Kristalliluola",
+      "description": "Ruusukvartsiformaatioita ja ametistiklustereita",
+      "atmosphere": "Eteeerinen ja lumoava"
+    },
+    "treasureVault": {
+      "name": "Aarrekammio",
+      "description": "Kultaiset rikkaudet ja smaragdiset aarteet yli kaiken mittaamattomia",
+      "atmosphere": "Ylellinen ja palkitseva"
+    }
   },
   "privacy": {
     "title": "Tietosuojakäytäntö",
@@ -1145,151 +1244,6 @@
     "unauthorized": "Ei käyttöoikeutta",
     "networkError": "Verkkovirhe. Tarkista yhteytesi.",
     "tryAgain": "Yritä uudelleen"
-  },
-  "auth": {
-    "login": "Kirjaudu sisään",
-    "logout": "Kirjaudu ulos",
-    "register": "Rekisteröidy",
-    "email": "Sähköposti",
-    "password": "Salasana",
-    "confirmPassword": "Vahvista salasana",
-    "forgotPassword": "Unohditko salasanan?",
-    "resetPassword": "Nollaa salasana",
-    "createAccount": "Luo tili",
-    "alreadyHaveAccount": "Onko sinulla jo tili?",
-    "dontHaveAccount": "Eikö sinulla ole tiliä?",
-    "loginWithGoogle": "Kirjaudu Googlella",
-    "loginWithFacebook": "Kirjaudu Facebookilla",
-    "checkYourEmail": "Tarkista sähköpostisi",
-    "verifyEmailSent": "Vahvistussähköposti lähetetty",
-    "verifyEmailInstructions": "Olemme lähettäneet vahvistuslinkin sähköpostiisi. Tarkista postilaatikkosi ja napsauta linkkiä vahvistaaksesi tilisi.",
-    "backToLogin": "Takaisin kirjautumiseen",
-    "emailNotReceived": "Etkö saanut sähköpostia?",
-    "resendEmail": "Lähetä vahvistussähköposti uudelleen",
-    "emailVerified": "Sähköposti vahvistettu onnistuneesti",
-    "verificationFailed": "Vahvistus epäonnistui",
-    "invalidCredentials": "Virheellinen sähköposti tai salasana",
-    "accountCreated": "Tili luotu onnistuneesti",
-    "loginToRsvp": "Kirjaudu vastataksesi"
-  },
-  "users": {
-    "notFound": "Käyttäjää ei löytynyt",
-    "notFoundDescription": "Etsimääsi käyttäjää ei ole olemassa tai hänen profiilinsa on yksityinen.",
-    "backToDiscover": "Takaisin löytöön",
-    "memberSince": "Jäsen alkaen",
-    "friends": "Kaverit",
-    "requestSent": "Pyyntö lähetetty",
-    "requestReceived": "Pyyntö odottaa",
-    "addFriend": "Lisää kaveri",
-    "sendMessage": "Viesti",
-    "editProfile": "Muokkaa profiilia",
-    "gamesOwned": "Pelit",
-    "friendsCount": "Kaverit",
-    "currentLevel": "Taso",
-    "totalXP": "XP yhteensä",
-    "collection": "Kokoelma",
-    "friendsList": "Kaverit",
-    "noGamesYet": "Tällä käyttäjällä ei ole vielä pelejä kokoelmassaan.",
-    "noFriendsYet": "Tällä käyttäjällä ei ole vielä kavereita.",
-    "plays": "pelikertaa"
-  },
-  "landing": {
-    "nav": {
-      "forWhom": "Kenelle",
-      "features": "Ominaisuudet",
-      "tools": "Työkalut",
-      "enterManor": "Astu Kartanoon"
-    },
-"hero": {
-  "title1": "Kaikkien",
-  "title2": "pöytäpelaajien",
-  "title3": "koti.",
-  "subtitle": "Kartano avaa ovensa",
-  "subtitleOpen": "Kartano on avoinna",
-  "description": "Lautapelaajasta roolipelaajaan, miniatyyrimaalarista kortinkerääjään — yksi kartano koko harrastukselle."
-  },
-    "countdown": {
-      "label": "Ovet avautuvat",
-      "days": "Päivää",
-      "hours": "Tuntia",
-      "minutes": "Minuuttia",
-      "seconds": "Sekuntia",
-      "visitors": "pelaajaa odottaa ovien avautumista",
-      "enterManor": "Astu Kartanoon",
-      "openingDate": "Kartano avaa ovensa 1.4.2026"
-    },
-    "stats": {
-      "players": "pelaajaa kartanossa",
-      "games": "peliä kokoelmissa",
-      "membership": "jäsenyys, aina"
-    },
-    "forWhom": {
-      "label": "Kenelle",
-      "title": "Sinulle — lajityypistä riippumatta.",
-      "boardGamer": {
-        "type": "Lautapelaaja",
-        "desc": "Luetteloi kokoelmasi, löydä pelikavereita ja seuraa jokaista peli-iltaa."
-      },
-      "roleplayer": {
-        "type": "Roolipelaaja",
-        "desc": "Löydä pelinjohtajia ja pelaajia, hallinnoi kampanjoita ja pidä hahmohistoriasi tallessa."
-      },
-      "miniatures": {
-        "type": "Miniatyyriharrastaja",
-        "desc": "Tallenna armeijasilistasi, jaa maalaamasi miniatyyrit ja löydä muita wargame-harrastajia."
-      },
-      "cardCollector": {
-        "type": "Kortinkerääjä",
-        "desc": "Hallinnoi kokoelmaasi, rakenna pakkoja ja kauppaa korttiyhteisön sisällä."
-      }
-    },
-    "features": {
-      "label": "Ominaisuudet",
-      "title": "Kolme pilaria harrastuksellesi.",
-      "collection": {
-        "number": "01",
-        "title": "Kokoelma",
-        "subtitle": "Kaikki pelisi yhdessä paikassa.",
-        "desc": "Lautapelit, RPG-kirjat, miniatyyrit, keräilykortit — kaikki lajityypit saman kokoelman alla."
-      },
-      "community": {
-        "number": "02",
-        "title": "Yhteisö",
-        "subtitle": "Löydä oman lajisi pelaajat.",
-        "desc": "Etsi pelaajia lajityypin ja sijainnin mukaan. Yksityisviestit, yhteisöprofiilit ja kauppapaikka."
-      },
-      "events": {
-        "number": "03",
-        "title": "Tapahtumat",
-        "subtitle": "Peli-illat. Turnaukset. Kampanjat.",
-        "desc": "Luo tapahtumia tai liity niihin — sisäänrakennettu ilmoittautuminen ja pelilistan hallinta."
-      }
-    },
-    "tools": {
-      "label": "Työkalut",
-      "title": "Kasvava arsenaalisi.",
-      "armyBuilder": { "name": "Armeijanrakentaja", "status": "Tulossa", "desc": "Miniatyyriharrastajille" },
-      "characterBuilder": { "name": "Hahmonrakentaja", "status": "Tulossa", "desc": "RPG-pelaajille" },
-      "deckBuilder": { "name": "Pakkainrakentaja", "status": "Suunnitteilla", "desc": "Kortinkerääjille" },
-      "campaignDiary": { "name": "Kampanjapäiväkirja", "status": "Suunnitteilla", "desc": "Seikkailuille" }
-    },
-    "mansion": {
-      "label": "Rakenna Kartanosi",
-      "title": "Avaa uusia huoneita.",
-      "description": "Ansaitse kokemuspisteitä (XP) osallistumalla yhteisöön ja avaa uusia huoneita kartanoosi. Jokainen huone tuo mukanaan uusia ominaisuuksia."
-    },
-    "manifesto": {
-      "quote": "Pöytäpelaaminen on yksi harrastus, ei neljää erillistä yhteisöä jotka eivät puhu toisilleen."
-    },
-    "cta": {
-      "welcome": "Tervetuloa",
-      "soon": "Pian"
-    },
-    "footer": {
-      "terms": "Ehdot",
-      "privacy": "Tietosuoja",
-      "contact": "Yhteystiedot"
-    }
   },
   "auth": {
     "login": {
@@ -1368,6 +1322,355 @@
       "message": "Jokin meni vikaan todennuksen aikana.",
       "tryAgain": "Yritä uudelleen",
       "backToHome": "Takaisin etusivulle"
+    },
+    "loginRequired": "Kirjautuminen vaaditaan",
+    "loginToRsvp": "Kirjaudu vastataksesi"
+  },
+  "users": {
+    "notFound": "Käyttäjää ei löytynyt",
+    "notFoundDescription": "Etsimääsi käyttäjää ei ole olemassa tai hänen profiilinsa on yksityinen.",
+    "backToDiscover": "Takaisin löytöön",
+    "memberSince": "Jäsen alkaen",
+    "friends": "Kaverit",
+    "requestSent": "Pyyntö lähetetty",
+    "requestReceived": "Pyyntö odottaa",
+    "addFriend": "Lisää kaveri",
+    "sendMessage": "Viesti",
+    "editProfile": "Muokkaa profiilia",
+    "gamesOwned": "Pelit",
+    "friendsCount": "Kaverit",
+    "currentLevel": "Taso",
+    "totalXP": "XP yhteensä",
+    "collection": "Kokoelma",
+    "friendsList": "Kaverit",
+    "noGamesYet": "Tällä käyttäjällä ei ole vielä pelejä kokoelmassaan.",
+    "noFriendsYet": "Tällä käyttäjällä ei ole vielä kavereita.",
+    "plays": "pelikertaa"
+  },
+  "landing": {
+    "nav": {
+      "forWhom": "Kenelle",
+      "features": "Ominaisuudet",
+      "tools": "Työkalut",
+      "enterManor": "Astu Kartanoon"
+    },
+    "hero": {
+      "title1": "Kaikkien",
+      "title2": "pöytäpelaajien",
+      "title3": "koti.",
+      "subtitle": "Kartano avaa ovensa",
+      "subtitleOpen": "Kartano on avoinna",
+      "description": "Lautapelaajasta roolipelaajaan, miniatyyrimaalarista kortinkerääjään — yksi kartano koko harrastukselle."
+    },
+    "countdown": {
+      "label": "Ovet avautuvat",
+      "days": "Päivää",
+      "hours": "Tuntia",
+      "minutes": "Minuuttia",
+      "seconds": "Sekuntia",
+      "visitors": "pelaajaa odottaa ovien avautumista",
+      "enterManor": "Astu Kartanoon",
+      "openingDate": "Kartano avaa ovensa 1.4.2026"
+    },
+    "stats": {
+      "players": "pelaajaa kartanossa",
+      "games": "peliä kokoelmissa",
+      "membership": "jäsenyys, aina"
+    },
+    "forWhom": {
+      "label": "Kenelle",
+      "title": "Sinulle — lajityypistä riippumatta.",
+      "boardGamer": {
+        "type": "Lautapelaaja",
+        "desc": "Luetteloi kokoelmasi, löydä pelikavereita ja seuraa jokaista peli-iltaa."
+      },
+      "roleplayer": {
+        "type": "Roolipelaaja",
+        "desc": "Löydä pelinjohtajia ja pelaajia, hallinnoi kampanjoita ja pidä hahmohistoriasi tallessa."
+      },
+      "miniatures": {
+        "type": "Miniatyyriharrastaja",
+        "desc": "Tallenna armeijasilistasi, jaa maalaamasi miniatyyrit ja löydä muita wargame-harrastajia."
+      },
+      "cardCollector": {
+        "type": "Kortinkerääjä",
+        "desc": "Hallinnoi kokoelmaasi, rakenna pakkoja ja kauppaa korttiyhteisön sisällä."
+      }
+    },
+    "features": {
+      "label": "Ominaisuudet",
+      "title": "Kolme pilaria harrastuksellesi.",
+      "collection": {
+        "number": "01",
+        "title": "Kokoelma",
+        "subtitle": "Kaikki pelisi yhdessä paikassa.",
+        "desc": "Lautapelit, RPG-kirjat, miniatyyrit, keräilykortit — kaikki lajityypit saman kokoelman alla."
+      },
+      "community": {
+        "number": "02",
+        "title": "Yhteisö",
+        "subtitle": "Löydä oman lajisi pelaajat.",
+        "desc": "Etsi pelaajia lajityypin ja sijainnin mukaan. Yksityisviestit, yhteisöprofiilit ja kauppapaikka."
+      },
+      "events": {
+        "number": "03",
+        "title": "Tapahtumat",
+        "subtitle": "Peli-illat. Turnaukset. Kampanjat.",
+        "desc": "Luo tapahtumia tai liity niihin — sisäänrakennettu ilmoittautuminen ja pelilistan hallinta."
+      }
+    },
+    "tools": {
+      "label": "Työkalut",
+      "title": "Kasvava arsenaalisi.",
+      "armyBuilder": {
+        "name": "Armeijanrakentaja",
+        "status": "Tulossa",
+        "desc": "Miniatyyriharrastajille"
+      },
+      "characterBuilder": {
+        "name": "Hahmonrakentaja",
+        "status": "Tulossa",
+        "desc": "RPG-pelaajille"
+      },
+      "deckBuilder": {
+        "name": "Pakkainrakentaja",
+        "status": "Suunnitteilla",
+        "desc": "Kortinkerääjille"
+      },
+      "campaignDiary": {
+        "name": "Kampanjapäiväkirja",
+        "status": "Suunnitteilla",
+        "desc": "Seikkailuille"
+      }
+    },
+    "mansion": {
+      "label": "Rakenna Kartanosi",
+      "title": "Avaa uusia huoneita.",
+      "description": "Ansaitse kokemuspisteitä (XP) osallistumalla yhteisöön ja avaa uusia huoneita kartanoosi. Jokainen huone tuo mukanaan uusia ominaisuuksia."
+    },
+    "manifesto": {
+      "quote": "Pöytäpelaaminen on yksi harrastus, ei neljää erillistä yhteisöä jotka eivät puhu toisilleen."
+    },
+    "cta": {
+      "welcome": "Tervetuloa",
+      "soon": "Pian"
+    },
+    "footer": {
+      "terms": "Ehdot",
+      "privacy": "Tietosuoja",
+      "contact": "Yhteystiedot"
     }
+  },
+  "leagueUi": {
+    "s0": "Ladataan liigaa...",
+    "s1": "Liigaa ei löytynyt.",
+    "s2": "← Tapahtumat",
+    "s3": "GameTable · Liiga",
+    "s4": "Poista liiga",
+    "s5": "Muokkaa liigaa",
+    "s6": "Liigan nimi",
+    "s7": "Peli tai pelilaji",
+    "s8": "Esittely",
+    "s9": "Näkyvyys",
+    "s10": "Julkinen",
+    "s11": "Yksityinen",
+    "s12": "Tallenna muutokset",
+    "s13": "Poista",
+    "s14": "Etsi pelaaja nimellä tai käyttäjätunnuksella",
+    "s15": "Haetaan pelaajia...",
+    "s16": "Pelaajia ei löytynyt.",
+    "s17": "Lisää valittu osallistuja",
+    "s18": "Tämä liiga on siirretty vanhasta tapahtumamallista. Aiemmat sarjaottelut, osallistujat ja tulokset säilyvät alkuperäisellä sivulla, kunnes niiden kausikohtainen siirto on valmis.",
+    "s19": "Avaa aiemmat ottelut ja tulokset",
+    "s20": "Kauden nimi",
+    "s21": "Alkaa",
+    "s22": "Päättyy",
+    "s23": "Tallenna kausi",
+    "s24": "Kauden sarjataulukko",
+    "s25": "Sarjataulukko muodostuu, kun kauteen liitetyissä turnauksissa kirjataan ottelutuloksia.",
+    "s26": "Sija",
+    "s27": "Pelaaja",
+    "s28": "Pisteet",
+    "s29": "Pisteet lasketaan kirjatuista otteluista. Jos turnauksessa ei ole määritetty ottelupisteitä, voitosta saa 3 ja tasapelistä 1 pisteen. Tasapisteissä ratkaisevat voitot ja maaliero.",
+    "s30": "Kirjatut ottelutulokset",
+    "s31": "Kauden kilpailut ja tapahtumat",
+    "s32": "Tähän kauteen ei ole vielä liitetty tapahtumia.",
+    "s33": "Irrota",
+    "s34": "Valitse olemassa oleva turnaus tai peli-ilta",
+    "s35": "Liitä kauteen",
+    "s36": "Voit luoda uusia turnauksia ja peli-iltoja tavallisella tapahtuman luontisivulla ja liittää ne tänne.",
+    "s37": "Luo uusi tapahtuma",
+    "s38": "Uusi kausi",
+    "s39": "Lisää kausi",
+    "s40": "Kirjoita vähintään kaksi merkkiä",
+    "s41": "Hakutulokset",
+    "s42": "Turnauksia",
+    "s43": "Otteluita",
+    "s44": "Voitot",
+    "s45": "Tasapelit",
+    "s46": "Tappiot",
+    "s47": "Liitettävä tapahtuma",
+    "s48": "Uuden kauden nimi",
+    "s49": "Esim. Kausi 2028",
+    "s50": "Julkinen liiga",
+    "s51": "Yksityinen liiga",
+    "s52": "Sulje muokkaus",
+    "s53": "Liigan poistaminen epäonnistui.",
+    "s54": "Tallennus epäonnistui.",
+    "s55": "Pelaajien haku epäonnistui.",
+    "s56": "Osallistujan lisääminen epäonnistui.",
+    "s57": "Poistetaanko osallistuja liigasta?",
+    "s58": "Poistu liigasta",
+    "s59": "Liity liigaan",
+    "s60": "Alku avoin",
+    "s61": "Loppu avoin",
+    "s62": "Sulje kauden muokkaus",
+    "s63": "Muokkaa kautta",
+    "s64": "Kauden tallennus epäonnistui.",
+    "s65": "turnaus",
+    "s66": "peli-ilta",
+    "s67": "Järjestäjä",
+    "s68": "Liiga",
+    "memberCount": "Liigan osallistujat ({{count}})",
+    "host": "Järjestäjä",
+    "confirmDelete": "Poistetaanko liiga \"{{name}}\" ja kaikki sen kaudet? Liitetyt turnaukset ja peli-illat säilyvät. Tätä ei voi perua."
+  },
+  "eventUi": {
+    "s0": "Pysyvä kilpailuyhteisö",
+    "s1": "Perustat liigan, joka säilyy kaudesta toiseen. Voit liittää jokaiseen kauteen olemassa olevia tai uusia turnauksia ja peli-iltoja.",
+    "s2": "Järjestäjän asetukset",
+    "s3": "Formaatti",
+    "s4": "Viikoittainen",
+    "s5": "Joka toinen viikko",
+    "s6": "Vapaamuotoinen",
+    "s7": "Alkulohkot + pudotuspelit",
+    "s8": "Pisteytys",
+    "s9": "Voitto 3 / tasapeli 1 / tappio 0",
+    "s10": "Voitto 3 / tasapeli 0 / tappio 0",
+    "s11": "Voitto 2 / tasapeli 1 / tappio 0",
+    "s12": "Voitto 2 / tasapeli 0 / tappio 0",
+    "s13": "Voitto 1 / tasapeli 0 / tappio 0",
+    "s14": "Mukautettu",
+    "s15": "Tasapisteiden ratkaisu",
+    "s16": "Järjestäjän lisätiedot",
+    "s17": "Ensimmäinen kausi",
+    "s18": "Anna ensimmäiselle kaudelle nimi. Kilpailut, ottelut ja pisteytys lisätään liigan sisällä myöhemmin.",
+    "s19": "Kauden nimi *",
+    "s20": "Kausi alkaa (valinnainen)",
+    "s21": "Kausi päättyy (valinnainen)",
+    "s22": "Valitse formaatti",
+    "s23": "Valitse määrä",
+    "s24": "Valitse pisteytysmalli",
+    "s25": "Esim. keskinäinen ottelu, VP-ero...",
+    "s26": "Kirjoita tähän muut järjestämiseen liittyvät säännöt, käytännöt tai huomioitavat asiat.",
+    "s27": "Esim. Kausi 2027",
+    "s28": "Siirrä liiga uuteen rakenteeseen",
+    "s29": "Tämä on vanhan tapahtumamallin liiga. Siirto perustaa pysyvän liigan ja ensimmäisen kauden sekä liittää siihen nykyiset turnaukset. Alkuperäinen liiga, ottelut ja tulokset säilyvät luettavina.",
+    "s30": "Liigan turnaukset",
+    "s31": "Kokoa kauden turnaukset yhteen. Jokaisen turnauksen ottelut ja tulokset säilyvät sen omalla sivulla.",
+    "s32": "Liigaan ei ole vielä liitetty turnauksia.",
+    "s33": "Irrota",
+    "s34": "Valitse oma turnaus",
+    "s35": "Liitä turnaus",
+    "s36": "Kauden sarjataulukko",
+    "s37": "Päättyneiden turnausten sijoituspisteet ja liigan omien otteluiden pisteet lasketaan yhteen. Turnauksen omat ottelupisteet eivät sellaisenaan siirry liigaan.",
+    "s38": "Sijoituspisteet (1., 2., 3. jne.)",
+    "s39": "Tallenna pisteytys",
+    "s40": "Kauden tuloksia ei vielä ole. Liitä päättynyt turnaus tai kirjaa liigan oma ottelu.",
+    "s41": "Pelaaja",
+    "s42": "Turn.",
+    "s43": "Sij.p.",
+    "s44": "Ott.p.",
+    "s45": "Yht.",
+    "s46": "Sarjaottelut",
+    "s47": "Lisää yksittäisiä kausiotteluita ilman erillistä turnausta. Ottelut kerryttävät kauden ottelupisteitä.",
+    "s48": "Sarjaottelut (automaattinen ryhmä)",
+    "s49": "Lisää sarjaottelu",
+    "s50": "Yksittäisiä sarjaotteluita ei ole vielä lisätty.",
+    "s51": "Tallenna tulos",
+    "s52": "Kilpailijat",
+    "s53": "Valitse kilpailija",
+    "s54": "Kilpailijoita ei ole vielä valittu.",
+    "s55": "Kampanjan eteneminen",
+    "s56": "Määritä eteneminen",
+    "s57": "Etenemisen tyyppi",
+    "s58": "Vaiheet",
+    "s59": "Mittari",
+    "s60": "Vapaa tila",
+    "s61": "Nimi",
+    "s62": "Muokkaa etenemistä",
+    "s63": "Lisää sessio",
+    "s64": "Sessiota ei ole vielä määritelty.",
+    "s65": "Suunniteltu",
+    "s66": "Käynnissä",
+    "s67": "Valmis",
+    "s68": "Peruttu",
+    "s69": "Kierroksia ei ole vielä määritelty.",
+    "s70": "Lisää ottelu",
+    "s71": "Ei voittajaa",
+    "s72": "Sarjataulukko",
+    "s73": "Pisteet ovat järjestäjän määrittelemiä. GameTable ei päätä pisteytyssääntöä.",
+    "s74": "Taulukko muodostuu, kun liigaan tai turnaukseen lisätään kilpailijoita.",
+    "s75": "Ott.",
+    "s76": "Pisteet",
+    "s77": "Ottelukierros",
+    "s78": "Kotijoukkueen tulos",
+    "s79": "Tulos 1",
+    "s80": "Vierasjoukkueen tulos",
+    "s81": "Tulos 2",
+    "s82": "Poista kilpailija",
+    "s83": "Esim. Luku, Skenaario, Tehtävä",
+    "s84": "Nykyinen",
+    "s85": "Yhteensä",
+    "s86": "Yksikkö, esim. skenaariota",
+    "s87": "Nykyinen vaihe, esim. Muinainen temppeli",
+    "s88": "Esim. Käännekohta – seuraavaksi etsitään kadonnut kruunu.",
+    "s89": "Etenemiseen liittyvä lisätieto (valinnainen)",
+    "s90": "Esim. Sessio 1 – Kaupungin portit",
+    "s91": "Muistiinpanot sessiosta (valinnainen)",
+    "s92": "Muistiinpanot",
+    "s93": "Esim. Kierros 1",
+    "s94": "Pelaaja 1 tulos",
+    "s95": "P1 tulos",
+    "s96": "Pelaaja 2 tulos",
+    "s97": "P2 tulos",
+    "structureRules": "Määritä tapahtuman rakenne oman pelisi sääntöjen mukaan. GameTable ei määrää pisteytystä tai formaattia.",
+    "roundPlanNote": "Tämä on alkuperäinen suunnitelma, ei kierrosten yläraja. Kierroksia voi lisätä myöhemmin.",
+    "scoringHint": "Valitse pisteytys, jota käytetään ottelutulosten pisteiden laskemiseen.",
+    "competitorHint": "RSVP kertoo, ketkä ovat mukana tapahtumassa. Tässä valitaan erikseen ne osallistujat, jotka ovat mukana itse kilpailussa.",
+    "campaignModelHint": "Kampanjalla ei ole vielä etenemismallia. Voit käyttää vaiheita, omaa mittaria tai vapaamuotoista kuvausta.",
+    "stagesPlaceholder": "Vaiheet, yksi rivilleen:\nPrologi\nKaupungin portit\nVarjojen metsä\nMuinainen temppeli",
+    "competitor": "Kilpailija",
+    "editSession": "Muokkaa sessiota"
+  },
+  "eventDynamic": {
+    "s0": "Anna ensimmäisen kauden nimi",
+    "s1": "Kauden päättymispäivä on ennen alkua",
+    "s2": "Liigan perustaminen epäonnistui",
+    "s3": "Esim. Hyvinkään Blood Bowl -liiga",
+    "s4": "Suunniteltu kierrosmäärä",
+    "s5": "Kausi päättyy (arvio)",
+    "s6": "Päättyy",
+    "s7": "Tänään",
+    "s8": "Ottelun lisääminen epäonnistui",
+    "s9": "Päätä tapahtuma",
+    "s10": "Siirto epäonnistui",
+    "s11": "Siirretään...",
+    "s12": "Siirrä pysyväksi liigaksi",
+    "s13": "Päättynyt",
+    "s14": "Tulossa / käynnissä",
+    "s15": "Vaihetta ei ole määritetty",
+    "s16": "Etenemistä ei ole määritetty",
+    "s17": "Suunnittele kampanjan sessiot etukäteen ja täydennä niiden sisältöä matkan varrella. Suunnitelma ei ole yläraja.",
+    "s18": "Järjestäjä voi rakentaa tapahtuman etenemisen vaiheittain. GameTable ei määrää kierrosten tai sessioiden sisältöä.",
+    "s19": "Lisää sessio",
+    "s20": "Nimetön sessio",
+    "s21": "Ajankohtaa ei ole määritetty",
+    "s22": "Käynnissä",
+    "s23": "Päätä sessio",
+    "s24": "Lisää",
+    "s25": "Nimetön vaihe",
+    "sessionsToFill": "Täydennä {{count}} sessioon",
+    "roundsToFill": "Täydennä {{count}} kierrokseen"
   }
 }
