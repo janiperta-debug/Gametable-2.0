@@ -6,10 +6,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { ArchiveButton, ArchiveCard, ArchiveCardContent, archiveField } from "@/components/archive-frame"
-import { sendBroadcast, checkIsAdmin, getBroadcastHistory, type BroadcastHistory } from "@/app/actions/admin"
+import { sendBroadcast, checkIsAdmin, getBroadcastHistory, uploadNewsletterImage, listNewsletterImages, type BroadcastHistory } from "@/app/actions/admin"
 import { useToast } from "@/hooks/use-toast"
 import { useUser } from "@/hooks/useUser"
-import { Loader2, Send, Mail, Shield, AlertTriangle, History, Users, Clock, Crown } from "lucide-react"
+import { Loader2, Send, Mail, Shield, AlertTriangle, History, Users, Clock, Crown, ImagePlus, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "@/lib/i18n"
 
@@ -17,6 +17,9 @@ export default function AnnouncementsPage() {
   const [subject, setSubject] = useState("")
   const [message, setMessage] = useState("")
   const [testMode, setTestMode] = useState(true)
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [savedImages, setSavedImages] = useState<string[]>([])
+  const [uploading, setUploading] = useState(false)
   const [isSending, setIsSending] = useState(false)
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
   const [history, setHistory] = useState<BroadcastHistory[]>([])
@@ -40,6 +43,8 @@ export default function AnnouncementsPage() {
       if (result.isAdmin) {
         const historyResult = await getBroadcastHistory()
         setHistory(historyResult.broadcasts)
+        const imageResult = await listNewsletterImages()
+        setSavedImages(imageResult.images)
       }
       setLoadingHistory(false)
     }
@@ -65,6 +70,7 @@ export default function AnnouncementsPage() {
         subject,
         body: message,
         testMode,
+        imageUrl,
       })
 
       if (result.success) {
@@ -78,6 +84,7 @@ export default function AnnouncementsPage() {
         })
         setSubject("")
         setMessage("")
+        setImageUrl(null)
 
         const historyResult = await getBroadcastHistory()
         setHistory(historyResult.broadcasts)
@@ -189,6 +196,57 @@ export default function AnnouncementsPage() {
                 <p className="text-xs text-muted-foreground">{message.length}/5000</p>
               </div>
 
+
+              <div className="space-y-3">
+                <Label htmlFor="newsletter-image" className="font-cinzel text-accent-gold">Uutiskirjeen kuva (valinnainen)</Label>
+                <p className="text-sm text-muted-foreground">Lisää kuva otsikon alle. JPG, PNG, WebP tai GIF, enintään 5 Mt. Ladattuja kuvia voi käyttää uudelleen.</p>
+                <label htmlFor="newsletter-image" className="flex w-fit cursor-pointer items-center gap-2 rounded-lg border border-accent-gold/40 px-4 py-3 text-sm text-accent-gold hover:bg-accent-gold/10">
+                  {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+                  {uploading ? "Ladataan kuvaa..." : "Lisää kuva"}
+                </label>
+                <input id="newsletter-image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="sr-only" disabled={uploading || isSending}
+                  onChange={async (event) => {
+                    const file = event.target.files?.[0]
+                    if (!file) return
+                    event.target.value = ""
+                    if (file.size > 5 * 1024 * 1024 || !["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+                      toast({ title: "Virheellinen kuva", description: "Valitse JPG-, PNG-, WebP- tai GIF-kuva (enintään 5 Mt).", variant: "destructive" })
+                      return
+                    }
+                    setUploading(true)
+                    try {
+                      const data = new FormData()
+                      data.set("image", file)
+                      const result = await uploadNewsletterImage(data)
+                      if (result.url) { setImageUrl(result.url); setSavedImages((current) => [result.url!, ...current.filter((url) => url !== result.url)]) }
+                      else toast({ title: "Kuvan lataus epäonnistui", description: result.error, variant: "destructive" })
+                    } catch { toast({ title: "Kuvan lataus epäonnistui", variant: "destructive" }) }
+                    finally { setUploading(false) }
+                  }} />
+                {imageUrl && <div className="relative max-w-xl overflow-hidden rounded-lg border border-accent-gold/30">
+                  <img src={imageUrl} alt="Uutiskirjeen valittu kuva" className="h-auto w-full" />
+                  <button type="button" onClick={() => setImageUrl(null)} aria-label="Poista kuva kirjeestä" className="absolute right-2 top-2 rounded-full bg-black/80 p-2 text-white"><X className="h-4 w-4" /></button>
+                </div>}
+                {savedImages.length > 0 && <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Aiemmin ladatut kuvat</p>
+                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                    {savedImages.map((url) => <button type="button" key={url} aria-label="Valitse aiemmin ladattu kuva" aria-pressed={imageUrl === url} onClick={() => setImageUrl(url)}
+                      className={`aspect-square overflow-hidden rounded-lg border-2 ${imageUrl === url ? "border-accent-gold" : "border-accent-gold/20"}`}>
+                      <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />
+                    </button>)}
+                  </div>
+                </div>}
+                <div className="rounded-lg border border-accent-gold/25 bg-black/20 p-4">
+                  <p className="mb-3 text-sm text-accent-gold">Kirjeen esikatselu</p>
+                  <div className="mx-auto max-w-lg space-y-4 border border-accent-gold/30 bg-[#171310] p-4 text-center">
+                    <p className="text-xs tracking-[0.2em] text-[#b9954b]">GAMETABLE</p>
+                    <h3 className="break-words font-heading text-xl text-[#e2b44f]">{subject || "Uutiskirjeen otsikko"}</h3>
+                    {imageUrl && <img src={imageUrl} alt="" className="h-auto w-full" />}
+                    <p className="whitespace-pre-wrap break-words text-left text-sm leading-7 text-[#d8c69b]">{message || "Uutiskirjeen teksti näkyy tässä."}</p>
+                  </div>
+                </div>
+              </div>
+
               <div className="flex items-center gap-3 rounded-lg bg-[hsl(var(--surface-dark)/0.35)] p-4">
                 <Switch
                   id="test-mode"
@@ -231,7 +289,7 @@ export default function AnnouncementsPage() {
 
               <ArchiveButton
                 onClick={handleSend}
-                disabled={isSending || !subject.trim() || !message.trim()}
+                disabled={isSending || uploading || !subject.trim() || !message.trim()}
                 active
                 icon={isSending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
               >
