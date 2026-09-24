@@ -63,7 +63,7 @@ const formatEventDate = (dateString: string, locale: "fi" | "en") => {
   const tomorrow = new Date(today)
   tomorrow.setDate(today.getDate() + 1)
 
-  if (date.toDateString() === today.toDateString()) return locale === "fi" ? t("eventDynamic.s7") : "Today"
+  if (date.toDateString() === today.toDateString()) return locale === "fi" ? "Tänään" : "Today"
   if (date.toDateString() === tomorrow.toDateString()) return locale === "fi" ? "Huomenna" : "Tomorrow"
 
   return date.toLocaleDateString(locale === "fi" ? "fi-FI" : "en-GB", {
