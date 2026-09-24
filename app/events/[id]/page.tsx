@@ -1042,18 +1042,22 @@ export default function EventDetailsPage() {
               </ArchiveCard>
             )}
 
-            {event.event_type !== "campaign" && event.event_type !== "game_night" && standings.length > 0 && (
+            {(event.event_type === "tournament" || event.event_type === "league") && (
               <ArchiveCard>
-                <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">Sarjataulukko</ArchiveCardTitle></ArchiveCardHeader>
+                <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">{event.event_type === "league" ? "Liigataulukko" : "Sarjataulukko"}</ArchiveCardTitle></ArchiveCardHeader>
                 <ArchiveCardContent>
                   <p className="text-sm text-muted-foreground mb-4">Pisteet ovat järjestäjän määrittelemiä. GameTable ei päätä pisteytyssääntöä.</p>
+                  {standings.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Taulukko muodostuu, kun liigaan tai turnaukseen lisätään kilpailijoita.</p>
+                  ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm"><thead><tr className="border-b border-accent-gold/20 text-muted-foreground">
                       <th className="text-left py-2 pr-3">Pelaaja</th><th className="text-right px-2">Ott.</th><th className="text-right px-2">V</th><th className="text-right px-2">T</th><th className="text-right px-2">H</th><th className="text-right pl-2">Pisteet</th>
-                    </tr></thead><tbody>{standings.map((row: any) => <tr key={row.user_id} className="border-b border-accent-gold/10">
+                    </tr></thead><tbody>{standings.map((row: any) => <tr key={row.entry_id} className="border-b border-accent-gold/10">
                       <td className="py-2 pr-3">{row.name}</td><td className="text-right px-2">{row.played}</td><td className="text-right px-2">{row.wins}</td><td className="text-right px-2">{row.draws}</td><td className="text-right px-2">{row.losses}</td><td className="text-right pl-2 font-medium text-accent-gold">{row.points}</td>
                     </tr>)}</tbody></table>
                   </div>
+                  )}
                 </ArchiveCardContent>
               </ArchiveCard>
             )}
