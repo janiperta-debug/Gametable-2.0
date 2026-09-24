@@ -378,7 +378,9 @@ export default function CreateEventPage() {
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="event-rounds" className="font-body text-accent-gold">Kierrokset / sessiot</Label>
+                        <Label htmlFor="event-rounds" className="font-body text-accent-gold">
+                          {eventType === "campaign" ? "Sessiot" : "Suunniteltu kierrosmäärä"}
+                        </Label>
                         <Select
                           value={eventConfig.rounds}
                           onValueChange={(value) => setEventConfig({ ...eventConfig, rounds: value })}
@@ -392,6 +394,11 @@ export default function CreateEventPage() {
                             ))}
                           </SelectContent>
                         </Select>
+                        {eventType !== "campaign" && (
+                          <p className="text-xs text-muted-foreground">
+                            Tämä on alkuperäinen suunnitelma, ei kierrosten yläraja. Kierroksia voi lisätä myöhemmin.
+                          </p>
+                        )}
                       </div>
                     </div>
 
