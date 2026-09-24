@@ -28,6 +28,10 @@ export default function LeaguePage() {
     {hub.league.description && <p className="text-muted-foreground">{hub.league.description}</p>}
    </div>
    {error && <p role="alert" className="text-red-400">{error}</p>}
+   {hub.league.legacy_event_id && <div className="rounded-lg border border-accent-gold/25 p-4 space-y-2">
+     <p className="text-sm text-muted-foreground">Tämä liiga on siirretty vanhasta tapahtumamallista. Aiemmat sarjaottelut, osallistujat ja tulokset säilyvät alkuperäisellä sivulla, kunnes niiden kausikohtainen siirto on valmis.</p>
+     <ArchiveCardButton onClick={() => router.push("/events/" + hub.league.legacy_event_id)}>Avaa aiemmat ottelut ja tulokset</ArchiveCardButton>
+   </div>}
    {hub.seasons.map((season) => <ArchiveCard key={season.id}>
     <ArchiveCardHeader><ArchiveCardTitle>{season.name}</ArchiveCardTitle></ArchiveCardHeader>
     <ArchiveCardContent className="space-y-4">
