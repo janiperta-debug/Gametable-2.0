@@ -77,6 +77,57 @@ export async function addEventRound(eventId: string, data: { title?: string; sta
   return { round }
 }
 
+export async function addPlannedEventRounds(eventId: string) {
+  const { supabase, error } = await requireHost(eventId)
+  if (error) return { error }
+
+  const { data: event } = await supabase
+    .from("events")
+    .select("event_type, event_config")
+    .eq("id", eventId)
+    .single()
+
+  if (!event) return { error: "Tapahtumaa ei löytynyt." }
+  if (event.event_type !== "tournament" && event.event_type !== "league") {
+    return { error: "Kierrosten automaattinen luonti koskee turnauksia ja liigoja." }
+  }
+
+  const plannedRounds = Number((event.event_config as Record<string, unknown> | null)?.rounds || 0)
+  if (!Number.isInteger(plannedRounds) || plannedRounds < 1) {
+    return { error: "Tapahtumalle ei ole määritetty kierrosmäärää." }
+  }
+
+  const { data: existing } = await supabase
+    .from("event_rounds")
+    .select("round_number")
+    .eq("event_id", eventId)
+    .order("round_number", { ascending: false })
+    .limit(1)
+
+  const currentCount = existing?.[0]?.round_number || 0
+  const missing = plannedRounds - currentCount
+
+  if (missing <= 0) {
+    return { rounds: [], created: 0, planned: plannedRounds, current: currentCount }
+  }
+
+  const rows = Array.from({ length: missing }, (_, index) => ({
+    event_id: eventId,
+    round_number: currentCount + index + 1,
+    title: `Kierros ${currentCount + index + 1}`,
+  }))
+
+  const { data: rounds, error: insertError } = await supabase
+    .from("event_rounds")
+    .insert(rows)
+    .select()
+
+  if (insertError) return { error: insertError.message }
+
+  revalidatePath("/events/" + eventId)
+  return { rounds: rounds || [], created: rows.length, planned: plannedRounds, current: currentCount + rows.length }
+}
+
 export async function addEventMatch(eventId: string, data: { round_id: string; entry_a_id?: string; entry_b_id?: string }) {
   const { supabase, error } = await requireHost(eventId)
   if (error) return { error }
