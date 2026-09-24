@@ -66,8 +66,6 @@
     "minutesAgo": "minutes ago",
     "justNow": "Just now",
     "new": "new",
-    "loading": "Loading...",
-    "search": "Search",
     "searching": "Searching...",
     "filters": "Filters",
     "hideFilters": "Hide Filters",
@@ -208,7 +206,6 @@
     "friendRequestRejected": "Friend request declined",
     "unreadNotifications": "unread",
     "noNotifications": "No new notifications",
-    "emailNotifications": "Email Notifications",
     "emailNotificationsDescription": "Choose which notifications you'd like to receive by email.",
     "loginToManageNotifications": "Please log in to manage your notification preferences.",
     "emailFriendRequests": "Friend requests",
@@ -323,13 +320,12 @@
     "searchBGGDescription": "Search the BoardGameGeek database to add board games to your collection.",
     "searchRPGGDescription": "Search the RPGGeek database to add role-playing games to your collection.",
     "searchTCGDescription": "Search trading card game databases to add cards to your collection.",
-    "searchMiniDescription": "Search miniature game databases to add models to your collection.",
+    "searchMiniDescription": "Search the BattleScribe database to add miniatures to your collection.",
     "searchPlaceholder": "Enter game name...",
     "searchFailed": "Search failed. Please try again.",
     "detailsFailed": "Failed to fetch game details. Please try again.",
     "addFailed": "Failed to add game. Please try again.",
     "addedToCollection": "has been added to your collection! (+10 XP)",
-    "addToCollection": "Add to Collection",
     "addToWishlist": "Add to Wishlist",
     "quantity": "Quantity",
     "bulkImport": "Bulk Import",
@@ -345,7 +341,6 @@
     "inProgress": "In Progress",
     "painted": "Painted",
     "based": "Based",
-    "searchMiniDescription": "Search the BattleScribe database to add miniatures to your collection.",
     "bulkImportTCGDescription": "Paste your deck list to import multiple cards at once. Format: '4 Lightning Bolt' or '4x Dark Ritual'",
     "bulkImportMiniDescription": "Paste your army list to import multiple units at once. Format: '10 Intercessors' or '5x Hellblasters'",
     "importing": "Importing...",
@@ -356,7 +351,6 @@
     "importDescription": "Import your collection by entering your username",
     "noItemsToImport": "No items found in your collection to import",
     "importingCollection": "Importing collection...",
-    "searchFailed": "Search failed. Please try again.",
     "bggUsernamePlaceholder": "Enter your BoardGameGeek username",
     "rpggUsernamePlaceholder": "Enter your RPGGeek username",
     "noResults": "No games found. Try a different search term.",
@@ -382,7 +376,7 @@
     "pastEvents": "Past Events",
     "myEvents": "My Events",
     "hosting": "Hosting",
-    "attending": "Attending",
+    "attending": "attending",
     "searchEvents": "Search events...",
     "filterByType": "Filter by type",
     "eventDetails": "Event Details",
@@ -407,7 +401,6 @@
     "maybe": "Maybe",
     "confirm": "Confirm",
     "manage": "Manage",
-    "attending": "attending",
     "viewDetails": "View Details",
     "noEvents": "No Events Yet",
     "noEventsDesc": "Create your first event or check back soon!",
@@ -505,7 +498,23 @@
       "selectGame": "Select game",
       "isPrivate": "Private Event",
       "requiresApproval": "Requires Approval"
-    }
+    },
+    "rsvpDeclined": "Declined",
+    "participantCount": "{{count}} participants",
+    "leagueLoadFailed": "Failed to load leagues.",
+    "legacyLeague": "Legacy league",
+    "myLeaguesCampaigns": "My leagues and campaigns",
+    "myLeaguesCampaignsEmpty": "Your leagues and active campaigns will appear here.",
+    "showLess": "Show less",
+    "showAllCount": "Show all ({{count}})",
+    "nextEvents": "Next events",
+    "hideFilters": "Hide filters",
+    "filters": "Filters",
+    "clear": "Clear",
+    "noMatchingUpcoming": "No upcoming events match your search.",
+    "showAllUpcoming": "Show all upcoming events ({{count}})",
+    "noPastEvents": "No past events.",
+    "showFullHistory": "Show full history"
   },
   "community": {
     "title": "Community",
@@ -612,47 +621,47 @@
     "everyDimensionTellsStory": "Every dimension tells a different story",
     "selectTheme": "Select Theme",
     "applyTheme": "Apply Theme",
-  "currentlyActive": "Currently Active",
-  "enterRoom": "Enter Room",
-  "tabManor": "Manor",
-  "tabArtifacts": "Artifacts",
-  "artifactsTitle": "Manor Artifacts",
-  "artifactsSubtitle": "Artifacts are found. Secrets remain. The story unfolds.",
-  "manorTitle": "Manor Rooms",
-  "manorSubtitle": "Every journey begins at a door.",
-  "roomPage": {
-    "backToMap": "Back to Map",
-    "essence": "The Essence",
-    "journey": "Your Journey in This Room",
-    "glimpse": "A Glimpse Inside",
-    "glimpseCollection": "Collection",
-    "glimpseEvents": "Events",
-    "glimpseCommunity": "Community",
-    "artefact": "Artefact",
-    "whatUnlocks": "What Unlocks",
-    "progressSaved": "Your progress will always be saved.",
-    "levelLabel": "Level",
-    "themeActive": "Theme in use",
-    "themeActiveDesc": "This room defines the look of your GameTable.",
-    "themeUnlocked": "Theme unlocked",
-    "themeUnlockedDesc": "Apply this room's theme to your GameTable.",
-    "themeLocked": "Theme locked",
-    "themeLockedDesc": "Unlock this room to use its theme.",
-    "useTheme": "Use theme",
-    "inUse": "In use"
-  },
-  "artifactPage": {
-    "backToArtifacts": "Back to Artifacts",
-    "artefact": "Artefact",
-    "loreEntry": "Lore Entry",
-    "loreNote": "This entry is added to your Lore Collection and can be read anytime in your Profile.",
-    "unlocks": "Unlocks",
-    "rowTheme": "Theme",
-    "rowRoomAccess": "Room Access",
-    "rowLore": "Lore Entry",
-    "rowArtefact": "Artefact",
-    "rowAchievement": "Achievement"
-  }
+    "currentlyActive": "Currently Active",
+    "enterRoom": "Enter Room",
+    "tabManor": "Manor",
+    "tabArtifacts": "Artifacts",
+    "artifactsTitle": "Manor Artifacts",
+    "artifactsSubtitle": "Artifacts are found. Secrets remain. The story unfolds.",
+    "manorTitle": "Manor Rooms",
+    "manorSubtitle": "Every journey begins at a door.",
+    "roomPage": {
+      "backToMap": "Back to Map",
+      "essence": "The Essence",
+      "journey": "Your Journey in This Room",
+      "glimpse": "A Glimpse Inside",
+      "glimpseCollection": "Collection",
+      "glimpseEvents": "Events",
+      "glimpseCommunity": "Community",
+      "artefact": "Artefact",
+      "whatUnlocks": "What Unlocks",
+      "progressSaved": "Your progress will always be saved.",
+      "levelLabel": "Level",
+      "themeActive": "Theme in use",
+      "themeActiveDesc": "This room defines the look of your GameTable.",
+      "themeUnlocked": "Theme unlocked",
+      "themeUnlockedDesc": "Apply this room's theme to your GameTable.",
+      "themeLocked": "Theme locked",
+      "themeLockedDesc": "Unlock this room to use its theme.",
+      "useTheme": "Use theme",
+      "inUse": "In use"
+    },
+    "artifactPage": {
+      "backToArtifacts": "Back to Artifacts",
+      "artefact": "Artefact",
+      "loreEntry": "Lore Entry",
+      "loreNote": "This entry is added to your Lore Collection and can be read anytime in your Profile.",
+      "unlocks": "Unlocks",
+      "rowTheme": "Theme",
+      "rowRoomAccess": "Room Access",
+      "rowLore": "Lore Entry",
+      "rowArtefact": "Artefact",
+      "rowAchievement": "Achievement"
+    }
   },
   "trophies": {
     "title": "Trophy Collection",
@@ -1022,7 +1031,6 @@
       "accessDeniedDescription": "You do not have administrator privileges to access this page.",
       "returnHome": "Return to Home"
     },
-
     "title": "Manor Correspondence",
     "manorAdmin": "Manor Administration",
     "announcements": "Manor Announcements",
@@ -1068,25 +1076,101 @@
     "gdprInquiry": "For GDPR-related inquiries, please email"
   },
   "rooms": {
-    "mainHall": { "name": "Main Hall", "description": "The grand entrance with burgundy elegance and golden accents", "atmosphere": "Majestic and welcoming" },
-    "library": { "name": "Library", "description": "Deep mahogany shelves filled with gaming wisdom", "atmosphere": "Scholarly and contemplative" },
-    "conservatory": { "name": "Conservatory", "description": "Lush greenery and natural light for peaceful gaming", "atmosphere": "Fresh and rejuvenating" },
-    "firesideLounge": { "name": "Fireside Lounge", "description": "Dramatic obsidian and steel with flickering orange flames", "atmosphere": "Dark and sophisticated" },
-    "bar": { "name": "Bar", "description": "Amber spirits and brass fixtures for social gaming", "atmosphere": "Lively and social" },
-    "spa": { "name": "Spa", "description": "Serene lavender sanctuary with amethyst accents and spa tranquility", "atmosphere": "Peaceful and rejuvenating" },
-    "gallery": { "name": "Gallery", "description": "Royal navy walls showcasing gaming masterpieces", "atmosphere": "Refined and artistic" },
-    "ballroom": { "name": "Ballroom", "description": "Crystal white grandeur with golden accents", "atmosphere": "Luxurious celebration" },
-    "mapRoom": { "name": "Map Room", "description": "Sepia charts and brass instruments for strategic planning", "atmosphere": "Adventurous strategy" },
-    "observatory": { "name": "Observatory", "description": "Dark crimson depths with silver starlight", "atmosphere": "Cosmic contemplation" },
-    "theaterRoom": { "name": "Theater Room", "description": "Royal purple curtains and golden stage lights", "atmosphere": "Dramatic entertainment" },
-    "clockTower": { "name": "Clock Tower", "description": "Ice blue precision with steel and chrome mechanisms", "atmosphere": "Mechanical precision" },
-    "warRoom": { "name": "War Room", "description": "Military green strategy with bronze battle plans", "atmosphere": "Strategic command" },
-    "artroom": { "name": "Artroom", "description": "Creative studio with rich mustard walls and charcoal drawing tools", "atmosphere": "Artistic and inspiring" },
-    "alchemistLaboratory": { "name": "Alchemist Laboratory", "description": "Emerald potions and azure mystical energies", "atmosphere": "Magical and experimental" },
-    "dungeon": { "name": "Dungeon", "description": "Honey stone walls with bronze torch brackets", "atmosphere": "Mysterious and ancient" },
-    "undergroundTemple": { "name": "Underground Temple", "description": "Stone gray sanctity with teal sacred waters", "atmosphere": "Sacred and timeless" },
-    "crystalCavern": { "name": "Crystal Cavern", "description": "Rose quartz formations and amethyst clusters", "atmosphere": "Ethereal and enchanting" },
-    "treasureVault": { "name": "Treasure Vault", "description": "Golden riches and emerald treasures beyond measure", "atmosphere": "Opulent and rewarding" }
+    "mainHall": {
+      "name": "Main Hall",
+      "description": "The grand entrance with burgundy elegance and golden accents",
+      "atmosphere": "Majestic and welcoming"
+    },
+    "library": {
+      "name": "Library",
+      "description": "Deep mahogany shelves filled with gaming wisdom",
+      "atmosphere": "Scholarly and contemplative"
+    },
+    "conservatory": {
+      "name": "Conservatory",
+      "description": "Lush greenery and natural light for peaceful gaming",
+      "atmosphere": "Fresh and rejuvenating"
+    },
+    "firesideLounge": {
+      "name": "Fireside Lounge",
+      "description": "Dramatic obsidian and steel with flickering orange flames",
+      "atmosphere": "Dark and sophisticated"
+    },
+    "bar": {
+      "name": "Bar",
+      "description": "Amber spirits and brass fixtures for social gaming",
+      "atmosphere": "Lively and social"
+    },
+    "spa": {
+      "name": "Spa",
+      "description": "Serene lavender sanctuary with amethyst accents and spa tranquility",
+      "atmosphere": "Peaceful and rejuvenating"
+    },
+    "gallery": {
+      "name": "Gallery",
+      "description": "Royal navy walls showcasing gaming masterpieces",
+      "atmosphere": "Refined and artistic"
+    },
+    "ballroom": {
+      "name": "Ballroom",
+      "description": "Crystal white grandeur with golden accents",
+      "atmosphere": "Luxurious celebration"
+    },
+    "mapRoom": {
+      "name": "Map Room",
+      "description": "Sepia charts and brass instruments for strategic planning",
+      "atmosphere": "Adventurous strategy"
+    },
+    "observatory": {
+      "name": "Observatory",
+      "description": "Dark crimson depths with silver starlight",
+      "atmosphere": "Cosmic contemplation"
+    },
+    "theaterRoom": {
+      "name": "Theater Room",
+      "description": "Royal purple curtains and golden stage lights",
+      "atmosphere": "Dramatic entertainment"
+    },
+    "clockTower": {
+      "name": "Clock Tower",
+      "description": "Ice blue precision with steel and chrome mechanisms",
+      "atmosphere": "Mechanical precision"
+    },
+    "warRoom": {
+      "name": "War Room",
+      "description": "Military green strategy with bronze battle plans",
+      "atmosphere": "Strategic command"
+    },
+    "artroom": {
+      "name": "Artroom",
+      "description": "Creative studio with rich mustard walls and charcoal drawing tools",
+      "atmosphere": "Artistic and inspiring"
+    },
+    "alchemistLaboratory": {
+      "name": "Alchemist Laboratory",
+      "description": "Emerald potions and azure mystical energies",
+      "atmosphere": "Magical and experimental"
+    },
+    "dungeon": {
+      "name": "Dungeon",
+      "description": "Honey stone walls with bronze torch brackets",
+      "atmosphere": "Mysterious and ancient"
+    },
+    "undergroundTemple": {
+      "name": "Underground Temple",
+      "description": "Stone gray sanctity with teal sacred waters",
+      "atmosphere": "Sacred and timeless"
+    },
+    "crystalCavern": {
+      "name": "Crystal Cavern",
+      "description": "Rose quartz formations and amethyst clusters",
+      "atmosphere": "Ethereal and enchanting"
+    },
+    "treasureVault": {
+      "name": "Treasure Vault",
+      "description": "Golden riches and emerald treasures beyond measure",
+      "atmosphere": "Opulent and rewarding"
+    }
   },
   "privacy": {
     "title": "Privacy Policy",
@@ -1146,30 +1230,83 @@
     "tryAgain": "Try again"
   },
   "auth": {
-    "login": "Log In",
-    "logout": "Log Out",
-    "register": "Register",
-    "email": "Email",
-    "password": "Password",
-    "confirmPassword": "Confirm Password",
-    "forgotPassword": "Forgot password?",
-    "resetPassword": "Reset Password",
-    "createAccount": "Create Account",
-    "alreadyHaveAccount": "Already have an account?",
-    "dontHaveAccount": "Don't have an account?",
-    "loginWithGoogle": "Log in with Google",
-    "loginWithFacebook": "Log in with Facebook",
-    "checkYourEmail": "Check Your Email",
-    "verifyEmailSent": "Verification email sent",
-    "verifyEmailInstructions": "We've sent a verification link to your email address. Please check your inbox and click the link to verify your account.",
-    "backToLogin": "Back to Login",
-    "emailNotReceived": "Didn't receive the email?",
-    "resendEmail": "Resend verification email",
-    "emailVerified": "Email verified successfully",
-    "verificationFailed": "Verification failed",
-    "invalidCredentials": "Invalid email or password",
-    "accountCreated": "Account created successfully",
-    "loginToRsvp": "Log in to RSVP"
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to continue your gaming journey",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign In",
+      "signingIn": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create one",
+      "orContinueWith": "Or continue with",
+      "google": "Google",
+      "facebook": "Facebook",
+      "invalidCredentials": "Invalid email or password",
+      "errorOccurred": "An error occurred. Please try again.",
+      "backToLanding": "Back to landing page"
+    },
+    "signup": {
+      "title": "Join the Manor",
+      "subtitle": "Create your account and start your gaming journey",
+      "displayName": "Display Name",
+      "username": "Username",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Create Account",
+      "creatingAccount": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "orContinueWith": "Or continue with",
+      "google": "Google",
+      "facebook": "Facebook",
+      "passwordMismatch": "Passwords do not match",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "usernameTaken": "This username is already taken",
+      "emailTaken": "An account with this email already exists",
+      "errorOccurred": "An error occurred. Please try again.",
+      "termsNotice": "By creating an account, you agree to our",
+      "terms": "Terms of Service",
+      "and": "and",
+      "privacy": "Privacy Policy",
+      "backToLanding": "Back to landing page"
+    },
+    "verifyEmail": {
+      "title": "Check Your Email",
+      "subtitle": "We've sent you a verification link",
+      "message": "Please check your email and click the verification link to activate your account.",
+      "backToLogin": "Back to login"
+    },
+    "forgotPassword": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email to receive a reset link",
+      "email": "Email",
+      "submit": "Send Reset Link",
+      "sending": "Sending...",
+      "success": "Check your email for the reset link",
+      "backToLogin": "Back to login",
+      "errorOccurred": "An error occurred. Please try again."
+    },
+    "resetPassword": {
+      "title": "Set New Password",
+      "subtitle": "Enter your new password",
+      "password": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "submit": "Update Password",
+      "updating": "Updating...",
+      "success": "Password updated successfully",
+      "passwordMismatch": "Passwords do not match",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "errorOccurred": "An error occurred. Please try again."
+    },
+    "error": {
+      "title": "Authentication Error",
+      "message": "Something went wrong during authentication.",
+      "tryAgain": "Try Again",
+      "backToHome": "Back to Home"
+    }
   },
   "users": {
     "notFound": "User Not Found",
@@ -1267,10 +1404,26 @@
     "tools": {
       "label": "Tools",
       "title": "Your growing arsenal.",
-      "armyBuilder": { "name": "Army Builder", "status": "Coming Soon", "desc": "For miniature hobbyists" },
-      "characterBuilder": { "name": "Character Builder", "status": "Coming Soon", "desc": "For RPG players" },
-      "deckBuilder": { "name": "Deck Builder", "status": "Planned", "desc": "For card collectors" },
-      "campaignDiary": { "name": "Campaign Diary", "status": "Planned", "desc": "For adventures" }
+      "armyBuilder": {
+        "name": "Army Builder",
+        "status": "Coming Soon",
+        "desc": "For miniature hobbyists"
+      },
+      "characterBuilder": {
+        "name": "Character Builder",
+        "status": "Coming Soon",
+        "desc": "For RPG players"
+      },
+      "deckBuilder": {
+        "name": "Deck Builder",
+        "status": "Planned",
+        "desc": "For card collectors"
+      },
+      "campaignDiary": {
+        "name": "Campaign Diary",
+        "status": "Planned",
+        "desc": "For adventures"
+      }
     },
     "mansion": {
       "label": "Build Your Manor",
@@ -1288,85 +1441,6 @@
       "terms": "Terms",
       "privacy": "Privacy",
       "contact": "Contact"
-    }
-  },
-  "auth": {
-    "login": {
-      "title": "Welcome Back",
-      "subtitle": "Sign in to continue your gaming journey",
-      "email": "Email",
-      "password": "Password",
-      "forgotPassword": "Forgot password?",
-      "submit": "Sign In",
-      "signingIn": "Signing in...",
-      "noAccount": "Don't have an account?",
-      "createAccount": "Create one",
-      "orContinueWith": "Or continue with",
-      "google": "Google",
-      "facebook": "Facebook",
-      "invalidCredentials": "Invalid email or password",
-      "errorOccurred": "An error occurred. Please try again.",
-      "backToLanding": "Back to landing page"
-    },
-    "signup": {
-      "title": "Join the Manor",
-      "subtitle": "Create your account and start your gaming journey",
-      "displayName": "Display Name",
-      "username": "Username",
-      "email": "Email",
-      "password": "Password",
-      "confirmPassword": "Confirm Password",
-      "submit": "Create Account",
-      "creatingAccount": "Creating account...",
-      "hasAccount": "Already have an account?",
-      "signIn": "Sign in",
-      "orContinueWith": "Or continue with",
-      "google": "Google",
-      "facebook": "Facebook",
-      "passwordMismatch": "Passwords do not match",
-      "passwordTooShort": "Password must be at least 8 characters",
-      "usernameTaken": "This username is already taken",
-      "emailTaken": "An account with this email already exists",
-      "errorOccurred": "An error occurred. Please try again.",
-      "termsNotice": "By creating an account, you agree to our",
-      "terms": "Terms of Service",
-      "and": "and",
-      "privacy": "Privacy Policy",
-      "backToLanding": "Back to landing page"
-    },
-    "verifyEmail": {
-      "title": "Check Your Email",
-      "subtitle": "We've sent you a verification link",
-      "message": "Please check your email and click the verification link to activate your account.",
-      "backToLogin": "Back to login"
-    },
-    "forgotPassword": {
-      "title": "Reset Password",
-      "subtitle": "Enter your email to receive a reset link",
-      "email": "Email",
-      "submit": "Send Reset Link",
-      "sending": "Sending...",
-      "success": "Check your email for the reset link",
-      "backToLogin": "Back to login",
-      "errorOccurred": "An error occurred. Please try again."
-    },
-    "resetPassword": {
-      "title": "Set New Password",
-      "subtitle": "Enter your new password",
-      "password": "New Password",
-      "confirmPassword": "Confirm New Password",
-      "submit": "Update Password",
-      "updating": "Updating...",
-      "success": "Password updated successfully",
-      "passwordMismatch": "Passwords do not match",
-      "passwordTooShort": "Password must be at least 8 characters",
-      "errorOccurred": "An error occurred. Please try again."
-    },
-    "error": {
-      "title": "Authentication Error",
-      "message": "Something went wrong during authentication.",
-      "tryAgain": "Try Again",
-      "backToHome": "Back to Home"
     }
   }
 }
