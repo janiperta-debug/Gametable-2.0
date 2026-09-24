@@ -24,6 +24,13 @@ import { createClient } from "@/lib/supabase/client"
 import { convertLegacyLeague } from "@/app/actions/league-hub"
 import { addEventRound, addPlannedEventRounds, addEventSession, addPlannedEventSessions, updateEventSession, updateCampaignProgression, addEventMatch, addEventEntry, removeEventEntry, recordEventMatch, getEventStructure, getEventStandings, type CampaignProgression } from "@/app/actions/event-structure"
 
+const EVENT_TYPE_IMAGES: Record<string, string> = {
+  game_night: "/images/events/game-night.png",
+  campaign: "/images/events/campaign.png",
+  tournament: "/images/events/tournament.png",
+  league: "/images/events/league.png",
+}
+
 const EVENT_TYPE_LABELS: Record<string, string> = {
   game_night: "Peli-ilta",
   campaign: "Kampanja",
@@ -1295,40 +1302,40 @@ export default function EventDetailsPage() {
             {/* Main Event Info */}
             <ArchiveCard>
               <ArchiveCardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <ArchiveCardTitle className="text-3xl mb-2 normal-case">
+                <div className="flex flex-col-reverse items-start gap-4 sm:flex-row sm:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <ArchiveCardTitle className="text-3xl mb-2 normal-case break-words">
                       {event.title}
                     </ArchiveCardTitle>
-                    <div className="flex items-center gap-4 text-muted-foreground mb-4">
-                      <div className="flex items-center gap-2">
-                        {getPrivacyIcon(event.privacy)}
-                        <span className="text-sm">{getPrivacyLabel(event.privacy, t)}</span>
-                      </div>
-                      {event.status === "cancelled" && (
-                        <Badge variant="destructive">
-                          {t("events.cancelled") || "Cancelled"}
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      {getPrivacyIcon(event.privacy)}
+                      <span className="text-sm">{getPrivacyLabel(event.privacy, t)}</span>
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      {userRsvp && (
+                        <Badge variant={userRsvp === "attending" ? "default" : "secondary"}
+                          className={userRsvp === "attending" ? "bg-green-600" : userRsvp === "maybe" ? "bg-yellow-600" : ""}>
+                          {userRsvp === "attending" ? (t("events.attending") || "Attending") :
+                           userRsvp === "maybe" ? (t("events.maybe") || "Maybe") :
+                           (t("events.invited") || "Invited")}
                         </Badge>
+                      )}
+                      {event.event_type && (
+                        <Badge variant="outline" className="border-accent-gold/30 text-accent-gold">
+                          {EVENT_TYPE_LABELS[event.event_type] || event.event_type.replace(/_/g, " ")}
+                        </Badge>
+                      )}
+                      {event.status === "cancelled" && (
+                        <Badge variant="destructive">{t("events.cancelled") || "Peruttu"}</Badge>
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    {userRsvp && (
-                      <Badge
-                        variant={userRsvp === "attending" ? "default" : "secondary"}
-                        className={userRsvp === "attending" ? "bg-green-600" : userRsvp === "maybe" ? "bg-yellow-600" : ""}
-                      >
-                        {userRsvp === "attending" ? (t("events.attending") || "Attending") : 
-                         userRsvp === "maybe" ? (t("events.maybe") || "Maybe") : 
-                         t("events.invited") || "Invited"}
-                      </Badge>
-                    )}
-                    {event.event_type && (
-                      <Badge variant="outline" className="border-accent-gold/30 text-accent-gold">
-                        {EVENT_TYPE_LABELS[event.event_type] || event.event_type.replace(/_/g, " ")}
-                      </Badge>
-                    )}
-                  </div>
+                  {EVENT_TYPE_IMAGES[event.event_type] && (
+                    <div className="w-28 sm:w-36 aspect-square shrink-0 overflow-hidden rounded-lg border border-accent-gold/30 self-end sm:self-start">
+                      <img src={EVENT_TYPE_IMAGES[event.event_type]} alt={EVENT_TYPE_LABELS[event.event_type] || "Tapahtuma"}
+                        className="h-full w-full object-cover" />
+                    </div>
+                  )}
                 </div>
               </ArchiveCardHeader>
               <ArchiveCardContent className="space-y-6">
