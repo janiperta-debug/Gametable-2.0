@@ -3,14 +3,14 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { getLeague, addLeagueSeason, linkSeasonEvent, updateLeague, updateLeagueSeason, deleteLeague, joinLeague, leaveLeague, addLeagueMemberById, searchLeaguePlayers, removeLeagueMember } from "@/app/actions/league-hub"
-import { useTranslations } from "@/lib/i18n"
+import { useTranslation } from "@/lib/i18n"
 import { ArchiveFrame, ArchiveButton, ArchiveCard, ArchiveCardHeader, ArchiveCardTitle, ArchiveCardContent, ArchiveCardButton } from "@/components/archive-frame"
 
 type Hub = Awaited<ReturnType<typeof getLeague>>
 export default function LeaguePage() {
  const { id } = useParams<{ id: string }>()
  const router = useRouter()
- const t = useTranslations()
+ const { t, locale } = useTranslation()
  const [hub, setHub] = useState<Hub | null>(null)
  const [newSeason, setNewSeason] = useState("")
  const [newMember, setNewMember] = useState("")
@@ -137,7 +137,7 @@ export default function LeaguePage() {
    {hub.seasons.map((season) => <ArchiveCard key={season.id} corners={false} centerOrnaments={false}>
     <ArchiveCardHeader><ArchiveCardTitle>{season.name}</ArchiveCardTitle></ArchiveCardHeader>
     <ArchiveCardContent className="space-y-4">
-     <p className="text-sm text-muted-foreground">{season.starts_on || t("leagueUi.s60")} – {season.ends_on || t("leagueUi.s61")}</p>
+     <p className="text-sm text-muted-foreground">{season.starts_on ? new Date(`${season.starts_on}T12:00:00`).toLocaleDateString(locale === "fi" ? "fi-FI" : "en-GB") : t("leagueUi.s60")} – {season.ends_on ? new Date(`${season.ends_on}T12:00:00`).toLocaleDateString(locale === "fi" ? "fi-FI" : "en-GB") : t("leagueUi.s61")}</p>
 
      {hub.isOwner && <div className="space-y-3">
       <ArchiveCardButton disabled={busy} onClick={() => {
