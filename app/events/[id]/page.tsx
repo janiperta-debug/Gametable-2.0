@@ -895,7 +895,7 @@ export default function EventDetailsPage() {
                           <option value="">Valitse kilpailija {index + 1}</option>
                           {structure.entries.filter((entry: any) => entry.status === "active").map((entry: any) => {
                             const profile = structure.profiles.find((p: any) => p.id === entry.user_id)
-                            return <option key={entry.id} value={entry.id}>{entry.display_name || profile?.display_name || profile?.username || "Kilpailija"}</option>
+                            return <option key={entry.id} value={entry.id}>{entry.display_name || profile?.display_name || profile?.username || t("eventUi.competitor")}</option>
                           })}
                         </select>
                       ))}
@@ -913,7 +913,7 @@ export default function EventDetailsPage() {
                         const b = structure.entries.find((entry: any) => entry.id === match.entry_b_id)
                         const round = structure.rounds.find((item: any) => item.id === match.round_id)
                         return <div key={match.id} className="rounded-md border border-accent-gold/15 p-3 space-y-2">
-                          <div className="flex flex-wrap justify-between gap-2 text-sm"><span>{a?.display_name || "Kilpailija"} – {b?.display_name || "Kilpailija"}</span><span className="text-muted-foreground">{round?.title || "Sarjaottelu"} · {match.status === "completed" ? "Pelattu" : "Tulossa"}</span></div>
+                          <div className="flex flex-wrap justify-between gap-2 text-sm"><span>{a?.display_name || t("eventUi.competitor")} – {b?.display_name || t("eventUi.competitor")}</span><span className="text-muted-foreground">{round?.title || "Sarjaottelu"} · {match.status === "completed" ? "Pelattu" : "Tulossa"}</span></div>
                           {match.status === "completed" && <div className="text-sm text-accent-gold">Tulos: {match.score_a ?? "–"} – {match.score_b ?? "–"}</div>}
                           {isHost && <div className="grid grid-cols-2 gap-2">
                             <input id={`league-score-a-${match.id}`} aria-label={t("eventUi.s78")} type="number" min="0" defaultValue={match.score_a ?? ""} placeholder={t("eventUi.s79")} className="min-w-0 rounded-md border border-accent-gold/20 bg-background px-2 py-2 text-sm" />
@@ -950,7 +950,7 @@ export default function EventDetailsPage() {
                 </ArchiveCardHeader>
                 <ArchiveCardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    RSVP kertoo, ketkä ovat mukana tapahtumassa. Tässä valitaan erikseen ne osallistujat, jotka ovat mukana itse kilpailussa.
+                    {t("eventUi.competitorHint")}
                   </p>
                   {isHost && (
                     <div className="flex gap-2">
@@ -959,7 +959,7 @@ export default function EventDetailsPage() {
                         {structure.profiles
                           .filter((p: any) => structure.participants.some((participant: any) => participant.user_id === p.id && participant.status === "attending"))
                           .filter((p: any) => !structure.entries.some((e: any) => e.user_id === p.id && e.status === "active"))
-                          .map((p: any) => <option key={p.id} value={p.id}>{p.display_name || p.username || "Pelaaja"}</option>)}
+                          .map((p: any) => <option key={p.id} value={p.id}>{p.display_name || p.username || t("eventUi.s40")}</option>)}
                       </select>
                       <ArchiveCardButton onClick={() => {
                         const select = document.getElementById("competitor-select") as HTMLSelectElement | null
@@ -977,7 +977,7 @@ export default function EventDetailsPage() {
                         const profile = structure.profiles.find((p: any) => p.id === entry.user_id)
                         return (
                           <div key={entry.id} className="flex items-center justify-between rounded-md border border-accent-gold/10 p-3">
-                            <span>{entry.display_name || profile?.display_name || profile?.username || "Kilpailija"}</span>
+                            <span>{entry.display_name || profile?.display_name || profile?.username || t("eventUi.competitor")}</span>
                             {isHost && (
                               <button
                                 className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-colors"
@@ -1005,7 +1005,7 @@ export default function EventDetailsPage() {
                   {!editingProgression && !campaignProgression.currentStage && campaignProgression.stages.length === 0 && campaignProgression.total === 0 ? (
                     <div className="space-y-3">
                       <p className="text-sm text-muted-foreground">
-                        Kampanjalla ei ole vielä etenemismallia. Voit käyttää vaiheita, omaa mittaria tai vapaamuotoista kuvausta.
+                        {t("eventUi.campaignModelHint")}
                       </p>
                       {isHost && (
                         <ArchiveCardButton onClick={() => setEditingProgression(true)}>{t("eventUi.s56")}</ArchiveCardButton>
@@ -1075,7 +1075,7 @@ export default function EventDetailsPage() {
                           <textarea
                             value={campaignProgression.stages.join("\n")}
                             onChange={(e) => setCampaignProgression({ ...campaignProgression, stages: e.target.value.split("\n") })}
-                            placeholder={"Vaiheet, yksi rivilleen:\nPrologi\nKaupungin portit\nVarjojen metsä\nMuinainen temppeli"}
+                            placeholder={t("eventUi.stagesPlaceholder")}
                             rows={5}
                             className="w-full rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
                           />
@@ -1381,7 +1381,7 @@ export default function EventDetailsPage() {
                                       <option value="">Valitse pelaaja {slot + 1}</option>
                                       {structure.entries.map((entry: any) => {
                                         const p = structure.profiles.find((profile: any) => profile.id === entry.user_id)
-                                        return <option key={entry.id} value={entry.id}>{entry.display_name || p?.display_name || p?.username || "Kilpailija"}</option>
+                                        return <option key={entry.id} value={entry.id}>{entry.display_name || p?.display_name || p?.username || t("eventUi.competitor")}</option>
                                       })}
                                     </select>
                                   ))}
@@ -1392,8 +1392,8 @@ export default function EventDetailsPage() {
                                   const entryB = structure.entries.find((e: any) => e.id === m.entry_b_id)
                                   const a = structure.profiles.find((p: any) => p.id === entryA?.user_id)
                                   const b = structure.profiles.find((p: any) => p.id === entryB?.user_id)
-                                  const nameA = entryA?.display_name || a?.display_name || a?.username || "Kilpailija"
-                                  const nameB = entryB?.display_name || b?.display_name || b?.username || "Kilpailija"
+                                  const nameA = entryA?.display_name || a?.display_name || a?.username || t("eventUi.competitor")
+                                  const nameB = entryB?.display_name || b?.display_name || b?.username || t("eventUi.competitor")
                                   return (
                                     <div key={m.id} className="rounded-md bg-background/40 border border-accent-gold/10 p-3 space-y-2">
                                       <div className="text-sm">{nameA} vs {nameB}</div>
