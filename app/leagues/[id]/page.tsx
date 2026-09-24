@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { getLeague, addLeagueSeason, linkSeasonEvent } from "@/app/actions/league-hub"
-import { ArchiveFrame, ArchiveCard, ArchiveCardHeader, ArchiveCardTitle, ArchiveCardContent, ArchiveCardButton } from "@/components/archive-frame"
+import { ArchiveFrame, ArchiveButton, ArchiveCard, ArchiveCardHeader, ArchiveCardTitle, ArchiveCardContent, ArchiveCardButton } from "@/components/archive-frame"
 
 type Hub = Awaited<ReturnType<typeof getLeague>>
 export default function LeaguePage() {
@@ -20,7 +20,7 @@ export default function LeaguePage() {
  if (!hub.league) return <div className="p-8">{hub.error || "Liigaa ei löytynyt."}</div>
  return <ArchiveFrame className="mx-auto max-w-5xl">
   <div className="space-y-6 p-3 sm:p-6">
-   <button type="button" className="text-sm text-accent-gold" onClick={() => router.push("/events")}>← Tapahtumat</button>
+   <ArchiveButton type="button" onClick={() => router.push("/events")}>← Tapahtumat</ArchiveButton>
    <div className="space-y-2">
     <p className="text-sm uppercase tracking-widest text-accent-gold">GameTable · Liiga</p>
     <h1 className="font-heading text-3xl">{hub.league.name}</h1>
