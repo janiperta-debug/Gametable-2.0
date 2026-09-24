@@ -398,7 +398,7 @@ export default function CreateEventPage() {
                     <div>
                       <h3 className="font-heading text-lg text-accent-gold">{t("eventUi.s2")}</h3>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        Määritä tapahtuman rakenne oman pelisi sääntöjen mukaan. GameTable ei määrää pisteytystä tai formaattia.
+                        {t("eventUi.structureRules")}
                       </p>
                     </div>
 
@@ -451,7 +451,7 @@ export default function CreateEventPage() {
                         </Select>
                         {eventType !== "campaign" && (
                           <p className="text-xs text-muted-foreground">
-                            Tämä on alkuperäinen suunnitelma, ei kierrosten yläraja. Kierroksia voi lisätä myöhemmin.
+                            {t("eventUi.roundPlanNote")}
                           </p>
                         )}
                       </div>
@@ -462,7 +462,7 @@ export default function CreateEventPage() {
                       <div>
                         <Label className="font-body text-accent-gold">{t("eventUi.s8")}</Label>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Valitse pisteytys, jota käytetään ottelutulosten pisteiden laskemiseen.
+                          {t("eventUi.scoringHint")}
                         </p>
                       </div>
 
