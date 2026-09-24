@@ -30,7 +30,7 @@ export async function getLeague(leagueId: string) {
  const supabase = await createClient()
  const { data: { user } } = await supabase.auth.getUser()
  const { data: league, error } = await supabase.from("leagues").select("*").eq("id", leagueId).single()
- if (error || !league) return { league: null, seasons: [], events: [], available: [], error: "Liigaa ei löytynyt." }
+ if (error || !league) return { league: null, seasons: [], events: [], available: [], members: [], results: [], isMember: false, error: "Liigaa ei löytynyt." }
  const { data: seasons } = await supabase.from("league_seasons").select("*").eq("league_id", leagueId).order("created_at", { ascending: false })
  const ids = (seasons || []).map((season) => season.id)
  const { data: links } = ids.length ? await supabase.from("league_season_events").select("season_id,event_id").in("season_id", ids) : { data: [] }
@@ -40,8 +40,30 @@ export async function getLeague(leagueId: string) {
   const event = (linkedEvents || []).find((item) => item.id === link.event_id)
   return event ? [{ ...event, season_id: link.season_id }] : []
  })
+ const { data: memberRows } = await supabase.from("league_members").select("user_id,joined_at").eq("league_id",leagueId).order("joined_at")
+ const memberIds = [...new Set([league.owner_id,...(memberRows || []).map(row=>row.user_id)])]
+ const { data: memberProfiles } = memberIds.length ? await supabase.from("profiles").select("id,display_name,username,avatar_url").in("id",memberIds) : {data:[]}
+ const members = memberIds.map(userId => ({
+  user_id:userId, isOwner:userId===league.owner_id,
+  display_name:(memberProfiles || []).find(p=>p.id===userId)?.display_name || (memberProfiles || []).find(p=>p.id===userId)?.username || "Pelaaja",
+  avatar_url:(memberProfiles || []).find(p=>p.id===userId)?.avatar_url || null,
+ }))
+ // Show only actual recorded match results from linked events, never infer scores.
+ const tournamentIds = events.filter(e=>e.event_type==="tournament").map(e=>e.id)
+ const {data:matchRows} = tournamentIds.length ? await supabase.from("event_matches")
+  .select("id,event_id,entry_a_id,entry_b_id,score_a,score_b,result,status")
+  .in("event_id",tournamentIds).eq("status","completed").order("created_at",{ascending:false}).limit(100) : {data:[]}
+ const {data:entryRows} = tournamentIds.length ? await supabase.from("event_entries")
+  .select("id,display_name,event_id").in("event_id",tournamentIds) : {data:[]}
+ const results = (matchRows || []).map(match=>({
+  ...match,
+  event_title:events.find(e=>e.id===match.event_id)?.title || "Turnaus",
+  player_a:(entryRows || []).find(e=>e.id===match.entry_a_id)?.display_name || "Pelaaja A",
+  player_b:(entryRows || []).find(e=>e.id===match.entry_b_id)?.display_name || "Pelaaja B",
+  season_id:events.find(e=>e.id===match.event_id)?.season_id || "",
+ }))
  const { data: owned } = user?.id === league.owner_id ? await supabase.from("events").select("id,title,event_type,starts_at,status").eq("host_id", user.id).in("event_type", ["tournament","game_night"]).neq("status","cancelled").order("starts_at", { ascending: false }) : { data: [] }
- return { league, seasons: seasons || [], events, available: (owned || []).filter((event) => !linkedIds.includes(event.id)), isOwner: user?.id === league.owner_id, error: undefined }
+ return { league, seasons: seasons || [], events, available: (owned || []).filter((event) => !linkedIds.includes(event.id)), members, results, isMember:!!user && memberIds.includes(user.id), isOwner: user?.id === league.owner_id, error: undefined }
 }
 
 export async function addLeagueSeason(leagueId: string, name: string) {
@@ -169,4 +191,54 @@ export async function deleteLeague(leagueId: string) {
  revalidatePath("/events")
  revalidatePath("/leagues")
  return { success: true }
+}
+
+export async function joinLeague(leagueId:string) {
+ const supabase=await createClient()
+ const {data:{user}}=await supabase.auth.getUser()
+ if(!user)return {error:"Kirjaudu sisään."}
+ const {data:league}=await supabase.from("leagues").select("id,privacy,owner_id").eq("id",leagueId).single()
+ if(!league || league.privacy!=="public")return {error:"Vain julkisiin liigoihin voi liittyä itse."}
+ if(league.owner_id===user.id)return {success:true}
+ const {error}=await supabase.from("league_members").upsert({league_id:leagueId,user_id:user.id},{onConflict:"league_id,user_id",ignoreDuplicates:true})
+ if(error)return {error:error.message}
+ revalidatePath("/leagues/"+leagueId);revalidatePath("/events")
+ return {success:true}
+}
+
+export async function leaveLeague(leagueId:string) {
+ const supabase=await createClient()
+ const {data:{user}}=await supabase.auth.getUser()
+ if(!user)return {error:"Kirjaudu sisään."}
+ const {error}=await supabase.from("league_members").delete().eq("league_id",leagueId).eq("user_id",user.id)
+ if(error)return {error:error.message}
+ revalidatePath("/leagues/"+leagueId);revalidatePath("/events")
+ return {success:true}
+}
+
+export async function addLeagueMember(leagueId:string, username:string) {
+ const supabase=await createClient()
+ const {data:{user}}=await supabase.auth.getUser()
+ const {data:league}=await supabase.from("leagues").select("owner_id").eq("id",leagueId).single()
+ if(!user || league?.owner_id!==user.id)return {error:"Vain järjestäjä voi lisätä jäseniä."}
+ const clean=username.trim().replace(/^@/,"")
+ if(!clean)return {error:"Anna käyttäjätunnus."}
+ const {data:profile}=await supabase.from("profiles").select("id").ilike("username",clean).maybeSingle()
+ if(!profile)return {error:"Käyttäjätunnusta ei löytynyt."}
+ if(profile.id===user.id)return {error:"Olet jo liigan järjestäjä."}
+ const {error}=await supabase.from("league_members").upsert({league_id:leagueId,user_id:profile.id},{onConflict:"league_id,user_id",ignoreDuplicates:true})
+ if(error)return {error:error.message}
+ revalidatePath("/leagues/"+leagueId)
+ return {success:true}
+}
+
+export async function removeLeagueMember(leagueId:string,memberId:string) {
+ const supabase=await createClient()
+ const {data:{user}}=await supabase.auth.getUser()
+ const {data:league}=await supabase.from("leagues").select("owner_id").eq("id",leagueId).single()
+ if(!user || league?.owner_id!==user.id)return {error:"Vain järjestäjä voi poistaa jäseniä."}
+ const {error}=await supabase.from("league_members").delete().eq("league_id",leagueId).eq("user_id",memberId)
+ if(error)return {error:error.message}
+ revalidatePath("/leagues/"+leagueId)
+ return {success:true}
 }
