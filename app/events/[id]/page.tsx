@@ -642,6 +642,163 @@ export default function EventDetailsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Event Details */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Main Event Info */}
+            <ArchiveCard>
+              <ArchiveCardHeader>
+                <div className="flex flex-col items-center gap-4 text-center">
+                  {EVENT_TYPE_IMAGES[event.event_type] && (
+                    <div className="relative flex w-full items-center justify-center py-2">
+                      {/* Shared ornaments for all event types. Missing files do not display broken image icons. */}
+                      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 w-[calc(50%-5rem)] bg-contain bg-left bg-no-repeat sm:w-[calc(50%-6rem)]"
+                        style={{ backgroundImage: 'url("/images/events/ornate-left.png")' }} />
+                      <div className="relative z-10 aspect-square w-32 overflow-hidden rounded-lg border border-accent-gold/30 sm:w-40">
+                        <img src={EVENT_TYPE_IMAGES[event.event_type]} alt={EVENT_TYPE_LABELS[event.event_type] || "Tapahtuma"}
+                          className="h-full w-full object-cover" />
+                      </div>
+                      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-[calc(50%-5rem)] bg-contain bg-right bg-no-repeat sm:w-[calc(50%-6rem)]"
+                        style={{ backgroundImage: 'url("/images/events/ornate-right.png")' }} />
+                    </div>
+                  )}
+                  <div className="w-full min-w-0">
+                    <ArchiveCardTitle className="mb-2 text-center text-3xl normal-case break-words">
+                      {event.title}
+                    </ArchiveCardTitle>
+                    <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                      {getPrivacyIcon(event.privacy)}
+                      <span className="text-sm">{getPrivacyLabel(event.privacy, t)}</span>
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                      {userRsvp && (
+                        <Badge variant={userRsvp === "attending" ? "default" : "secondary"}
+                          className={userRsvp === "attending" ? "bg-green-600" : userRsvp === "maybe" ? "bg-yellow-600" : ""}>
+                          {userRsvp === "attending" ? (t("events.attending") || "Attending") :
+                           userRsvp === "maybe" ? (t("events.maybe") || "Maybe") :
+                           (t("events.invited") || "Invited")}
+                        </Badge>
+                      )}
+                      {event.event_type && (
+                        <Badge variant="outline" className="border-accent-gold/30 text-accent-gold">
+                          {EVENT_TYPE_LABELS[event.event_type] || event.event_type.replace(/_/g, " ")}
+                        </Badge>
+                      )}
+                      {event.status === "cancelled" && (
+                        <Badge variant="destructive">{t("events.cancelled") || "Peruttu"}</Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </ArchiveCardHeader>
+              <ArchiveCardContent className="space-y-6">
+                {/* Host */}
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-accent-gold/20 flex items-center justify-center">
+                    {event.host?.avatar_url ? (
+                      <img 
+                        src={event.host.avatar_url} 
+                        alt={event.host?.display_name || "Host"} 
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="w-5 h-5 text-accent-gold" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      {t("events.hostedBy") || "Hosted by"}
+                    </p>
+                    <p className="font-medium text-accent-gold">
+                      {event.host?.display_name || t("profile.anonymous") || "Anonymous"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Date & Time */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-accent-gold" />
+                    <div>
+                      <p className="font-medium">{formatEventDate(event.starts_at, locale)}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-5 h-5 text-accent-gold" />
+                    <div>
+                      <p className="font-medium">{formatEventTime(event.starts_at, event.ends_at, locale)}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Location */}
+                {event.location && (
+                  <div className="flex items-start gap-3">
+                    <MapPin className="w-5 h-5 text-accent-gold mt-1" />
+                    <div>
+                      <p className="font-medium">{event.location}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Players */}
+                <div className="flex items-center gap-3">
+                  <Users className="w-5 h-5 text-accent-gold" />
+                  <div>
+                    <p className="font-medium">
+                      {event.participant_count || 0}
+                      {event.max_players && `/${event.max_players}`} {t("events.attending") || "attending"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Description */}
+                {event.description && (
+                  <div>
+                    <h3 className="font-cinzel text-accent-gold mb-2">
+                      {t("events.description") || "Description"}
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed">{event.description}</p>
+                  </div>
+                )}
+
+                {/* RSVP Buttons - only show if not cancelled and user is logged in */}
+                {event.status !== "cancelled" && currentUserId && !isHost && (
+                  <div className="flex flex-wrap gap-3 pt-4 border-t border-accent-gold/20">
+                    <ArchiveCardButton
+                      active={userRsvp === "attending"}
+                      onClick={() => handleRSVP("attending")}
+                      disabled={updatingRsvp}
+                      icon={updatingRsvp ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}
+                    >
+                      {t("events.attending") || "Attending"}
+                    </ArchiveCardButton>
+                    <ArchiveCardButton
+                      active={userRsvp === "maybe"}
+                      onClick={() => handleRSVP("maybe")}
+                      disabled={updatingRsvp}
+                    >
+                      {t("events.maybe") || "Maybe"}
+                    </ArchiveCardButton>
+                    <ArchiveCardButton
+                      active={userRsvp === "declined"}
+                      onClick={() => handleRSVP("declined")}
+                      disabled={updatingRsvp}
+                    >
+                      {t("events.cantAttend") || "Can't Attend"}
+                    </ArchiveCardButton>
+                  </div>
+                )}
+
+                {!currentUserId && event.status !== "cancelled" && (
+                  <div className="pt-4 border-t border-accent-gold/20">
+                    <ArchiveCardButton asChild active fullWidth>
+                      <Link href="/auth/login">
+                        {t("events.loginToRsvp") || t("auth.loginToRsvp") || "Log in to RSVP"}
+                      </Link>
+                    </ArchiveCardButton>
+                  </div>
+                )}
+              </ArchiveCardContent>
+            </ArchiveCard>
+
             {event.event_type === "league" && (
               <ArchiveCard>
                 <ArchiveCardHeader>
@@ -1288,163 +1445,6 @@ export default function EventDetailsPage() {
                 </ArchiveCardContent>
               </ArchiveCard>
             )}
-            {/* Main Event Info */}
-            <ArchiveCard>
-              <ArchiveCardHeader>
-                <div className="flex flex-col items-center gap-4 text-center">
-                  {EVENT_TYPE_IMAGES[event.event_type] && (
-                    <div className="relative flex w-full items-center justify-center py-2">
-                      {/* Shared ornaments for all event types. Missing files do not display broken image icons. */}
-                      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 w-[calc(50%-5rem)] bg-contain bg-left bg-no-repeat sm:w-[calc(50%-6rem)]"
-                        style={{ backgroundImage: 'url("/images/events/ornate-left.png")' }} />
-                      <div className="relative z-10 aspect-square w-32 overflow-hidden rounded-lg border border-accent-gold/30 sm:w-40">
-                        <img src={EVENT_TYPE_IMAGES[event.event_type]} alt={EVENT_TYPE_LABELS[event.event_type] || "Tapahtuma"}
-                          className="h-full w-full object-cover" />
-                      </div>
-                      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-[calc(50%-5rem)] bg-contain bg-right bg-no-repeat sm:w-[calc(50%-6rem)]"
-                        style={{ backgroundImage: 'url("/images/events/ornate-right.png")' }} />
-                    </div>
-                  )}
-                  <div className="w-full min-w-0">
-                    <ArchiveCardTitle className="mb-2 text-center text-3xl normal-case break-words">
-                      {event.title}
-                    </ArchiveCardTitle>
-                    <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                      {getPrivacyIcon(event.privacy)}
-                      <span className="text-sm">{getPrivacyLabel(event.privacy, t)}</span>
-                    </div>
-                    <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-                      {userRsvp && (
-                        <Badge variant={userRsvp === "attending" ? "default" : "secondary"}
-                          className={userRsvp === "attending" ? "bg-green-600" : userRsvp === "maybe" ? "bg-yellow-600" : ""}>
-                          {userRsvp === "attending" ? (t("events.attending") || "Attending") :
-                           userRsvp === "maybe" ? (t("events.maybe") || "Maybe") :
-                           (t("events.invited") || "Invited")}
-                        </Badge>
-                      )}
-                      {event.event_type && (
-                        <Badge variant="outline" className="border-accent-gold/30 text-accent-gold">
-                          {EVENT_TYPE_LABELS[event.event_type] || event.event_type.replace(/_/g, " ")}
-                        </Badge>
-                      )}
-                      {event.status === "cancelled" && (
-                        <Badge variant="destructive">{t("events.cancelled") || "Peruttu"}</Badge>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </ArchiveCardHeader>
-              <ArchiveCardContent className="space-y-6">
-                {/* Host */}
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-accent-gold/20 flex items-center justify-center">
-                    {event.host?.avatar_url ? (
-                      <img 
-                        src={event.host.avatar_url} 
-                        alt={event.host?.display_name || "Host"} 
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                    ) : (
-                      <User className="w-5 h-5 text-accent-gold" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      {t("events.hostedBy") || "Hosted by"}
-                    </p>
-                    <p className="font-medium text-accent-gold">
-                      {event.host?.display_name || t("profile.anonymous") || "Anonymous"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Date & Time */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-center gap-3">
-                    <Calendar className="w-5 h-5 text-accent-gold" />
-                    <div>
-                      <p className="font-medium">{formatEventDate(event.starts_at, locale)}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-5 h-5 text-accent-gold" />
-                    <div>
-                      <p className="font-medium">{formatEventTime(event.starts_at, event.ends_at, locale)}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Location */}
-                {event.location && (
-                  <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-accent-gold mt-1" />
-                    <div>
-                      <p className="font-medium">{event.location}</p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Players */}
-                <div className="flex items-center gap-3">
-                  <Users className="w-5 h-5 text-accent-gold" />
-                  <div>
-                    <p className="font-medium">
-                      {event.participant_count || 0}
-                      {event.max_players && `/${event.max_players}`} {t("events.attending") || "attending"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Description */}
-                {event.description && (
-                  <div>
-                    <h3 className="font-cinzel text-accent-gold mb-2">
-                      {t("events.description") || "Description"}
-                    </h3>
-                    <p className="text-muted-foreground leading-relaxed">{event.description}</p>
-                  </div>
-                )}
-
-                {/* RSVP Buttons - only show if not cancelled and user is logged in */}
-                {event.status !== "cancelled" && currentUserId && !isHost && (
-                  <div className="flex flex-wrap gap-3 pt-4 border-t border-accent-gold/20">
-                    <ArchiveCardButton
-                      active={userRsvp === "attending"}
-                      onClick={() => handleRSVP("attending")}
-                      disabled={updatingRsvp}
-                      icon={updatingRsvp ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}
-                    >
-                      {t("events.attending") || "Attending"}
-                    </ArchiveCardButton>
-                    <ArchiveCardButton
-                      active={userRsvp === "maybe"}
-                      onClick={() => handleRSVP("maybe")}
-                      disabled={updatingRsvp}
-                    >
-                      {t("events.maybe") || "Maybe"}
-                    </ArchiveCardButton>
-                    <ArchiveCardButton
-                      active={userRsvp === "declined"}
-                      onClick={() => handleRSVP("declined")}
-                      disabled={updatingRsvp}
-                    >
-                      {t("events.cantAttend") || "Can't Attend"}
-                    </ArchiveCardButton>
-                  </div>
-                )}
-
-                {!currentUserId && event.status !== "cancelled" && (
-                  <div className="pt-4 border-t border-accent-gold/20">
-                    <ArchiveCardButton asChild active fullWidth>
-                      <Link href="/auth/login">
-                        {t("events.loginToRsvp") || t("auth.loginToRsvp") || "Log in to RSVP"}
-                      </Link>
-                    </ArchiveCardButton>
-                  </div>
-                )}
-              </ArchiveCardContent>
-            </ArchiveCard>
-
             {/* Attendees */}
             <ArchiveCard>
               <ArchiveCardHeader>
