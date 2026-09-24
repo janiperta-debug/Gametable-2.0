@@ -15,13 +15,13 @@ import { listLeagues } from "@/app/actions/league-hub"
 import type { Event } from "@/app/actions/events"
 import { cn } from "@/lib/utils"
 
-// Replace these four existing fallback assets with the finished event illustrations
+// Dedicated event illustrations; collection fallback assets remain untouched.
 // when they have been added to the repository.
 const categoryImages: Record<string, string> = {
-  game_night: "/images/fallbacks/board-games-fallback.png",
-  campaign: "/images/fallbacks/rpg-fallback.png",
-  tournament: "/images/fallbacks/tcg-fallback.png",
-  league: "/images/fallbacks/miniatures-fallback.png",
+  game_night: "/images/events/game-night.png",
+  campaign: "/images/events/campaign.png",
+  tournament: "/images/events/tournament.png",
+  league: "/images/events/league.png",
 }
 const categoryLabels: Record<string, string> = {
   game_night: "Peli-ilta", campaign: "Kampanja", tournament: "Turnaus", league: "Liiga",
