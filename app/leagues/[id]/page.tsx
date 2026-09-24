@@ -20,7 +20,7 @@ export default function LeaguePage() {
  if (!hub.league) return <div className="p-8">{hub.error || "Liigaa ei löytynyt."}</div>
  return <ArchiveFrame className="mx-auto max-w-5xl">
   <div className="space-y-6 p-3 sm:p-6">
-   <ArchiveButton type="button" onClick={() => router.push("/events")}>← Tapahtumat</ArchiveButton>
+   <ArchiveCardButton type="button" onClick={() => router.push("/events")}>← Tapahtumat</ArchiveCardButton>
    <div className="space-y-2">
     <p className="text-sm uppercase tracking-widest text-accent-gold">GameTable · Liiga</p>
     <h1 className="font-heading text-3xl">{hub.league.name}</h1>
@@ -32,7 +32,7 @@ export default function LeaguePage() {
      <p className="text-sm text-muted-foreground">Tämä liiga on siirretty vanhasta tapahtumamallista. Aiemmat sarjaottelut, osallistujat ja tulokset säilyvät alkuperäisellä sivulla, kunnes niiden kausikohtainen siirto on valmis.</p>
      <ArchiveCardButton onClick={() => router.push("/events/" + hub.league.legacy_event_id)}>Avaa aiemmat ottelut ja tulokset</ArchiveCardButton>
    </div>}
-   {hub.seasons.map((season) => <ArchiveCard key={season.id}>
+   {hub.seasons.map((season) => <ArchiveCard key={season.id} corners={false} centerOrnaments={false}>
     <ArchiveCardHeader><ArchiveCardTitle>{season.name}</ArchiveCardTitle></ArchiveCardHeader>
     <ArchiveCardContent className="space-y-4">
      <p className="text-sm text-muted-foreground">{season.starts_on || "Alku avoin"} – {season.ends_on || "Loppu avoin"}</p>
@@ -61,7 +61,7 @@ export default function LeaguePage() {
      {hub.isOwner && <ArchiveCardButton onClick={() => router.push("/events/create")}>Luo uusi tapahtuma</ArchiveCardButton>}
     </ArchiveCardContent>
    </ArchiveCard>)}
-   {hub.isOwner && <ArchiveCard><ArchiveCardHeader><ArchiveCardTitle>Uusi kausi</ArchiveCardTitle></ArchiveCardHeader>
+   {hub.isOwner && <ArchiveCard corners={false} centerOrnaments={false}><ArchiveCardHeader><ArchiveCardTitle>Uusi kausi</ArchiveCardTitle></ArchiveCardHeader>
     <ArchiveCardContent className="flex flex-wrap gap-2">
      <input aria-label="Uuden kauden nimi" className="min-w-0 flex-1 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm" value={newSeason} onChange={(e) => setNewSeason(e.target.value)} placeholder="Esim. Kausi 2028" />
      <ArchiveCardButton disabled={busy || !newSeason.trim()} onClick={async () => {
