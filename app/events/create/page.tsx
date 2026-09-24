@@ -53,7 +53,10 @@ export default function CreateEventPage() {
   const [eventConfig, setEventConfig] = useState({
     format: "",
     rounds: "",
-    scoring: "",
+    scoringMode: "3_1_0",
+    winPoints: "3",
+    drawPoints: "1",
+    lossPoints: "0",
     tiebreaker: "",
     organizerNotes: "",
   })
@@ -132,7 +135,12 @@ export default function CreateEventPage() {
         event_config: {
           format: eventConfig.format.trim() || undefined,
           rounds: eventConfig.rounds.trim() || undefined,
-          scoring: eventConfig.scoring.trim() || undefined,
+          scoring: {
+            mode: eventConfig.scoringMode,
+            win: Number(eventConfig.winPoints),
+            draw: Number(eventConfig.drawPoints),
+            loss: Number(eventConfig.lossPoints),
+          },
           tiebreaker: eventConfig.tiebreaker.trim() || undefined,
           organizerNotes: eventConfig.organizerNotes.trim() || undefined,
         },
@@ -402,15 +410,69 @@ export default function CreateEventPage() {
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="event-scoring" className="font-body text-accent-gold">Pisteytys</Label>
-                      <Input
-                        id="event-scoring"
-                        placeholder="Esim. voitto 3 p, tasapeli 1 p, tappio 0 p"
-                        value={eventConfig.scoring}
-                        onChange={(e) => setEventConfig({ ...eventConfig, scoring: e.target.value })}
-                        className={archiveField}
-                      />
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="font-body text-accent-gold">Pisteytys</Label>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Valitse pisteytys, jota käytetään ottelutulosten pisteiden laskemiseen.
+                        </p>
+                      </div>
+
+                      <Select
+                        value={eventConfig.scoringMode}
+                        onValueChange={(value) => {
+                          const presets: Record<string, { win: string; draw: string; loss: string }> = {
+                            "3_1_0": { win: "3", draw: "1", loss: "0" },
+                            "3_0_0": { win: "3", draw: "0", loss: "0" },
+                            "2_1_0": { win: "2", draw: "1", loss: "0" },
+                            "2_0_0": { win: "2", draw: "0", loss: "0" },
+                            "1_0_0": { win: "1", draw: "0", loss: "0" },
+                          }
+                          const preset = presets[value]
+                          setEventConfig({
+                            ...eventConfig,
+                            scoringMode: value,
+                            ...(preset || {}),
+                          })
+                        }}
+                      >
+                        <SelectTrigger className={archiveField}>
+                          <SelectValue placeholder="Valitse pisteytysmalli" />
+                        </SelectTrigger>
+                        <SelectContent className={archiveSelectContent}>
+                          <SelectItem className={archiveSelectItem} value="3_1_0">Voitto 3 / tasapeli 1 / tappio 0</SelectItem>
+                          <SelectItem className={archiveSelectItem} value="3_0_0">Voitto 3 / tasapeli 0 / tappio 0</SelectItem>
+                          <SelectItem className={archiveSelectItem} value="2_1_0">Voitto 2 / tasapeli 1 / tappio 0</SelectItem>
+                          <SelectItem className={archiveSelectItem} value="2_0_0">Voitto 2 / tasapeli 0 / tappio 0</SelectItem>
+                          <SelectItem className={archiveSelectItem} value="1_0_0">Voitto 1 / tasapeli 0 / tappio 0</SelectItem>
+                          <SelectItem className={archiveSelectItem} value="custom">Mukautettu</SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      <div className="grid gap-3 sm:grid-cols-3">
+                        {[
+                          { key: "winPoints", label: "Voitto" },
+                          { key: "drawPoints", label: "Tasapeli" },
+                          { key: "lossPoints", label: "Tappio" },
+                        ].map(({ key, label }) => (
+                          <div key={key} className="space-y-2">
+                            <Label className="text-sm text-muted-foreground">{label}</Label>
+                            <Select
+                              value={eventConfig[key as "winPoints" | "drawPoints" | "lossPoints"]}
+                              onValueChange={(value) => setEventConfig({ ...eventConfig, scoringMode: "custom", [key]: value })}
+                            >
+                              <SelectTrigger className={archiveField}>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className={archiveSelectContent}>
+                                {Array.from({ length: 11 }, (_, i) => (
+                                  <SelectItem className={archiveSelectItem} key={i} value={String(i)}>{i} p</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
                     {(eventType === "tournament" || eventType === "league") && (
