@@ -132,6 +132,22 @@ export default function LeaguePage() {
        }}>Tallenna kausi</ArchiveCardButton>
       </div>}
      </div>}
+     <section className="space-y-3">
+      <h3 className="font-heading text-xl text-accent-gold">Kauden sarjataulukko</h3>
+      {hub.standings.filter(row=>row.season_id===season.id).length===0
+       ? <p className="text-sm text-muted-foreground">Sarjataulukko muodostuu, kun kauteen liitetyissä turnauksissa kirjataan ottelutuloksia.</p>
+       : <div className="overflow-x-auto rounded-md border border-accent-gold/25">
+        <table className="w-full min-w-[490px] text-left text-sm">
+         <thead className="border-b border-accent-gold/25 bg-accent-gold/10 text-accent-gold">
+          <tr><th className="p-2">Sija</th><th className="p-2">Pelaaja</th><th className="p-2 text-center" title="Turnauksia">T</th><th className="p-2 text-center" title="Otteluita">O</th><th className="p-2 text-center" title="Voitot">V</th><th className="p-2 text-center" title="Tasapelit">TAS</th><th className="p-2 text-center" title="Tappiot">H</th><th className="p-2 text-right">Pisteet</th></tr>
+         </thead>
+         <tbody>{hub.standings.filter(row=>row.season_id===season.id).map((row,index)=><tr key={row.key} className="border-b border-accent-gold/10 last:border-0">
+          <td className="p-2">{index+1}.</td><td className="p-2 font-medium break-words">{row.name}</td><td className="p-2 text-center">{row.tournaments}</td><td className="p-2 text-center">{row.played}</td><td className="p-2 text-center">{row.wins}</td><td className="p-2 text-center">{row.draws}</td><td className="p-2 text-center">{row.losses}</td><td className="p-2 text-right font-bold text-accent-gold">{row.points}</td>
+         </tr>)}</tbody>
+        </table>
+       </div>}
+      <p className="text-xs text-muted-foreground">Pisteet lasketaan kirjatuista otteluista. Jos turnauksessa ei ole määritetty ottelupisteitä, voitosta saa 3 ja tasapelistä 1 pisteen. Tasapisteissä ratkaisevat voitot ja maaliero.</p>
+     </section>
      <h3 className="font-heading text-lg text-accent-gold">Kauden kilpailut ja tapahtumat</h3>
      {hub.events.filter((event) => event.season_id === season.id).length === 0 && <p className="text-sm text-muted-foreground">Tähän kauteen ei ole vielä liitetty tapahtumia.</p>}
      {hub.events.filter((event) => event.season_id === season.id).map((event) => <div key={event.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-accent-gold/20 p-3">
