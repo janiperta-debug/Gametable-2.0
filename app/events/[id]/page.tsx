@@ -21,7 +21,7 @@ import { useTranslations } from "@/lib/i18n"
 import { getEventById, updateRSVP, cancelEvent, completeEvent, getInvitableUsers, inviteToEvent, uninviteFromEvent, type Event, type EventParticipant, type RSVPStatus } from "@/app/actions/events"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
-import { addEventRound, addEventSession, addEventMatch, addEventEntry, removeEventEntry, recordEventMatch, getEventStructure, getEventStandings } from "@/app/actions/event-structure"
+import { addEventRound, addPlannedEventRounds, addEventSession, addEventMatch, addEventEntry, removeEventEntry, recordEventMatch, getEventStructure, getEventStandings } from "@/app/actions/event-structure"
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   game_night: "Peli-ilta",
@@ -185,6 +185,28 @@ export default function EventDetailsPage() {
     else {
       await refreshEventStructure()
     }
+  }
+
+  const createPlannedRounds = async () => {
+    if (!event || (event.event_type !== "tournament" && event.event_type !== "league")) return
+
+    const plannedRounds = Number((event.event_config as Record<string, unknown> | null)?.rounds || 0)
+    if (!plannedRounds) return
+
+    setStructureLoading(true)
+    const result = await addPlannedEventRounds(eventId)
+    if (result.error) {
+      toast({ title: t("common.error"), description: result.error, variant: "destructive" })
+    } else {
+      await refreshEventStructure()
+      if (result.created) {
+        toast({
+          title: t("common.success"),
+          description: `${result.created} kierrosta luotu.`,
+        })
+      }
+    }
+    setStructureLoading(false)
   }
 
   const addStructureItem = async () => {
@@ -483,6 +505,26 @@ export default function EventDetailsPage() {
                   <p className="text-sm text-muted-foreground">
                     Järjestäjä voi rakentaa tapahtuman etenemisen vaiheittain. GameTable ei määrää kierrosten tai sessioiden sisältöä.
                   </p>
+                  {event.event_type !== "campaign" && (() => {
+                    const plannedRounds = Number((event.event_config as Record<string, unknown> | null)?.rounds || 0)
+                    const currentRounds = structure.rounds.length
+                    if (!plannedRounds || currentRounds >= plannedRounds) return null
+                    return (
+                      <div className="rounded-md border border-accent-gold/20 bg-background/20 p-3 space-y-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <div className="text-sm text-accent-gold">Suunniteltu kierrosmäärä: {plannedRounds}</div>
+                            <div className="text-xs text-muted-foreground">Luotu {currentRounds} / {plannedRounds}. Suunnitelma ei ole yläraja.</div>
+                          </div>
+                          {isHost && (
+                            <ArchiveCardButton onClick={createPlannedRounds} disabled={structureLoading}>
+                              {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : currentRounds === 0 ? `Luo ${plannedRounds} kierrosta` : `Täydennä ${plannedRounds} kierrokseen`}
+                            </ArchiveCardButton>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })()}
                   {isHost && <div className="flex gap-2">
                     <input
                       value={structureTitle}
