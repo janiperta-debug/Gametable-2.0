@@ -114,8 +114,8 @@ export default function EventDetailsPage() {
   const [campaignProgression, setCampaignProgression] = useState<CampaignProgression>({
     mode: "stages",
     label: "Vaihe",
-    current: 1,
-    total: 1,
+    current: 0,
+    total: 0,
     unit: "",
     currentStage: "",
     stages: [],
