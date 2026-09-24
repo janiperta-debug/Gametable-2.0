@@ -69,7 +69,9 @@
     "searching": "Searching...",
     "filters": "Filters",
     "hideFilters": "Hide Filters",
-    "clearFilters": "Clear Filters"
+    "clearFilters": "Clear Filters",
+    "today": "Today",
+    "yesterday": "Yesterday"
   },
   "friends": {
     "sendRequest": "Send Friend Request",
@@ -219,7 +221,8 @@
     "warhammer": "Warhammer",
     "otherMiniatureGames": "Other Miniature Games",
     "roleplayingGames": "Roleplaying Games (RPGs)",
-    "tradingCards": "Trading Cards"
+    "tradingCards": "Trading Cards",
+    "anonymous": "Anonymous"
   },
   "collection": {
     "title": "Game Collection",
@@ -514,7 +517,20 @@
     "noMatchingUpcoming": "No upcoming events match your search.",
     "showAllUpcoming": "Show all upcoming events ({{count}})",
     "noPastEvents": "No past events.",
-    "showFullHistory": "Show full history"
+    "showFullHistory": "Show full history",
+    "notHost": "Only the organizer can edit this event.",
+    "titleRequired": "Enter an event name.",
+    "eventUpdated": "Event updated.",
+    "notFound": "Event not found",
+    "titlePlaceholder": "Enter event name...",
+    "privacy": "Visibility",
+    "private": "Private",
+    "dateTime": "Date and time",
+    "notFoundDesc": "The event you are looking for could not be found.",
+    "cancelled": "Cancelled",
+    "cantAttend": "Can't attend",
+    "eventCancelled": "Event cancelled.",
+    "noMessages": "No messages yet. Start the conversation!"
   },
   "community": {
     "title": "Community",
@@ -1306,7 +1322,9 @@
       "message": "Something went wrong during authentication.",
       "tryAgain": "Try Again",
       "backToHome": "Back to Home"
-    }
+    },
+    "loginRequired": "Login required",
+    "loginToRsvp": "Log in to RSVP"
   },
   "users": {
     "notFound": "User Not Found",
