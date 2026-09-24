@@ -332,7 +332,7 @@ export default function CreateEventPage() {
                           key={value}
                           type="button"
                           aria-pressed={selected}
-                          onClick={() => setEventType(value)}
+                          onClick={() => value === "league" ? router.push("/leagues/create") : setEventType(value)}
                           className={cn(
                             "group relative flex min-h-[145px] flex-col items-center justify-center overflow-hidden rounded-lg px-3 py-3 text-center transition-all duration-200",
                             "border border-[var(--archive-gold,#d9b65c)]/25",
