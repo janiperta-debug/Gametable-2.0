@@ -173,6 +173,6 @@ export async function listNewsletterImages(): Promise<{ images: string[]; error?
     limit: 100, sortBy: { column: "created_at", order: "desc" },
   })
   if (error) return { images: [], error: error.message }
-  return { images: (data || []).filter((item) => /\\.(jpg|jpeg|png|webp|gif)$/i.test(item.name))
+  return { images: (data || []).filter((item) => /\.(jpg|jpeg|png|webp|gif)$/i.test(item.name))
     .map((item) => service.storage.from(IMAGE_BUCKET).getPublicUrl(user.id + "/" + item.name).data.publicUrl) }
 }
