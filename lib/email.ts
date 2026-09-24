@@ -107,6 +107,7 @@ export function getAdminBroadcastEmailTemplate(title: string, message: string, i
 
   const safeTitle = escapeHtml(title)
   const safeMessage = escapeHtml(message).replace(/\n/g, "<br />")
+  const safeImage = imageUrl ? escapeHtml(imageUrl) : null
 
   return {
     subject: `[Gametable] ${title}`,
