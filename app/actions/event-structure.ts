@@ -181,17 +181,51 @@ export async function removeEventEntry(eventId: string, entryId: string) {
 }
 
 
-export async function recordEventMatch(eventId: string, matchId: string, data: { winner_id?: string; score_a?: number; score_b?: number; points_a?: number; points_b?: number; result?: string }) {
+export async function recordEventMatch(eventId: string, matchId: string, data: { winner_id?: string; score_a?: number; score_b?: number; result?: string }) {
   const { supabase, error } = await requireHost(eventId)
   if (error) return { error }
-  const { data: existingMatch } = await supabase.from("event_matches").select("entry_a_id, entry_b_id, player_a_id, player_b_id").eq("id", matchId).eq("event_id", eventId).single()
-  const winnerEntry = data.winner_id && existingMatch
+
+  const [{ data: existingMatch }, { data: event }] = await Promise.all([
+    supabase.from("event_matches").select("entry_a_id, entry_b_id, player_a_id, player_b_id").eq("id", matchId).eq("event_id", eventId).single(),
+    supabase.from("events").select("event_config").eq("id", eventId).single(),
+  ])
+  if (!existingMatch) return { error: "Ottelua ei löytynyt." }
+
+  const winnerEntry = data.winner_id
     ? (data.winner_id === existingMatch.player_a_id ? existingMatch.entry_a_id : data.winner_id === existingMatch.player_b_id ? existingMatch.entry_b_id : null)
     : null
+
+  const scoring = (event?.event_config as Record<string, unknown> | null)?.scoring as Record<string, unknown> | undefined
+  let pointsA: number | null = null
+  let pointsB: number | null = null
+
+  if (scoring && Number.isFinite(Number(scoring.win)) && Number.isFinite(Number(scoring.draw)) && Number.isFinite(Number(scoring.loss))) {
+    const win = Number(scoring.win)
+    const draw = Number(scoring.draw)
+    const loss = Number(scoring.loss)
+    if (data.winner_id === existingMatch.player_a_id) {
+      pointsA = win
+      pointsB = loss
+    } else if (data.winner_id === existingMatch.player_b_id) {
+      pointsA = loss
+      pointsB = win
+    } else if (data.score_a !== undefined && data.score_b !== undefined && data.score_a === data.score_b) {
+      pointsA = draw
+      pointsB = draw
+    }
+  }
+
   const { data: match, error: updateError } = await supabase.from("event_matches").update({
-    winner_id: data.winner_id || null, winner_entry_id: winnerEntry, score_a: data.score_a ?? null, score_b: data.score_b ?? null, points_a: data.points_a ?? null, points_b: data.points_b ?? null,
-    result: data.result?.trim() || null, status: "completed",
+    winner_id: data.winner_id || null,
+    winner_entry_id: winnerEntry,
+    score_a: data.score_a ?? null,
+    score_b: data.score_b ?? null,
+    points_a: pointsA,
+    points_b: pointsB,
+    result: data.result?.trim() || null,
+    status: "completed",
   }).eq("id", matchId).eq("event_id", eventId).select().single()
+
   if (updateError) return { error: updateError.message }
   revalidatePath("/events/" + eventId)
   return { match }
