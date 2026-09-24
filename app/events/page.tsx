@@ -180,7 +180,6 @@ const eventTypes = ["game_night", "campaign", "tournament", "league"] as const
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState("upcoming")
   const [leagues, setLeagues] = useState<Awaited<ReturnType<typeof listLeagues>>["leagues"]>([])
-  useEffect(() => { void listLeagues().then((result) => setLeagues(result.leagues)) }, [user?.id])
   const [searchQuery, setSearchQuery] = useState("")
   const [showFilters, setShowFilters] = useState(false)
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
@@ -188,6 +187,7 @@ export default function EventsPage() {
   const t = useTranslations()
   const { toast } = useToast()
   const { user } = useUser()
+  useEffect(() => { void listLeagues().then((result) => setLeagues(result.leagues)) }, [user?.id])
   const { publicEvents, myEvents, pastEvents, loading, refetch } = useEvents()
 
   const toggleEventType = (type: string) => {
