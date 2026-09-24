@@ -177,7 +177,7 @@ export function EventChat({ eventId, eventTitle }: EventChatProps) {
   }
 
   return (
-    <ArchiveFrame className="min-h-[600px] flex flex-col">
+    <ArchiveFrame className="flex flex-col h-full">
       <div className="p-5 pb-3">
         <div className="font-cinzel text-accent-gold flex items-center gap-2">
           <MessageCircle className="w-5 h-5" />
