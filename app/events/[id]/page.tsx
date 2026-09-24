@@ -1291,16 +1291,29 @@ export default function EventDetailsPage() {
             {/* Main Event Info */}
             <ArchiveCard>
               <ArchiveCardHeader>
-                <div className="flex flex-col-reverse items-start gap-4 sm:flex-row sm:justify-between">
-                  <div className="min-w-0 flex-1">
-                    <ArchiveCardTitle className="text-3xl mb-2 normal-case break-words">
+                <div className="flex flex-col items-center gap-4 text-center">
+                  {EVENT_TYPE_IMAGES[event.event_type] && (
+                    <div className="relative flex w-full items-center justify-center py-2">
+                      {/* Shared ornaments for all event types. Missing files do not display broken image icons. */}
+                      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 w-[calc(50%-5rem)] bg-contain bg-left bg-no-repeat sm:w-[calc(50%-6rem)]"
+                        style={{ backgroundImage: 'url("/images/events/ornate-left.png")' }} />
+                      <div className="relative z-10 aspect-square w-32 overflow-hidden rounded-lg border border-accent-gold/30 sm:w-40">
+                        <img src={EVENT_TYPE_IMAGES[event.event_type]} alt={EVENT_TYPE_LABELS[event.event_type] || "Tapahtuma"}
+                          className="h-full w-full object-cover" />
+                      </div>
+                      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-[calc(50%-5rem)] bg-contain bg-right bg-no-repeat sm:w-[calc(50%-6rem)]"
+                        style={{ backgroundImage: 'url("/images/events/ornate-right.png")' }} />
+                    </div>
+                  )}
+                  <div className="w-full min-w-0">
+                    <ArchiveCardTitle className="mb-2 text-center text-3xl normal-case break-words">
                       {event.title}
                     </ArchiveCardTitle>
-                    <div className="flex items-center gap-2 text-muted-foreground">
+                    <div className="flex items-center justify-center gap-2 text-muted-foreground">
                       {getPrivacyIcon(event.privacy)}
                       <span className="text-sm">{getPrivacyLabel(event.privacy, t)}</span>
                     </div>
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                       {userRsvp && (
                         <Badge variant={userRsvp === "attending" ? "default" : "secondary"}
                           className={userRsvp === "attending" ? "bg-green-600" : userRsvp === "maybe" ? "bg-yellow-600" : ""}>
@@ -1319,12 +1332,6 @@ export default function EventDetailsPage() {
                       )}
                     </div>
                   </div>
-                  {EVENT_TYPE_IMAGES[event.event_type] && (
-                    <div className="w-28 sm:w-36 aspect-square shrink-0 overflow-hidden rounded-lg border border-accent-gold/30 self-end sm:self-start">
-                      <img src={EVENT_TYPE_IMAGES[event.event_type]} alt={EVENT_TYPE_LABELS[event.event_type] || "Tapahtuma"}
-                        className="h-full w-full object-cover" />
-                    </div>
-                  )}
                 </div>
               </ArchiveCardHeader>
               <ArchiveCardContent className="space-y-6">
