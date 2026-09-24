@@ -174,11 +174,11 @@ export default function EventDetailsPage() {
     }
   }
 
-  const saveMatchResult = async (matchId: string, winnerId: string, scoreA: string, scoreB: string, pointsA: string, pointsB: string) => {
+  const saveMatchResult = async (matchId: string, winnerId: string, scoreA: string, scoreB: string) => {
     const result = await recordEventMatch(eventId, matchId, {
       winner_id: winnerId || undefined,
       score_a: scoreA === "" ? undefined : Number(scoreA),
-      score_b: scoreB === "" ? undefined : Number(scoreB), points_a: pointsA === "" ? undefined : Number(pointsA), points_b: pointsB === "" ? undefined : Number(pointsB),
+      score_b: scoreB === "" ? undefined : Number(scoreB),
     })
     if (result.error) toast({ title: t("common.error"), description: result.error, variant: "destructive" })
     else {
@@ -577,15 +577,13 @@ export default function EventDetailsPage() {
                                   <div key={m.id} className="rounded-md bg-background/40 border border-accent-gold/10 p-3 space-y-2">
                                     <div className="text-sm">{nameA} vs {nameB}</div>
                                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                                      <input aria-label="Pelaaja 1 pisteet" type="number" placeholder="P1" defaultValue={m.score_a ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`score-a-${m.id}`} />
-                                      <input aria-label="Pelaaja 2 pisteet" type="number" placeholder="P2" defaultValue={m.score_b ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`score-b-${m.id}`} />
-                                      <input aria-label="Pelaaja 1 pisteet" type="number" placeholder="Tapahtumapisteet P1" defaultValue={m.points_a ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`points-a-${m.id}`} />
-                                      <input aria-label="Pelaaja 2 pisteet" type="number" placeholder="Tapahtumapisteet P2" defaultValue={m.points_b ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`points-b-${m.id}`} />
+                                      <input aria-label="Pelaaja 1 tulos" type="number" placeholder="P1 tulos" defaultValue={m.score_a ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`score-a-${m.id}`} />
+                                      <input aria-label="Pelaaja 2 tulos" type="number" placeholder="P2 tulos" defaultValue={m.score_b ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`score-b-${m.id}`} />
                                       <select defaultValue={m.winner_id || ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`winner-${m.id}`}>
                                         <option value="">Ei voittajaa</option><option value={m.player_a_id}>{nameA}</option><option value={m.player_b_id}>{nameB}</option>
                                       </select>
                                     </div>
-                                    {isHost && <ArchiveCardButton onClick={() => saveMatchResult(m.id, (document.getElementById(`winner-${m.id}`) as HTMLSelectElement)?.value, (document.getElementById(`score-a-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`score-b-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`points-a-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`points-b-${m.id}`) as HTMLInputElement)?.value)}>Tallenna tulos</ArchiveCardButton>}
+                                    {isHost && <ArchiveCardButton onClick={() => saveMatchResult(m.id, (document.getElementById(`winner-${m.id}`) as HTMLSelectElement)?.value, (document.getElementById(`score-a-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`score-b-${m.id}`) as HTMLInputElement)?.value)}>Tallenna tulos</ArchiveCardButton>}
                                   </div>
                                 )
                               })}
