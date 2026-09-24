@@ -56,6 +56,26 @@ export function useEvents(): UseEventsReturn {
     fetchEvents()
   }, [fetchEvents])
 
+  // Refresh when returning to the Events view. This keeps newly created,
+  // completed, or updated events visible without requiring an app restart.
+  useEffect(() => {
+    const handleReturn = () => {
+      if (document.visibilityState === "visible") {
+        fetchEvents()
+      }
+    }
+
+    window.addEventListener("focus", handleReturn)
+    window.addEventListener("pageshow", handleReturn)
+    document.addEventListener("visibilitychange", handleReturn)
+
+    return () => {
+      window.removeEventListener("focus", handleReturn)
+      window.removeEventListener("pageshow", handleReturn)
+      document.removeEventListener("visibilitychange", handleReturn)
+    }
+  }, [fetchEvents])
+
   return {
     publicEvents,
     myEvents,
