@@ -509,7 +509,7 @@ export default function CreateEventPage() {
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="date" className="text-sm text-muted-foreground">Alkaa</Label>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 min-w-0">
                         <Input
                           id="date"
                           type="date"
@@ -522,7 +522,7 @@ export default function CreateEventPage() {
                               endDate: !formData.endDate || formData.endDate === formData.date ? nextDate : formData.endDate,
                             })
                           }}
-                          className={cn("font-body", archiveField)}
+                          className={cn("font-body w-full min-w-0", archiveField)}
                           required
                         />
                         <Input
@@ -530,21 +530,21 @@ export default function CreateEventPage() {
                           type="time"
                           value={formData.time}
                           onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                          className={cn("font-body", archiveField)}
+                          className={cn("font-body w-full min-w-0", archiveField)}
                           required
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="endDate" className="text-sm text-muted-foreground">Päättyy</Label>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 min-w-0">
                         <Input
                           id="endDate"
                           type="date"
                           value={formData.endDate}
                           min={formData.date || undefined}
                           onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                          className={cn("font-body", archiveField)}
+                          className={cn("font-body w-full min-w-0", archiveField)}
                           required
                         />
                         <Input
@@ -552,7 +552,7 @@ export default function CreateEventPage() {
                           type="time"
                           value={formData.endTime}
                           onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                          className={cn("font-body", archiveField)}
+                          className={cn("font-body w-full min-w-0", archiveField)}
                           required
                         />
                       </div>
