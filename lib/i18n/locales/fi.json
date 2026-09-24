@@ -1640,7 +1640,8 @@
     "competitorHint": "RSVP kertoo, ketkä ovat mukana tapahtumassa. Tässä valitaan erikseen ne osallistujat, jotka ovat mukana itse kilpailussa.",
     "campaignModelHint": "Kampanjalla ei ole vielä etenemismallia. Voit käyttää vaiheita, omaa mittaria tai vapaamuotoista kuvausta.",
     "stagesPlaceholder": "Vaiheet, yksi rivilleen:\nPrologi\nKaupungin portit\nVarjojen metsä\nMuinainen temppeli",
-    "competitor": "Kilpailija"
+    "competitor": "Kilpailija",
+    "editSession": "Muokkaa sessiota"
   },
   "eventDynamic": {
     "s0": "Anna ensimmäisen kauden nimi",
