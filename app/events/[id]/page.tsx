@@ -959,14 +959,12 @@ export default function EventDetailsPage() {
                         {structure.profiles
                           .filter((p: any) => structure.participants.some((participant: any) => participant.user_id === p.id && participant.status === "attending"))
                           .filter((p: any) => !structure.entries.some((e: any) => e.user_id === p.id && e.status === "active"))
-                          .map((p: any) => <option key={p.id} value={p.id}>{p.display_name || p.username || t("eventUi.s40")}</option>)}
+                          .map((p: any) => <option key={p.id} value={p.id}>{p.display_name || p.username || t("eventUi.s41")}</option>)}
                       </select>
                       <ArchiveCardButton onClick={() => {
                         const select = document.getElementById("competitor-select") as HTMLSelectElement | null
                         if (select?.value) addCompetitor(select.value)
-                      }}>
-                        Lisää
-                      </ArchiveCardButton>
+                      }}>{t("eventDynamic.s24")}</ArchiveCardButton>
                     </div>
                   )}
                   {structure.entries.length === 0 ? (
