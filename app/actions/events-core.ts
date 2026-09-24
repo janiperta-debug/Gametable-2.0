@@ -42,6 +42,7 @@ export interface EventParticipant {
   user?: {
     id: string
     display_name: string | null
+    username?: string | null
     avatar_url: string | null
   }
 }
@@ -479,11 +480,11 @@ export async function getEventById(
 
   // Resolve participant profiles explicitly for the detail view.
   const participantIds = Array.from(new Set((participants || []).map((participant) => participant.user_id).filter(Boolean)))
-  let participantProfiles: Array<{ id: string; display_name: string | null; avatar_url: string | null }> = []
+  let participantProfiles: Array<{ id: string; display_name: string | null; username: string | null; avatar_url: string | null }> = []
   if (participantIds.length > 0) {
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("id, display_name, avatar_url")
+      .select("id, display_name, username, avatar_url")
       .in("id", participantIds)
     participantProfiles = profiles || []
   }
