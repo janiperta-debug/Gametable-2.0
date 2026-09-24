@@ -867,6 +867,51 @@ export async function getInvitableUsers(
 }
 
 /**
+ * Complete an event (host only)
+ */
+export async function completeEvent(
+  eventId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { success: false, error: "Unauthorized" }
+
+  const { data: event } = await supabase
+    .from("events")
+    .select("host_id, status")
+    .eq("id", eventId)
+    .single()
+
+  if (!event || event.host_id !== user.id) {
+    return { success: false, error: "Only the host can complete this event" }
+  }
+
+  if (event.status === "cancelled") {
+    return { success: false, error: "Cancelled events cannot be completed" }
+  }
+
+  if (event.status === "completed") {
+    return { success: true }
+  }
+
+  const { error } = await supabase
+    .from("events")
+    .update({ status: "completed" })
+    .eq("id", eventId)
+
+  if (error) {
+    console.error("Error completing event:", error)
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath("/events")
+  revalidatePath(`/events/${eventId}`)
+
+  return { success: true }
+}
+
+/**
  * Cancel an event (host only)
  */
 export async function cancelEvent(
