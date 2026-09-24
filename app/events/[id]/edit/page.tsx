@@ -289,7 +289,7 @@ export default function EditEventPage() {
                   <div>
                     <Label className="text-accent-gold">{t("eventUi.s8")}</Label>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      Valitse pisteytys, jota käytetään ottelutulosten pisteiden laskemiseen.
+                      {t("eventUi.scoringHint")}
                     </p>
                   </div>
                   <Select
