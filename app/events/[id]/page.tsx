@@ -21,6 +21,7 @@ import { getEventById, updateRSVP, cancelEvent, completeEvent, getInvitableUsers
 import { useToast } from "@/hooks/use-toast"
 import { getLeagueTournaments, setTournamentLeague, getLeagueStandings, updateLeaguePlacementPoints, type LeagueStanding } from "@/app/actions/league"
 import { createClient } from "@/lib/supabase/client"
+import { convertLegacyLeague } from "@/app/actions/league-hub"
 import { addEventRound, addPlannedEventRounds, addEventSession, addPlannedEventSessions, updateEventSession, updateCampaignProgression, addEventMatch, addEventEntry, removeEventEntry, recordEventMatch, getEventStructure, getEventStandings, type CampaignProgression } from "@/app/actions/event-structure"
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
@@ -109,6 +110,7 @@ export default function EventDetailsPage() {
   const [leagueTournaments, setLeagueTournaments] = useState<any[]>([])
   const [availableTournaments, setAvailableTournaments] = useState<any[]>([])
   const [leagueSaving, setLeagueSaving] = useState(false)
+  const [convertingLeague, setConvertingLeague] = useState(false)
   const [leagueMatchForm, setLeagueMatchForm] = useState({ entryA: "", entryB: "", roundId: "" })
   const [leagueStandings, setLeagueStandings] = useState<LeagueStanding[]>([])
   const [placementPoints, setPlacementPoints] = useState("10, 7, 5, 3, 1")
@@ -619,6 +621,27 @@ export default function EventDetailsPage() {
             </>
           )}
         </div>
+
+        {event.event_type === "league" && isHost && (
+          <ArchiveCard className="mb-6">
+            <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">Siirrä liiga uuteen rakenteeseen</ArchiveCardTitle></ArchiveCardHeader>
+            <ArchiveCardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">Tämä on vanhan tapahtumamallin liiga. Siirto perustaa pysyvän liigan ja ensimmäisen kauden sekä liittää siihen nykyiset turnaukset. Alkuperäinen liiga, ottelut ja tulokset säilyvät luettavina.</p>
+              <ArchiveCardButton disabled={convertingLeague} onClick={async () => {
+                setConvertingLeague(true)
+                try {
+                  const result = await convertLegacyLeague(eventId)
+                  if (result.error) toast({ title: "Siirto epäonnistui", description: result.error, variant: "destructive" })
+                  else if (result.id) {
+                    if (result.warning) toast({ title: "Tarkista siirto", description: result.warning })
+                    router.push("/leagues/" + result.id)
+                  }
+                } catch { toast({ title: "Siirto epäonnistui", variant: "destructive" }) }
+                finally { setConvertingLeague(false) }
+              }}>{convertingLeague ? "Siirretään..." : "Siirrä pysyväksi liigaksi"}</ArchiveCardButton>
+            </ArchiveCardContent>
+          </ArchiveCard>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Event Details */}
