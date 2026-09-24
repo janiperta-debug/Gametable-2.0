@@ -1633,7 +1633,14 @@
     "s94": "Player 1 score",
     "s95": "P1 score",
     "s96": "Player 2 score",
-    "s97": "P2 score"
+    "s97": "P2 score",
+    "structureRules": "Define the event structure according to your game's rules. GameTable does not set scoring or format.",
+    "roundPlanNote": "This is the initial plan, not a limit on rounds. More rounds can be added later.",
+    "scoringHint": "Select the scoring model used to calculate points from match results.",
+    "competitorHint": "RSVP shows who is attending the event. Here you select which attendees are competing.",
+    "campaignModelHint": "This campaign has no progress model yet. Use stages, a counter or a freeform description.",
+    "stagesPlaceholder": "Stages, one per line:\nPrologue\nCity Gates\nShadow Forest\nAncient Temple",
+    "competitor": "Competitor"
   },
   "eventDynamic": {
     "s0": "Enter the first season name",
