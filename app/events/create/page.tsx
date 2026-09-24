@@ -22,6 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ArrowLeft, Globe, UserCheck, Lock, Loader2, Calendar, Search, X, UserPlus, Check } from "lucide-react"
 import { createEvent, inviteToEvent, type EventType, type EventPrivacy } from "@/app/actions/events"
+import { createLeague } from "@/app/actions/league-hub"
 import { getUserFriendsList } from "@/app/actions/friends"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -62,6 +63,7 @@ export default function CreateEventPage() {
     leagueStructure: "mixed",
     placementPoints: "10, 7, 5, 3, 1",
   })
+  const [leagueSeason, setLeagueSeason] = useState({ name: "", startsOn: "", endsOn: "" })
   const [saving, setSaving] = useState(false)
   const [userGames, setUserGames] = useState<UserGame[]>([])
   const [loadingGames, setLoadingGames] = useState(true)
@@ -117,11 +119,35 @@ export default function CreateEventPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.title.trim() || !formData.date || !formData.time || !formData.endDate || !formData.endTime) return
-    if (eventType === "league" && (!eventConfig.placementPoints.trim() || eventConfig.placementPoints.split(",").some((value) => !/^\d+$/.test(value.trim()) || Number(value) > 1000) || eventConfig.placementPoints.split(",").length > 20)) {
-      toast({ title: "Tarkista sijoituspisteet", description: "Anna 1–20 pistemäärää pilkuilla erotettuna (0–1000).", variant: "destructive" })
+    if (!formData.title.trim()) return
+    if (eventType === "league") {
+      if (!leagueSeason.name.trim()) {
+        toast({ title: "Anna ensimmäisen kauden nimi", variant: "destructive" })
+        return
+      }
+      if (leagueSeason.startsOn && leagueSeason.endsOn && leagueSeason.endsOn < leagueSeason.startsOn) {
+        toast({ title: "Kauden päättymispäivä on ennen alkua", variant: "destructive" })
+        return
+      }
+      setSaving(true)
+      try {
+        const result = await createLeague({
+          name: formData.title,
+          game: formData.game,
+          description: formData.description,
+          privacy: privacy === "public" ? "public" : "private",
+          seasonName: leagueSeason.name,
+          startsOn: leagueSeason.startsOn,
+          endsOn: leagueSeason.endsOn,
+        })
+        if (result.error) toast({ title: "Liigan perustaminen epäonnistui", description: result.error, variant: "destructive" })
+        else if (result.id) router.push("/leagues/" + result.id)
+      } catch {
+        toast({ title: "Liigan perustaminen epäonnistui", variant: "destructive" })
+      } finally { setSaving(false) }
       return
     }
+    if (!formData.date || !formData.time || !formData.endDate || !formData.endTime) return
 
     setSaving(true)
 
@@ -218,7 +244,7 @@ export default function CreateEventPage() {
                   </Label>
                   <Input 
                     id="title" 
-                    placeholder={eventType === "league" ? "Esim. Blood Bowl – kausi 2027" : t("events.eventTitlePlaceholder")}
+                    placeholder={eventType === "league" ? "Esim. Hyvinkään Blood Bowl -liiga" : t("events.eventTitlePlaceholder")}
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className={cn("font-body", archiveField)}
@@ -332,7 +358,7 @@ export default function CreateEventPage() {
                           key={value}
                           type="button"
                           aria-pressed={selected}
-                          onClick={() => value === "league" ? router.push("/leagues/create") : setEventType(value)}
+                          onClick={() => setEventType(value)}
                           className={cn(
                             "group relative flex min-h-[145px] flex-col items-center justify-center overflow-hidden rounded-lg px-3 py-3 text-center transition-all duration-200",
                             "border border-[var(--archive-gold,#d9b65c)]/25",
@@ -361,8 +387,8 @@ export default function CreateEventPage() {
 
                 {eventType === "league" && (
                   <div className="rounded-lg border border-accent-gold/25 bg-background/20 p-4 space-y-2">
-                    <h3 className="font-heading text-lg text-accent-gold">Luo kokonainen kilpailukausi</h3>
-                    <p className="text-sm text-muted-foreground">Liiga kokoaa useita turnauksia ja/tai yksittäisiä sarjaotteluita saman kauden alle. Turnaukset ja ottelut lisätään liigan sivulla myöhemmin – niitä ei tarvitse tietää vielä luontivaiheessa.</p>
+                    <h3 className="font-heading text-lg text-accent-gold">Pysyvä kilpailuyhteisö</h3>
+                    <p className="text-sm text-muted-foreground">Perustat liigan, joka säilyy kaudesta toiseen. Voit liittää jokaiseen kauteen olemassa olevia tai uusia turnauksia ja peli-iltoja.</p>
                   </div>
                 )}
 
@@ -528,72 +554,30 @@ export default function CreateEventPage() {
                 )}
 
                 {eventType === "league" && (
-                  <div className="space-y-5">
+                  <div className="space-y-4 rounded-lg border border-accent-gold/25 p-4">
                     <div>
-                      <h3 className="font-heading text-lg text-accent-gold">Kauden rakenne</h3>
-                      <p className="mt-1 text-sm text-muted-foreground">Valitse, millaisia kilpailuja kauteen voi kuulua. Voit lisätä niitä vähitellen kauden aikana.</p>
+                      <h3 className="font-heading text-lg text-accent-gold">Ensimmäinen kausi</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">Anna ensimmäiselle kaudelle nimi. Kilpailut, ottelut ja pisteytys lisätään liigan sisällä myöhemmin.</p>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="league-structure" className="font-body text-accent-gold">Liigan sisältö</Label>
-                      <Select value={eventConfig.leagueStructure} onValueChange={(value) => setEventConfig({ ...eventConfig, leagueStructure: value })}>
-                        <SelectTrigger id="league-structure" className={archiveField}><SelectValue /></SelectTrigger>
-                        <SelectContent className={archiveSelectContent}>
-                          <SelectItem className={archiveSelectItem} value="mixed">Turnauksia ja sarjaotteluita</SelectItem>
-                          <SelectItem className={archiveSelectItem} value="tournaments">Useita turnauksia</SelectItem>
-                          <SelectItem className={archiveSelectItem} value="matches">Yksittäisiä sarjaotteluita</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <p className="text-xs text-muted-foreground">Tämä on kauden suunnitelma, ei rajoitus. Voit käyttää molempia tapoja myöhemminkin.</p>
+                      <Label htmlFor="league-season-name" className="text-accent-gold">Kauden nimi *</Label>
+                      <Input id="league-season-name" required={eventType === "league"} maxLength={120} value={leagueSeason.name} onChange={(e) => setLeagueSeason({ ...leagueSeason, name: e.target.value })} placeholder="Esim. Kausi 2027" className={archiveField} />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="league-placement" className="font-body text-accent-gold">Turnausten sijoituspisteet</Label>
-                      <Input id="league-placement" value={eventConfig.placementPoints} onChange={(e) => setEventConfig({ ...eventConfig, placementPoints: e.target.value })} placeholder="10, 7, 5, 3, 1" className={archiveField} />
-                      <p className="text-xs text-muted-foreground">Esimerkiksi 1. sija 10 p, 2. sija 7 p, 3. sija 5 p. Pisteet lisätään kauden sarjataulukkoon turnauksen päätyttyä. Voit muuttaa niitä liigan sivulla.</p>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="font-body text-accent-gold">Sarjaotteluiden pisteytys</Label>
-                      <Select value={eventConfig.scoringMode} onValueChange={(value) => {
-                        const presets: Record<string, { winPoints: string; drawPoints: string; lossPoints: string }> = {
-                          "3_1_0": { winPoints: "3", drawPoints: "1", lossPoints: "0" },
-                          "3_0_0": { winPoints: "3", drawPoints: "0", lossPoints: "0" },
-                          "2_1_0": { winPoints: "2", drawPoints: "1", lossPoints: "0" },
-                          "2_0_0": { winPoints: "2", drawPoints: "0", lossPoints: "0" },
-                          "1_0_0": { winPoints: "1", drawPoints: "0", lossPoints: "0" },
-                        }
-                        setEventConfig({ ...eventConfig, scoringMode: value, ...(presets[value] || {}) })
-                      }}>
-                        <SelectTrigger className={archiveField}><SelectValue /></SelectTrigger>
-                        <SelectContent className={archiveSelectContent}>
-                          <SelectItem className={archiveSelectItem} value="3_1_0">Voitto 3 / tasapeli 1 / tappio 0</SelectItem>
-                          <SelectItem className={archiveSelectItem} value="3_0_0">Voitto 3 / tasapeli 0 / tappio 0</SelectItem>
-                          <SelectItem className={archiveSelectItem} value="2_1_0">Voitto 2 / tasapeli 1 / tappio 0</SelectItem>
-                          <SelectItem className={archiveSelectItem} value="2_0_0">Voitto 2 / tasapeli 0 / tappio 0</SelectItem>
-                          <SelectItem className={archiveSelectItem} value="1_0_0">Voitto 1 / tasapeli 0 / tappio 0</SelectItem>
-                          <SelectItem className={archiveSelectItem} value="custom">Mukautettu</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {eventConfig.scoringMode === "custom" && <div className="grid grid-cols-3 gap-2">
-                        {([{ key: "winPoints", label: "Voitto" }, { key: "drawPoints", label: "Tasapeli" }, { key: "lossPoints", label: "Tappio" }] as const).map(({ key, label }) => (
-                          <div key={key} className="space-y-1">
-                            <Label className="text-xs text-muted-foreground">{label}</Label>
-                            <Select value={eventConfig[key]} onValueChange={(value) => setEventConfig({ ...eventConfig, [key]: value })}>
-                              <SelectTrigger className={archiveField}><SelectValue /></SelectTrigger>
-                              <SelectContent className={archiveSelectContent}>{Array.from({ length: 11 }, (_, i) => <SelectItem key={i} className={archiveSelectItem} value={String(i)}>{i} p</SelectItem>)}</SelectContent>
-                            </Select>
-                          </div>
-                        ))}
-                      </div>}
-                      <p className="text-xs text-muted-foreground">Koskee vain suoraan liigaan kirjattavia otteluita, ei turnausten omia pisteitä.</p>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="league-notes" className="font-body text-accent-gold">Kauden säännöt ja lisätiedot</Label>
-                      <Textarea id="league-notes" value={eventConfig.organizerNotes} onChange={(e) => setEventConfig({ ...eventConfig, organizerNotes: e.target.value })} placeholder="Esim. osallistumisehdot, kauden rakenne, finaali..." rows={3} className={archiveField} />
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="league-start" className="text-accent-gold">Kausi alkaa (valinnainen)</Label>
+                        <Input id="league-start" type="date" value={leagueSeason.startsOn} onChange={(e) => setLeagueSeason({ ...leagueSeason, startsOn: e.target.value })} className={cn("w-full min-w-0", archiveField)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="league-end" className="text-accent-gold">Kausi päättyy (valinnainen)</Label>
+                        <Input id="league-end" type="date" min={leagueSeason.startsOn || undefined} value={leagueSeason.endsOn} onChange={(e) => setLeagueSeason({ ...leagueSeason, endsOn: e.target.value })} className={cn("w-full min-w-0", archiveField)} />
+                      </div>
                     </div>
                   </div>
                 )}
 
                 {/* Date & Time Range */}
-                <div className="space-y-4">
+                {eventType !== "league" && <div className="space-y-4">
                   <div className="space-y-3">
                   <Label className="font-body text-accent-gold">{eventType === "league" ? "Kausi" : "Ajankohta"}</Label>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -649,10 +633,10 @@ export default function CreateEventPage() {
                     </div>
                   </div>
                   </div>
-                </div>
+                </div>}
 
                 {/* Location */}
-                <div className="space-y-2">
+                {eventType !== "league" && <div className="space-y-2">
                   <Label htmlFor="location" className="font-body text-accent-gold">
                     {t("events.location")}
                   </Label>
@@ -663,10 +647,10 @@ export default function CreateEventPage() {
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     className={cn("font-body", archiveField)}
                   />
-                </div>
+                </div>}
 
                 {/* Max Players */}
-                <div className="space-y-2">
+                {eventType !== "league" && <div className="space-y-2">
                   <Label htmlFor="maxPlayers" className="font-body text-accent-gold">
                     {t("events.maxPlayers")}
                   </Label>
@@ -679,7 +663,7 @@ export default function CreateEventPage() {
                     className={cn("font-body", archiveField)}
                     min="1"
                   />
-                </div>
+                </div>}
 
                 {/* Description */}
                 <div className="space-y-2">
@@ -743,7 +727,7 @@ export default function CreateEventPage() {
                 </div>
 
                 {/* Invite Friends Section - Show for private/friends events */}
-                {(privacy === "private" || privacy === "friends") && (
+                {eventType !== "league" && (privacy === "private" || privacy === "friends") && (
                   <div className="space-y-4 p-4 border border-accent-gold/30 rounded-lg bg-accent-gold/5">
                     <div className="flex items-center gap-2">
                       <UserPlus className="h-5 w-5 text-accent-gold" />
@@ -811,7 +795,7 @@ export default function CreateEventPage() {
                     disabled={saving}
                     icon={saving ? <Loader2 className="h-4 w-4 animate-spin" /> : undefined}
                   >
-                    {saving ? t("common.loading") : t("events.createEvent")}
+                    {saving ? t("common.loading") : eventType === "league" ? "Perusta liiga" : t("events.createEvent")}
                   </ArchiveCardButton>
                 </div>
               </form>
