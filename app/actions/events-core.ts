@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { createNotification } from "./notifications"
 import { revalidatePath } from "next/cache"
 
 export type EventType = "game_night" | "campaign" | "tournament" | "league"
@@ -476,6 +477,21 @@ export async function getEventById(
     .in("status", ["attending", "maybe"])
     .order("joined_at", { ascending: true })
 
+  // Resolve participant profiles explicitly for the detail view.
+  const participantIds = Array.from(new Set((participants || []).map((participant) => participant.user_id).filter(Boolean)))
+  let participantProfiles: Array<{ id: string; display_name: string | null; avatar_url: string | null }> = []
+  if (participantIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, display_name, avatar_url")
+      .in("id", participantIds)
+    participantProfiles = profiles || []
+  }
+  const participantsWithProfiles = (participants || []).map((participant) => ({
+    ...participant,
+    user: participantProfiles.find((profile) => profile.id === participant.user_id) || undefined,
+  }))
+
   // Get user's RSVP status
   let userRsvp = null
   if (user) {
@@ -494,7 +510,7 @@ export async function getEventById(
       host,
       participant_count: count || 0,
       user_rsvp: userRsvp,
-      participants: participants || [],
+      participants: participantsWithProfiles,
     },
   }
 }
@@ -644,7 +660,49 @@ export async function sendEventMessage(
   if (error) {
     console.error("Error sending message:", error)
     return { error: error.message }
-  }
+  }  // Notify everyone else who is currently attending the event.
+  const { data: recipients } = await supabase
+    .from("event_participants")
+    .select("user_id")
+    .eq("event_id", eventId)
+    .eq("status", "attending")
+    .neq("user_id", user.id)
+
+  const { data: eventDetails } = await supabase
+    .from("events")
+    .select("title")
+    .eq("id", eventId)
+    .single()
+
+  const { data: senderProfile } = await supabase
+    .from("profiles")
+    .select("display_name")
+    .eq("id", user.id)
+    .single()
+
+  const recipientIds = Array.from(new Set([
+    ...(recipients || []).map((recipient) => recipient.user_id),
+    ...(event.host_id !== user.id ? [event.host_id] : []),
+  ]))
+
+  await Promise.all(
+    recipientIds.map((recipientId) =>
+      createNotification({
+        user_id: recipientId,
+        type: "message",
+        title: eventDetails?.title || "Event Chat",
+        body: (senderProfile?.display_name || "Someone") + " sent a message in the event chat.",
+        data: {
+          event_id: eventId,
+          event_name: eventDetails?.title || "Event Chat",
+          sender_id: user.id,
+          sender_name: senderProfile?.display_name || "Someone",
+          notification_type: "event_message",
+        },
+        sendEmail: false,
+      })
+    )
+  )
 
   return { message }
 }
