@@ -1633,7 +1633,14 @@
     "s94": "Pelaaja 1 tulos",
     "s95": "P1 tulos",
     "s96": "Pelaaja 2 tulos",
-    "s97": "P2 tulos"
+    "s97": "P2 tulos",
+    "structureRules": "Määritä tapahtuman rakenne oman pelisi sääntöjen mukaan. GameTable ei määrää pisteytystä tai formaattia.",
+    "roundPlanNote": "Tämä on alkuperäinen suunnitelma, ei kierrosten yläraja. Kierroksia voi lisätä myöhemmin.",
+    "scoringHint": "Valitse pisteytys, jota käytetään ottelutulosten pisteiden laskemiseen.",
+    "competitorHint": "RSVP kertoo, ketkä ovat mukana tapahtumassa. Tässä valitaan erikseen ne osallistujat, jotka ovat mukana itse kilpailussa.",
+    "campaignModelHint": "Kampanjalla ei ole vielä etenemismallia. Voit käyttää vaiheita, omaa mittaria tai vapaamuotoista kuvausta.",
+    "stagesPlaceholder": "Vaiheet, yksi rivilleen:\nPrologi\nKaupungin portit\nVarjojen metsä\nMuinainen temppeli",
+    "competitor": "Kilpailija"
   },
   "eventDynamic": {
     "s0": "Anna ensimmäisen kauden nimi",
