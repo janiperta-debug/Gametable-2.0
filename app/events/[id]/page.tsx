@@ -242,6 +242,7 @@ export default function EventDetailsPage() {
     const result = await addEventSession(eventId, {
       title: sessionForm.title,
       starts_at: sessionForm.startsAt ? new Date(sessionForm.startsAt).toISOString() : undefined,
+      ends_at: sessionForm.endsAt ? new Date(sessionForm.endsAt).toISOString() : undefined,
       notes: sessionForm.notes,
     })
     if (result.error) {
@@ -616,12 +617,20 @@ export default function EventDetailsPage() {
                               placeholder="Esim. Sessio 1 – Kaupungin portit"
                               className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
                             />
-                            <input
-                              type="datetime-local"
-                              value={sessionForm.startsAt}
-                              onChange={(e) => setSessionForm({ ...sessionForm, startsAt: e.target.value })}
-                              className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
-                            />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <input
+                                type="datetime-local"
+                                value={sessionForm.startsAt}
+                                onChange={(e) => setSessionForm({ ...sessionForm, startsAt: e.target.value })}
+                                className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                              />
+                              <input
+                                type="datetime-local"
+                                value={sessionForm.endsAt}
+                                onChange={(e) => setSessionForm({ ...sessionForm, endsAt: e.target.value })}
+                                className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                              />
+                            </div>
                           </div>
                           <textarea
                             value={sessionForm.notes}
