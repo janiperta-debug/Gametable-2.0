@@ -287,7 +287,7 @@ export default function EditEventPage() {
               {(eventType === "tournament" || eventType === "league") && (
                 <div className="space-y-3">
                   <div>
-                    <Label className="text-accent-gold">Pisteytys</Label>
+                    <Label className="text-accent-gold">{t("eventUi.s8")}</Label>
                     <p className="mt-1 text-xs text-muted-foreground">
                       Valitse pisteytys, jota käytetään ottelutulosten pisteiden laskemiseen.
                     </p>
@@ -311,15 +311,15 @@ export default function EditEventPage() {
                     }}
                   >
                     <SelectTrigger className={archiveField}>
-                      <SelectValue placeholder="Valitse pisteytysmalli" />
+                      <SelectValue placeholder={t("eventUi.s24")} />
                     </SelectTrigger>
                     <SelectContent className={archiveSelectContent}>
-                      <SelectItem value="3_1_0" className={archiveSelectItem}>Voitto 3 / tasapeli 1 / tappio 0</SelectItem>
-                      <SelectItem value="3_0_0" className={archiveSelectItem}>Voitto 3 / tasapeli 0 / tappio 0</SelectItem>
-                      <SelectItem value="2_1_0" className={archiveSelectItem}>Voitto 2 / tasapeli 1 / tappio 0</SelectItem>
-                      <SelectItem value="2_0_0" className={archiveSelectItem}>Voitto 2 / tasapeli 0 / tappio 0</SelectItem>
-                      <SelectItem value="1_0_0" className={archiveSelectItem}>Voitto 1 / tasapeli 0 / tappio 0</SelectItem>
-                      <SelectItem value="custom" className={archiveSelectItem}>Mukautettu</SelectItem>
+                      <SelectItem value="3_1_0" className={archiveSelectItem}>{t("eventUi.s9")}</SelectItem>
+                      <SelectItem value="3_0_0" className={archiveSelectItem}>{t("eventUi.s10")}</SelectItem>
+                      <SelectItem value="2_1_0" className={archiveSelectItem}>{t("eventUi.s11")}</SelectItem>
+                      <SelectItem value="2_0_0" className={archiveSelectItem}>{t("eventUi.s12")}</SelectItem>
+                      <SelectItem value="1_0_0" className={archiveSelectItem}>{t("eventUi.s13")}</SelectItem>
+                      <SelectItem value="custom" className={archiveSelectItem}>{t("eventUi.s14")}</SelectItem>
                     </SelectContent>
                   </Select>
                   <div className="grid gap-3 sm:grid-cols-3">
