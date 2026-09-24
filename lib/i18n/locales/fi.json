@@ -69,7 +69,9 @@
     "searching": "Haetaan...",
     "filters": "Suodattimet",
     "hideFilters": "Piilota suodattimet",
-    "clearFilters": "Tyhjennä suodattimet"
+    "clearFilters": "Tyhjennä suodattimet",
+    "today": "Tänään",
+    "yesterday": "Eilen"
   },
   "friends": {
     "sendRequest": "Lähetä kaveripyyntö",
@@ -219,7 +221,8 @@
     "warhammer": "Warhammer",
     "otherMiniatureGames": "Muut miniatyyrit",
     "roleplayingGames": "Roolipelit (RPG)",
-    "tradingCards": "Keräilykortit"
+    "tradingCards": "Keräilykortit",
+    "anonymous": "Nimetön"
   },
   "collection": {
     "title": "Pelikokoelma",
@@ -501,7 +504,20 @@
     "noMatchingUpcoming": "Ei hakua vastaavia tulevia tapahtumia.",
     "showAllUpcoming": "Näytä kaikki tulevat tapahtumat ({{count}})",
     "noPastEvents": "Ei menneitä tapahtumia.",
-    "showFullHistory": "Näytä koko historia"
+    "showFullHistory": "Näytä koko historia",
+    "notHost": "Vain järjestäjä voi muokata tapahtumaa.",
+    "titleRequired": "Anna tapahtumalle nimi.",
+    "eventUpdated": "Tapahtuma päivitetty.",
+    "notFound": "Tapahtumaa ei löytynyt",
+    "titlePlaceholder": "Anna tapahtuman nimi...",
+    "privacy": "Näkyvyys",
+    "private": "Yksityinen",
+    "dateTime": "Päivämäärä ja kellonaika",
+    "notFoundDesc": "Etsimääsi tapahtumaa ei löytynyt.",
+    "cancelled": "Peruttu",
+    "cantAttend": "En pääse",
+    "eventCancelled": "Tapahtuma peruttu.",
+    "noMessages": "Ei vielä viestejä. Aloita keskustelu!"
   },
   "community": {
     "title": "Yhteisö",
@@ -1306,7 +1322,9 @@
       "message": "Jokin meni vikaan todennuksen aikana.",
       "tryAgain": "Yritä uudelleen",
       "backToHome": "Takaisin etusivulle"
-    }
+    },
+    "loginRequired": "Kirjautuminen vaaditaan",
+    "loginToRsvp": "Kirjaudu vastataksesi"
   },
   "users": {
     "notFound": "Käyttäjää ei löytynyt",
