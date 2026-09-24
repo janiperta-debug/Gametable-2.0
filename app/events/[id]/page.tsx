@@ -620,9 +620,9 @@ export default function EventDetailsPage() {
 
         {event.event_type === "league" && isHost && (
           <ArchiveCard className="mb-6">
-            <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">Siirrä liiga uuteen rakenteeseen</ArchiveCardTitle></ArchiveCardHeader>
+            <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">{t("eventUi.s28")}</ArchiveCardTitle></ArchiveCardHeader>
             <ArchiveCardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">Tämä on vanhan tapahtumamallin liiga. Siirto perustaa pysyvän liigan ja ensimmäisen kauden sekä liittää siihen nykyiset turnaukset. Alkuperäinen liiga, ottelut ja tulokset säilyvät luettavina.</p>
+              <p className="text-sm text-muted-foreground">{t("eventUi.s29")}</p>
               <ArchiveCardButton disabled={convertingLeague} onClick={async () => {
                 setConvertingLeague(true)
                 try {
@@ -802,12 +802,12 @@ export default function EventDetailsPage() {
             {event.event_type === "league" && (
               <ArchiveCard>
                 <ArchiveCardHeader>
-                  <ArchiveCardTitle className="text-xl normal-case">Liigan turnaukset</ArchiveCardTitle>
+                  <ArchiveCardTitle className="text-xl normal-case">{t("eventUi.s30")}</ArchiveCardTitle>
                 </ArchiveCardHeader>
                 <ArchiveCardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">Kokoa kauden turnaukset yhteen. Jokaisen turnauksen ottelut ja tulokset säilyvät sen omalla sivulla.</p>
+                  <p className="text-sm text-muted-foreground">{t("eventUi.s31")}</p>
                   {leagueTournaments.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">Liigaan ei ole vielä liitetty turnauksia.</p>
+                    <p className="text-sm text-muted-foreground">{t("eventUi.s32")}</p>
                   ) : (
                     <div className="space-y-2">
                       {leagueTournaments.map((item: any) => (
@@ -824,7 +824,7 @@ export default function EventDetailsPage() {
                                 await refreshLeague()
                               }
                               setLeagueSaving(false)
-                            }}>Irrota</ArchiveCardButton>}
+                            }}>{t("eventUi.s33")}</ArchiveCardButton>}
                           </div>
                         </div>
                       ))}
@@ -833,7 +833,7 @@ export default function EventDetailsPage() {
                   {isHost && (
                     <div className="flex flex-wrap gap-2">
                       <select id="league-tournament-select" className="min-w-0 flex-1 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm">
-                        <option value="">Valitse oma turnaus</option>
+                        <option value="">{t("eventUi.s34")}</option>
                         {availableTournaments.map((item: any) => <option key={item.id} value={item.id}>{item.title}</option>)}
                       </select>
                       <ArchiveCardButton disabled={leagueSaving || availableTournaments.length === 0} onClick={async () => {
@@ -846,7 +846,7 @@ export default function EventDetailsPage() {
                           await refreshLeague()
                         }
                         setLeagueSaving(false)
-                      }}>Liitä turnaus</ArchiveCardButton>
+                      }}>{t("eventUi.s35")}</ArchiveCardButton>
                     </div>
                   )}
                 </ArchiveCardContent>
@@ -854,11 +854,11 @@ export default function EventDetailsPage() {
             )}
             {event.event_type === "league" && (
               <ArchiveCard>
-                <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">Kauden sarjataulukko</ArchiveCardTitle></ArchiveCardHeader>
+                <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">{t("eventUi.s36")}</ArchiveCardTitle></ArchiveCardHeader>
                 <ArchiveCardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">Päättyneiden turnausten sijoituspisteet ja liigan omien otteluiden pisteet lasketaan yhteen. Turnauksen omat ottelupisteet eivät sellaisenaan siirry liigaan.</p>
+                  <p className="text-sm text-muted-foreground">{t("eventUi.s37")}</p>
                   {isHost && <div className="space-y-2">
-                    <label htmlFor="league-placement-points" className="block text-sm text-accent-gold">Sijoituspisteet (1., 2., 3. jne.)</label>
+                    <label htmlFor="league-placement-points" className="block text-sm text-accent-gold">{t("eventUi.s38")}</label>
                     <div className="flex flex-wrap gap-2">
                       <input id="league-placement-points" className="min-w-0 flex-1 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm" value={placementPoints} onChange={(e) => setPlacementPoints(e.target.value)} placeholder="10, 7, 5, 3, 1" />
                       <ArchiveCardButton disabled={leagueSaving} onClick={async () => {
@@ -872,14 +872,14 @@ export default function EventDetailsPage() {
                         if (result.error) toast({ title: "Virhe", description: result.error, variant: "destructive" })
                         else await refreshLeague()
                         setLeagueSaving(false)
-                      }}>Tallenna pisteytys</ArchiveCardButton>
+                      }}>{t("eventUi.s39")}</ArchiveCardButton>
                     </div>
                   </div>}
-                  {leagueStandings.length === 0 ? <p className="text-sm text-muted-foreground">Kauden tuloksia ei vielä ole. Liitä päättynyt turnaus tai kirjaa liigan oma ottelu.</p> : (
+                  {leagueStandings.length === 0 ? <p className="text-sm text-muted-foreground">{t("eventUi.s40")}</p> : (
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead><tr className="border-b border-accent-gold/20 text-muted-foreground">
-                          <th className="text-left py-2 pr-3">Pelaaja</th><th className="text-right px-2">Turn.</th><th className="text-right px-2">Sij.p.</th><th className="text-right px-2">Ott.p.</th><th className="text-right pl-2">Yht.</th>
+                          <th className="text-left py-2 pr-3">{t("eventUi.s41")}</th><th className="text-right px-2">{t("eventUi.s42")}</th><th className="text-right px-2">{t("eventUi.s43")}</th><th className="text-right px-2">{t("eventUi.s44")}</th><th className="text-right pl-2">{t("eventUi.s45")}</th>
                         </tr></thead>
                         <tbody>{leagueStandings.map((row) => <tr key={row.key} className="border-b border-accent-gold/10">
                           <td className="py-2 pr-3">{row.name}</td><td className="text-right px-2">{row.tournaments}</td><td className="text-right px-2">{row.leaguePoints}</td><td className="text-right px-2">{row.matchPoints}</td><td className="text-right pl-2 font-medium text-accent-gold">{row.points}</td>
@@ -892,9 +892,9 @@ export default function EventDetailsPage() {
             )}
             {event.event_type === "league" && (
               <ArchiveCard>
-                <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">Sarjaottelut</ArchiveCardTitle></ArchiveCardHeader>
+                <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">{t("eventUi.s46")}</ArchiveCardTitle></ArchiveCardHeader>
                 <ArchiveCardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">Lisää yksittäisiä kausiotteluita ilman erillistä turnausta. Ottelut kerryttävät kauden ottelupisteitä.</p>
+                  <p className="text-sm text-muted-foreground">{t("eventUi.s47")}</p>
                   {isHost && <div className="space-y-3 rounded-md border border-accent-gold/20 p-3">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {(["entryA", "entryB"] as const).map((side, index) => (
@@ -907,13 +907,13 @@ export default function EventDetailsPage() {
                         </select>
                       ))}
                     </div>
-                    <select aria-label="Ottelukierros" value={leagueMatchForm.roundId} onChange={(e) => setLeagueMatchForm((current) => ({ ...current, roundId: e.target.value }))} className="w-full min-w-0 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm">
-                      <option value="">Sarjaottelut (automaattinen ryhmä)</option>
+                    <select aria-label={t("eventUi.s77")} value={leagueMatchForm.roundId} onChange={(e) => setLeagueMatchForm((current) => ({ ...current, roundId: e.target.value }))} className="w-full min-w-0 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm">
+                      <option value="">{t("eventUi.s48")}</option>
                       {structure.rounds.map((round: any) => <option key={round.id} value={round.id}>{round.title || `Kierros ${round.round_number}`}</option>)}
                     </select>
-                    <ArchiveCardButton disabled={leagueSaving || !leagueMatchForm.entryA || !leagueMatchForm.entryB || leagueMatchForm.entryA === leagueMatchForm.entryB} onClick={addLeagueMatch}>Lisää sarjaottelu</ArchiveCardButton>
+                    <ArchiveCardButton disabled={leagueSaving || !leagueMatchForm.entryA || !leagueMatchForm.entryB || leagueMatchForm.entryA === leagueMatchForm.entryB} onClick={addLeagueMatch}>{t("eventUi.s49")}</ArchiveCardButton>
                   </div>}
-                  {structure.matches.length === 0 ? <p className="text-sm text-muted-foreground">Yksittäisiä sarjaotteluita ei ole vielä lisätty.</p> : (
+                  {structure.matches.length === 0 ? <p className="text-sm text-muted-foreground">{t("eventUi.s50")}</p> : (
                     <div className="space-y-2">
                       {structure.matches.map((match: any) => {
                         const a = structure.entries.find((entry: any) => entry.id === match.entry_a_id)
@@ -923,8 +923,8 @@ export default function EventDetailsPage() {
                           <div className="flex flex-wrap justify-between gap-2 text-sm"><span>{a?.display_name || "Kilpailija"} – {b?.display_name || "Kilpailija"}</span><span className="text-muted-foreground">{round?.title || "Sarjaottelu"} · {match.status === "completed" ? "Pelattu" : "Tulossa"}</span></div>
                           {match.status === "completed" && <div className="text-sm text-accent-gold">Tulos: {match.score_a ?? "–"} – {match.score_b ?? "–"}</div>}
                           {isHost && <div className="grid grid-cols-2 gap-2">
-                            <input id={`league-score-a-${match.id}`} aria-label="Kotijoukkueen tulos" type="number" min="0" defaultValue={match.score_a ?? ""} placeholder="Tulos 1" className="min-w-0 rounded-md border border-accent-gold/20 bg-background px-2 py-2 text-sm" />
-                            <input id={`league-score-b-${match.id}`} aria-label="Vierasjoukkueen tulos" type="number" min="0" defaultValue={match.score_b ?? ""} placeholder="Tulos 2" className="min-w-0 rounded-md border border-accent-gold/20 bg-background px-2 py-2 text-sm" />
+                            <input id={`league-score-a-${match.id}`} aria-label={t("eventUi.s78")} type="number" min="0" defaultValue={match.score_a ?? ""} placeholder={t("eventUi.s79")} className="min-w-0 rounded-md border border-accent-gold/20 bg-background px-2 py-2 text-sm" />
+                            <input id={`league-score-b-${match.id}`} aria-label={t("eventUi.s80")} type="number" min="0" defaultValue={match.score_b ?? ""} placeholder={t("eventUi.s81")} className="min-w-0 rounded-md border border-accent-gold/20 bg-background px-2 py-2 text-sm" />
                             <ArchiveCardButton disabled={leagueSaving} onClick={async () => {
                               const first = (document.getElementById(`league-score-a-${match.id}`) as HTMLInputElement)?.value
                               const second = (document.getElementById(`league-score-b-${match.id}`) as HTMLInputElement)?.value
@@ -940,7 +940,7 @@ export default function EventDetailsPage() {
                                 if (result.error) toast({ title: "Virhe", description: result.error, variant: "destructive" })
                                 else await refreshEventStructure()
                               } finally { setLeagueSaving(false) }
-                            }}>Tallenna tulos</ArchiveCardButton>
+                            }}>{t("eventUi.s51")}</ArchiveCardButton>
                           </div>}
                         </div>
                       })}
@@ -953,7 +953,7 @@ export default function EventDetailsPage() {
             {(event.event_type === "tournament" || event.event_type === "league") && (
               <ArchiveCard>
                 <ArchiveCardHeader>
-                  <ArchiveCardTitle className="text-xl normal-case">Kilpailijat</ArchiveCardTitle>
+                  <ArchiveCardTitle className="text-xl normal-case">{t("eventUi.s52")}</ArchiveCardTitle>
                 </ArchiveCardHeader>
                 <ArchiveCardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground">
@@ -962,7 +962,7 @@ export default function EventDetailsPage() {
                   {isHost && (
                     <div className="flex gap-2">
                       <select id="competitor-select" className="flex-1 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm">
-                        <option value="">Valitse kilpailija</option>
+                        <option value="">{t("eventUi.s53")}</option>
                         {structure.profiles
                           .filter((p: any) => structure.participants.some((participant: any) => participant.user_id === p.id && participant.status === "attending"))
                           .filter((p: any) => !structure.entries.some((e: any) => e.user_id === p.id && e.status === "active"))
@@ -977,7 +977,7 @@ export default function EventDetailsPage() {
                     </div>
                   )}
                   {structure.entries.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">Kilpailijoita ei ole vielä valittu.</p>
+                    <p className="text-sm text-muted-foreground">{t("eventUi.s54")}</p>
                   ) : (
                     <div className="space-y-2">
                       {structure.entries.map((entry: any) => {
@@ -989,7 +989,7 @@ export default function EventDetailsPage() {
                               <button
                                 className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-colors"
                                 onClick={() => removeCompetitor(entry.id)}
-                                aria-label="Poista kilpailija"
+                                aria-label={t("eventUi.s82")}
                               >
                                 <X className="h-3 w-3" />
                               </button>
@@ -1006,7 +1006,7 @@ export default function EventDetailsPage() {
             {event.event_type === "campaign" && (
               <ArchiveCard>
                 <ArchiveCardHeader>
-                  <ArchiveCardTitle className="text-xl normal-case">Kampanjan eteneminen</ArchiveCardTitle>
+                  <ArchiveCardTitle className="text-xl normal-case">{t("eventUi.s55")}</ArchiveCardTitle>
                 </ArchiveCardHeader>
                 <ArchiveCardContent className="space-y-4">
                   {!editingProgression && !campaignProgression.currentStage && campaignProgression.stages.length === 0 && campaignProgression.total === 0 ? (
@@ -1015,30 +1015,30 @@ export default function EventDetailsPage() {
                         Kampanjalla ei ole vielä etenemismallia. Voit käyttää vaiheita, omaa mittaria tai vapaamuotoista kuvausta.
                       </p>
                       {isHost && (
-                        <ArchiveCardButton onClick={() => setEditingProgression(true)}>Määritä eteneminen</ArchiveCardButton>
+                        <ArchiveCardButton onClick={() => setEditingProgression(true)}>{t("eventUi.s56")}</ArchiveCardButton>
                       )}
                     </div>
                   ) : editingProgression ? (
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="space-y-2">
-                          <label className="text-sm text-accent-gold">Etenemisen tyyppi</label>
+                          <label className="text-sm text-accent-gold">{t("eventUi.s57")}</label>
                           <select
                             value={campaignProgression.mode}
                             onChange={(e) => setCampaignProgression({ ...campaignProgression, mode: e.target.value as CampaignProgression["mode"] })}
                             className="w-full rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
                           >
-                            <option value="stages">Vaiheet</option>
-                            <option value="counter">Mittari</option>
-                            <option value="freeform">Vapaa tila</option>
+                            <option value="stages">{t("eventUi.s58")}</option>
+                            <option value="counter">{t("eventUi.s59")}</option>
+                            <option value="freeform">{t("eventUi.s60")}</option>
                           </select>
                         </div>
                         <div className="space-y-2">
-                          <label className="text-sm text-accent-gold">Nimi</label>
+                          <label className="text-sm text-accent-gold">{t("eventUi.s61")}</label>
                           <input
                             value={campaignProgression.label}
                             onChange={(e) => setCampaignProgression({ ...campaignProgression, label: e.target.value })}
-                            placeholder="Esim. Luku, Skenaario, Tehtävä"
+                            placeholder={t("eventUi.s83")}
                             className="w-full rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
                           />
                         </div>
@@ -1051,7 +1051,7 @@ export default function EventDetailsPage() {
                             min="0"
                             value={campaignProgression.current}
                             onChange={(e) => setCampaignProgression({ ...campaignProgression, current: Number(e.target.value) })}
-                            placeholder="Nykyinen"
+                            placeholder={t("eventUi.s84")}
                             className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
                           />
                           <input
@@ -1059,13 +1059,13 @@ export default function EventDetailsPage() {
                             min="0"
                             value={campaignProgression.total}
                             onChange={(e) => setCampaignProgression({ ...campaignProgression, total: Number(e.target.value) })}
-                            placeholder="Yhteensä"
+                            placeholder={t("eventUi.s85")}
                             className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
                           />
                           <input
                             value={campaignProgression.unit}
                             onChange={(e) => setCampaignProgression({ ...campaignProgression, unit: e.target.value })}
-                            placeholder="Yksikkö, esim. skenaariota"
+                            placeholder={t("eventUi.s86")}
                             className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
                           />
                         </div>
@@ -1076,7 +1076,7 @@ export default function EventDetailsPage() {
                           <input
                             value={campaignProgression.currentStage}
                             onChange={(e) => setCampaignProgression({ ...campaignProgression, currentStage: e.target.value })}
-                            placeholder="Nykyinen vaihe, esim. Muinainen temppeli"
+                            placeholder={t("eventUi.s87")}
                             className="w-full rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
                           />
                           <textarea
@@ -1093,7 +1093,7 @@ export default function EventDetailsPage() {
                         <textarea
                           value={campaignProgression.currentStage}
                           onChange={(e) => setCampaignProgression({ ...campaignProgression, currentStage: e.target.value })}
-                          placeholder="Esim. Käännekohta – seuraavaksi etsitään kadonnut kruunu."
+                          placeholder={t("eventUi.s88")}
                           rows={3}
                           className="w-full rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
                         />
@@ -1102,7 +1102,7 @@ export default function EventDetailsPage() {
                       <textarea
                         value={campaignProgression.note}
                         onChange={(e) => setCampaignProgression({ ...campaignProgression, note: e.target.value })}
-                        placeholder="Etenemiseen liittyvä lisätieto (valinnainen)"
+                        placeholder={t("eventUi.s89")}
                         rows={2}
                         className="w-full rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
                       />
@@ -1151,7 +1151,7 @@ export default function EventDetailsPage() {
                         </div>
                       )}
                       {campaignProgression.note && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{campaignProgression.note}</p>}
-                      {isHost && <ArchiveCardButton onClick={() => setEditingProgression(true)}>Muokkaa etenemistä</ArchiveCardButton>}
+                      {isHost && <ArchiveCardButton onClick={() => setEditingProgression(true)}>{t("eventUi.s62")}</ArchiveCardButton>}
                     </div>
                   )}
                 </ArchiveCardContent>
@@ -1198,12 +1198,12 @@ export default function EventDetailsPage() {
 
                       {isHost && (
                         <div className="space-y-3 rounded-md border border-accent-gold/15 p-3">
-                          <div className="text-sm text-accent-gold">Lisää sessio</div>
+                          <div className="text-sm text-accent-gold">{t("eventUi.s63")}</div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <input
                               value={sessionForm.title}
                               onChange={(e) => setSessionForm({ ...sessionForm, title: e.target.value })}
-                              placeholder="Esim. Sessio 1 – Kaupungin portit"
+                              placeholder={t("eventUi.s90")}
                               className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
                             />
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1224,7 +1224,7 @@ export default function EventDetailsPage() {
                           <textarea
                             value={sessionForm.notes}
                             onChange={(e) => setSessionForm({ ...sessionForm, notes: e.target.value })}
-                            placeholder="Muistiinpanot sessiosta (valinnainen)"
+                            placeholder={t("eventUi.s91")}
                             rows={2}
                             className="w-full rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
                           />
@@ -1235,7 +1235,7 @@ export default function EventDetailsPage() {
                       )}
 
                       {structure.sessions.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">Sessiota ei ole vielä määritelty.</p>
+                        <p className="text-sm text-muted-foreground">{t("eventUi.s64")}</p>
                       ) : (
                         <div className="space-y-3">
                           {structure.sessions.map((session: any, index: number) => {
@@ -1255,10 +1255,10 @@ export default function EventDetailsPage() {
                                         onChange={(e) => setEditingSessionForm({ ...editingSessionForm, status: e.target.value })}
                                         className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
                                       >
-                                        <option value="planned">Suunniteltu</option>
-                                        <option value="active">Käynnissä</option>
-                                        <option value="completed">Valmis</option>
-                                        <option value="cancelled">Peruttu</option>
+                                        <option value="planned">{t("eventUi.s65")}</option>
+                                        <option value="active">{t("eventUi.s66")}</option>
+                                        <option value="completed">{t("eventUi.s67")}</option>
+                                        <option value="cancelled">{t("eventUi.s68")}</option>
                                       </select>
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1279,7 +1279,7 @@ export default function EventDetailsPage() {
                                       value={editingSessionForm.notes}
                                       onChange={(e) => setEditingSessionForm({ ...editingSessionForm, notes: e.target.value })}
                                       rows={3}
-                                      placeholder="Muistiinpanot"
+                                      placeholder={t("eventUi.s92")}
                                       className="w-full rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
                                     />
                                     <div className="flex flex-wrap gap-2">
@@ -1360,7 +1360,7 @@ export default function EventDetailsPage() {
                         <input
                           value={structureTitle}
                           onChange={(e) => setStructureTitle(e.target.value)}
-                          placeholder="Esim. Kierros 1"
+                          placeholder={t("eventUi.s93")}
                           className="flex-1 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
                         />
                         <ArchiveCardButton onClick={addStructureItem} disabled={structureLoading || !structureTitle.trim()}>
@@ -1368,7 +1368,7 @@ export default function EventDetailsPage() {
                         </ArchiveCardButton>
                       </div>}
                       {(structure.rounds.length === 0) ? (
-                        <p className="text-sm text-muted-foreground">Kierroksia ei ole vielä määritelty.</p>
+                        <p className="text-sm text-muted-foreground">{t("eventUi.s69")}</p>
                       ) : (
                         <div className="space-y-3">
                           {structure.rounds.map((item: any, index: number) => (
@@ -1393,7 +1393,7 @@ export default function EventDetailsPage() {
                                     </select>
                                   ))}
                                 </div>
-                                {isHost && <ArchiveCardButton onClick={() => addMatch(item.id)}>Lisää ottelu</ArchiveCardButton>}
+                                {isHost && <ArchiveCardButton onClick={() => addMatch(item.id)}>{t("eventUi.s70")}</ArchiveCardButton>}
                                 {structure.matches.filter((m: any) => m.round_id === item.id).map((m: any) => {
                                   const entryA = structure.entries.find((e: any) => e.id === m.entry_a_id)
                                   const entryB = structure.entries.find((e: any) => e.id === m.entry_b_id)
@@ -1405,13 +1405,13 @@ export default function EventDetailsPage() {
                                     <div key={m.id} className="rounded-md bg-background/40 border border-accent-gold/10 p-3 space-y-2">
                                       <div className="text-sm">{nameA} vs {nameB}</div>
                                       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                                        <input aria-label="Pelaaja 1 tulos" type="number" placeholder="P1 tulos" defaultValue={m.score_a ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`score-a-${m.id}`} />
-                                        <input aria-label="Pelaaja 2 tulos" type="number" placeholder="P2 tulos" defaultValue={m.score_b ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`score-b-${m.id}`} />
+                                        <input aria-label={t("eventUi.s94")} type="number" placeholder={t("eventUi.s95")} defaultValue={m.score_a ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`score-a-${m.id}`} />
+                                        <input aria-label={t("eventUi.s96")} type="number" placeholder={t("eventUi.s97")} defaultValue={m.score_b ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`score-b-${m.id}`} />
                                         <select defaultValue={m.winner_id || ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`winner-${m.id}`}>
-                                          <option value="">Ei voittajaa</option><option value={m.player_a_id}>{nameA}</option><option value={m.player_b_id}>{nameB}</option>
+                                          <option value="">{t("eventUi.s71")}</option><option value={m.player_a_id}>{nameA}</option><option value={m.player_b_id}>{nameB}</option>
                                         </select>
                                       </div>
-                                      {isHost && <ArchiveCardButton onClick={() => saveMatchResult(m.id, (document.getElementById(`winner-${m.id}`) as HTMLSelectElement)?.value, (document.getElementById(`score-a-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`score-b-${m.id}`) as HTMLInputElement)?.value)}>Tallenna tulos</ArchiveCardButton>}
+                                      {isHost && <ArchiveCardButton onClick={() => saveMatchResult(m.id, (document.getElementById(`winner-${m.id}`) as HTMLSelectElement)?.value, (document.getElementById(`score-a-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`score-b-${m.id}`) as HTMLInputElement)?.value)}>{t("eventUi.s51")}</ArchiveCardButton>}
                                     </div>
                                   )
                                 })}
@@ -1428,15 +1428,15 @@ export default function EventDetailsPage() {
 
             {event.event_type === "tournament" && (
               <ArchiveCard>
-                <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">Sarjataulukko</ArchiveCardTitle></ArchiveCardHeader>
+                <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">{t("eventUi.s72")}</ArchiveCardTitle></ArchiveCardHeader>
                 <ArchiveCardContent>
-                  <p className="text-sm text-muted-foreground mb-4">Pisteet ovat järjestäjän määrittelemiä. GameTable ei päätä pisteytyssääntöä.</p>
+                  <p className="text-sm text-muted-foreground mb-4">{t("eventUi.s73")}</p>
                   {standings.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">Taulukko muodostuu, kun liigaan tai turnaukseen lisätään kilpailijoita.</p>
+                    <p className="text-sm text-muted-foreground">{t("eventUi.s74")}</p>
                   ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm"><thead><tr className="border-b border-accent-gold/20 text-muted-foreground">
-                      <th className="text-left py-2 pr-3">Pelaaja</th><th className="text-right px-2">Ott.</th><th className="text-right px-2">V</th><th className="text-right px-2">T</th><th className="text-right px-2">H</th><th className="text-right pl-2">Pisteet</th>
+                      <th className="text-left py-2 pr-3">{t("eventUi.s41")}</th><th className="text-right px-2">{t("eventUi.s75")}</th><th className="text-right px-2">V</th><th className="text-right px-2">T</th><th className="text-right px-2">H</th><th className="text-right pl-2">{t("eventUi.s76")}</th>
                     </tr></thead><tbody>{standings.map((row: any) => <tr key={row.entry_id} className="border-b border-accent-gold/10">
                       <td className="py-2 pr-3">{row.name}</td><td className="text-right px-2">{row.played}</td><td className="text-right px-2">{row.wins}</td><td className="text-right px-2">{row.draws}</td><td className="text-right px-2">{row.losses}</td><td className="text-right pl-2 font-medium text-accent-gold">{row.points}</td>
                     </tr>)}</tbody></table>
