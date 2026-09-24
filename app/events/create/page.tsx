@@ -563,12 +563,12 @@ export default function CreateEventPage() {
                       <Label htmlFor="league-season-name" className="text-accent-gold">Kauden nimi *</Label>
                       <Input id="league-season-name" required={eventType === "league"} maxLength={120} value={leagueSeason.name} onChange={(e) => setLeagueSeason({ ...leagueSeason, name: e.target.value })} placeholder="Esim. Kausi 2027" className={archiveField} />
                     </div>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-2">
+                    <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div className="min-w-0 space-y-2">
                         <Label htmlFor="league-start" className="text-accent-gold">Kausi alkaa (valinnainen)</Label>
-                        <Input id="league-start" type="date" value={leagueSeason.startsOn} onChange={(e) => setLeagueSeason({ ...leagueSeason, startsOn: e.target.value })} className={cn("w-full min-w-0", archiveField)} />
+                        <Input id="league-start" type="date" value={leagueSeason.startsOn} onChange={(e) => setLeagueSeason({ ...leagueSeason, startsOn: e.target.value })} className={cn(archiveField, "block !w-full !min-w-0 !max-w-full [min-inline-size:0]")} />
                       </div>
-                      <div className="space-y-2">
+                      <div className="min-w-0 space-y-2">
                         <Label htmlFor="league-end" className="text-accent-gold">Kausi päättyy (valinnainen)</Label>
                         <Input id="league-end" type="date" min={leagueSeason.startsOn || undefined} value={leagueSeason.endsOn} onChange={(e) => setLeagueSeason({ ...leagueSeason, endsOn: e.target.value })} className={cn("w-full min-w-0", archiveField)} />
                       </div>
