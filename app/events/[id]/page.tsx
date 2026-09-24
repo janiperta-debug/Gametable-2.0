@@ -63,7 +63,7 @@ const formatEventDate = (dateString: string, locale: "fi" | "en") => {
   const tomorrow = new Date(today)
   tomorrow.setDate(today.getDate() + 1)
 
-  if (date.toDateString() === today.toDateString()) return locale === "fi" ? "Tänään" : "Today"
+  if (date.toDateString() === today.toDateString()) return locale === "fi" ? t("eventDynamic.s7") : "Today"
   if (date.toDateString() === tomorrow.toDateString()) return locale === "fi" ? "Huomenna" : "Tomorrow"
 
   return date.toLocaleDateString(locale === "fi" ? "fi-FI" : "en-GB", {
@@ -235,14 +235,14 @@ export default function EventDetailsPage() {
         else {
           const created = await addEventRound(eventId, { title: "Sarjaottelut" })
           if (created.error || !created.round?.id) {
-            toast({ title: "Ottelun lisääminen epäonnistui", description: created.error, variant: "destructive" })
+            toast({ title: t("eventDynamic.s8"), description: created.error, variant: "destructive" })
             return
           }
           roundId = created.round.id
         }
       }
       const result = await addEventMatch(eventId, { round_id: roundId, entry_a_id: leagueMatchForm.entryA, entry_b_id: leagueMatchForm.entryB })
-      if (result.error) toast({ title: "Ottelun lisääminen epäonnistui", description: result.error, variant: "destructive" })
+      if (result.error) toast({ title: t("eventDynamic.s8"), description: result.error, variant: "destructive" })
       else {
         setLeagueMatchForm({ entryA: "", entryB: "", roundId: "" })
         await refreshEventStructure()
@@ -598,7 +598,7 @@ export default function EventDetailsPage() {
                 disabled={completing || cancelling}
                 icon={completing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
               >
-                {t("events.completeEvent") || "Päätä tapahtuma"}
+                {t("events.completeEvent") || t("eventDynamic.s9")}
               </ArchiveCardButton>
               <ArchiveCardButton
                 onClick={handleCancel}
@@ -620,14 +620,14 @@ export default function EventDetailsPage() {
                 setConvertingLeague(true)
                 try {
                   const result = await convertLegacyLeague(eventId)
-                  if (result.error) toast({ title: "Siirto epäonnistui", description: result.error, variant: "destructive" })
+                  if (result.error) toast({ title: t("eventDynamic.s10"), description: result.error, variant: "destructive" })
                   else if (result.id) {
                     if (result.warning) toast({ title: "Tarkista siirto", description: result.warning })
                     router.push("/leagues/" + result.id)
                   }
-                } catch { toast({ title: "Siirto epäonnistui", variant: "destructive" }) }
+                } catch { toast({ title: t("eventDynamic.s10"), variant: "destructive" }) }
                 finally { setConvertingLeague(false) }
-              }}>{convertingLeague ? "Siirretään..." : "Siirrä pysyväksi liigaksi"}</ArchiveCardButton>
+              }}>{convertingLeague ? t("eventDynamic.s11") : t("eventDynamic.s12")}</ArchiveCardButton>
             </ArchiveCardContent>
           </ArchiveCard>
         )}
@@ -808,7 +808,7 @@ export default function EventDetailsPage() {
                           <button className="text-left text-accent-gold hover:underline" onClick={() => router.push(`/events/${item.id}`)}>{item.title}</button>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <span>{new Date(item.starts_at).toLocaleDateString("fi-FI")}</span>
-                            <span>{item.status === "completed" ? "Päättynyt" : item.status === "cancelled" ? "Peruttu" : "Tulossa / käynnissä"}</span>
+                            <span>{item.status === "completed" ? t("eventDynamic.s13") : item.status === "cancelled" ? "Peruttu" : t("eventDynamic.s14")}</span>
                             {isHost && <ArchiveCardButton disabled={leagueSaving} onClick={async () => {
                               setLeagueSaving(true)
                               const result = await setTournamentLeague(eventId, item.id, false)
@@ -1129,7 +1129,7 @@ export default function EventDetailsPage() {
                       {campaignProgression.mode === "stages" && (
                         <div className="space-y-2">
                           <div className="text-sm text-accent-gold">{campaignProgression.label}</div>
-                          <div className="text-lg">{campaignProgression.currentStage || "Vaihetta ei ole määritetty"}</div>
+                          <div className="text-lg">{campaignProgression.currentStage || t("eventDynamic.s15")}</div>
                           {campaignProgression.stages.length > 0 && (
                             <div className="text-xs text-muted-foreground">
                               {campaignProgression.stages.findIndex((stage) => stage === campaignProgression.currentStage) + 1} / {campaignProgression.stages.length} vaihetta
@@ -1140,7 +1140,7 @@ export default function EventDetailsPage() {
                       {campaignProgression.mode === "freeform" && (
                         <div className="space-y-2">
                           <div className="text-sm text-accent-gold">{campaignProgression.label}</div>
-                          <div className="text-lg whitespace-pre-wrap">{campaignProgression.currentStage || "Etenemistä ei ole määritetty"}</div>
+                          <div className="text-lg whitespace-pre-wrap">{campaignProgression.currentStage || t("eventDynamic.s16")}</div>
                         </div>
                       )}
                       {campaignProgression.note && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{campaignProgression.note}</p>}
@@ -1162,8 +1162,8 @@ export default function EventDetailsPage() {
                 <ArchiveCardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground">
                     {event.event_type === "campaign"
-                      ? "Suunnittele kampanjan sessiot etukäteen ja täydennä niiden sisältöä matkan varrella. Suunnitelma ei ole yläraja."
-                      : "Järjestäjä voi rakentaa tapahtuman etenemisen vaiheittain. GameTable ei määrää kierrosten tai sessioiden sisältöä."}
+                      ? t("eventDynamic.s17")
+                      : t("eventDynamic.s18")}
                   </p>
 
                   {event.event_type === "campaign" ? (
@@ -1181,7 +1181,7 @@ export default function EventDetailsPage() {
                               </div>
                               {isHost && (
                                 <ArchiveCardButton onClick={createPlannedSessions} disabled={structureLoading}>
-                                  {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : currentSessions === 0 ? `Luo ${plannedSessions} sessiota` : `Täydennä ${plannedSessions} sessioon`}
+                                  {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : currentSessions === 0 ? `Luo ${plannedSessions} sessiota` : t("eventDynamic.sessionsToFill", { count: plannedSessions })}
                                 </ArchiveCardButton>
                               )}
                             </div>
@@ -1222,7 +1222,7 @@ export default function EventDetailsPage() {
                             className="w-full rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
                           />
                           <ArchiveCardButton onClick={createCampaignSession} disabled={structureLoading || !sessionForm.title.trim()}>
-                            {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Lisää sessio"}
+                            {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("eventDynamic.s19")}
                           </ArchiveCardButton>
                         </div>
                       )}
@@ -1290,16 +1290,16 @@ export default function EventDetailsPage() {
                                       <div className="min-w-0">
                                         <div className="flex items-center gap-3">
                                           <span className="font-cinzel text-accent-gold">{session.session_number ?? index + 1}</span>
-                                          <span className="font-medium">{session.title || "Nimetön sessio"}</span>
+                                          <span className="font-medium">{session.title || t("eventDynamic.s20")}</span>
                                         </div>
                                         <div className="mt-1 text-xs text-muted-foreground">
                                           {session.starts_at
                                             ? `${new Date(session.starts_at).toLocaleDateString()} ${new Date(session.starts_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-                                            : "Ajankohtaa ei ole määritetty"}
+                                            : t("eventDynamic.s21")}
                                         </div>
                                       </div>
                                       <Badge variant="outline" className="shrink-0 border-accent-gold/30 text-accent-gold">
-                                        {session.status === "completed" ? "Valmis" : session.status === "active" ? "Käynnissä" : session.status === "cancelled" ? "Peruttu" : "Suunniteltu"}
+                                        {session.status === "completed" ? "Valmis" : session.status === "active" ? t("eventDynamic.s22") : session.status === "cancelled" ? "Peruttu" : "Suunniteltu"}
                                       </Badge>
                                     </div>
                                     {session.notes && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{session.notes}</p>}
@@ -1314,7 +1314,7 @@ export default function EventDetailsPage() {
                                             disabled={structureLoading}
                                             active
                                           >
-                                            {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Päätä sessio"}
+                                            {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("eventDynamic.s23")}
                                           </ArchiveCardButton>
                                         )}
                                       </div>
@@ -1342,7 +1342,7 @@ export default function EventDetailsPage() {
                               </div>
                               {isHost && (
                                 <ArchiveCardButton onClick={createPlannedRounds} disabled={structureLoading}>
-                                  {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : currentRounds === 0 ? `Luo ${plannedRounds} kierrosta` : `Täydennä ${plannedRounds} kierrokseen`}
+                                  {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : currentRounds === 0 ? `Luo ${plannedRounds} kierrosta` : t("eventDynamic.roundsToFill", { count: plannedRounds })}
                                 </ArchiveCardButton>
                               )}
                             </div>
@@ -1357,7 +1357,7 @@ export default function EventDetailsPage() {
                           className="flex-1 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
                         />
                         <ArchiveCardButton onClick={addStructureItem} disabled={structureLoading || !structureTitle.trim()}>
-                          {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Lisää"}
+                          {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("eventDynamic.s24")}
                         </ArchiveCardButton>
                       </div>}
                       {(structure.rounds.length === 0) ? (
@@ -1368,11 +1368,11 @@ export default function EventDetailsPage() {
                             <div key={item.id} className="rounded-md border border-accent-gold/15 p-3 space-y-3">
                               <div className="flex items-center gap-3">
                                 <span className="font-cinzel text-accent-gold">{item.round_number ?? index + 1}</span>
-                                <span>{item.title || "Nimetön vaihe"}</span>
+                                <span>{item.title || t("eventDynamic.s25")}</span>
                               </div>
                               <div className="flex items-center justify-between text-xs text-muted-foreground">
                                 <span>{structure.matches.filter((m: any) => m.round_id === item.id).length} ottelua</span>
-                                <span>{item.status === "completed" ? "Valmis" : item.status === "active" ? "Käynnissä" : "Suunniteltu"}</span>
+                                <span>{item.status === "completed" ? "Valmis" : item.status === "active" ? t("eventDynamic.s22") : "Suunniteltu"}</span>
                               </div>
                               <div data-round-id={item.id} className="space-y-2">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
