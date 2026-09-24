@@ -177,7 +177,7 @@ export function EventChat({ eventId, eventTitle }: EventChatProps) {
   }
 
   return (
-    <ArchiveFrame className="h-[600px] flex flex-col overflow-hidden">
+    <ArchiveFrame className="min-h-[600px] flex flex-col">
       <div className="p-5 pb-3">
         <div className="font-cinzel text-accent-gold flex items-center gap-2">
           <MessageCircle className="w-5 h-5" />
@@ -252,7 +252,7 @@ export function EventChat({ eventId, eventTitle }: EventChatProps) {
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder={t("events.typeMessage") || "Type your message..."}
+              placeholder={t("messages.typeMessage") || "Type your message..."}
               className={`flex-1 ${archiveField}`}
               disabled={sending}
             />
