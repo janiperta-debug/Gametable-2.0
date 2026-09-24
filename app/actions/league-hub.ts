@@ -72,7 +72,9 @@ export async function getLeague(leagueId: string) {
  type Standing = {key:string;name:string;season_id:string;played:number;wins:number;draws:number;losses:number;points:number;score_for:number;score_against:number;events:Set<string>}
  const standingRows=new Map<string,Standing>()
  const allEntryById=new Map((allEntries||[]).map(entry=>[entry.id,entry]))
- const profileById=new Map((memberProfiles||[]).map(profile=>[profile.id,profile]))
+ const tournamentUserIds=[...new Set((allEntries||[]).map(entry=>entry.user_id).filter((id):id is string=>!!id))]
+ const {data:tournamentProfiles}=tournamentUserIds.length?await supabase.from("profiles").select("id,display_name,username").in("id",tournamentUserIds):{data:[]}
+ const profileById=new Map([...(memberProfiles||[]),...(tournamentProfiles||[])].map(profile=>[profile.id,profile]))
  for(const match of allMatches||[]){
   const event=events.find(item=>item.id===match.event_id)
   if(!event)continue
@@ -100,6 +102,8 @@ export async function getLeague(leagueId: string) {
    if(side.opponent!==null)row.score_against+=Number(side.opponent)
    // Use the actual points recorded for this match. Unscored matches contribute no points.
    if(side.points!==null)row.points+=Number(side.points)
+   else if(side.won)row.points+=3
+   else if(draw)row.points+=1
   }
  }
  const standings=Array.from(standingRows.values()).map(({events:playedEvents,...row})=>({...row,tournaments:playedEvents.size}))
