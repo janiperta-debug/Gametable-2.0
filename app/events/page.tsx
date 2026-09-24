@@ -1,504 +1,202 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
-import {
-  ArchiveButton,
-  ArchiveCard,
-  ArchiveCardButton,
-  ArchiveCardContent,
-  ArchiveCardHeader,
-  ArchiveCardTitle,
-  ArchiveFrame,
-  ArchiveToggle,
-  archiveField,
-} from "@/components/archive-frame"
+import { ChevronDown, ChevronRight, Filter, Loader2, Plus, Search } from "lucide-react"
+import { ArchiveButton, ArchiveCard, ArchiveCardContent, ArchiveFrame, archiveField } from "@/components/archive-frame"
 import { ArchiveDivider } from "@/components/archive-divider"
-import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ThemeHero } from "@/components/theme-hero"
-import { Calendar, MapPin, Users, Clock, Plus, Search, Filter, Loader2, Check, HelpCircle, X } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { useEvents } from "@/hooks/useEvents"
-import { updateRSVP, type Event, type RSVPStatus } from "@/app/actions/events"
-import { useToast } from "@/hooks/use-toast"
 import { useUser } from "@/hooks/useUser"
 import { listLeagues } from "@/app/actions/league-hub"
+import type { Event } from "@/app/actions/events"
+import { cn } from "@/lib/utils"
 
-const statusColors: Record<string, string> = {
-  attending: "bg-green-100 text-green-600 border-green-200 dark:bg-green-900/30 dark:text-green-400",
-  maybe: "bg-yellow-100 text-yellow-600 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400",
-  invited: "bg-blue-100 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400",
-  hosting: "bg-purple-100 text-purple-600 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400",
-  declined: "bg-red-100 text-red-600 border-red-200 dark:bg-red-900/30 dark:text-red-400",
-  not_attending: "bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-900/30 dark:text-gray-400",
+// Replace these four existing fallback assets with the finished event illustrations
+// when they have been added to the repository.
+const categoryImages: Record<string, string> = {
+  game_night: "/images/fallbacks/board-games-fallback.png",
+  campaign: "/images/fallbacks/rpg-fallback.png",
+  tournament: "/images/fallbacks/tcg-fallback.png",
+  league: "/images/fallbacks/miniatures-fallback.png",
 }
-
-const eventTypeLabels: Record<string, string> = {
-  game_night: "Game Night",
-  campaign: "Campaign",
-  tournament: "Tournament",
-  league: "League",
+const categoryLabels: Record<string, string> = {
+  game_night: "Peli-ilta", campaign: "Kampanja", tournament: "Turnaus", league: "Liiga",
 }
-
-const eventTypeColors: Record<string, string> = {
-  game_night: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
-  campaign: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
-  tournament: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
-  league: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
+const categoryBorders: Record<string, string> = {
+  game_night: "border-amber-600/50", campaign: "border-emerald-700/60",
+  tournament: "border-red-700/60", league: "border-blue-700/60",
 }
+const formatDate = (date: string, options: Intl.DateTimeFormatOptions) =>
+  new Date(date).toLocaleDateString("fi-FI", options)
+const formatTime = (date: string) =>
+  new Date(date).toLocaleTimeString("fi-FI", { hour: "2-digit", minute: "2-digit" })
 
-interface EventCardProps {
-  event: Event
-  onViewDetails: (event: Event) => void
-  onRSVP: (eventId: string, status: RSVPStatus) => void
-  t: (key: string) => string
-  isLoggedIn: boolean
-  currentUserId?: string
-}
-
-function EventCard({ event, onViewDetails, onRSVP, t, isLoggedIn, currentUserId }: EventCardProps) {
-  const [rsvpLoading, setRsvpLoading] = useState<RSVPStatus | null>(null)
-  
-  const isHost = currentUserId === event.host_id
-  const eventDate = new Date(event.starts_at)
-  const dateStr = eventDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
-  const timeStr = eventDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
-  const hostName = event.host?.display_name || 'Unknown Host'
-  const hostInitials = hostName.split(' ').map((n: string) => n[0]).join('').toUpperCase()
-
-  const handleRSVP = async (status: RSVPStatus) => {
-    setRsvpLoading(status)
-    await onRSVP(event.id, status)
-    setRsvpLoading(null)
-  }
-
+function EventRow({ event, onOpen, userId }: { event: Event; onOpen: () => void; userId?: string }) {
+  const kind = event.event_type || "game_night"
+  const isHost = event.host_id === userId
   return (
-    <ArchiveCard className="transition-all">
-      <ArchiveCardHeader className="pb-4">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <ArchiveCardTitle className="text-lg md:text-xl mb-2 break-words normal-case">{event.title}</ArchiveCardTitle>
-            <div className="flex items-center flex-wrap gap-2 mb-3">
-              {isHost && (
-                <Badge className={statusColors.hosting}>{t("events.hosting")}</Badge>
-              )}
-              {event.user_rsvp && !isHost && (
-                <Badge className={statusColors[event.user_rsvp] || statusColors.attending}>
-                  {event.user_rsvp}
-                </Badge>
-              )}
-              {event.event_type && (
-                <Badge variant="outline" className={eventTypeColors[event.event_type] || eventTypeColors.game_night}>
-                  {eventTypeLabels[event.event_type] || event.event_type}
-                </Badge>
-              )}
-            </div>
-          </div>
+    <button type="button" onClick={onOpen} className="group flex w-full min-w-0 items-center gap-3 px-3 py-4 text-left transition-colors hover:bg-accent-gold/5 sm:gap-4 sm:px-5">
+      <div className={cn("relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border sm:h-16 sm:w-16", categoryBorders[kind])}>
+        <Image src={categoryImages[kind] || categoryImages.game_night} alt="" fill sizes="64px" className="object-cover" />
+      </div>
+      <div className="min-w-0 flex-1 space-y-1">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+          <span className="text-accent-gold">{formatDate(event.starts_at, { day: "numeric", month: "short" })} · {formatTime(event.starts_at)}</span>
+          <span>{categoryLabels[kind] || kind}</span>
+          {isHost && <span className="rounded-full border border-accent-gold/35 px-2 py-0.5 text-accent-gold">Järjestän</span>}
+          {!isHost && event.user_rsvp && <span className="rounded-full border border-accent-gold/20 px-2 py-0.5">{event.user_rsvp === "attending" ? "Osallistun" : event.user_rsvp === "maybe" ? "Ehkä" : event.user_rsvp === "invited" ? "Kutsuttu" : event.user_rsvp === "declined" ? "Kieltäydyin" : event.user_rsvp}</span>}
         </div>
-        {event.description && (
-          <p className="font-body text-sm text-muted-foreground break-words line-clamp-2">{event.description}</p>
-        )}
-      </ArchiveCardHeader>
-      <ArchiveCardContent className="space-y-4">
-        <div className="grid gap-3 text-sm">
-          <div className="flex items-center space-x-2">
-            <Calendar className="h-4 w-4 text-accent-gold flex-shrink-0" />
-            <span className="font-body">{dateStr}</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Clock className="h-4 w-4 text-accent-gold flex-shrink-0" />
-            <span className="font-body">{timeStr}</span>
-          </div>
-          {event.location && (
-            <div className="flex items-center space-x-2">
-              <MapPin className="h-4 w-4 text-accent-gold flex-shrink-0" />
-              <span className="font-body break-words">{event.location}</span>
-            </div>
-          )}
-          <div className="flex items-center space-x-2">
-            <Users className="h-4 w-4 text-accent-gold flex-shrink-0" />
-            <span className="font-body">
-              {event.participant_count || 0}{event.max_players ? `/${event.max_players}` : ''} {t("events.attending")}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex flex-col space-y-3 pt-4 border-t border-accent-gold/20">
-          <div className="flex items-center space-x-2">
-            <Avatar className="h-6 w-6 flex-shrink-0">
-              <AvatarImage src={event.host?.avatar_url || "/placeholder.svg"} alt={hostName} />
-              <AvatarFallback className="text-xs font-body">{hostInitials}</AvatarFallback>
-            </Avatar>
-            <span className="font-body text-sm text-muted-foreground truncate">{t("events.hostedBy")} {hostName}</span>
-          </div>
-          
-          {/* RSVP Buttons */}
-          {isLoggedIn && !isHost && (
-            <div className="flex flex-wrap gap-2">
-              <ArchiveCardButton
-                active={event.user_rsvp === 'attending'}
-                onClick={() => handleRSVP('attending')}
-                disabled={rsvpLoading !== null}
-                icon={rsvpLoading === 'attending' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
-              >
-                {t("events.join")}
-              </ArchiveCardButton>
-              <ArchiveCardButton
-                active={event.user_rsvp === 'maybe'}
-                onClick={() => handleRSVP('maybe')}
-                disabled={rsvpLoading !== null}
-                icon={rsvpLoading === 'maybe' ? <Loader2 className="h-3 w-3 animate-spin" /> : <HelpCircle className="h-3 w-3" />}
-              >
-                {t("events.maybe")}
-              </ArchiveCardButton>
-              <ArchiveCardButton
-                active={event.user_rsvp === 'declined'}
-                onClick={() => handleRSVP('declined')}
-                disabled={rsvpLoading !== null}
-                icon={rsvpLoading === 'declined' ? <Loader2 className="h-3 w-3 animate-spin" /> : <X className="h-3 w-3" />}
-              >
-                {t("events.decline")}
-              </ArchiveCardButton>
-            </div>
-          )}
-          
-          {/* View Details - always visible */}
-          <ArchiveCardButton fullWidth onClick={() => onViewDetails(event)}>
-            {isHost ? t("events.manage") : t("events.viewDetails") || "View Details"}
-          </ArchiveCardButton>
-        </div>
-      </ArchiveCardContent>
-    </ArchiveCard>
+        <div className="break-words font-heading text-base text-foreground group-hover:text-accent-gold sm:text-lg">{event.title}</div>
+        <div className="truncate text-xs text-muted-foreground sm:text-sm">{event.location || event.host?.display_name || ""}{event.participant_count != null ? ` · ${event.participant_count} osallistujaa` : ""}</div>
+      </div>
+      <ChevronRight className="h-5 w-5 shrink-0 text-accent-gold/70" />
+    </button>
   )
 }
-
-const eventTypes = ["game_night", "campaign", "tournament", "league"] as const
 
 export default function EventsPage() {
-  const [activeTab, setActiveTab] = useState("upcoming")
-  const [leagues, setLeagues] = useState<Awaited<ReturnType<typeof listLeagues>>["leagues"]>([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [showFilters, setShowFilters] = useState(false)
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const router = useRouter()
   const t = useTranslations()
-  const { toast } = useToast()
   const { user } = useUser()
-  useEffect(() => { void listLeagues().then((result) => setLeagues(result.leagues)) }, [user?.id])
-  const { publicEvents, myEvents, pastEvents, loading, refetch } = useEvents()
+  const { publicEvents, myEvents, pastEvents, loading, error } = useEvents()
+  const [leagues, setLeagues] = useState<Awaited<ReturnType<typeof listLeagues>>["leagues"]>([])
+  const [leagueError, setLeagueError] = useState("")
+  const [query, setQuery] = useState("")
+  const [types, setTypes] = useState<string[]>([])
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [allCommunities, setAllCommunities] = useState(false)
+  const [allUpcoming, setAllUpcoming] = useState(false)
+  const [historyOpen, setHistoryOpen] = useState(false)
+  const [historyAll, setHistoryAll] = useState(false)
 
-  const toggleEventType = (type: string) => {
-    setSelectedTypes(prev => 
-      prev.includes(type) 
-        ? prev.filter(t => t !== type)
-        : [...prev, type]
-    )
-  }
+  useEffect(() => {
+    let cancelled = false
+    listLeagues().then((result) => {
+      if (!cancelled) { setLeagues(result.leagues); setLeagueError(result.error || "") }
+    }).catch(() => { if (!cancelled) setLeagueError("Liigojen lataaminen epäonnistui.") })
+    return () => { cancelled = true }
+  }, [user?.id])
 
-  const clearFilters = () => {
-    setSelectedTypes([])
-  }
-
-  function handleViewDetails(event: Event) {
-    router.push("/events/" + event.id)
-  }
-
-  async function handleRSVP(eventId: string, status: RSVPStatus) {
-    const result = await updateRSVP(eventId, status)
-    if (result.error) {
-      toast({
-        title: t("common.error"),
-        description: result.error,
-        variant: "destructive",
-      })
-    } else {
-      toast({
-        title: t("common.success"),
-        description: t("events.rsvpUpdated"),
-      })
-      refetch()
+  const convertedIds = useMemo(() => new Set(leagues.map((league) => league.legacy_event_id).filter(Boolean)), [leagues])
+  const matches = (event: Event) =>
+    (types.length === 0 || types.includes(event.event_type || "game_night")) &&
+    (event.title.toLocaleLowerCase("fi-FI").includes(query.toLocaleLowerCase("fi-FI")) ||
+     (event.description || "").toLocaleLowerCase("fi-FI").includes(query.toLocaleLowerCase("fi-FI")))
+  const upcoming = useMemo(() => {
+    const byId = new Map<string, Event>()
+    for (const event of [...publicEvents, ...myEvents]) {
+      if (event.event_type === "league" && convertedIds.has(event.id)) continue
+      if (event.status === "completed" || event.status === "cancelled") continue
+      if (event.event_type === "league" || event.event_type === "campaign") continue
+      byId.set(event.id, { ...byId.get(event.id), ...event })
     }
-  }
+    return [...byId.values()].filter(matches).sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
+  }, [publicEvents, myEvents, convertedIds, query, types])
+  const communities = useMemo(() => {
+    const ownLeagues = user ? leagues.filter((league) => league.owner_id === user.id) : []
+    const ownCampaigns = user ? myEvents.filter((event) => event.event_type === "campaign" && event.status !== "cancelled" && event.status !== "completed") : []
+    const oldLeagues = user ? myEvents.filter((event) => event.event_type === "league" && !convertedIds.has(event.id) && event.status !== "cancelled" && event.status !== "completed") : []
+    return [
+      ...ownLeagues.map((league) => ({ id: league.id, title: league.name, kind: "league", subtitle: league.league_seasons?.[0]?.name || "Liiga", href: "/leagues/" + league.id })),
+      ...ownCampaigns.map((event) => ({ id: event.id, title: event.title, kind: "campaign", subtitle: "Kampanja", href: "/events/" + event.id })),
+      ...oldLeagues.map((event) => ({ id: event.id, title: event.title, kind: "league", subtitle: "Vanha liigamalli", href: "/events/" + event.id })),
+    ]
+  }, [leagues, myEvents, convertedIds, user?.id])
+  const history = useMemo(() => pastEvents.filter((event) => !(event.event_type === "league" && convertedIds.has(event.id))).filter(matches).sort((a, b) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime()), [pastEvents, convertedIds, query, types])
+  const visibleUpcoming = allUpcoming ? upcoming : upcoming.slice(0, 5)
+  const visibleHistory = historyAll ? history : history.slice(0, 10)
 
-  // Filter events by search query and event type
-  const query = searchQuery.toLowerCase()
-  const convertedIds = new Set(leagues.map((league) => league.legacy_event_id).filter(Boolean))
-  const filteredPublicEvents = publicEvents.filter(function(event) {
-    if (event.event_type === "league" && convertedIds.has(event.id)) return false
-    const matchesSearch = event.title.toLowerCase().includes(query) || (event.description ? event.description.toLowerCase().includes(query) : false)
-    const matchesType = selectedTypes.length === 0 || (event.event_type && selectedTypes.includes(event.event_type))
-    return matchesSearch && matchesType
-  })
+  return <div className="min-h-screen room-environment">
+    <main className="container mx-auto px-4 py-8">
+      <ThemeHero page="events" mode="backdrop">
+        <div className="text-center">
+          <h1 className="logo-text text-5xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">{t("events.title")}</h1>
+          <p className="mx-auto mt-4 max-w-3xl font-body text-xl text-foreground/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">{t("events.subtitle")}</p>
+        </div>
+      </ThemeHero>
 
-  const filteredMyEvents = myEvents.filter(function(event) {
-    if (event.event_type === "league" && convertedIds.has(event.id)) return false
-    const matchesSearch = event.title.toLowerCase().includes(query) || (event.description ? event.description.toLowerCase().includes(query) : false)
-    const matchesType = selectedTypes.length === 0 || (event.event_type && selectedTypes.includes(event.event_type))
-    return matchesSearch && matchesType
-  })
+      <div className="mx-auto mt-6 flex max-w-4xl justify-center">
+        <ArchiveButton onClick={() => router.push("/events/create")} icon={<Plus className="h-4 w-4" />}>{t("events.createEvent")}</ArchiveButton>
+      </div>
 
-  return (
-    <div className="min-h-screen room-environment">
-      <main className="container mx-auto px-4 py-8">
-        <ThemeHero page="events" mode="backdrop">
-          <div className="text-center">
-            <h1 className="logo-text text-5xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">{t("events.title")}</h1>
-            <p className="font-body text-foreground/90 text-xl max-w-3xl mx-auto mt-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
-              {t("events.subtitle")}
-            </p>
-          </div>
-        </ThemeHero>
-
-        {leagues.length > 0 && (
-          <ArchiveFrame className="mb-6 max-w-5xl mx-auto">
-            <div className="space-y-3 p-4 sm:p-6">
-              <h2 className="font-heading text-xl text-accent-gold">Liigat</h2>
-              <p className="text-sm text-muted-foreground">Pysyvät kilpailuyhteisöt ja niiden kaudet.</p>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {leagues.map((league) => <button type="button" key={league.id} onClick={() => router.push("/leagues/" + league.id)} className="rounded-lg border border-accent-gold/30 p-4 text-left transition-colors hover:bg-accent-gold/10">
-                  <div className="font-heading text-lg text-accent-gold">{league.name}</div>
-                  <div className="text-sm text-muted-foreground">{league.league_seasons?.map((season) => season.name).join(" · ") || "Ei kausia"}{league.isOwner ? " · Järjestän" : ""}</div>
+      <div className="mx-auto mt-6 max-w-4xl space-y-6">
+        {user && <ArchiveFrame>
+          <section className="space-y-4 p-4 sm:p-6">
+            <h2 className="font-heading text-xl text-accent-gold sm:text-2xl">Omat liigat ja kampanjat</h2>
+            {leagueError && <p role="status" className="text-sm text-muted-foreground">{leagueError}</p>}
+            {communities.length === 0 ? <p className="text-sm text-muted-foreground">Omat liigasi ja käynnissä olevat kampanjasi näkyvät täällä.</p> :
+              <div className="grid grid-cols-2 gap-3">
+                {(allCommunities ? communities : communities.slice(0, 2)).map((item) => <button key={item.kind + item.id} type="button" onClick={() => router.push(item.href)} className={cn("group min-w-0 overflow-hidden rounded-xl border text-left transition-colors hover:bg-accent-gold/10", categoryBorders[item.kind])}>
+                  <div className="relative aspect-[2/1] w-full overflow-hidden">
+                    <Image src={categoryImages[item.kind]} alt="" fill sizes="(max-width: 640px) 50vw, 320px" className="object-cover" />
+                  </div>
+                  <div className="space-y-1 p-3">
+                    <div className="break-words font-heading text-sm text-foreground group-hover:text-accent-gold sm:text-lg">{item.title}</div>
+                    <div className="text-xs text-muted-foreground sm:text-sm">{item.subtitle}</div>
+                  </div>
                 </button>)}
+              </div>}
+            {communities.length > 2 && <button type="button" onClick={() => setAllCommunities(!allCommunities)} className="flex w-full items-center justify-center gap-2 rounded-lg border border-accent-gold/25 py-3 text-sm text-accent-gold hover:bg-accent-gold/10">
+              {allCommunities ? "Näytä vähemmän" : `Näytä kaikki (${communities.length})`} <ChevronDown className={cn("h-4 w-4", allCommunities && "rotate-180")} />
+            </button>}
+          </section>
+        </ArchiveFrame>}
+
+        <ArchiveFrame>
+          <section className="space-y-4 p-4 sm:p-6">
+            <h2 className="font-heading text-xl text-accent-gold sm:text-2xl">Seuraavat tapahtumat</h2>
+            <div className="space-y-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input aria-label="Hae tapahtumia" placeholder={t("events.searchEvents")} value={query} onChange={(event) => { setQuery(event.target.value); setAllUpcoming(false) }} className={cn("w-full pl-10", archiveField)} />
               </div>
+              <ArchiveButton active={filtersOpen} onClick={() => setFiltersOpen(!filtersOpen)} icon={<Filter className="h-4 w-4" />}>{filtersOpen ? "Piilota suodattimet" : "Suodattimet"}{types.length ? ` (${types.length})` : ""}</ArchiveButton>
+              {filtersOpen && <div className="flex flex-wrap gap-2 rounded-lg border border-accent-gold/20 p-3">
+                {Object.entries(categoryLabels).map(([kind, label]) => <button type="button" key={kind} aria-pressed={types.includes(kind)} onClick={() => setTypes((current) => current.includes(kind) ? current.filter((value) => value !== kind) : [...current, kind])} className={cn("rounded-lg border px-3 py-2 text-sm", types.includes(kind) ? "border-accent-gold bg-accent-gold/15 text-accent-gold" : "border-accent-gold/20 text-muted-foreground")}>{label}</button>)}
+                {types.length > 0 && <button type="button" className="px-2 text-sm text-accent-gold underline" onClick={() => setTypes([])}>Tyhjennä</button>}
+              </div>}
             </div>
-          </ArchiveFrame>
-        )}
+            {loading ? <Loader2 className="mx-auto h-7 w-7 animate-spin text-accent-gold" /> :
+              error ? <p role="alert" className="text-sm text-red-400">{error}</p> :
+              upcoming.length === 0 ? <p className="py-5 text-sm text-muted-foreground">Ei hakua vastaavia tulevia tapahtumia.</p> :
+              <div className="overflow-hidden rounded-lg border border-accent-gold/20">
+                {visibleUpcoming.map((event, index) => <div key={event.id}>{index > 0 && <ArchiveDivider variant="subtle" />}<EventRow event={event} onOpen={() => router.push("/events/" + event.id)} userId={user?.id} /></div>)}
+              </div>}
+            {upcoming.length > 5 && <button type="button" onClick={() => setAllUpcoming(!allUpcoming)} className="flex w-full items-center justify-center gap-2 rounded-lg border border-accent-gold/25 py-3 text-sm text-accent-gold hover:bg-accent-gold/10">
+              {allUpcoming ? "Näytä vähemmän" : `Näytä kaikki tulevat tapahtumat (${upcoming.length})`} <ChevronDown className={cn("h-4 w-4", allUpcoming && "rotate-180")} />
+            </button>}
+          </section>
+        </ArchiveFrame>
 
-        {/* Tabs */}
-        <div className="w-full mb-6 md:mb-8">
-          <div className="flex justify-center">
-            <ArchiveToggle
-              value={activeTab}
-              onChange={setActiveTab}
-              options={[
-                { value: "upcoming", label: t("events.upcomingEvents") },
-                { value: "my-events", label: t("events.myEvents") },
-                { value: "past", label: t("events.pastEvents") },
-              ]}
-              className="w-full max-w-xl"
-            />
-          </div>
-        </div>
-
-        {/* Action Bar */}
-        <div className="flex flex-col gap-3 mb-6 md:mb-8">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
-              <Input
-                placeholder={t("events.searchEvents")}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={cn("pl-10 font-body w-full", archiveField)}
-              />
-            </div>
-            <ArchiveButton
-              active={showFilters}
-              onClick={() => setShowFilters(!showFilters)}
-              icon={<Filter className="h-4 w-4" />}
-            >
-              {showFilters ? t("common.hideFilters") : t("common.filters")}
-              {selectedTypes.length > 0 && (
-                <Badge className="ml-2 bg-accent-gold text-background">{selectedTypes.length}</Badge>
-              )}
-            </ArchiveButton>
-          </div>
-          <div className="flex justify-center">
-            <ArchiveButton onClick={() => router.push("/events/create")} icon={<Plus className="h-4 w-4" />}>
-              {t("events.createEvent")}
-            </ArchiveButton>
-          </div>
-
-          {/* Filter Panel */}
-          {showFilters && (
-            <ArchiveCard>
-              <ArchiveCardContent className="pt-5">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-heading text-lg text-accent-gold">{t("events.eventType")}</h3>
-                  {selectedTypes.length > 0 && (
-                    <button
-                      onClick={clearFilters}
-                      className="text-sm font-body text-muted-foreground hover:text-accent-gold transition-colors"
-                    >
-                      {t("common.clearFilters")}
-                    </button>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {eventTypes.map((type) => (
-                    <ArchiveCardButton
-                      key={type}
-                      active={selectedTypes.includes(type)}
-                      onClick={() => toggleEventType(type)}
-                    >
-                      {t(`events.types.${type}`)}
-                    </ArchiveCardButton>
-                  ))}
-                </div>
-              </ArchiveCardContent>
-            </ArchiveCard>
-          )}
-        </div>
-
-        <div className="w-full">
-          {activeTab === "upcoming" && (
-            <div>
-              {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
-                </div>
-              ) : filteredPublicEvents.length === 0 ? (
-                <ArchiveCard className="text-center">
-                  <ArchiveCardContent className="py-12">
-                    <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
-                    <h3 className="ornate-text font-heading text-xl font-semibold mb-2">{t("events.noEvents")}</h3>
-                    <p className="font-body text-muted-foreground">{t("events.noEventsDesc")}</p>
-                  </ArchiveCardContent>
-                </ArchiveCard>
-              ) : (
-                <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {filteredPublicEvents.map((event) => (
-                    <EventCard 
-                      key={event.id} 
-                      event={event} 
-                      onViewDetails={handleViewDetails} 
-                      onRSVP={handleRSVP}
-                      t={t}
-                      isLoggedIn={!!user}
-                      currentUserId={user?.id}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === "my-events" && (
-            <div>
-              {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
-                </div>
-              ) : !user ? (
-                <ArchiveCard className="text-center">
-                  <ArchiveCardContent className="py-12">
-                    <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
-                    <h3 className="ornate-text font-heading text-xl font-semibold mb-2">{t("events.loginRequired")}</h3>
-                    <p className="font-body text-muted-foreground">{t("events.loginToSeeMyEvents")}</p>
-                  </ArchiveCardContent>
-                </ArchiveCard>
-              ) : filteredMyEvents.length === 0 ? (
-                <ArchiveCard className="text-center">
-                  <ArchiveCardContent className="py-12">
-                    <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
-                    <h3 className="ornate-text font-heading text-xl font-semibold mb-2">{t("events.noMyEvents")}</h3>
-                    <p className="font-body text-muted-foreground">{t("events.noMyEventsDesc")}</p>
-                  </ArchiveCardContent>
-                </ArchiveCard>
-              ) : (
-                <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {filteredMyEvents.map((event) => (
-                    <EventCard 
-                      key={event.id} 
-                      event={event} 
-                      onViewDetails={handleViewDetails}
-                      onRSVP={handleRSVP}
-                      t={t}
-                      isLoggedIn={!!user}
-                      currentUserId={user?.id}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === "past" && (
-            <div>
-              {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
-                </div>
-              ) : pastEvents.filter(function(event) {
-                const matchesSearch = event.title.toLowerCase().includes(query) || (event.description ? event.description.toLowerCase().includes(query) : false)
-                const matchesType = selectedTypes.length === 0 || (event.event_type && selectedTypes.includes(event.event_type))
-                return matchesSearch && matchesType
-              }).length === 0 ? (
-                <ArchiveCard className="text-center">
-                  <ArchiveCardContent className="py-12">
-                    <Calendar className="h-16 w-16 text-accent-gold mx-auto mb-4" />
-                    <h3 className="ornate-text font-heading text-xl font-semibold mb-2">Ei menneitä tapahtumia</h3>
-                    <p className="font-body text-muted-foreground">
-                      Menneet tapahtumat, joihin sinulla on pääsy, näkyvät täällä.
-                    </p>
-                  </ArchiveCardContent>
-                </ArchiveCard>
-              ) : (
-                <ArchiveFrame className="max-w-4xl mx-auto overflow-hidden">
-                  {pastEvents.filter(function(event) {
-                    const matchesSearch = event.title.toLowerCase().includes(query) || (event.description ? event.description.toLowerCase().includes(query) : false)
-                    const matchesType = selectedTypes.length === 0 || (event.event_type && selectedTypes.includes(event.event_type))
-                    return matchesSearch && matchesType
-                  }).map((event, index) => {
-                    const startDate = new Date(event.starts_at)
-                    const endDate = event.ends_at ? new Date(event.ends_at) : null
-                    const dateStr = startDate.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short", year: "numeric" })
-                    const startTime = startDate.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
-                    const endTime = endDate ? endDate.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : null
-                    const hostName = event.host?.display_name || "Unknown Host"
-
-                    return (
-                      <div key={event.id}>
-                        {index > 0 && <ArchiveDivider variant="subtle" />}
-                        <button
-                          type="button"
-                          onClick={() => handleViewDetails(event)}
-                          className="group w-full text-left p-5 sm:p-6 transition-colors hover:bg-[var(--archive-gold,#d9b65c)]/5"
-                        >
-                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div className="min-w-0 flex-1">
-                              <div className="flex flex-wrap items-center gap-2 mb-2">
-                                <h3 className="font-heading text-lg font-semibold text-[var(--archive-gold,#d9b65c)] group-hover:text-[var(--archive-gold-light,#f0d98c)]">
-                                  {event.title}
-                                </h3>
-                                {event.event_type && (
-                                  <Badge variant="outline" className={eventTypeColors[event.event_type] || eventTypeColors.game_night}>
-                                    {eventTypeLabels[event.event_type] || event.event_type}
-                                  </Badge>
-                                )}
-                              </div>
-                              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground font-body">
-                                <span className="inline-flex items-center gap-1.5">
-                                  <Calendar className="h-4 w-4 text-accent-gold" />
-                                  {dateStr}
-                                </span>
-                                <span className="inline-flex items-center gap-1.5">
-                                  <Clock className="h-4 w-4 text-accent-gold" />
-                                  {startTime}{endTime ? "–" + endTime : ""}
-                                </span>
-                                <span className="inline-flex items-center gap-1.5">
-                                  <Users className="h-4 w-4 text-accent-gold" />
-                                  {event.participant_count || 0} {t("events.attending")}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="shrink-0 text-sm text-muted-foreground font-body sm:text-right">
-                              <div>{t("events.hostedBy")}</div>
-                              <div className="text-foreground/80">{hostName}</div>
-                            </div>
-                          </div>
-                        </button>
-                      </div>
-                    )
+        <ArchiveFrame>
+          <section className="p-4 sm:p-6">
+            <button type="button" aria-expanded={historyOpen} onClick={() => setHistoryOpen(!historyOpen)} className="flex w-full items-center justify-between gap-3 text-left">
+              <span className="font-heading text-xl text-accent-gold sm:text-2xl">Menneet tapahtumat</span>
+              <ChevronDown className={cn("h-5 w-5 shrink-0 text-accent-gold transition-transform", historyOpen && "rotate-180")} />
+            </button>
+            {historyOpen && <div className="mt-4 space-y-4">
+              {loading ? <Loader2 className="mx-auto h-7 w-7 animate-spin text-accent-gold" /> :
+                history.length === 0 ? <p className="text-sm text-muted-foreground">Ei menneitä tapahtumia.</p> :
+                <div className="overflow-hidden rounded-lg border border-accent-gold/20">
+                  {visibleHistory.map((event, index) => {
+                    const month = formatDate(event.starts_at, { month: "long", year: "numeric" })
+                    const previous = index > 0 ? formatDate(visibleHistory[index - 1].starts_at, { month: "long", year: "numeric" }) : ""
+                    return <div key={event.id}>
+                      {month !== previous && <div className="border-b border-accent-gold/20 bg-accent-gold/5 px-4 py-2 font-heading text-sm capitalize text-accent-gold">{month}</div>}
+                      {month === previous && <ArchiveDivider variant="subtle" />}
+                      <EventRow event={event} onOpen={() => router.push("/events/" + event.id)} userId={user?.id} />
+                    </div>
                   })}
-                </ArchiveFrame>
-              )}
-            </div>
-          )}        </div>
-      </main>
-    </div>
-  )
+                </div>}
+              {history.length > 10 && <button type="button" onClick={() => setHistoryAll(!historyAll)} className="w-full rounded-lg border border-accent-gold/25 py-3 text-sm text-accent-gold">{historyAll ? "Näytä vähemmän" : "Näytä koko historia"}</button>}
+            </div>}
+          </section>
+        </ArchiveFrame>
+      </div>
+    </main>
+  </div>
 }
