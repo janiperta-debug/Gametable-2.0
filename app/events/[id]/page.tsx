@@ -265,6 +265,17 @@ export default function EventDetailsPage() {
     })
   }
 
+  const completeSession = async (sessionId: string) => {
+    setStructureLoading(true)
+    const result = await updateEventSession(eventId, sessionId, { status: "completed" })
+    if (result.error) {
+      toast({ title: t("common.error"), description: result.error, variant: "destructive" })
+    } else {
+      await refreshEventStructure()
+    }
+    setStructureLoading(false)
+  }
+
   const saveSessionEdit = async () => {
     if (!editingSessionId || !editingSessionForm.title.trim()) return
     setStructureLoading(true)
@@ -722,9 +733,20 @@ export default function EventDetailsPage() {
                                     </div>
                                     {session.notes && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{session.notes}</p>}
                                     {isHost && (
-                                      <ArchiveCardButton onClick={() => startSessionEdit(session)}>
-                                        Muokkaa sessiota
-                                      </ArchiveCardButton>
+                                      <div className="flex flex-wrap gap-2">
+                                        <ArchiveCardButton onClick={() => startSessionEdit(session)}>
+                                          Muokkaa sessiota
+                                        </ArchiveCardButton>
+                                        {session.status !== "completed" && session.status !== "cancelled" && (
+                                          <ArchiveCardButton
+                                            onClick={() => completeSession(session.id)}
+                                            disabled={structureLoading}
+                                            active
+                                          >
+                                            {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Päätä sessio"}
+                                          </ArchiveCardButton>
+                                        )}
+                                      </div>
                                     )}
                                   </>
                                 )}
