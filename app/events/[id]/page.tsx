@@ -31,13 +31,6 @@ const EVENT_TYPE_IMAGES: Record<string, string> = {
   league: "/images/events/league.png",
 }
 
-const EVENT_TYPE_LABELS: Record<string, string> = {
-  game_night: "Peli-ilta",
-  campaign: "Kampanja",
-  tournament: "Turnaus",
-  league: "Liiga",
-}
-
 const getPrivacyIcon = (privacy: string | null) => {
   switch (privacy) {
     case "public":
@@ -652,7 +645,7 @@ export default function EventDetailsPage() {
                       <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 w-[calc(50%-5rem)] bg-contain bg-left bg-no-repeat sm:w-[calc(50%-6rem)]"
                         style={{ backgroundImage: 'url("/images/events/ornate-left.png")' }} />
                       <div className="relative z-10 aspect-square w-32 overflow-hidden rounded-lg border border-accent-gold/30 sm:w-40">
-                        <img src={EVENT_TYPE_IMAGES[event.event_type]} alt={EVENT_TYPE_LABELS[event.event_type] || "Tapahtuma"}
+                        <img src={EVENT_TYPE_IMAGES[event.event_type]} alt={t(`events.types.${event.event_type}`)}
                           className="h-full w-full object-cover" />
                       </div>
                       <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-[calc(50%-5rem)] bg-contain bg-right bg-no-repeat sm:w-[calc(50%-6rem)]"
@@ -678,7 +671,7 @@ export default function EventDetailsPage() {
                       )}
                       {event.event_type && (
                         <Badge variant="outline" className="border-accent-gold/30 text-accent-gold">
-                          {EVENT_TYPE_LABELS[event.event_type] || event.event_type.replace(/_/g, " ")}
+                          {t(`events.types.${event.event_type}`)}
                         </Badge>
                       )}
                       {event.status === "cancelled" && (
