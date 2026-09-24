@@ -20,7 +20,7 @@ import { useTranslations } from "@/lib/i18n"
 import { getEventById, updateRSVP, cancelEvent, completeEvent, getInvitableUsers, inviteToEvent, uninviteFromEvent, type Event, type EventParticipant, type RSVPStatus } from "@/app/actions/events"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
-import { addEventRound, addPlannedEventRounds, addEventSession, addPlannedEventSessions, updateEventSession, addEventMatch, addEventEntry, removeEventEntry, recordEventMatch, getEventStructure, getEventStandings } from "@/app/actions/event-structure"
+import { addEventRound, addPlannedEventRounds, addEventSession, addPlannedEventSessions, updateEventSession, updateCampaignProgression, addEventMatch, addEventEntry, removeEventEntry, recordEventMatch, getEventStructure, getEventStandings, type CampaignProgression } from "@/app/actions/event-structure"
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   game_night: "Peli-ilta",
@@ -111,6 +111,17 @@ export default function EventDetailsPage() {
   const [sessionForm, setSessionForm] = useState({ title: "", startsAt: "", endsAt: "", notes: "" })
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null)
   const [editingSessionForm, setEditingSessionForm] = useState({ title: "", startsAt: "", endsAt: "", notes: "", status: "planned" })
+  const [campaignProgression, setCampaignProgression] = useState<CampaignProgression>({
+    mode: "stages",
+    label: "Vaihe",
+    current: 1,
+    total: 1,
+    unit: "",
+    currentStage: "",
+    stages: [],
+    note: "",
+  })
+  const [editingProgression, setEditingProgression] = useState(false)
 
   useEffect(() => {
     const loadEvent = async () => {
@@ -127,6 +138,21 @@ export default function EventDetailsPage() {
         setError(result.error)
       } else if (result.event) {
         setEvent(result.event)
+        if (result.event.event_type === "campaign") {
+          const saved = (result.event.event_config as Record<string, unknown> | null)?.progression as Partial<CampaignProgression> | undefined
+          if (saved) {
+            setCampaignProgression({
+              mode: saved.mode === "counter" || saved.mode === "freeform" ? saved.mode : "stages",
+              label: String(saved.label || "Vaihe"),
+              current: Number(saved.current || 0),
+              total: Number(saved.total || 0),
+              unit: String(saved.unit || ""),
+              currentStage: String(saved.currentStage || ""),
+              stages: Array.isArray(saved.stages) ? saved.stages.map(String) : [],
+              note: String(saved.note || ""),
+            })
+          }
+        }
       }
       
       const structureResult = await getEventStructure(eventId)
@@ -216,6 +242,19 @@ export default function EventDetailsPage() {
     const date = new Date(value)
     const pad = (n: number) => String(n).padStart(2, "0")
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+  }
+
+  const saveCampaignProgression = async () => {
+    setStructureLoading(true)
+    const result = await updateCampaignProgression(eventId, campaignProgression)
+    if (result.error) {
+      toast({ title: t("common.error"), description: result.error, variant: "destructive" })
+    } else {
+      setEvent((current) => current ? { ...current, event_config: result.event?.event_config || current.event_config } : current)
+      setEditingProgression(false)
+      toast({ title: t("common.success"), description: "Kampanjan eteneminen tallennettu." })
+    }
+    setStructureLoading(false)
   }
 
   const createPlannedSessions = async () => {
@@ -574,6 +613,161 @@ export default function EventDetailsPage() {
                           </div>
                         )
                       })}
+                    </div>
+                  )}
+                </ArchiveCardContent>
+              </ArchiveCard>
+            )}
+
+            {event.event_type === "campaign" && (
+              <ArchiveCard>
+                <ArchiveCardHeader>
+                  <ArchiveCardTitle className="text-xl normal-case">Kampanjan eteneminen</ArchiveCardTitle>
+                </ArchiveCardHeader>
+                <ArchiveCardContent className="space-y-4">
+                  {!editingProgression && !campaignProgression.currentStage && campaignProgression.stages.length === 0 && campaignProgression.total === 0 ? (
+                    <div className="space-y-3">
+                      <p className="text-sm text-muted-foreground">
+                        Kampanjalla ei ole vielä etenemismallia. Voit käyttää vaiheita, omaa mittaria tai vapaamuotoista kuvausta.
+                      </p>
+                      {isHost && (
+                        <ArchiveCardButton onClick={() => setEditingProgression(true)}>Määritä eteneminen</ArchiveCardButton>
+                      )}
+                    </div>
+                  ) : editingProgression ? (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                          <label className="text-sm text-accent-gold">Etenemisen tyyppi</label>
+                          <select
+                            value={campaignProgression.mode}
+                            onChange={(e) => setCampaignProgression({ ...campaignProgression, mode: e.target.value as CampaignProgression["mode"] })}
+                            className="w-full rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                          >
+                            <option value="stages">Vaiheet</option>
+                            <option value="counter">Mittari</option>
+                            <option value="freeform">Vapaa tila</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm text-accent-gold">Nimi</label>
+                          <input
+                            value={campaignProgression.label}
+                            onChange={(e) => setCampaignProgression({ ...campaignProgression, label: e.target.value })}
+                            placeholder="Esim. Luku, Skenaario, Tehtävä"
+                            className="w-full rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      {campaignProgression.mode === "counter" && (
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <input
+                            type="number"
+                            min="0"
+                            value={campaignProgression.current}
+                            onChange={(e) => setCampaignProgression({ ...campaignProgression, current: Number(e.target.value) })}
+                            placeholder="Nykyinen"
+                            className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                          />
+                          <input
+                            type="number"
+                            min="0"
+                            value={campaignProgression.total}
+                            onChange={(e) => setCampaignProgression({ ...campaignProgression, total: Number(e.target.value) })}
+                            placeholder="Yhteensä"
+                            className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                          />
+                          <input
+                            value={campaignProgression.unit}
+                            onChange={(e) => setCampaignProgression({ ...campaignProgression, unit: e.target.value })}
+                            placeholder="Yksikkö, esim. skenaariota"
+                            className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                          />
+                        </div>
+                      )}
+
+                      {campaignProgression.mode === "stages" && (
+                        <>
+                          <input
+                            value={campaignProgression.currentStage}
+                            onChange={(e) => setCampaignProgression({ ...campaignProgression, currentStage: e.target.value })}
+                            placeholder="Nykyinen vaihe, esim. Muinainen temppeli"
+                            className="w-full rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                          />
+                          <textarea
+                            value={campaignProgression.stages.join("\n")}
+                            onChange={(e) => setCampaignProgression({ ...campaignProgression, stages: e.target.value.split("\n") })}
+                            placeholder={"Vaiheet, yksi rivilleen:\nPrologi\nKaupungin portit\nVarjojen metsä\nMuinainen temppeli"}
+                            rows={5}
+                            className="w-full rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                          />
+                        </>
+                      )}
+
+                      {campaignProgression.mode === "freeform" && (
+                        <textarea
+                          value={campaignProgression.currentStage}
+                          onChange={(e) => setCampaignProgression({ ...campaignProgression, currentStage: e.target.value })}
+                          placeholder="Esim. Käännekohta – seuraavaksi etsitään kadonnut kruunu."
+                          rows={3}
+                          className="w-full rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                        />
+                      )}
+
+                      <textarea
+                        value={campaignProgression.note}
+                        onChange={(e) => setCampaignProgression({ ...campaignProgression, note: e.target.value })}
+                        placeholder="Etenemiseen liittyvä lisätieto (valinnainen)"
+                        rows={2}
+                        className="w-full rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                      />
+
+                      <div className="flex flex-wrap gap-2">
+                        <ArchiveCardButton onClick={saveCampaignProgression} disabled={structureLoading} active>
+                          {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Tallenna eteneminen"}
+                        </ArchiveCardButton>
+                        <ArchiveCardButton onClick={() => setEditingProgression(false)} disabled={structureLoading}>
+                          Peruuta
+                        </ArchiveCardButton>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {campaignProgression.mode === "counter" && (
+                        <>
+                          <div className="flex items-baseline justify-between gap-3">
+                            <span className="text-sm text-accent-gold">{campaignProgression.label}</span>
+                            <span className="font-cinzel text-lg">{campaignProgression.current} / {campaignProgression.total}</span>
+                          </div>
+                          <div className="h-2 rounded-full bg-background/60 overflow-hidden">
+                            <div
+                              className="h-full bg-accent-gold transition-all"
+                              style={{ width: `${campaignProgression.total > 0 ? Math.min(100, (campaignProgression.current / campaignProgression.total) * 100) : 0}%` }}
+                            />
+                          </div>
+                          {campaignProgression.unit && <div className="text-xs text-muted-foreground">{campaignProgression.unit}</div>}
+                        </>
+                      )}
+                      {campaignProgression.mode === "stages" && (
+                        <div className="space-y-2">
+                          <div className="text-sm text-accent-gold">{campaignProgression.label}</div>
+                          <div className="text-lg">{campaignProgression.currentStage || "Vaihetta ei ole määritetty"}</div>
+                          {campaignProgression.stages.length > 0 && (
+                            <div className="text-xs text-muted-foreground">
+                              {campaignProgression.stages.findIndex((stage) => stage === campaignProgression.currentStage) + 1} / {campaignProgression.stages.length} vaihetta
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {campaignProgression.mode === "freeform" && (
+                        <div className="space-y-2">
+                          <div className="text-sm text-accent-gold">{campaignProgression.label}</div>
+                          <div className="text-lg whitespace-pre-wrap">{campaignProgression.currentStage || "Etenemistä ei ole määritetty"}</div>
+                        </div>
+                      )}
+                      {campaignProgression.note && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{campaignProgression.note}</p>}
+                      {isHost && <ArchiveCardButton onClick={() => setEditingProgression(true)}>Muokkaa etenemistä</ArchiveCardButton>}
                     </div>
                   )}
                 </ArchiveCardContent>
