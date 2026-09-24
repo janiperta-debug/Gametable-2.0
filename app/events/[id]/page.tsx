@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { EventChat } from "@/components/event-chat"
 import { 
   ArrowLeft, Calendar, Clock, MapPin, Users, Globe, UserCheck, Lock, 
-  Edit, Loader2, User, XCircle, UserPlus, X
+  Edit, Loader2, User, XCircle, CheckCircle2, UserPlus, X
 } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { getEventById, updateRSVP, cancelEvent, completeEvent, getInvitableUsers, inviteToEvent, uninviteFromEvent, type Event, type EventParticipant, type RSVPStatus } from "@/app/actions/events"
@@ -399,7 +399,7 @@ export default function EventDetailsPage() {
               <ArchiveCardButton
                 onClick={handleComplete}
                 disabled={completing || cancelling}
-                icon={completing ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                icon={completing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
               >
                 <span className="hidden sm:inline">{t("events.completeEvent") || "Päätä tapahtuma"}</span>
               </ArchiveCardButton>
