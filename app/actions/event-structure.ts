@@ -51,13 +51,62 @@ export async function getEventStructure(eventId: string) {
   return { sessions: sessions || [], rounds: rounds || [], matches: matches || [], participants: participants || [], entries: entries || [], profiles: profiles || [], error: sessionsError?.message || roundsError?.message || matchesError?.message }
 }
 
+export type CampaignProgression = {
+  mode: "counter" | "stages" | "freeform"
+  label: string
+  current: number
+  total: number
+  unit: string
+  currentStage: string
+  stages: string[]
+  note: string
+}
+
+export async function updateCampaignProgression(eventId: string, progression: CampaignProgression) {
+  const { supabase, error } = await requireHost(eventId)
+  if (error) return { error }
+
+  const { data: event } = await supabase
+    .from("events")
+    .select("event_type, event_config")
+    .eq("id", eventId)
+    .single()
+
+  if (!event) return { error: "Tapahtumaa ei löytynyt." }
+  if (event.event_type !== "campaign") return { error: "Eteneminen koskee kampanjoita." }
+
+  const config = (event.event_config as Record<string, unknown> | null) || {}
+  const clean = {
+    mode: progression.mode,
+    label: progression.label.trim(),
+    current: Math.max(0, Number(progression.current) || 0),
+    total: Math.max(0, Number(progression.total) || 0),
+    unit: progression.unit.trim(),
+    currentStage: progression.currentStage.trim(),
+    stages: progression.stages.map((stage) => stage.trim()).filter(Boolean),
+    note: progression.note.trim(),
+  }
+
+  const { data: updated, error: updateError } = await supabase
+    .from("events")
+    .update({ event_config: { ...config, progression: clean } })
+    .eq("id", eventId)
+    .select()
+    .single()
+
+  if (updateError) return { error: updateError.message }
+
+  revalidatePath("/events/" + eventId)
+  return { event: updated }
+}
+
 export async function addEventSession(eventId: string, data: { title: string; starts_at?: string; ends_at?: string; notes?: string }) {
   const { supabase, error } = await requireHost(eventId)
   if (error) return { error }
   const { count } = await supabase.from("event_sessions").select("*", { count: "exact", head: true }).eq("event_id", eventId)
   const { data: session, error: insertError } = await supabase.from("event_sessions").insert({
     event_id: eventId, title: data.title.trim(), session_number: (count || 0) + 1,
-    starts_at: data.starts_at || null, notes: data.notes?.trim() || null,
+    starts_at: data.starts_at || null, ends_at: data.ends_at || null, notes: data.notes?.trim() || null,
   }).select().single()
   if (insertError) return { error: insertError.message }
   revalidatePath("/events/" + eventId)
