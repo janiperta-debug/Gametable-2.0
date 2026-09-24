@@ -64,6 +64,98 @@ export async function addEventSession(eventId: string, data: { title: string; st
   return { session }
 }
 
+export async function addPlannedEventSessions(eventId: string) {
+  const { supabase, error } = await requireHost(eventId)
+  if (error) return { error }
+
+  const { data: event } = await supabase
+    .from("events")
+    .select("event_type, event_config")
+    .eq("id", eventId)
+    .single()
+
+  if (!event) return { error: "Tapahtumaa ei löytynyt." }
+  if (event.event_type !== "campaign") {
+    return { error: "Sessioiden automaattinen luonti koskee kampanjoita." }
+  }
+
+  const plannedSessions = Number((event.event_config as Record<string, unknown> | null)?.rounds || 0)
+  if (!Number.isInteger(plannedSessions) || plannedSessions < 1) {
+    return { error: "Kampanjalle ei ole määritetty sessiomäärää." }
+  }
+
+  const { data: existing } = await supabase
+    .from("event_sessions")
+    .select("session_number")
+    .eq("event_id", eventId)
+    .order("session_number", { ascending: false })
+    .limit(1)
+
+  const currentCount = existing?.[0]?.session_number || 0
+  const missing = plannedSessions - currentCount
+
+  if (missing <= 0) {
+    return { sessions: [], created: 0, planned: plannedSessions, current: currentCount }
+  }
+
+  const rows = Array.from({ length: missing }, (_, index) => ({
+    event_id: eventId,
+    session_number: currentCount + index + 1,
+    title: `Sessio ${currentCount + index + 1}`,
+  }))
+
+  const { data: sessions, error: insertError } = await supabase
+    .from("event_sessions")
+    .insert(rows)
+    .select()
+
+  if (insertError) return { error: insertError.message }
+
+  revalidatePath("/events/" + eventId)
+  return {
+    sessions: sessions || [],
+    created: rows.length,
+    planned: plannedSessions,
+    current: currentCount + rows.length,
+  }
+}
+
+export async function updateEventSession(eventId: string, sessionId: string, data: {
+  title?: string
+  starts_at?: string | null
+  ends_at?: string | null
+  notes?: string | null
+  status?: "planned" | "active" | "completed" | "cancelled"
+}) {
+  const { supabase, error } = await requireHost(eventId)
+  if (error) return { error }
+
+  const update: Record<string, unknown> = {}
+  if (data.title !== undefined) update.title = data.title.trim()
+  if (data.starts_at !== undefined) update.starts_at = data.starts_at || null
+  if (data.ends_at !== undefined) update.ends_at = data.ends_at || null
+  if (data.notes !== undefined) update.notes = data.notes?.trim() || null
+  if (data.status !== undefined) update.status = data.status
+
+  if (data.title !== undefined && !data.title.trim()) {
+    return { error: "Session nimi ei voi olla tyhjä." }
+  }
+
+  const { data: session, error: updateError } = await supabase
+    .from("event_sessions")
+    .update(update)
+    .eq("id", sessionId)
+    .eq("event_id", eventId)
+    .select()
+    .single()
+
+  if (updateError) return { error: updateError.message }
+  if (!session) return { error: "Sessiota ei löytynyt." }
+
+  revalidatePath("/events/" + eventId)
+  return { session }
+}
+
 export async function addEventRound(eventId: string, data: { title?: string; starts_at?: string }) {
   const { supabase, error } = await requireHost(eventId)
   if (error) return { error }
