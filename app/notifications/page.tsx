@@ -9,7 +9,7 @@ import {
   ArchiveCardContent,
 } from "@/components/archive-frame"
 import { Badge } from "@/components/ui/badge"
-import { Bell, Check, X, Users, Calendar, Trophy, MessageCircle, Star, Settings, Loader2, UserCheck } from "lucide-react"
+import { Bell, Check, X, Users, Calendar, Trophy, MessageCircle, Star, Settings, Loader2, UserCheck, ChevronDown, ChevronUp } from "lucide-react"
 import { ThemeHero } from "@/components/theme-hero"
 import { useTranslations } from "@/lib/i18n"
 import { useUser } from "@/hooks/useUser"
@@ -49,6 +49,7 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [expandedNotifications, setExpandedNotifications] = useState<string[]>([])
   const t = useTranslations()
   const { user } = useUser()
   const { toast } = useToast()
@@ -274,6 +275,8 @@ export default function NotificationsPage() {
                   const IconComponent = iconMap[notification.type] || Bell
                   const iconColor = colorMap[notification.type] || "text-accent-gold"
                   const timeAgo = formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })
+                  const expanded = expandedNotifications.includes(notification.id)
+                  const hasLongBody = (notification.body?.length || 0) > 160 || (notification.body?.split("\\n").length || 0) > 3
 
                   return (
                     <div
@@ -298,7 +301,23 @@ export default function NotificationsPage() {
                                 <span className="w-2 h-2 bg-accent-gold rounded-full ml-2 flex-shrink-0" />
                               )}
                             </h3>
-                            <p className="font-body text-sm text-muted-foreground mt-1 break-words">{notification.body}</p>
+                            <p id={`notification-body-${notification.id}`} className={`font-body text-sm text-muted-foreground mt-1 break-words whitespace-pre-line ${!expanded ? "line-clamp-3" : ""}`}>{notification.body}</p>
+                            {hasLongBody && (
+                              <button
+                                type="button"
+                                aria-expanded={expanded}
+                                aria-controls={`notification-body-${notification.id}`}
+                                onClick={(event) => {
+                                  event.stopPropagation()
+                                  setExpandedNotifications((current) =>
+                                    expanded ? current.filter((id) => id !== notification.id) : [...current, notification.id]
+                                  )
+                                }}
+                                className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-accent-gold hover:underline"
+                              >
+                                {expanded ? <>Näytä vähemmän <ChevronUp className="h-4 w-4" /></> : <>Lue kaikki <ChevronDown className="h-4 w-4" /></>}
+                              </button>
+                            )}
                           </div>
                           <span className="text-xs text-muted-foreground whitespace-nowrap font-body">
                             {timeAgo}
