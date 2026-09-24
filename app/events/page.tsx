@@ -13,6 +13,7 @@ import {
   ArchiveToggle,
   archiveField,
 } from "@/components/archive-frame"
+import { ArchiveDivider } from "@/components/archive-divider"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -415,27 +416,67 @@ export default function EventsPage() {
                   </ArchiveCardContent>
                 </ArchiveCard>
               ) : (
-                <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <ArchiveFrame className="max-w-4xl mx-auto overflow-hidden">
                   {pastEvents.filter(function(event) {
                     const matchesSearch = event.title.toLowerCase().includes(query) || (event.description ? event.description.toLowerCase().includes(query) : false)
                     const matchesType = selectedTypes.length === 0 || (event.event_type && selectedTypes.includes(event.event_type))
                     return matchesSearch && matchesType
-                  }).map((event) => (
-                    <EventCard
-                      key={event.id}
-                      event={event}
-                      onViewDetails={handleViewDetails}
-                      onRSVP={handleRSVP}
-                      t={t}
-                      isLoggedIn={!!user}
-                      currentUserId={user?.id}
-                    />
-                  ))}
-                </div>
+                  }).map((event, index) => {
+                    const startDate = new Date(event.starts_at)
+                    const endDate = event.ends_at ? new Date(event.ends_at) : null
+                    const dateStr = startDate.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short", year: "numeric" })
+                    const startTime = startDate.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
+                    const endTime = endDate ? endDate.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : null
+                    const hostName = event.host?.display_name || "Unknown Host"
+
+                    return (
+                      <div key={event.id}>
+                        {index > 0 && <ArchiveDivider variant="subtle" />}
+                        <button
+                          type="button"
+                          onClick={() => handleViewDetails(event)}
+                          className="group w-full text-left p-5 sm:p-6 transition-colors hover:bg-[var(--archive-gold,#d9b65c)]/5"
+                        >
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-2 mb-2">
+                                <h3 className="font-heading text-lg font-semibold text-[var(--archive-gold,#d9b65c)] group-hover:text-[var(--archive-gold-light,#f0d98c)]">
+                                  {event.title}
+                                </h3>
+                                {event.event_type && (
+                                  <Badge variant="outline" className={eventTypeColors[event.event_type] || eventTypeColors.game_night}>
+                                    {eventTypeLabels[event.event_type] || event.event_type}
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground font-body">
+                                <span className="inline-flex items-center gap-1.5">
+                                  <Calendar className="h-4 w-4 text-accent-gold" />
+                                  {dateStr}
+                                </span>
+                                <span className="inline-flex items-center gap-1.5">
+                                  <Clock className="h-4 w-4 text-accent-gold" />
+                                  {startTime}{endTime ? "–" + endTime : ""}
+                                </span>
+                                <span className="inline-flex items-center gap-1.5">
+                                  <Users className="h-4 w-4 text-accent-gold" />
+                                  {event.participant_count || 0} {t("events.attending")}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="shrink-0 text-sm text-muted-foreground font-body sm:text-right">
+                              <div>{t("events.hostedBy")}</div>
+                              <div className="text-foreground/80">{hostName}</div>
+                            </div>
+                          </div>
+                        </button>
+                      </div>
+                    )
+                  })}
+                </ArchiveFrame>
               )}
             </div>
-          )}
-        </div>
+          )}        </div>
       </main>
     </div>
   )
