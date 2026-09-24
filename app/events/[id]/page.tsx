@@ -714,7 +714,7 @@ export default function EventDetailsPage() {
                               </span>
                             )}
                           </div>
-                          <span>{participant.user?.display_name || t("profile.anonymous") || "Anonymous"}</span>
+                          <span>{participant.user?.display_name || participant.user?.username || t("profile.anonymous") || "Anonymous"}</span>
                           {participant.user_id === event.host_id && (
                             <Badge variant="outline" className="text-xs border-accent-gold/30 text-accent-gold">
                               {t("events.host") || "Host"}
