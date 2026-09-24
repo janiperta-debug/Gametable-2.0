@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { ArchiveButton, ArchiveCard, ArchiveCardContent, archiveField } from "@/components/archive-frame"
-import { sendBroadcast, checkIsAdmin, getBroadcastHistory, uploadNewsletterImage, listNewsletterImages, type BroadcastHistory } from "@/app/actions/admin"
+import { sendBroadcast, checkIsAdmin, getBroadcastHistory, listNewsletterImages, type BroadcastHistory } from "@/app/actions/admin"
 import { useToast } from "@/hooks/use-toast"
 import { useUser } from "@/hooks/useUser"
 import { Loader2, Send, Mail, Shield, AlertTriangle, History, Users, Clock, Crown, ImagePlus, X } from "lucide-react"
@@ -55,6 +55,10 @@ export default function AnnouncementsPage() {
   }, [user, loading])
 
   const handleSend = async () => {
+    if (uploading) {
+      toast({ title: "Odota kuvan latautumista", description: "Lähetä viesti vasta kun kuva näkyy esikatselussa.", variant: "destructive" })
+      return
+    }
     if (!subject.trim() || !message.trim()) {
       toast({
         title: t("common.error"),
@@ -217,12 +221,14 @@ export default function AnnouncementsPage() {
                     try {
                       const data = new FormData()
                       data.set("image", file)
-                      const result = await uploadNewsletterImage(data)
-                      if (result.url) { setImageUrl(result.url); setSavedImages((current) => [result.url!, ...current.filter((url) => url !== result.url)]) }
-                      else toast({ title: "Kuvan lataus epäonnistui", description: result.error, variant: "destructive" })
+                      const response = await fetch("/api/admin/newsletter-images", { method: "POST", body: data })
+                      const result = await response.json() as { url?: string; error?: string }
+                      if (response.ok && result.url) { setImageUrl(result.url); setSavedImages((current) => [result.url!, ...current.filter((url) => url !== result.url)]) }
+                      else toast({ title: "Kuvan lataus epäonnistui", description: result.error || "Yritä uudelleen.", variant: "destructive" })
                     } catch { toast({ title: "Kuvan lataus epäonnistui", variant: "destructive" }) }
                     finally { setUploading(false) }
                   }} />
+                {imageUrl && <p role="status" className="text-sm text-green-400">Kuva ladattu ja liitetty uutiskirjeeseen.</p>}
                 {imageUrl && <div className="relative max-w-xl overflow-hidden rounded-lg border border-accent-gold/30">
                   <img src={imageUrl} alt="Uutiskirjeen valittu kuva" className="h-auto w-full" />
                   <button type="button" onClick={() => setImageUrl(null)} aria-label="Poista kuva kirjeestä" className="absolute right-2 top-2 rounded-full bg-black/80 p-2 text-white"><X className="h-4 w-4" /></button>
