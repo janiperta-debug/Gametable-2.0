@@ -19,7 +19,7 @@ import {
 import { useTranslations } from "@/lib/i18n"
 import { getEventById, updateRSVP, cancelEvent, completeEvent, getInvitableUsers, inviteToEvent, uninviteFromEvent, type Event, type EventParticipant, type RSVPStatus } from "@/app/actions/events"
 import { useToast } from "@/hooks/use-toast"
-import { getLeagueTournaments, setTournamentLeague } from "@/app/actions/league"
+import { getLeagueTournaments, setTournamentLeague, getLeagueStandings, updateLeaguePlacementPoints, type LeagueStanding } from "@/app/actions/league"
 import { createClient } from "@/lib/supabase/client"
 import { addEventRound, addPlannedEventRounds, addEventSession, addPlannedEventSessions, updateEventSession, updateCampaignProgression, addEventMatch, addEventEntry, removeEventEntry, recordEventMatch, getEventStructure, getEventStandings, type CampaignProgression } from "@/app/actions/event-structure"
 
@@ -109,6 +109,8 @@ export default function EventDetailsPage() {
   const [leagueTournaments, setLeagueTournaments] = useState<any[]>([])
   const [availableTournaments, setAvailableTournaments] = useState<any[]>([])
   const [leagueSaving, setLeagueSaving] = useState(false)
+  const [leagueStandings, setLeagueStandings] = useState<LeagueStanding[]>([])
+  const [placementPoints, setPlacementPoints] = useState("10, 7, 5, 3, 1")
   const [structure, setStructure] = useState<{ sessions: any[]; rounds: any[]; matches: any[]; participants: any[]; entries: any[]; profiles: any[] }>({ sessions: [], rounds: [], matches: [], participants: [], entries: [], profiles: [] })
   const [structureTitle, setStructureTitle] = useState("")
   const [structureLoading, setStructureLoading] = useState(false)
@@ -146,6 +148,10 @@ export default function EventDetailsPage() {
           const linked = await getLeagueTournaments(eventId)
           setLeagueTournaments(linked.tournaments)
           setAvailableTournaments(linked.available)
+          const season = await getLeagueStandings(eventId)
+          setLeagueStandings(season.standings)
+          const savedPoints = (result.event.event_config as Record<string, unknown> | null)?.placementPoints
+          if (Array.isArray(savedPoints)) setPlacementPoints(savedPoints.join(", "))
         }
         if (result.event.event_type === "campaign") {
           const saved = (result.event.event_config as Record<string, unknown> | null)?.progression as Partial<CampaignProgression> | undefined
@@ -179,6 +185,17 @@ export default function EventDetailsPage() {
     setStructure({ sessions: refreshed.sessions, rounds: refreshed.rounds, matches: refreshed.matches || [], participants: refreshed.participants || [], entries: refreshed.entries || [], profiles: refreshed.profiles || [] })
     const standingsResult = await getEventStandings(eventId)
     setStandings(standingsResult.standings || [])
+    if (event?.event_type === "league") {
+      const season = await getLeagueStandings(eventId)
+      setLeagueStandings(season.standings)
+    }
+  }
+
+  const refreshLeague = async () => {
+    const [linked, season] = await Promise.all([getLeagueTournaments(eventId), getLeagueStandings(eventId)])
+    setLeagueTournaments(linked.tournaments)
+    setAvailableTournaments(linked.available)
+    setLeagueStandings(season.standings)
   }
 
   const addCompetitor = async (userId: string) => {
@@ -596,9 +613,7 @@ export default function EventDetailsPage() {
                               const result = await setTournamentLeague(eventId, item.id, false)
                               if (result.error) toast({ title: "Virhe", description: result.error, variant: "destructive" })
                               else {
-                                const updated = await getLeagueTournaments(eventId)
-                                setLeagueTournaments(updated.tournaments)
-                                setAvailableTournaments(updated.available)
+                                await refreshLeague()
                               }
                               setLeagueSaving(false)
                             }}>Irrota</ArchiveCardButton>}
@@ -620,12 +635,48 @@ export default function EventDetailsPage() {
                         const result = await setTournamentLeague(eventId, select.value, true)
                         if (result.error) toast({ title: "Virhe", description: result.error, variant: "destructive" })
                         else {
-                          const updated = await getLeagueTournaments(eventId)
-                          setLeagueTournaments(updated.tournaments)
-                          setAvailableTournaments(updated.available)
+                          await refreshLeague()
                         }
                         setLeagueSaving(false)
                       }}>Liitä turnaus</ArchiveCardButton>
+                    </div>
+                  )}
+                </ArchiveCardContent>
+              </ArchiveCard>
+            )}
+            {event.event_type === "league" && (
+              <ArchiveCard>
+                <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">Kauden sarjataulukko</ArchiveCardTitle></ArchiveCardHeader>
+                <ArchiveCardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">Päättyneiden turnausten sijoituspisteet ja liigan omien otteluiden pisteet lasketaan yhteen. Turnauksen omat ottelupisteet eivät sellaisenaan siirry liigaan.</p>
+                  {isHost && <div className="space-y-2">
+                    <label htmlFor="league-placement-points" className="block text-sm text-accent-gold">Sijoituspisteet (1., 2., 3. jne.)</label>
+                    <div className="flex flex-wrap gap-2">
+                      <input id="league-placement-points" className="min-w-0 flex-1 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm" value={placementPoints} onChange={(e) => setPlacementPoints(e.target.value)} placeholder="10, 7, 5, 3, 1" />
+                      <ArchiveCardButton disabled={leagueSaving} onClick={async () => {
+                        const values = placementPoints.split(",").map((value) => Number(value.trim()))
+                        if (values.some((value) => !Number.isInteger(value) || value < 0) || values.length < 1 || values.length > 20) {
+                          toast({ title: "Virhe", description: "Anna 1–20 kokonaislukua pilkuilla erotettuna.", variant: "destructive" })
+                          return
+                        }
+                        setLeagueSaving(true)
+                        const result = await updateLeaguePlacementPoints(eventId, values)
+                        if (result.error) toast({ title: "Virhe", description: result.error, variant: "destructive" })
+                        else await refreshLeague()
+                        setLeagueSaving(false)
+                      }}>Tallenna pisteytys</ArchiveCardButton>
+                    </div>
+                  </div>}
+                  {leagueStandings.length === 0 ? <p className="text-sm text-muted-foreground">Kauden tuloksia ei vielä ole. Liitä päättynyt turnaus tai kirjaa liigan oma ottelu.</p> : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead><tr className="border-b border-accent-gold/20 text-muted-foreground">
+                          <th className="text-left py-2 pr-3">Pelaaja</th><th className="text-right px-2">Turn.</th><th className="text-right px-2">Sij.p.</th><th className="text-right px-2">Ott.p.</th><th className="text-right pl-2">Yht.</th>
+                        </tr></thead>
+                        <tbody>{leagueStandings.map((row) => <tr key={row.key} className="border-b border-accent-gold/10">
+                          <td className="py-2 pr-3">{row.name}</td><td className="text-right px-2">{row.tournaments}</td><td className="text-right px-2">{row.leaguePoints}</td><td className="text-right px-2">{row.matchPoints}</td><td className="text-right pl-2 font-medium text-accent-gold">{row.points}</td>
+                        </tr>)}</tbody>
+                      </table>
                     </div>
                   )}
                 </ArchiveCardContent>
@@ -1108,9 +1159,9 @@ export default function EventDetailsPage() {
               </ArchiveCard>
             )}
 
-            {(event.event_type === "tournament" || event.event_type === "league") && (
+            {event.event_type === "tournament" && (
               <ArchiveCard>
-                <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">{event.event_type === "league" ? "Liigataulukko" : "Sarjataulukko"}</ArchiveCardTitle></ArchiveCardHeader>
+                <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">Sarjataulukko</ArchiveCardTitle></ArchiveCardHeader>
                 <ArchiveCardContent>
                   <p className="text-sm text-muted-foreground mb-4">Pisteet ovat järjestäjän määrittelemiä. GameTable ei päätä pisteytyssääntöä.</p>
                   {standings.length === 0 ? (
