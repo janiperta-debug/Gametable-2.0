@@ -135,13 +135,15 @@ export default function CreateEventPage() {
         event_config: {
           format: eventConfig.format.trim() || undefined,
           rounds: eventConfig.rounds.trim() || undefined,
-          scoring: {
-            mode: eventConfig.scoringMode,
-            win: Number(eventConfig.winPoints),
-            draw: Number(eventConfig.drawPoints),
-            loss: Number(eventConfig.lossPoints),
-          },
-          tiebreaker: eventConfig.tiebreaker.trim() || undefined,
+          ...(eventType === "tournament" || eventType === "league" ? {
+            scoring: {
+              mode: eventConfig.scoringMode,
+              win: Number(eventConfig.winPoints),
+              draw: Number(eventConfig.drawPoints),
+              loss: Number(eventConfig.lossPoints),
+            },
+            tiebreaker: eventConfig.tiebreaker.trim() || undefined,
+          } : {}),
           organizerNotes: eventConfig.organizerNotes.trim() || undefined,
         },
       })
