@@ -20,7 +20,7 @@ import { useTranslations } from "@/lib/i18n"
 import { getEventById, updateRSVP, cancelEvent, completeEvent, getInvitableUsers, inviteToEvent, uninviteFromEvent, type Event, type EventParticipant, type RSVPStatus } from "@/app/actions/events"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
-import { addEventRound, addPlannedEventRounds, addEventSession, addEventMatch, addEventEntry, removeEventEntry, recordEventMatch, getEventStructure, getEventStandings } from "@/app/actions/event-structure"
+import { addEventRound, addPlannedEventRounds, addEventSession, addPlannedEventSessions, updateEventSession, addEventMatch, addEventEntry, removeEventEntry, recordEventMatch, getEventStructure, getEventStandings } from "@/app/actions/event-structure"
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   game_night: "Peli-ilta",
@@ -108,6 +108,9 @@ export default function EventDetailsPage() {
   const [structure, setStructure] = useState<{ sessions: any[]; rounds: any[]; matches: any[]; participants: any[]; entries: any[]; profiles: any[] }>({ sessions: [], rounds: [], matches: [], participants: [], entries: [], profiles: [] })
   const [structureTitle, setStructureTitle] = useState("")
   const [structureLoading, setStructureLoading] = useState(false)
+  const [sessionForm, setSessionForm] = useState({ title: "", startsAt: "", endsAt: "", notes: "" })
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null)
+  const [editingSessionForm, setEditingSessionForm] = useState({ title: "", startsAt: "", endsAt: "", notes: "", status: "planned" })
 
   useEffect(() => {
     const loadEvent = async () => {
@@ -204,6 +207,78 @@ export default function EventDetailsPage() {
           description: `${result.created} kierrosta luotu.`,
         })
       }
+    }
+    setStructureLoading(false)
+  }
+
+  const toLocalDateTime = (value?: string | null) => {
+    if (!value) return ""
+    const date = new Date(value)
+    const pad = (n: number) => String(n).padStart(2, "0")
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+  }
+
+  const createPlannedSessions = async () => {
+    if (!event || event.event_type !== "campaign") return
+    const plannedSessions = Number((event.event_config as Record<string, unknown> | null)?.rounds || 0)
+    if (!plannedSessions) return
+
+    setStructureLoading(true)
+    const result = await addPlannedEventSessions(eventId)
+    if (result.error) {
+      toast({ title: t("common.error"), description: result.error, variant: "destructive" })
+    } else {
+      await refreshEventStructure()
+      if (result.created) {
+        toast({ title: t("common.success"), description: `${result.created} sessiota luotu.` })
+      }
+    }
+    setStructureLoading(false)
+  }
+
+  const createCampaignSession = async () => {
+    if (!sessionForm.title.trim()) return
+    setStructureLoading(true)
+    const result = await addEventSession(eventId, {
+      title: sessionForm.title,
+      starts_at: sessionForm.startsAt ? new Date(sessionForm.startsAt).toISOString() : undefined,
+      notes: sessionForm.notes,
+    })
+    if (result.error) {
+      toast({ title: t("common.error"), description: result.error, variant: "destructive" })
+    } else {
+      setSessionForm({ title: "", startsAt: "", endsAt: "", notes: "" })
+      await refreshEventStructure()
+    }
+    setStructureLoading(false)
+  }
+
+  const startSessionEdit = (session: any) => {
+    setEditingSessionId(session.id)
+    setEditingSessionForm({
+      title: session.title || "",
+      startsAt: toLocalDateTime(session.starts_at),
+      endsAt: toLocalDateTime(session.ends_at),
+      notes: session.notes || "",
+      status: session.status || "planned",
+    })
+  }
+
+  const saveSessionEdit = async () => {
+    if (!editingSessionId || !editingSessionForm.title.trim()) return
+    setStructureLoading(true)
+    const result = await updateEventSession(eventId, editingSessionId, {
+      title: editingSessionForm.title,
+      starts_at: editingSessionForm.startsAt ? new Date(editingSessionForm.startsAt).toISOString() : null,
+      ends_at: editingSessionForm.endsAt ? new Date(editingSessionForm.endsAt).toISOString() : null,
+      notes: editingSessionForm.notes,
+      status: editingSessionForm.status as "planned" | "active" | "completed" | "cancelled",
+    })
+    if (result.error) {
+      toast({ title: t("common.error"), description: result.error, variant: "destructive" })
+    } else {
+      setEditingSessionId(null)
+      await refreshEventStructure()
     }
     setStructureLoading(false)
   }
@@ -503,95 +578,240 @@ export default function EventDetailsPage() {
                 </ArchiveCardHeader>
                 <ArchiveCardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    Järjestäjä voi rakentaa tapahtuman etenemisen vaiheittain. GameTable ei määrää kierrosten tai sessioiden sisältöä.
+                    {event.event_type === "campaign"
+                      ? "Suunnittele kampanjan sessiot etukäteen ja täydennä niiden sisältöä matkan varrella. Suunnitelma ei ole yläraja."
+                      : "Järjestäjä voi rakentaa tapahtuman etenemisen vaiheittain. GameTable ei määrää kierrosten tai sessioiden sisältöä."}
                   </p>
-                  {event.event_type !== "campaign" && (() => {
-                    const plannedRounds = Number((event.event_config as Record<string, unknown> | null)?.rounds || 0)
-                    const currentRounds = structure.rounds.length
-                    if (!plannedRounds || currentRounds >= plannedRounds) return null
-                    return (
-                      <div className="rounded-md border border-accent-gold/20 bg-background/20 p-3 space-y-2">
-                        <div className="flex items-center justify-between gap-3">
-                          <div>
-                            <div className="text-sm text-accent-gold">Suunniteltu kierrosmäärä: {plannedRounds}</div>
-                            <div className="text-xs text-muted-foreground">Luotu {currentRounds} / {plannedRounds}. Suunnitelma ei ole yläraja.</div>
-                          </div>
-                          {isHost && (
-                            <ArchiveCardButton onClick={createPlannedRounds} disabled={structureLoading}>
-                              {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : currentRounds === 0 ? `Luo ${plannedRounds} kierrosta` : `Täydennä ${plannedRounds} kierrokseen`}
-                            </ArchiveCardButton>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  })()}
-                  {isHost && <div className="flex gap-2">
-                    <input
-                      value={structureTitle}
-                      onChange={(e) => setStructureTitle(e.target.value)}
-                      placeholder={event.event_type === "campaign" ? "Esim. Sessio 1 – Kaupungin portit" : "Esim. Kierros 1"}
-                      className="flex-1 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
-                    />
-                    <ArchiveCardButton onClick={addStructureItem} disabled={structureLoading || !structureTitle.trim()}>
-                      {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Lisää"}
-                    </ArchiveCardButton>
-                  </div>}
-                  {(event.event_type === "campaign" ? structure.sessions : structure.rounds).length === 0 ? (
-                    <p className="text-sm text-muted-foreground">Rakennetta ei ole vielä määritelty.</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {(event.event_type === "campaign" ? structure.sessions : structure.rounds).map((item: any, index: number) => (
-                        <div key={item.id} className="rounded-md border border-accent-gold/15 p-3 space-y-3">
-                          <div className="flex items-center gap-3">
-                            <span className="font-cinzel text-accent-gold">{item.session_number ?? item.round_number ?? index + 1}</span>
-                            <span>{item.title || "Nimetön vaihe"}</span>
-                          </div>
-                          {event.event_type !== "campaign" && (
-                            <div className="flex items-center justify-between text-xs text-muted-foreground">
-                              <span>{structure.matches.filter((m: any) => m.round_id === item.id).length} ottelua</span>
-                              <span>{item.status === "completed" ? "Valmis" : item.status === "active" ? "Käynnissä" : "Suunniteltu"}</span>
-                            </div>
-                          )}
-                          {event.event_type !== "campaign" && (
-                            <div data-round-id={item.id} className="space-y-2">
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                {[0,1].map((slot) => (
-                                  <select key={slot} className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm">
-                                    <option value="">Valitse pelaaja {slot + 1}</option>
-                                    {structure.entries.map((entry: any) => {
-                                      const p = structure.profiles.find((profile: any) => profile.id === entry.user_id)
-                                      return <option key={entry.id} value={entry.id}>{entry.display_name || p?.display_name || p?.username || "Kilpailija"}</option>
-                                    })}
-                                  </select>
-                                ))}
+
+                  {event.event_type === "campaign" ? (
+                    <>
+                      {(() => {
+                        const plannedSessions = Number((event.event_config as Record<string, unknown> | null)?.rounds || 0)
+                        const currentSessions = structure.sessions.length
+                        if (!plannedSessions || currentSessions >= plannedSessions) return null
+                        return (
+                          <div className="rounded-md border border-accent-gold/20 bg-background/20 p-3 space-y-2">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                              <div>
+                                <div className="text-sm text-accent-gold">Suunniteltu sessiomäärä: {plannedSessions}</div>
+                                <div className="text-xs text-muted-foreground">Luotu {currentSessions} / {plannedSessions}. Suunnitelma ei ole yläraja.</div>
                               </div>
-                              {isHost && <ArchiveCardButton onClick={() => addMatch(item.id)}>Lisää ottelu</ArchiveCardButton>}
-                              {structure.matches.filter((m: any) => m.round_id === item.id).map((m: any) => {
-                                const entryA = structure.entries.find((e: any) => e.id === m.entry_a_id)
-                                const entryB = structure.entries.find((e: any) => e.id === m.entry_b_id)
-                                const a = structure.profiles.find((p: any) => p.id === entryA?.user_id)
-                                const b = structure.profiles.find((p: any) => p.id === entryB?.user_id)
-                                const nameA = entryA?.display_name || a?.display_name || a?.username || "Kilpailija"
-                                const nameB = entryB?.display_name || b?.display_name || b?.username || "Kilpailija"
-                                return (
-                                  <div key={m.id} className="rounded-md bg-background/40 border border-accent-gold/10 p-3 space-y-2">
-                                    <div className="text-sm">{nameA} vs {nameB}</div>
-                                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                                      <input aria-label="Pelaaja 1 tulos" type="number" placeholder="P1 tulos" defaultValue={m.score_a ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`score-a-${m.id}`} />
-                                      <input aria-label="Pelaaja 2 tulos" type="number" placeholder="P2 tulos" defaultValue={m.score_b ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`score-b-${m.id}`} />
-                                      <select defaultValue={m.winner_id || ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`winner-${m.id}`}>
-                                        <option value="">Ei voittajaa</option><option value={m.player_a_id}>{nameA}</option><option value={m.player_b_id}>{nameB}</option>
+                              {isHost && (
+                                <ArchiveCardButton onClick={createPlannedSessions} disabled={structureLoading}>
+                                  {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : currentSessions === 0 ? `Luo ${plannedSessions} sessiota` : `Täydennä ${plannedSessions} sessioon`}
+                                </ArchiveCardButton>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })()}
+
+                      {isHost && (
+                        <div className="space-y-3 rounded-md border border-accent-gold/15 p-3">
+                          <div className="text-sm text-accent-gold">Lisää sessio</div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <input
+                              value={sessionForm.title}
+                              onChange={(e) => setSessionForm({ ...sessionForm, title: e.target.value })}
+                              placeholder="Esim. Sessio 1 – Kaupungin portit"
+                              className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                            />
+                            <input
+                              type="datetime-local"
+                              value={sessionForm.startsAt}
+                              onChange={(e) => setSessionForm({ ...sessionForm, startsAt: e.target.value })}
+                              className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                            />
+                          </div>
+                          <textarea
+                            value={sessionForm.notes}
+                            onChange={(e) => setSessionForm({ ...sessionForm, notes: e.target.value })}
+                            placeholder="Muistiinpanot sessiosta (valinnainen)"
+                            rows={2}
+                            className="w-full rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                          />
+                          <ArchiveCardButton onClick={createCampaignSession} disabled={structureLoading || !sessionForm.title.trim()}>
+                            {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Lisää sessio"}
+                          </ArchiveCardButton>
+                        </div>
+                      )}
+
+                      {structure.sessions.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">Sessiota ei ole vielä määritelty.</p>
+                      ) : (
+                        <div className="space-y-3">
+                          {structure.sessions.map((session: any, index: number) => {
+                            const isEditing = editingSessionId === session.id
+                            return (
+                              <div key={session.id} className="rounded-md border border-accent-gold/15 p-3 space-y-3">
+                                {isEditing ? (
+                                  <>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                      <input
+                                        value={editingSessionForm.title}
+                                        onChange={(e) => setEditingSessionForm({ ...editingSessionForm, title: e.target.value })}
+                                        className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                                      />
+                                      <select
+                                        value={editingSessionForm.status}
+                                        onChange={(e) => setEditingSessionForm({ ...editingSessionForm, status: e.target.value })}
+                                        className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                                      >
+                                        <option value="planned">Suunniteltu</option>
+                                        <option value="active">Käynnissä</option>
+                                        <option value="completed">Valmis</option>
+                                        <option value="cancelled">Peruttu</option>
                                       </select>
                                     </div>
-                                    {isHost && <ArchiveCardButton onClick={() => saveMatchResult(m.id, (document.getElementById(`winner-${m.id}`) as HTMLSelectElement)?.value, (document.getElementById(`score-a-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`score-b-${m.id}`) as HTMLInputElement)?.value)}>Tallenna tulos</ArchiveCardButton>}
-                                  </div>
-                                )
-                              })}
-                            </div>
-                          )}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                      <input
+                                        type="datetime-local"
+                                        value={editingSessionForm.startsAt}
+                                        onChange={(e) => setEditingSessionForm({ ...editingSessionForm, startsAt: e.target.value })}
+                                        className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                                      />
+                                      <input
+                                        type="datetime-local"
+                                        value={editingSessionForm.endsAt}
+                                        onChange={(e) => setEditingSessionForm({ ...editingSessionForm, endsAt: e.target.value })}
+                                        className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                                      />
+                                    </div>
+                                    <textarea
+                                      value={editingSessionForm.notes}
+                                      onChange={(e) => setEditingSessionForm({ ...editingSessionForm, notes: e.target.value })}
+                                      rows={3}
+                                      placeholder="Muistiinpanot"
+                                      className="w-full rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                                    />
+                                    <div className="flex flex-wrap gap-2">
+                                      <ArchiveCardButton onClick={saveSessionEdit} disabled={structureLoading || !editingSessionForm.title.trim()} active>
+                                        {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Tallenna"}
+                                      </ArchiveCardButton>
+                                      <ArchiveCardButton onClick={() => setEditingSessionId(null)} disabled={structureLoading}>
+                                        Peruuta
+                                      </ArchiveCardButton>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <>
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div className="min-w-0">
+                                        <div className="flex items-center gap-3">
+                                          <span className="font-cinzel text-accent-gold">{session.session_number ?? index + 1}</span>
+                                          <span className="font-medium">{session.title || "Nimetön sessio"}</span>
+                                        </div>
+                                        <div className="mt-1 text-xs text-muted-foreground">
+                                          {session.starts_at
+                                            ? `${new Date(session.starts_at).toLocaleDateString()} ${new Date(session.starts_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                                            : "Ajankohtaa ei ole määritetty"}
+                                        </div>
+                                      </div>
+                                      <Badge variant="outline" className="shrink-0 border-accent-gold/30 text-accent-gold">
+                                        {session.status === "completed" ? "Valmis" : session.status === "active" ? "Käynnissä" : session.status === "cancelled" ? "Peruttu" : "Suunniteltu"}
+                                      </Badge>
+                                    </div>
+                                    {session.notes && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{session.notes}</p>}
+                                    {isHost && (
+                                      <ArchiveCardButton onClick={() => startSessionEdit(session)}>
+                                        Muokkaa sessiota
+                                      </ArchiveCardButton>
+                                    )}
+                                  </>
+                                )}
+                              </div>
+                            )
+                          })}
                         </div>
-                      ))}
-                    </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {(() => {
+                        const plannedRounds = Number((event.event_config as Record<string, unknown> | null)?.rounds || 0)
+                        const currentRounds = structure.rounds.length
+                        if (!plannedRounds || currentRounds >= plannedRounds) return null
+                        return (
+                          <div className="rounded-md border border-accent-gold/20 bg-background/20 p-3 space-y-2">
+                            <div className="flex items-center justify-between gap-3">
+                              <div>
+                                <div className="text-sm text-accent-gold">Suunniteltu kierrosmäärä: {plannedRounds}</div>
+                                <div className="text-xs text-muted-foreground">Luotu {currentRounds} / {plannedRounds}. Suunnitelma ei ole yläraja.</div>
+                              </div>
+                              {isHost && (
+                                <ArchiveCardButton onClick={createPlannedRounds} disabled={structureLoading}>
+                                  {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : currentRounds === 0 ? `Luo ${plannedRounds} kierrosta` : `Täydennä ${plannedRounds} kierrokseen`}
+                                </ArchiveCardButton>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })()}
+                      {isHost && <div className="flex gap-2">
+                        <input
+                          value={structureTitle}
+                          onChange={(e) => setStructureTitle(e.target.value)}
+                          placeholder="Esim. Kierros 1"
+                          className="flex-1 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm"
+                        />
+                        <ArchiveCardButton onClick={addStructureItem} disabled={structureLoading || !structureTitle.trim()}>
+                          {structureLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Lisää"}
+                        </ArchiveCardButton>
+                      </div>}
+                      {(structure.rounds.length === 0) ? (
+                        <p className="text-sm text-muted-foreground">Kierroksia ei ole vielä määritelty.</p>
+                      ) : (
+                        <div className="space-y-3">
+                          {structure.rounds.map((item: any, index: number) => (
+                            <div key={item.id} className="rounded-md border border-accent-gold/15 p-3 space-y-3">
+                              <div className="flex items-center gap-3">
+                                <span className="font-cinzel text-accent-gold">{item.round_number ?? index + 1}</span>
+                                <span>{item.title || "Nimetön vaihe"}</span>
+                              </div>
+                              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                <span>{structure.matches.filter((m: any) => m.round_id === item.id).length} ottelua</span>
+                                <span>{item.status === "completed" ? "Valmis" : item.status === "active" ? "Käynnissä" : "Suunniteltu"}</span>
+                              </div>
+                              <div data-round-id={item.id} className="space-y-2">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                  {[0,1].map((slot) => (
+                                    <select key={slot} className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm">
+                                      <option value="">Valitse pelaaja {slot + 1}</option>
+                                      {structure.entries.map((entry: any) => {
+                                        const p = structure.profiles.find((profile: any) => profile.id === entry.user_id)
+                                        return <option key={entry.id} value={entry.id}>{entry.display_name || p?.display_name || p?.username || "Kilpailija"}</option>
+                                      })}
+                                    </select>
+                                  ))}
+                                </div>
+                                {isHost && <ArchiveCardButton onClick={() => addMatch(item.id)}>Lisää ottelu</ArchiveCardButton>}
+                                {structure.matches.filter((m: any) => m.round_id === item.id).map((m: any) => {
+                                  const entryA = structure.entries.find((e: any) => e.id === m.entry_a_id)
+                                  const entryB = structure.entries.find((e: any) => e.id === m.entry_b_id)
+                                  const a = structure.profiles.find((p: any) => p.id === entryA?.user_id)
+                                  const b = structure.profiles.find((p: any) => p.id === entryB?.user_id)
+                                  const nameA = entryA?.display_name || a?.display_name || a?.username || "Kilpailija"
+                                  const nameB = entryB?.display_name || b?.display_name || b?.username || "Kilpailija"
+                                  return (
+                                    <div key={m.id} className="rounded-md bg-background/40 border border-accent-gold/10 p-3 space-y-2">
+                                      <div className="text-sm">{nameA} vs {nameB}</div>
+                                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                                        <input aria-label="Pelaaja 1 tulos" type="number" placeholder="P1 tulos" defaultValue={m.score_a ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`score-a-${m.id}`} />
+                                        <input aria-label="Pelaaja 2 tulos" type="number" placeholder="P2 tulos" defaultValue={m.score_b ?? ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`score-b-${m.id}`} />
+                                        <select defaultValue={m.winner_id || ""} className="rounded border border-accent-gold/20 bg-background px-2 py-1 text-sm" id={`winner-${m.id}`}>
+                                          <option value="">Ei voittajaa</option><option value={m.player_a_id}>{nameA}</option><option value={m.player_b_id}>{nameB}</option>
+                                        </select>
+                                      </div>
+                                      {isHost && <ArchiveCardButton onClick={() => saveMatchResult(m.id, (document.getElementById(`winner-${m.id}`) as HTMLSelectElement)?.value, (document.getElementById(`score-a-${m.id}`) as HTMLInputElement)?.value, (document.getElementById(`score-b-${m.id}`) as HTMLInputElement)?.value)}>Tallenna tulos</ArchiveCardButton>}
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
                   )}
                 </ArchiveCardContent>
               </ArchiveCard>
