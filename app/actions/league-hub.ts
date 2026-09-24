@@ -288,3 +288,37 @@ export async function removeLeagueMember(leagueId:string,memberId:string) {
  revalidatePath("/leagues/"+leagueId)
  return {success:true}
 }
+
+export async function searchLeaguePlayers(leagueId:string, query:string) {
+ const supabase=await createClient()
+ const {data:{user}}=await supabase.auth.getUser()
+ if(!user)return {players:[],error:"Kirjaudu sisään."}
+ const {data:league}=await supabase.from("leagues").select("owner_id").eq("id",leagueId).single()
+ if(league?.owner_id!==user.id)return {players:[],error:"Vain järjestäjä voi hakea osallistujia."}
+ const term=query.trim().replace(/^@/,"").slice(0,60)
+ if(term.length<2)return {players:[]}
+ // Escape PostgREST filter syntax and SQL LIKE wildcards from user input.
+ const safe=term.replace(/[,%()\\]/g," ").replace(/[%_]/g," ").trim()
+ if(safe.length<2)return {players:[]}
+ const {data,error}=await supabase.from("profiles")
+  .select("id,username,display_name,avatar_url")
+  .or(`username.ilike.%${safe}%,display_name.ilike.%${safe}%`)
+  .neq("id",user.id).limit(12)
+ if(error)return {players:[],error:"Pelaajien haku epäonnistui."}
+ return {players:data||[]}
+}
+
+export async function addLeagueMemberById(leagueId:string,playerId:string) {
+ const supabase=await createClient()
+ const {data:{user}}=await supabase.auth.getUser()
+ if(!user)return {error:"Kirjaudu sisään."}
+ const {data:league}=await supabase.from("leagues").select("owner_id").eq("id",leagueId).single()
+ if(league?.owner_id!==user.id)return {error:"Vain järjestäjä voi lisätä osallistujia."}
+ if(playerId===user.id)return {error:"Olet jo liigan järjestäjä."}
+ const {data:profile}=await supabase.from("profiles").select("id").eq("id",playerId).maybeSingle()
+ if(!profile)return {error:"Pelaajaa ei löytynyt."}
+ const {error}=await supabase.from("league_members").upsert({league_id:leagueId,user_id:playerId},{onConflict:"league_id,user_id",ignoreDuplicates:true})
+ if(error)return {error:error.message}
+ revalidatePath("/leagues/"+leagueId)
+ return {success:true}
+}
