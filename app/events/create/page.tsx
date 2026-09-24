@@ -118,7 +118,7 @@ export default function CreateEventPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.title.trim() || !formData.date || !formData.time || !formData.endDate || !formData.endTime) return
-    if (eventType === "league" && (!eventConfig.placementPoints.trim() || eventConfig.placementPoints.split(",").some((value) => !/^\\d+$/.test(value.trim()) || Number(value) > 1000) || eventConfig.placementPoints.split(",").length > 20)) {
+    if (eventType === "league" && (!eventConfig.placementPoints.trim() || eventConfig.placementPoints.split(",").some((value) => !/^\d+$/.test(value.trim()) || Number(value) > 1000) || eventConfig.placementPoints.split(",").length > 20)) {
       toast({ title: "Tarkista sijoituspisteet", description: "Anna 1–20 pistemäärää pilkuilla erotettuna (0–1000).", variant: "destructive" })
       return
     }
