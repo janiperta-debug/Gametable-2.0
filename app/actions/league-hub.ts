@@ -125,3 +125,48 @@ export async function convertLegacyLeague(eventId: string) {
  revalidatePath("/leagues/" + league.id)
  return { id: league.id }
 }
+
+
+export async function updateLeague(leagueId: string, input: { name: string; game: string; description: string; privacy: "public" | "private" }) {
+ const supabase = await createClient()
+ const { data: { user } } = await supabase.auth.getUser()
+ if (!user) return { error: "Kirjaudu sisään." }
+ if (input.name.trim().length < 2 || input.name.trim().length > 120) return { error: "Liigan nimessä tulee olla 2–120 merkkiä." }
+ const { data, error } = await supabase.from("leagues").update({
+  name: input.name.trim(), game: input.game.trim() || null,
+  description: input.description.trim() || null, privacy: input.privacy,
+ }).eq("id", leagueId).eq("owner_id", user.id).select("id").maybeSingle()
+ if (error || !data) return { error: error?.message || "Liigan muokkaus ei onnistunut." }
+ revalidatePath("/leagues/" + leagueId)
+ revalidatePath("/events")
+ return { success: true }
+}
+
+export async function updateLeagueSeason(leagueId: string, seasonId: string, input: { name: string; startsOn: string; endsOn: string }) {
+ const supabase = await createClient()
+ const { data: { user } } = await supabase.auth.getUser()
+ const { data: league } = await supabase.from("leagues").select("owner_id").eq("id", leagueId).single()
+ if (!user || league?.owner_id !== user.id) return { error: "Vain järjestäjä voi muokata kautta." }
+ if (!input.name.trim() || input.name.trim().length > 120) return { error: "Anna kauden nimi (enintään 120 merkkiä)." }
+ if (input.startsOn && input.endsOn && input.endsOn < input.startsOn) return { error: "Päättymispäivä ei voi olla ennen alkua." }
+ const { data, error } = await supabase.from("league_seasons").update({
+  name: input.name.trim(), starts_on: input.startsOn || null, ends_on: input.endsOn || null,
+ }).eq("id", seasonId).eq("league_id", leagueId).select("id").maybeSingle()
+ if (error || !data) return { error: error?.message || "Kauden muokkaus ei onnistunut." }
+ revalidatePath("/leagues/" + leagueId)
+ return { success: true }
+}
+
+export async function deleteLeague(leagueId: string) {
+ const supabase = await createClient()
+ const { data: { user } } = await supabase.auth.getUser()
+ if (!user) return { error: "Kirjaudu sisään." }
+ const { data: league } = await supabase.from("leagues").select("id,owner_id").eq("id", leagueId).single()
+ if (!league || league.owner_id !== user.id) return { error: "Vain järjestäjä voi poistaa liigan." }
+ // Cascades remove seasons and their links; linked tournaments and game nights remain.
+ const { data, error } = await supabase.from("leagues").delete().eq("id", leagueId).eq("owner_id", user.id).select("id").maybeSingle()
+ if (error || !data) return { error: error?.message || "Liigan poistaminen ei onnistunut." }
+ revalidatePath("/events")
+ revalidatePath("/leagues")
+ return { success: true }
+}
