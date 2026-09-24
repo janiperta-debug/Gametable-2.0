@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { ChevronDown, ChevronRight, Filter, Loader2, Plus, Search } from "lucide-react"
-import { ArchiveButton, ArchiveCard, ArchiveCardContent, ArchiveFrame, archiveField } from "@/components/archive-frame"
+import { ArchiveButton, ArchiveCardButton, ArchiveFrame, archiveField } from "@/components/archive-frame"
 import { ArchiveDivider } from "@/components/archive-divider"
 import { Input } from "@/components/ui/input"
 import { ThemeHero } from "@/components/theme-hero"
@@ -154,7 +154,7 @@ export default function EventsPage() {
                 <Search className="absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input aria-label="Hae tapahtumia" placeholder={t("events.searchEvents")} value={query} onChange={(event) => { setQuery(event.target.value); setAllUpcoming(false) }} className={cn("w-full pl-10", archiveField)} />
               </div>
-              <ArchiveButton active={filtersOpen} onClick={() => setFiltersOpen(!filtersOpen)} icon={<Filter className="h-4 w-4" />}>{filtersOpen ? "Piilota suodattimet" : "Suodattimet"}{types.length ? ` (${types.length})` : ""}</ArchiveButton>
+              <ArchiveCardButton active={filtersOpen} onClick={() => setFiltersOpen(!filtersOpen)} icon={<Filter className="h-4 w-4" />}>{filtersOpen ? "Piilota suodattimet" : "Suodattimet"}{types.length ? ` (${types.length})` : ""}</ArchiveCardButton>
               {filtersOpen && <div className="flex flex-wrap gap-2 rounded-lg border border-accent-gold/20 p-3">
                 {Object.entries(categoryLabels).map(([kind, label]) => <button type="button" key={kind} aria-pressed={types.includes(kind)} onClick={() => setTypes((current) => current.includes(kind) ? current.filter((value) => value !== kind) : [...current, kind])} className={cn("rounded-lg border px-3 py-2 text-sm", types.includes(kind) ? "border-accent-gold bg-accent-gold/15 text-accent-gold" : "border-accent-gold/20 text-muted-foreground")}>{label}</button>)}
                 {types.length > 0 && <button type="button" className="px-2 text-sm text-accent-gold underline" onClick={() => setTypes([])}>Tyhjennä</button>}
