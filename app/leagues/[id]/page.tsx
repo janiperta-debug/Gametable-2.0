@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { getLeague, addLeagueSeason, linkSeasonEvent, updateLeague, updateLeagueSeason, deleteLeague } from "@/app/actions/league-hub"
+import { getLeague, addLeagueSeason, linkSeasonEvent, updateLeague, updateLeagueSeason, deleteLeague, joinLeague, leaveLeague, addLeagueMember, removeLeagueMember } from "@/app/actions/league-hub"
 import { ArchiveFrame, ArchiveButton, ArchiveCard, ArchiveCardHeader, ArchiveCardTitle, ArchiveCardContent, ArchiveCardButton } from "@/components/archive-frame"
 
 type Hub = Awaited<ReturnType<typeof getLeague>>
@@ -11,6 +11,7 @@ export default function LeaguePage() {
  const router = useRouter()
  const [hub, setHub] = useState<Hub | null>(null)
  const [newSeason, setNewSeason] = useState("")
+ const [newMember, setNewMember] = useState("")
  const [selected, setSelected] = useState<Record<string,string>>({})
  const [busy, setBusy] = useState(false)
  const [editing, setEditing] = useState(false)
@@ -25,11 +26,17 @@ export default function LeaguePage() {
  return <ArchiveFrame className="mx-auto max-w-5xl">
   <div className="space-y-6 p-3 sm:p-6">
    <ArchiveCardButton type="button" onClick={() => router.push("/events")}>← Tapahtumat</ArchiveCardButton>
-   <div className="space-y-2">
+   <div className="space-y-4 text-center">
+    <div className="relative mx-auto flex w-full max-w-xl items-center justify-center py-3">
+     <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 w-[calc(50%-5rem)] bg-contain bg-left bg-no-repeat sm:w-[calc(50%-6rem)]" style={{backgroundImage:'url("/images/events/ornate-left.png")'}} />
+     <img src="/images/events/league.png" alt="Liiga" className="relative z-10 aspect-square w-32 rounded-lg border border-accent-gold/30 object-cover sm:w-40" />
+     <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-[calc(50%-5rem)] bg-contain bg-right bg-no-repeat sm:w-[calc(50%-6rem)]" style={{backgroundImage:'url("/images/events/ornate-right.png")'}} />
+    </div>
     <p className="text-sm uppercase tracking-widest text-accent-gold">GameTable · Liiga</p>
-    <h1 className="font-heading text-3xl">{hub.league.name}</h1>
+    <h1 className="font-heading text-3xl break-words">{hub.league.name}</h1>
+    <p className="text-sm text-muted-foreground">{hub.league.privacy==="public"?"Julkinen liiga":"Yksityinen liiga"}</p>
     {hub.league.game && <p className="text-accent-gold">{hub.league.game}</p>}
-    {hub.league.description && <p className="text-muted-foreground">{hub.league.description}</p>}
+    {hub.league.description && <p className="whitespace-pre-wrap text-muted-foreground">{hub.league.description}</p>}
    </div>
 
    {hub.isOwner && <div className="flex flex-wrap gap-3">
@@ -59,6 +66,45 @@ export default function LeaguePage() {
     }}>Tallenna muutokset</ArchiveCardButton>
    </ArchiveCardContent></ArchiveCard>}
    {error && <p role="alert" className="text-red-400">{error}</p>}
+   <ArchiveCard corners={false} centerOrnaments={false}>
+    <ArchiveCardHeader><ArchiveCardTitle>Liigan osallistujat ({hub.members.length})</ArchiveCardTitle></ArchiveCardHeader>
+    <ArchiveCardContent className="space-y-4">
+     <div className="flex flex-wrap gap-3">
+      {hub.members.map(member=><div key={member.user_id} className="flex items-center gap-2 rounded-lg border border-accent-gold/20 p-2">
+       {member.avatar_url?<img src={member.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover"/>:<div className="h-9 w-9 rounded-full bg-accent-gold/20"/>}
+       <span>{member.display_name}{member.isOwner?" · Järjestäjä":""}</span>
+       {hub.isOwner && !member.isOwner && <button type="button" disabled={busy} className="text-xs text-red-300 underline" onClick={async()=>{
+        if(!window.confirm("Poistetaanko osallistuja liigasta?"))return
+        setBusy(true);setError("")
+        try{const result=await removeLeagueMember(id,member.user_id);if(result.error)setError(result.error);else await refresh()}
+        finally{setBusy(false)}
+       }}>Poista</button>}
+      </div>)}
+     </div>
+     {!hub.isOwner && hub.league.privacy==="public" && <ArchiveCardButton disabled={busy} onClick={async()=>{
+      setBusy(true);setError("")
+      try{const result=hub.isMember?await leaveLeague(id):await joinLeague(id);if(result.error)setError(result.error);else await refresh()}
+      finally{setBusy(false)}
+     }}>{hub.isMember?"Poistu liigasta":"Liity liigaan"}</ArchiveCardButton>}
+     {hub.results.filter(result=>result.season_id===season.id).length>0 && <div className="space-y-2">
+      <h3 className="font-heading text-lg text-accent-gold">Kirjatut ottelutulokset</h3>
+      {hub.results.filter(result=>result.season_id===season.id).map(result=><div key={result.id} className="rounded-md border border-accent-gold/20 p-3">
+       <p className="text-xs text-muted-foreground">{result.event_title}</p>
+       <p className="break-words">{result.player_a} {result.score_a!==null?result.score_a:"–"} – {result.score_b!==null?result.score_b:"–"} {result.player_b}</p>
+       {result.result && <p className="text-xs text-muted-foreground">{result.result}</p>}
+      </div>)}
+     </div>}
+     {hub.isOwner && <div className="flex flex-wrap gap-2">
+      <input aria-label="Lisättävän pelaajan käyttäjätunnus" placeholder="Pelaajan käyttäjätunnus" value={newMember} onChange={e=>setNewMember(e.target.value)}
+       className="min-w-0 flex-1 rounded-md border border-accent-gold/30 bg-background px-3 py-2"/>
+      <ArchiveCardButton disabled={busy||!newMember.trim()} onClick={async()=>{
+       setBusy(true);setError("")
+       try{const result=await addLeagueMember(id,newMember);if(result.error)setError(result.error);else{setNewMember("");await refresh()}}
+       finally{setBusy(false)}
+      }}>Lisää osallistuja</ArchiveCardButton>
+     </div>}
+    </ArchiveCardContent>
+   </ArchiveCard>}
    {hub.league.legacy_event_id && <div className="rounded-lg border border-accent-gold/25 p-4 space-y-2">
      <p className="text-sm text-muted-foreground">Tämä liiga on siirretty vanhasta tapahtumamallista. Aiemmat sarjaottelut, osallistujat ja tulokset säilyvät alkuperäisellä sivulla, kunnes niiden kausikohtainen siirto on valmis.</p>
      <ArchiveCardButton onClick={() => router.push("/events/" + hub.league.legacy_event_id)}>Avaa aiemmat ottelut ja tulokset</ArchiveCardButton>
