@@ -19,6 +19,7 @@ import {
 import { useTranslations } from "@/lib/i18n"
 import { getEventById, updateRSVP, cancelEvent, completeEvent, getInvitableUsers, inviteToEvent, uninviteFromEvent, type Event, type EventParticipant, type RSVPStatus } from "@/app/actions/events"
 import { useToast } from "@/hooks/use-toast"
+import { getLeagueTournaments, setTournamentLeague } from "@/app/actions/league"
 import { createClient } from "@/lib/supabase/client"
 import { addEventRound, addPlannedEventRounds, addEventSession, addPlannedEventSessions, updateEventSession, updateCampaignProgression, addEventMatch, addEventEntry, removeEventEntry, recordEventMatch, getEventStructure, getEventStandings, type CampaignProgression } from "@/app/actions/event-structure"
 
@@ -105,6 +106,9 @@ export default function EventDetailsPage() {
   const [inviting, setInviting] = useState<string | null>(null)
   const [showInviteSection, setShowInviteSection] = useState(false)
   const [standings, setStandings] = useState<any[]>([])
+  const [leagueTournaments, setLeagueTournaments] = useState<any[]>([])
+  const [availableTournaments, setAvailableTournaments] = useState<any[]>([])
+  const [leagueSaving, setLeagueSaving] = useState(false)
   const [structure, setStructure] = useState<{ sessions: any[]; rounds: any[]; matches: any[]; participants: any[]; entries: any[]; profiles: any[] }>({ sessions: [], rounds: [], matches: [], participants: [], entries: [], profiles: [] })
   const [structureTitle, setStructureTitle] = useState("")
   const [structureLoading, setStructureLoading] = useState(false)
@@ -138,6 +142,11 @@ export default function EventDetailsPage() {
         setError(result.error)
       } else if (result.event) {
         setEvent(result.event)
+        if (result.event.event_type === "league") {
+          const linked = await getLeagueTournaments(eventId)
+          setLeagueTournaments(linked.tournaments)
+          setAvailableTournaments(linked.available)
+        }
         if (result.event.event_type === "campaign") {
           const saved = (result.event.event_config as Record<string, unknown> | null)?.progression as Partial<CampaignProgression> | undefined
           if (saved) {
@@ -565,6 +574,63 @@ export default function EventDetailsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Event Details */}
           <div className="lg:col-span-2 space-y-6">
+            {event.event_type === "league" && (
+              <ArchiveCard>
+                <ArchiveCardHeader>
+                  <ArchiveCardTitle className="text-xl normal-case">Liigan turnaukset</ArchiveCardTitle>
+                </ArchiveCardHeader>
+                <ArchiveCardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">Kokoa kauden turnaukset yhteen. Jokaisen turnauksen ottelut ja tulokset säilyvät sen omalla sivulla.</p>
+                  {leagueTournaments.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Liigaan ei ole vielä liitetty turnauksia.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {leagueTournaments.map((item: any) => (
+                        <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-accent-gold/20 p-3">
+                          <button className="text-left text-accent-gold hover:underline" onClick={() => router.push(`/events/${item.id}`)}>{item.title}</button>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span>{new Date(item.starts_at).toLocaleDateString("fi-FI")}</span>
+                            <span>{item.status === "completed" ? "Päättynyt" : item.status === "cancelled" ? "Peruttu" : "Tulossa / käynnissä"}</span>
+                            {isHost && <ArchiveCardButton disabled={leagueSaving} onClick={async () => {
+                              setLeagueSaving(true)
+                              const result = await setTournamentLeague(eventId, item.id, false)
+                              if (result.error) toast({ title: "Virhe", description: result.error, variant: "destructive" })
+                              else {
+                                const updated = await getLeagueTournaments(eventId)
+                                setLeagueTournaments(updated.tournaments)
+                                setAvailableTournaments(updated.available)
+                              }
+                              setLeagueSaving(false)
+                            }}>Irrota</ArchiveCardButton>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {isHost && (
+                    <div className="flex flex-wrap gap-2">
+                      <select id="league-tournament-select" className="min-w-0 flex-1 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm">
+                        <option value="">Valitse oma turnaus</option>
+                        {availableTournaments.map((item: any) => <option key={item.id} value={item.id}>{item.title}</option>)}
+                      </select>
+                      <ArchiveCardButton disabled={leagueSaving || availableTournaments.length === 0} onClick={async () => {
+                        const select = document.getElementById("league-tournament-select") as HTMLSelectElement | null
+                        if (!select?.value) return
+                        setLeagueSaving(true)
+                        const result = await setTournamentLeague(eventId, select.value, true)
+                        if (result.error) toast({ title: "Virhe", description: result.error, variant: "destructive" })
+                        else {
+                          const updated = await getLeagueTournaments(eventId)
+                          setLeagueTournaments(updated.tournaments)
+                          setAvailableTournaments(updated.available)
+                        }
+                        setLeagueSaving(false)
+                      }}>Liitä turnaus</ArchiveCardButton>
+                    </div>
+                  )}
+                </ArchiveCardContent>
+              </ArchiveCard>
+            )}
             {/* Competition Entries */}
             {(event.event_type === "tournament" || event.event_type === "league") && (
               <ArchiveCard>
