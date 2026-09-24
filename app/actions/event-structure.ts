@@ -51,7 +51,7 @@ export async function getEventStructure(eventId: string) {
   return { sessions: sessions || [], rounds: rounds || [], matches: matches || [], participants: participants || [], entries: entries || [], profiles: profiles || [], error: sessionsError?.message || roundsError?.message || matchesError?.message }
 }
 
-export async function addEventSession(eventId: string, data: { title: string; starts_at?: string; notes?: string }) {
+export async function addEventSession(eventId: string, data: { title: string; starts_at?: string; ends_at?: string; notes?: string }) {
   const { supabase, error } = await requireHost(eventId)
   if (error) return { error }
   const { count } = await supabase.from("event_sessions").select("*", { count: "exact", head: true }).eq("event_id", eventId)
