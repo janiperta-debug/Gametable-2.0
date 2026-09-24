@@ -18,7 +18,7 @@ import {
   Edit, Loader2, User, XCircle, UserPlus, X
 } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
-import { getEventById, updateRSVP, cancelEvent, getInvitableUsers, inviteToEvent, uninviteFromEvent, type Event, type EventParticipant, type RSVPStatus } from "@/app/actions/events"
+import { getEventById, updateRSVP, cancelEvent, completeEvent, getInvitableUsers, inviteToEvent, uninviteFromEvent, type Event, type EventParticipant, type RSVPStatus } from "@/app/actions/events"
 import { useToast } from "@/hooks/use-toast"
 import { createClient } from "@/lib/supabase/client"
 import { addEventRound, addEventSession, addEventMatch, addEventEntry, removeEventEntry, recordEventMatch, getEventStructure, getEventStandings } from "@/app/actions/event-structure"
@@ -101,6 +101,7 @@ export default function EventDetailsPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [updatingRsvp, setUpdatingRsvp] = useState(false)
   const [cancelling, setCancelling] = useState(false)
+  const [completing, setCompleting] = useState(false)
   const [invitableUsers, setInvitableUsers] = useState<Array<{ id: string; display_name: string | null; avatar_url: string | null }>>([])
   const [inviting, setInviting] = useState<string | null>(null)
   const [showInviteSection, setShowInviteSection] = useState(false)
@@ -236,6 +237,32 @@ export default function EventDetailsPage() {
     setUpdatingRsvp(false)
   }
 
+  const handleComplete = async () => {
+    if (!confirm(t("events.confirmComplete") || "Are you sure you want to mark this event as completed? This will move it to past events.")) {
+      return
+    }
+
+    setCompleting(true)
+    const result = await completeEvent(eventId)
+
+    if (result.error) {
+      toast({
+        title: t("common.error"),
+        description: result.error,
+        variant: "destructive",
+      })
+    } else {
+      setEvent((current) => current ? { ...current, status: "completed" } : current)
+      toast({
+        title: t("common.success"),
+        description: t("events.eventCompleted") || "Event completed",
+      })
+      router.push("/events")
+    }
+
+    setCompleting(false)
+  }
+
   const handleCancel = async () => {
     if (!confirm(t("events.confirmCancel") || "Are you sure you want to cancel this event?")) {
       return
@@ -362,7 +389,7 @@ export default function EventDetailsPage() {
             </ArchiveCardButton>
           </div>
 
-          {isHost && (
+          {isHost && event.status !== "completed" && event.status !== "cancelled" && (
             <>
               <ArchiveCardButton asChild icon={<Edit className="w-4 h-4" />}>
                 <Link href={`/events/${eventId}/edit`}>
@@ -370,8 +397,15 @@ export default function EventDetailsPage() {
                 </Link>
               </ArchiveCardButton>
               <ArchiveCardButton
+                onClick={handleComplete}
+                disabled={completing || cancelling}
+                icon={completing ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+              >
+                <span className="hidden sm:inline">{t("events.completeEvent") || "Päätä tapahtuma"}</span>
+              </ArchiveCardButton>
+              <ArchiveCardButton
                 onClick={handleCancel}
-                disabled={cancelling}
+                disabled={cancelling || completing}
                 icon={cancelling ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
               >
                 <span className="hidden sm:inline">{t("events.cancel") || "Cancel"}</span>
