@@ -262,7 +262,7 @@ export default function EditEventPage() {
 
                 <div className="space-y-2">
                   <Label className="text-accent-gold">
-                    {t("events.privacy") || "Privacy"}
+                    {t("events.privacy") === "events.privacy" ? "Näkyvyys" : t("events.privacy")}
                   </Label>
                   <Select value={privacy} onValueChange={(v) => setPrivacy(v as EventPrivacy)}>
                     <SelectTrigger className={archiveField}>
@@ -367,7 +367,7 @@ export default function EditEventPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="startsAt" className="text-accent-gold">
-                    {t("events.dateTime") || "Date & Time"} *
+                    {t("events.dateTime") === "events.dateTime" ? "Päivämäärä ja kellonaika" : t("events.dateTime")} *
                   </Label>
                   <Input
                     id="startsAt"
