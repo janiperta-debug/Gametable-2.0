@@ -109,6 +109,7 @@ export default function EventDetailsPage() {
   const [leagueTournaments, setLeagueTournaments] = useState<any[]>([])
   const [availableTournaments, setAvailableTournaments] = useState<any[]>([])
   const [leagueSaving, setLeagueSaving] = useState(false)
+  const [leagueMatchForm, setLeagueMatchForm] = useState({ entryA: "", entryB: "", roundId: "" })
   const [leagueStandings, setLeagueStandings] = useState<LeagueStanding[]>([])
   const [placementPoints, setPlacementPoints] = useState("10, 7, 5, 3, 1")
   const [structure, setStructure] = useState<{ sessions: any[]; rounds: any[]; matches: any[]; participants: any[]; entries: any[]; profiles: any[] }>({ sessions: [], rounds: [], matches: [], participants: [], entries: [], profiles: [] })
@@ -226,6 +227,37 @@ export default function EventDetailsPage() {
     if (result.error) toast({ title: t("common.error"), description: result.error, variant: "destructive" })
     else {
       await refreshEventStructure()
+    }
+  }
+
+  const addLeagueMatch = async () => {
+    if (!leagueMatchForm.entryA || !leagueMatchForm.entryB || leagueMatchForm.entryA === leagueMatchForm.entryB) {
+      toast({ title: "Valitse kaksi eri kilpailijaa", variant: "destructive" })
+      return
+    }
+    setLeagueSaving(true)
+    try {
+      let roundId = leagueMatchForm.roundId
+      if (!roundId) {
+        const existing = structure.rounds.find((round: any) => round.title === "Sarjaottelut")
+        if (existing) roundId = existing.id
+        else {
+          const created = await addEventRound(eventId, { title: "Sarjaottelut" })
+          if (created.error || !created.round?.id) {
+            toast({ title: "Ottelun lisääminen epäonnistui", description: created.error, variant: "destructive" })
+            return
+          }
+          roundId = created.round.id
+        }
+      }
+      const result = await addEventMatch(eventId, { round_id: roundId, entry_a_id: leagueMatchForm.entryA, entry_b_id: leagueMatchForm.entryB })
+      if (result.error) toast({ title: "Ottelun lisääminen epäonnistui", description: result.error, variant: "destructive" })
+      else {
+        setLeagueMatchForm({ entryA: "", entryB: "", roundId: "" })
+        await refreshEventStructure()
+      }
+    } finally {
+      setLeagueSaving(false)
     }
   }
 
@@ -677,6 +709,65 @@ export default function EventDetailsPage() {
                           <td className="py-2 pr-3">{row.name}</td><td className="text-right px-2">{row.tournaments}</td><td className="text-right px-2">{row.leaguePoints}</td><td className="text-right px-2">{row.matchPoints}</td><td className="text-right pl-2 font-medium text-accent-gold">{row.points}</td>
                         </tr>)}</tbody>
                       </table>
+                    </div>
+                  )}
+                </ArchiveCardContent>
+              </ArchiveCard>
+            )}
+            {event.event_type === "league" && (
+              <ArchiveCard>
+                <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">Sarjaottelut</ArchiveCardTitle></ArchiveCardHeader>
+                <ArchiveCardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">Lisää yksittäisiä kausiotteluita ilman erillistä turnausta. Ottelut kerryttävät kauden ottelupisteitä.</p>
+                  {isHost && <div className="space-y-3 rounded-md border border-accent-gold/20 p-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {(["entryA", "entryB"] as const).map((side, index) => (
+                        <select key={side} aria-label={`Kilpailija ${index + 1}`} value={leagueMatchForm[side]} onChange={(e) => setLeagueMatchForm((current) => ({ ...current, [side]: e.target.value }))} className="min-w-0 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm">
+                          <option value="">Valitse kilpailija {index + 1}</option>
+                          {structure.entries.filter((entry: any) => entry.status === "active").map((entry: any) => {
+                            const profile = structure.profiles.find((p: any) => p.id === entry.user_id)
+                            return <option key={entry.id} value={entry.id}>{entry.display_name || profile?.display_name || profile?.username || "Kilpailija"}</option>
+                          })}
+                        </select>
+                      ))}
+                    </div>
+                    <select aria-label="Ottelukierros" value={leagueMatchForm.roundId} onChange={(e) => setLeagueMatchForm((current) => ({ ...current, roundId: e.target.value }))} className="w-full min-w-0 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm">
+                      <option value="">Sarjaottelut (automaattinen ryhmä)</option>
+                      {structure.rounds.map((round: any) => <option key={round.id} value={round.id}>{round.title || `Kierros ${round.round_number}`}</option>)}
+                    </select>
+                    <ArchiveCardButton disabled={leagueSaving || !leagueMatchForm.entryA || !leagueMatchForm.entryB || leagueMatchForm.entryA === leagueMatchForm.entryB} onClick={addLeagueMatch}>Lisää sarjaottelu</ArchiveCardButton>
+                  </div>}
+                  {structure.matches.length === 0 ? <p className="text-sm text-muted-foreground">Yksittäisiä sarjaotteluita ei ole vielä lisätty.</p> : (
+                    <div className="space-y-2">
+                      {structure.matches.map((match: any) => {
+                        const a = structure.entries.find((entry: any) => entry.id === match.entry_a_id)
+                        const b = structure.entries.find((entry: any) => entry.id === match.entry_b_id)
+                        const round = structure.rounds.find((item: any) => item.id === match.round_id)
+                        return <div key={match.id} className="rounded-md border border-accent-gold/15 p-3 space-y-2">
+                          <div className="flex flex-wrap justify-between gap-2 text-sm"><span>{a?.display_name || "Kilpailija"} – {b?.display_name || "Kilpailija"}</span><span className="text-muted-foreground">{round?.title || "Sarjaottelu"} · {match.status === "completed" ? "Pelattu" : "Tulossa"}</span></div>
+                          {match.status === "completed" && <div className="text-sm text-accent-gold">Tulos: {match.score_a ?? "–"} – {match.score_b ?? "–"}</div>}
+                          {isHost && <div className="grid grid-cols-2 gap-2">
+                            <input id={`league-score-a-${match.id}`} aria-label="Kotijoukkueen tulos" type="number" min="0" defaultValue={match.score_a ?? ""} placeholder="Tulos 1" className="min-w-0 rounded-md border border-accent-gold/20 bg-background px-2 py-2 text-sm" />
+                            <input id={`league-score-b-${match.id}`} aria-label="Vierasjoukkueen tulos" type="number" min="0" defaultValue={match.score_b ?? ""} placeholder="Tulos 2" className="min-w-0 rounded-md border border-accent-gold/20 bg-background px-2 py-2 text-sm" />
+                            <ArchiveCardButton disabled={leagueSaving} onClick={async () => {
+                              const first = (document.getElementById(`league-score-a-${match.id}`) as HTMLInputElement)?.value
+                              const second = (document.getElementById(`league-score-b-${match.id}`) as HTMLInputElement)?.value
+                              if (first === "" || second === "" || Number(first) < 0 || Number(second) < 0) {
+                                toast({ title: "Anna molempien kilpailijoiden tulokset", variant: "destructive" })
+                                return
+                              }
+                              const scoreA = Number(first), scoreB = Number(second)
+                              const winner = scoreA > scoreB ? match.player_a_id : scoreB > scoreA ? match.player_b_id : undefined
+                              setLeagueSaving(true)
+                              try {
+                                const result = await recordEventMatch(eventId, match.id, { winner_id: winner, score_a: scoreA, score_b: scoreB })
+                                if (result.error) toast({ title: "Virhe", description: result.error, variant: "destructive" })
+                                else await refreshEventStructure()
+                              } finally { setLeagueSaving(false) }
+                            }}>Tallenna tulos</ArchiveCardButton>
+                          </div>}
+                        </div>
+                      })}
                     </div>
                   )}
                 </ArchiveCardContent>
