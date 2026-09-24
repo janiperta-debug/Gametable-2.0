@@ -36,12 +36,12 @@ export default function LeaguePage() {
      {hub.events.filter((event) => event.season_id === season.id).length === 0 && <p className="text-sm text-muted-foreground">Tähän kauteen ei ole vielä liitetty tapahtumia.</p>}
      {hub.events.filter((event) => event.season_id === season.id).map((event) => <div key={event.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-accent-gold/20 p-3">
       <button type="button" onClick={() => router.push("/events/" + event.id)} className="text-left text-accent-gold hover:underline">{event.title} <span className="text-xs text-muted-foreground">· {event.event_type === "tournament" ? "Turnaus" : "Peli-ilta"}</span></button>
-      {hub.available.length >= 0 && <ArchiveCardButton disabled={busy} onClick={async () => {
+      {hub.isOwner && <ArchiveCardButton disabled={busy} onClick={async () => {
        setBusy(true); const result = await linkSeasonEvent(id, season.id, event.id, false)
        if (result.error) setError(result.error); else await refresh(); setBusy(false)
       }}>Irrota</ArchiveCardButton>}
      </div>)}
-     <div className="flex flex-wrap gap-2">
+     {hub.isOwner && <div className="flex flex-wrap gap-2">
       <select aria-label="Liitettävä tapahtuma" className="min-w-0 flex-1 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm" value={selected[season.id] || ""} onChange={(e) => setSelected({ ...selected, [season.id]: e.target.value })}>
        <option value="">Valitse olemassa oleva turnaus tai peli-ilta</option>
        {hub.available.map((event) => <option key={event.id} value={event.id}>{event.title} ({event.event_type === "tournament" ? "turnaus" : "peli-ilta"})</option>)}
@@ -52,12 +52,12 @@ export default function LeaguePage() {
        if (result.error) setError(result.error); else { setSelected({ ...selected, [season.id]: "" }); await refresh() }
        setBusy(false)
       }}>Liitä kauteen</ArchiveCardButton>
-     </div>
-     <p className="text-xs text-muted-foreground">Voit luoda uusia turnauksia ja peli-iltoja tavallisella tapahtuman luontisivulla ja liittää ne tänne.</p>
-     <ArchiveCardButton onClick={() => router.push("/events/create")}>Luo uusi tapahtuma</ArchiveCardButton>
+     </div>}
+     {hub.isOwner && <p className="text-xs text-muted-foreground">Voit luoda uusia turnauksia ja peli-iltoja tavallisella tapahtuman luontisivulla ja liittää ne tänne.</p>}
+     {hub.isOwner && <ArchiveCardButton onClick={() => router.push("/events/create")}>Luo uusi tapahtuma</ArchiveCardButton>}
     </ArchiveCardContent>
    </ArchiveCard>)}
-   <ArchiveCard><ArchiveCardHeader><ArchiveCardTitle>Uusi kausi</ArchiveCardTitle></ArchiveCardHeader>
+   {hub.isOwner && <ArchiveCard><ArchiveCardHeader><ArchiveCardTitle>Uusi kausi</ArchiveCardTitle></ArchiveCardHeader>
     <ArchiveCardContent className="flex flex-wrap gap-2">
      <input aria-label="Uuden kauden nimi" className="min-w-0 flex-1 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm" value={newSeason} onChange={(e) => setNewSeason(e.target.value)} placeholder="Esim. Kausi 2028" />
      <ArchiveCardButton disabled={busy || !newSeason.trim()} onClick={async () => {
@@ -67,7 +67,7 @@ export default function LeaguePage() {
       setBusy(false)
      }}>Lisää kausi</ArchiveCardButton>
     </ArchiveCardContent>
-   </ArchiveCard>
+   </ArchiveCard>}
   </div>
  </ArchiveFrame>
 }
