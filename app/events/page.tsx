@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   ArchiveButton,
@@ -25,6 +25,7 @@ import { useEvents } from "@/hooks/useEvents"
 import { updateRSVP, type Event, type RSVPStatus } from "@/app/actions/events"
 import { useToast } from "@/hooks/use-toast"
 import { useUser } from "@/hooks/useUser"
+import { listLeagues } from "@/app/actions/league-hub"
 
 const statusColors: Record<string, string> = {
   attending: "bg-green-100 text-green-600 border-green-200 dark:bg-green-900/30 dark:text-green-400",
@@ -178,6 +179,8 @@ const eventTypes = ["game_night", "campaign", "tournament", "league"] as const
 
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState("upcoming")
+  const [leagues, setLeagues] = useState<Awaited<ReturnType<typeof listLeagues>>["leagues"]>([])
+  useEffect(() => { void listLeagues().then((result) => setLeagues(result.leagues)) }, [user?.id])
   const [searchQuery, setSearchQuery] = useState("")
   const [showFilters, setShowFilters] = useState(false)
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
@@ -222,13 +225,16 @@ export default function EventsPage() {
 
   // Filter events by search query and event type
   const query = searchQuery.toLowerCase()
+  const convertedIds = new Set(leagues.map((league) => league.legacy_event_id).filter(Boolean))
   const filteredPublicEvents = publicEvents.filter(function(event) {
+    if (event.event_type === "league" && convertedIds.has(event.id)) return false
     const matchesSearch = event.title.toLowerCase().includes(query) || (event.description ? event.description.toLowerCase().includes(query) : false)
     const matchesType = selectedTypes.length === 0 || (event.event_type && selectedTypes.includes(event.event_type))
     return matchesSearch && matchesType
   })
 
   const filteredMyEvents = myEvents.filter(function(event) {
+    if (event.event_type === "league" && convertedIds.has(event.id)) return false
     const matchesSearch = event.title.toLowerCase().includes(query) || (event.description ? event.description.toLowerCase().includes(query) : false)
     const matchesType = selectedTypes.length === 0 || (event.event_type && selectedTypes.includes(event.event_type))
     return matchesSearch && matchesType
@@ -245,6 +251,21 @@ export default function EventsPage() {
             </p>
           </div>
         </ThemeHero>
+
+        {leagues.length > 0 && (
+          <ArchiveFrame className="mb-6 max-w-5xl mx-auto">
+            <div className="space-y-3 p-4 sm:p-6">
+              <h2 className="font-heading text-xl text-accent-gold">Liigat</h2>
+              <p className="text-sm text-muted-foreground">Pysyvät kilpailuyhteisöt ja niiden kaudet.</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {leagues.map((league) => <button type="button" key={league.id} onClick={() => router.push("/leagues/" + league.id)} className="rounded-lg border border-accent-gold/30 p-4 text-left transition-colors hover:bg-accent-gold/10">
+                  <div className="font-heading text-lg text-accent-gold">{league.name}</div>
+                  <div className="text-sm text-muted-foreground">{league.league_seasons?.map((season) => season.name).join(" · ") || "Ei kausia"}{league.isOwner ? " · Järjestän" : ""}</div>
+                </button>)}
+              </div>
+            </div>
+          </ArchiveFrame>
+        )}
 
         {/* Tabs */}
         <div className="w-full mb-6 md:mb-8">
