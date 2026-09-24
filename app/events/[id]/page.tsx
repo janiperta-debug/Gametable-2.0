@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import Link from "next/link"
 import {
   ArchiveCard,
   ArchiveCardButton,
@@ -407,30 +406,31 @@ export default function EventDetailsPage() {
         <div className="flex flex-wrap items-center gap-2 mb-8">
           <div className="mr-auto">
             <ArchiveCardButton onClick={() => router.push("/events")} icon={<ArrowLeft className="w-4 h-4" />}>
-              <span className="hidden sm:inline">{t("events.backToEvents") || "Back to Events"}</span>
+              {t("events.backToEvents") || "Takaisin tapahtumiin"}
             </ArchiveCardButton>
           </div>
 
           {isHost && event.status !== "completed" && event.status !== "cancelled" && (
             <>
-              <ArchiveCardButton asChild icon={<Edit className="w-4 h-4" />}>
-                <Link href={`/events/${eventId}/edit`}>
-                  <span className="hidden sm:inline">{t("common.edit") || "Edit"}</span>
-                </Link>
+              <ArchiveCardButton
+                onClick={() => router.push(`/events/${eventId}/edit`)}
+                icon={<Edit className="w-4 h-4" />}
+              >
+                {t("common.edit") || "Muokkaa"}
               </ArchiveCardButton>
               <ArchiveCardButton
                 onClick={handleComplete}
                 disabled={completing || cancelling}
                 icon={completing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
               >
-                <span className="hidden sm:inline">{t("events.completeEvent") || "Päätä tapahtuma"}</span>
+                {t("events.completeEvent") || "Päätä tapahtuma"}
               </ArchiveCardButton>
               <ArchiveCardButton
                 onClick={handleCancel}
                 disabled={cancelling || completing}
                 icon={cancelling ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
               >
-                <span className="hidden sm:inline">{t("events.cancel") || "Cancel"}</span>
+                {t("events.cancel") || "Peruuta tapahtuma"}
               </ArchiveCardButton>
             </>
           )}
