@@ -93,7 +93,7 @@ export function getNewMessageEmailTemplate(senderName: string) {
   return { subject: `New message from ${senderName} on Gametable`, html: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;"><h2 style="color: #1a1a1a;">New Message</h2><p style="color: #4a4a4a; line-height: 1.6;">You have a new message from <strong>${senderName}</strong> on Gametable.</p><a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://gametable.app'}/messages" style="display:inline-block;background:#d4af37;color:#1a1a1a;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;margin-top:16px;">Read Message</a></div>` }
 }
 
-export function getAdminBroadcastEmailTemplate(title: string, message: string) {
+export function getAdminBroadcastEmailTemplate(title: string, message: string, imageUrl?: string | null) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://gametable.app"
   const crestUrl = `${appUrl}/crests/main-hall-home.png`
 
@@ -119,6 +119,7 @@ export function getAdminBroadcastEmailTemplate(title: string, message: string) {
             <h1 style="margin:10px 0 0;font-size:28px;line-height:1.2;font-weight:normal;color:#e2b44f;">${safeTitle}</h1>
           </div>
 
+          ${safeImage ? `<div style="padding:20px 20px 0;text-align:center;"><img src="${safeImage}" alt="" width="580" style="display:block;width:100%;max-width:580px;height:auto;margin:0 auto;border:1px solid #6f5120;" /></div>` : ""}
           <div style="padding:34px 32px 30px;">
             <p style="margin:0 0 22px;font-size:18px;line-height:1.7;color:#e7d6aa;">
               <strong>The manor staff wishes to inform you...</strong>
