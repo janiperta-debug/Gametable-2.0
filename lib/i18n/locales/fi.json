@@ -1512,6 +1512,9 @@
     "s65": "turnaus",
     "s66": "peli-ilta",
     "s67": "Järjestäjä",
-    "s68": "Liiga"
+    "s68": "Liiga",
+    "memberCount": "Liigan osallistujat ({{count}})",
+    "host": "Järjestäjä",
+    "confirmDelete": "Poistetaanko liiga \"{{name}}\" ja kaikki sen kaudet? Liitetyt turnaukset ja peli-illat säilyvät. Tätä ei voi perua."
   }
 }
