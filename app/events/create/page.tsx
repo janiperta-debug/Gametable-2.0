@@ -122,11 +122,11 @@ export default function CreateEventPage() {
     if (!formData.title.trim()) return
     if (eventType === "league") {
       if (!leagueSeason.name.trim()) {
-        toast({ title: "Anna ensimmäisen kauden nimi", variant: "destructive" })
+        toast({ title: t("eventDynamic.s0"), variant: "destructive" })
         return
       }
       if (leagueSeason.startsOn && leagueSeason.endsOn && leagueSeason.endsOn < leagueSeason.startsOn) {
-        toast({ title: "Kauden päättymispäivä on ennen alkua", variant: "destructive" })
+        toast({ title: t("eventDynamic.s1"), variant: "destructive" })
         return
       }
       setSaving(true)
@@ -140,10 +140,10 @@ export default function CreateEventPage() {
           startsOn: leagueSeason.startsOn,
           endsOn: leagueSeason.endsOn,
         })
-        if (result.error) toast({ title: "Liigan perustaminen epäonnistui", description: result.error, variant: "destructive" })
+        if (result.error) toast({ title: t("eventDynamic.s2"), description: result.error, variant: "destructive" })
         else if (result.id) router.push("/leagues/" + result.id)
       } catch {
-        toast({ title: "Liigan perustaminen epäonnistui", variant: "destructive" })
+        toast({ title: t("eventDynamic.s2"), variant: "destructive" })
       } finally { setSaving(false) }
       return
     }
@@ -244,7 +244,7 @@ export default function CreateEventPage() {
                   </Label>
                   <Input 
                     id="title" 
-                    placeholder={eventType === "league" ? "Esim. Hyvinkään Blood Bowl -liiga" : t("events.eventTitlePlaceholder")}
+                    placeholder={eventType === "league" ? t("eventDynamic.s3") : t("events.eventTitlePlaceholder")}
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className={cn("font-body", archiveField)}
@@ -434,7 +434,7 @@ export default function CreateEventPage() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="event-rounds" className="font-body text-accent-gold">
-                          {eventType === "campaign" ? "Sessiot" : "Suunniteltu kierrosmäärä"}
+                          {eventType === "campaign" ? "Sessiot" : t("eventDynamic.s4")}
                         </Label>
                         <Select
                           value={eventConfig.rounds}
@@ -610,7 +610,7 @@ export default function CreateEventPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="endDate" className="text-sm text-muted-foreground">{eventType === "league" ? "Kausi päättyy (arvio)" : "Päättyy"}</Label>
+                      <Label htmlFor="endDate" className="text-sm text-muted-foreground">{eventType === "league" ? t("eventDynamic.s5") : t("eventDynamic.s6")}</Label>
                       <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 min-w-0">
                         <Input
                           id="endDate"
