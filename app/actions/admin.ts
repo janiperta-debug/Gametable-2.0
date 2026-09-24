@@ -101,7 +101,7 @@ export async function sendBroadcast(params: {
 
   if (usersWantingEmail.length > 0) {
     const serviceClient = createServiceClient()
-    const emailTemplate = getAdminBroadcastEmailTemplate(params.subject, params.body)
+    const emailTemplate = getAdminBroadcastEmailTemplate(params.subject, params.body, imageUrl)
     for (const profileId of usersWantingEmail) {
       try {
         const { data: authData } = await serviceClient.auth.admin.getUserById(profileId)
