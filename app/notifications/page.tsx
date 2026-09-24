@@ -146,7 +146,8 @@ export default function NotificationsPage() {
         router.push("/trophies")
         break
       case "message":
-        router.push("/messages")
+        if (data.event_id) router.push(`/events/${data.event_id}`)
+        else router.push("/messages")
         break
     }
   }
