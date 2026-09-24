@@ -410,6 +410,7 @@ export default function CreateEventPage() {
                       </div>
                     </div>
 
+                    {(eventType === "tournament" || eventType === "league") && (
                     <div className="space-y-3">
                       <div>
                         <Label className="font-body text-accent-gold">Pisteytys</Label>
@@ -474,6 +475,9 @@ export default function CreateEventPage() {
                         ))}
                       </div>
                     </div>
+
+
+                    )}
 
                     {(eventType === "tournament" || eventType === "league") && (
                       <div className="space-y-2">
