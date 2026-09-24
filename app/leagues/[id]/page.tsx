@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { getLeague, addLeagueSeason, linkSeasonEvent, updateLeague, updateLeagueSeason, deleteLeague, joinLeague, leaveLeague, addLeagueMember, removeLeagueMember } from "@/app/actions/league-hub"
+import { getLeague, addLeagueSeason, linkSeasonEvent, updateLeague, updateLeagueSeason, deleteLeague, joinLeague, leaveLeague, addLeagueMemberById, searchLeaguePlayers, removeLeagueMember } from "@/app/actions/league-hub"
 import { ArchiveFrame, ArchiveButton, ArchiveCard, ArchiveCardHeader, ArchiveCardTitle, ArchiveCardContent, ArchiveCardButton } from "@/components/archive-frame"
 
 type Hub = Awaited<ReturnType<typeof getLeague>>
@@ -12,6 +12,9 @@ export default function LeaguePage() {
  const [hub, setHub] = useState<Hub | null>(null)
  const [newSeason, setNewSeason] = useState("")
  const [newMember, setNewMember] = useState("")
+ const [playerResults, setPlayerResults] = useState<{id:string;username:string|null;display_name:string|null;avatar_url:string|null}[]>([])
+ const [searchingPlayers, setSearchingPlayers] = useState(false)
+ const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null)
  const [selected, setSelected] = useState<Record<string,string>>({})
  const [busy, setBusy] = useState(false)
  const [editing, setEditing] = useState(false)
@@ -21,6 +24,18 @@ export default function LeaguePage() {
  const [error, setError] = useState("")
  const refresh = async () => setHub(await getLeague(id))
  useEffect(() => { void refresh() }, [id])
+ useEffect(() => {
+  let active=true
+  if(newMember.trim().length<2){setPlayerResults([]);setSearchingPlayers(false);return}
+  setSearchingPlayers(true)
+  const timer=setTimeout(async()=>{
+   try{
+    const result=await searchLeaguePlayers(id,newMember)
+    if(active){setPlayerResults(result.players||[]);setSearchingPlayers(false);if(result.error)setError(result.error)}
+   }catch{if(active){setSearchingPlayers(false);setError("Pelaajien haku epäonnistui.")}}
+  },300)
+  return()=>{active=false;clearTimeout(timer)}
+ },[id,newMember])
  if (!hub) return <div className="p-8">Ladataan liigaa...</div>
  if (!hub.league) return <div className="p-8">{hub.error || "Liigaa ei löytynyt."}</div>
  return <ArchiveFrame className="mx-auto max-w-5xl">
@@ -86,14 +101,30 @@ export default function LeaguePage() {
       try{const result=hub.isMember?await leaveLeague(id):await joinLeague(id);if(result.error)setError(result.error);else await refresh()}
       finally{setBusy(false)}
      }}>{hub.isMember?"Poistu liigasta":"Liity liigaan"}</ArchiveCardButton>}
-     {hub.isOwner && <div className="flex flex-wrap gap-2">
-      <input aria-label="Lisättävän pelaajan käyttäjätunnus" placeholder="Pelaajan käyttäjätunnus" value={newMember} onChange={e=>setNewMember(e.target.value)}
-       className="min-w-0 flex-1 rounded-md border border-accent-gold/30 bg-background px-3 py-2"/>
-      <ArchiveCardButton disabled={busy||!newMember.trim()} onClick={async()=>{
+     {hub.isOwner && <div className="space-y-3">
+      <label htmlFor="league-player-search" className="block text-sm text-accent-gold">Etsi pelaaja nimellä tai käyttäjätunnuksella</label>
+      <input id="league-player-search" autoComplete="off" placeholder="Kirjoita vähintään kaksi merkkiä"
+       value={newMember} onChange={e=>{setNewMember(e.target.value);setSelectedPlayer(null)}}
+       className="w-full rounded-md border border-accent-gold/30 bg-background px-3 py-2"/>
+      {searchingPlayers && <p className="text-sm text-muted-foreground">Haetaan pelaajia...</p>}
+      {!searchingPlayers && newMember.trim().length>=2 && playerResults.length===0 && <p className="text-sm text-muted-foreground">Pelaajia ei löytynyt.</p>}
+      {playerResults.length>0 && <div role="group" aria-label="Hakutulokset" className="space-y-1">
+       {playerResults.filter(player=>!hub.members.some(member=>member.user_id===player.id)).map(player=><button key={player.id} type="button"
+        onClick={()=>setSelectedPlayer(player.id)}
+        className={"flex w-full items-center gap-3 rounded-md border p-2 text-left "+(selectedPlayer===player.id?"border-accent-gold bg-accent-gold/10":"border-accent-gold/20")}>
+        {player.avatar_url?<img src={player.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover"/>:<div className="h-9 w-9 rounded-full bg-accent-gold/20"/>}
+        <span className="min-w-0"><span className="block truncate">{player.display_name||player.username||"Pelaaja"}</span>
+         {player.username && <span className="block truncate text-xs text-muted-foreground">@{player.username}</span>}</span>
+        {selectedPlayer===player.id && <span className="ml-auto text-accent-gold">✓</span>}
+       </button>)}
+      </div>}
+      <ArchiveCardButton disabled={busy||!selectedPlayer} onClick={async()=>{
+       if(!selectedPlayer)return
        setBusy(true);setError("")
-       try{const result=await addLeagueMember(id,newMember);if(result.error)setError(result.error);else{setNewMember("");await refresh()}}
+       try{const result=await addLeagueMemberById(id,selectedPlayer);if(result.error)setError(result.error);else{setNewMember("");setSelectedPlayer(null);setPlayerResults([]);await refresh()}}
+       catch{setError("Osallistujan lisääminen epäonnistui.")}
        finally{setBusy(false)}
-      }}>Lisää osallistuja</ArchiveCardButton>
+      }}>Lisää valittu osallistuja</ArchiveCardButton>
      </div>}
     </ArchiveCardContent>
    </ArchiveCard>}
