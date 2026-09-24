@@ -62,7 +62,7 @@ export default function LeaguePage() {
      setEditing(!editing); setError("")
     }}>{editing ? t("leagueUi.s52") : t("leagueUi.s5")}</ArchiveCardButton>
     <ArchiveCardButton disabled={busy} onClick={async () => {
-     if (!window.confirm(`Poistetaanko liiga "${hub.league!.name}" ja kaikki sen kaudet? Liitetyt turnaukset ja peli-illat säilyvät. Tätä ei voi perua.`)) return
+     if (!window.confirm(t("leagueUi.confirmDelete", { name: hub.league!.name }))) return
      setBusy(true); setError("")
      try { const result = await deleteLeague(id); if (result.error) setError(result.error); else router.push("/events") }
      catch { setError(t("leagueUi.s53")) }
@@ -84,12 +84,12 @@ export default function LeaguePage() {
    </ArchiveCardContent></ArchiveCard>}
    {error && <p role="alert" className="text-red-400">{error}</p>}
    <ArchiveCard corners={false} centerOrnaments={false}>
-    <ArchiveCardHeader><ArchiveCardTitle>Liigan osallistujat ({hub.members.length})</ArchiveCardTitle></ArchiveCardHeader>
+    <ArchiveCardHeader><ArchiveCardTitle>{t("leagueUi.memberCount", { count: hub.members.length })}</ArchiveCardTitle></ArchiveCardHeader>
     <ArchiveCardContent className="space-y-4">
      <div className="flex flex-wrap gap-3">
       {hub.members.map(member=><div key={member.user_id} className="flex items-center gap-2 rounded-lg border border-accent-gold/20 p-2">
        {member.avatar_url?<img src={member.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover"/>:<div className="h-9 w-9 rounded-full bg-accent-gold/20"/>}
-       <span>{member.display_name}{member.isOwner?" · Järjestäjä":""}</span>
+       <span>{member.display_name}{member.isOwner ? ` · ${t("leagueUi.host")}` : ""}</span>
        {hub.isOwner && !member.isOwner && <button type="button" disabled={busy} className="text-xs text-red-300 underline" onClick={async()=>{
         if(!window.confirm(t("leagueUi.s57")))return
         setBusy(true);setError("")
@@ -184,7 +184,7 @@ export default function LeaguePage() {
      <h3 className="font-heading text-lg text-accent-gold">{t("leagueUi.s31")}</h3>
      {hub.events.filter((event) => event.season_id === season.id).length === 0 && <p className="text-sm text-muted-foreground">{t("leagueUi.s32")}</p>}
      {hub.events.filter((event) => event.season_id === season.id).map((event) => <div key={event.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-accent-gold/20 p-3">
-      <button type="button" onClick={() => router.push("/events/" + event.id)} className="text-left text-accent-gold hover:underline">{event.title} <span className="text-xs text-muted-foreground">· {event.event_type === "tournament" ? "Turnaus" : "Peli-ilta"}</span></button>
+      <button type="button" onClick={() => router.push("/events/" + event.id)} className="text-left text-accent-gold hover:underline">{event.title} <span className="text-xs text-muted-foreground">· {t(`events.types.${event.event_type === "tournament" ? "tournament" : "game_night"}`)}</span></button>
       {hub.isOwner && <ArchiveCardButton disabled={busy} onClick={async () => {
        setBusy(true); const result = await linkSeasonEvent(id, season.id, event.id, false)
        if (result.error) setError(result.error); else await refresh(); setBusy(false)
@@ -193,7 +193,7 @@ export default function LeaguePage() {
      {hub.isOwner && <div className="flex flex-wrap gap-2">
       <select aria-label={t("leagueUi.s47")} className="min-w-0 flex-1 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm" value={selected[season.id] || ""} onChange={(e) => setSelected({ ...selected, [season.id]: e.target.value })}>
        <option value="">{t("leagueUi.s34")}</option>
-       {hub.available.map((event) => <option key={event.id} value={event.id}>{event.title} ({event.event_type === "tournament" ? t("leagueUi.s65") : t("leagueUi.s66")})</option>)}
+       {hub.available.map((event) => <option key={event.id} value={event.id}>{event.title} ({t(`events.types.${event.event_type === "tournament" ? "tournament" : "game_night"}`)})</option>)}
       </select>
       <ArchiveCardButton disabled={busy || !selected[season.id]} onClick={async () => {
        setBusy(true); setError("")
