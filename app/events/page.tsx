@@ -8,7 +8,7 @@ import { ArchiveButton, ArchiveCardButton, ArchiveFrame, archiveField } from "@/
 import { ArchiveDivider } from "@/components/archive-divider"
 import { Input } from "@/components/ui/input"
 import { ThemeHero } from "@/components/theme-hero"
-import { useTranslations } from "@/lib/i18n"
+import { useTranslation } from "@/lib/i18n"
 import { useEvents } from "@/hooks/useEvents"
 import { useUser } from "@/hooks/useUser"
 import { listLeagues } from "@/app/actions/league-hub"
@@ -23,19 +23,18 @@ const categoryImages: Record<string, string> = {
   tournament: "/images/events/tournament.png",
   league: "/images/events/league.png",
 }
-const categoryLabels: Record<string, string> = {
-  game_night: "Peli-ilta", campaign: "Kampanja", tournament: "Turnaus", league: "Liiga",
-}
+const categoryLabels = ["game_night", "campaign", "tournament", "league"] as const
 const categoryBorders: Record<string, string> = {
   game_night: "border-amber-600/50", campaign: "border-emerald-700/60",
   tournament: "border-red-700/60", league: "border-blue-700/60",
 }
-const formatDate = (date: string, options: Intl.DateTimeFormatOptions) =>
-  new Date(date).toLocaleDateString("fi-FI", options)
-const formatTime = (date: string) =>
-  new Date(date).toLocaleTimeString("fi-FI", { hour: "2-digit", minute: "2-digit" })
+const formatDate = (date: string, options: Intl.DateTimeFormatOptions, locale: string) =>
+  new Date(date).toLocaleDateString(locale === "fi" ? "fi-FI" : "en-GB", options)
+const formatTime = (date: string, locale: string) =>
+  new Date(date).toLocaleTimeString(locale === "fi" ? "fi-FI" : "en-GB", { hour: "2-digit", minute: "2-digit" })
 
 function EventRow({ event, onOpen, userId }: { event: Event; onOpen: () => void; userId?: string }) {
+  const { t, locale } = useTranslation()
   const kind = event.event_type || "game_night"
   const isHost = event.host_id === userId
   return (
@@ -45,13 +44,13 @@ function EventRow({ event, onOpen, userId }: { event: Event; onOpen: () => void;
       </div>
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-          <span className="text-accent-gold">{formatDate(event.starts_at, { day: "numeric", month: "short" })} · {formatTime(event.starts_at)}</span>
-          <span>{categoryLabels[kind] || kind}</span>
-          {isHost && <span className="rounded-full border border-accent-gold/35 px-2 py-0.5 text-accent-gold">Järjestän</span>}
-          {!isHost && event.user_rsvp && <span className="rounded-full border border-accent-gold/20 px-2 py-0.5">{event.user_rsvp === "attending" ? "Osallistun" : event.user_rsvp === "maybe" ? "Ehkä" : event.user_rsvp === "invited" ? "Kutsuttu" : event.user_rsvp === "declined" ? "Kieltäydyin" : event.user_rsvp}</span>}
+          <span className="text-accent-gold">{formatDate(event.starts_at, { day: "numeric", month: "short" }, locale)} · {formatTime(event.starts_at, locale)}</span>
+          <span>{t(`events.types.${kind}`)}</span>
+          {isHost && <span className="rounded-full border border-accent-gold/35 px-2 py-0.5 text-accent-gold">{t("events.hosting")}</span>}
+          {!isHost && event.user_rsvp && <span className="rounded-full border border-accent-gold/20 px-2 py-0.5">{event.user_rsvp === "attending" ? t("events.rsvpAttending") : event.user_rsvp === "maybe" ? t("events.rsvpMaybe") : event.user_rsvp === "invited" ? t("events.invited") : event.user_rsvp === "declined" ? t("events.rsvpDeclined") : event.user_rsvp}</span>}
         </div>
         <div className="break-words font-heading text-base text-foreground group-hover:text-accent-gold sm:text-lg">{event.title}</div>
-        <div className="truncate text-xs text-muted-foreground sm:text-sm">{event.location || event.host?.display_name || ""}{event.participant_count != null ? ` · ${event.participant_count} osallistujaa` : ""}</div>
+        <div className="truncate text-xs text-muted-foreground sm:text-sm">{event.location || event.host?.display_name || ""}{event.participant_count != null ? ` · ${t("events.participantCount", { count: event.participant_count })}` : ""}</div>
       </div>
       <ChevronRight className="h-5 w-5 shrink-0 text-accent-gold/70" />
     </button>
@@ -60,7 +59,7 @@ function EventRow({ event, onOpen, userId }: { event: Event; onOpen: () => void;
 
 export default function EventsPage() {
   const router = useRouter()
-  const t = useTranslations()
+  const { t, locale } = useTranslation()
   const { user } = useUser()
   const { publicEvents, myEvents, pastEvents, loading, error } = useEvents()
   const [leagues, setLeagues] = useState<Awaited<ReturnType<typeof listLeagues>>["leagues"]>([])
@@ -77,7 +76,7 @@ export default function EventsPage() {
     let cancelled = false
     listLeagues().then((result) => {
       if (!cancelled) { setLeagues(result.leagues); setLeagueError(result.error || "") }
-    }).catch(() => { if (!cancelled) setLeagueError("Liigojen lataaminen epäonnistui.") })
+    }).catch(() => { if (!cancelled) setLeagueError("events.leagueLoadFailed") })
     return () => { cancelled = true }
   }, [user?.id])
 
@@ -101,9 +100,9 @@ export default function EventsPage() {
     const ownCampaigns = user ? myEvents.filter((event) => event.event_type === "campaign" && event.status !== "cancelled" && event.status !== "completed") : []
     const oldLeagues = user ? myEvents.filter((event) => event.event_type === "league" && !convertedIds.has(event.id) && event.status !== "cancelled" && event.status !== "completed") : []
     return [
-      ...ownLeagues.map((league) => ({ id: league.id, title: league.name, kind: "league", subtitle: league.league_seasons?.[0]?.name || "Liiga", href: "/leagues/" + league.id })),
-      ...ownCampaigns.map((event) => ({ id: event.id, title: event.title, kind: "campaign", subtitle: "Kampanja", href: "/events/" + event.id })),
-      ...oldLeagues.map((event) => ({ id: event.id, title: event.title, kind: "league", subtitle: "Vanha liigamalli", href: "/events/" + event.id })),
+      ...ownLeagues.map((league) => ({ id: league.id, title: league.name, kind: "league", subtitle: league.league_seasons?.[0]?.name || "league", href: "/leagues/" + league.id })),
+      ...ownCampaigns.map((event) => ({ id: event.id, title: event.title, kind: "campaign", subtitle: "campaign", href: "/events/" + event.id })),
+      ...oldLeagues.map((event) => ({ id: event.id, title: event.title, kind: "league", subtitle: "legacyLeague", href: "/events/" + event.id })),
     ]
   }, [leagues, myEvents, convertedIds, user?.id])
   const history = useMemo(() => pastEvents.filter((event) => !(event.event_type === "league" && convertedIds.has(event.id))).filter(matches).sort((a, b) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime()), [pastEvents, convertedIds, query, types])
@@ -126,9 +125,9 @@ export default function EventsPage() {
       <div className="mx-auto mt-6 max-w-4xl space-y-6">
         {user && <ArchiveFrame>
           <section className="space-y-4 p-4 sm:p-6">
-            <h2 className="font-heading text-xl text-accent-gold sm:text-2xl">Omat liigat ja kampanjat</h2>
-            {leagueError && <p role="status" className="text-sm text-muted-foreground">{leagueError}</p>}
-            {communities.length === 0 ? <p className="text-sm text-muted-foreground">Omat liigasi ja käynnissä olevat kampanjasi näkyvät täällä.</p> :
+            <h2 className="font-heading text-xl text-accent-gold sm:text-2xl">{t("events.myLeaguesCampaigns")}</h2>
+            {leagueError && <p role="status" className="text-sm text-muted-foreground">{leagueError === "events.leagueLoadFailed" ? t(leagueError) : leagueError}</p>}
+            {communities.length === 0 ? <p className="text-sm text-muted-foreground">{t("events.myLeaguesCampaignsEmpty")}</p> :
               <div className="grid grid-cols-2 gap-3">
                 {(allCommunities ? communities : communities.slice(0, 2)).map((item) => <button key={item.kind + item.id} type="button" onClick={() => router.push(item.href)} className={cn("group min-w-0 overflow-hidden rounded-xl border text-left transition-colors hover:bg-accent-gold/10", categoryBorders[item.kind])}>
                   <div className="relative aspect-[2/1] w-full overflow-hidden">
@@ -136,38 +135,38 @@ export default function EventsPage() {
                   </div>
                   <div className="space-y-1 p-3">
                     <div className="break-words font-heading text-sm text-foreground group-hover:text-accent-gold sm:text-lg">{item.title}</div>
-                    <div className="text-xs text-muted-foreground sm:text-sm">{item.subtitle}</div>
+                    <div className="text-xs text-muted-foreground sm:text-sm">{item.subtitle === "league" ? t("events.types.league") : item.subtitle === "campaign" ? t("events.types.campaign") : item.subtitle === "legacyLeague" ? t("events.legacyLeague") : item.subtitle}</div>
                   </div>
                 </button>)}
               </div>}
             {communities.length > 2 && <button type="button" onClick={() => setAllCommunities(!allCommunities)} className="flex w-full items-center justify-center gap-2 rounded-lg border border-accent-gold/25 py-3 text-sm text-accent-gold hover:bg-accent-gold/10">
-              {allCommunities ? "Näytä vähemmän" : `Näytä kaikki (${communities.length})`} <ChevronDown className={cn("h-4 w-4", allCommunities && "rotate-180")} />
+              {allCommunities ? t("events.showLess") : t("events.showAllCount", { count: communities.length })} <ChevronDown className={cn("h-4 w-4", allCommunities && "rotate-180")} />
             </button>}
           </section>
         </ArchiveFrame>}
 
         <ArchiveFrame>
           <section className="space-y-4 p-4 sm:p-6">
-            <h2 className="font-heading text-xl text-accent-gold sm:text-2xl">Seuraavat tapahtumat</h2>
+            <h2 className="font-heading text-xl text-accent-gold sm:text-2xl">{t("events.nextEvents")}</h2>
             <div className="space-y-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input aria-label="Hae tapahtumia" placeholder={t("events.searchEvents")} value={query} onChange={(event) => { setQuery(event.target.value); setAllUpcoming(false) }} className={cn("w-full pl-10", archiveField)} />
+                <Input aria-label={t("events.searchEvents")} placeholder={t("events.searchEvents")} value={query} onChange={(event) => { setQuery(event.target.value); setAllUpcoming(false) }} className={cn("w-full pl-10", archiveField)} />
               </div>
-              <ArchiveCardButton active={filtersOpen} onClick={() => setFiltersOpen(!filtersOpen)} icon={<Filter className="h-4 w-4" />}>{filtersOpen ? "Piilota suodattimet" : "Suodattimet"}{types.length ? ` (${types.length})` : ""}</ArchiveCardButton>
+              <ArchiveCardButton active={filtersOpen} onClick={() => setFiltersOpen(!filtersOpen)} icon={<Filter className="h-4 w-4" />}>{filtersOpen ? t("events.hideFilters") : t("events.filters")}{types.length ? ` (${types.length})` : ""}</ArchiveCardButton>
               {filtersOpen && <div className="flex flex-wrap gap-2 rounded-lg border border-accent-gold/20 p-3">
-                {Object.entries(categoryLabels).map(([kind, label]) => <button type="button" key={kind} aria-pressed={types.includes(kind)} onClick={() => setTypes((current) => current.includes(kind) ? current.filter((value) => value !== kind) : [...current, kind])} className={cn("rounded-lg border px-3 py-2 text-sm", types.includes(kind) ? "border-accent-gold bg-accent-gold/15 text-accent-gold" : "border-accent-gold/20 text-muted-foreground")}>{label}</button>)}
-                {types.length > 0 && <button type="button" className="px-2 text-sm text-accent-gold underline" onClick={() => setTypes([])}>Tyhjennä</button>}
+                {categoryLabels.map((kind) => <button type="button" key={kind} aria-pressed={types.includes(kind)} onClick={() => setTypes((current) => current.includes(kind) ? current.filter((value) => value !== kind) : [...current, kind])} className={cn("rounded-lg border px-3 py-2 text-sm", types.includes(kind) ? "border-accent-gold bg-accent-gold/15 text-accent-gold" : "border-accent-gold/20 text-muted-foreground")}>{t(`events.types.${kind}`)}</button>)}
+                {types.length > 0 && <button type="button" className="px-2 text-sm text-accent-gold underline" onClick={() => setTypes([])}>{t("events.clear")}</button>}
               </div>}
             </div>
             {loading ? <Loader2 className="mx-auto h-7 w-7 animate-spin text-accent-gold" /> :
               error ? <p role="alert" className="text-sm text-red-400">{error}</p> :
-              upcoming.length === 0 ? <p className="py-5 text-sm text-muted-foreground">Ei hakua vastaavia tulevia tapahtumia.</p> :
+              upcoming.length === 0 ? <p className="py-5 text-sm text-muted-foreground">{t("events.noMatchingUpcoming")}</p> :
               <div className="overflow-hidden rounded-lg border border-accent-gold/20">
                 {visibleUpcoming.map((event, index) => <div key={event.id}>{index > 0 && <ArchiveDivider variant="subtle" />}<EventRow event={event} onOpen={() => router.push("/events/" + event.id)} userId={user?.id} /></div>)}
               </div>}
             {upcoming.length > 5 && <button type="button" onClick={() => setAllUpcoming(!allUpcoming)} className="flex w-full items-center justify-center gap-2 rounded-lg border border-accent-gold/25 py-3 text-sm text-accent-gold hover:bg-accent-gold/10">
-              {allUpcoming ? "Näytä vähemmän" : `Näytä kaikki tulevat tapahtumat (${upcoming.length})`} <ChevronDown className={cn("h-4 w-4", allUpcoming && "rotate-180")} />
+              {allUpcoming ? t("events.showLess") : t("events.showAllUpcoming", { count: upcoming.length })} <ChevronDown className={cn("h-4 w-4", allUpcoming && "rotate-180")} />
             </button>}
           </section>
         </ArchiveFrame>
@@ -175,16 +174,16 @@ export default function EventsPage() {
         <ArchiveFrame>
           <section className="p-4 sm:p-6">
             <button type="button" aria-expanded={historyOpen} onClick={() => setHistoryOpen(!historyOpen)} className="flex w-full items-center justify-between gap-3 text-left">
-              <span className="font-heading text-xl text-accent-gold sm:text-2xl">Menneet tapahtumat</span>
+              <span className="font-heading text-xl text-accent-gold sm:text-2xl">{t("events.pastEvents")}</span>
               <ChevronDown className={cn("h-5 w-5 shrink-0 text-accent-gold transition-transform", historyOpen && "rotate-180")} />
             </button>
             {historyOpen && <div className="mt-4 space-y-4">
               {loading ? <Loader2 className="mx-auto h-7 w-7 animate-spin text-accent-gold" /> :
-                history.length === 0 ? <p className="text-sm text-muted-foreground">Ei menneitä tapahtumia.</p> :
+                history.length === 0 ? <p className="text-sm text-muted-foreground">{t("events.noPastEvents")}</p> :
                 <div className="overflow-hidden rounded-lg border border-accent-gold/20">
                   {visibleHistory.map((event, index) => {
-                    const month = formatDate(event.starts_at, { month: "long", year: "numeric" })
-                    const previous = index > 0 ? formatDate(visibleHistory[index - 1].starts_at, { month: "long", year: "numeric" }) : ""
+                    const month = formatDate(event.starts_at, { month: "long", year: "numeric" }, locale)
+                    const previous = index > 0 ? formatDate(visibleHistory[index - 1].starts_at, { month: "long", year: "numeric" }, locale) : ""
                     return <div key={event.id}>
                       {month !== previous && <div className="border-b border-accent-gold/20 bg-accent-gold/5 px-4 py-2 font-heading text-sm capitalize text-accent-gold">{month}</div>}
                       {month === previous && <ArchiveDivider variant="subtle" />}
@@ -192,7 +191,7 @@ export default function EventsPage() {
                     </div>
                   })}
                 </div>}
-              {history.length > 10 && <button type="button" onClick={() => setHistoryAll(!historyAll)} className="w-full rounded-lg border border-accent-gold/25 py-3 text-sm text-accent-gold">{historyAll ? "Näytä vähemmän" : "Näytä koko historia"}</button>}
+              {history.length > 10 && <button type="button" onClick={() => setHistoryAll(!historyAll)} className="w-full rounded-lg border border-accent-gold/25 py-3 text-sm text-accent-gold">{historyAll ? t("events.showLess") : t("events.showFullHistory")}</button>}
             </div>}
           </section>
         </ArchiveFrame>
