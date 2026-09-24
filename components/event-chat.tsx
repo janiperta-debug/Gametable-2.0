@@ -151,7 +151,7 @@ export function EventChat({ eventId, eventTitle }: EventChatProps) {
 
   if (loading) {
     return (
-      <ArchiveFrame className="h-[600px] flex flex-col items-center justify-center">
+      <ArchiveFrame className="min-h-[220px] flex flex-col items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-accent-gold" />
         <p className="mt-2 text-muted-foreground">{t("common.loading") || "Loading..."}</p>
       </ArchiveFrame>
@@ -160,7 +160,7 @@ export function EventChat({ eventId, eventTitle }: EventChatProps) {
 
   if (error) {
     return (
-      <ArchiveFrame className="h-[600px] flex flex-col">
+      <ArchiveFrame className="min-h-[220px] flex flex-col">
         <div className="p-5">
           <div className="font-cinzel text-accent-gold flex items-center gap-2">
             <MessageCircle className="w-5 h-5" />
@@ -177,7 +177,7 @@ export function EventChat({ eventId, eventTitle }: EventChatProps) {
   }
 
   return (
-    <ArchiveFrame className="flex flex-col h-full">
+    <ArchiveFrame className="flex flex-col max-h-[70vh]">
       <div className="p-5 pb-3">
         <div className="font-cinzel text-accent-gold flex items-center gap-2">
           <MessageCircle className="w-5 h-5" />
