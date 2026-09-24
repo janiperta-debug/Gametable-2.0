@@ -41,7 +41,7 @@ export async function getLeague(leagueId: string) {
   return event ? [{ ...event, season_id: link.season_id }] : []
  })
  const { data: owned } = user?.id === league.owner_id ? await supabase.from("events").select("id,title,event_type,starts_at,status").eq("host_id", user.id).in("event_type", ["tournament","game_night"]).neq("status","cancelled").order("starts_at", { ascending: false }) : { data: [] }
- return { league, seasons: seasons || [], events, available: (owned || []).filter((event) => !linkedIds.includes(event.id)), error: undefined }
+ return { league, seasons: seasons || [], events, available: (owned || []).filter((event) => !linkedIds.includes(event.id)), isOwner: user?.id === league.owner_id, error: undefined }
 }
 
 export async function addLeagueSeason(leagueId: string, name: string) {
