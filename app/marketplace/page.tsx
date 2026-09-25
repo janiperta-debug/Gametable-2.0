@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ThemeHero } from "@/components/theme-hero"
-import { Store, Heart, Search, MessageCircle, User, Plus, Loader2, CheckCircle2, XCircle, Users, Clock } from "lucide-react"
+import { Store, ShoppingBag, Heart, Search, MessageCircle, User, Plus, Loader2, CheckCircle2, XCircle, Users, Clock } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -179,6 +179,25 @@ export default function Marketplace() {
           </div>
         </ThemeHero>
 
+        {/* The market hall has two destinations: the existing player market and the future official shop. */}
+        <section aria-label="Kartanon kauppapaikan alueet" className="mb-10 grid gap-5 md:grid-cols-2">
+          <a href="#players-market" className="group relative flex min-h-52 flex-col justify-end overflow-hidden rounded-xl border border-accent-gold/40 bg-gradient-to-br from-amber-950/80 via-stone-900/90 to-stone-950 p-6 shadow-lg transition-all hover:border-accent-gold hover:shadow-accent-gold/10">
+            <div className="absolute right-6 top-6 rounded-full border border-emerald-400/40 bg-emerald-950/60 px-3 py-1 text-xs text-emerald-200">Avoinna</div>
+            <Store className="mb-5 h-10 w-10 text-accent-gold" aria-hidden="true" />
+            <h2 className="font-heading text-2xl text-accent-gold">Pelaajien tori</h2>
+            <p className="mt-2 max-w-sm font-body text-sm text-foreground/80">Myy, vaihda ja löydä pelejä muiden pelaajien kanssa. Tutustu ilmoituksiin ja toivelistoihin.</p>
+            <span className="mt-4 text-sm font-semibold text-accent-gold group-hover:underline">Tutustu ilmoituksiin →</span>
+          </a>
+          <Link href="/marketplace/store" className="group relative flex min-h-52 flex-col justify-end overflow-hidden rounded-xl border border-accent-gold/40 bg-gradient-to-br from-rose-950/70 via-stone-900/90 to-stone-950 p-6 shadow-lg transition-all hover:border-accent-gold hover:shadow-accent-gold/10">
+            <div className="absolute right-6 top-6 rounded-full border border-accent-gold/40 bg-stone-950/60 px-3 py-1 text-xs text-accent-gold">Suunnitteilla</div>
+            <ShoppingBag className="mb-5 h-10 w-10 text-accent-gold" aria-hidden="true" />
+            <h2 className="font-heading text-2xl text-accent-gold">GameTable Official Store</h2>
+            <p className="mt-2 max-w-sm font-body text-sm text-foreground/80">Kartanon oma tuotevalikoima on suunnitteilla. Tutustu tulevaan kauppaan ja kerro mielipiteesi.</p>
+            <span className="mt-4 text-sm font-semibold text-accent-gold group-hover:underline">Tutustu suunnitelmaan →</span>
+          </Link>
+        </section>
+
+        <section id="players-market" aria-label="Pelaajien tori" className="scroll-mt-24">
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
           <ArchiveToggle
             value={activeTab}
@@ -473,6 +492,7 @@ export default function Marketplace() {
             )}
           </div>
         )}
+        </section>
       </main>
     </div>
   )
