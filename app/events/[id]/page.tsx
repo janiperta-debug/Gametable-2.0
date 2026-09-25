@@ -435,29 +435,35 @@ export default function EventDetailsPage() {
   }
 
   const handleComplete = async () => {
-    if (!confirm(t("events.confirmComplete") || "Are you sure you want to mark this event as completed? This will move it to past events.")) {
-      return
-    }
+    if (completing) return
+    if (!confirm(t("events.confirmComplete") || "Are you sure you want to mark this event as completed? This will move it to past events.")) return
 
     setCompleting(true)
-    const result = await completeEvent(eventId, event?.event_type === "tournament" ? championEntryId : undefined)
-
-    if (result.error) {
+    try {
+      // A failed or stale Server Action must never leave the completion button spinning forever.
+      const result = await Promise.race([
+        completeEvent(eventId, event?.event_type === "tournament" ? championEntryId : undefined),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 20000)),
+      ])
+      if (!result.success || result.error) {
+        toast({ title: t("common.error"), description: result.error || (locale === "fi" ? "Tapahtuman päättäminen epäonnistui." : "Could not complete the event."), variant: "destructive" })
+        return
+      }
+      setEvent((current) => current ? { ...current, status: "completed" } : current)
+      toast({ title: t("common.success"), description: t("events.eventCompleted") || "Event completed" })
+      router.push("/events")
+    } catch (error) {
+      const timedOut = error instanceof Error && error.message === "TIMEOUT"
       toast({
         title: t("common.error"),
-        description: result.error,
+        description: timedOut
+          ? (locale === "fi" ? "Vahvistus ei vastannut ajoissa. Päivitä sivu ja tarkista tapahtuman tila ennen uutta yritystä." : "Confirmation timed out. Refresh and check the event status before retrying.")
+          : (locale === "fi" ? "Yhteys katkesi tai julkaisu vaihtui. Päivitä sivu ja yritä uudelleen, jos tapahtuma on edelleen kesken." : "Connection failed or deployment changed. Refresh and retry only if the event is still active."),
         variant: "destructive",
       })
-    } else {
-      setEvent((current) => current ? { ...current, status: "completed" } : current)
-      toast({
-        title: t("common.success"),
-        description: t("events.eventCompleted") || "Event completed",
-      })
-      router.push("/events")
+    } finally {
+      setCompleting(false)
     }
-
-    setCompleting(false)
   }
 
   const handleCancel = async () => {
