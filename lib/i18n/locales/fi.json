@@ -1811,5 +1811,17 @@
     "starts": "Alkaa",
     "season": "Kausi",
     "seasonStarts": "Kausi alkaa"
+  },
+  "eventAwards": {
+    "title": "Palkitseminen",
+    "none": "Ei palkintoja",
+    "topThree": "Kolme parasta palkitaan",
+    "explanation": "Vapaaehtoinen lisäominaisuus. Valitse pokaalisarja tai jätä palkinnot pois.",
+    "selection": "Pokaalisarja",
+    "boardGames": "Lautapelit – kolme parasta",
+    "rolePlayingGames": "Roolipelit – kolme parasta",
+    "miniatures": "Miniatyyrit – kolme parasta",
+    "tradingCardGames": "Keräilykorttipelit – kolme parasta",
+    "confirmLater": "Palkinnonsaajat vahvistetaan vasta lopullisten tulosten perusteella."
   }
 }
