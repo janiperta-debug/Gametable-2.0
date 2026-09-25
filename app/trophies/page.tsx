@@ -7,7 +7,7 @@ import { BADGE_DEFINITIONS, type BadgeSeries } from "@/lib/badge-definitions"
 import { getBadgesWithProgress, type BadgeWithProgress } from "@/app/actions/badges"
 import { useUser } from "@/hooks/useUser"
 import { ThemeHero } from "@/components/theme-hero"
-import { ArchiveCard, ArchiveCardContent } from "@/components/archive-frame"
+import { ArchiveCard, ArchiveCardContent, ArchiveToggle } from "@/components/archive-frame"
 import Image from "next/image"
 
 export default function TrophiesPage() {
@@ -159,9 +159,15 @@ export default function TrophiesPage() {
         </ThemeHero>
 
         {loadError && <div role="alert" className="mb-5 rounded-lg border border-amber-500/40 bg-amber-950/30 p-4 text-sm font-merriweather text-amber-100">Could not load your achievements. Showing available achievement definitions; earned medals and progress are temporarily unavailable. Please try reloading the page.</div>}
-        <div className="flex flex-wrap gap-2 mb-6" role="tablist" aria-label={t("trophies.title")}>
-          <button type="button" role="tab" aria-selected={activeTab === "progress"} onClick={() => setActiveTab("progress")} className={`rounded-lg border px-5 py-3 font-cinzel transition-colors ${activeTab === "progress" ? "border-accent-gold text-accent-gold bg-accent-gold/10" : "border-border text-muted-foreground"}`}>{t("trophies.progress")}</button>
-          <button type="button" role="tab" aria-selected={activeTab === "cabinet"} onClick={() => setActiveTab("cabinet")} className={`rounded-lg border px-5 py-3 font-cinzel transition-colors ${activeTab === "cabinet" ? "border-accent-gold text-accent-gold bg-accent-gold/10" : "border-border text-muted-foreground"}`}>{t("trophies.showcase")}</button>
+        <div className="mb-6 flex justify-center">
+          <ArchiveToggle
+            value={activeTab}
+            onChange={setActiveTab}
+            options={[
+              { value: "progress", label: t("trophies.progress") },
+              { value: "cabinet", label: t("trophies.showcase") },
+            ]}
+          />
         </div>
         {activeTab === "progress" ? (
           <div className="grid gap-4 md:grid-cols-2">
