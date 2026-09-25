@@ -1811,5 +1811,17 @@
     "starts": "Starts",
     "season": "Season",
     "seasonStarts": "Season starts"
+  },
+  "eventAwards": {
+    "title": "Awards",
+    "none": "No awards",
+    "topThree": "Top three receive trophies",
+    "explanation": "Optional feature. Choose a trophy series or leave awards disabled.",
+    "selection": "Trophy series",
+    "boardGames": "Board games – top three",
+    "rolePlayingGames": "Role-playing games – top three",
+    "miniatures": "Miniatures – top three",
+    "tradingCardGames": "Trading card games – top three",
+    "confirmLater": "Recipients are confirmed only after final results."
   }
 }
