@@ -950,7 +950,7 @@
     },
     "showMore": "Katso lisää",
     "showLess": "Sulje lisätiedot",
-    "legacyImportAwards": "Vanhoja tuontimitaleja: {count} · tarkistus kesken"
+    "legacyImportAwards": "Vanhoja tuontimitaleja: {{count}} · tarkistus kesken"
   },
   "findPlayers": {
     "title": "Etsi pelaajia",
