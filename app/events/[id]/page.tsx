@@ -902,7 +902,7 @@ export default function EventDetailsPage() {
                     </div>
                     <select aria-label={t("eventUi.s77")} value={leagueMatchForm.roundId} onChange={(e) => setLeagueMatchForm((current) => ({ ...current, roundId: e.target.value }))} className="w-full min-w-0 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm">
                       <option value="">{t("eventUi.s48")}</option>
-                      {structure.rounds.map((round: any) => <option key={round.id} value={round.id}>{round.title || `Kierros ${round.round_number}`}</option>)}
+                      {structure.rounds.map((round: any) => <option key={round.id} value={round.id}>{round.title?.match(/^Kierros (\d+)$/) ? t("eventFix.roundNumber", { number: round.round_number }) : round.title || t("eventFix.roundNumber", { number: round.round_number })}</option>)}
                     </select>
                     <ArchiveCardButton disabled={leagueSaving || !leagueMatchForm.entryA || !leagueMatchForm.entryB || leagueMatchForm.entryA === leagueMatchForm.entryB} onClick={addLeagueMatch}>{t("eventUi.s49")}</ArchiveCardButton>
                   </div>}
@@ -1154,7 +1154,7 @@ export default function EventDetailsPage() {
               <ArchiveCard>
                 <ArchiveCardHeader>
                   <ArchiveCardTitle className="text-xl normal-case">
-                    {event.event_type === "campaign" ? "Kampanjan sessiot" : "Tapahtuman kierrokset"}
+                    {event.event_type === "campaign" ? t("eventFix.campaignSessions") : t("eventFix.eventRounds")}
                   </ArchiveCardTitle>
                 </ArchiveCardHeader>
                 <ArchiveCardContent className="space-y-4">
@@ -1288,7 +1288,7 @@ export default function EventDetailsPage() {
                                       <div className="min-w-0">
                                         <div className="flex items-center gap-3">
                                           <span className="font-cinzel text-accent-gold">{session.session_number ?? index + 1}</span>
-                                          <span className="font-medium">{session.title || t("eventDynamic.s20")}</span>
+                                          <span className="font-medium">{session.title?.match(/^Sessio (\d+)$/) ? t("eventFix.sessionNumber", { number: session.session_number ?? index + 1 }) : session.title || t("eventDynamic.s20")}</span>
                                         </div>
                                         <div className="mt-1 text-xs text-muted-foreground">
                                           {session.starts_at
@@ -1366,17 +1366,17 @@ export default function EventDetailsPage() {
                             <div key={item.id} className="rounded-md border border-accent-gold/15 p-3 space-y-3">
                               <div className="flex items-center gap-3">
                                 <span className="font-cinzel text-accent-gold">{item.round_number ?? index + 1}</span>
-                                <span>{item.title || t("eventDynamic.s25")}</span>
+                                <span>{item.title?.match(/^Kierros (\d+)$/) ? t("eventFix.roundNumber", { number: item.round_number ?? index + 1 }) : item.title || t("eventDynamic.s25")}</span>
                               </div>
                               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                <span>{structure.matches.filter((m: any) => m.round_id === item.id).length} ottelua</span>
-                                <span>{item.status === "completed" ? "Valmis" : item.status === "active" ? t("eventDynamic.s22")  : t("eventUi.s65")}</span>
+                                <span>{t("eventFix.matchCount", { count: structure.matches.filter((m: any) => m.round_id === item.id).length })}</span>
+                                <span>{item.status === "completed" ? t("eventUi.s67") : item.status === "active" ? t("eventDynamic.s22") : t("eventUi.s65")}</span>
                               </div>
                               <div data-round-id={item.id} className="space-y-2">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                   {[0,1].map((slot) => (
                                     <select key={slot} className="rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm">
-                                      <option value="">Valitse pelaaja {slot + 1}</option>
+                                      <option value="">{t("eventFix.selectPlayer", { number: slot + 1 })}</option>
                                       {structure.entries.map((entry: any) => {
                                         const p = structure.profiles.find((profile: any) => profile.id === entry.user_id)
                                         return <option key={entry.id} value={entry.id}>{entry.display_name || p?.display_name || p?.username || t("eventUi.competitor")}</option>
