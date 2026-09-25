@@ -20,7 +20,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { ArrowLeft, Globe, UserCheck, Lock, Loader2, Calendar, Search, X, UserPlus, Check } from "lucide-react"
+import { ArrowLeft, Globe, UserCheck, Lock, Loader2, Calendar, Search, X, UserPlus, Check, ChevronDown, ChevronUp, Trophy } from "lucide-react"
 import { createEvent, inviteToEvent, type EventType, type EventPrivacy } from "@/app/actions/events"
 import { createLeague } from "@/app/actions/league-hub"
 import { getUserFriendsList } from "@/app/actions/friends"
@@ -64,6 +64,8 @@ export default function CreateEventPage() {
     placementPoints: "10, 7, 5, 3, 1",
   })
   const [leagueSeason, setLeagueSeason] = useState({ name: "", startsOn: "", endsOn: "" })
+  const [showAwards, setShowAwards] = useState(false)
+  const [awardCategory, setAwardCategory] = useState<"none" | "board-games" | "role-playing-games" | "miniatures" | "trading-card-games">("none")
   const [saving, setSaving] = useState(false)
   const [userGames, setUserGames] = useState<UserGame[]>([])
   const [loadingGames, setLoadingGames] = useState(true)
@@ -139,6 +141,7 @@ export default function CreateEventPage() {
           seasonName: leagueSeason.name,
           startsOn: leagueSeason.startsOn,
           endsOn: leagueSeason.endsOn,
+          awardCategory,
         })
         if (result.error) toast({ title: t("eventDynamic.s2"), description: result.error, variant: "destructive" })
         else if (result.id) router.push("/leagues/" + result.id)
@@ -183,6 +186,7 @@ export default function CreateEventPage() {
             rounds: undefined,
           } : {}),
           organizerNotes: eventConfig.organizerNotes.trim() || undefined,
+          ...(eventType === "tournament" ? { awards: { category: awardCategory, places: awardCategory === "none" ? [] : [1, 2, 3], confirmed: false } } : {}),
         },
       })
 
@@ -779,6 +783,35 @@ export default function CreateEventPage() {
                             </button>
                           )
                         })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {(eventType === "tournament" || eventType === "league") && (
+                  <div className="rounded-lg border border-accent-gold/30 bg-background/20">
+                    <button type="button" aria-expanded={showAwards} aria-controls="event-awards-settings" onClick={() => setShowAwards((open) => !open)} className="flex w-full items-center justify-between gap-3 p-4 text-left">
+                      <span className="flex items-center gap-3">
+                        <Trophy aria-hidden="true" className="h-5 w-5 text-accent-gold" />
+                        <span><span className="block font-cinzel text-accent-gold">{t("eventAwards.title")}</span><span className="block text-sm text-muted-foreground">{t(awardCategory === "none" ? "eventAwards.none" : "eventAwards.topThree")}</span></span>
+                      </span>
+                      {showAwards ? <ChevronUp className="h-5 w-5 text-accent-gold" /> : <ChevronDown className="h-5 w-5 text-accent-gold" />}
+                    </button>
+                    {showAwards && (
+                      <div id="event-awards-settings" className="space-y-3 border-t border-accent-gold/20 p-4">
+                        <p className="text-sm text-muted-foreground">{t("eventAwards.explanation")}</p>
+                        <Label htmlFor="award-category" className="text-accent-gold">{t("eventAwards.selection")}</Label>
+                        <Select value={awardCategory} onValueChange={(value) => setAwardCategory(value as typeof awardCategory)}>
+                          <SelectTrigger id="award-category" className={archiveField}><SelectValue /></SelectTrigger>
+                          <SelectContent className={archiveSelectContent}>
+                            <SelectItem className={archiveSelectItem} value="none">{t("eventAwards.none")}</SelectItem>
+                            <SelectItem className={archiveSelectItem} value="board-games">{t("eventAwards.boardGames")}</SelectItem>
+                            <SelectItem className={archiveSelectItem} value="role-playing-games">{t("eventAwards.rolePlayingGames")}</SelectItem>
+                            <SelectItem className={archiveSelectItem} value="miniatures">{t("eventAwards.miniatures")}</SelectItem>
+                            <SelectItem className={archiveSelectItem} value="trading-card-games">{t("eventAwards.tradingCardGames")}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {awardCategory !== "none" && <p className="text-sm text-accent-gold">{t("eventAwards.confirmLater")}</p>}
                       </div>
                     )}
                   </div>
