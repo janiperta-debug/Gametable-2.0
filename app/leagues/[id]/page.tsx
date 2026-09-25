@@ -23,6 +23,7 @@ export default function LeaguePage() {
  const [editing, setEditing] = useState(false)
  const [leagueDraft, setLeagueDraft] = useState({ name: "", game: "", description: "", privacy: "public" as "public" | "private" })
  const [editingSeason, setEditingSeason] = useState<string | null>(null)
+ const [showCompletedSeasons, setShowCompletedSeasons] = useState(false)
  const [seasonDraft, setSeasonDraft] = useState({ name: "", startsOn: "", endsOn: "" })
  const [error, setError] = useState("")
  const refresh = async () => {
@@ -144,7 +145,8 @@ export default function LeaguePage() {
      <p className="text-sm text-muted-foreground">{t("leagueUi.s18")}</p>
      <ArchiveCardButton onClick={() => router.push("/events/" + hub.league.legacy_event_id)}>{t("leagueUi.s19")}</ArchiveCardButton>
    </div>}
-   {hub.seasons.map((season) => <ArchiveCard key={season.id} corners={false} centerOrnaments={false}>
+   {hub.seasons.some((season) => season.status === "completed") && <ArchiveCardButton type="button" onClick={() => setShowCompletedSeasons((shown) => !shown)}>{showCompletedSeasons ? (locale === "fi" ? "Piilota päättyneet kaudet" : "Hide completed seasons") : (locale === "fi" ? "Näytä päättyneet kaudet" : "Show completed seasons")}</ArchiveCardButton>}
+   {hub.seasons.filter((season) => season.status !== "completed" || showCompletedSeasons).map((season) => <ArchiveCard key={season.id} corners={false} centerOrnaments={false}>
     <ArchiveCardHeader><ArchiveCardTitle>{season.name} {season.status === "completed" && <span className="ml-2 text-sm text-emerald-300">{locale === "fi" ? "Päättynyt" : "Completed"}</span>}</ArchiveCardTitle></ArchiveCardHeader>
     <ArchiveCardContent className="space-y-4">
      <p className="text-sm text-muted-foreground">{season.starts_on ? new Date(`${season.starts_on}T12:00:00`).toLocaleDateString(locale === "fi" ? "fi-FI" : "en-GB") : t("leagueUi.s60")} – {season.ends_on ? new Date(`${season.ends_on}T12:00:00`).toLocaleDateString(locale === "fi" ? "fi-FI" : "en-GB") : t("leagueUi.s61")}</p>
