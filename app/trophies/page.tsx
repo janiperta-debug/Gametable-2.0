@@ -253,12 +253,12 @@ export default function TrophiesPage() {
                     <h3 className="font-cinzel text-lg text-accent-gold">{t(`trophies.series.${series}`)}</h3>
                     <p className="mt-2 font-merriweather text-sm leading-relaxed text-foreground/80">{t(`trophies.seriesDescriptions.${series}`)}</p>
                     {series === "portal-keeper" && <p className="mt-2 text-sm text-amber-200/90">{t("trophies.importPending")}</p>}
-                    <p className="mt-4 mb-2 text-xs uppercase tracking-wide text-accent-gold">{t("trophies.nextTiers")}</p>
+                    {series !== "portal-keeper" && <p className="mt-4 mb-2 text-xs uppercase tracking-wide text-accent-gold">{t("trophies.nextTiers")}</p>}
                     <ul className="space-y-2">
-                      {seriesBadges.map((badge) => (
+                      {(series === "portal-keeper" ? [] : seriesBadges).map((badge) => (
                         <li key={badge.id} className="flex items-start gap-3 font-merriweather text-sm">
                           <span className={badge.earned ? "text-accent-gold" : "text-muted-foreground"}>{badge.earned ? "✓" : "○"}</span>
-                          <span><strong>{t(`trophies.${badge.tier}`)}:</strong> {series === "portal-keeper" ? (badge.tier === "bronze" ? "3" : badge.tier === "silver" ? "15" : "50") : badge.requirement_value} — {series === "portal-keeper" ? t("trophies.importPending") : t(`trophies.badges.${badge.id}.requirement`)}</span>
+                          <span><strong>{t(`trophies.${badge.tier}`)}:</strong> {t(`trophies.badges.${badge.id}.requirement`)}</span>
                         </li>
                       ))}
                     </ul>
