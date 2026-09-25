@@ -92,6 +92,7 @@ export default function EventDetailsPage() {
   const [updatingRsvp, setUpdatingRsvp] = useState(false)
   const [cancelling, setCancelling] = useState(false)
   const [completing, setCompleting] = useState(false)
+  const [championEntryId, setChampionEntryId] = useState("")
   const [invitableUsers, setInvitableUsers] = useState<Array<{ id: string; display_name: string | null; avatar_url: string | null }>>([])
   const [inviting, setInviting] = useState<string | null>(null)
   const [showInviteSection, setShowInviteSection] = useState(false)
@@ -439,7 +440,7 @@ export default function EventDetailsPage() {
     }
 
     setCompleting(true)
-    const result = await completeEvent(eventId)
+    const result = await completeEvent(eventId, event?.event_type === "tournament" ? championEntryId : undefined)
 
     if (result.error) {
       toast({
@@ -595,7 +596,7 @@ export default function EventDetailsPage() {
               </ArchiveCardButton>
               <ArchiveCardButton
                 onClick={handleComplete}
-                disabled={completing || cancelling}
+                disabled={completing || cancelling || (event.event_type === "tournament" && (!championEntryId || !structure.matches.length || structure.matches.some((match: any) => match.status !== "completed")))}
                 icon={completing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
               >
                 {t("events.completeEvent") || t("eventDynamic.s9")}
@@ -611,6 +612,22 @@ export default function EventDetailsPage() {
           )}
         </div>
 
+        {event.event_type === "tournament" && isHost && event.status !== "completed" && event.status !== "cancelled" && (
+          <ArchiveCard className="mb-6">
+            <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">{locale === "fi" ? "Turnauksen voittajan vahvistaminen" : "Confirm tournament champion"}</ArchiveCardTitle></ArchiveCardHeader>
+            <ArchiveCardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">{locale === "fi" ? "Kirjaa kaikki ottelutulokset ja valitse voittaja ennen tapahtuman päättämistä. Voittajan on oltava rekisteröitynyt kilpailija, jolla on vähintään yksi kirjattu otteluvoitto." : "Record every match result and select the champion before completing the event. The champion must be a registered competitor with at least one recorded match win."}</p>
+              <select aria-label={locale === "fi" ? "Turnauksen voittaja" : "Tournament champion"} value={championEntryId} onChange={(e) => setChampionEntryId(e.target.value)} className="w-full rounded-md border border-accent-gold/30 bg-background p-3">
+                <option value="">{locale === "fi" ? "Valitse voittaja" : "Select champion"}</option>
+                {structure.entries.filter((entry: any) => entry.user_id && structure.matches.some((match: any) => match.status === "completed" && match.winner_entry_id === entry.id)).map((entry: any) => {
+                  const profile = structure.profiles.find((p: any) => p.id === entry.user_id)
+                  return <option key={entry.id} value={entry.id}>{entry.display_name || profile?.display_name || profile?.username || (locale === "fi" ? "Kilpailija" : "Competitor")}</option>
+                })}
+              </select>
+              {structure.matches.some((match: any) => match.status !== "completed") && <p className="text-sm text-amber-300">{locale === "fi" ? "Kaikkien otteluiden tulokset on kirjattava ennen turnauksen päättämistä." : "All match results must be recorded before the tournament can be completed."}</p>}
+            </ArchiveCardContent>
+          </ArchiveCard>
+        )}
         {event.event_type === "league" && isHost && (
           <ArchiveCard className="mb-6">
             <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">{t("eventUi.s28")}</ArchiveCardTitle></ArchiveCardHeader>
