@@ -927,6 +927,20 @@
         "description": "Legendaarinen läsnäolo jokaisessa kokoontumisessa",
         "requirement": "Osallistu 200 toteutuneeseen tapahtumaan"
       }
+    },
+    "howEarned": "Miten palkinnot ansaitaan",
+    "howEarnedIntro": "Palkinnot perustuvat todelliseen harrastustoimintaan. Pronssi-, hopea- ja kultataso avautuvat, kun kunkin sarjan vaatimus täyttyy. Palkinnoista ei saa XP:tä.",
+    "awardCriteria": "Ansaitsemisen ehdot",
+    "nextTiers": "Kaikki tasot",
+    "importPending": "Tuontikertojen uusi seuranta on työn alla. Vanhat tuontipalkinnot säilyvät toistaiseksi, mutta uusia ei vielä myönnetä.",
+    "seriesDescriptions": {
+      "curator-of-wonders": "Kokoelmaasi kuuluvat omistetut lautapelit, roolipelit, keräilykortit ja miniatyyrit. Toivelistan kohteita ei lasketa mukaan.",
+      "dimensional-wanderer": "Neljä erillistä harrastuskategoriaa ovat lautapelit, roolipelit, keräilykortit ja miniatyyrit. Kukin kategoria lasketaan kerran, kun omistat siitä vähintään yhden kohteen.",
+      "fellowship-weaver": "Vain hyväksytyt GameTable-ystävyyssuhteet lasketaan mukaan. Lähetetyt tai odottavat pyynnöt eivät riitä.",
+      "gathering-master": "Järjestämiäsi tapahtumia lasketaan vasta, kun niiden tila on päättynyt. Peruutetut ja tulevat tapahtumat eivät kerrytä saavutusta.",
+      "stalwart-companion": "Osallistumisesi lasketaan päättyneistä tapahtumista, joihin sinut on merkitty osallistujaksi. Pelkkä ilmoittautuminen tulevaan tapahtumaan ei riitä.",
+      "manor-ascendant": "Kartanon taso määräytyy harrastustoiminnasta kertyneestä XP:stä. Mitalit tunnustavat saavuttamasi tasot, mutta eivät itsessään anna XP:tä.",
+      "portal-keeper": "Tuleva Suuri arkistonhoitaja -sarja palkitsee onnistuneista tuontikerroista kaikissa neljässä pelikategoriassa. Yksi onnistunut tuonti on yksi suoritus riippumatta tuotujen kohteiden määrästä."
     }
   },
   "findPlayers": {
