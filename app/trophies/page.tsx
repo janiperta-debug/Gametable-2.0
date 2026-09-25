@@ -195,12 +195,14 @@ export default function TrophiesPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <h2 className="text-lg sm:text-xl font-cinzel text-accent-gold">{t(`trophies.series.${series}`)}</h2>
-                        <p className="text-sm text-muted-foreground">{earned.length} / {seriesBadges.length} {t("trophies.tiersEarned")}</p>
-                        {highest && <p className="text-sm text-accent-gold mt-1">{t(`trophies.${highest.tier}`)} · {t(`trophies.badges.${highest.id}.name`)}</p>}
-                        {!highest && <p className="text-sm text-muted-foreground mt-1">{t("trophies.locked")}</p>}
+                        <p className="text-sm text-muted-foreground">{series === "portal-keeper" ? t("trophies.legacyImportAwards", { count: earned.length }) : `${earned.length} / ${seriesBadges.length} ${t("trophies.tiersEarned")}`}</p>
+                        {highest && series !== "portal-keeper" && <p className="text-sm text-accent-gold mt-1">{t(`trophies.${highest.tier}`)} · {t(`trophies.badges.${highest.id}.name`)}</p>}
+                        {!highest && series !== "portal-keeper" && <p className="text-sm text-muted-foreground mt-1">{t("trophies.locked")}</p>}
                       </div>
                     </div>
-                    {next ? (
+                    {series === "portal-keeper" ? (
+                      <p className="mt-4 text-sm font-merriweather text-amber-200/90">{t("trophies.importPending")}</p>
+                    ) : next ? (
                       <div className="mt-4">
                         <div className="flex justify-between gap-3 text-xs sm:text-sm font-merriweather mb-2">
                           <span>{t(`trophies.${next.tier}`)} · {t(`trophies.badges.${next.id}.requirement`)}</span>
