@@ -95,28 +95,41 @@ export async function getUserStats(userId: string, client?: any): Promise<{
 }> {
   const supabase = client || await createClient()
   
-  // Get game count
-  const { count: gameCount } = await supabase
+  // Count only owned board games/RPGs. Card and miniature ownership
+  // lives in separate collection tables, not in user_games.
+  const { count: gameCount, error: gameCountError } = await supabase
     .from("user_games")
     .select("*", { count: "exact", head: true })
     .eq("user_id", userId)
-  
-  // Get unique categories from user's games
-  const { data: userGames } = await supabase
+    .eq("status", "owned")
+  if (gameCountError) throw new Error(gameCountError.message)
+
+  const { data: userGames, error: categoryError } = await supabase
     .from("user_games")
-    .select("games(game_type)")
+    .select("games(category)")
     .eq("user_id", userId)
-  
+    .eq("status", "owned")
+  if (categoryError) throw new Error(categoryError.message)
+
   const uniqueCategories = new Set<string>()
-  if (userGames) {
-    for (const ug of userGames) {
-      const game = ug.games as { game_type?: string } | null
-      if (game?.game_type) {
-        uniqueCategories.add(game.game_type)
-      }
-    }
+  for (const row of userGames || []) {
+    const relation = row.games as unknown as { category?: string | null } | { category?: string | null }[] | null
+    const game = Array.isArray(relation) ? relation[0] : relation
+    const category = game?.category
+    if (category === "board_game" || category === "rpg") uniqueCategories.add(category)
+    if (category === "trading_card" || category === "tcg") uniqueCategories.add("tcg")
+    if (category === "miniature" || category === "miniatures") uniqueCategories.add("miniature")
   }
-  
+
+  const [{ count: ownedCards, error: cardsError }, { count: ownedMiniatures, error: miniaturesError }] = await Promise.all([
+    supabase.from("tcg_collection").select("*", { count: "exact", head: true }).eq("user_id", userId),
+    supabase.from("mini_army_units").select("*", { count: "exact", head: true }).eq("user_id", userId).eq("owned", true),
+  ])
+  if (cardsError) throw new Error(cardsError.message)
+  if (miniaturesError) throw new Error(miniaturesError.message)
+  if ((ownedCards || 0) > 0) uniqueCategories.add("tcg")
+  if ((ownedMiniatures || 0) > 0) uniqueCategories.add("miniature")
+
   // Get friend count (accepted friendships)
   const { count: friendCount } = await supabase
     .from("friendships")
@@ -129,14 +142,22 @@ export async function getUserStats(userId: string, client?: any): Promise<{
     .from("events")
     .select("*", { count: "exact", head: true })
     .eq("host_id", userId)
+    .eq("status", "completed")
   
-  // Get events attended count (RSVP with 'attending' status)
-  const { count: eventsAttended } = await supabase
-    .from("event_rsvps")
-    .select("*", { count: "exact", head: true })
+  // Attendance uses the current event_participants table. Only completed
+  // events count; the host's automatic participation does not count twice.
+  const { data: attendedRows, error: attendanceError } = await supabase
+    .from("event_participants")
+    .select("event_id, events!inner(status, host_id)")
     .eq("user_id", userId)
     .eq("status", "attending")
-  
+    .eq("events.status", "completed")
+  if (attendanceError) throw new Error(attendanceError.message)
+  const eventsAttended = new Set((attendedRows || []).filter((row: any) => {
+    const event = Array.isArray(row.events) ? row.events[0] : row.events
+    return event?.host_id !== userId
+  }).map((row: any) => row.event_id)).size
+
   // Get user level
   const { data: profile } = await supabase
     .from("profiles")
@@ -149,6 +170,7 @@ export async function getUserStats(userId: string, client?: any): Promise<{
     .from("user_games")
     .select("games!inner(bgg_id)", { count: "exact", head: true })
     .eq("user_id", userId)
+    .eq("status", "owned")
     .not("games.bgg_id", "is", null)
   
   return {
@@ -156,7 +178,7 @@ export async function getUserStats(userId: string, client?: any): Promise<{
     category_count: uniqueCategories.size,
     friend_count: friendCount || 0,
     events_hosted: eventsHosted || 0,
-    events_attended: eventsAttended || 0,
+    events_attended: eventsAttended,
     level: getManorLevelFromXp(profile?.xp || 0),
     manor_level: getManorLevelFromXp(profile?.xp || 0),
     bgg_imports: bggImports || 0,
