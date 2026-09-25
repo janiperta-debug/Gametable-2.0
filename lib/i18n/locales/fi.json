@@ -947,7 +947,9 @@
       "stalwart-companion": "Osallistumisesi lasketaan päättyneistä tapahtumista, joihin sinut on merkitty osallistujaksi. Pelkkä ilmoittautuminen tulevaan tapahtumaan ei riitä.",
       "manor-ascendant": "Kartanon taso määräytyy harrastustoiminnasta kertyneestä XP:stä. Mitalit tunnustavat saavuttamasi tasot, mutta eivät itsessään anna XP:tä.",
       "portal-keeper": "Tuleva Suuri arkistonhoitaja -sarja palkitsee onnistuneista tuontikerroista kaikissa neljässä pelikategoriassa. Yksi onnistunut tuonti on yksi suoritus riippumatta tuotujen kohteiden määrästä."
-    }
+    },
+    "showMore": "Katso lisää",
+    "showLess": "Sulje lisätiedot"
   },
   "findPlayers": {
     "title": "Etsi pelaajia",
