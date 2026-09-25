@@ -81,12 +81,18 @@ export default function TrophiesPage() {
       case "stalwart-companion": return "events_attended"
       case "manor-ascendant": return "level"
       case "portal-keeper": return "import_operations"
+      case "tournament-champion": return "tournament_wins"
+      case "tournament-master": return "tournaments_hosted"
+      case "chronicler-of-legends": return "campaigns_played"
+      case "master-storyteller": return "campaigns_hosted"
+      case "league-veteran": return "league_seasons_played"
+      case "league-commissioner": return "league_seasons_hosted"
       default: return "game_count"
     }
   }
 
   // Group badges by series using local definitions as fallback
-  const seriesOrder: BadgeSeries[] = ["curator-of-wonders", "dimensional-wanderer", "fellowship-weaver", "gathering-master", "stalwart-companion", "manor-ascendant", "portal-keeper"]
+  const seriesOrder: BadgeSeries[] = ["curator-of-wonders", "dimensional-wanderer", "fellowship-weaver", "gathering-master", "stalwart-companion", "manor-ascendant", "portal-keeper", "tournament-champion", "tournament-master", "chronicler-of-legends", "master-storyteller", "league-veteran", "league-commissioner"]
   
   const badgesBySeries = seriesOrder.map((series) => {
     // Get badges for this series from loaded data or use local definitions
