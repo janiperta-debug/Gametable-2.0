@@ -443,10 +443,22 @@ export default function EventDetailsPage() {
     setCompleting(true)
     try {
       // A failed or stale Server Action must never leave the completion button spinning forever.
-      const result = await Promise.race([
-        completeEvent(eventId, event?.event_type === "tournament" ? championEntryId : undefined),
-        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 20000)),
-      ])
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 20000)
+      let result: { success: boolean; error?: string }
+      try {
+        const response = await fetch("/api/events/complete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ eventId, championEntryId: event?.event_type === "tournament" ? championEntryId : undefined }),
+          signal: controller.signal,
+        })
+        result = await response.json()
+        if (!response.ok && !result.error) result.error = `HTTP ${response.status}`
+      } finally {
+        clearTimeout(timeout)
+      }
       if (!result.success || result.error) {
         const message = result.error || (locale === "fi" ? "Tapahtuman päättäminen epäonnistui." : "Could not complete the event.")
         setCompletionError(message)
@@ -457,7 +469,7 @@ export default function EventDetailsPage() {
       toast({ title: t("common.success"), description: t("events.eventCompleted") || "Event completed" })
       router.push("/events")
     } catch (error) {
-      const timedOut = error instanceof Error && error.message === "TIMEOUT"
+      const timedOut = error instanceof Error && error.name === "AbortError"
       const message = timedOut
         ? (locale === "fi" ? "Vahvistus ei vastannut ajoissa. Päivitä sivu ja tarkista tapahtuman tila ennen uutta yritystä." : "Confirmation timed out. Refresh and check the event status before retrying.")
         : (locale === "fi" ? "Yhteys katkesi tai julkaisu vaihtui. Päivitä sivu ja yritä uudelleen, jos tapahtuma on edelleen kesken." : "Connection failed or deployment changed. Refresh and retry only if the event is still active.")
