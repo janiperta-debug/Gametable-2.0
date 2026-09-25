@@ -11,18 +11,18 @@ export type ImportCategory = "board_game" | "rpg" | "tcg" | "miniatures"
 async function ownedIds(userId: string, category: ImportCategory): Promise<string[]> {
   const db = createServiceClient()
   if (category === "tcg") {
-    const { data, error } = await db.from("tcg_collection").select("id").eq("user_id", userId)
+    const { data, error } = await db.from("tcg_collection").select("card_id").eq("user_id", userId)
     if (error) throw new Error(error.message)
-    return (data ?? []).map((row) => row.id)
+    return [...new Set((data ?? []).map((row) => row.card_id))]
   }
   if (category === "miniatures") {
-    const { data, error } = await db.from("mini_army_units").select("id").eq("user_id", userId).eq("owned", true)
+    const { data, error } = await db.from("mini_army_units").select("unit_id").eq("user_id", userId).eq("owned", true)
     if (error) throw new Error(error.message)
-    return (data ?? []).map((row) => row.id)
+    return [...new Set((data ?? []).map((row) => row.unit_id))]
   }
-  const { data, error } = await db.from("user_games").select("id, games!inner(category)").eq("user_id", userId).eq("status", "owned").eq("games.category", category)
+  const { data, error } = await db.from("user_games").select("game_id, games!inner(category)").eq("user_id", userId).eq("status", "owned").eq("games.category", category)
   if (error) throw new Error(error.message)
-  return (data ?? []).map((row) => row.id)
+  return [...new Set((data ?? []).map((row) => row.game_id))]
 }
 
 export async function beginCollectionImport(category: ImportCategory): Promise<{ operationId?: string; error?: string }> {
