@@ -216,7 +216,14 @@ export default function TrophiesPage() {
             })}
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-7">
+            <ArchiveCard>
+              <ArchiveCardContent>
+                <h2 className="font-cinzel text-xl text-accent-gold">{t("trophies.howEarned")}</h2>
+                <p className="mt-2 font-merriweather text-sm leading-relaxed text-foreground/80">{t("trophies.howEarnedIntro")}</p>
+              </ArchiveCardContent>
+            </ArchiveCard>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {badges.filter((badge) => badge.earned).map((badge) => {
               const local = BADGE_DEFINITIONS.find((item) => item.id === badge.id)
               return (
@@ -227,12 +234,38 @@ export default function TrophiesPage() {
                     </div>
                     <h2 className="text-center text-lg font-cinzel text-accent-gold">{t(`trophies.badges.${badge.id}.name`)}</h2>
                     <p className="text-center text-sm text-muted-foreground mt-1">{t(`trophies.${badge.tier}`)} · {t(`trophies.series.${badge.series}`)}</p>
+                    <p className="mt-3 text-center font-merriweather text-sm leading-relaxed text-foreground/80">{t(`trophies.badges.${badge.id}.description`)}</p>
+                    <div className="mt-4 border-t border-accent-gold/20 pt-3">
+                      <p className="text-xs uppercase tracking-wide text-accent-gold">{t("trophies.requirement")}</p>
+                      <p className="mt-1 font-merriweather text-sm">{t(`trophies.badges.${badge.id}.requirement`)}</p>
+                    </div>
                     {badge.earned_at && <p className="text-center text-xs text-muted-foreground mt-2">{t("trophies.earnedAt")} {new Date(badge.earned_at).toLocaleDateString()}</p>}
                   </ArchiveCardContent>
                 </ArchiveCard>
               )
             })}
             {earnedCount === 0 && <p className="font-merriweather text-muted-foreground">{t("trophies.locked")}</p>}
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {badgesBySeries.map(({ series, badges: seriesBadges }) => (
+                <ArchiveCard key={series}>
+                  <ArchiveCardContent>
+                    <h3 className="font-cinzel text-lg text-accent-gold">{t(`trophies.series.${series}`)}</h3>
+                    <p className="mt-2 font-merriweather text-sm leading-relaxed text-foreground/80">{t(`trophies.seriesDescriptions.${series}`)}</p>
+                    {series === "portal-keeper" && <p className="mt-2 text-sm text-amber-200/90">{t("trophies.importPending")}</p>}
+                    <p className="mt-4 mb-2 text-xs uppercase tracking-wide text-accent-gold">{t("trophies.nextTiers")}</p>
+                    <ul className="space-y-2">
+                      {seriesBadges.map((badge) => (
+                        <li key={badge.id} className="flex items-start gap-3 font-merriweather text-sm">
+                          <span className={badge.earned ? "text-accent-gold" : "text-muted-foreground"}>{badge.earned ? "✓" : "○"}</span>
+                          <span><strong>{t(`trophies.${badge.tier}`)}:</strong> {series === "portal-keeper" ? (badge.tier === "bronze" ? "3" : badge.tier === "silver" ? "15" : "50") : badge.requirement_value} — {series === "portal-keeper" ? t("trophies.importPending") : t(`trophies.badges.${badge.id}.requirement`)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </ArchiveCardContent>
+                </ArchiveCard>
+              ))}
+            </div>
           </div>
         )}
       </main>
