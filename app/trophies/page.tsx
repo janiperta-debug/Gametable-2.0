@@ -80,7 +80,7 @@ export default function TrophiesPage() {
       case "gathering-master": return "events_hosted"
       case "stalwart-companion": return "events_attended"
       case "manor-ascendant": return "level"
-      case "portal-keeper": return "bgg_imports"
+      case "portal-keeper": return "import_operations"
       default: return "game_count"
     }
   }
@@ -177,9 +177,10 @@ export default function TrophiesPage() {
         {activeTab === "progress" ? (
           <div className="grid gap-4 md:grid-cols-2">
             {badgesBySeries.map(({ series, badges: seriesBadges }) => {
-              const earned = seriesBadges.filter((badge) => badge.earned)
+              const verified = (badge: BadgeWithProgress) => badge.earned && (series !== "portal-keeper" || badge.current_progress >= (badge.requirement_value || 0))
+              const earned = seriesBadges.filter(verified)
               const highest = earned[earned.length - 1]
-              const next = seriesBadges.find((badge) => !badge.earned)
+              const next = seriesBadges.find((badge) => !verified(badge))
               const featured = highest || next
               if (!featured) return null
               const local = BADGE_DEFINITIONS.find((badge) => badge.id === featured.id)
@@ -195,14 +196,12 @@ export default function TrophiesPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <h2 className="text-lg sm:text-xl font-cinzel text-accent-gold">{t(`trophies.series.${series}`)}</h2>
-                        <p className="text-sm text-muted-foreground">{series === "portal-keeper" ? t("trophies.legacyImportAwards", { count: earned.length }) : `${earned.length} / ${seriesBadges.length} ${t("trophies.tiersEarned")}`}</p>
-                        {highest && series !== "portal-keeper" && <p className="text-sm text-accent-gold mt-1">{t(`trophies.${highest.tier}`)} · {t(`trophies.badges.${highest.id}.name`)}</p>}
-                        {!highest && series !== "portal-keeper" && <p className="text-sm text-muted-foreground mt-1">{t("trophies.locked")}</p>}
+                        <p className="text-sm text-muted-foreground">{`${earned.length} / ${seriesBadges.length} ${t("trophies.tiersEarned")}`}</p>
+                        {highest && <p className="text-sm text-accent-gold mt-1">{t(`trophies.${highest.tier}`)} · {t(`trophies.badges.${highest.id}.name`)}</p>}
+                        {!highest && <p className="text-sm text-muted-foreground mt-1">{t("trophies.locked")}</p>}
                       </div>
                     </div>
-                    {series === "portal-keeper" ? (
-                      <p className="mt-4 text-sm font-merriweather text-amber-200/90">{t("trophies.importPending")}</p>
-                    ) : next ? (
+                    {next ? (
                       <div className="mt-4">
                         <div className="flex justify-between gap-3 text-xs sm:text-sm font-merriweather mb-2">
                           <span>{t(`trophies.${next.tier}`)} · {t(`trophies.badges.${next.id}.requirement`)}</span>
@@ -226,15 +225,12 @@ export default function TrophiesPage() {
                     {expandedSeries.includes(series) && (
                       <div id={`badge-details-${series}`} className="mt-4 space-y-4 border-t border-accent-gold/20 pt-4 font-merriweather text-sm">
                         <p className="leading-relaxed text-foreground/80">{t(`trophies.seriesDescriptions.${series}`)}</p>
-                        {series === "portal-keeper" ? (
-                          <p className="text-amber-200/90">{t("trophies.importPending")}</p>
-                        ) : (
-                          <div>
+                        <div>
                             <h3 className="mb-3 font-cinzel text-accent-gold">{t("trophies.nextTiers")}</h3>
                             <ul className="space-y-3">
                               {seriesBadges.map((badge) => (
                                 <li key={badge.id} className="flex items-start gap-3">
-                                  <span aria-hidden="true" className={badge.earned ? "text-accent-gold" : "text-muted-foreground"}>{badge.earned ? "✓" : "○"}</span>
+                                  <span aria-hidden="true" className={verified(badge) ? "text-accent-gold" : "text-muted-foreground"}>{verified(badge) ? "✓" : "○"}</span>
                                   <div>
                                     <p className="font-semibold">{t(`trophies.${badge.tier}`)} · {t(`trophies.badges.${badge.id}.name`)}</p>
                                     <p className="mt-1 text-foreground/75">{t(`trophies.badges.${badge.id}.description`)}</p>
@@ -243,8 +239,7 @@ export default function TrophiesPage() {
                                 </li>
                               ))}
                             </ul>
-                          </div>
-                        )}
+                        </div>
                       </div>
                     )}
                   </ArchiveCardContent>
@@ -264,6 +259,7 @@ export default function TrophiesPage() {
                     </div>
                     <h2 className="text-center font-cinzel text-lg text-accent-gold">{t(`trophies.badges.${badge.id}.name`)}</h2>
                     <p className="mt-1 text-center text-sm text-muted-foreground">{t(`trophies.${badge.tier}`)} · {t(`trophies.series.${badge.series}`)}</p>
+                    {badge.series === "portal-keeper" && badge.current_progress < (badge.requirement_value || 0) && <p className="mt-2 text-center text-xs text-amber-200/90">{t("trophies.legacyMedal")}</p>}
                     {badge.earned_at && <p className="mt-2 text-center text-xs text-muted-foreground">{t("trophies.earnedAt")} {new Date(badge.earned_at).toLocaleDateString()}</p>}
                   </ArchiveCardContent>
                 </ArchiveCard>
