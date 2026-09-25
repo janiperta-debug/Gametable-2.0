@@ -906,17 +906,17 @@
       "portal-novice": {
         "name": "Portaalin noviisi",
         "description": "Avaa ensimmäinen portaalisi BoardGameGeekiin",
-        "requirement": "Tuo 1 peli BGG:stä"
+        "requirement": "3 onnistunutta tuontikertaa"
       },
       "portal-adept": {
         "name": "Portaalin taitaja",
         "description": "Valjasta BGG-portaalin voima",
-        "requirement": "Tuo 10 peliä BGG:stä"
+        "requirement": "15 onnistunutta tuontikertaa"
       },
       "portal-master": {
         "name": "Portaalin mestari",
         "description": "Ulottuvuuksien välisen pelikeräilyn mestari",
-        "requirement": "Tuo 50 peliä BGG:stä"
+        "requirement": "50 onnistunutta tuontikertaa"
       },
       "eager-newcomer": {
         "name": "Innokas tulokas",
@@ -938,7 +938,7 @@
     "howEarnedIntro": "Palkinnot perustuvat todelliseen harrastustoimintaan. Pronssi-, hopea- ja kultataso avautuvat, kun kunkin sarjan vaatimus täyttyy. Palkinnoista ei saa XP:tä.",
     "awardCriteria": "Ansaitsemisen ehdot",
     "nextTiers": "Kaikki tasot",
-    "importPending": "Tuontikertojen uusi seuranta on työn alla. Vanhat tuontipalkinnot säilyvät toistaiseksi, mutta uusia ei vielä myönnetä.",
+    "importPending": "Tuontikertojen seuranta on käytössä uusille tuonneille. Vanhoja tuontimitaleja ei voida vahvistaa ilman aiempaa tuontihistoriaa.",
     "seriesDescriptions": {
       "curator-of-wonders": "Kokoelmaasi kuuluvat omistetut lautapelit, roolipelit, keräilykortit ja miniatyyrit. Toivelistan kohteita ei lasketa mukaan.",
       "dimensional-wanderer": "Neljä erillistä harrastuskategoriaa ovat lautapelit, roolipelit, keräilykortit ja miniatyyrit. Kukin kategoria lasketaan kerran, kun omistat siitä vähintään yhden kohteen.",
@@ -946,11 +946,12 @@
       "gathering-master": "Järjestämiäsi tapahtumia lasketaan vasta, kun niiden tila on päättynyt. Peruutetut ja tulevat tapahtumat eivät kerrytä saavutusta.",
       "stalwart-companion": "Osallistumisesi lasketaan päättyneistä tapahtumista, joihin sinut on merkitty osallistujaksi. Pelkkä ilmoittautuminen tulevaan tapahtumaan ei riitä.",
       "manor-ascendant": "Kartanon taso määräytyy harrastustoiminnasta kertyneestä XP:stä. Mitalit tunnustavat saavuttamasi tasot, mutta eivät itsessään anna XP:tä.",
-      "portal-keeper": "Tuleva Suuri arkistonhoitaja -sarja palkitsee onnistuneista tuontikerroista kaikissa neljässä pelikategoriassa. Yksi onnistunut tuonti on yksi suoritus riippumatta tuotujen kohteiden määrästä."
+      "portal-keeper": "Suuri arkistonhoitaja palkitsee onnistuneista tuontikerroista kaikissa neljässä pelikategoriassa. Yksi tuontikerta lasketaan, kun kokoelmaan lisätään vähintään yksi uusi omistettu kohde. Pelkät kaksoiskappaleet tai toivelistan kohteet eivät kerrytä edistymistä."
     },
     "showMore": "Katso lisää",
     "showLess": "Sulje lisätiedot",
-    "legacyImportAwards": "Vanhoja tuontimitaleja: {{count}} · tarkistus kesken"
+    "legacyImportAwards": "Vanhoja tuontimitaleja: {{count}} · tarkistus kesken",
+    "legacyMedal": "Vanha tuontimitali · uuden seurannan vaatimus ei vielä täyty"
   },
   "findPlayers": {
     "title": "Etsi pelaajia",
