@@ -92,6 +92,7 @@ export async function getUserStats(userId: string, client?: any): Promise<{
   level: number
   manor_level: number
   bgg_imports: number
+  import_operations: number
 }> {
   const supabase = client || await createClient()
   
@@ -165,8 +166,12 @@ export async function getUserStats(userId: string, client?: any): Promise<{
     .eq("id", userId)
     .single()
   
-  // Import operations need their own audit log; existing BGG item counts
-  // must not be presented as successful import operations.
+  const { count: importOperations, error: importError } = await supabase
+    .from("collection_import_operations")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("status", "completed")
+  if (importError) throw new Error(importError.message)
   
   return {
     game_count: (gameCount || 0) + (ownedCards || 0) + (ownedMiniatures || 0),
@@ -176,7 +181,8 @@ export async function getUserStats(userId: string, client?: any): Promise<{
     events_attended: eventsAttended,
     level: getManorLevelFromXp(profile?.xp || 0),
     manor_level: getManorLevelFromXp(profile?.xp || 0),
-    bgg_imports: 0,
+    bgg_imports: importOperations || 0,
+    import_operations: importOperations || 0,
   }
 }
 
@@ -201,7 +207,8 @@ function getProgressForRequirement(
     case "level":
       return stats.manor_level
     case "bgg_imports":
-      return stats.bgg_imports
+    case "import_operations":
+      return stats.import_operations
     default:
       return 0
   }
@@ -329,8 +336,8 @@ async function checkAndAwardBadgesInternal(userId: string, supabase: any): Promi
       continue
     }
     
-    // Legacy BGG item counts are not valid import-operation evidence.
-    if (badge.requirement_type === "bgg_imports" || !badge.requirement_type || !["game_count", "category_count", "friend_count", "events_hosted", "events_attended", "level"].includes(badge.requirement_type) || !badge.requirement_value || badge.requirement_value <= 0) continue
+    // Only the verified import operation log qualifies for portal medals.
+    if (!badge.requirement_type || !["game_count", "category_count", "friend_count", "events_hosted", "events_attended", "level", "import_operations"].includes(badge.requirement_type) || !badge.requirement_value || badge.requirement_value <= 0) continue
 
     // Check if requirement is met
     const currentProgress = getProgressForRequirement(stats, badge.requirement_type)
