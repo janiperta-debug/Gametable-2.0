@@ -906,17 +906,17 @@
       "portal-novice": {
         "name": "Portal Novice",
         "description": "Open your first portal to BoardGameGeek",
-        "requirement": "Import 1 game from BGG"
+        "requirement": "Complete 3 successful imports"
       },
       "portal-adept": {
         "name": "Portal Adept",
         "description": "Harness the power of the BGG portal",
-        "requirement": "Import 10 games from BGG"
+        "requirement": "Complete 15 successful imports"
       },
       "portal-master": {
         "name": "Portal Master",
         "description": "Master of dimensional game collection",
-        "requirement": "Import 50 games from BGG"
+        "requirement": "Complete 50 successful imports"
       },
       "eager-newcomer": {
         "name": "Eager Newcomer",
@@ -938,7 +938,7 @@
     "howEarnedIntro": "Achievements reflect actual hobby activity. Bronze, silver and gold unlock when their requirements are met. Achievements do not grant XP.",
     "awardCriteria": "Award criteria",
     "nextTiers": "All tiers",
-    "importPending": "Import-operation tracking is being rebuilt. Previously earned import badges remain for now, but new ones are not yet awarded.",
+    "importPending": "Import tracking is active for new imports. Legacy import medals cannot be verified without historical operation records.",
     "seriesDescriptions": {
       "curator-of-wonders": "Owned board games, RPGs, trading cards and miniatures count toward your collection. Wishlist items do not count.",
       "dimensional-wanderer": "The four categories are board games, RPGs, trading cards and miniatures. Each category counts once when you own at least one item in it.",
@@ -946,11 +946,12 @@
       "gathering-master": "Events you organize count once they are marked completed. Upcoming and cancelled events do not count.",
       "stalwart-companion": "Participation counts for completed events where you are recorded as attending. Signing up for a future event alone is not enough.",
       "manor-ascendant": "Your Manor level comes from XP earned through hobby activities. Medals recognize milestones but do not themselves award XP.",
-      "portal-keeper": "The upcoming Grand Archivist series will recognize successful import operations across all four game categories. Each successful import counts once, regardless of how many items it adds."
+      "portal-keeper": "The Grand Archivist rewards successful import operations across all four hobby categories. An operation counts once when it adds at least one new owned collection entry. Duplicate-only or wishlist-only imports do not count."
     },
     "showMore": "Show details",
     "showLess": "Hide details",
-    "legacyImportAwards": "Legacy import medals: {{count}} · verification pending"
+    "legacyImportAwards": "Legacy import medals: {{count}} · verification pending",
+    "legacyMedal": "Legacy import medal · new tracking requirement not yet met"
   },
   "findPlayers": {
     "title": "Find Players",
