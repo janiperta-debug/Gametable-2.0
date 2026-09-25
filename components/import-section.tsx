@@ -233,9 +233,11 @@ export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "m
     let result: Awaited<ReturnType<typeof importMiniaturesToCollection>>
     try {
       result = await importMiniaturesToCollection(
-      rows.map((row) => ({ catalogId: row.catalogId, modelCount: row.modelCount })),
-      army,
+        rows.map((row) => ({ catalogId: row.catalogId, modelCount: row.modelCount })),
+        army,
       )
+    } catch (error) {
+      result = { success: false, error: error instanceof Error ? error.message : "Miniature import failed" }
     } finally {
       const audit = await finishCollectionImport(operation.operationId)
       if (audit.error) console.error("Miniature import tracking failed:", audit.error)
