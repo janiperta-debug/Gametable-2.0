@@ -1,0 +1,2 @@
+ALTER TABLE public.league_seasons ADD COLUMN IF NOT EXISTS award_config jsonb NOT NULL DEFAULT '{"category":"none","places":[],"confirmed":false}'::jsonb;
+COMMENT ON COLUMN public.league_seasons.award_config IS 'Optional organizer-selected trophy series; recipients are confirmed separately after final standings.';
