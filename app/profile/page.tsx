@@ -1,4 +1,5 @@
 import { ProfileHeader } from "@/components/profile-header"
+import { ProfileAdminLink } from "@/components/profile-admin-link"
 import { GamingProgress } from "@/components/gaming-progress"
 import { ProfileNotifications } from "@/components/profile-notifications"
 import { GameInterests } from "@/components/game-interests"
@@ -17,6 +18,8 @@ export default function ProfilePage() {
 
         {/* Profile Content */}
         <div className="max-w-6xl mx-auto space-y-8">
+          <ProfileAdminLink />
+
           <GamingProgress />
 
           {/* Mobile Navigation */}
