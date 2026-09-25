@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { getLeague, addLeagueSeason, linkSeasonEvent, updateLeague, updateLeagueSeason, deleteLeague, joinLeague, leaveLeague, addLeagueMemberById, searchLeaguePlayers, removeLeagueMember } from "@/app/actions/league-hub"
 import { useTranslation } from "@/lib/i18n"
 import { completeLeagueSeason } from "@/app/actions/league-season-completion"
+import { awardPersonalTrophies, getSourcePersonalTrophies } from "@/app/actions/personal-trophies"
 import { ArchiveFrame, ArchiveButton, ArchiveCard, ArchiveCardHeader, ArchiveCardTitle, ArchiveCardContent, ArchiveCardButton } from "@/components/archive-frame"
 
 type Hub = Awaited<ReturnType<typeof getLeague>>
@@ -24,6 +25,8 @@ export default function LeaguePage() {
  const [leagueDraft, setLeagueDraft] = useState({ name: "", game: "", description: "", privacy: "public" as "public" | "private" })
  const [editingSeason, setEditingSeason] = useState<string | null>(null)
  const [showCompletedSeasons, setShowCompletedSeasons] = useState(false)
+ const [awardSelections, setAwardSelections] = useState<Record<string, string[]>>({})
+ const [awardedSeasons, setAwardedSeasons] = useState<Record<string, boolean>>({})
  const [seasonDraft, setSeasonDraft] = useState({ name: "", startsOn: "", endsOn: "" })
  const [error, setError] = useState("")
  const refresh = async () => {
@@ -31,6 +34,10 @@ export default function LeaguePage() {
    const next = await getLeague(id)
    setHub(next)
    setError("")
+   if (next.isOwner) {
+    const awardStates = await Promise.all(next.seasons.filter((season: any) => (season.award_config as any)?.category && (season.award_config as any)?.category !== "none").map(async (season: any) => [season.id, (await getSourcePersonalTrophies("league_season", season.id)).awarded] as const))
+    setAwardedSeasons(Object.fromEntries(awardStates))
+   }
   } catch (cause) {
    console.error("League data loading failed:", cause)
    setError(locale === "fi" ? "Liigan tietojen lataaminen epäonnistui. Päivitä sivu ja yritä uudelleen." : "Could not load league data. Refresh and try again.")
@@ -169,6 +176,26 @@ export default function LeaguePage() {
        }}>{t("leagueUi.s23")}</ArchiveCardButton>
       </div>}
      </div>}
+     {hub.isOwner && (season.award_config as any)?.category && (season.award_config as any)?.category !== "none" && !awardedSeasons[season.id] && <div className="space-y-3 rounded-md border border-accent-gold/30 p-3">
+       <h3 className="font-heading text-accent-gold">{locale === "fi" ? "Palkitseminen · kolme parasta" : "Awards · top three"}</h3>
+       <p className="text-sm text-muted-foreground">{locale === "fi" ? "Valitse lopulliset sijoitukset sarjataulukosta. Vain otteluita pelanneet rekisteröityneet käyttäjät voivat saada pokaalin." : "Confirm the final podium from the standings. Only registered users who played matches can receive trophies."}</p>
+       {([0,1,2] as const).map((place) => <label key={place} className="block space-y-1 text-sm">
+        <span>{[locale === "fi" ? "Kulta" : "Gold", locale === "fi" ? "Hopea" : "Silver", locale === "fi" ? "Pronssi" : "Bronze"][place]}</span>
+        <select value={(awardSelections[season.id] || [])[place] || ""} onChange={(e) => setAwardSelections((old) => { const next = [...(old[season.id] || ["","",""])]; next[place] = e.target.value; return {...old,[season.id]:next} })} className="w-full rounded-md border border-accent-gold/30 bg-background p-3">
+         <option value="">{locale === "fi" ? "Ei jaeta" : "Not awarded"}</option>
+         {hub.standings.filter(row => row.season_id === season.id && row.played > 0 && row.key.startsWith("user:")).map(row => <option key={row.key} value={row.key.slice(5)}>{row.name} · {row.points} {locale === "fi" ? "pistettä" : "points"}</option>)}
+        </select>
+       </label>)}
+       {season.status === "completed" && <ArchiveCardButton disabled={busy} onClick={async () => {
+         const places = awardSelections[season.id] || []
+         const recipients = places.filter(Boolean)
+         if (!recipients.length || !places[0] || (places[2] && !places[1]) || new Set(recipients).size !== recipients.length) { setError(locale === "fi" ? "Valitse palkintosijat järjestyksessä, jokaiselle eri pelaaja." : "Select distinct players for each place in order."); return }
+         if (!window.confirm(locale === "fi" ? "Jaetaanko kauden pokaalit valituille pelaajille?" : "Issue the season trophies to these players?")) return
+         setBusy(true); setError("")
+         try { const result = await awardPersonalTrophies("league_season", season.id, recipients); if (result.success) await refresh(); else setError(result.error || "Award failed") }
+         finally { setBusy(false) }
+       }}>{locale === "fi" ? "Vahvista pokaalien jako" : "Confirm trophy awards"}</ArchiveCardButton>}
+      </div>}
      {hub.isOwner && season.status !== "completed" && <div className="rounded-md border border-accent-gold/30 bg-accent-gold/5 p-3 space-y-2">
       <p className="text-sm text-muted-foreground">{locale === "fi" ? "Päätä kausi vasta, kun kaikki siihen liitetyt tapahtumat ja ottelut on kirjattu valmiiksi. Päättäminen vahvistaa liigasaavutusten laskennan." : "Complete the season only after all linked events and match results are finalized. Completion confirms league achievement progress."}</p>
       <ArchiveCardButton disabled={busy} onClick={async () => {
@@ -177,7 +204,7 @@ export default function LeaguePage() {
        try {
         const result = await completeLeagueSeason(season.id)
         if (!result.success) setError(result.error || (locale === "fi" ? "Kauden päättäminen epäonnistui." : "Could not complete season."))
-        else await refresh()
+        else { await refresh(); if ((season.award_config as any)?.category && (season.award_config as any)?.category !== "none") setShowCompletedSeasons(true) }
        } catch { setError(locale === "fi" ? "Kauden päättäminen epäonnistui." : "Could not complete season.") }
        finally { setBusy(false) }
       }}>{locale === "fi" ? "Vahvista kauden päättyminen" : "Confirm season completion"}</ArchiveCardButton>
