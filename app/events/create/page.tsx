@@ -67,7 +67,7 @@ export default function CreateEventPage() {
   })
   const [leagueSeason, setLeagueSeason] = useState({ name: "", startsOn: "", endsOn: "" })
   const [showAwards, setShowAwards] = useState(false)
-  const [awardCategory, setAwardCategory] = useState<"none" | "board-games" | "role-playing-games" | "miniatures" | "trading-card-games">("none")
+  const [awardCategory, setAwardCategory] = useState<"none" | "league" | "board-games" | "role-playing-games" | "miniatures" | "trading-card-games">("none")
   const [saving, setSaving] = useState(false)
   const [userGames, setUserGames] = useState<UserGame[]>([])
   const [loadingGames, setLoadingGames] = useState(true)
@@ -151,7 +151,7 @@ export default function CreateEventPage() {
           seasonName: leagueSeason.name,
           startsOn: leagueSeason.startsOn,
           endsOn: leagueSeason.endsOn,
-          awardCategory,
+          awardCategory: awardCategory === "none" ? "none" : "league",
         })
         if (result.error) toast({ title: t("eventDynamic.s2"), description: result.error, variant: "destructive" })
         else if (result.id) router.push("/leagues/" + result.id)
@@ -803,22 +803,22 @@ export default function CreateEventPage() {
                     <button type="button" aria-expanded={showAwards} aria-controls="event-awards-settings" onClick={() => setShowAwards((open) => !open)} className="flex w-full items-center justify-between gap-3 p-4 text-left">
                       <span className="flex items-center gap-3">
                         <Trophy aria-hidden="true" className="h-5 w-5 text-accent-gold" />
-                        <span><span className="block font-cinzel text-accent-gold">{awardText("title")}</span><span className="block text-sm text-muted-foreground">{awardText(awardCategory === "none" ? "none" : "topThree")}</span></span>
+                        <span><span className="block font-cinzel text-accent-gold">{awardText("title")}</span><span className="block text-sm text-muted-foreground">{eventType === "league" && awardCategory !== "none" ? (locale === "fi" ? "Vain voittaja · 3 pokaalivaihtoehtoa" : "Winner only · 3 trophy options") : awardText(awardCategory === "none" ? "none" : "topThree")}</span></span>
                       </span>
                       {showAwards ? <ChevronUp className="h-5 w-5 text-accent-gold" /> : <ChevronDown className="h-5 w-5 text-accent-gold" />}
                     </button>
                     {showAwards && (
                       <div id="event-awards-settings" className="space-y-3 border-t border-accent-gold/20 p-4">
-                        <p className="text-sm text-muted-foreground">{awardText("explanation")}</p>
+                        <p className="text-sm text-muted-foreground">{eventType === "league" ? (locale === "fi" ? "Liigassa palkitaan vain voittaja. Voit valita kristallin, viirin tai veistoksen kauden päättyessä." : "Only the league winner receives a trophy. Choose crystal, pennant or sculpture when the season ends.") : awardText("explanation")}</p>
                         <Label htmlFor="award-category" className="text-accent-gold">{awardText("selection")}</Label>
                         <Select value={awardCategory} onValueChange={(value) => setAwardCategory(value as typeof awardCategory)}>
                           <SelectTrigger id="award-category" className={archiveField}><SelectValue /></SelectTrigger>
                           <SelectContent className={archiveSelectContent}>
                             <SelectItem className={archiveSelectItem} value="none">{awardText("none")}</SelectItem>
-                            <SelectItem className={archiveSelectItem} value="board-games">{awardText("boardGames")}</SelectItem>
-                            <SelectItem className={archiveSelectItem} value="role-playing-games">{awardText("rolePlayingGames")}</SelectItem>
-                            <SelectItem className={archiveSelectItem} value="miniatures">{awardText("miniatures")}</SelectItem>
-                            <SelectItem className={archiveSelectItem} value="trading-card-games">{awardText("tradingCardGames")}</SelectItem>
+                            {eventType === "league" ? <SelectItem className={archiveSelectItem} value="league">{locale === "fi" ? "Voittajan pokaali" : "Winner trophy"}</SelectItem> : <SelectItem className={archiveSelectItem} value="board-games">{awardText("boardGames")}</SelectItem>}
+                            {eventType !== "league" && <SelectItem className={archiveSelectItem} value="role-playing-games">{awardText("rolePlayingGames")}</SelectItem>}
+                            {eventType !== "league" && <SelectItem className={archiveSelectItem} value="miniatures">{awardText("miniatures")}</SelectItem>}
+                            {eventType !== "league" && <SelectItem className={archiveSelectItem} value="trading-card-games">{awardText("tradingCardGames")}</SelectItem>}
                           </SelectContent>
                         </Select>
                         {awardCategory !== "none" && <p className="text-sm text-accent-gold">{awardText("confirmLater")}</p>}
