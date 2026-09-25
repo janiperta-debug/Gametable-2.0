@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
@@ -168,6 +169,11 @@ export default function AnnouncementsPage() {
                 </p>
               </div>
             </header>
+
+            <Link href="/admin/store-interest" className="flex items-center justify-between gap-3 rounded-lg border border-accent-gold/40 bg-black/20 p-4 transition-colors hover:border-accent-gold hover:bg-accent-gold/10">
+              <span><strong className="block font-heading text-accent-gold">Official Store – kiinnostusmittari</strong><span className="mt-1 block text-sm text-muted-foreground">Tarkastele tulevan kaupan kiinnostusäänestyksen tuloksia.</span></span>
+              <span aria-hidden="true" className="text-accent-gold">→</span>
+            </Link>
 
             <div className="space-y-6">
               <div className="space-y-2">
