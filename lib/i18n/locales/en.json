@@ -780,17 +780,17 @@
       "manor-bronze": {
         "name": "Ground Floor Master",
         "description": "Master the ground floor of the manor",
-        "requirement": "Reach Level 5"
+        "requirement": "Reach Manor Level 35"
       },
       "manor-silver": {
         "name": "Second Floor Master",
         "description": "Ascend to the second floor",
-        "requirement": "Reach Level 10"
+        "requirement": "Reach Manor Level 70"
       },
       "manor-gold": {
         "name": "Basement Lord",
         "description": "Unlock the secrets of the basement",
-        "requirement": "Reach Level 15"
+        "requirement": "Reach Manor Level 95"
       },
       "portal-bronze": {
         "name": "Portal Novice",
@@ -885,17 +885,17 @@
       "ground-floor-master": {
         "name": "Ground Floor Master",
         "description": "Master the ground floor of the manor",
-        "requirement": "Reach Level 5"
+        "requirement": "Reach Manor Level 35"
       },
       "second-floor-master": {
         "name": "Second Floor Master",
         "description": "Ascend to the second floor",
-        "requirement": "Reach Level 10"
+        "requirement": "Reach Manor Level 70"
       },
       "basement-lord": {
         "name": "Basement Lord",
         "description": "Unlock the secrets of the basement",
-        "requirement": "Reach Level 15"
+        "requirement": "Reach Manor Level 95"
       },
       "portal-novice": {
         "name": "Portal Novice",
