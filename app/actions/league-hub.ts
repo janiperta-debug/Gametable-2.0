@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
-export async function createLeague(input: { name: string; game: string; description: string; privacy: "public" | "private"; seasonName: string; startsOn?: string; endsOn?: string; awardCategory?: "none" | "board-games" | "role-playing-games" | "miniatures" | "trading-card-games" }) {
+export async function createLeague(input: { name: string; game: string; description: string; privacy: "public" | "private"; seasonName: string; startsOn?: string; endsOn?: string; awardCategory?: "none" | "league" | "board-games" | "role-playing-games" | "miniatures" | "trading-card-games" }) {
  const supabase = await createClient()
  const { data: { user } } = await supabase.auth.getUser()
  if (!user) return { error: "Kirjaudu sisään." }
@@ -17,7 +17,7 @@ export async function createLeague(input: { name: string; game: string; descript
  const { error: seasonError } = await supabase.from("league_seasons").insert({
   league_id: league.id, name: input.seasonName.trim(),
   starts_on: input.startsOn || null, ends_on: input.endsOn || null,
-  award_config: { category: ["board-games", "role-playing-games", "miniatures", "trading-card-games"].includes(input.awardCategory || "") ? input.awardCategory : "none", places: input.awardCategory && input.awardCategory !== "none" ? [1, 2, 3] : [], confirmed: false },
+  award_config: { category: ["league", "board-games", "role-playing-games", "miniatures", "trading-card-games"].includes(input.awardCategory || "") ? input.awardCategory : "none", places: input.awardCategory && input.awardCategory !== "none" ? [1] : [], confirmed: false },
  })
  if (seasonError) {
   await supabase.from("leagues").delete().eq("id", league.id).eq("owner_id", user.id)
