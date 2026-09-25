@@ -15,6 +15,7 @@ import {
   type MiniatureArmyContext,
 } from "@/app/actions/miniatures"
 import { addGameToCollection } from "@/app/actions/games"
+import { beginCollectionImport, finishCollectionImport } from "@/app/actions/collection-import-operations"
 import type { TCGSearchResult } from "@/app/api/tcg/search/route"
 import type { MiniatureSearchResult } from "@/app/api/miniatures/search/route"
 import { resolveMiniatureArmy } from "@/lib/miniatures/army-resolver"
@@ -89,6 +90,7 @@ export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "m
     }
     
     setImporting(true)
+    let operationId: string | undefined
     console.log("handleImport: Starting import for user:", username)
     try {
       console.log("Importing from", getSourceName(), "for user:", username)
@@ -117,6 +119,11 @@ export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "m
         return
       }
       
+      // Start only after the external collection has returned items.
+      const operation = await beginCollectionImport(selectedCategory === "board-games" ? "board_game" : "rpg")
+      if (operation.error || !operation.operationId) throw new Error(operation.error || "Could not start import tracking")
+      operationId = operation.operationId
+
       // Import each game
       let successCount = 0
       let errorCount = 0
@@ -152,6 +159,9 @@ export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "m
         }
       }
 
+      const audit = await finishCollectionImport(operationId)
+      operationId = undefined
+      if (audit.error) console.error("Import tracking failed:", audit.error)
       toast({
         title: t("common.success"),
         description: `${t("collection.imported") || "Imported"} ${successCount} ${t("collection.items") || "games"}${errorCount > 0 ? `, ${errorCount} ${t("collection.failed") || "failed"}` : ""}`,
@@ -168,6 +178,10 @@ export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "m
         variant: "destructive",
       })
     } finally {
+      if (operationId) {
+        const audit = await finishCollectionImport(operationId)
+        if (audit.error) console.error("Import tracking failed:", audit.error)
+      }
       setImporting(false)
     }
   }
@@ -210,10 +224,22 @@ export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "m
     rows: ResolvedMiniatureImportRow[],
     army: Pick<MiniatureArmyContext, "id" | "factionId">,
   ) => {
-    const result = await importMiniaturesToCollection(
+    const operation = await beginCollectionImport("miniatures")
+    if (operation.error || !operation.operationId) {
+      setImportingBulk(false)
+      toast({ title: t("common.error"), description: operation.error || "Could not start import tracking", variant: "destructive" })
+      return
+    }
+    let result: Awaited<ReturnType<typeof importMiniaturesToCollection>>
+    try {
+      result = await importMiniaturesToCollection(
       rows.map((row) => ({ catalogId: row.catalogId, modelCount: row.modelCount })),
       army,
-    )
+      )
+    } finally {
+      const audit = await finishCollectionImport(operation.operationId)
+      if (audit.error) console.error("Miniature import tracking failed:", audit.error)
+    }
 
     setImportingBulk(false)
     setBulkArmyMode("idle")
@@ -324,6 +350,12 @@ export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "m
 
   const handleBulkImportTCG = async () => {
     setImportingBulk(true)
+    const operation = await beginCollectionImport("tcg")
+    if (operation.error || !operation.operationId) {
+      setImportingBulk(false)
+      toast({ title: t("common.error"), description: operation.error || "Could not start import tracking", variant: "destructive" })
+      return
+    }
     let successCount = 0
     let errorCount = 0
 
@@ -345,6 +377,8 @@ export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "m
       }
     }
 
+    const audit = await finishCollectionImport(operation.operationId)
+    if (audit.error) console.error("TCG import tracking failed:", audit.error)
     setImportingBulk(false)
     setBulkText("")
     setParsedItems([])
