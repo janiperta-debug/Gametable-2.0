@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { getLeague, addLeagueSeason, linkSeasonEvent, updateLeague, updateLeagueSeason, deleteLeague, joinLeague, leaveLeague, addLeagueMemberById, searchLeaguePlayers, removeLeagueMember } from "@/app/actions/league-hub"
 import { useTranslation } from "@/lib/i18n"
+import { completeLeagueSeason } from "@/app/actions/league-season-completion"
 import { ArchiveFrame, ArchiveButton, ArchiveCard, ArchiveCardHeader, ArchiveCardTitle, ArchiveCardContent, ArchiveCardButton } from "@/components/archive-frame"
 
 type Hub = Awaited<ReturnType<typeof getLeague>>
@@ -103,7 +104,7 @@ export default function LeaguePage() {
       try{const result=hub.isMember?await leaveLeague(id):await joinLeague(id);if(result.error)setError(result.error);else await refresh()}
       finally{setBusy(false)}
      }}>{hub.isMember?t("leagueUi.s58"):t("leagueUi.s59")}</ArchiveCardButton>}
-     {hub.isOwner && <div className="space-y-3">
+     {hub.isOwner && season.status !== "completed" && <div className="space-y-3">
       <label htmlFor="league-player-search" className="block text-sm text-accent-gold">{t("leagueUi.s14")}</label>
       <input id="league-player-search" autoComplete="off" placeholder={t("leagueUi.s40")}
        value={newMember} onChange={e=>{setNewMember(e.target.value);setSelectedPlayer(null)}}
@@ -135,7 +136,7 @@ export default function LeaguePage() {
      <ArchiveCardButton onClick={() => router.push("/events/" + hub.league.legacy_event_id)}>{t("leagueUi.s19")}</ArchiveCardButton>
    </div>}
    {hub.seasons.map((season) => <ArchiveCard key={season.id} corners={false} centerOrnaments={false}>
-    <ArchiveCardHeader><ArchiveCardTitle>{season.name}</ArchiveCardTitle></ArchiveCardHeader>
+    <ArchiveCardHeader><ArchiveCardTitle>{season.name} {season.status === "completed" && <span className="ml-2 text-sm text-emerald-300">{locale === "fi" ? "Päättynyt" : "Completed"}</span>}</ArchiveCardTitle></ArchiveCardHeader>
     <ArchiveCardContent className="space-y-4">
      <p className="text-sm text-muted-foreground">{season.starts_on ? new Date(`${season.starts_on}T12:00:00`).toLocaleDateString(locale === "fi" ? "fi-FI" : "en-GB") : t("leagueUi.s60")} – {season.ends_on ? new Date(`${season.ends_on}T12:00:00`).toLocaleDateString(locale === "fi" ? "fi-FI" : "en-GB") : t("leagueUi.s61")}</p>
 
@@ -156,6 +157,19 @@ export default function LeaguePage() {
         finally { setBusy(false) }
        }}>{t("leagueUi.s23")}</ArchiveCardButton>
       </div>}
+     </div>}
+     {hub.isOwner && season.status !== "completed" && <div className="rounded-md border border-accent-gold/30 bg-accent-gold/5 p-3 space-y-2">
+      <p className="text-sm text-muted-foreground">{locale === "fi" ? "Päätä kausi vasta, kun kaikki siihen liitetyt tapahtumat ja ottelut on kirjattu valmiiksi. Päättäminen vahvistaa liigasaavutusten laskennan." : "Complete the season only after all linked events and match results are finalized. Completion confirms league achievement progress."}</p>
+      <ArchiveCardButton disabled={busy} onClick={async () => {
+       if (!window.confirm(locale === "fi" ? "Vahvistetaanko kauden päättyminen? Tarkista ottelutulokset ensin." : "Complete this season? Check all match results first.")) return
+       setBusy(true); setError("")
+       try {
+        const result = await completeLeagueSeason(season.id)
+        if (!result.success) setError(result.error || (locale === "fi" ? "Kauden päättäminen epäonnistui." : "Could not complete season."))
+        else await refresh()
+       } catch { setError(locale === "fi" ? "Kauden päättäminen epäonnistui." : "Could not complete season.") }
+       finally { setBusy(false) }
+      }}>{locale === "fi" ? "Vahvista kauden päättyminen" : "Confirm season completion"}</ArchiveCardButton>
      </div>}
      <section className="space-y-3">
       <h3 className="font-heading text-xl text-accent-gold">{t("leagueUi.s24")}</h3>
@@ -185,12 +199,12 @@ export default function LeaguePage() {
      {hub.events.filter((event) => event.season_id === season.id).length === 0 && <p className="text-sm text-muted-foreground">{t("leagueUi.s32")}</p>}
      {hub.events.filter((event) => event.season_id === season.id).map((event) => <div key={event.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-accent-gold/20 p-3">
       <button type="button" onClick={() => router.push("/events/" + event.id)} className="text-left text-accent-gold hover:underline">{event.title} <span className="text-xs text-muted-foreground">· {t(`events.types.${event.event_type === "tournament" ? "tournament" : "game_night"}`)}</span></button>
-      {hub.isOwner && <ArchiveCardButton disabled={busy} onClick={async () => {
+      {hub.isOwner && season.status !== "completed" && <ArchiveCardButton disabled={busy} onClick={async () => {
        setBusy(true); const result = await linkSeasonEvent(id, season.id, event.id, false)
        if (result.error) setError(result.error); else await refresh(); setBusy(false)
       }}>{t("leagueUi.s33")}</ArchiveCardButton>}
      </div>)}
-     {hub.isOwner && <div className="flex flex-wrap gap-2">
+     {hub.isOwner && season.status !== "completed" && <div className="flex flex-wrap gap-2">
       <select aria-label={t("leagueUi.s47")} className="min-w-0 flex-1 rounded-md border border-accent-gold/20 bg-background px-3 py-2 text-sm" value={selected[season.id] || ""} onChange={(e) => setSelected({ ...selected, [season.id]: e.target.value })}>
        <option value="">{t("leagueUi.s34")}</option>
        {hub.available.map((event) => <option key={event.id} value={event.id}>{event.title} ({t(`events.types.${event.event_type === "tournament" ? "tournament" : "game_night"}`)})</option>)}
@@ -202,8 +216,8 @@ export default function LeaguePage() {
        setBusy(false)
       }}>{t("leagueUi.s35")}</ArchiveCardButton>
      </div>}
-     {hub.isOwner && <p className="text-xs text-muted-foreground">{t("leagueUi.s36")}</p>}
-     {hub.isOwner && <ArchiveCardButton onClick={() => router.push("/events/create")}>{t("leagueUi.s37")}</ArchiveCardButton>}
+     {hub.isOwner && season.status !== "completed" && <p className="text-xs text-muted-foreground">{t("leagueUi.s36")}</p>}
+     {hub.isOwner && season.status !== "completed" && <ArchiveCardButton onClick={() => router.push("/events/create")}>{t("leagueUi.s37")}</ArchiveCardButton>}
     </ArchiveCardContent>
    </ArchiveCard>)}
    {hub.isOwner && <ArchiveCard corners={false} centerOrnaments={false}><ArchiveCardHeader><ArchiveCardTitle>{t("leagueUi.s38")}</ArchiveCardTitle></ArchiveCardHeader>
