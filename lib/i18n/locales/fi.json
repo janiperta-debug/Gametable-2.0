@@ -103,6 +103,12 @@
     "register": "Rekisteröidy",
     "guest": "Vieras"
   },
+  "storeTeaser": {
+    "status": "Suunnitteilla",
+    "description": "Kartanon oma tuotevalikoima on suunnitteilla. Tutustu tulevaan kauppaan ja kerro mielipiteesi.",
+    "cta": "Tutustu suunnitelmaan",
+    "open": "Tutustu suunnitteilla olevaan GameTable Official Storeen"
+  },
   "home": {
     "title": "Tervetuloa Kartanoon",
     "subtitle": "Pöytäpelaamisen koti",
