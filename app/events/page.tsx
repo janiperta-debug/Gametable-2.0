@@ -96,11 +96,11 @@ export default function EventsPage() {
     return [...byId.values()].filter(matches).sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
   }, [publicEvents, myEvents, convertedIds, query, types])
   const communities = useMemo(() => {
-    const ownLeagues = user ? leagues.filter((league) => league.owner_id === user.id) : []
+    const ownLeagues = user ? leagues.filter((league) => league.owner_id === user.id && (league.league_seasons?.length === 0 || league.league_seasons?.some((season) => season.status !== "completed"))) : []
     const ownCampaigns = user ? myEvents.filter((event) => event.event_type === "campaign" && event.status !== "cancelled" && event.status !== "completed") : []
     const oldLeagues = user ? myEvents.filter((event) => event.event_type === "league" && !convertedIds.has(event.id) && event.status !== "cancelled" && event.status !== "completed") : []
     return [
-      ...ownLeagues.map((league) => ({ id: league.id, title: league.name, kind: "league", subtitle: league.league_seasons?.[0]?.name || "league", href: "/leagues/" + league.id })),
+      ...ownLeagues.map((league) => ({ id: league.id, title: league.name, kind: "league", subtitle: league.league_seasons?.find((season) => season.status !== "completed")?.name || "league", href: "/leagues/" + league.id })),
       ...ownCampaigns.map((event) => ({ id: event.id, title: event.title, kind: "campaign", subtitle: "campaign", href: "/events/" + event.id })),
       ...oldLeagues.map((event) => ({ id: event.id, title: event.title, kind: "league", subtitle: "legacyLeague", href: "/events/" + event.id })),
     ]
