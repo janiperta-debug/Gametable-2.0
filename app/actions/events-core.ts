@@ -870,44 +870,45 @@ export async function getInvitableUsers(
  * Complete an event (host only)
  */
 export async function completeEvent(
-  eventId: string
+  eventId: string,
+  championEntryId?: string
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
-
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return { success: false, error: "Unauthorized" }
 
-  const { data: event } = await supabase
-    .from("events")
-    .select("host_id, status")
-    .eq("id", eventId)
-    .single()
-
-  if (!event || event.host_id !== user.id) {
+  const { data: event, error: eventError } = await supabase.from("events")
+    .select("host_id,status,event_type,event_config").eq("id", eventId).single()
+  if (eventError || !event || event.host_id !== user.id)
     return { success: false, error: "Only the host can complete this event" }
+  if (event.status === "cancelled") return { success: false, error: "Cancelled events cannot be completed" }
+  if (event.status === "completed") return { success: true }
+
+  let finalConfig = event.event_config as Record<string, unknown> | null
+  if (event.event_type === "tournament") {
+    if (!championEntryId) return { success: false, error: "Select the tournament champion before completing the event." }
+    const { data: entry, error: entryError } = await supabase.from("event_entries")
+      .select("id,user_id,status").eq("id", championEntryId).eq("event_id", eventId).single()
+    if (entryError || !entry || entry.status !== "active" || !entry.user_id)
+      return { success: false, error: "Champion must be an active registered GameTable competitor." }
+    const { data: matches, error: matchError } = await supabase.from("event_matches")
+      .select("id,status,winner_entry_id").eq("event_id", eventId)
+    if (matchError) return { success: false, error: matchError.message }
+    if (!matches?.length || matches.some((match) => match.status !== "completed"))
+      return { success: false, error: "Record every match result before completing the tournament." }
+    if (!matches.some((match) => match.winner_entry_id === championEntryId))
+      return { success: false, error: "The champion must have won at least one recorded match." }
+    finalConfig = { ...(finalConfig || {}), champion_entry_id: championEntryId, champion_confirmed_at: new Date().toISOString(), champion_confirmed_by: user.id }
   }
 
-  if (event.status === "cancelled") {
-    return { success: false, error: "Cancelled events cannot be completed" }
-  }
-
-  if (event.status === "completed") {
-    return { success: true }
-  }
-
-  const { error } = await supabase
-    .from("events")
-    .update({ status: "completed" })
-    .eq("id", eventId)
-
-  if (error) {
-    console.error("Error completing event:", error)
-    return { success: false, error: error.message }
-  }
+  const { data: completed, error } = await supabase.from("events")
+    .update({ status: "completed", ...(event.event_type === "tournament" ? { event_config: finalConfig } : {}) })
+    .eq("id", eventId).neq("status", "completed").select("id").maybeSingle()
+  if (error || !completed) return { success: false, error: error?.message || "Event could not be completed" }
 
   revalidatePath("/events")
   revalidatePath(`/events/${eventId}`)
-
+  revalidatePath("/trophies")
   return { success: true }
 }
 
