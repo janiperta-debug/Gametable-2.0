@@ -35,7 +35,9 @@ const eventTypes: { value: EventType; image: string }[] = [
 ]
 import { getUserGames } from "@/app/actions/games"
 import { useToast } from "@/hooks/use-toast"
-import { useTranslations } from "@/lib/i18n"
+import { useTranslation } from "@/lib/i18n"
+import fiTranslations from "@/lib/i18n/locales/fi.json"
+import enTranslations from "@/lib/i18n/locales/en.json"
 
 interface UserGame {
   id: string
@@ -75,7 +77,15 @@ export default function CreateEventPage() {
   const [selectedFriends, setSelectedFriends] = useState<string[]>([])
   const [loadingFriends, setLoadingFriends] = useState(true)
   const { toast } = useToast()
-  const t = useTranslations()
+  const { t, locale } = useTranslation()
+  // Keep the newly introduced award labels available even if an older PWA
+  // translation bundle is still cached while the event form has updated.
+  const awardText = (key: keyof typeof fiTranslations.eventAwards) => {
+    const translated = t(`eventAwards.${key}`)
+    return translated === `eventAwards.${key}`
+      ? (locale === "en" ? enTranslations.eventAwards[key] : fiTranslations.eventAwards[key])
+      : translated
+  }
   
   // Filter games based on search query
   const filteredGames = userGames.filter(userGame => 
@@ -793,25 +803,25 @@ export default function CreateEventPage() {
                     <button type="button" aria-expanded={showAwards} aria-controls="event-awards-settings" onClick={() => setShowAwards((open) => !open)} className="flex w-full items-center justify-between gap-3 p-4 text-left">
                       <span className="flex items-center gap-3">
                         <Trophy aria-hidden="true" className="h-5 w-5 text-accent-gold" />
-                        <span><span className="block font-cinzel text-accent-gold">{t("eventAwards.title")}</span><span className="block text-sm text-muted-foreground">{t(awardCategory === "none" ? "eventAwards.none" : "eventAwards.topThree")}</span></span>
+                        <span><span className="block font-cinzel text-accent-gold">{awardText("title")}</span><span className="block text-sm text-muted-foreground">{awardText(awardCategory === "none" ? "none" : "topThree")}</span></span>
                       </span>
                       {showAwards ? <ChevronUp className="h-5 w-5 text-accent-gold" /> : <ChevronDown className="h-5 w-5 text-accent-gold" />}
                     </button>
                     {showAwards && (
                       <div id="event-awards-settings" className="space-y-3 border-t border-accent-gold/20 p-4">
-                        <p className="text-sm text-muted-foreground">{t("eventAwards.explanation")}</p>
-                        <Label htmlFor="award-category" className="text-accent-gold">{t("eventAwards.selection")}</Label>
+                        <p className="text-sm text-muted-foreground">{awardText("explanation")}</p>
+                        <Label htmlFor="award-category" className="text-accent-gold">{awardText("selection")}</Label>
                         <Select value={awardCategory} onValueChange={(value) => setAwardCategory(value as typeof awardCategory)}>
                           <SelectTrigger id="award-category" className={archiveField}><SelectValue /></SelectTrigger>
                           <SelectContent className={archiveSelectContent}>
-                            <SelectItem className={archiveSelectItem} value="none">{t("eventAwards.none")}</SelectItem>
-                            <SelectItem className={archiveSelectItem} value="board-games">{t("eventAwards.boardGames")}</SelectItem>
-                            <SelectItem className={archiveSelectItem} value="role-playing-games">{t("eventAwards.rolePlayingGames")}</SelectItem>
-                            <SelectItem className={archiveSelectItem} value="miniatures">{t("eventAwards.miniatures")}</SelectItem>
-                            <SelectItem className={archiveSelectItem} value="trading-card-games">{t("eventAwards.tradingCardGames")}</SelectItem>
+                            <SelectItem className={archiveSelectItem} value="none">{awardText("none")}</SelectItem>
+                            <SelectItem className={archiveSelectItem} value="board-games">{awardText("boardGames")}</SelectItem>
+                            <SelectItem className={archiveSelectItem} value="role-playing-games">{awardText("rolePlayingGames")}</SelectItem>
+                            <SelectItem className={archiveSelectItem} value="miniatures">{awardText("miniatures")}</SelectItem>
+                            <SelectItem className={archiveSelectItem} value="trading-card-games">{awardText("tradingCardGames")}</SelectItem>
                           </SelectContent>
                         </Select>
-                        {awardCategory !== "none" && <p className="text-sm text-accent-gold">{t("eventAwards.confirmLater")}</p>}
+                        {awardCategory !== "none" && <p className="text-sm text-accent-gold">{awardText("confirmLater")}</p>}
                       </div>
                     )}
                   </div>
