@@ -25,7 +25,16 @@ export default function LeaguePage() {
  const [editingSeason, setEditingSeason] = useState<string | null>(null)
  const [seasonDraft, setSeasonDraft] = useState({ name: "", startsOn: "", endsOn: "" })
  const [error, setError] = useState("")
- const refresh = async () => setHub(await getLeague(id))
+ const refresh = async () => {
+  try {
+   const next = await getLeague(id)
+   setHub(next)
+   setError("")
+  } catch (cause) {
+   console.error("League data loading failed:", cause)
+   setError(locale === "fi" ? "Liigan tietojen lataaminen epäonnistui. Päivitä sivu ja yritä uudelleen." : "Could not load league data. Refresh and try again.")
+  }
+ }
  useEffect(() => { void refresh() }, [id])
  useEffect(() => {
   let active=true
@@ -39,7 +48,7 @@ export default function LeaguePage() {
   },300)
   return()=>{active=false;clearTimeout(timer)}
  },[id,newMember])
- if (!hub) return <div className="p-8">{t("leagueUi.s0")}</div>
+ if (!hub) return <div className="space-y-4 p-8">{error || t("leagueUi.s0")}{error && <button className="block rounded border px-4 py-2" onClick={() => void refresh()}>{locale === "fi" ? "Yritä uudelleen" : "Retry"}</button>}</div>
  if (!hub.league) return <div className="p-8">{hub.error || t("leagueUi.s1")}</div>
  return <ArchiveFrame className="mx-auto max-w-5xl">
   <div className="space-y-6 p-3 sm:p-6">
