@@ -1,3 +1,17 @@
+/* Load the same families in the browser instead of during Vercel's build.
+   Local fallback stacks keep the UI usable when Google Fonts is unavailable. */
+@import url("https://fonts.googleapis.com/css2?family=Charm:wght@400;700&family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Inter:wght@400;500;600;700&family=Marcellus&family=Merriweather:wght@300;400;700&display=swap");
+
+:root {
+  --font-charm: "Charm", cursive;
+  --font-cinzel: "Cinzel", Georgia, serif;
+  --font-marcellus: "Marcellus", Georgia, serif;
+  --font-merriweather: "Merriweather", Georgia, serif;
+  --font-cormorant: "Cormorant Garamond", Georgia, serif;
+  --font-dm-sans: "DM Sans", Arial, sans-serif;
+  --font-inter: "Inter", Arial, sans-serif;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -1,52 +1,11 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter, Charm, Cinzel, Marcellus, Merriweather, Cormorant_Garamond, DM_Sans, Crimson_Pro } from "next/font/google"
 import "./globals.css"
 import "./theme-background.css"
 import "./archive-typography.css"
 import "./manual-entry.css"
 import { AppShell } from "@/components/app-shell"
 import { I18nProvider } from "@/lib/i18n"
-
-const inter = Inter({ subsets: ["latin"] })
-
-const charm = Charm({
-  weight: ["400", "700"],
-  subsets: ["latin"],
-  variable: "--font-charm",
-})
-
-const cinzel = Cinzel({
-  weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-  variable: "--font-cinzel",
-})
-
-const marcellus = Marcellus({
-  weight: ["400"],
-  subsets: ["latin"],
-  variable: "--font-marcellus",
-})
-
-const merriweather = Merriweather({
-  weight: ["300", "400", "700"],
-  subsets: ["latin"],
-  variable: "--font-merriweather",
-})
-
-const cormorantGaramond = Cormorant_Garamond({
-  weight: ["300", "400", "500", "600"],
-  subsets: ["latin"],
-  variable: "--font-cormorant",
-  style: ["normal", "italic"],
-})
-
-const dmSans = DM_Sans({
-  weight: ["300", "400", "500", "600"],
-  subsets: ["latin"],
-  variable: "--font-dm-sans",
-  style: ["normal", "italic"],
-})
 
 export const metadata: Metadata = {
   title: "GameTable - Your Exclusive Gaming Manor",
@@ -85,7 +44,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${charm.variable} ${cinzel.variable} ${marcellus.variable} ${merriweather.variable} ${cormorantGaramond.variable} ${dmSans.variable}`}
+
     >
       <head>
         <link rel="apple-touch-icon" href="/images/gametable-logo.png" />
@@ -106,7 +65,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${marcellus.className} font-body`}>
+      <body className="font-body">
         <div className="app-background min-h-screen">
           <I18nProvider>
             <AppShell>{children}</AppShell>
