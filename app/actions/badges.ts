@@ -239,8 +239,15 @@ export async function getBadgesWithProgress(userId?: string): Promise<{
     return { badges: [], earnedCount: 0, totalXP: 0, error: defError }
   }
   
-  // Get user's earned badges
-  const { data: userBadges, error: badgeError } = await getUserBadges(targetUserId)
+  // Reconcile earned badges when the owner opens the trophy page.
+  const { data: { user: viewer } } = await supabase.auth.getUser()
+  if (viewer?.id === targetUserId) {
+    const reconciliation = await checkAndAwardBadgesInternal(targetUserId, supabase)
+    if (reconciliation.error) console.error("Badge reconciliation failed:", reconciliation.error)
+  }
+
+  // Get earned badges after reconciliation.
+  const { data: userBadges, error: badgeError } = await getUserBadges(targetUserId, supabase)
   if (badgeError) {
     return { badges: [], earnedCount: 0, totalXP: 0, error: badgeError }
   }
@@ -310,8 +317,14 @@ async function checkAndAwardBadgesInternal(userId: string, supabase: any): Promi
   const earnedBadgeIds = new Set(existingBadges.map((b) => b.badge_id))
   
   // Get user stats
-  const stats = await getUserStats(userId, supabase)
-  
+  let stats: Awaited<ReturnType<typeof getUserStats>>
+  try {
+    stats = await getUserStats(userId, supabase)
+  } catch (error) {
+    console.error("Badge stats failed:", error)
+    return { newBadges: [], error: error instanceof Error ? error.message : "Badge stats unavailable" }
+  }
+
   // Find badges that should be awarded
   const newBadges: string[] = []
   
@@ -321,6 +334,9 @@ async function checkAndAwardBadgesInternal(userId: string, supabase: any): Promi
       continue
     }
     
+    // Legacy BGG item counts are not valid import-operation evidence.
+    if (badge.requirement_type === "bgg_imports" || !badge.requirement_type || !["game_count", "category_count", "friend_count", "events_hosted", "events_attended", "level"].includes(badge.requirement_type) || !badge.requirement_value || badge.requirement_value <= 0) continue
+
     // Check if requirement is met
     const currentProgress = getProgressForRequirement(stats, badge.requirement_type)
     const requiredValue = badge.requirement_value || 0
