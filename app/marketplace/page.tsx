@@ -179,22 +179,33 @@ export default function Marketplace() {
           </div>
         </ThemeHero>
 
-        {/* Official Store is a teaser inside the existing player marketplace, not a second entrance. */}
+        {/* Image-backed announcement. Copy remains in i18n; the image itself has no text. */}
         <Link
           href="/marketplace/store"
-          className="group relative mb-8 flex min-h-44 flex-col justify-center overflow-hidden rounded-xl border border-accent-gold/40 bg-gradient-to-br from-rose-950/75 via-stone-900/90 to-stone-950 px-6 py-7 shadow-lg transition-colors hover:border-accent-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold sm:px-8"
+          aria-label={t("storeTeaser.open")}
+          className="group relative mb-8 block min-h-[270px] overflow-hidden rounded-xl border border-accent-gold/40 bg-[#160f0c] shadow-xl transition-colors hover:border-accent-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold sm:min-h-[300px] lg:min-h-[340px]"
         >
-          <span className="absolute right-4 top-4 rounded-full border border-accent-gold/40 bg-stone-950/70 px-3 py-1 text-xs text-accent-gold sm:right-6 sm:top-6">
-            Suunnitteilla
-          </span>
-          <ShoppingBag className="mb-3 h-8 w-8 text-accent-gold" aria-hidden="true" />
-          <h2 className="max-w-[80%] font-heading text-xl text-accent-gold sm:text-2xl">GameTable Official Store</h2>
-          <p className="mt-2 max-w-xl font-body text-sm leading-relaxed text-foreground/85 sm:text-base">
-            Kartanon oma tuotevalikoima on suunnitteilla. Tutustu tulevaan kauppaan ja kerro mielipiteesi.
-          </p>
-          <span className="mt-4 text-sm font-semibold text-accent-gold group-hover:underline">
-            Tutustu suunnitelmaan →
-          </span>
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-cover bg-[position:63%_center] transition-transform duration-700 group-hover:scale-[1.02] sm:bg-center"
+            style={{ backgroundImage: "url('/images/marketplace/official-store-teaser.png')" }}
+          />
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[#0b0706]/95 via-[#0b0706]/85 to-[#0b0706]/30 sm:from-[#0b0706]/95 sm:via-[#0b0706]/75 sm:to-transparent" />
+          <div className="relative z-10 flex min-h-[270px] max-w-xl flex-col items-start justify-center px-5 py-7 sm:min-h-[300px] sm:px-9 lg:min-h-[340px] lg:px-12">
+            <span className="mb-4 rounded-full border border-[#d9b66e]/60 bg-[#1a120e]/75 px-4 py-1.5 font-body text-xs tracking-wide text-[#efd396] sm:text-sm">
+              {t("storeTeaser.status")}
+            </span>
+            <h2 className="font-heading text-2xl leading-tight text-[#efd396] drop-shadow-lg sm:text-3xl lg:text-4xl">
+              GameTable Official Store
+            </h2>
+            <div aria-hidden="true" className="my-4 h-px w-32 bg-gradient-to-r from-[#d9b66e] to-transparent" />
+            <p className="max-w-md font-body text-sm leading-relaxed text-[#f5eee4] drop-shadow-md sm:text-base">
+              {t("storeTeaser.description")}
+            </p>
+            <span className="mt-5 font-heading text-sm font-semibold text-[#efd396] group-hover:underline sm:text-base">
+              {t("storeTeaser.cta")} <span aria-hidden="true">→</span>
+            </span>
+          </div>
         </Link>
 
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
