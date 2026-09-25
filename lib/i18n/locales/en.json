@@ -950,7 +950,7 @@
     },
     "showMore": "Show details",
     "showLess": "Hide details",
-    "legacyImportAwards": "Legacy import medals: {count} · verification pending"
+    "legacyImportAwards": "Legacy import medals: {{count}} · verification pending"
   },
   "findPlayers": {
     "title": "Find Players",
