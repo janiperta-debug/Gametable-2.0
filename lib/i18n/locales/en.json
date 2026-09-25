@@ -947,7 +947,9 @@
       "stalwart-companion": "Participation counts for completed events where you are recorded as attending. Signing up for a future event alone is not enough.",
       "manor-ascendant": "Your Manor level comes from XP earned through hobby activities. Medals recognize milestones but do not themselves award XP.",
       "portal-keeper": "The upcoming Grand Archivist series will recognize successful import operations across all four game categories. Each successful import counts once, regardless of how many items it adds."
-    }
+    },
+    "showMore": "Show details",
+    "showLess": "Hide details"
   },
   "findPlayers": {
     "title": "Find Players",
