@@ -176,3 +176,34 @@ export async function listNewsletterImages(): Promise<{ images: string[]; error?
   return { images: (data || []).filter((item) => /\.(jpg|jpeg|png|webp|gif)$/i.test(item.name))
     .map((item) => service.storage.from(IMAGE_BUCKET).getPublicUrl(user.id + "/" + item.name).data.publicUrl) }
 }
+
+export type StoreInterestStats = {
+  interested: number
+  notInterested: number
+  total: number
+  updatedAt: string | null
+}
+
+/** Aggregate only: never return individual votes or user IDs to the browser. */
+export async function getStoreInterestStats(): Promise<{ stats?: StoreInterestStats; error?: string }> {
+  const { isAdmin } = await checkIsAdmin()
+  if (!isAdmin) return { error: "Unauthorized" }
+
+  const service = createServiceClient()
+  const { data, error } = await service
+    .from("marketplace_store_interest")
+    .select("vote, updated_at")
+    .order("updated_at", { ascending: false })
+
+  if (error) return { error: "Äänestystulosten hakeminen epäonnistui." }
+
+  const votes = data ?? []
+  return {
+    stats: {
+      interested: votes.filter((entry) => entry.vote === 1).length,
+      notInterested: votes.filter((entry) => entry.vote === -1).length,
+      total: votes.length,
+      updatedAt: votes[0]?.updated_at ?? null,
+    },
+  }
+}
