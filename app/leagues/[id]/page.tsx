@@ -113,7 +113,7 @@ export default function LeaguePage() {
       try{const result=hub.isMember?await leaveLeague(id):await joinLeague(id);if(result.error)setError(result.error);else await refresh()}
       finally{setBusy(false)}
      }}>{hub.isMember?t("leagueUi.s58"):t("leagueUi.s59")}</ArchiveCardButton>}
-     {hub.isOwner && season.status !== "completed" && <div className="space-y-3">
+     {hub.isOwner && <div className="space-y-3">
       <label htmlFor="league-player-search" className="block text-sm text-accent-gold">{t("leagueUi.s14")}</label>
       <input id="league-player-search" autoComplete="off" placeholder={t("leagueUi.s40")}
        value={newMember} onChange={e=>{setNewMember(e.target.value);setSelectedPlayer(null)}}
