@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Trophy, Loader2 } from "lucide-react"
+import { Trophy, Loader2, ChevronDown, ChevronUp } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { BADGE_DEFINITIONS, type BadgeSeries } from "@/lib/badge-definitions"
 import { getBadgesWithProgress, type BadgeWithProgress } from "@/app/actions/badges"
@@ -19,6 +19,7 @@ export default function TrophiesPage() {
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
   const [activeTab, setActiveTab] = useState<"progress" | "cabinet">("progress")
+  const [expandedSeries, setExpandedSeries] = useState<BadgeSeries[]>([])
 
   useEffect(() => {
     let active = true
@@ -210,62 +211,63 @@ export default function TrophiesPage() {
                         </div>
                       </div>
                     ) : <p className="mt-4 text-sm font-merriweather text-accent-gold">{t("trophies.gold")} · {t("trophies.earned")}</p>}
+                    <button
+                      type="button"
+                      aria-expanded={expandedSeries.includes(series)}
+                      aria-controls={`badge-details-${series}`}
+                      onClick={() => setExpandedSeries((current) => current.includes(series) ? current.filter((item) => item !== series) : [...current, series])}
+                      className="mt-4 flex w-full items-center justify-between border-t border-accent-gold/25 pt-3 text-left font-merriweather text-sm text-accent-gold transition-colors hover:text-foreground"
+                    >
+                      <span>{t(expandedSeries.includes(series) ? "trophies.showLess" : "trophies.showMore")}</span>
+                      {expandedSeries.includes(series) ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </button>
+                    {expandedSeries.includes(series) && (
+                      <div id={`badge-details-${series}`} className="mt-4 space-y-4 border-t border-accent-gold/20 pt-4 font-merriweather text-sm">
+                        <p className="leading-relaxed text-foreground/80">{t(`trophies.seriesDescriptions.${series}`)}</p>
+                        {series === "portal-keeper" ? (
+                          <p className="text-amber-200/90">{t("trophies.importPending")}</p>
+                        ) : (
+                          <div>
+                            <h3 className="mb-3 font-cinzel text-accent-gold">{t("trophies.nextTiers")}</h3>
+                            <ul className="space-y-3">
+                              {seriesBadges.map((badge) => (
+                                <li key={badge.id} className="flex items-start gap-3">
+                                  <span aria-hidden="true" className={badge.earned ? "text-accent-gold" : "text-muted-foreground"}>{badge.earned ? "✓" : "○"}</span>
+                                  <div>
+                                    <p className="font-semibold">{t(`trophies.${badge.tier}`)} · {t(`trophies.badges.${badge.id}.name`)}</p>
+                                    <p className="mt-1 text-foreground/75">{t(`trophies.badges.${badge.id}.description`)}</p>
+                                    <p className="mt-1 text-accent-gold">{t(`trophies.badges.${badge.id}.requirement`)}</p>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </ArchiveCardContent>
                 </ArchiveCard>
               )
             })}
           </div>
         ) : (
-          <div className="space-y-7">
-            <ArchiveCard>
-              <ArchiveCardContent>
-                <h2 className="font-cinzel text-xl text-accent-gold">{t("trophies.howEarned")}</h2>
-                <p className="mt-2 font-merriweather text-sm leading-relaxed text-foreground/80">{t("trophies.howEarnedIntro")}</p>
-              </ArchiveCardContent>
-            </ArchiveCard>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {badges.filter((badge) => badge.earned).map((badge) => {
               const local = BADGE_DEFINITIONS.find((item) => item.id === badge.id)
               return (
                 <ArchiveCard key={badge.id}>
                   <ArchiveCardContent>
-                    <div className="relative w-28 h-28 mx-auto mb-3">
+                    <div className="relative mx-auto mb-3 h-32 w-32 sm:h-36 sm:w-36">
                       <Image src={badge.image_url || local?.image || "/placeholder.svg"} alt="" fill className="object-contain" />
                     </div>
-                    <h2 className="text-center text-lg font-cinzel text-accent-gold">{t(`trophies.badges.${badge.id}.name`)}</h2>
-                    <p className="text-center text-sm text-muted-foreground mt-1">{t(`trophies.${badge.tier}`)} · {t(`trophies.series.${badge.series}`)}</p>
-                    <p className="mt-3 text-center font-merriweather text-sm leading-relaxed text-foreground/80">{t(`trophies.badges.${badge.id}.description`)}</p>
-                    <div className="mt-4 border-t border-accent-gold/20 pt-3">
-                      <p className="text-xs uppercase tracking-wide text-accent-gold">{t("trophies.requirement")}</p>
-                      <p className="mt-1 font-merriweather text-sm">{t(`trophies.badges.${badge.id}.requirement`)}</p>
-                    </div>
-                    {badge.earned_at && <p className="text-center text-xs text-muted-foreground mt-2">{t("trophies.earnedAt")} {new Date(badge.earned_at).toLocaleDateString()}</p>}
+                    <h2 className="text-center font-cinzel text-lg text-accent-gold">{t(`trophies.badges.${badge.id}.name`)}</h2>
+                    <p className="mt-1 text-center text-sm text-muted-foreground">{t(`trophies.${badge.tier}`)} · {t(`trophies.series.${badge.series}`)}</p>
+                    {badge.earned_at && <p className="mt-2 text-center text-xs text-muted-foreground">{t("trophies.earnedAt")} {new Date(badge.earned_at).toLocaleDateString()}</p>}
                   </ArchiveCardContent>
                 </ArchiveCard>
               )
             })}
             {earnedCount === 0 && <p className="font-merriweather text-muted-foreground">{t("trophies.locked")}</p>}
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              {badgesBySeries.map(({ series, badges: seriesBadges }) => (
-                <ArchiveCard key={series}>
-                  <ArchiveCardContent>
-                    <h3 className="font-cinzel text-lg text-accent-gold">{t(`trophies.series.${series}`)}</h3>
-                    <p className="mt-2 font-merriweather text-sm leading-relaxed text-foreground/80">{t(`trophies.seriesDescriptions.${series}`)}</p>
-                    {series === "portal-keeper" && <p className="mt-2 text-sm text-amber-200/90">{t("trophies.importPending")}</p>}
-                    {series !== "portal-keeper" && <p className="mt-4 mb-2 text-xs uppercase tracking-wide text-accent-gold">{t("trophies.nextTiers")}</p>}
-                    <ul className="space-y-2">
-                      {(series === "portal-keeper" ? [] : seriesBadges).map((badge) => (
-                        <li key={badge.id} className="flex items-start gap-3 font-merriweather text-sm">
-                          <span className={badge.earned ? "text-accent-gold" : "text-muted-foreground"}>{badge.earned ? "✓" : "○"}</span>
-                          <span><strong>{t(`trophies.${badge.tier}`)}:</strong> {t(`trophies.badges.${badge.id}.requirement`)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </ArchiveCardContent>
-                </ArchiveCard>
-              ))}
-            </div>
           </div>
         )}
       </main>
