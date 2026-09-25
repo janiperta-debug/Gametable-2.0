@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { getPublicEvents, getMyEvents, getPastEvents, type Event } from "@/app/actions/events"
 
 interface UseEventsReturn {
@@ -18,36 +18,55 @@ export function useEvents(): UseEventsReturn {
   const [pastEvents, setPastEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const inFlight = useRef(false)
 
   const fetchEvents = useCallback(async () => {
+    // Visibility/focus can fire together on iOS. Avoid overlapping requests and
+    // guarantee that a stalled Server Action never leaves the spinner running.
+    if (inFlight.current) return
+    inFlight.current = true
     setLoading(true)
     setError(null)
 
+    const withTimeout = async <T,>(request: Promise<T>): Promise<T> => {
+      let timeout: ReturnType<typeof setTimeout> | undefined
+      try {
+        return await Promise.race([
+          request,
+          new Promise<never>((_, reject) => {
+            timeout = setTimeout(() => reject(new Error("EVENTS_TIMEOUT")), 12000)
+          }),
+        ])
+      } finally {
+        if (timeout !== undefined) clearTimeout(timeout)
+      }
+    }
+
     try {
-      const [publicResult, myResult, pastResult] = await Promise.all([
-        getPublicEvents(),
-        getMyEvents(),
-        getPastEvents(),
+      // A slow personal/history request must not block the public event list.
+      const [publicResult, myResult, pastResult] = await Promise.allSettled([
+        withTimeout(getPublicEvents()),
+        withTimeout(getMyEvents()),
+        withTimeout(getPastEvents()),
       ])
 
-      if (publicResult.error) {
-        setError(publicResult.error)
+      if (publicResult.status === "fulfilled" && !publicResult.value.error) {
+        setPublicEvents(publicResult.value.events)
       } else {
-        setPublicEvents(publicResult.events)
+        const message = publicResult.status === "rejected"
+          ? (publicResult.reason instanceof Error && publicResult.reason.message === "EVENTS_TIMEOUT"
+              ? "Tapahtumien lataus aikakatkaistiin. Yritä uudelleen."
+              : "Tapahtumien lataus epäonnistui. Yritä uudelleen.")
+          : publicResult.value.error || "Tapahtumien lataus epäonnistui."
+        setError(message)
+        console.error("Public events load failed:", publicResult.status === "rejected" ? publicResult.reason : publicResult.value.error)
       }
-
-      // My events may fail if not logged in - that's ok
-      if (!myResult.error) {
-        setMyEvents(myResult.events)
-      }
-
-      if (!pastResult.error) {
-        setPastEvents(pastResult.events)
-      }
-    } catch (err) {
-      console.error("Error fetching events:", err)
-      setError("Failed to load events")
+      if (myResult.status === "fulfilled" && !myResult.value.error) setMyEvents(myResult.value.events)
+      if (pastResult.status === "fulfilled" && !pastResult.value.error) setPastEvents(pastResult.value.events)
+      if (myResult.status === "rejected") console.error("My events load failed:", myResult.reason)
+      if (pastResult.status === "rejected") console.error("Past events load failed:", pastResult.reason)
     } finally {
+      inFlight.current = false
       setLoading(false)
     }
   }, [])
