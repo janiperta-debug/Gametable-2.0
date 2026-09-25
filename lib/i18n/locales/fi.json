@@ -825,17 +825,17 @@
       "apprentice-curator": {
         "name": "Aloitteleva kuraattori",
         "description": "Aloita matkasi kerääjänä",
-        "requirement": "Lisää 5 peliä kokoelmaasi"
+        "requirement": "Lisää 10 peliä kokoelmaasi"
       },
       "master-curator": {
         "name": "Mestarikuraattori",
         "description": "Kokoelmasi kasvaa vaikuttavaksi",
-        "requirement": "Lisää 25 peliä kokoelmaasi"
+        "requirement": "Lisää 50 peliä kokoelmaasi"
       },
       "grand-curator": {
         "name": "Suurkuraattori",
         "description": "Legendaarinen kokoelma kartanon arvoisena",
-        "requirement": "Lisää 100 peliä kokoelmaasi"
+        "requirement": "Lisää 250 peliä kokoelmaasi"
       },
       "curious-explorer": {
         "name": "Utelias tutkija",
@@ -855,32 +855,32 @@
       "bond-forger": {
         "name": "Siteen luoja",
         "description": "Aloita toverikuntasi rakentaminen",
-        "requirement": "Yhdistä 3 ystävän kanssa"
+        "requirement": "Yhdistä 5 ystävän kanssa"
       },
       "circle-builder": {
         "name": "Piirin rakentaja",
         "description": "Ystäväpiirisi kasvaa vahvaksi",
-        "requirement": "Yhdistä 10 ystävän kanssa"
+        "requirement": "Yhdistä 25 ystävän kanssa"
       },
       "fellowship-master": {
         "name": "Toverikunnan mestari",
         "description": "Todellinen toverikunnan ja yhteisön mestari",
-        "requirement": "Yhdistä 25 ystävän kanssa"
+        "requirement": "Yhdistä 100 ystävän kanssa"
       },
       "first-gathering": {
         "name": "Ensimmäinen kokoontuminen",
         "description": "Järjestä ensimmäinen pelitapahtumasi",
-        "requirement": "Järjestä 1 tapahtuma"
+        "requirement": "Järjestä 10 toteutunutta tapahtumaa"
       },
       "regular-host": {
         "name": "Vakituinen isäntä",
         "description": "Tule säännölliseksi tapahtumajärjestäjäksi",
-        "requirement": "Järjestä 5 tapahtumaa"
+        "requirement": "Järjestä 50 toteutunutta tapahtumaa"
       },
       "grand-orchestrator": {
         "name": "Suuri orkestroija",
         "description": "Hallitse suurten kokoontumisten taide",
-        "requirement": "Järjestä 20 tapahtumaa"
+        "requirement": "Järjestä 200 toteutunutta tapahtumaa"
       },
       "ground-floor-master": {
         "name": "Ensimmäisen kerroksen mestari",
@@ -915,17 +915,17 @@
       "eager-newcomer": {
         "name": "Innokas tulokas",
         "description": "Liity ensimmäisiin pelikokoontumisiin",
-        "requirement": "Osallistu 3 tapahtumaan"
+        "requirement": "Osallistu 10 toteutuneeseen tapahtumaan"
       },
       "reliable-ally": {
         "name": "Luotettava liittolainen",
         "description": "Tule luotettavaksi kumppaniksi",
-        "requirement": "Osallistu 10 tapahtumaan"
+        "requirement": "Osallistu 50 toteutuneeseen tapahtumaan"
       },
       "legendary-companion": {
         "name": "Legendaarinen kumppani",
         "description": "Legendaarinen läsnäolo jokaisessa kokoontumisessa",
-        "requirement": "Osallistu 25 tapahtumaan"
+        "requirement": "Osallistu 200 toteutuneeseen tapahtumaan"
       }
     }
   },
