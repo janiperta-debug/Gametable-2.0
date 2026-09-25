@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { getLeague, addLeagueSeason, linkSeasonEvent, updateLeague, updateLeagueSeason, deleteLeague, joinLeague, leaveLeague, addLeagueMemberById, searchLeaguePlayers, removeLeagueMember } from "@/app/actions/league-hub"
 import { useTranslation } from "@/lib/i18n"
 import { completeLeagueSeason } from "@/app/actions/league-season-completion"
-import { awardPersonalTrophies, getSourcePersonalTrophies } from "@/app/actions/personal-trophies"
+import { awardLeagueWinnerTrophy, getSourcePersonalTrophies } from "@/app/actions/personal-trophies"
 import { ArchiveFrame, ArchiveButton, ArchiveCard, ArchiveCardHeader, ArchiveCardTitle, ArchiveCardContent, ArchiveCardButton } from "@/components/archive-frame"
 
 type Hub = Awaited<ReturnType<typeof getLeague>>
@@ -25,7 +25,8 @@ export default function LeaguePage() {
  const [leagueDraft, setLeagueDraft] = useState({ name: "", game: "", description: "", privacy: "public" as "public" | "private" })
  const [editingSeason, setEditingSeason] = useState<string | null>(null)
  const [showCompletedSeasons, setShowCompletedSeasons] = useState(false)
- const [awardSelections, setAwardSelections] = useState<Record<string, string[]>>({})
+ const [awardSelections, setAwardSelections] = useState<Record<string, string>>({})
+ const [awardVariants, setAwardVariants] = useState<Record<string, "crystal" | "pennant" | "sculpture">>({})
  const [awardedSeasons, setAwardedSeasons] = useState<Record<string, boolean>>({})
  const [seasonDraft, setSeasonDraft] = useState({ name: "", startsOn: "", endsOn: "" })
  const [error, setError] = useState("")
@@ -177,24 +178,28 @@ export default function LeaguePage() {
       </div>}
      </div>}
      {hub.isOwner && (season.award_config as any)?.category && (season.award_config as any)?.category !== "none" && !awardedSeasons[season.id] && <div className="space-y-3 rounded-md border border-accent-gold/30 p-3">
-       <h3 className="font-heading text-accent-gold">{locale === "fi" ? "Palkitseminen · kolme parasta" : "Awards · top three"}</h3>
-       <p className="text-sm text-muted-foreground">{locale === "fi" ? "Valitse lopulliset sijoitukset sarjataulukosta. Vain otteluita pelanneet rekisteröityneet käyttäjät voivat saada pokaalin." : "Confirm the final podium from the standings. Only registered users who played matches can receive trophies."}</p>
-       {([0,1,2] as const).map((place) => <label key={place} className="block space-y-1 text-sm">
-        <span>{[locale === "fi" ? "Kulta" : "Gold", locale === "fi" ? "Hopea" : "Silver", locale === "fi" ? "Pronssi" : "Bronze"][place]}</span>
-        <select value={(awardSelections[season.id] || [])[place] || ""} onChange={(e) => setAwardSelections((old) => { const next = [...(old[season.id] || ["","",""])]; next[place] = e.target.value; return {...old,[season.id]:next} })} className="w-full rounded-md border border-accent-gold/30 bg-background p-3">
-         <option value="">{locale === "fi" ? "Ei jaeta" : "Not awarded"}</option>
+       <h3 className="font-heading text-accent-gold">{locale === "fi" ? "Liigan voittajan palkinto" : "League winner trophy"}</h3>
+       <p className="text-sm text-muted-foreground">{locale === "fi" ? "Liigassa palkitaan vain voittaja. Valitse sarjataulukon voittaja ja hänelle yksi kolmesta pokaalista." : "Only the league winner receives a trophy. Select the winner from the standings and choose one of three trophy designs."}</p>
+       <label className="block space-y-1 text-sm"><span>{locale === "fi" ? "Voittaja" : "Winner"}</span>
+        <select value={awardSelections[season.id] || ""} onChange={e => setAwardSelections(old => ({...old,[season.id]:e.target.value}))} className="w-full rounded-md border border-accent-gold/30 bg-background p-3">
+         <option value="">{locale === "fi" ? "Valitse voittaja" : "Select winner"}</option>
          {hub.standings.filter(row => row.season_id === season.id && row.played > 0 && row.key.startsWith("user:")).map(row => <option key={row.key} value={row.key.slice(5)}>{row.name} · {row.points} {locale === "fi" ? "pistettä" : "points"}</option>)}
         </select>
-       </label>)}
-       {season.status === "completed" && <ArchiveCardButton disabled={busy} onClick={async () => {
-         const places = awardSelections[season.id] || []
-         const recipients = places.filter(Boolean)
-         if (!recipients.length || !places[0] || (places[2] && !places[1]) || new Set(recipients).size !== recipients.length) { setError(locale === "fi" ? "Valitse palkintosijat järjestyksessä, jokaiselle eri pelaaja." : "Select distinct players for each place in order."); return }
-         if (!window.confirm(locale === "fi" ? "Jaetaanko kauden pokaalit valituille pelaajille?" : "Issue the season trophies to these players?")) return
+       </label>
+       <fieldset className="space-y-2"><legend className="text-sm text-accent-gold">{locale === "fi" ? "Pokaalin malli" : "Trophy design"}</legend>
+        {(["crystal","pennant","sculpture"] as const).map(variant => <label key={variant} className="flex items-center gap-3 rounded-md border border-accent-gold/25 p-3">
+         <input type="radio" name={`league-trophy-${season.id}`} value={variant} checked={(awardVariants[season.id] || "crystal") === variant} onChange={() => setAwardVariants(old => ({...old,[season.id]:variant}))} />
+         <span>{variant === "crystal" ? (locale === "fi" ? "Kristalli" : "Crystal") : variant === "pennant" ? (locale === "fi" ? "Viiri" : "Pennant") : (locale === "fi" ? "Veistos" : "Sculpture")}</span>
+        </label>)}
+       </fieldset>
+       {season.status === "completed" && <ArchiveCardButton disabled={busy || !awardSelections[season.id]} onClick={async () => {
+         const winner = awardSelections[season.id]
+         if (!winner) return
+         if (!window.confirm(locale === "fi" ? "Jaetaanko valittu pokaali liigan voittajalle?" : "Award the selected trophy to the league winner?")) return
          setBusy(true); setError("")
-         try { const result = await awardPersonalTrophies("league_season", season.id, recipients); if (result.success) await refresh(); else setError(result.error || "Award failed") }
+         try { const result = await awardLeagueWinnerTrophy(season.id, winner, awardVariants[season.id] || "crystal"); if (result.success) await refresh(); else setError(result.error || "Award failed") }
          finally { setBusy(false) }
-       }}>{locale === "fi" ? "Vahvista pokaalien jako" : "Confirm trophy awards"}</ArchiveCardButton>}
+       }}>{locale === "fi" ? "Vahvista voittajan pokaali" : "Confirm winner trophy"}</ArchiveCardButton>}
       </div>}
      {hub.isOwner && season.status !== "completed" && <div className="rounded-md border border-accent-gold/30 bg-accent-gold/5 p-3 space-y-2">
       <p className="text-sm text-muted-foreground">{locale === "fi" ? "Päätä kausi vasta, kun kaikki siihen liitetyt tapahtumat ja ottelut on kirjattu valmiiksi. Päättäminen vahvistaa liigasaavutusten laskennan." : "Complete the season only after all linked events and match results are finalized. Completion confirms league achievement progress."}</p>
