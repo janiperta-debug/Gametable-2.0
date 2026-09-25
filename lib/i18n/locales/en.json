@@ -720,7 +720,13 @@
       "gathering-master": "Gathering Master",
       "stalwart-companion": "Stalwart Companion",
       "manor-ascendant": "Manor Ascendant",
-      "portal-keeper": "Portal Keeper"
+      "portal-keeper": "Portal Keeper",
+      "tournament-champion": "Tournament Champion",
+      "tournament-master": "Tournament Master",
+      "chronicler-of-legends": "Chronicler of Legends",
+      "master-storyteller": "Master Storyteller",
+      "league-veteran": "League Veteran",
+      "league-commissioner": "League Commissioner"
     },
     "badges": {
       "collection-bronze": {
@@ -932,6 +938,96 @@
         "name": "Legendary Companion",
         "description": "A legendary presence at every gathering",
         "requirement": "Attend 200 completed events"
+      },
+      "tournament-champion-bronze": {
+        "name": "Tournament Champion — Bronze",
+        "description": "Win completed tournaments with an organizer-confirmed champion and recorded winning match.",
+        "requirement": "Win 1 tournaments"
+      },
+      "tournament-champion-silver": {
+        "name": "Tournament Champion — Silver",
+        "description": "Win completed tournaments with an organizer-confirmed champion and recorded winning match.",
+        "requirement": "Win 5 tournaments"
+      },
+      "tournament-champion-gold": {
+        "name": "Tournament Champion — Gold",
+        "description": "Win completed tournaments with an organizer-confirmed champion and recorded winning match.",
+        "requirement": "Win 20 tournaments"
+      },
+      "tournament-master-bronze": {
+        "name": "Tournament Master — Bronze",
+        "description": "Organize tournaments marked completed.",
+        "requirement": "Organize 1 tournaments"
+      },
+      "tournament-master-silver": {
+        "name": "Tournament Master — Silver",
+        "description": "Organize tournaments marked completed.",
+        "requirement": "Organize 5 tournaments"
+      },
+      "tournament-master-gold": {
+        "name": "Tournament Master — Gold",
+        "description": "Organize tournaments marked completed.",
+        "requirement": "Organize 20 tournaments"
+      },
+      "chronicler-of-legends-bronze": {
+        "name": "Chronicler of Legends — Bronze",
+        "description": "Participate in completed campaigns with at least one completed session.",
+        "requirement": "Play 1 campaigns"
+      },
+      "chronicler-of-legends-silver": {
+        "name": "Chronicler of Legends — Silver",
+        "description": "Participate in completed campaigns with at least one completed session.",
+        "requirement": "Play 5 campaigns"
+      },
+      "chronicler-of-legends-gold": {
+        "name": "Chronicler of Legends — Gold",
+        "description": "Participate in completed campaigns with at least one completed session.",
+        "requirement": "Play 15 campaigns"
+      },
+      "master-storyteller-bronze": {
+        "name": "Master Storyteller — Bronze",
+        "description": "Lead completed campaigns.",
+        "requirement": "Lead 1 campaigns"
+      },
+      "master-storyteller-silver": {
+        "name": "Master Storyteller — Silver",
+        "description": "Lead completed campaigns.",
+        "requirement": "Lead 5 campaigns"
+      },
+      "master-storyteller-gold": {
+        "name": "Master Storyteller — Gold",
+        "description": "Lead completed campaigns.",
+        "requirement": "Lead 15 campaigns"
+      },
+      "league-veteran-bronze": {
+        "name": "League Veteran — Bronze",
+        "description": "Participate in completed league seasons with at least one recorded completed match.",
+        "requirement": "Play 1 league seasons"
+      },
+      "league-veteran-silver": {
+        "name": "League Veteran — Silver",
+        "description": "Participate in completed league seasons with at least one recorded completed match.",
+        "requirement": "Play 5 league seasons"
+      },
+      "league-veteran-gold": {
+        "name": "League Veteran — Gold",
+        "description": "Participate in completed league seasons with at least one recorded completed match.",
+        "requirement": "Play 15 league seasons"
+      },
+      "league-commissioner-bronze": {
+        "name": "League Commissioner — Bronze",
+        "description": "Organize explicitly completed league seasons.",
+        "requirement": "Organize 1 league seasons"
+      },
+      "league-commissioner-silver": {
+        "name": "League Commissioner — Silver",
+        "description": "Organize explicitly completed league seasons.",
+        "requirement": "Organize 5 league seasons"
+      },
+      "league-commissioner-gold": {
+        "name": "League Commissioner — Gold",
+        "description": "Organize explicitly completed league seasons.",
+        "requirement": "Organize 15 league seasons"
       }
     },
     "howEarned": "How to earn achievements",
@@ -946,7 +1042,13 @@
       "gathering-master": "Events you organize count once they are marked completed. Upcoming and cancelled events do not count.",
       "stalwart-companion": "Participation counts for completed events where you are recorded as attending. Signing up for a future event alone is not enough.",
       "manor-ascendant": "Your Manor level comes from XP earned through hobby activities. Medals recognize milestones but do not themselves award XP.",
-      "portal-keeper": "The Grand Archivist rewards successful import operations across all four hobby categories. An operation counts once when it adds at least one new owned collection entry. Duplicate-only or wishlist-only imports do not count."
+      "portal-keeper": "The Grand Archivist rewards successful import operations across all four hobby categories. An operation counts once when it adds at least one new owned collection entry. Duplicate-only or wishlist-only imports do not count.",
+      "tournament-champion": "Win completed tournaments with an organizer-confirmed champion and recorded winning match.",
+      "tournament-master": "Organize tournaments marked completed.",
+      "chronicler-of-legends": "Participate in completed campaigns with at least one completed session.",
+      "master-storyteller": "Lead completed campaigns.",
+      "league-veteran": "Participate in completed league seasons with at least one recorded completed match.",
+      "league-commissioner": "Organize explicitly completed league seasons."
     },
     "showMore": "Show details",
     "showLess": "Hide details",
