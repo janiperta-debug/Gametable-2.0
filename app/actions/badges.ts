@@ -2,7 +2,6 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
-import { awardTrustedXP } from "@/lib/xp-engine"
 import { createServiceClient } from "@/lib/supabase/service"
 import { createNotification } from "./notifications"
 import { getManorLevelFromXp } from "@/lib/manor-progression"
@@ -297,10 +296,6 @@ async function checkAndAwardBadgesInternal(userId: string, supabase: any): Promi
   for (const badge of definitions) {
     // Skip if already earned
     if (earnedBadgeIds.has(badge.id)) {
-      // Retry a previously persisted badge reward; the XP event key makes this idempotent.
-      if (badge.xp_reward) {
-        await awardTrustedXP(userId, "badge_earned", badge.xp_reward, null, `badge:${badge.id}`)
-      }
       continue
     }
     
@@ -329,10 +324,6 @@ async function checkAndAwardBadgesInternal(userId: string, supabase: any): Promi
           data: { badge_id: badge.id, badge_name: badge.name }
         })
         
-        // Award badge XP through the authoritative XP engine.
-        if (badge.xp_reward) {
-          await awardTrustedXP(userId, "badge_earned", badge.xp_reward, null, `badge:${badge.id}`)
-        }
       } else {
         console.error("Error awarding badge:", badge.id, insertError)
       }
