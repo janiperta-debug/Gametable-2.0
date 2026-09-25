@@ -1672,5 +1672,18 @@
     "s25": "Untitled stage",
     "sessionsToFill": "Fill in {{count}} sessions",
     "roundsToFill": "Fill in {{count}} rounds"
+  },
+  "eventFix": {
+    "campaignSessions": "Campaign sessions",
+    "eventRounds": "Event rounds",
+    "matchCount": "{{count}} matches",
+    "selectPlayer": "Select player {{number}}",
+    "roundNumber": "Round {{number}}",
+    "sessionNumber": "Session {{number}}",
+    "sessions": "Sessions",
+    "schedule": "Schedule",
+    "starts": "Starts",
+    "season": "Season",
+    "seasonStarts": "Season starts"
   }
 }
