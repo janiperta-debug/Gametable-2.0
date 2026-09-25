@@ -19,6 +19,7 @@ import {
 import { useTranslation } from "@/lib/i18n"
 import { getEventById, updateRSVP, cancelEvent, completeEvent, getInvitableUsers, inviteToEvent, uninviteFromEvent, type Event, type EventParticipant, type RSVPStatus } from "@/app/actions/events"
 import { useToast } from "@/hooks/use-toast"
+import { awardPersonalTrophies, getSourcePersonalTrophies } from "@/app/actions/personal-trophies"
 import { getLeagueTournaments, setTournamentLeague, getLeagueStandings, updateLeaguePlacementPoints, type LeagueStanding } from "@/app/actions/league"
 import { createClient } from "@/lib/supabase/client"
 import { convertLegacyLeague } from "@/app/actions/league-hub"
@@ -94,6 +95,10 @@ export default function EventDetailsPage() {
   const [completing, setCompleting] = useState(false)
   const [completionError, setCompletionError] = useState("")
   const [championEntryId, setChampionEntryId] = useState("")
+  const [runnerUpId, setRunnerUpId] = useState("")
+  const [thirdPlaceId, setThirdPlaceId] = useState("")
+  const [personalAwardsIssued, setPersonalAwardsIssued] = useState(false)
+  const [issuingAwards, setIssuingAwards] = useState(false)
   const [invitableUsers, setInvitableUsers] = useState<Array<{ id: string; display_name: string | null; avatar_url: string | null }>>([])
   const [inviting, setInviting] = useState<string | null>(null)
   const [showInviteSection, setShowInviteSection] = useState(false)
@@ -138,6 +143,9 @@ export default function EventDetailsPage() {
         setError(result.error)
       } else if (result.event) {
         setEvent(result.event)
+        if (result.event.event_type === "tournament" && result.event.status === "completed") {
+          void getSourcePersonalTrophies("tournament", eventId).then((award) => setPersonalAwardsIssued(award.awarded))
+        }
         if (result.event.event_type === "league") {
           const linked = await getLeagueTournaments(eventId)
           setLeagueTournaments(linked.tournaments)
@@ -437,6 +445,10 @@ export default function EventDetailsPage() {
 
   const handleComplete = async () => {
     if (completing) return
+    if (event?.event_type === "tournament" && awardEnabled && (!championEntryId || (thirdPlaceId && !runnerUpId) || [championEntryId, runnerUpId, thirdPlaceId].filter(Boolean).length !== new Set([championEntryId, runnerUpId, thirdPlaceId].filter(Boolean)).size)) {
+      setCompletionError(locale === "fi" ? "Valitse palkintosijat järjestyksessä ja jokaiselle eri kilpailija." : "Choose distinct competitors for each awarded place in order.")
+      return
+    }
     if (!confirm(t("events.confirmComplete") || "Are you sure you want to mark this event as completed? This will move it to past events.")) return
 
     setCompletionError("")
@@ -445,13 +457,13 @@ export default function EventDetailsPage() {
       // A failed or stale Server Action must never leave the completion button spinning forever.
       const controller = new AbortController()
       const timeout = setTimeout(() => controller.abort(), 20000)
-      let result: { success: boolean; error?: string }
+      let result: { success: boolean; error?: string; awardError?: string }
       try {
         const response = await fetch("/api/events/complete", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "same-origin",
-          body: JSON.stringify({ eventId, championEntryId: event?.event_type === "tournament" ? championEntryId : undefined }),
+          body: JSON.stringify({ eventId, championEntryId: event?.event_type === "tournament" ? championEntryId : undefined, awardRecipients: awardEnabled ? [championEntryId, runnerUpId, thirdPlaceId].filter(Boolean).map((id) => structure.entries.find((entry: any) => entry.id === id)?.user_id).filter(Boolean) : [] }),
           signal: controller.signal,
         })
         result = await response.json()
@@ -466,6 +478,11 @@ export default function EventDetailsPage() {
         return
       }
       setEvent((current) => current ? { ...current, status: "completed" } : current)
+      if (result.awardError) {
+        setCompletionError((locale === "fi" ? "Turnaus päättyi, mutta pokaalien jako odottaa: " : "Tournament completed, but trophy issuance needs retry: ") + result.awardError)
+        return
+      }
+      if (awardEnabled) setPersonalAwardsIssued(true)
       toast({ title: t("common.success"), description: t("events.eventCompleted") || "Event completed" })
       router.push("/events")
     } catch (error) {
@@ -599,6 +616,9 @@ export default function EventDetailsPage() {
     )
   }
 
+  const awardCategory = (event.event_config as any)?.awards?.category as string | undefined
+  const awardEnabled = event.event_type === "tournament" && !!awardCategory && awardCategory !== "none"
+  const eligibleAwardEntries = structure.entries.filter((entry: any) => entry.user_id && entry.status === "active" && structure.matches.some((match: any) => match.status === "completed" && (match.entry_a_id === entry.id || match.entry_b_id === entry.id)))
   const isHost = currentUserId === event.host_id
   const userRsvp = event.user_rsvp
 
@@ -653,10 +673,43 @@ export default function EventDetailsPage() {
                   return <option key={entry.id} value={entry.id}>{entry.display_name || profile?.display_name || profile?.username || (locale === "fi" ? "Kilpailija" : "Competitor")}</option>
                 })}
               </select>
+              {awardEnabled && <div className="space-y-3 rounded-md border border-accent-gold/30 p-3">
+                <h3 className="font-heading text-accent-gold">{locale === "fi" ? "Palkitseminen · kolme parasta" : "Awards · top three"}</h3>
+                <p className="text-sm text-muted-foreground">{locale === "fi" ? "Kulta annetaan vahvistetulle voittajalle. Valitse halutessasi myös hopea ja pronssi. Pokaalit jaetaan vasta, kun vahvistat turnauksen päättymisen." : "Gold goes to the confirmed champion. Optionally select silver and bronze. Trophies are issued only after you confirm tournament completion."}</p>
+                {([["2", runnerUpId, setRunnerUpId], ["3", thirdPlaceId, setThirdPlaceId]] as const).map(([place, value, setter]) => <label key={place} className="block space-y-1 text-sm">
+                  <span>{place === "2" ? (locale === "fi" ? "Hopea" : "Silver") : (locale === "fi" ? "Pronssi" : "Bronze")}</span>
+                  <select value={value} onChange={e => setter(e.target.value)} className="w-full rounded-md border border-accent-gold/30 bg-background p-3">
+                    <option value="">{locale === "fi" ? "Ei jaeta" : "Not awarded"}</option>
+                    {eligibleAwardEntries.filter((entry: any) => entry.id !== championEntryId).map((entry: any) => <option key={entry.id} value={entry.id}>{entry.display_name || structure.profiles.find((profile: any) => profile.id === entry.user_id)?.display_name || (locale === "fi" ? "Kilpailija" : "Competitor")}</option>)}
+                  </select>
+                </label>)}
+              </div>}
               {structure.matches.some((match: any) => match.status !== "completed") && <p className="text-sm text-amber-300">{locale === "fi" ? "Kaikkien otteluiden tulokset on kirjattava ennen turnauksen päättämistä." : "All match results must be recorded before the tournament can be completed."}</p>}
             </ArchiveCardContent>
           </ArchiveCard>
         )}
+        {event.event_type === "tournament" && isHost && event.status === "completed" && awardEnabled && !personalAwardsIssued && <ArchiveCard className="mb-6">
+          <ArchiveCardHeader><ArchiveCardTitle>{locale === "fi" ? "Pokaalien jako" : "Award trophies"}</ArchiveCardTitle></ArchiveCardHeader>
+          <ArchiveCardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">{locale === "fi" ? "Turnaus on päättynyt. Voit vahvistaa palkinnot nyt, jos niitä ei vielä jaettu." : "The tournament is complete. Confirm the trophies if they have not yet been issued."}</p>
+            {[["1", championEntryId, setChampionEntryId], ["2", runnerUpId, setRunnerUpId], ["3", thirdPlaceId, setThirdPlaceId]].map(([place, value, setter]: any) => <label key={place} className="block space-y-1">
+              <span>{place === "1" ? (locale === "fi" ? "Kulta" : "Gold") : place === "2" ? (locale === "fi" ? "Hopea" : "Silver") : (locale === "fi" ? "Pronssi" : "Bronze")}</span>
+              <select value={place === "1" ? ((event.event_config as any)?.champion_entry_id || "") : value} disabled={place === "1"} onChange={e => setter(e.target.value)} className="w-full rounded-md border border-accent-gold/30 bg-background p-3">
+                <option value="">{locale === "fi" ? "Ei jaeta" : "Not awarded"}</option>
+                {structure.entries.filter((entry: any) => entry.user_id).map((entry: any) => <option key={entry.id} value={entry.id}>{entry.display_name || (locale === "fi" ? "Kilpailija" : "Competitor")}</option>)}
+              </select>
+            </label>)}
+            <ArchiveCardButton disabled={issuingAwards} onClick={async () => {
+              const ids = [(event.event_config as any)?.champion_entry_id, runnerUpId, thirdPlaceId].filter(Boolean)
+              const recipients = ids.map((id: string) => structure.entries.find((entry: any) => entry.id === id)?.user_id).filter(Boolean)
+              if (recipients.length !== ids.length || new Set(recipients).size !== recipients.length || (thirdPlaceId && !runnerUpId)) { setCompletionError(locale === "fi" ? "Tarkista palkintosijat." : "Check award placements."); return }
+              if (!window.confirm(locale === "fi" ? "Jaetaanko pokaalit valituille kilpailijoille?" : "Issue trophies to the selected competitors?")) return
+              setIssuingAwards(true)
+              try { const result = await awardPersonalTrophies("tournament", eventId, recipients); if (result.success) { setPersonalAwardsIssued(true); setCompletionError("") } else setCompletionError(result.error || "Award failed") }
+              finally { setIssuingAwards(false) }
+            }}>{locale === "fi" ? "Vahvista pokaalien jako" : "Confirm trophy awards"}</ArchiveCardButton>
+          </ArchiveCardContent>
+        </ArchiveCard>}
         {event.event_type === "league" && isHost && (
           <ArchiveCard className="mb-6">
             <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">{t("eventUi.s28")}</ArchiveCardTitle></ArchiveCardHeader>
