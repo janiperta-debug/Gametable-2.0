@@ -1672,5 +1672,18 @@
     "s25": "Nimetön vaihe",
     "sessionsToFill": "Täydennä {{count}} sessioon",
     "roundsToFill": "Täydennä {{count}} kierrokseen"
+  },
+  "eventFix": {
+    "campaignSessions": "Kampanjan sessiot",
+    "eventRounds": "Tapahtuman kierrokset",
+    "matchCount": "{{count}} ottelua",
+    "selectPlayer": "Valitse pelaaja {{number}}",
+    "roundNumber": "Kierros {{number}}",
+    "sessionNumber": "Sessio {{number}}",
+    "sessions": "Sessiot",
+    "schedule": "Ajankohta",
+    "starts": "Alkaa",
+    "season": "Kausi",
+    "seasonStarts": "Kausi alkaa"
   }
 }
