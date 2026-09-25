@@ -80,6 +80,83 @@ const { data, error } = await supabase
   return { data: data || [] }
 }
 
+
+// Event achievements require completed events and recorded participation.
+// Tournament wins additionally require an organizer-recorded champion entry
+// that actually won a completed match.
+async function getVerifiedEventStats(userId: string, db: any) {
+  const empty = { tournament_wins: 0, tournaments_hosted: 0, campaigns_played: 0, campaigns_hosted: 0, league_seasons_played: 0, league_seasons_hosted: 0 }
+  const { data: events, error } = await db.from("events")
+    .select("id,host_id,event_type,event_config").eq("status", "completed").in("event_type", ["tournament", "campaign"])
+  if (error) throw new Error(error.message)
+  const tournaments = (events || []).filter((e: any) => e.event_type === "tournament")
+  const campaigns = (events || []).filter((e: any) => e.event_type === "campaign")
+  empty.tournaments_hosted = tournaments.filter((e: any) => e.host_id === userId).length
+  empty.campaigns_hosted = campaigns.filter((e: any) => e.host_id === userId).length
+  const campaignIds = campaigns.filter((e: any) => e.host_id !== userId).map((e: any) => e.id)
+  if (campaignIds.length) {
+    const { data: participants, error: pError } = await db.from("event_participants")
+      .select("event_id").eq("user_id", userId).eq("status", "attending").in("event_id", campaignIds)
+    if (pError) throw new Error(pError.message)
+    const { data: sessions, error: sError } = await db.from("event_sessions")
+      .select("event_id").eq("status", "completed").in("event_id", campaignIds)
+    if (sError) throw new Error(sError.message)
+    const played = new Set((sessions || []).map((x: any) => x.event_id))
+    empty.campaigns_played = new Set((participants || []).filter((x: any) => played.has(x.event_id)).map((x: any) => x.event_id)).size
+  }
+  const tournamentIds = tournaments.map((e: any) => e.id)
+  if (tournamentIds.length) {
+    const { data: entries, error: eError } = await db.from("event_entries")
+      .select("id,event_id").eq("user_id", userId).in("event_id", tournamentIds)
+    if (eError) throw new Error(eError.message)
+    const ownEntries = new Map((entries || []).map((e: any) => [e.event_id, e.id]))
+    const { data: matches, error: mError } = await db.from("event_matches")
+      .select("event_id,winner_entry_id").eq("status", "completed").in("event_id", tournamentIds)
+    if (mError) throw new Error(mError.message)
+    const verifiedWins = new Set((matches || []).filter((m: any) => ownEntries.get(m.event_id) === m.winner_entry_id).map((m: any) => m.event_id))
+    empty.tournament_wins = tournaments.filter((e: any) =>
+      ownEntries.get(e.id) && e.event_config?.champion_entry_id === ownEntries.get(e.id) && verifiedWins.has(e.id)
+    ).length
+  }
+  const { data: seasons, error: seasonError } = await db.from("league_seasons")
+    .select("id,league_id,leagues!inner(owner_id)").eq("status", "completed")
+  if (seasonError) throw new Error(seasonError.message)
+  const completed = seasons || []
+  empty.league_seasons_hosted = completed.filter((s: any) => {
+    const league = Array.isArray(s.leagues) ? s.leagues[0] : s.leagues
+    return league?.owner_id === userId
+  }).length
+  if (completed.length) {
+    const { data: links, error: linkError } = await db.from("league_season_events")
+      .select("season_id,event_id").in("season_id", completed.map((s: any) => s.id))
+    if (linkError) throw new Error(linkError.message)
+    const eventIds = [...new Set((links || []).map((l: any) => l.event_id))]
+    if (eventIds.length) {
+      const { data: leagueEvents, error: leError } = await db.from("events")
+        .select("id").eq("status", "completed").in("id", eventIds)
+      if (leError) throw new Error(leError.message)
+      const completedEventIds = new Set((leagueEvents || []).map((e: any) => e.id))
+      const { data: entries, error: entryError } = await db.from("event_entries")
+        .select("id,event_id").eq("user_id", userId).in("event_id", eventIds)
+      if (entryError) throw new Error(entryError.message)
+      const entryIds = (entries || []).map((e: any) => e.id)
+      if (entryIds.length) {
+        const { data: matches, error: matchError } = await db.from("event_matches")
+          .select("event_id,entry_a_id,entry_b_id").eq("status", "completed").in("event_id", eventIds)
+        if (matchError) throw new Error(matchError.message)
+        const playedEntries = new Set(entryIds)
+        const playedEvents = new Set((matches || []).filter((m: any) =>
+          playedEntries.has(m.entry_a_id) || playedEntries.has(m.entry_b_id)
+        ).map((m: any) => m.event_id))
+        empty.league_seasons_played = new Set((links || []).filter((l: any) =>
+          completedEventIds.has(l.event_id) && playedEvents.has(l.event_id)
+        ).map((l: any) => l.season_id)).size
+      }
+    }
+  }
+  return empty
+}
+
 /**
  * Get user stats for badge progress calculation
  */
@@ -93,6 +170,12 @@ export async function getUserStats(userId: string, client?: any): Promise<{
   manor_level: number
   bgg_imports: number
   import_operations: number
+  tournament_wins: number
+  tournaments_hosted: number
+  campaigns_played: number
+  campaigns_hosted: number
+  league_seasons_played: number
+  league_seasons_hosted: number
 }> {
   const supabase = client || await createClient()
   
@@ -173,7 +256,9 @@ export async function getUserStats(userId: string, client?: any): Promise<{
     .eq("status", "completed")
   if (importError) throw new Error(importError.message)
   
+  const eventStats = await getVerifiedEventStats(userId, supabase)
   return {
+    ...eventStats,
     game_count: (gameCount || 0) + (ownedCards || 0) + (ownedMiniatures || 0),
     category_count: uniqueCategories.size,
     friend_count: friendCount || 0,
@@ -209,6 +294,12 @@ function getProgressForRequirement(
     case "bgg_imports":
     case "import_operations":
       return stats.import_operations
+    case "tournament_wins": return stats.tournament_wins
+    case "tournaments_hosted": return stats.tournaments_hosted
+    case "campaigns_played": return stats.campaigns_played
+    case "campaigns_hosted": return stats.campaigns_hosted
+    case "league_seasons_played": return stats.league_seasons_played
+    case "league_seasons_hosted": return stats.league_seasons_hosted
     default:
       return 0
   }
@@ -337,7 +428,7 @@ async function checkAndAwardBadgesInternal(userId: string, supabase: any): Promi
     }
     
     // Only the verified import operation log qualifies for portal medals.
-    if (!badge.requirement_type || !["game_count", "category_count", "friend_count", "events_hosted", "events_attended", "level", "import_operations"].includes(badge.requirement_type) || !badge.requirement_value || badge.requirement_value <= 0) continue
+    if (!badge.requirement_type || !["game_count", "category_count", "friend_count", "events_hosted", "events_attended", "level", "import_operations", "tournament_wins", "tournaments_hosted", "campaigns_played", "campaigns_hosted", "league_seasons_played", "league_seasons_hosted"].includes(badge.requirement_type) || !badge.requirement_value || badge.requirement_value <= 0) continue
 
     // Check if requirement is met
     const currentProgress = getProgressForRequirement(stats, badge.requirement_type)
