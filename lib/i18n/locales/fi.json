@@ -949,7 +949,8 @@
       "portal-keeper": "Tuleva Suuri arkistonhoitaja -sarja palkitsee onnistuneista tuontikerroista kaikissa neljässä pelikategoriassa. Yksi onnistunut tuonti on yksi suoritus riippumatta tuotujen kohteiden määrästä."
     },
     "showMore": "Katso lisää",
-    "showLess": "Sulje lisätiedot"
+    "showLess": "Sulje lisätiedot",
+    "legacyImportAwards": "Vanhoja tuontimitaleja: {count} · tarkistus kesken"
   },
   "findPlayers": {
     "title": "Etsi pelaajia",
