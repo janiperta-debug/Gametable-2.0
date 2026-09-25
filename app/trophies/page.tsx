@@ -7,7 +7,8 @@ import { BADGE_DEFINITIONS, type BadgeSeries } from "@/lib/badge-definitions"
 import { getBadgesWithProgress, type BadgeWithProgress } from "@/app/actions/badges"
 import { useUser } from "@/hooks/useUser"
 import { ThemeHero } from "@/components/theme-hero"
-import { ArchiveCard, ArchiveCardContent, ArchiveToggle } from "@/components/archive-frame"
+import { ArchiveCard, ArchiveCardContent, ArchiveFrame, ArchiveToggle } from "@/components/archive-frame"
+import { ArchiveDivider } from "@/components/archive-divider"
 import Image from "next/image"
 
 export default function TrophiesPage() {
@@ -145,30 +146,33 @@ export default function TrophiesPage() {
                 {t("trophies.subtitle")}
               </p>
             </div>
-            <div className="flex gap-6 sm:gap-8">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
-                  <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-accent-gold" />
-                  <span className="text-xl sm:text-3xl font-cinzel text-accent-gold">{earnedCount}</span>
-                  <span className="text-sm sm:text-xl font-merriweather text-foreground/90">/ {totalBadges}</span>
-                </div>
-                <p className="text-xs sm:text-sm font-merriweather text-foreground/80">{t("trophies.badgesEarned")}</p>
-              </div>
-            </div>
           </div>
         </ThemeHero>
 
         {loadError && <div role="alert" className="mb-5 rounded-lg border border-amber-500/40 bg-amber-950/30 p-4 text-sm font-merriweather text-amber-100">Could not load your achievements. Showing available achievement definitions; earned medals and progress are temporarily unavailable. Please try reloading the page.</div>}
-        <div className="mb-6 flex justify-center">
-          <ArchiveToggle
-            value={activeTab}
-            onChange={setActiveTab}
-            options={[
-              { value: "progress", label: t("trophies.progress") },
-              { value: "cabinet", label: t("trophies.showcase") },
-            ]}
-          />
-        </div>
+        <ArchiveFrame weight="thin" cornerSize="sm" className="mb-8 rounded-xl">
+          <div className="flex justify-center px-2 pt-2">
+            <ArchiveToggle
+              framed={false}
+              value={activeTab}
+              onChange={setActiveTab}
+              options={[
+                { value: "progress", label: t("trophies.progress"), icon: <Trophy className="h-4 w-4" /> },
+                { value: "cabinet", label: t("trophies.showcase"), icon: <Trophy className="h-4 w-4" /> },
+              ]}
+            />
+          </div>
+          <ArchiveDivider />
+          <div className="px-4 py-4 text-center sm:px-6 sm:py-5">
+            <h2 className="logo-text text-2xl sm:text-3xl">{t("trophies.title")}</h2>
+            <div className="mt-3 flex items-center justify-center gap-2">
+              <Trophy className="h-5 w-5 text-accent-gold" />
+              <span className="font-cinzel text-xl text-accent-gold">{earnedCount}</span>
+              <span className="font-merriweather text-foreground/80">/ {totalBadges}</span>
+            </div>
+            <p className="mt-1 font-merriweather text-sm text-foreground/80">{t("trophies.badgesEarned")}</p>
+          </div>
+        </ArchiveFrame>
         {activeTab === "progress" ? (
           <div className="grid gap-4 md:grid-cols-2">
             {badgesBySeries.map(({ series, badges: seriesBadges }) => {
