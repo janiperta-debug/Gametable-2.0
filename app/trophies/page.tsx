@@ -1,16 +1,14 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { BadgeIcon, Lock, Trophy, Loader2 } from "lucide-react"
+import { Trophy, Loader2 } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { BADGE_DEFINITIONS, type BadgeSeries } from "@/lib/badge-definitions"
 import { getBadgesWithProgress, type BadgeWithProgress } from "@/app/actions/badges"
 import { useUser } from "@/hooks/useUser"
 import { ThemeHero } from "@/components/theme-hero"
 import { ArchiveCard, ArchiveCardContent } from "@/components/archive-frame"
-import { ArchiveDivider } from "@/components/archive-divider"
 import Image from "next/image"
-import { formatDistanceToNow } from "date-fns"
 
 export default function TrophiesPage() {
   const { user, loading: userLoading } = useUser()
@@ -18,6 +16,7 @@ export default function TrophiesPage() {
   const [badges, setBadges] = useState<BadgeWithProgress[]>([])
   const [earnedCount, setEarnedCount] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<"progress" | "cabinet">("progress")
 
   useEffect(() => {
     async function loadBadges() {
@@ -164,127 +163,72 @@ export default function TrophiesPage() {
           </div>
         </ThemeHero>
 
-        {/* Badge Series Grid */}
-        <div className="space-y-6">
-          {badgesBySeries.map(({ series, badges: seriesBadges }) => {
-            const earnedInSeries = seriesBadges.filter((b) => b.earned).length
-            const seriesNameTranslated = t(`trophies.series.${series}`)
-
-            return (
-              <ArchiveCard key={series}>
-                <ArchiveCardContent>
-                {/* Series Header */}
-                <div className="flex items-center justify-between mb-5">
-                  <div>
-                    <h2 className="text-2xl text-accent-gold mb-1">{seriesNameTranslated}</h2>
-                    <p className="text-sm font-merriweather text-muted-foreground">
-                      {earnedInSeries} / {seriesBadges.length} {t("trophies.tiersEarned")}
-                    </p>
-                  </div>
-                  <BadgeIcon className="h-6 w-6 text-accent-gold/60" />
-                </div>
-                <ArchiveDivider variant="ornate" className="mb-1" />
-
-                {/* Badge Tiers */}
-                <div className="space-y-0">
-                  {seriesBadges.map((badge, badgeIndex) => {
-                    const isEarned = badge.earned
-                    const progress = badge.current_progress
-                    const required = badge.requirement_value || 0
-                    const progressPercent = required > 0 ? Math.min(100, (progress / required) * 100) : 0
-                    
-                    // Get badge info from local definitions for translations
-                    const localBadge = BADGE_DEFINITIONS.find((b) => b.id === badge.id)
-                    const imageUrl = badge.image_url || localBadge?.image || "/placeholder.svg"
-
-                    return (
-                      <div
-                        key={badge.id}
-                        className={`relative group transition-all duration-300 ${
-                          isEarned ? "scale-100" : "scale-95 opacity-75"
-                        }`}
-                      >
-                        <div
-                          className={`relative py-7 sm:py-8 transition-all duration-300 ${
-                            isEarned ? "" : "opacity-75"
-                          }`}
-                        >
-                          {/* Badge Image */}
-                          <div className="relative w-32 h-32 mx-auto mb-4">
-                            <Image
-                              src={imageUrl}
-                              alt={badge.name}
-                              fill
-                              className={`object-contain transition-all duration-300 ${
-                                isEarned ? "grayscale-0" : "grayscale opacity-40"
-                              }`}
-                            />
-                            {!isEarned && (
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="bg-background/80 rounded-full p-3">
-                                  <Lock className="h-6 w-6 text-muted-foreground" />
-                                </div>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Badge Info */}
-                          <div className="text-center space-y-2">
-                            <div className="flex items-center justify-center gap-2">
-                              <h3 className="text-lg font-cinzel text-accent-gold">{t(`trophies.badges.${badge.id}.name`)}</h3>
-                              <span
-                                className={`text-xs font-merriweather uppercase px-2 py-0.5 rounded ${
-                                  badge.tier === "bronze"
-                                    ? "bg-orange-900/30 text-orange-400"
-                                    : badge.tier === "silver"
-                                      ? "bg-slate-700/30 text-slate-300"
-                                      : "bg-yellow-900/30 text-yellow-400"
-                                }`}
-                              >
-                                {t(`trophies.${badge.tier}`)}
-                              </span>
-                            </div>
-                            <p className="text-sm font-merriweather text-muted-foreground">{t(`trophies.badges.${badge.id}.description`)}</p>
-                            
-                            {/* Progress bar for unearned badges */}
-                            {!isEarned && required > 0 && (
-                              <div className="pt-2">
-                                <div className="flex justify-between text-xs font-merriweather text-muted-foreground mb-1">
-                                  <span>{t("trophies.progress")}</span>
-                                  <span>{progress} / {required}</span>
-                                </div>
-                                <div className="h-2 bg-background/50 rounded-full overflow-hidden">
-                                  <div 
-                                    className="h-full bg-accent-gold/60 rounded-full transition-all duration-500"
-                                    style={{ width: `${progressPercent}%` }}
-                                  />
-                                </div>
-                              </div>
-                            )}
-                            
-                            {/* Earned date for earned badges */}
-                            {isEarned && badge.earned_at && (
-                              <p className="text-xs font-merriweather text-accent-gold/80 pt-2">
-                                {t("trophies.earnedAt")} {formatDistanceToNow(new Date(badge.earned_at), { addSuffix: true })}
-                              </p>
-                            )}
-                            
-                            <div className="pt-2 space-y-1">
-                              <p className="text-xs font-merriweather text-foreground">{t(`trophies.badges.${badge.id}.requirement`)}</p>
-                            </div>
-                          </div>
-
-                        </div>
-                        {badgeIndex < seriesBadges.length - 1 && <ArchiveDivider variant="ornate" />}
-                      </div>
-                    )
-                  })}
-                </div>
-                </ArchiveCardContent>
-              </ArchiveCard>
-            )
-          })}
+        <div className="flex flex-wrap gap-2 mb-6" role="tablist" aria-label={t("trophies.title")}>
+          <button type="button" role="tab" aria-selected={activeTab === "progress"} onClick={() => setActiveTab("progress")} className={`rounded-lg border px-5 py-3 font-cinzel transition-colors ${activeTab === "progress" ? "border-accent-gold text-accent-gold bg-accent-gold/10" : "border-border text-muted-foreground"}`}>{t("trophies.progress")}</button>
+          <button type="button" role="tab" aria-selected={activeTab === "cabinet"} onClick={() => setActiveTab("cabinet")} className={`rounded-lg border px-5 py-3 font-cinzel transition-colors ${activeTab === "cabinet" ? "border-accent-gold text-accent-gold bg-accent-gold/10" : "border-border text-muted-foreground"}`}>{t("trophies.showcase")}</button>
         </div>
+        {activeTab === "progress" ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            {badgesBySeries.map(({ series, badges: seriesBadges }) => {
+              const earned = seriesBadges.filter((badge) => badge.earned)
+              const highest = earned[earned.length - 1]
+              const next = seriesBadges.find((badge) => !badge.earned)
+              const featured = highest || next
+              if (!featured) return null
+              const local = BADGE_DEFINITIONS.find((badge) => badge.id === featured.id)
+              const target = next?.requirement_value || 0
+              const progress = next?.current_progress || 0
+              const percent = target > 0 ? Math.min(100, Math.max(0, progress / target * 100)) : 100
+              return (
+                <ArchiveCard key={series}>
+                  <ArchiveCardContent>
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0">
+                        <Image src={featured.image_url || local?.image || "/placeholder.svg"} alt="" fill className={`object-contain ${highest ? "" : "grayscale opacity-50"}`} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h2 className="text-lg sm:text-xl font-cinzel text-accent-gold">{t(`trophies.series.${series}`)}</h2>
+                        <p className="text-sm text-muted-foreground">{earned.length} / {seriesBadges.length} {t("trophies.tiersEarned")}</p>
+                        {highest && <p className="text-sm text-accent-gold mt-1">{t(`trophies.${highest.tier}`)} · {t(`trophies.badges.${highest.id}.name`)}</p>}
+                        {!highest && <p className="text-sm text-muted-foreground mt-1">{t("trophies.locked")}</p>}
+                      </div>
+                    </div>
+                    {next ? (
+                      <div className="mt-4">
+                        <div className="flex justify-between gap-3 text-xs sm:text-sm font-merriweather mb-2">
+                          <span>{t(`trophies.${next.tier}`)} · {t(`trophies.badges.${next.id}.requirement`)}</span>
+                          <span className="whitespace-nowrap text-accent-gold">{progress} / {target}</span>
+                        </div>
+                        <div className="h-2 rounded-full overflow-hidden bg-background/50" role="progressbar" aria-valuenow={Math.min(progress, target)} aria-valuemin={0} aria-valuemax={target}>
+                          <div className="h-full bg-accent-gold/70 rounded-full" style={{ width: `${percent}%` }} />
+                        </div>
+                      </div>
+                    ) : <p className="mt-4 text-sm font-merriweather text-accent-gold">{t("trophies.gold")} · {t("trophies.earned")}</p>}
+                  </ArchiveCardContent>
+                </ArchiveCard>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {badges.filter((badge) => badge.earned).map((badge) => {
+              const local = BADGE_DEFINITIONS.find((item) => item.id === badge.id)
+              return (
+                <ArchiveCard key={badge.id}>
+                  <ArchiveCardContent>
+                    <div className="relative w-28 h-28 mx-auto mb-3">
+                      <Image src={badge.image_url || local?.image || "/placeholder.svg"} alt="" fill className="object-contain" />
+                    </div>
+                    <h2 className="text-center text-lg font-cinzel text-accent-gold">{t(`trophies.badges.${badge.id}.name`)}</h2>
+                    <p className="text-center text-sm text-muted-foreground mt-1">{t(`trophies.${badge.tier}`)} · {t(`trophies.series.${badge.series}`)}</p>
+                    {badge.earned_at && <p className="text-center text-xs text-muted-foreground mt-2">{t("trophies.earnedAt")} {new Date(badge.earned_at).toLocaleDateString()}</p>}
+                  </ArchiveCardContent>
+                </ArchiveCard>
+              )
+            })}
+            {earnedCount === 0 && <p className="font-merriweather text-muted-foreground">{t("trophies.locked")}</p>}
+          </div>
+        )}
       </main>
     </div>
   )
