@@ -92,6 +92,7 @@ export default function EventDetailsPage() {
   const [updatingRsvp, setUpdatingRsvp] = useState(false)
   const [cancelling, setCancelling] = useState(false)
   const [completing, setCompleting] = useState(false)
+  const [completionError, setCompletionError] = useState("")
   const [championEntryId, setChampionEntryId] = useState("")
   const [invitableUsers, setInvitableUsers] = useState<Array<{ id: string; display_name: string | null; avatar_url: string | null }>>([])
   const [inviting, setInviting] = useState<string | null>(null)
@@ -438,6 +439,7 @@ export default function EventDetailsPage() {
     if (completing) return
     if (!confirm(t("events.confirmComplete") || "Are you sure you want to mark this event as completed? This will move it to past events.")) return
 
+    setCompletionError("")
     setCompleting(true)
     try {
       // A failed or stale Server Action must never leave the completion button spinning forever.
@@ -446,7 +448,9 @@ export default function EventDetailsPage() {
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 20000)),
       ])
       if (!result.success || result.error) {
-        toast({ title: t("common.error"), description: result.error || (locale === "fi" ? "Tapahtuman päättäminen epäonnistui." : "Could not complete the event."), variant: "destructive" })
+        const message = result.error || (locale === "fi" ? "Tapahtuman päättäminen epäonnistui." : "Could not complete the event.")
+        setCompletionError(message)
+        toast({ title: t("common.error"), description: message, variant: "destructive" })
         return
       }
       setEvent((current) => current ? { ...current, status: "completed" } : current)
@@ -454,6 +458,11 @@ export default function EventDetailsPage() {
       router.push("/events")
     } catch (error) {
       const timedOut = error instanceof Error && error.message === "TIMEOUT"
+      const message = timedOut
+        ? (locale === "fi" ? "Vahvistus ei vastannut ajoissa. Päivitä sivu ja tarkista tapahtuman tila ennen uutta yritystä." : "Confirmation timed out. Refresh and check the event status before retrying.")
+        : (locale === "fi" ? "Yhteys katkesi tai julkaisu vaihtui. Päivitä sivu ja yritä uudelleen, jos tapahtuma on edelleen kesken." : "Connection failed or deployment changed. Refresh and retry only if the event is still active.")
+      setCompletionError(message)
+      console.error("Event completion request failed:", error)
       toast({
         title: t("common.error"),
         description: timedOut
@@ -617,6 +626,8 @@ export default function EventDetailsPage() {
             </>
           )}
         </div>
+
+        {completionError && <div role="alert" className="mb-4 rounded-md border border-red-400/60 bg-red-950/50 p-4 text-sm text-red-100"><strong>{locale === "fi" ? "Tapahtuman päättäminen epäonnistui" : "Event completion failed"}</strong><p className="mt-2">{completionError}</p></div>}
 
         {event.event_type === "tournament" && isHost && event.status !== "completed" && event.status !== "cancelled" && (
           <ArchiveCard className="mb-6">
