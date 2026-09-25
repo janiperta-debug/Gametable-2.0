@@ -25,7 +25,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Curator of Wonders",
     requirement: 10,
     requirementText: "Add 10 games to your collection",
-    xp: 100,
+    xp: 0,
     image: "/badges/collection/apprentice-curator-bronze.png",
   },
   {
@@ -37,7 +37,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Curator of Wonders",
     requirement: 50,
     requirementText: "Add 50 games to your collection",
-    xp: 250,
+    xp: 0,
     image: "/badges/collection/master-curator-silver.png",
   },
   {
@@ -49,7 +49,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Curator of Wonders",
     requirement: 250,
     requirementText: "Add 250 games to your collection",
-    xp: 500,
+    xp: 0,
     image: "/badges/collection/grand-curator-gold.png",
   },
   // Dimensional Wanderer Series (Category Explorer)
@@ -62,7 +62,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Dimensional Wanderer",
     requirement: 2,
     requirementText: "Own games from 2 different categories",
-    xp: 100,
+    xp: 0,
     image: "/badges/category/curious-explorer-bronze.png",
   },
   {
@@ -74,7 +74,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Dimensional Wanderer",
     requirement: 3,
     requirementText: "Own games from 3 different categories",
-    xp: 250,
+    xp: 0,
     image: "/badges/category/realm-walker-silver.png",
   },
   {
@@ -86,7 +86,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Dimensional Wanderer",
     requirement: 4,
     requirementText: "Own games from all 4 categories",
-    xp: 500,
+    xp: 0,
     image: "/badges/category/dimensional-master-gold.png",
   },
   // Fellowship Weaver Series (Social)
@@ -99,7 +99,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Fellowship Weaver",
     requirement: 5,
     requirementText: "Connect with 5 friends",
-    xp: 100,
+    xp: 0,
     image: "/badges/social/bond-forger-bronze.png",
   },
   {
@@ -111,7 +111,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Fellowship Weaver",
     requirement: 25,
     requirementText: "Connect with 25 friends",
-    xp: 250,
+    xp: 0,
     image: "/badges/social/circle-builder-silver.png",
   },
   {
@@ -123,7 +123,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Fellowship Weaver",
     requirement: 100,
     requirementText: "Connect with 100 friends",
-    xp: 500,
+    xp: 0,
     image: "/badges/social/fellowship-master-gold.png",
   },
   // Gathering Master Series (Event Hosting)
@@ -136,7 +136,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Gathering Master",
     requirement: 10,
     requirementText: "Host 10 completed events",
-    xp: 100,
+    xp: 0,
     image: "/badges/events-hosted/first-gathering-bronze.png",
   },
   {
@@ -148,7 +148,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Gathering Master",
     requirement: 50,
     requirementText: "Host 50 completed events",
-    xp: 250,
+    xp: 0,
     image: "/badges/events-hosted/regular-host-silver.png",
   },
   {
@@ -160,7 +160,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Gathering Master",
     requirement: 200,
     requirementText: "Host 200 completed events",
-    xp: 500,
+    xp: 0,
     image: "/badges/events-hosted/grand-orchestrator-gold.png",
   },
   // Manor Ascendant Series (Level)
@@ -173,7 +173,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Manor Ascendant",
     requirement: 35,
     requirementText: "Reach Manor Level 35 — master the Ground Floor",
-    xp: 100,
+    xp: 0,
     image: "/badges/manor/ground-floor-master-bronze.png",
   },
   {
@@ -185,7 +185,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Manor Ascendant",
     requirement: 70,
     requirementText: "Reach Manor Level 70 — master the Second Floor",
-    xp: 250,
+    xp: 0,
     image: "/badges/manor/second-floor-master-silver.png",
   },
   {
@@ -197,7 +197,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Manor Ascendant",
     requirement: 95,
     requirementText: "Reach Manor Level 95 — master the Basement",
-    xp: 500,
+    xp: 0,
     image: "/badges/manor/basement-lord-gold.png",
   },
   // Portal Keeper Series (BGG Integration)
@@ -210,7 +210,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Portal Keeper",
     requirement: 1,
     requirementText: "Import 1 game from BGG",
-    xp: 100,
+    xp: 0,
     image: "/badges/bgg/portal-novice-bronze.png",
   },
   {
@@ -222,7 +222,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Portal Keeper",
     requirement: 10,
     requirementText: "Import 10 games from BGG",
-    xp: 250,
+    xp: 0,
     image: "/badges/bgg/portal-adept-silver.png",
   },
   {
@@ -234,7 +234,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Portal Keeper",
     requirement: 50,
     requirementText: "Import 50 games from BGG",
-    xp: 500,
+    xp: 0,
     image: "/badges/bgg/portal-master-gold.png",
   },
   // Stalwart Companion Series (Event Attendance)
@@ -247,7 +247,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Stalwart Companion",
     requirement: 10,
     requirementText: "Attend 10 completed events",
-    xp: 100,
+    xp: 0,
     image: "/badges/events-attended/eager-newcomer-bronze.png",
   },
   {
@@ -259,7 +259,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Stalwart Companion",
     requirement: 50,
     requirementText: "Attend 50 completed events",
-    xp: 250,
+    xp: 0,
     image: "/badges/events-attended/reliable-ally-silver.png",
   },
   {
@@ -271,7 +271,7 @@ export const BADGE_DEFINITIONS: Badge[] = [
     seriesName: "Stalwart Companion",
     requirement: 200,
     requirementText: "Attend 200 completed events",
-    xp: 500,
+    xp: 0,
     image: "/badges/events-attended/legendary-companion-gold.png",
   },
 ]
