@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, ShoppingBag, ThumbsDown, ThumbsUp, Loader2 } from "lucide-react"
+import Image from "next/image"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import { ThemeHero } from "@/components/theme-hero"
 import { ArchiveCard, ArchiveCardContent } from "@/components/archive-frame"
 import { createClient } from "@/lib/supabase/client"
@@ -65,7 +66,7 @@ export default function OfficialStorePreview() {
         <ThemeHero page="marketplace" mode="backdrop">
           <div className="text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-accent-gold/50 bg-black/50 px-4 py-1.5 text-sm tracking-widest text-accent-gold">
-              <ShoppingBag className="h-4 w-4" /> SUUNNITTEILLA
+              SUUNNITTEILLA
             </span>
             <h1 className="logo-text mt-5 text-4xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] md:text-6xl">
               GameTable Official Store
@@ -83,8 +84,14 @@ export default function OfficialStorePreview() {
 
           <ArchiveCard>
             <ArchiveCardContent className="space-y-6 p-6 md:p-10">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-accent-gold/40 bg-accent-gold/10">
-                <ShoppingBag className="h-10 w-10 text-accent-gold" aria-hidden="true" />
+              <div className="mx-auto flex w-full max-w-64 items-center justify-center">
+                <Image
+                  src="/images/marketplace/official-store-sign.png"
+                  alt="GameTable-kartanon myymälän koristeellinen kyltti"
+                  width={512}
+                  height={512}
+                  className="h-auto w-full object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.45)]"
+                />
               </div>
               <div className="space-y-4 text-center">
                 <h2 className="font-heading text-3xl text-accent-gold">Kartanon aarteet ovat tulossa</h2>
@@ -111,14 +118,28 @@ export default function OfficialStorePreview() {
                     <div className="grid grid-cols-2 gap-3">
                       <button type="button" onClick={() => void submitVote(1)} disabled={saving}
                         aria-pressed={vote === 1}
-                        className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-xl border p-4 transition-colors disabled:opacity-60 ${vote === 1 ? "border-accent-gold bg-accent-gold/20 text-accent-gold" : "border-accent-gold/30 hover:border-accent-gold/70"}`}>
-                        <ThumbsUp className="h-8 w-8" />
+                        className={`group flex min-h-40 flex-col items-center justify-center gap-2 rounded-xl border p-4 transition-colors disabled:opacity-60 ${vote === 1 ? "border-accent-gold bg-accent-gold/20 text-accent-gold" : "border-accent-gold/30 hover:border-accent-gold/70"}`}>
+                        <Image
+                          src="/images/marketplace/store-door-open.png"
+                          alt=""
+                          aria-hidden="true"
+                          width={256}
+                          height={256}
+                          className={`h-24 w-24 object-contain transition-transform duration-300 group-hover:scale-105 ${vote === 1 ? "drop-shadow-[0_0_12px_rgba(230,184,91,0.6)]" : ""}`}
+                        />
                         <span className="font-heading">Kiinnostaa!</span>
                       </button>
                       <button type="button" onClick={() => void submitVote(-1)} disabled={saving}
                         aria-pressed={vote === -1}
                         className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-xl border p-4 transition-colors disabled:opacity-60 ${vote === -1 ? "border-accent-gold bg-accent-gold/20 text-accent-gold" : "border-accent-gold/30 hover:border-accent-gold/70"}`}>
-                        <ThumbsDown className="h-8 w-8" />
+                        <Image
+                          src="/images/marketplace/store-door-closed.png"
+                          alt=""
+                          aria-hidden="true"
+                          width={256}
+                          height={256}
+                          className={`h-24 w-24 object-contain transition-transform duration-300 group-hover:scale-105 ${vote === -1 ? "drop-shadow-[0_0_12px_rgba(230,184,91,0.6)]" : ""}`}
+                        />
                         <span className="font-heading">Ei minulle</span>
                       </button>
                     </div>
