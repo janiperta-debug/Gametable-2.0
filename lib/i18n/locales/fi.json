@@ -780,17 +780,17 @@
       "manor-bronze": {
         "name": "Ensimmäisen kerroksen mestari",
         "description": "Hallitse kartanon ensimmäinen kerros",
-        "requirement": "Saavuta taso 5"
+        "requirement": "Saavuta kartanon taso 35"
       },
       "manor-silver": {
         "name": "Toisen kerroksen mestari",
         "description": "Nouse toiseen kerrokseen",
-        "requirement": "Saavuta taso 10"
+        "requirement": "Saavuta kartanon taso 70"
       },
       "manor-gold": {
         "name": "Kellarin herra",
         "description": "Avaa kellarin salaisuudet",
-        "requirement": "Saavuta taso 15"
+        "requirement": "Saavuta kartanon taso 95"
       },
       "portal-bronze": {
         "name": "Portaalin noviisi",
@@ -885,17 +885,17 @@
       "ground-floor-master": {
         "name": "Ensimmäisen kerroksen mestari",
         "description": "Hallitse kartanon ensimmäinen kerros",
-        "requirement": "Saavuta taso 5"
+        "requirement": "Saavuta kartanon taso 35"
       },
       "second-floor-master": {
         "name": "Toisen kerroksen mestari",
         "description": "Nouse toiseen kerrokseen",
-        "requirement": "Saavuta taso 10"
+        "requirement": "Saavuta kartanon taso 70"
       },
       "basement-lord": {
         "name": "Kellarin herra",
         "description": "Avaa kellarin salaisuudet",
-        "requirement": "Saavuta taso 15"
+        "requirement": "Saavuta kartanon taso 95"
       },
       "portal-novice": {
         "name": "Portaalin noviisi",
