@@ -103,6 +103,12 @@
     "register": "Register",
     "guest": "Guest"
   },
+  "storeTeaser": {
+    "status": "In planning",
+    "description": "The manor's own merchandise collection is in the works. Explore the upcoming store and tell us what you think.",
+    "cta": "Explore the plans",
+    "open": "Explore the upcoming GameTable Official Store"
+  },
   "home": {
     "title": "Welcome to the Manor",
     "subtitle": "The home of tabletop gaming",
