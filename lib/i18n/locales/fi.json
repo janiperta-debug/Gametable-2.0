@@ -720,7 +720,13 @@
       "gathering-master": "Kokoontumisten mestari",
       "stalwart-companion": "Vakaa kumppani",
       "manor-ascendant": "Kartanon nousija",
-      "portal-keeper": "Portaalin vartija"
+      "portal-keeper": "Portaalin vartija",
+      "tournament-champion": "Turnausmestari",
+      "tournament-master": "Turnausten mestarijärjestäjä",
+      "chronicler-of-legends": "Legendojen kronikoitsija",
+      "master-storyteller": "Mestaritarinankertoja",
+      "league-veteran": "Liigaveteraani",
+      "league-commissioner": "Liigakomissaari"
     },
     "badges": {
       "collection-bronze": {
@@ -932,6 +938,96 @@
         "name": "Legendaarinen kumppani",
         "description": "Legendaarinen läsnäolo jokaisessa kokoontumisessa",
         "requirement": "Osallistu 200 toteutuneeseen tapahtumaan"
+      },
+      "tournament-champion-bronze": {
+        "name": "Turnausmestari — Pronssi",
+        "description": "Voita päättyneitä turnauksia, joissa järjestäjä on vahvistanut mestarin ja ottelutuloksen.",
+        "requirement": "Voita 1 turnausta"
+      },
+      "tournament-champion-silver": {
+        "name": "Turnausmestari — Hopea",
+        "description": "Voita päättyneitä turnauksia, joissa järjestäjä on vahvistanut mestarin ja ottelutuloksen.",
+        "requirement": "Voita 5 turnausta"
+      },
+      "tournament-champion-gold": {
+        "name": "Turnausmestari — Kulta",
+        "description": "Voita päättyneitä turnauksia, joissa järjestäjä on vahvistanut mestarin ja ottelutuloksen.",
+        "requirement": "Voita 20 turnausta"
+      },
+      "tournament-master-bronze": {
+        "name": "Turnausten mestarijärjestäjä — Pronssi",
+        "description": "Järjestä loppuun asti vietyjä turnauksia.",
+        "requirement": "Järjestä 1 turnausta"
+      },
+      "tournament-master-silver": {
+        "name": "Turnausten mestarijärjestäjä — Hopea",
+        "description": "Järjestä loppuun asti vietyjä turnauksia.",
+        "requirement": "Järjestä 5 turnausta"
+      },
+      "tournament-master-gold": {
+        "name": "Turnausten mestarijärjestäjä — Kulta",
+        "description": "Järjestä loppuun asti vietyjä turnauksia.",
+        "requirement": "Järjestä 20 turnausta"
+      },
+      "chronicler-of-legends-bronze": {
+        "name": "Legendojen kronikoitsija — Pronssi",
+        "description": "Osallistu päättyneisiin kampanjoihin, joissa on vähintään yksi pelattu istunto.",
+        "requirement": "Pelaa 1 kampanjaa"
+      },
+      "chronicler-of-legends-silver": {
+        "name": "Legendojen kronikoitsija — Hopea",
+        "description": "Osallistu päättyneisiin kampanjoihin, joissa on vähintään yksi pelattu istunto.",
+        "requirement": "Pelaa 5 kampanjaa"
+      },
+      "chronicler-of-legends-gold": {
+        "name": "Legendojen kronikoitsija — Kulta",
+        "description": "Osallistu päättyneisiin kampanjoihin, joissa on vähintään yksi pelattu istunto.",
+        "requirement": "Pelaa 15 kampanjaa"
+      },
+      "master-storyteller-bronze": {
+        "name": "Mestaritarinankertoja — Pronssi",
+        "description": "Johda loppuun asti vietyjä kampanjoita.",
+        "requirement": "Johda 1 kampanjaa"
+      },
+      "master-storyteller-silver": {
+        "name": "Mestaritarinankertoja — Hopea",
+        "description": "Johda loppuun asti vietyjä kampanjoita.",
+        "requirement": "Johda 5 kampanjaa"
+      },
+      "master-storyteller-gold": {
+        "name": "Mestaritarinankertoja — Kulta",
+        "description": "Johda loppuun asti vietyjä kampanjoita.",
+        "requirement": "Johda 15 kampanjaa"
+      },
+      "league-veteran-bronze": {
+        "name": "Liigaveteraani — Pronssi",
+        "description": "Osallistu päättyneisiin liigakausiin ja pelaa vähintään yksi kirjattu ottelu.",
+        "requirement": "Pelaa 1 liigakautta"
+      },
+      "league-veteran-silver": {
+        "name": "Liigaveteraani — Hopea",
+        "description": "Osallistu päättyneisiin liigakausiin ja pelaa vähintään yksi kirjattu ottelu.",
+        "requirement": "Pelaa 5 liigakautta"
+      },
+      "league-veteran-gold": {
+        "name": "Liigaveteraani — Kulta",
+        "description": "Osallistu päättyneisiin liigakausiin ja pelaa vähintään yksi kirjattu ottelu.",
+        "requirement": "Pelaa 15 liigakautta"
+      },
+      "league-commissioner-bronze": {
+        "name": "Liigakomissaari — Pronssi",
+        "description": "Järjestä vahvistetusti päättyneitä liigakausia.",
+        "requirement": "Järjestä 1 liigakautta"
+      },
+      "league-commissioner-silver": {
+        "name": "Liigakomissaari — Hopea",
+        "description": "Järjestä vahvistetusti päättyneitä liigakausia.",
+        "requirement": "Järjestä 5 liigakautta"
+      },
+      "league-commissioner-gold": {
+        "name": "Liigakomissaari — Kulta",
+        "description": "Järjestä vahvistetusti päättyneitä liigakausia.",
+        "requirement": "Järjestä 15 liigakautta"
       }
     },
     "howEarned": "Miten palkinnot ansaitaan",
@@ -946,7 +1042,13 @@
       "gathering-master": "Järjestämiäsi tapahtumia lasketaan vasta, kun niiden tila on päättynyt. Peruutetut ja tulevat tapahtumat eivät kerrytä saavutusta.",
       "stalwart-companion": "Osallistumisesi lasketaan päättyneistä tapahtumista, joihin sinut on merkitty osallistujaksi. Pelkkä ilmoittautuminen tulevaan tapahtumaan ei riitä.",
       "manor-ascendant": "Kartanon taso määräytyy harrastustoiminnasta kertyneestä XP:stä. Mitalit tunnustavat saavuttamasi tasot, mutta eivät itsessään anna XP:tä.",
-      "portal-keeper": "Suuri arkistonhoitaja palkitsee onnistuneista tuontikerroista kaikissa neljässä pelikategoriassa. Yksi tuontikerta lasketaan, kun kokoelmaan lisätään vähintään yksi uusi omistettu kohde. Pelkät kaksoiskappaleet tai toivelistan kohteet eivät kerrytä edistymistä."
+      "portal-keeper": "Suuri arkistonhoitaja palkitsee onnistuneista tuontikerroista kaikissa neljässä pelikategoriassa. Yksi tuontikerta lasketaan, kun kokoelmaan lisätään vähintään yksi uusi omistettu kohde. Pelkät kaksoiskappaleet tai toivelistan kohteet eivät kerrytä edistymistä.",
+      "tournament-champion": "Voita päättyneitä turnauksia, joissa järjestäjä on vahvistanut mestarin ja ottelutuloksen.",
+      "tournament-master": "Järjestä loppuun asti vietyjä turnauksia.",
+      "chronicler-of-legends": "Osallistu päättyneisiin kampanjoihin, joissa on vähintään yksi pelattu istunto.",
+      "master-storyteller": "Johda loppuun asti vietyjä kampanjoita.",
+      "league-veteran": "Osallistu päättyneisiin liigakausiin ja pelaa vähintään yksi kirjattu ottelu.",
+      "league-commissioner": "Järjestä vahvistetusti päättyneitä liigakausia."
     },
     "showMore": "Katso lisää",
     "showLess": "Sulje lisätiedot",
