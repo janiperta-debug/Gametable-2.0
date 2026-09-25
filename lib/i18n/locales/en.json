@@ -927,6 +927,20 @@
         "description": "A legendary presence at every gathering",
         "requirement": "Attend 200 completed events"
       }
+    },
+    "howEarned": "How to earn achievements",
+    "howEarnedIntro": "Achievements reflect actual hobby activity. Bronze, silver and gold unlock when their requirements are met. Achievements do not grant XP.",
+    "awardCriteria": "Award criteria",
+    "nextTiers": "All tiers",
+    "importPending": "Import-operation tracking is being rebuilt. Previously earned import badges remain for now, but new ones are not yet awarded.",
+    "seriesDescriptions": {
+      "curator-of-wonders": "Owned board games, RPGs, trading cards and miniatures count toward your collection. Wishlist items do not count.",
+      "dimensional-wanderer": "The four categories are board games, RPGs, trading cards and miniatures. Each category counts once when you own at least one item in it.",
+      "fellowship-weaver": "Only accepted GameTable friendships count. Pending or outgoing friend requests do not count.",
+      "gathering-master": "Events you organize count once they are marked completed. Upcoming and cancelled events do not count.",
+      "stalwart-companion": "Participation counts for completed events where you are recorded as attending. Signing up for a future event alone is not enough.",
+      "manor-ascendant": "Your Manor level comes from XP earned through hobby activities. Medals recognize milestones but do not themselves award XP.",
+      "portal-keeper": "The upcoming Grand Archivist series will recognize successful import operations across all four game categories. Each successful import counts once, regardless of how many items it adds."
     }
   },
   "findPlayers": {
