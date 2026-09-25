@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache"
 
 export type PersonalTrophy = {
  id: string; recipient_id: string; source_type: "tournament" | "league_season"
- source_name: string; category: string; placement: number; awarded_at: string
+ source_name: string; category: string; placement: number; award_variant: string | null; awarded_at: string
  event_id: string | null; season_id: string | null
 }
 
@@ -14,7 +14,7 @@ export async function getMyPersonalTrophies(): Promise<{ trophies: PersonalTroph
  const { data: { user } } = await db.auth.getUser()
  if (!user) return { trophies: [] }
  const { data, error } = await db.from("personal_trophies")
-  .select("id,recipient_id,source_type,source_name,category,placement,awarded_at,event_id,season_id")
+  .select("id,recipient_id,source_type,source_name,category,placement,award_variant,awarded_at,event_id,season_id")
   .eq("recipient_id", user.id).order("awarded_at", { ascending: false })
  return { trophies: (data || []) as PersonalTrophy[], error: error?.message }
 }
@@ -51,4 +51,14 @@ export async function awardPersonalTrophies(sourceType: "tournament" | "league_s
  revalidatePath("/events")
  if (sourceType === "tournament") revalidatePath(`/events/${sourceId}`)
  return { success: true, count: Number(data || 0) }
+}
+
+export async function awardLeagueWinnerTrophy(seasonId: string, recipientId: string, variant: "crystal" | "pennant" | "sculpture") {
+ const db = await createClient()
+ const { data: { user } } = await db.auth.getUser()
+ if (!user) return { success: false, error: "Kirjaudu sisään." }
+ const { error } = await db.rpc("issue_league_winner_trophy", { p_season_id: seasonId, p_recipient_id: recipientId, p_variant: variant })
+ if (error) return { success: false, error: error.message }
+ revalidatePath("/trophies")
+ return { success: true }
 }
