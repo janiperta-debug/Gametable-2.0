@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Trophy, Loader2, ChevronDown, ChevronUp } from "lucide-react"
+import { Trophy, Loader2, ChevronDown, ChevronUp, X, ZoomIn } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { BADGE_DEFINITIONS, type BadgeSeries } from "@/lib/badge-definitions"
 import { getBadgesWithProgress, type BadgeWithProgress } from "@/app/actions/badges"
@@ -20,6 +20,7 @@ export default function TrophiesPage() {
   const [loadError, setLoadError] = useState(false)
   const [activeTab, setActiveTab] = useState<"progress" | "cabinet">("progress")
   const [expandedSeries, setExpandedSeries] = useState<BadgeSeries[]>([])
+  const [previewBadge, setPreviewBadge] = useState<BadgeWithProgress | null>(null)
 
   useEffect(() => {
     let active = true
@@ -70,6 +71,15 @@ export default function TrophiesPage() {
     }
     return () => { active = false }
   }, [user?.id, userLoading])
+
+  useEffect(() => {
+    if (!previewBadge) return
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setPreviewBadge(null) }
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    window.addEventListener("keydown", onKeyDown)
+    return () => { document.body.style.overflow = previousOverflow; window.removeEventListener("keydown", onKeyDown) }
+  }, [previewBadge])
 
   // Helper to map series to requirement type
   function getRequirementType(series: string): string {
@@ -198,9 +208,10 @@ export default function TrophiesPage() {
                 <ArchiveCard key={series}>
                   <ArchiveCardContent>
                     <div className="flex items-center gap-4 min-w-0">
-                      <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0">
-                        <Image src={featured.image_url || local?.image || "/placeholder.svg"} alt="" fill className={`object-contain ${highest ? "" : "grayscale opacity-50"}`} />
-                      </div>
+                      <button type="button" onClick={() => setPreviewBadge(featured)} aria-label={`Suurenna / Enlarge: ${t(`trophies.badges.${featured.id}.name`)}`} className="group relative w-20 h-20 sm:w-24 sm:h-24 shrink-0 cursor-zoom-in rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-gold">
+                        <Image src={featured.image_url || local?.image || "/placeholder.svg"} alt="" fill className={`object-contain select-none ${highest ? "" : "grayscale opacity-50"}`} draggable={false} />
+                        <ZoomIn aria-hidden="true" className="absolute bottom-0 right-0 h-5 w-5 rounded-full bg-background/80 p-0.5 text-accent-gold opacity-80 group-hover:opacity-100" />
+                      </button>
                       <div className="min-w-0 flex-1">
                         <h2 className="text-lg sm:text-xl font-cinzel text-accent-gold">{t(`trophies.series.${series}`)}</h2>
                         <p className="text-sm text-muted-foreground">{`${earned.length} / ${seriesBadges.length} ${t("trophies.tiersEarned")}`}</p>
@@ -261,9 +272,10 @@ export default function TrophiesPage() {
               return (
                 <ArchiveCard key={badge.id}>
                   <ArchiveCardContent>
-                    <div className="relative mx-auto mb-3 h-32 w-32 sm:h-36 sm:w-36">
-                      <Image src={badge.image_url || local?.image || "/placeholder.svg"} alt="" fill className="object-contain" />
-                    </div>
+                    <button type="button" onClick={() => setPreviewBadge(badge)} aria-label={`Suurenna / Enlarge: ${t(`trophies.badges.${badge.id}.name`)}`} className="group relative mx-auto mb-3 block h-32 w-32 cursor-zoom-in rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-gold sm:h-36 sm:w-36">
+                      <Image src={badge.image_url || local?.image || "/placeholder.svg"} alt="" fill className="object-contain select-none" draggable={false} />
+                      <ZoomIn aria-hidden="true" className="absolute bottom-1 right-1 h-6 w-6 rounded-full bg-background/80 p-1 text-accent-gold opacity-80 group-hover:opacity-100" />
+                    </button>
                     <h2 className="text-center font-cinzel text-lg text-accent-gold">{t(`trophies.badges.${badge.id}.name`)}</h2>
                     <p className="mt-1 text-center text-sm text-muted-foreground">{t(`trophies.${badge.tier}`)} · {t(`trophies.series.${badge.series}`)}</p>
                     {badge.series === "portal-keeper" && badge.current_progress < (badge.requirement_value || 0) && <p className="mt-2 text-center text-xs text-amber-200/90">{t("trophies.legacyMedal")}</p>}
@@ -276,6 +288,23 @@ export default function TrophiesPage() {
           </div>
         )}
       </main>
+      {previewBadge && (() => {
+        const local = BADGE_DEFINITIONS.find((item) => item.id === previewBadge.id)
+        return (
+          <div role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setPreviewBadge(null) }} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 px-4 py-8 backdrop-blur-sm">
+            <div role="dialog" aria-modal="true" aria-labelledby="trophy-preview-title" className="relative flex max-h-[94dvh] w-full max-w-3xl flex-col items-center overflow-y-auto rounded-xl border border-accent-gold/50 bg-[#211017] p-4 shadow-2xl sm:p-8">
+              <button type="button" autoFocus onClick={() => setPreviewBadge(null)} aria-label="Sulje / Close" className="absolute right-3 top-3 z-10 rounded-full border border-accent-gold/50 bg-black/70 p-2 text-accent-gold hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-gold"><X className="h-6 w-6" /></button>
+              <div className="relative mt-8 h-[min(60dvh,550px)] w-full max-w-[550px] shrink-0 sm:mt-3">
+                <Image src={previewBadge.image_url || local?.image || "/placeholder.svg"} alt={t(`trophies.badges.${previewBadge.id}.name`)} fill sizes="(max-width: 640px) 90vw, 550px" className="object-contain select-none" draggable={false} priority />
+              </div>
+              <h2 id="trophy-preview-title" className="mt-3 text-center font-cinzel text-xl text-accent-gold sm:text-2xl">{t(`trophies.badges.${previewBadge.id}.name`)}</h2>
+              <p className="mt-2 text-center font-merriweather text-sm text-foreground/80">{t(`trophies.${previewBadge.tier}`)} · {t(`trophies.series.${previewBadge.series}`)}</p>
+              {!previewBadge.earned && <p className="mt-2 text-center font-merriweather text-sm text-foreground/60">{t("trophies.locked")}</p>}
+              {previewBadge.earned && previewBadge.earned_at && <p className="mt-2 text-center font-merriweather text-xs text-foreground/60">{t("trophies.earnedAt")} {new Date(previewBadge.earned_at).toLocaleDateString()}</p>}
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }
