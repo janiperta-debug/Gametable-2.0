@@ -825,17 +825,17 @@
       "apprentice-curator": {
         "name": "Apprentice Curator",
         "description": "Begin your journey as a collector",
-        "requirement": "Add 5 games to your collection"
+        "requirement": "Add 10 games to your collection"
       },
       "master-curator": {
         "name": "Master Curator",
         "description": "Your collection grows impressive",
-        "requirement": "Add 25 games to your collection"
+        "requirement": "Add 50 games to your collection"
       },
       "grand-curator": {
         "name": "Grand Curator",
         "description": "A legendary collection worthy of the manor",
-        "requirement": "Add 100 games to your collection"
+        "requirement": "Add 250 games to your collection"
       },
       "curious-explorer": {
         "name": "Curious Explorer",
@@ -855,32 +855,32 @@
       "bond-forger": {
         "name": "Bond Forger",
         "description": "Begin building your fellowship",
-        "requirement": "Connect with 3 friends"
+        "requirement": "Connect with 5 friends"
       },
       "circle-builder": {
         "name": "Circle Builder",
         "description": "Your circle of friends grows strong",
-        "requirement": "Connect with 10 friends"
+        "requirement": "Connect with 25 friends"
       },
       "fellowship-master": {
         "name": "Fellowship Master",
         "description": "A true master of fellowship and community",
-        "requirement": "Connect with 25 friends"
+        "requirement": "Connect with 100 friends"
       },
       "first-gathering": {
         "name": "First Gathering",
         "description": "Host your first gaming event",
-        "requirement": "Host 1 event"
+        "requirement": "Host 10 completed events"
       },
       "regular-host": {
         "name": "Regular Host",
         "description": "Become a regular event organizer",
-        "requirement": "Host 5 events"
+        "requirement": "Host 50 completed events"
       },
       "grand-orchestrator": {
         "name": "Grand Orchestrator",
         "description": "Master the art of grand gatherings",
-        "requirement": "Host 20 events"
+        "requirement": "Host 200 completed events"
       },
       "ground-floor-master": {
         "name": "Ground Floor Master",
@@ -915,17 +915,17 @@
       "eager-newcomer": {
         "name": "Eager Newcomer",
         "description": "Join your first gaming gatherings",
-        "requirement": "Attend 3 events"
+        "requirement": "Attend 10 completed events"
       },
       "reliable-ally": {
         "name": "Reliable Ally",
         "description": "Become a dependable companion",
-        "requirement": "Attend 10 events"
+        "requirement": "Attend 50 completed events"
       },
       "legendary-companion": {
         "name": "Legendary Companion",
         "description": "A legendary presence at every gathering",
-        "requirement": "Attend 25 events"
+        "requirement": "Attend 200 completed events"
       }
     }
   },
