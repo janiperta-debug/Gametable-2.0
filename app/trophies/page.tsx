@@ -91,6 +91,7 @@ export default function TrophiesPage() {
     }
   }
 
+  // Include all 13 achievement series in the production trophy progress view.
   // Group badges by series using local definitions as fallback
   const seriesOrder: BadgeSeries[] = ["curator-of-wonders", "dimensional-wanderer", "fellowship-weaver", "gathering-master", "stalwart-companion", "manor-ascendant", "portal-keeper", "tournament-champion", "tournament-master", "chronicler-of-legends", "master-storyteller", "league-veteran", "league-commissioner"]
   
