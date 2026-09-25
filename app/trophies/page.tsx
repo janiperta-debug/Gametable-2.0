@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { BadgeIcon, Lock, Trophy, Award, Loader2 } from "lucide-react"
+import { BadgeIcon, Lock, Trophy, Loader2 } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
 import { BADGE_DEFINITIONS, type BadgeSeries } from "@/lib/badge-definitions"
 import { getBadgesWithProgress, type BadgeWithProgress } from "@/app/actions/badges"
@@ -17,7 +17,6 @@ export default function TrophiesPage() {
   const t = useTranslations()
   const [badges, setBadges] = useState<BadgeWithProgress[]>([])
   const [earnedCount, setEarnedCount] = useState(0)
-  const [totalXP, setTotalXP] = useState(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -39,7 +38,6 @@ export default function TrophiesPage() {
         }))
         setBadges(localBadges)
         setEarnedCount(0)
-        setTotalXP(0)
         setLoading(false)
         return
       }
@@ -50,7 +48,6 @@ export default function TrophiesPage() {
         if (result.badges.length > 0) {
           setBadges(result.badges)
           setEarnedCount(result.earnedCount)
-          setTotalXP(result.totalXP)
         } else {
           // Fallback to local definitions with Supabase progress
           const localBadges: BadgeWithProgress[] = BADGE_DEFINITIONS.map((b) => ({
@@ -68,7 +65,6 @@ export default function TrophiesPage() {
           }))
           setBadges(localBadges)
           setEarnedCount(0)
-          setTotalXP(0)
         }
       }
       setLoading(false)
@@ -163,13 +159,6 @@ export default function TrophiesPage() {
                   <span className="text-sm sm:text-xl font-merriweather text-foreground/90">/ {totalBadges}</span>
                 </div>
                 <p className="text-xs sm:text-sm font-merriweather text-foreground/80">{t("trophies.badgesEarned")}</p>
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
-                  <Award className="h-4 w-4 sm:h-5 sm:w-5 text-accent-gold" />
-                  <span className="text-xl sm:text-3xl font-cinzel text-accent-gold">{totalXP}</span>
-                </div>
-                <p className="text-xs sm:text-sm font-merriweather text-foreground/80">{t("trophies.totalXP")}</p>
               </div>
             </div>
           </div>
@@ -282,7 +271,6 @@ export default function TrophiesPage() {
                             
                             <div className="pt-2 space-y-1">
                               <p className="text-xs font-merriweather text-foreground">{t(`trophies.badges.${badge.id}.requirement`)}</p>
-                              <p className="text-xs font-merriweather text-accent-gold">{t("trophies.reward")}: +{badge.xp_reward || localBadge?.xp || 100} XP</p>
                             </div>
                           </div>
 
