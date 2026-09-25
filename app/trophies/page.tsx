@@ -16,63 +16,58 @@ export default function TrophiesPage() {
   const [badges, setBadges] = useState<BadgeWithProgress[]>([])
   const [earnedCount, setEarnedCount] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [activeTab, setActiveTab] = useState<"progress" | "cabinet">("progress")
 
   useEffect(() => {
+    let active = true
     async function loadBadges() {
-      if (!user) {
-        // Use local badge definitions with no progress for non-logged in users
+      setLoading(true)
+      setLoadError(false)
+      try {
         const localBadges: BadgeWithProgress[] = BADGE_DEFINITIONS.map((b) => ({
-          id: b.id,
-          series: b.series,
-          tier: b.tier,
-          name: b.name,
-          description: b.description,
-          requirement_type: getRequirementType(b.series),
-          requirement_value: b.requirement,
-          xp_reward: b.xp,
-          image_url: b.image,
-          earned: false,
-          current_progress: 0,
+          id: b.id, series: b.series, tier: b.tier, name: b.name,
+          description: b.description, requirement_type: getRequirementType(b.series),
+          requirement_value: b.requirement, xp_reward: b.xp, image_url: b.image,
+          earned: false, current_progress: 0,
         }))
-        setBadges(localBadges)
-        setEarnedCount(0)
-        setLoading(false)
-        return
-      }
-
-      const result = await getBadgesWithProgress(user.id)
-      if (!result.error) {
-        // If we got data from Supabase, use it; otherwise fall back to local definitions
-        if (result.badges.length > 0) {
-          setBadges(result.badges)
-          setEarnedCount(result.earnedCount)
-        } else {
-          // Fallback to local definitions with Supabase progress
-          const localBadges: BadgeWithProgress[] = BADGE_DEFINITIONS.map((b) => ({
-            id: b.id,
-            series: b.series,
-            tier: b.tier,
-            name: b.name,
-            description: b.description,
-            requirement_type: getRequirementType(b.series),
-            requirement_value: b.requirement,
-            xp_reward: b.xp,
-            image_url: b.image,
-            earned: false,
-            current_progress: 0,
-          }))
+        if (!user) {
+          if (active) { setBadges(localBadges); setEarnedCount(0) }
+          return
+        }
+        const result = await getBadgesWithProgress(user.id)
+        if (!active) return
+        if (result.error) {
+          console.error("Could not load trophies:", result.error)
+          setLoadError(true)
           setBadges(localBadges)
           setEarnedCount(0)
+        } else {
+          setBadges(result.badges.length ? result.badges : localBadges)
+          setEarnedCount(result.earnedCount)
         }
+      } catch (error) {
+        console.error("Trophy page failed to load:", error)
+        if (active) {
+          setLoadError(true)
+          setBadges(BADGE_DEFINITIONS.map((b) => ({
+            id: b.id, series: b.series, tier: b.tier, name: b.name,
+            description: b.description, requirement_type: getRequirementType(b.series),
+            requirement_value: b.requirement, xp_reward: b.xp, image_url: b.image,
+            earned: false, current_progress: 0,
+          })))
+          setEarnedCount(0)
+        }
+      } finally {
+        if (active) setLoading(false)
       }
-      setLoading(false)
     }
-    
+
     if (!userLoading) {
       loadBadges()
     }
-  }, [user, userLoading])
+    return () => { active = false }
+  }, [user?.id, userLoading])
 
   // Helper to map series to requirement type
   function getRequirementType(series: string): string {
@@ -163,6 +158,7 @@ export default function TrophiesPage() {
           </div>
         </ThemeHero>
 
+        {loadError && <div role="alert" className="mb-5 rounded-lg border border-amber-500/40 bg-amber-950/30 p-4 text-sm font-merriweather text-amber-100">Could not load your achievements. Showing available achievement definitions; earned medals and progress are temporarily unavailable. Please try reloading the page.</div>}
         <div className="flex flex-wrap gap-2 mb-6" role="tablist" aria-label={t("trophies.title")}>
           <button type="button" role="tab" aria-selected={activeTab === "progress"} onClick={() => setActiveTab("progress")} className={`rounded-lg border px-5 py-3 font-cinzel transition-colors ${activeTab === "progress" ? "border-accent-gold text-accent-gold bg-accent-gold/10" : "border-border text-muted-foreground"}`}>{t("trophies.progress")}</button>
           <button type="button" role="tab" aria-selected={activeTab === "cabinet"} onClick={() => setActiveTab("cabinet")} className={`rounded-lg border px-5 py-3 font-cinzel transition-colors ${activeTab === "cabinet" ? "border-accent-gold text-accent-gold bg-accent-gold/10" : "border-border text-muted-foreground"}`}>{t("trophies.showcase")}</button>
