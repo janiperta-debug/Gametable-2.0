@@ -95,8 +95,8 @@ export async function getUserStats(userId: string, client?: any): Promise<{
 }> {
   const supabase = client || await createClient()
   
-  // Count only owned board games/RPGs. Card and miniature ownership
-  // lives in separate collection tables, not in user_games.
+  // Count owned collection entries across all four hobby categories.
+  // Card and miniature ownership lives in separate collection tables.
   const { count: gameCount, error: gameCountError } = await supabase
     .from("user_games")
     .select("*", { count: "exact", head: true })
@@ -165,23 +165,18 @@ export async function getUserStats(userId: string, client?: any): Promise<{
     .eq("id", userId)
     .single()
   
-  // Get BGG imports count (games with bgg_id set)
-  const { count: bggImports } = await supabase
-    .from("user_games")
-    .select("games!inner(bgg_id)", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .eq("status", "owned")
-    .not("games.bgg_id", "is", null)
+  // Import operations need their own audit log; existing BGG item counts
+  // must not be presented as successful import operations.
   
   return {
-    game_count: gameCount || 0,
+    game_count: (gameCount || 0) + (ownedCards || 0) + (ownedMiniatures || 0),
     category_count: uniqueCategories.size,
     friend_count: friendCount || 0,
     events_hosted: eventsHosted || 0,
     events_attended: eventsAttended,
     level: getManorLevelFromXp(profile?.xp || 0),
     manor_level: getManorLevelFromXp(profile?.xp || 0),
-    bgg_imports: bggImports || 0,
+    bgg_imports: 0,
   }
 }
 
