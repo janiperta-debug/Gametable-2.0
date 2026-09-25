@@ -127,8 +127,9 @@ export async function linkSeasonEvent(leagueId: string, seasonId: string, eventI
  const supabase = await createClient()
  const { data: { user } } = await supabase.auth.getUser()
  const { data: league } = await supabase.from("leagues").select("owner_id").eq("id", leagueId).single()
- const { data: season } = await supabase.from("league_seasons").select("id").eq("id", seasonId).eq("league_id", leagueId).single()
+ const { data: season } = await supabase.from("league_seasons").select("id,status").eq("id", seasonId).eq("league_id", leagueId).single()
  if (!user || league?.owner_id !== user.id || !season) return { error: "Ei käyttöoikeutta." }
+ if (season.status === "completed") return { error: "Päättyneen kauden tapahtumia ei voi enää muuttaa." }
  const { data: event } = await supabase.from("events").select("host_id,event_type").eq("id", eventId).single()
  if (!event || event.host_id !== user.id || !["tournament","game_night"].includes(event.event_type)) return { error: "Voit liittää omia turnauksiasi ja peli-iltojasi." }
  const { error } = linked
@@ -216,6 +217,8 @@ export async function updateLeagueSeason(leagueId: string, seasonId: string, inp
  const { data: league } = await supabase.from("leagues").select("owner_id").eq("id", leagueId).single()
  if (!user || league?.owner_id !== user.id) return { error: "Vain järjestäjä voi muokata kautta." }
  if (!input.name.trim() || input.name.trim().length > 120) return { error: "Anna kauden nimi (enintään 120 merkkiä)." }
+ const { data: currentSeason } = await supabase.from("league_seasons").select("status").eq("id", seasonId).eq("league_id", leagueId).single()
+ if (currentSeason?.status === "completed") return { error: "Päättynyttä kautta ei voi enää muokata." }
  if (input.startsOn && input.endsOn && input.endsOn < input.startsOn) return { error: "Päättymispäivä ei voi olla ennen alkua." }
  const { data, error } = await supabase.from("league_seasons").update({
   name: input.name.trim(), starts_on: input.startsOn || null, ends_on: input.endsOn || null,
