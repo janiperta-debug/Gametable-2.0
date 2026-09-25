@@ -5,16 +5,21 @@ import { Trophy, Loader2, ChevronDown, ChevronUp, X, ZoomIn } from "lucide-react
 import { useTranslations } from "@/lib/i18n"
 import { BADGE_DEFINITIONS, type BadgeSeries } from "@/lib/badge-definitions"
 import { getBadgesWithProgress, type BadgeWithProgress } from "@/app/actions/badges"
+import { getMyPersonalTrophies, type PersonalTrophy } from "@/app/actions/personal-trophies"
 import { useUser } from "@/hooks/useUser"
 import { ThemeHero } from "@/components/theme-hero"
 import { ArchiveCard, ArchiveCardContent, ArchiveFrame, ArchiveToggle } from "@/components/archive-frame"
 import { ArchiveDivider } from "@/components/archive-divider"
 import Image from "next/image"
 
+function localeLabel(placement: number) { return placement === 1 ? "Kulta / Gold" : placement === 2 ? "Hopea / Silver" : "Pronssi / Bronze" }
+
 export default function TrophiesPage() {
   const { user, loading: userLoading } = useUser()
   const t = useTranslations()
   const [badges, setBadges] = useState<BadgeWithProgress[]>([])
+  const [personalTrophies, setPersonalTrophies] = useState<PersonalTrophy[]>([])
+  const [previewPersonalTrophy, setPreviewPersonalTrophy] = useState<PersonalTrophy | null>(null)
   const [earnedCount, setEarnedCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
@@ -38,7 +43,8 @@ export default function TrophiesPage() {
           if (active) { setBadges(localBadges); setEarnedCount(0) }
           return
         }
-        const result = await getBadgesWithProgress(user.id)
+        const [result, personal] = await Promise.all([getBadgesWithProgress(user.id), getMyPersonalTrophies()])
+        if (active && !personal.error) setPersonalTrophies(personal.trophies)
         if (!active) return
         if (result.error) {
           console.error("Could not load trophies:", result.error)
@@ -73,13 +79,13 @@ export default function TrophiesPage() {
   }, [user?.id, userLoading])
 
   useEffect(() => {
-    if (!previewBadge) return
+    if (!previewBadge && !previewPersonalTrophy) return
     const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setPreviewBadge(null) }
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = "hidden"
     window.addEventListener("keydown", onKeyDown)
     return () => { document.body.style.overflow = previousOverflow; window.removeEventListener("keydown", onKeyDown) }
-  }, [previewBadge])
+  }, [previewBadge, previewPersonalTrophy])
 
   // Helper to map series to requirement type
   function getRequirementType(series: string): string {
@@ -267,6 +273,21 @@ export default function TrophiesPage() {
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {personalTrophies.map((trophy) => {
+              const tier = trophy.placement === 1 ? "gold" : trophy.placement === 2 ? "silver" : "bronze"
+              const categoryName: Record<string, string> = { "board-games": "Lautapelit / Board games", "role-playing-games": "Roolipelit / RPG", miniatures: "Miniatyyrit / Miniatures", "trading-card-games": "Keräilykortit / TCG" }
+              const path = `/trophies/${trophy.category}-tournament-${tier}-transparent.png`
+              return <ArchiveCard key={trophy.id}><ArchiveCardContent>
+                <button type="button" onClick={() => setPreviewPersonalTrophy(trophy)} aria-label={localeLabel(trophy.placement)} className="group relative mx-auto mb-3 block h-32 w-32 cursor-zoom-in sm:h-36 sm:w-36">
+                  <img src={path} alt="" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/events/tournament.png" }} className="h-full w-full object-contain" />
+                  <ZoomIn aria-hidden="true" className="absolute bottom-1 right-1 h-6 w-6 rounded-full bg-background/80 p-1 text-accent-gold" />
+                </button>
+                <h2 className="text-center font-cinzel text-lg text-accent-gold">{localeLabel(trophy.placement)}</h2>
+                <p className="mt-1 text-center text-sm">{categoryName[trophy.category] || trophy.category}</p>
+                <p className="mt-2 text-center text-sm text-foreground/80">{trophy.source_name}</p>
+                <p className="mt-2 text-center text-xs text-muted-foreground">{new Date(trophy.awarded_at).toLocaleDateString()}</p>
+              </ArchiveCardContent></ArchiveCard>
+            })}
             {badges.filter((badge) => badge.earned).map((badge) => {
               const local = BADGE_DEFINITIONS.find((item) => item.id === badge.id)
               return (
@@ -284,10 +305,19 @@ export default function TrophiesPage() {
                 </ArchiveCard>
               )
             })}
-            {earnedCount === 0 && <p className="font-merriweather text-muted-foreground">{t("trophies.locked")}</p>}
+            {earnedCount === 0 && personalTrophies.length === 0 && <p className="font-merriweather text-muted-foreground">{t("trophies.locked")}</p>}
           </div>
         )}
       </main>
+      {previewPersonalTrophy && <div role="presentation" onMouseDown={e => { if (e.target === e.currentTarget) setPreviewPersonalTrophy(null) }} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4">
+        <div role="dialog" aria-modal="true" aria-label={previewPersonalTrophy.source_name} className="relative w-full max-w-xl rounded-xl border border-accent-gold/40 bg-background p-4">
+          <button type="button" onClick={() => setPreviewPersonalTrophy(null)} aria-label="Sulje / Close" className="absolute right-3 top-3 z-10 rounded-full bg-background/90 p-2"><X className="h-5 w-5" /></button>
+          <img src={`/trophies/${previewPersonalTrophy.category}-tournament-${previewPersonalTrophy.placement === 1 ? "gold" : previewPersonalTrophy.placement === 2 ? "silver" : "bronze"}-transparent.png`} alt="" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/events/tournament.png" }} className="mx-auto max-h-[65vh] w-full object-contain" />
+          <h2 className="mt-3 text-center font-cinzel text-xl text-accent-gold">{localeLabel(previewPersonalTrophy.placement)}</h2>
+          <p className="mt-2 text-center">{previewPersonalTrophy.source_name}</p>
+          <p className="mt-2 text-center text-sm text-muted-foreground">{new Date(previewPersonalTrophy.awarded_at).toLocaleDateString()}</p>
+        </div>
+      </div>}
       {previewBadge && (() => {
         const local = BADGE_DEFINITIONS.find((item) => item.id === previewBadge.id)
         return (
