@@ -276,14 +276,16 @@ export default function TrophiesPage() {
             {personalTrophies.map((trophy) => {
               const tier = trophy.placement === 1 ? "gold" : trophy.placement === 2 ? "silver" : "bronze"
               const categoryName: Record<string, string> = { "board-games": "Lautapelit / Board games", "role-playing-games": "Roolipelit / RPG", miniatures: "Miniatyyrit / Miniatures", "trading-card-games": "Keräilykortit / TCG" }
+              const isLeague = trophy.source_type === "league_season"
+              const leagueVariant = trophy.award_variant === "pennant" ? "Viiri / Pennant" : trophy.award_variant === "sculpture" ? "Veistos / Sculpture" : "Kristalli / Crystal"
               const path = `/trophies/${trophy.category}-tournament-${tier}-transparent.png`
               return <ArchiveCard key={trophy.id}><ArchiveCardContent>
-                <button type="button" onClick={() => setPreviewPersonalTrophy(trophy)} aria-label={localeLabel(trophy.placement)} className="group relative mx-auto mb-3 block h-32 w-32 cursor-zoom-in sm:h-36 sm:w-36">
-                  <img src={path} alt="" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/events/tournament.png" }} className="h-full w-full object-contain" />
+                <button type="button" onClick={() => setPreviewPersonalTrophy(trophy)} aria-label={isLeague ? leagueVariant : localeLabel(trophy.placement)} className="group relative mx-auto mb-3 block h-32 w-32 cursor-zoom-in sm:h-36 sm:w-36">
+                  {isLeague ? <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-accent-gold"><Trophy className="h-16 w-16" /><span className="font-cinzel text-sm">{leagueVariant}</span></div> : <img src={path} alt="" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/events/tournament.png" }} className="h-full w-full object-contain" />}
                   <ZoomIn aria-hidden="true" className="absolute bottom-1 right-1 h-6 w-6 rounded-full bg-background/80 p-1 text-accent-gold" />
                 </button>
-                <h2 className="text-center font-cinzel text-lg text-accent-gold">{localeLabel(trophy.placement)}</h2>
-                <p className="mt-1 text-center text-sm">{categoryName[trophy.category] || trophy.category}</p>
+                <h2 className="text-center font-cinzel text-lg text-accent-gold">{isLeague ? leagueVariant : localeLabel(trophy.placement)}</h2>
+                <p className="mt-1 text-center text-sm">{isLeague ? "Liigan voittaja / League winner" : (categoryName[trophy.category] || trophy.category)}</p>
                 <p className="mt-2 text-center text-sm text-foreground/80">{trophy.source_name}</p>
                 <p className="mt-2 text-center text-xs text-muted-foreground">{new Date(trophy.awarded_at).toLocaleDateString()}</p>
               </ArchiveCardContent></ArchiveCard>
@@ -312,8 +314,8 @@ export default function TrophiesPage() {
       {previewPersonalTrophy && <div role="presentation" onMouseDown={e => { if (e.target === e.currentTarget) setPreviewPersonalTrophy(null) }} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4">
         <div role="dialog" aria-modal="true" aria-label={previewPersonalTrophy.source_name} className="relative w-full max-w-xl rounded-xl border border-accent-gold/40 bg-background p-4">
           <button type="button" onClick={() => setPreviewPersonalTrophy(null)} aria-label="Sulje / Close" className="absolute right-3 top-3 z-10 rounded-full bg-background/90 p-2"><X className="h-5 w-5" /></button>
-          <img src={`/trophies/${previewPersonalTrophy.category}-tournament-${previewPersonalTrophy.placement === 1 ? "gold" : previewPersonalTrophy.placement === 2 ? "silver" : "bronze"}-transparent.png`} alt="" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/events/tournament.png" }} className="mx-auto max-h-[65vh] w-full object-contain" />
-          <h2 className="mt-3 text-center font-cinzel text-xl text-accent-gold">{localeLabel(previewPersonalTrophy.placement)}</h2>
+          {previewPersonalTrophy.source_type === "league_season" ? <div className="mx-auto flex h-64 flex-col items-center justify-center gap-3 text-accent-gold"><Trophy className="h-28 w-28" /><span className="font-cinzel text-xl">{previewPersonalTrophy.award_variant === "pennant" ? "Viiri / Pennant" : previewPersonalTrophy.award_variant === "sculpture" ? "Veistos / Sculpture" : "Kristalli / Crystal"}</span></div> : <img src={`/trophies/${previewPersonalTrophy.category}-tournament-${previewPersonalTrophy.placement === 1 ? "gold" : previewPersonalTrophy.placement === 2 ? "silver" : "bronze"}-transparent.png`} alt="" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = "/images/events/tournament.png" }} className="mx-auto max-h-[65vh] w-full object-contain" />}
+          <h2 className="mt-3 text-center font-cinzel text-xl text-accent-gold">{previewPersonalTrophy.source_type === "league_season" ? "Liigan voittaja / League winner" : localeLabel(previewPersonalTrophy.placement)}</h2>
           <p className="mt-2 text-center">{previewPersonalTrophy.source_name}</p>
           <p className="mt-2 text-center text-sm text-muted-foreground">{new Date(previewPersonalTrophy.awarded_at).toLocaleDateString()}</p>
         </div>
