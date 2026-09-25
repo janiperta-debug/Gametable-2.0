@@ -949,7 +949,8 @@
       "portal-keeper": "The upcoming Grand Archivist series will recognize successful import operations across all four game categories. Each successful import counts once, regardless of how many items it adds."
     },
     "showMore": "Show details",
-    "showLess": "Hide details"
+    "showLess": "Hide details",
+    "legacyImportAwards": "Legacy import medals: {count} · verification pending"
   },
   "findPlayers": {
     "title": "Find Players",
