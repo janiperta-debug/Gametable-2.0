@@ -434,7 +434,7 @@ export default function CreateEventPage() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="event-rounds" className="font-body text-accent-gold">
-                          {eventType === "campaign" ? "Sessiot" : t("eventDynamic.s4")}
+                          {eventType === "campaign" ? t("eventFix.sessions") : t("eventDynamic.s4")}
                         </Label>
                         <Select
                           value={eventConfig.rounds}
@@ -579,10 +579,10 @@ export default function CreateEventPage() {
                 {/* Date & Time Range */}
                 {eventType !== "league" && <div className="space-y-4">
                   <div className="space-y-3">
-                  <Label className="font-body text-accent-gold">{eventType === "league" ? "Kausi" : "Ajankohta"}</Label>
+                  <Label className="font-body text-accent-gold">{eventType === "league" ? t("eventFix.season") : t("eventFix.schedule")}</Label>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="date" className="text-sm text-muted-foreground">{eventType === "league" ? "Kausi alkaa" : "Alkaa"}</Label>
+                      <Label htmlFor="date" className="text-sm text-muted-foreground">{eventType === "league" ? t("eventFix.seasonStarts") : t("eventFix.starts")}</Label>
                       <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 min-w-0">
                         <Input
                           id="date"
