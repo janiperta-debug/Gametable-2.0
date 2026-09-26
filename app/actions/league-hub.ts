@@ -348,10 +348,11 @@ export async function setLeagueSeasonTrophy(leagueId: string, seasonId: string, 
  if (!season) return { error: "Kautta ei löytynyt." }
  const config = (season.award_config || {}) as Record<string,unknown>
  if (!config.category || config.category === "none") return { error: "Kaudella ei ole palkintoa käytössä." }
- if (season.status === "completed") return { error: "Päättyneen kauden palkintoa ei voi vaihtaa." }
+ const { count: issuedCount } = await supabase.from("personal_trophies").select("*",{count:"exact",head:true}).eq("season_id",seasonId)
+ if (issuedCount) return { error: "Jaettua palkintoa ei voi vaihtaa." }
  const { error } = await supabase.from("league_seasons").update({
   award_config: { ...config, category:"league", places:[1], variant, confirmed:false }
- }).eq("id",seasonId).eq("league_id",leagueId).neq("status","completed")
+ }).eq("id",seasonId).eq("league_id",leagueId)
  if (!error) revalidatePath("/leagues/"+leagueId)
  return { error: error?.message }
 }
