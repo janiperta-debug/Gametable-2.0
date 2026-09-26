@@ -6,7 +6,8 @@ import { getLeague, addLeagueSeason, linkSeasonEvent, updateLeague, setLeagueSea
 import { useTranslation } from "@/lib/i18n"
 import { completeLeagueSeason } from "@/app/actions/league-season-completion"
 import { awardLeagueWinnerTrophy, getSourcePersonalTrophies } from "@/app/actions/personal-trophies"
-import { Gem, FlagTriangleRight, Award, Trophy } from "lucide-react"
+import { Trophy } from "lucide-react"
+import { LeagueTrophyImage, type LeagueTrophyVariant } from "@/components/league-trophy-image"
 import { ArchiveFrame, ArchiveButton, ArchiveCard, ArchiveCardHeader, ArchiveCardTitle, ArchiveCardContent, ArchiveCardButton } from "@/components/archive-frame"
 
 type Hub = Awaited<ReturnType<typeof getLeague>>
@@ -65,17 +66,15 @@ export default function LeaguePage() {
  const showcaseEnabled = !!showcaseSeason && !!showcaseConfig.category && showcaseConfig.category !== "none"
  const showcaseWinner = hub.seasonTrophies?.find(trophy => trophy.season_id === showcaseSeason?.id)
  const trophyNames = { crystal: locale === "fi" ? "Kristalli" : "Crystal", pennant: locale === "fi" ? "Viiri" : "Pennant", sculpture: locale === "fi" ? "Veistos" : "Sculpture" }
- const TrophyArt = ({variant,size="large"}:{variant:"crystal"|"pennant"|"sculpture";size?:"large"|"small"}) => {
-  const Icon = variant === "crystal" ? Gem : variant === "pennant" ? FlagTriangleRight : Award
-  return <Icon aria-hidden="true" strokeWidth={1.15} className={size==="large" ? "h-28 w-28 text-accent-gold drop-shadow-[0_0_22px_rgba(212,175,95,0.42)] sm:h-36 sm:w-36" : "h-10 w-10 text-accent-gold"} />
- }
+ const TrophyArt = ({variant,size="large"}:{variant:LeagueTrophyVariant;size?:"large"|"small"}) =>
+  <LeagueTrophyImage key={variant} variant={variant} alt={trophyNames[variant]} className={size==="large" ? "h-40 w-40 sm:h-52 sm:w-52" : "h-12 w-12"} iconClassName={size==="large" ? "h-28 w-28 sm:h-36 sm:w-36" : "h-10 w-10"} />
  return <ArchiveFrame className="mx-auto max-w-5xl">
   <div className="space-y-6 p-3 sm:p-6">
    <ArchiveCardButton type="button" onClick={() => router.push("/events")}>{t("leagueUi.s2")}</ArchiveCardButton>
    <div className="space-y-4 text-center">
     <div className="relative mx-auto flex w-full max-w-xl items-center justify-center py-3">
      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 w-[calc(50%-5rem)] bg-contain bg-left bg-no-repeat sm:w-[calc(50%-6rem)]" style={{backgroundImage:'url("/images/events/ornate-left.png")'}} />
-     {showcaseEnabled ? <div className="relative z-10 flex min-h-48 w-full max-w-72 flex-col items-center justify-center gap-3 rounded-xl border border-accent-gold/35 bg-gradient-to-b from-accent-gold/10 to-transparent px-4 py-6 sm:min-h-64 sm:max-w-80">
+     {showcaseEnabled ? <div className="relative z-10 flex w-full max-w-80 flex-col items-center justify-center gap-3 px-2 py-4 sm:max-w-96">
        <span className="font-heading text-xs uppercase tracking-[0.2em] text-accent-gold">{locale === "fi" ? "Liigakauden pääpalkinto" : "Season grand prize"}</span>
        {showcaseConfig.variant ? <TrophyArt variant={showcaseConfig.variant} /> : <Trophy className="h-24 w-24 text-accent-gold/65" strokeWidth={1} />}
        <span className="font-heading text-lg text-accent-gold">{showcaseConfig.variant ? trophyNames[showcaseConfig.variant] : (locale === "fi" ? "Palkinto valitsematta" : "Prize not selected")}</span>
