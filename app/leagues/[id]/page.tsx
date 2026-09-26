@@ -80,18 +80,18 @@ export default function LeaguePage() {
        {showcaseConfig.variant ? <TrophyArt variant={showcaseConfig.variant} /> : <Trophy className="h-24 w-24 text-accent-gold/65" strokeWidth={1} />}
        <span className="font-heading text-lg text-accent-gold">{showcaseConfig.variant ? trophyNames[showcaseConfig.variant] : (locale === "fi" ? "Palkinto valitsematta" : "Prize not selected")}</span>
        <span className="text-center text-xs text-muted-foreground">{showcaseWinner ? (locale === "fi" ? "Voittaja: " : "Winner: ")+showcaseWinner.winner_name : (locale === "fi" ? "Palkinto odottaa voittajaansa" : "Awaiting its champion")}</span>
-       <span className="text-center text-xs text-muted-foreground">{showcaseSeason.name}</span>
+       <span className="text-center text-xs text-muted-foreground">{showcaseSeason!.name}</span>
       </div> : <img src="/images/events/league.png" alt={t("leagueUi.s68")} className="relative z-10 aspect-square w-32 rounded-lg border border-accent-gold/30 object-cover sm:w-40" />}
      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-[calc(50%-5rem)] bg-contain bg-right bg-no-repeat sm:w-[calc(50%-6rem)]" style={{backgroundImage:'url("/images/events/ornate-right.png")'}} />
     </div>
     {showcaseEnabled && hub.isOwner && !showcaseWinner && <div className="mx-auto w-full max-w-lg rounded-lg border border-accent-gold/25 bg-background/30 p-3 text-left">
-      <button type="button" onClick={() => setChoosingTrophy(choosingTrophy === showcaseSeason.id ? null : showcaseSeason.id)} className="flex w-full items-center justify-between gap-2 text-sm text-accent-gold">
+      <button type="button" onClick={() => setChoosingTrophy(choosingTrophy === showcaseSeason!.id ? null : showcaseSeason.id)} className="flex w-full items-center justify-between gap-2 text-sm text-accent-gold">
        <span>{showcaseConfig.variant ? (locale === "fi" ? "Vaihda pääpalkintoa" : "Change grand prize") : (locale === "fi" ? "Valitse kauden pääpalkinto" : "Choose the season grand prize")}</span><span aria-hidden="true">{choosingTrophy === showcaseSeason.id ? "−" : "+"}</span>
       </button>
       {choosingTrophy === showcaseSeason.id && <div className="mt-3 grid grid-cols-3 gap-2">
        {(["crystal","pennant","sculpture"] as const).map(variant => <button key={variant} type="button" disabled={busy} aria-pressed={showcaseConfig.variant === variant}
         className={"flex min-w-0 flex-col items-center gap-2 rounded-lg border p-3 text-center text-xs "+(showcaseConfig.variant===variant?"border-accent-gold bg-accent-gold/15":"border-accent-gold/20")}
-        onClick={async () => {setBusy(true);setError("");try{const result=await setLeagueSeasonTrophy(id,showcaseSeason.id,variant);if(result.error)setError(result.error);else {setChoosingTrophy(null);await refresh()}}finally{setBusy(false)}}}>
+        onClick={async () => {setBusy(true);setError("");try{const result=await setLeagueSeasonTrophy(id,showcaseSeason!.id,variant);if(result.error)setError(result.error);else {setChoosingTrophy(null);await refresh()}}finally{setBusy(false)}}}>
         <TrophyArt variant={variant} size="small"/><span>{trophyNames[variant]}</span>
        </button>)}
       </div>}
