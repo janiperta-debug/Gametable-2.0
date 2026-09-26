@@ -33,20 +33,11 @@ const eventTypes: { value: EventType; image: string }[] = [
   { value: "tournament", image: "/images/events/tournament.png" },
   { value: "league", image: "/images/events/league.png" },
 ]
-import { getUserGames } from "@/app/actions/games"
+import { getEventCollectionGames, type EventCollectionGame, type EventGameCategory } from "@/app/actions/event-game-picker"
 import { useToast } from "@/hooks/use-toast"
 import { useTranslation } from "@/lib/i18n"
 import fiTranslations from "@/lib/i18n/locales/fi.json"
 import enTranslations from "@/lib/i18n/locales/en.json"
-
-interface UserGame {
-  id: string
-  game: {
-    id: string
-    name: string
-    image_url?: string
-  }
-}
 
 export default function CreateEventPage() {
   const router = useRouter()
@@ -69,7 +60,9 @@ export default function CreateEventPage() {
   const [showAwards, setShowAwards] = useState(false)
   const [awardCategory, setAwardCategory] = useState<"none" | "league" | "board-games" | "role-playing-games" | "miniatures" | "trading-card-games">("none")
   const [saving, setSaving] = useState(false)
-  const [userGames, setUserGames] = useState<UserGame[]>([])
+  const [userGames, setUserGames] = useState<EventCollectionGame[]>([])
+  const [selectedGame, setSelectedGame] = useState<EventCollectionGame | null>(null)
+  const [gameCategoryFilter, setGameCategoryFilter] = useState<"all" | EventGameCategory>("all")
   const [loadingGames, setLoadingGames] = useState(true)
   const [gameSearchQuery, setGameSearchQuery] = useState("")
   const [showGameResults, setShowGameResults] = useState(false)
@@ -87,16 +80,21 @@ export default function CreateEventPage() {
       : translated
   }
   
+  const categoryNames: Record<EventGameCategory, string> = locale === "fi"
+    ? {board_game:"Lautapeli",rpg:"Roolipeli",trading_card:"Korttipeli",miniature:"Miniatyyri"}
+    : {board_game:"Board game",rpg:"RPG",trading_card:"Card game",miniature:"Miniatures"}
+  const categoryFilters: Array<"all" | EventGameCategory> = ["all","board_game","rpg","trading_card","miniature"]
   // Filter games based on search query
   const filteredGames = userGames.filter(userGame => 
-    userGame.game.name.toLowerCase().includes(gameSearchQuery.toLowerCase())
+    (gameCategoryFilter === "all" || userGame.category === gameCategoryFilter) && userGame.name.toLowerCase().includes(gameSearchQuery.toLowerCase())
   )
   
   // Fetch user's collection and friends
   useEffect(() => {
     async function fetchGames() {
-      const { games } = await getUserGames()
-      setUserGames(games as UserGame[])
+      const { games, error } = await getEventCollectionGames()
+      setUserGames(games)
+      if (error) toast({ title: t("common.error"), description: error, variant: "destructive" })
       setLoadingGames(false)
     }
     async function fetchFriends() {
@@ -196,6 +194,7 @@ export default function CreateEventPage() {
             rounds: undefined,
           } : {}),
           organizerNotes: eventConfig.organizerNotes.trim() || undefined,
+          ...(formData.game.trim() ? { gameSelection: selectedGame ? {gameId:selectedGame.id,category:selectedGame.category,name:selectedGame.name,source:selectedGame.source,system:selectedGame.system||null} : {gameId:null,category:null,name:formData.game.trim(),source:"manual"} } : {}),
           ...(eventType === "tournament" ? { awards: { category: awardCategory, places: awardCategory === "none" ? [] : [1, 2, 3], confirmed: false } } : {}),
         },
       })
@@ -280,13 +279,21 @@ export default function CreateEventPage() {
                     <ArchiveCardButton
                       type="button"
                       active={gameSelection === "manual"}
-                      onClick={() => setGameSelection("manual")}
+                      onClick={() => { setGameSelection("manual"); setSelectedGame(null); setGameSearchQuery(""); setFormData(prev => ({...prev, game: ""})) }}
                     >
                       {t("events.manualEntry")}
                     </ArchiveCardButton>
                   </div>
 
                   {gameSelection === "collection" ? (
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap gap-2" role="group" aria-label={locale === "fi" ? "Rajaa kokoelmaa" : "Filter collection"}>
+                        {categoryFilters.map(category => <button key={category} type="button" aria-pressed={gameCategoryFilter === category}
+                          onClick={() => {setGameCategoryFilter(category);setShowGameResults(true)}}
+                          className={"rounded-md border px-3 py-1.5 text-sm "+(gameCategoryFilter===category?"border-accent-gold bg-accent-gold/15 text-accent-gold":"border-accent-gold/25 text-muted-foreground")}>
+                          {category === "all" ? (locale === "fi" ? "Kaikki" : "All") : categoryNames[category]}
+                        </button>)}
+                      </div>
                     <div className="relative">
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
@@ -295,6 +302,7 @@ export default function CreateEventPage() {
                           value={formData.game || gameSearchQuery}
                           onChange={(e) => {
                             setGameSearchQuery(e.target.value)
+                            setSelectedGame(null)
                             setFormData({ ...formData, game: "" })
                             setShowGameResults(true)
                           }}
@@ -307,6 +315,7 @@ export default function CreateEventPage() {
                             type="button"
                             onClick={() => {
                               setGameSearchQuery("")
+                              setSelectedGame(null)
                               setFormData({ ...formData, game: "" })
                             }}
                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
@@ -327,34 +336,36 @@ export default function CreateEventPage() {
                           ) : (
                             filteredGames.map((userGame) => (
                               <button
-                                key={userGame.game.id}
+                                key={userGame.id || userGame.category+":"+userGame.system}
                                 type="button"
                                 onClick={() => {
-                                  setFormData({ ...formData, game: userGame.game.name })
+                                  setFormData({ ...formData, game: userGame.name })
+                                  setSelectedGame(userGame)
                                   setGameSearchQuery("")
                                   setShowGameResults(false)
                                 }}
                                 className="w-full px-3 py-2 text-left text-sm hover:bg-accent transition-colors flex items-center gap-2"
                               >
-                                {userGame.game.image_url && (
+                                {userGame.image_url && (
                                   <img 
-                                    src={userGame.game.image_url} 
+                                    src={userGame.image_url} 
                                     alt="" 
                                     className="w-8 h-8 object-cover rounded"
                                   />
                                 )}
-                                <span>{userGame.game.name}</span>
+                                <span className="min-w-0 flex-1 truncate">{userGame.name}</span><span className="shrink-0 text-xs text-accent-gold/80">{categoryNames[userGame.category]}</span>
                               </button>
                             ))
                           )}
                         </div>
                       )}
                     </div>
+                    </div>
                   ) : (
                     <Input 
                       placeholder={t("events.enterGameName")} 
                       value={formData.game}
-                      onChange={(e) => setFormData({ ...formData, game: e.target.value })}
+                      onChange={(e) => { setSelectedGame(null); setFormData({ ...formData, game: e.target.value }) }}
                       className={archiveField}
                     />
                   )}
