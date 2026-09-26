@@ -174,6 +174,8 @@
     "allowFriendRequestsDesc": "Allow other players to send you friend requests",
     "showGameCollection": "Show Game Collection",
     "showGameCollectionDesc": "Display your game collection publicly on your profile",
+    "showTrophyCabinet": "Show trophy cabinet on public profile",
+    "showTrophyCabinetDesc": "Other players can see your earned medals and trophies. Private event names stay hidden.",
     "showLocation": "Show Location",
     "allowMessages": "Allow Messages",
     "public": "Public",
