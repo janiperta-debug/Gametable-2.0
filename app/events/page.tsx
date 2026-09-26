@@ -14,6 +14,7 @@ import { useUser } from "@/hooks/useUser"
 import { listLeagues } from "@/app/actions/league-hub"
 import type { Event } from "@/app/actions/events"
 import { cn } from "@/lib/utils"
+import { LeagueTrophyImage, isLeagueTrophyVariant, type LeagueTrophyVariant } from "@/components/league-trophy-image"
 
 // Dedicated event illustrations; collection fallback assets remain untouched.
 // when they have been added to the repository.
@@ -100,8 +101,8 @@ export default function EventsPage() {
     const ownCampaigns = user ? myEvents.filter((event) => event.event_type === "campaign" && event.status !== "cancelled" && event.status !== "completed") : []
     const oldLeagues = user ? myEvents.filter((event) => event.event_type === "league" && !convertedIds.has(event.id) && event.status !== "cancelled" && event.status !== "completed") : []
     return [
-      ...ownLeagues.map((league) => ({ id: league.id, title: league.name, kind: "league", subtitle: league.league_seasons?.find((season) => season.status !== "completed")?.name || "league", href: "/leagues/" + league.id })),
-      ...ownCampaigns.map((event) => ({ id: event.id, title: event.title, kind: "campaign", subtitle: "campaign", href: "/events/" + event.id })),
+      ...ownLeagues.map((league) => { const season = league.league_seasons?.find((s) => s.status !== "completed") || league.league_seasons?.[0]; const config = season?.award_config as {category?:string;variant?:string}|null; return { id: league.id, title: league.name, kind: "league", subtitle: season?.name || "league", href: "/leagues/" + league.id, trophyVariant: config?.category && config.category !== "none" && isLeagueTrophyVariant(config.variant) ? config.variant : null } }),
+      ...ownCampaigns.map((event) => ({ id: event.id, title: event.title, kind: "campaign", subtitle: "campaign", href: "/events/" + event.id, trophyVariant: null as LeagueTrophyVariant | null })),
       ...oldLeagues.map((event) => ({ id: event.id, title: event.title, kind: "league", subtitle: "legacyLeague", href: "/events/" + event.id })),
     ]
   }, [leagues, myEvents, convertedIds, user?.id])
@@ -131,7 +132,7 @@ export default function EventsPage() {
               <div className="grid grid-cols-2 gap-3">
                 {(allCommunities ? communities : communities.slice(0, 2)).map((item) => <button key={item.kind + item.id} type="button" onClick={() => router.push(item.href)} className={cn("group min-w-0 overflow-hidden rounded-xl border text-left transition-colors hover:bg-accent-gold/10", categoryBorders[item.kind])}>
                   <div className="relative aspect-[2/1] w-full overflow-hidden">
-                    <Image src={categoryImages[item.kind]} alt="" fill sizes="(max-width: 640px) 50vw, 320px" className="object-cover" />
+                    {item.trophyVariant ? <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-[#401c25] to-[#1c0e14]"><LeagueTrophyImage variant={item.trophyVariant} alt="" className="h-full w-full p-1" iconClassName="h-16 w-16" /></div> : <Image src={categoryImages[item.kind]} alt="" fill sizes="(max-width: 640px) 50vw, 320px" className="object-cover" />}
                   </div>
                   <div className="space-y-1 p-3">
                     <div className="break-words font-heading text-sm text-foreground group-hover:text-accent-gold sm:text-lg">{item.title}</div>
