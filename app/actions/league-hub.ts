@@ -154,7 +154,7 @@ export async function linkSeasonEvent(leagueId: string, seasonId: string, eventI
 export async function listLeagues() {
  const supabase = await createClient()
  const { data: { user } } = await supabase.auth.getUser()
- const { data, error } = await supabase.from("leagues").select("id,name,game,privacy,owner_id,legacy_event_id,league_seasons(id,name,starts_on,ends_on,status)").order("created_at", { ascending: false })
+ const { data, error } = await supabase.from("leagues").select("id,name,game,privacy,owner_id,legacy_event_id,league_seasons(id,name,starts_on,ends_on,status,award_config)").order("created_at", { ascending: false })
  if (error) return { leagues: [], error: error.message }
  return { leagues: (data || []).map((league) => ({ ...league, isOwner: league.owner_id === user?.id })), error: undefined }
 }
