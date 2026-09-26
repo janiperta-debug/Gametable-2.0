@@ -109,8 +109,18 @@ export async function getLeague(leagueId: string) {
  }
  const standings=Array.from(standingRows.values()).map(({events:playedEvents,...row})=>({...row,tournaments:playedEvents.size}))
   .sort((a,b)=>a.season_id.localeCompare(b.season_id)||b.points-a.points||b.wins-a.wins||(b.score_for-b.score_against)-(a.score_for-a.score_against)||a.name.localeCompare(b.name,"fi"))
+ const { data: trophyRows } = ids.length ? await supabase.from("personal_trophies")
+  .select("season_id,recipient_id,award_variant,awarded_at")
+  .in("season_id", ids).eq("source_type", "league_season") : { data: [] }
+ const winnerIds = [...new Set((trophyRows || []).map(trophy => trophy.recipient_id))]
+ const { data: winnerProfiles } = winnerIds.length ? await supabase.from("profiles")
+  .select("id,display_name,username").in("id", winnerIds) : { data: [] }
+ const seasonTrophies = (trophyRows || []).map(trophy => ({
+  ...trophy, winner_name: (winnerProfiles || []).find(profile => profile.id === trophy.recipient_id)?.display_name
+   || (winnerProfiles || []).find(profile => profile.id === trophy.recipient_id)?.username || "Voittaja",
+ }))
  const { data: owned } = user?.id === league.owner_id ? await supabase.from("events").select("id,title,event_type,starts_at,status").eq("host_id", user.id).in("event_type", ["tournament","game_night"]).neq("status","cancelled").order("starts_at", { ascending: false }) : { data: [] }
- return { league, seasons: seasons || [], events, available: (owned || []).filter((event) => !linkedIds.includes(event.id)), members, results, standings, isMember:!!user && memberIds.includes(user.id), isOwner: user?.id === league.owner_id, error: undefined }
+ return { league, seasons: seasons || [], events, available: (owned || []).filter((event) => !linkedIds.includes(event.id)), members, results, standings, seasonTrophies, isMember:!!user && memberIds.includes(user.id), isOwner: user?.id === league.owner_id, error: undefined }
 }
 
 export async function addLeagueSeason(leagueId: string, name: string) {
@@ -325,4 +335,23 @@ export async function addLeagueMemberById(leagueId:string,playerId:string) {
  if(error)return {error:error.message}
  revalidatePath("/leagues/"+leagueId)
  return {success:true}
+}
+
+export async function setLeagueSeasonTrophy(leagueId: string, seasonId: string, variant: "crystal" | "pennant" | "sculpture") {
+ const supabase = await createClient()
+ const { data: { user } } = await supabase.auth.getUser()
+ if (!user || !["crystal","pennant","sculpture"].includes(variant)) return { error: "Ei käyttöoikeutta." }
+ const { data: league } = await supabase.from("leagues").select("owner_id").eq("id",leagueId).maybeSingle()
+ if (league?.owner_id !== user.id) return { error: "Vain liigan järjestäjä voi valita palkinnon." }
+ const { data: season } = await supabase.from("league_seasons").select("award_config,status")
+  .eq("id",seasonId).eq("league_id",leagueId).maybeSingle()
+ if (!season) return { error: "Kautta ei löytynyt." }
+ const config = (season.award_config || {}) as Record<string,unknown>
+ if (!config.category || config.category === "none") return { error: "Kaudella ei ole palkintoa käytössä." }
+ if (season.status === "completed") return { error: "Päättyneen kauden palkintoa ei voi vaihtaa." }
+ const { error } = await supabase.from("league_seasons").update({
+  award_config: { ...config, category:"league", places:[1], variant, confirmed:false }
+ }).eq("id",seasonId).eq("league_id",leagueId).neq("status","completed")
+ if (!error) revalidatePath("/leagues/"+leagueId)
+ return { error: error?.message }
 }
