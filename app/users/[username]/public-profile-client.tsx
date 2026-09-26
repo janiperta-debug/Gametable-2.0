@@ -2,7 +2,10 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useTranslations } from "@/lib/i18n"
+import { useTranslation } from "@/lib/i18n"
+import { BADGE_DEFINITIONS } from "@/lib/badge-definitions"
+import { LeagueTrophyImage, isLeagueTrophyVariant } from "@/components/league-trophy-image"
+import { Trophy, X } from "lucide-react"
 import { ArchiveCard, ArchiveCardButton } from "@/components/archive-frame"
 import { ArchiveDivider } from "@/components/archive-divider"
 import Link from "next/link"
@@ -46,7 +49,13 @@ const INTEREST_LABELS: Record<string, string> = {
   rpg: "profile.roleplayingGames",
 }
 
+interface SharedBadge { id:string; name:string; series:string; tier:string; image_url:string|null; earned_at:string }
+interface SharedTrophy { id:string; source_type:string; source_name:string|null; category:string; placement:number; award_variant:string|null; awarded_at:string }
+
 interface PublicProfileClientProps {
+  showTrophyCabinet: boolean
+  sharedBadges: SharedBadge[]
+  sharedTrophies: SharedTrophy[]
   profile: Profile
   gameInterests: string[] | null
   gameCount: number
@@ -59,6 +68,9 @@ interface PublicProfileClientProps {
 
 export function PublicProfileClient({
   profile,
+  showTrophyCabinet,
+  sharedBadges,
+  sharedTrophies,
   gameInterests,
   gameCount,
   games,
@@ -67,13 +79,15 @@ export function PublicProfileClient({
   initialFriendshipStatus,
   initialFriendshipId,
 }: PublicProfileClientProps) {
-  const t = useTranslations()
+  const { t, locale } = useTranslation()
   const router = useRouter()
   const { toast } = useToast()
   const [friendshipStatus, setFriendshipStatus] = useState(initialFriendshipStatus)
   const [friendshipId] = useState(initialFriendshipId)
   const [loading, setLoading] = useState(false)
   const [showAllGames, setShowAllGames] = useState(false)
+  const [showAllTrophies, setShowAllTrophies] = useState(false)
+  const [previewTrophy, setPreviewTrophy] = useState<{kind:"badge"|"personal";id:string}|null>(null)
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null)
 
   const isOwnProfile = currentUserId === profile.id
@@ -327,6 +341,71 @@ export function PublicProfileClient({
             </div>
           </ArchiveCard>
         )}
+
+        {showTrophyCabinet && <ArchiveCard className="mb-6">
+          <div className="space-y-4 p-5 sm:p-6">
+            <div className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-accent-gold" />
+              <h2 className="font-heading text-xl text-accent-gold">{t("profile.publicTrophyCabinet")}</h2>
+            </div>
+            {sharedBadges.length === 0 && sharedTrophies.length === 0
+              ? <p className="text-sm text-muted-foreground">{t("profile.publicTrophyEmpty")}</p>
+              : <>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {[
+                    ...sharedTrophies.map(item => ({kind:"personal" as const, id:item.id, date:item.awarded_at, trophy:item})),
+                    ...sharedBadges.map(item => ({kind:"badge" as const, id:item.id, date:item.earned_at, badge:item})),
+                  ].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,showAllTrophies?undefined:3).map(item => {
+                    const personal = item.kind === "personal" ? item.trophy : null
+                    const badge = item.kind === "badge" ? item.badge : null
+                    const local = badge ? BADGE_DEFINITIONS.find(def => def.id === badge.id) : null
+                    const tier = personal?.placement === 1 ? "gold" : personal?.placement === 2 ? "silver" : "bronze"
+                    const variant = personal && isLeagueTrophyVariant(personal.award_variant) ? personal.award_variant : "crystal"
+                    const label = badge ? (local ? t(`trophies.badges.${badge.id}.name`) : badge.name)
+                      : personal?.source_type === "league_season" ? t("profile.leaguePrize")
+                      : personal?.placement === 1 ? t("trophies.gold") : personal?.placement === 2 ? t("trophies.silver") : t("trophies.bronze")
+                    return <button key={item.kind+item.id} type="button" onClick={()=>setPreviewTrophy({kind:item.kind,id:item.id})}
+                      className="group min-w-0 rounded-xl border border-accent-gold/25 bg-accent-gold/5 p-3 text-center hover:border-accent-gold/60">
+                      <div className="mx-auto mb-2 flex h-28 w-full items-center justify-center sm:h-36">
+                        {badge ? <img src={local?.image || badge.image_url || "/placeholder.svg"} alt="" className="h-full w-full object-contain" />
+                          : personal?.source_type === "league_season" ? <LeagueTrophyImage variant={variant} alt="" className="h-full w-full" iconClassName="h-20 w-20" />
+                          : <img src={`/images/awards/tournament/${personal?.category}-tournament-${tier}.png`} alt="" className="h-full w-full object-contain" />}
+                      </div>
+                      <p className="break-words font-heading text-sm text-accent-gold">{label}</p>
+                      {personal?.source_name && <p className="mt-1 break-words text-xs text-muted-foreground">{personal.source_name}</p>}
+                      {personal && !personal.source_name && <p className="mt-1 text-xs text-muted-foreground">{t("profile.privateEventPrize")}</p>}
+                    </button>
+                  })}
+                </div>
+                {sharedBadges.length + sharedTrophies.length > 3 && <ArchiveCardButton onClick={()=>setShowAllTrophies(!showAllTrophies)}>
+                  {showAllTrophies ? t("common.showLess") : t("profile.viewFullTrophyCabinet")}
+                </ArchiveCardButton>}
+              </>}
+          </div>
+        </ArchiveCard>}
+        {previewTrophy && showTrophyCabinet && (() => {
+          const badge = previewTrophy.kind === "badge" ? sharedBadges.find(item=>item.id===previewTrophy.id) : null
+          const personal = previewTrophy.kind === "personal" ? sharedTrophies.find(item=>item.id===previewTrophy.id) : null
+          const local = badge ? BADGE_DEFINITIONS.find(def=>def.id===badge.id) : null
+          const tier = personal?.placement===1?"gold":personal?.placement===2?"silver":"bronze"
+          return <div role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)setPreviewTrophy(null)}}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4">
+            <div role="dialog" aria-modal="true" aria-label={t("profile.publicTrophyCabinet")}
+              className="relative max-h-[90dvh] w-full max-w-xl overflow-y-auto rounded-xl border border-accent-gold/40 bg-background p-5 text-center">
+              <button type="button" onClick={()=>setPreviewTrophy(null)} aria-label={t("common.close")} className="absolute right-3 top-3 rounded-full p-2"><X className="h-5 w-5"/></button>
+              <div className="mx-auto mt-6 h-64 w-full sm:h-80">
+                {badge ? <img src={local?.image||badge.image_url||"/placeholder.svg"} alt="" className="h-full w-full object-contain"/>
+                  : personal?.source_type==="league_season" ? <LeagueTrophyImage variant={isLeagueTrophyVariant(personal.award_variant)?personal.award_variant:"crystal"} alt="" className="h-full w-full" iconClassName="h-40 w-40"/>
+                  : personal ? <img src={`/images/awards/tournament/${personal.category}-tournament-${tier}.png`} alt="" className="h-full w-full object-contain"/> : null}
+              </div>
+              <h3 className="mt-4 font-heading text-xl text-accent-gold">{badge ? (local?t(`trophies.badges.${badge.id}.name`):badge.name)
+                : personal?.source_type==="league_season"?t("profile.leaguePrize"):tier==="gold"?t("trophies.gold"):tier==="silver"?t("trophies.silver"):t("trophies.bronze")}</h3>
+              {personal?.source_name && <p className="mt-2">{personal.source_name}</p>}
+              {personal && !personal.source_name && <p className="mt-2 text-sm text-muted-foreground">{t("profile.privateEventPrize")}</p>}
+              <p className="mt-2 text-sm text-muted-foreground">{new Date(badge?.earned_at||personal?.awarded_at||"").toLocaleDateString(locale==="fi"?"fi-FI":"en-GB")}</p>
+            </div>
+          </div>
+        })()}
 
         {profile.show_collection === false && (
           <ArchiveCard>
