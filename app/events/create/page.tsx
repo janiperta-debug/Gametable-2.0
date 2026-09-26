@@ -809,9 +809,9 @@ export default function CreateEventPage() {
                     </button>
                     {showAwards && (
                       <div id="event-awards-settings" className="space-y-3 border-t border-accent-gold/20 p-4">
-                        <p className="text-sm text-muted-foreground">{eventType === "league" ? (locale === "fi" ? "Liigassa palkitaan vain voittaja. Voit valita kristallin, viirin tai veistoksen kauden päättyessä." : "Only the league winner receives a trophy. Choose crystal, pennant or sculpture when the season ends.") : awardText("explanation")}</p>
-                        <Label htmlFor="award-category" className="text-accent-gold">{awardText("selection")}</Label>
-                        <Select value={awardCategory} onValueChange={(value) => setAwardCategory(value as typeof awardCategory)}>
+                        <p className="text-sm text-muted-foreground">{eventType === "league" ? (locale === "fi" ? "Liigassa palkitaan vain voittaja. Valitse pääpalkinto liigan omalla sivulla; se on kaikkien nähtävillä koko kauden." : "Only the league winner receives a trophy. Choose the grand prize on the league page, where everyone can see it throughout the season.") : awardText("explanation")}</p>
+                        <Label htmlFor="award-category" className="text-accent-gold">{eventType === "league" ? (locale === "fi" ? "Palkitaanko voittaja?" : "Award the winner?") : awardText("selection")}</Label>
+                        <Select value={eventType === "league" && awardCategory !== "none" ? "league" : eventType !== "league" && awardCategory === "league" ? "none" : awardCategory} onValueChange={(value) => setAwardCategory(value as typeof awardCategory)}>
                           <SelectTrigger id="award-category" className={archiveField}><SelectValue /></SelectTrigger>
                           <SelectContent className={archiveSelectContent}>
                             <SelectItem className={archiveSelectItem} value="none">{awardText("none")}</SelectItem>
@@ -821,7 +821,7 @@ export default function CreateEventPage() {
                             {eventType !== "league" && <SelectItem className={archiveSelectItem} value="trading-card-games">{awardText("tradingCardGames")}</SelectItem>}
                           </SelectContent>
                         </Select>
-                        {awardCategory !== "none" && <p className="text-sm text-accent-gold">{awardText("confirmLater")}</p>}
+                        {awardCategory !== "none" && <p className="text-sm text-accent-gold">{eventType === "league" ? (locale === "fi" ? "Pääpalkinto valitaan liigan sivulla ja voittaja vahvistetaan kauden päätyttyä." : "Choose the grand prize on the league page and confirm the winner after the season.") : awardText("confirmLater")}</p>}
                       </div>
                     )}
                   </div>
