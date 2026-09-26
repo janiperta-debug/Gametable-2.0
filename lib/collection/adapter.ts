@@ -149,7 +149,12 @@ export function mapUserGameToCollectionEntry(row: UserGameRowLike): CollectionEn
   const game = row.game ?? null
   const normalizedStatus = normalizeStatus(row.status)
   const catalogId = game?.id ?? row.game_id
-  const domain: CollectionDomain = game?.category === 'rpg' ? 'rpg' : 'board_game'
+  const category = game?.category?.toLowerCase() || ''
+  const domain: CollectionDomain = category === 'rpg' || category.includes('role')
+    ? 'rpg'
+    : category.includes('miniature') || category.includes('wargame')
+      ? 'miniature'
+      : 'board_game'
 
   return {
     domain,
