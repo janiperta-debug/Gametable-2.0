@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { getLeague, addLeagueSeason, linkSeasonEvent, updateLeague, updateLeagueSeason, deleteLeague, joinLeague, leaveLeague, addLeagueMemberById, searchLeaguePlayers, removeLeagueMember } from "@/app/actions/league-hub"
+import { getLeague, addLeagueSeason, linkSeasonEvent, updateLeague, setLeagueSeasonTrophy, updateLeagueSeason, deleteLeague, joinLeague, leaveLeague, addLeagueMemberById, searchLeaguePlayers, removeLeagueMember } from "@/app/actions/league-hub"
 import { useTranslation } from "@/lib/i18n"
 import { completeLeagueSeason } from "@/app/actions/league-season-completion"
 import { awardLeagueWinnerTrophy, getSourcePersonalTrophies } from "@/app/actions/personal-trophies"
+import { Gem, FlagTriangleRight, Award, Trophy } from "lucide-react"
 import { ArchiveFrame, ArchiveButton, ArchiveCard, ArchiveCardHeader, ArchiveCardTitle, ArchiveCardContent, ArchiveCardButton } from "@/components/archive-frame"
 
 type Hub = Awaited<ReturnType<typeof getLeague>>
@@ -26,7 +27,7 @@ export default function LeaguePage() {
  const [editingSeason, setEditingSeason] = useState<string | null>(null)
  const [showCompletedSeasons, setShowCompletedSeasons] = useState(false)
  const [awardSelections, setAwardSelections] = useState<Record<string, string>>({})
- const [awardVariants, setAwardVariants] = useState<Record<string, "crystal" | "pennant" | "sculpture">>({})
+ const [choosingTrophy, setChoosingTrophy] = useState<string | null>(null)
  const [awardedSeasons, setAwardedSeasons] = useState<Record<string, boolean>>({})
  const [seasonDraft, setSeasonDraft] = useState({ name: "", startsOn: "", endsOn: "" })
  const [error, setError] = useState("")
@@ -59,15 +60,42 @@ export default function LeaguePage() {
  },[id,newMember])
  if (!hub) return <div className="space-y-4 p-8">{error || t("leagueUi.s0")}{error && <button className="block rounded border px-4 py-2" onClick={() => void refresh()}>{locale === "fi" ? "Yritä uudelleen" : "Retry"}</button>}</div>
  if (!hub.league) return <div className="p-8">{hub.error || t("leagueUi.s1")}</div>
+ const showcaseSeason = hub.seasons.find(season => season.status !== "completed") || hub.seasons[0]
+ const showcaseConfig = (showcaseSeason?.award_config || {}) as {category?:string;variant?:"crystal"|"pennant"|"sculpture"}
+ const showcaseEnabled = !!showcaseSeason && !!showcaseConfig.category && showcaseConfig.category !== "none"
+ const showcaseWinner = hub.seasonTrophies?.find(trophy => trophy.season_id === showcaseSeason?.id)
+ const trophyNames = { crystal: locale === "fi" ? "Kristalli" : "Crystal", pennant: locale === "fi" ? "Viiri" : "Pennant", sculpture: locale === "fi" ? "Veistos" : "Sculpture" }
+ const TrophyArt = ({variant,size="large"}:{variant:"crystal"|"pennant"|"sculpture";size?:"large"|"small"}) => {
+  const Icon = variant === "crystal" ? Gem : variant === "pennant" ? FlagTriangleRight : Award
+  return <Icon aria-hidden="true" strokeWidth={1.15} className={size==="large" ? "h-28 w-28 text-accent-gold drop-shadow-[0_0_22px_rgba(212,175,95,0.42)] sm:h-36 sm:w-36" : "h-10 w-10 text-accent-gold"} />
+ }
  return <ArchiveFrame className="mx-auto max-w-5xl">
   <div className="space-y-6 p-3 sm:p-6">
    <ArchiveCardButton type="button" onClick={() => router.push("/events")}>{t("leagueUi.s2")}</ArchiveCardButton>
    <div className="space-y-4 text-center">
     <div className="relative mx-auto flex w-full max-w-xl items-center justify-center py-3">
      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 w-[calc(50%-5rem)] bg-contain bg-left bg-no-repeat sm:w-[calc(50%-6rem)]" style={{backgroundImage:'url("/images/events/ornate-left.png")'}} />
-     <img src="/images/events/league.png" alt={t("leagueUi.s68")} className="relative z-10 aspect-square w-32 rounded-lg border border-accent-gold/30 object-cover sm:w-40" />
+     {showcaseEnabled ? <div className="relative z-10 flex min-h-48 w-full max-w-72 flex-col items-center justify-center gap-3 rounded-xl border border-accent-gold/35 bg-gradient-to-b from-accent-gold/10 to-transparent px-4 py-6 sm:min-h-64 sm:max-w-80">
+       <span className="font-heading text-xs uppercase tracking-[0.2em] text-accent-gold">{locale === "fi" ? "Liigakauden pääpalkinto" : "Season grand prize"}</span>
+       {showcaseConfig.variant ? <TrophyArt variant={showcaseConfig.variant} /> : <Trophy className="h-24 w-24 text-accent-gold/65" strokeWidth={1} />}
+       <span className="font-heading text-lg text-accent-gold">{showcaseConfig.variant ? trophyNames[showcaseConfig.variant] : (locale === "fi" ? "Palkinto valitsematta" : "Prize not selected")}</span>
+       <span className="text-center text-xs text-muted-foreground">{showcaseWinner ? (locale === "fi" ? "Voittaja: " : "Winner: ")+showcaseWinner.winner_name : (locale === "fi" ? "Palkinto odottaa voittajaansa" : "Awaiting its champion")}</span>
+       <span className="text-center text-xs text-muted-foreground">{showcaseSeason.name}</span>
+      </div> : <img src="/images/events/league.png" alt={t("leagueUi.s68")} className="relative z-10 aspect-square w-32 rounded-lg border border-accent-gold/30 object-cover sm:w-40" />}
      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-[calc(50%-5rem)] bg-contain bg-right bg-no-repeat sm:w-[calc(50%-6rem)]" style={{backgroundImage:'url("/images/events/ornate-right.png")'}} />
     </div>
+    {showcaseEnabled && hub.isOwner && !showcaseWinner && <div className="mx-auto w-full max-w-lg rounded-lg border border-accent-gold/25 bg-background/30 p-3 text-left">
+      <button type="button" onClick={() => setChoosingTrophy(choosingTrophy === showcaseSeason.id ? null : showcaseSeason.id)} className="flex w-full items-center justify-between gap-2 text-sm text-accent-gold">
+       <span>{showcaseConfig.variant ? (locale === "fi" ? "Vaihda pääpalkintoa" : "Change grand prize") : (locale === "fi" ? "Valitse kauden pääpalkinto" : "Choose the season grand prize")}</span><span aria-hidden="true">{choosingTrophy === showcaseSeason.id ? "−" : "+"}</span>
+      </button>
+      {choosingTrophy === showcaseSeason.id && <div className="mt-3 grid grid-cols-3 gap-2">
+       {(["crystal","pennant","sculpture"] as const).map(variant => <button key={variant} type="button" disabled={busy} aria-pressed={showcaseConfig.variant === variant}
+        className={"flex min-w-0 flex-col items-center gap-2 rounded-lg border p-3 text-center text-xs "+(showcaseConfig.variant===variant?"border-accent-gold bg-accent-gold/15":"border-accent-gold/20")}
+        onClick={async () => {setBusy(true);setError("");try{const result=await setLeagueSeasonTrophy(id,showcaseSeason.id,variant);if(result.error)setError(result.error);else {setChoosingTrophy(null);await refresh()}}finally{setBusy(false)}}}>
+        <TrophyArt variant={variant} size="small"/><span>{trophyNames[variant]}</span>
+       </button>)}
+      </div>}
+     </div>}
     <p className="text-sm uppercase tracking-widest text-accent-gold">{t("leagueUi.s3")}</p>
     <h1 className="font-heading text-3xl break-words">{hub.league.name}</h1>
     <p className="text-sm text-muted-foreground">{hub.league.privacy==="public"?t("leagueUi.s50"):t("leagueUi.s51")}</p>
@@ -177,30 +205,34 @@ export default function LeaguePage() {
        }}>{t("leagueUi.s23")}</ArchiveCardButton>
       </div>}
      </div>}
-     {hub.isOwner && (season.award_config as any)?.category && (season.award_config as any)?.category !== "none" && !awardedSeasons[season.id] && <div className="space-y-3 rounded-md border border-accent-gold/30 p-3">
-       <h3 className="font-heading text-accent-gold">{locale === "fi" ? "Liigan voittajan palkinto" : "League winner trophy"}</h3>
-       <p className="text-sm text-muted-foreground">{locale === "fi" ? "Liigassa palkitaan vain voittaja. Valitse sarjataulukon voittaja ja hänelle yksi kolmesta pokaalista." : "Only the league winner receives a trophy. Select the winner from the standings and choose one of three trophy designs."}</p>
-       <label className="block space-y-1 text-sm"><span>{locale === "fi" ? "Voittaja" : "Winner"}</span>
-        <select value={awardSelections[season.id] || ""} onChange={e => setAwardSelections(old => ({...old,[season.id]:e.target.value}))} className="w-full rounded-md border border-accent-gold/30 bg-background p-3">
-         <option value="">{locale === "fi" ? "Valitse voittaja" : "Select winner"}</option>
-         {hub.standings.filter(row => row.season_id === season.id && row.played > 0 && row.key.startsWith("user:")).map(row => <option key={row.key} value={row.key.slice(5)}>{row.name} · {row.points} {locale === "fi" ? "pistettä" : "points"}</option>)}
-        </select>
-       </label>
-       <fieldset className="space-y-2"><legend className="text-sm text-accent-gold">{locale === "fi" ? "Pokaalin malli" : "Trophy design"}</legend>
-        {(["crystal","pennant","sculpture"] as const).map(variant => <label key={variant} className="flex items-center gap-3 rounded-md border border-accent-gold/25 p-3">
-         <input type="radio" name={`league-trophy-${season.id}`} value={variant} checked={(awardVariants[season.id] || "crystal") === variant} onChange={() => setAwardVariants(old => ({...old,[season.id]:variant}))} />
-         <span>{variant === "crystal" ? (locale === "fi" ? "Kristalli" : "Crystal") : variant === "pennant" ? (locale === "fi" ? "Viiri" : "Pennant") : (locale === "fi" ? "Veistos" : "Sculpture")}</span>
-        </label>)}
-       </fieldset>
-       {season.status === "completed" && <ArchiveCardButton disabled={busy || !awardSelections[season.id]} onClick={async () => {
-         const winner = awardSelections[season.id]
-         if (!winner) return
-         if (!window.confirm(locale === "fi" ? "Jaetaanko valittu pokaali liigan voittajalle?" : "Award the selected trophy to the league winner?")) return
-         setBusy(true); setError("")
-         try { const result = await awardLeagueWinnerTrophy(season.id, winner, awardVariants[season.id] || "crystal"); if (result.success) await refresh(); else setError(result.error || "Award failed") }
-         finally { setBusy(false) }
-       }}>{locale === "fi" ? "Vahvista voittajan pokaali" : "Confirm winner trophy"}</ArchiveCardButton>}
-      </div>}
+     {(season.award_config as any)?.category && (season.award_config as any)?.category !== "none" && <div className="space-y-3 rounded-lg border border-accent-gold/30 bg-accent-gold/5 p-4">
+      <div className="flex items-center gap-3">
+       {(season.award_config as any)?.variant ? <TrophyArt variant={(season.award_config as any).variant} size="small"/> : <Trophy className="h-10 w-10 text-accent-gold"/>}
+       <div><h3 className="font-heading text-accent-gold">{locale === "fi" ? "Kauden pääpalkinto" : "Season grand prize"}</h3>
+        <p className="text-sm text-muted-foreground">{(season.award_config as any)?.variant ? trophyNames[(season.award_config as any).variant as keyof typeof trophyNames] : (locale === "fi" ? "Palkintoa ei ole vielä valittu" : "Prize not yet selected")}</p></div>
+      </div>
+      {hub.seasonTrophies?.find(trophy => trophy.season_id === season.id) ? <p className="font-heading text-accent-gold">{locale === "fi" ? "Voittaja: " : "Winner: "}{hub.seasonTrophies.find(trophy => trophy.season_id === season.id)?.winner_name}</p> : <>
+       {hub.isOwner && <div className="space-y-3">
+        <p className="text-sm text-muted-foreground">{locale === "fi" ? "Voit valita tai vaihtaa palkintoa ennen voittajan vahvistamista." : "Choose or change the prize before confirming the winner."}</p>
+        <div className="grid grid-cols-3 gap-2">{(["crystal","pennant","sculpture"] as const).map(variant => <button key={variant} type="button" disabled={busy} aria-pressed={(season.award_config as any)?.variant===variant} className={"flex flex-col items-center gap-2 rounded-lg border p-2 text-xs "+((season.award_config as any)?.variant===variant?"border-accent-gold bg-accent-gold/15":"border-accent-gold/20")} onClick={async()=>{setBusy(true);setError("");try{const result=await setLeagueSeasonTrophy(id,season.id,variant);if(result.error)setError(result.error);else await refresh()}finally{setBusy(false)}}}><TrophyArt variant={variant} size="small"/>{trophyNames[variant]}</button>)}</div>
+        {season.status === "completed" && <div className="space-y-3">
+         <label className="block space-y-1 text-sm"><span>{locale === "fi" ? "Vahvista kauden voittaja" : "Confirm season winner"}</span>
+          <select value={awardSelections[season.id] || ""} onChange={e=>setAwardSelections(old=>({...old,[season.id]:e.target.value}))} className="w-full rounded-md border border-accent-gold/30 bg-background p-3">
+           <option value="">{locale === "fi" ? "Valitse voittaja" : "Select winner"}</option>
+           {hub.standings.filter(row=>row.season_id===season.id&&row.played>0&&row.key.startsWith("user:")).map(row=><option key={row.key} value={row.key.slice(5)}>{row.name} · {row.points} {locale === "fi" ? "pistettä" : "points"}</option>)}
+          </select>
+         </label>
+         <ArchiveCardButton disabled={busy || !awardSelections[season.id] || !(season.award_config as any)?.variant} onClick={async()=>{
+          const variant=(season.award_config as any)?.variant as "crystal"|"pennant"|"sculpture"|undefined
+          if(!variant||!awardSelections[season.id])return
+          if(!window.confirm(locale==="fi"?"Jaetaanko valittu pääpalkinto vahvistetulle voittajalle?":"Award the grand prize to the confirmed winner?"))return
+          setBusy(true);setError("")
+          try{const result=await awardLeagueWinnerTrophy(season.id,awardSelections[season.id],variant);if(result.success)await refresh();else setError(result.error||"Award failed")}finally{setBusy(false)}
+         }}>{locale==="fi"?"Vahvista pääpalkinnon jako":"Confirm grand prize"}</ArchiveCardButton>
+        </div>}
+       </div>}
+      </>}
+     </div>}
      {hub.isOwner && season.status !== "completed" && <div className="rounded-md border border-accent-gold/30 bg-accent-gold/5 p-3 space-y-2">
       <p className="text-sm text-muted-foreground">{locale === "fi" ? "Päätä kausi vasta, kun kaikki siihen liitetyt tapahtumat ja ottelut on kirjattu valmiiksi. Päättäminen vahvistaa liigasaavutusten laskennan." : "Complete the season only after all linked events and match results are finalized. Completion confirms league achievement progress."}</p>
       <ArchiveCardButton disabled={busy} onClick={async () => {
