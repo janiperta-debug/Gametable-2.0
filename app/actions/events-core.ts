@@ -238,7 +238,7 @@ export async function getPastEvents(): Promise<{ events: Event[]; error?: string
   const pastEvents = (events || []).filter((event) => {
     const start = new Date(event.starts_at)
     const end = event.ends_at ? new Date(event.ends_at) : null
-    return end ? end <= now : start < now
+    return event.status === "completed" || (end ? end <= now : start < now)
   })
 
   const eventsWithCounts = await Promise.all(
