@@ -31,6 +31,7 @@ export interface Event {
   }
   participant_count?: number
   user_rsvp?: RSVPStatus | null
+  winner_name?: string | null
 }
 
 export interface EventParticipant {
@@ -241,6 +242,23 @@ export async function getPastEvents(): Promise<{ events: Event[]; error?: string
     return event.status === "completed" || (end ? end <= now : start < now)
   })
 
+  // Resolve confirmed tournament champions for the history list.
+  const championIds = [...new Set(pastEvents
+    .filter(event => event.event_type === "tournament" && event.status === "completed")
+    .map(event => (event.event_config as {champion_entry_id?: string} | null)?.champion_entry_id)
+    .filter((id): id is string => !!id))]
+  const { data: championEntries } = championIds.length
+    ? await supabase.from("event_entries").select("id,user_id").in("id", championIds)
+    : { data: [] }
+  const championUserIds = [...new Set((championEntries || []).map(entry => entry.user_id).filter((id): id is string => !!id))]
+  const { data: championProfiles } = championUserIds.length
+    ? await supabase.from("profiles").select("id,display_name,username").in("id", championUserIds)
+    : { data: [] }
+  const championNames = new Map((championEntries || []).map(entry => {
+    const profile = (championProfiles || []).find(profile => profile.id === entry.user_id)
+    return [entry.id, profile?.display_name || profile?.username || null] as const
+  }))
+
   const eventsWithCounts = await Promise.all(
     pastEvents.map(async (event) => {
       const { count } = await supabase
@@ -260,6 +278,7 @@ export async function getPastEvents(): Promise<{ events: Event[]; error?: string
         ...event,
         participant_count: count || 0,
         user_rsvp: rsvpData?.status || null,
+        winner_name: event.event_type === "tournament" && event.status === "completed" ? championNames.get((event.event_config as {champion_entry_id?: string} | null)?.champion_entry_id || "") || null : null,
       }
     })
   )
