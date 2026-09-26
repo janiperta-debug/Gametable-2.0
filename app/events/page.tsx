@@ -223,7 +223,7 @@ export default function EventsPage() {
                       <EventRow event={event} onOpen={() => router.push("/events/" + event.id)} userId={user?.id} />
                     </div>
                   })}
-                </div>}
+                  </div>}
                 </div>}
               {history.length > 10 && <button type="button" onClick={() => setHistoryAll(!historyAll)} className="w-full rounded-lg border border-accent-gold/25 py-3 text-sm text-accent-gold">{historyAll ? t("events.showLess") : t("events.showFullHistory")}</button>}
             </div>}
