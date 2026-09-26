@@ -42,6 +42,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
     .from("user_games")
     .select("*", { count: "exact", head: true })
     .eq("user_id", profile.id)
+    .eq("status", "owned")
 
   // Get user's games if show_collection is true
   let games: Array<{ 
