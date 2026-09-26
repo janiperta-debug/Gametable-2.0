@@ -52,6 +52,7 @@ function EventRow({ event, onOpen, userId }: { event: Event; onOpen: () => void;
         </div>
         <div className="break-words font-heading text-base text-foreground group-hover:text-accent-gold sm:text-lg">{event.title}</div>
         <div className="truncate text-xs text-muted-foreground sm:text-sm">{event.location || event.host?.display_name || ""}{event.participant_count != null ? ` · ${t("events.participantCount", { count: event.participant_count })}` : ""}</div>
+        {event.event_type === "tournament" && event.winner_name && <div className="flex items-center gap-1 text-xs text-accent-gold sm:text-sm"><span aria-hidden="true">🏆</span><span>{locale === "fi" ? "Voittaja" : "Winner"}: {event.winner_name}</span></div>
       </div>
       <ChevronRight className="h-5 w-5 shrink-0 text-accent-gold/70" />
     </button>
@@ -107,6 +108,15 @@ export default function EventsPage() {
     ]
   }, [leagues, myEvents, convertedIds, user?.id])
   const history = useMemo(() => pastEvents.filter((event) => !(event.event_type === "league" && convertedIds.has(event.id))).filter(matches).sort((a, b) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime()), [pastEvents, convertedIds, query, types])
+  // A league belongs to history when every season is completed. Preserve
+  // leagues with active seasons in the active section, even if older seasons ended.
+  const completedLeagues = useMemo(() => leagues.filter(league =>
+    league.league_seasons?.length > 0 &&
+    league.league_seasons.every(season => season.status === "completed") &&
+    (types.length === 0 || types.includes("league")) &&
+    (league.name.toLocaleLowerCase("fi-FI").includes(query.toLocaleLowerCase("fi-FI")) ||
+     (league.game || "").toLocaleLowerCase("fi-FI").includes(query.toLocaleLowerCase("fi-FI")))
+  ), [leagues, query, types])
   const visibleUpcoming = allUpcoming ? upcoming : upcoming.slice(0, 5)
   const visibleHistory = historyAll ? history : history.slice(0, 10)
 
@@ -180,8 +190,30 @@ export default function EventsPage() {
             </button>
             {historyOpen && <div className="mt-4 space-y-4">
               {loading ? <Loader2 className="mx-auto h-7 w-7 animate-spin text-accent-gold" /> :
-                history.length === 0 ? <p className="text-sm text-muted-foreground">{t("events.noPastEvents")}</p> :
-                <div className="overflow-hidden rounded-lg border border-accent-gold/20">
+                history.length === 0 && completedLeagues.length === 0 ? <p className="text-sm text-muted-foreground">{t("events.noPastEvents")}</p> :
+                <div className="space-y-4">
+                  {completedLeagues.length > 0 && <div className="overflow-hidden rounded-lg border border-accent-gold/20">
+                    {completedLeagues.map((league, index) => {
+                      const season = league.league_seasons?.[0]
+                      const config = season?.award_config as {category?: string;variant?: string} | null
+                      const variant = config?.category && config.category !== "none" && isLeagueTrophyVariant(config.variant) ? config.variant : null
+                      return <div key={league.id}>
+                        {index > 0 && <ArchiveDivider variant="subtle" />}
+                        <button type="button" onClick={() => router.push("/leagues/" + league.id)} className="group flex w-full items-center gap-3 px-3 py-4 text-left hover:bg-accent-gold/5 sm:px-5">
+                          <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-blue-700/60 sm:h-16 sm:w-16">
+                            {variant ? <LeagueTrophyImage variant={variant} alt="" className="h-full w-full p-1" iconClassName="h-12 w-12" /> : <Image src={categoryImages.league} alt="" fill sizes="64px" className="object-cover" />}
+                          </div>
+                          <div className="min-w-0 flex-1 space-y-1">
+                            <p className="text-xs text-accent-gold">{t("events.types.league")} · {locale === "fi" ? "Päättynyt" : "Completed"}</p>
+                            <p className="break-words font-heading text-base group-hover:text-accent-gold sm:text-lg">{league.name}</p>
+                            <p className="text-xs text-muted-foreground sm:text-sm">{league.league_seasons?.map(s => s.name).join(", ")}</p>
+                          </div>
+                          <ChevronRight className="h-5 w-5 shrink-0 text-accent-gold/70" />
+                        </button>
+                      </div>
+                    })}
+                  </div>}
+                  {visibleHistory.length > 0 && <div className="overflow-hidden rounded-lg border border-accent-gold/20">
                   {visibleHistory.map((event, index) => {
                     const month = formatDate(event.starts_at, { month: "long", year: "numeric" }, locale)
                     const previous = index > 0 ? formatDate(visibleHistory[index - 1].starts_at, { month: "long", year: "numeric" }, locale) : ""
@@ -191,6 +223,7 @@ export default function EventsPage() {
                       <EventRow event={event} onOpen={() => router.push("/events/" + event.id)} userId={user?.id} />
                     </div>
                   })}
+                </div>}
                 </div>}
               {history.length > 10 && <button type="button" onClick={() => setHistoryAll(!historyAll)} className="w-full rounded-lg border border-accent-gold/25 py-3 text-sm text-accent-gold">{historyAll ? t("events.showLess") : t("events.showFullHistory")}</button>}
             </div>}
