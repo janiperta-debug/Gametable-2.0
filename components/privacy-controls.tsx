@@ -13,6 +13,7 @@ type PrivacyPreferences = {
   showFriendList: boolean
   allowFriendRequests: boolean
   showGameCollection: boolean
+  showTrophyCabinet: boolean
 }
 
 const DEFAULT_PRIVACY_PREFERENCES: PrivacyPreferences = {
@@ -20,6 +21,7 @@ const DEFAULT_PRIVACY_PREFERENCES: PrivacyPreferences = {
   showFriendList: true,
   allowFriendRequests: true,
   showGameCollection: true,
+  showTrophyCabinet: false,
 }
 
 function readPrivacyPreferences(preferences: Record<string, unknown> | null | undefined): PrivacyPreferences {
@@ -34,6 +36,7 @@ function readPrivacyPreferences(preferences: Record<string, unknown> | null | un
     showFriendList: typeof values.showFriendList === "boolean" ? values.showFriendList : true,
     allowFriendRequests: typeof values.allowFriendRequests === "boolean" ? values.allowFriendRequests : true,
     showGameCollection: typeof values.showGameCollection === "boolean" ? values.showGameCollection : true,
+    showTrophyCabinet: values.showTrophyCabinet === true,
   }
 }
 
@@ -43,6 +46,7 @@ export function PrivacyControls() {
   const [showFriendList, setShowFriendList] = useState(true)
   const [allowFriendRequests, setAllowFriendRequests] = useState(true)
   const [showGameCollection, setShowGameCollection] = useState(true)
+  const [showTrophyCabinet, setShowTrophyCabinet] = useState(false)
   const [saving, setSaving] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
   const t = useTranslations()
@@ -55,6 +59,7 @@ export function PrivacyControls() {
     setShowFriendList(privacy.showFriendList)
     setAllowFriendRequests(privacy.allowFriendRequests)
     setShowGameCollection(profile.show_collection ?? privacy.showGameCollection)
+    setShowTrophyCabinet(privacy.showTrophyCabinet)
   }, [profile])
 
   const handleSave = async () => {
@@ -73,6 +78,7 @@ export function PrivacyControls() {
           showFriendList,
           allowFriendRequests,
           showGameCollection,
+          showTrophyCabinet,
         },
       }
 
@@ -168,6 +174,16 @@ export function PrivacyControls() {
               className="data-[state=checked]:bg-accent-gold"
               disabled={profileLoading || saving}
             />
+          </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-1">
+              <p className="font-merriweather font-semibold">{t("profile.showTrophyCabinet")}</p>
+              <p className="text-sm text-muted-foreground font-merriweather">{t("profile.showTrophyCabinetDesc")}</p>
+            </div>
+            <Switch checked={showTrophyCabinet} onCheckedChange={setShowTrophyCabinet}
+              className="data-[state=checked]:bg-accent-gold" disabled={profileLoading || saving}
+              aria-label={t("profile.showTrophyCabinet")} />
           </div>
 
           <ArchiveButton active disabled={profileLoading || saving || !profile} onClick={handleSave}>
