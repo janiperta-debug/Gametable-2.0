@@ -174,6 +174,8 @@
     "allowFriendRequestsDesc": "Salli muiden pelaajien lähettää sinulle kaveripyyntöjä",
     "showGameCollection": "Näytä pelikokoelma",
     "showGameCollectionDesc": "Näytä pelikokoelmasi julkisesti profiilissasi",
+    "showTrophyCabinet": "Näytä palkintovitriini julkisessa profiilissa",
+    "showTrophyCabinetDesc": "Muut pelaajat näkevät ansaitsemasi mitalit ja pokaalit. Yksityisten tapahtumien nimiä ei näytetä.",
     "showLocation": "Näytä sijainti",
     "allowMessages": "Salli viestit",
     "public": "Julkinen",
