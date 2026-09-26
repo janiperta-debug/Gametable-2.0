@@ -31,7 +31,7 @@ export async function getLeague(leagueId: string) {
  const supabase = await createClient()
  const { data: { user } } = await supabase.auth.getUser()
  const { data: league, error } = await supabase.from("leagues").select("*").eq("id", leagueId).single()
- if (error || !league) return { league: null, seasons: [], events: [], available: [], members: [], results: [], standings: [], isMember: false, error: "Liigaa ei löytynyt." }
+ if (error || !league) return { league: null, seasons: [], events: [], available: [], members: [], results: [], standings: [], seasonTrophies: [], isOwner: false, isMember: false, error: "Liigaa ei löytynyt." }
  const { data: seasons } = await supabase.from("league_seasons").select("*").eq("league_id", leagueId).order("created_at", { ascending: false })
  const ids = (seasons || []).map((season) => season.id)
  const { data: links } = ids.length ? await supabase.from("league_season_events").select("season_id,event_id").in("season_id", ids) : { data: [] }
