@@ -781,6 +781,21 @@ export default function EventDetailsPage() {
                 </div>
               </ArchiveCardHeader>
               <ArchiveCardContent className="space-y-6">
+                {/* Selected game from the event creation picker; old events have no selection. */}
+                {(() => {
+                  const config = event.event_config as Record<string, unknown> | null
+                  const selection = config?.gameSelection as {name?: string; category?: string | null} | undefined
+                  if (!selection?.name) return null
+                  const categoryLabels: Record<string, string> = locale === "fi"
+                    ? {board_game:"Lautapeli",rpg:"Roolipeli",trading_card:"Keräilykorttipeli",miniature:"Miniatyyripeli"}
+                    : {board_game:"Board game",rpg:"Role-playing game",trading_card:"Trading card game",miniature:"Miniatures game"}
+                  return <div className="rounded-lg border border-accent-gold/25 bg-accent-gold/5 px-4 py-3">
+                    <p className="text-xs uppercase tracking-widest text-accent-gold">{locale === "fi" ? "Valittu peli" : "Selected game"}</p>
+                    <p className="mt-1 font-medium break-words">{selection.name}</p>
+                    {selection.category && categoryLabels[selection.category] && <p className="mt-1 text-sm text-muted-foreground">{categoryLabels[selection.category]}</p>}
+                  </div>
+                })()}
+
                 {/* Host */}
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-accent-gold/20 flex items-center justify-center">
