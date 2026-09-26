@@ -26,7 +26,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
         .maybeSingle()
     : await supabase
         .from("profiles")
-        .select("id, display_name, username, avatar_url, bio, location, xp, level, show_collection, game_interests")
+        .select("id, display_name, username, avatar_url, bio, location, xp, level, show_collection, game_interests, preferences")
         .eq("username", username)
         .maybeSingle()
 
