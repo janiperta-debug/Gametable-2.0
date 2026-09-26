@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { createServiceClient } from "@/lib/supabase/service"
 import { notFound } from "next/navigation"
 import { PublicProfileClient } from "./public-profile-client"
 
@@ -20,7 +21,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
   const { data: profile } = isUuid
     ? await supabase
         .from("profiles")
-        .select("id, display_name, username, avatar_url, bio, location, xp, level, show_collection, game_interests")
+        .select("id, display_name, username, avatar_url, bio, location, xp, level, show_collection, game_interests, preferences")
         .eq("id", username)
         .maybeSingle()
     : await supabase
@@ -87,6 +88,47 @@ export default async function PublicProfilePage({ params }: PageProps) {
     else categoryCounts.boardGames++
   })
 
+  // Public trophy sharing is opt-in. Never query or pass trophies when disabled.
+  const privacy = (profile.preferences as {privacy?: {showTrophyCabinet?: boolean}} | null)?.privacy
+  const showTrophyCabinet = privacy?.showTrophyCabinet === true
+  type SharedBadge = { id: string; name: string; series: string; tier: string; image_url: string | null; earned_at: string }
+  type SharedTrophy = { id: string; source_type: string; source_name: string | null; category: string; placement: number; award_variant: string | null; awarded_at: string }
+  let sharedBadges: SharedBadge[] = []
+  let sharedTrophies: SharedTrophy[] = []
+  if (showTrophyCabinet) {
+    const db = createServiceClient()
+    const [{ data: earned }, { data: trophies }] = await Promise.all([
+      db.from("user_badges").select("badge_id,earned_at").eq("user_id", profile.id),
+      db.from("personal_trophies").select("id,source_type,source_name,category,placement,award_variant,awarded_at,event_id,season_id").eq("recipient_id", profile.id).order("awarded_at", {ascending:false}),
+    ])
+    const badgeIds = (earned || []).map(row => row.badge_id)
+    if (badgeIds.length) {
+      const { data: definitions } = await db.from("badge_definitions")
+        .select("id,name,series,tier,image_url").in("id", badgeIds)
+      sharedBadges = (earned || []).flatMap(row => {
+        const def = (definitions || []).find(item => item.id === row.badge_id)
+        return def ? [{...def, earned_at:row.earned_at}] : []
+      }).sort((a,b) => b.earned_at.localeCompare(a.earned_at))
+    }
+    const eventIds = [...new Set((trophies || []).map(row => row.event_id).filter((id): id is string => !!id))]
+    const seasonIds = [...new Set((trophies || []).map(row => row.season_id).filter((id): id is string => !!id))]
+    const [{data: eventPrivacy}, {data: seasonPrivacy}] = await Promise.all([
+      eventIds.length ? db.from("events").select("id,privacy").in("id",eventIds) : Promise.resolve({data:[]}),
+      seasonIds.length ? db.from("league_seasons").select("id,leagues!inner(privacy)").in("id",seasonIds) : Promise.resolve({data:[]}),
+    ])
+    sharedTrophies = (trophies || []).map(row => {
+      const event = (eventPrivacy || []).find(item => item.id === row.event_id)
+      const season = (seasonPrivacy || []).find(item => item.id === row.season_id)
+      const league = season?.leagues as {privacy?:string} | {privacy?:string}[] | undefined
+      const leaguePrivacy = Array.isArray(league) ? league[0]?.privacy : league?.privacy
+      const isPublic = row.source_type === "tournament"
+        ? event?.privacy === "public"
+        : leaguePrivacy === "public"
+      return {id:row.id,source_type:row.source_type,source_name:isPublic ? row.source_name : null,
+        category:row.category,placement:row.placement,award_variant:row.award_variant,awarded_at:row.awarded_at}
+    })
+  }
+
   // Get current user for friend button
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -113,6 +155,9 @@ export default async function PublicProfilePage({ params }: PageProps) {
   return (
     <PublicProfileClient 
       profile={profile}
+      sharedBadges={sharedBadges}
+      sharedTrophies={sharedTrophies}
+      showTrophyCabinet={showTrophyCabinet}
       gameInterests={gameInterests}
       gameCount={gameCount ?? 0}
       games={games}
