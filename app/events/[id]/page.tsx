@@ -661,55 +661,6 @@ export default function EventDetailsPage() {
 
         {completionError && <div role="alert" className="mb-4 rounded-md border border-red-400/60 bg-red-950/50 p-4 text-sm text-red-100"><strong>{locale === "fi" ? "Tapahtuman päättäminen epäonnistui" : "Event completion failed"}</strong><p className="mt-2">{completionError}</p></div>}
 
-        {event.event_type === "tournament" && isHost && event.status !== "completed" && event.status !== "cancelled" && (
-          <ArchiveCard className="mb-6">
-            <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">{locale === "fi" ? "Turnauksen voittajan vahvistaminen" : "Confirm tournament champion"}</ArchiveCardTitle></ArchiveCardHeader>
-            <ArchiveCardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">{locale === "fi" ? "Kirjaa kaikki ottelutulokset ja valitse voittaja ennen tapahtuman päättämistä. Voittajan on oltava rekisteröitynyt kilpailija, jolla on vähintään yksi kirjattu otteluvoitto." : "Record every match result and select the champion before completing the event. The champion must be a registered competitor with at least one recorded match win."}</p>
-              <select aria-label={locale === "fi" ? "Turnauksen voittaja" : "Tournament champion"} value={championEntryId} onChange={(e) => setChampionEntryId(e.target.value)} className="w-full rounded-md border border-accent-gold/30 bg-background p-3">
-                <option value="">{locale === "fi" ? "Valitse voittaja" : "Select champion"}</option>
-                {structure.entries.filter((entry: any) => entry.user_id && structure.matches.some((match: any) => match.status === "completed" && match.winner_entry_id === entry.id)).map((entry: any) => {
-                  const profile = structure.profiles.find((p: any) => p.id === entry.user_id)
-                  return <option key={entry.id} value={entry.id}>{entry.display_name || profile?.display_name || profile?.username || (locale === "fi" ? "Kilpailija" : "Competitor")}</option>
-                })}
-              </select>
-              {awardEnabled && <div className="space-y-3 rounded-md border border-accent-gold/30 p-3">
-                <h3 className="font-heading text-accent-gold">{locale === "fi" ? "Palkitseminen · kolme parasta" : "Awards · top three"}</h3>
-                <p className="text-sm text-muted-foreground">{locale === "fi" ? "Kulta annetaan vahvistetulle voittajalle. Valitse halutessasi myös hopea ja pronssi. Pokaalit jaetaan vasta, kun vahvistat turnauksen päättymisen." : "Gold goes to the confirmed champion. Optionally select silver and bronze. Trophies are issued only after you confirm tournament completion."}</p>
-                {([["2", runnerUpId, setRunnerUpId], ["3", thirdPlaceId, setThirdPlaceId]] as const).map(([place, value, setter]) => <label key={place} className="block space-y-1 text-sm">
-                  <span>{place === "2" ? (locale === "fi" ? "Hopea" : "Silver") : (locale === "fi" ? "Pronssi" : "Bronze")}</span>
-                  <select value={value} onChange={e => setter(e.target.value)} className="w-full rounded-md border border-accent-gold/30 bg-background p-3">
-                    <option value="">{locale === "fi" ? "Ei jaeta" : "Not awarded"}</option>
-                    {eligibleAwardEntries.filter((entry: any) => entry.id !== championEntryId).map((entry: any) => <option key={entry.id} value={entry.id}>{entry.display_name || structure.profiles.find((profile: any) => profile.id === entry.user_id)?.display_name || (locale === "fi" ? "Kilpailija" : "Competitor")}</option>)}
-                  </select>
-                </label>)}
-              </div>}
-              {structure.matches.some((match: any) => match.status !== "completed") && <p className="text-sm text-amber-300">{locale === "fi" ? "Kaikkien otteluiden tulokset on kirjattava ennen turnauksen päättämistä." : "All match results must be recorded before the tournament can be completed."}</p>}
-            </ArchiveCardContent>
-          </ArchiveCard>
-        )}
-        {event.event_type === "tournament" && isHost && event.status === "completed" && awardEnabled && !personalAwardsIssued && <ArchiveCard className="mb-6">
-          <ArchiveCardHeader><ArchiveCardTitle>{locale === "fi" ? "Pokaalien jako" : "Award trophies"}</ArchiveCardTitle></ArchiveCardHeader>
-          <ArchiveCardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">{locale === "fi" ? "Turnaus on päättynyt. Voit vahvistaa palkinnot nyt, jos niitä ei vielä jaettu." : "The tournament is complete. Confirm the trophies if they have not yet been issued."}</p>
-            {[["1", championEntryId, setChampionEntryId], ["2", runnerUpId, setRunnerUpId], ["3", thirdPlaceId, setThirdPlaceId]].map(([place, value, setter]: any) => <label key={place} className="block space-y-1">
-              <span>{place === "1" ? (locale === "fi" ? "Kulta" : "Gold") : place === "2" ? (locale === "fi" ? "Hopea" : "Silver") : (locale === "fi" ? "Pronssi" : "Bronze")}</span>
-              <select value={place === "1" ? ((event.event_config as any)?.champion_entry_id || "") : value} disabled={place === "1"} onChange={e => setter(e.target.value)} className="w-full rounded-md border border-accent-gold/30 bg-background p-3">
-                <option value="">{locale === "fi" ? "Ei jaeta" : "Not awarded"}</option>
-                {structure.entries.filter((entry: any) => entry.user_id).map((entry: any) => <option key={entry.id} value={entry.id}>{entry.display_name || (locale === "fi" ? "Kilpailija" : "Competitor")}</option>)}
-              </select>
-            </label>)}
-            <ArchiveCardButton disabled={issuingAwards} onClick={async () => {
-              const ids = [(event.event_config as any)?.champion_entry_id, runnerUpId, thirdPlaceId].filter(Boolean)
-              const recipients = ids.map((id: string) => structure.entries.find((entry: any) => entry.id === id)?.user_id).filter(Boolean)
-              if (recipients.length !== ids.length || new Set(recipients).size !== recipients.length || (thirdPlaceId && !runnerUpId)) { setCompletionError(locale === "fi" ? "Tarkista palkintosijat." : "Check award placements."); return }
-              if (!window.confirm(locale === "fi" ? "Jaetaanko pokaalit valituille kilpailijoille?" : "Issue trophies to the selected competitors?")) return
-              setIssuingAwards(true)
-              try { const result = await awardPersonalTrophies("tournament", eventId, recipients); if (result.success) { setPersonalAwardsIssued(true); setCompletionError("") } else setCompletionError(result.error || "Award failed") }
-              finally { setIssuingAwards(false) }
-            }}>{locale === "fi" ? "Vahvista pokaalien jako" : "Confirm trophy awards"}</ArchiveCardButton>
-          </ArchiveCardContent>
-        </ArchiveCard>}
         {event.event_type === "league" && isHost && (
           <ArchiveCard className="mb-6">
             <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">{t("eventUi.s28")}</ArchiveCardTitle></ArchiveCardHeader>
@@ -906,6 +857,55 @@ export default function EventDetailsPage() {
               </ArchiveCardContent>
             </ArchiveCard>
 
+        {event.event_type === "tournament" && isHost && event.status !== "completed" && event.status !== "cancelled" && (
+          <ArchiveCard className="mb-6">
+            <ArchiveCardHeader><ArchiveCardTitle className="text-xl normal-case">{locale === "fi" ? "Turnauksen voittajan vahvistaminen" : "Confirm tournament champion"}</ArchiveCardTitle></ArchiveCardHeader>
+            <ArchiveCardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">{locale === "fi" ? "Kirjaa kaikki ottelutulokset ja valitse voittaja ennen tapahtuman päättämistä. Voittajan on oltava rekisteröitynyt kilpailija, jolla on vähintään yksi kirjattu otteluvoitto." : "Record every match result and select the champion before completing the event. The champion must be a registered competitor with at least one recorded match win."}</p>
+              <select aria-label={locale === "fi" ? "Turnauksen voittaja" : "Tournament champion"} value={championEntryId} onChange={(e) => setChampionEntryId(e.target.value)} className="w-full rounded-md border border-accent-gold/30 bg-background p-3">
+                <option value="">{locale === "fi" ? "Valitse voittaja" : "Select champion"}</option>
+                {structure.entries.filter((entry: any) => entry.user_id && structure.matches.some((match: any) => match.status === "completed" && match.winner_entry_id === entry.id)).map((entry: any) => {
+                  const profile = structure.profiles.find((p: any) => p.id === entry.user_id)
+                  return <option key={entry.id} value={entry.id}>{entry.display_name || profile?.display_name || profile?.username || (locale === "fi" ? "Kilpailija" : "Competitor")}</option>
+                })}
+              </select>
+              {awardEnabled && <div className="space-y-3 rounded-md border border-accent-gold/30 p-3">
+                <h3 className="font-heading text-accent-gold">{locale === "fi" ? "Palkitseminen · kolme parasta" : "Awards · top three"}</h3>
+                <p className="text-sm text-muted-foreground">{locale === "fi" ? "Kulta annetaan vahvistetulle voittajalle. Valitse halutessasi myös hopea ja pronssi. Pokaalit jaetaan vasta, kun vahvistat turnauksen päättymisen." : "Gold goes to the confirmed champion. Optionally select silver and bronze. Trophies are issued only after you confirm tournament completion."}</p>
+                {([["2", runnerUpId, setRunnerUpId], ["3", thirdPlaceId, setThirdPlaceId]] as const).map(([place, value, setter]) => <label key={place} className="block space-y-1 text-sm">
+                  <span>{place === "2" ? (locale === "fi" ? "Hopea" : "Silver") : (locale === "fi" ? "Pronssi" : "Bronze")}</span>
+                  <select value={value} onChange={e => setter(e.target.value)} className="w-full rounded-md border border-accent-gold/30 bg-background p-3">
+                    <option value="">{locale === "fi" ? "Ei jaeta" : "Not awarded"}</option>
+                    {eligibleAwardEntries.filter((entry: any) => entry.id !== championEntryId).map((entry: any) => <option key={entry.id} value={entry.id}>{entry.display_name || structure.profiles.find((profile: any) => profile.id === entry.user_id)?.display_name || (locale === "fi" ? "Kilpailija" : "Competitor")}</option>)}
+                  </select>
+                </label>)}
+              </div>}
+              {structure.matches.some((match: any) => match.status !== "completed") && <p className="text-sm text-amber-300">{locale === "fi" ? "Kaikkien otteluiden tulokset on kirjattava ennen turnauksen päättämistä." : "All match results must be recorded before the tournament can be completed."}</p>}
+            </ArchiveCardContent>
+          </ArchiveCard>
+        )}
+        {event.event_type === "tournament" && isHost && event.status === "completed" && awardEnabled && !personalAwardsIssued && <ArchiveCard className="mb-6">
+          <ArchiveCardHeader><ArchiveCardTitle>{locale === "fi" ? "Pokaalien jako" : "Award trophies"}</ArchiveCardTitle></ArchiveCardHeader>
+          <ArchiveCardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">{locale === "fi" ? "Turnaus on päättynyt. Voit vahvistaa palkinnot nyt, jos niitä ei vielä jaettu." : "The tournament is complete. Confirm the trophies if they have not yet been issued."}</p>
+            {[["1", championEntryId, setChampionEntryId], ["2", runnerUpId, setRunnerUpId], ["3", thirdPlaceId, setThirdPlaceId]].map(([place, value, setter]: any) => <label key={place} className="block space-y-1">
+              <span>{place === "1" ? (locale === "fi" ? "Kulta" : "Gold") : place === "2" ? (locale === "fi" ? "Hopea" : "Silver") : (locale === "fi" ? "Pronssi" : "Bronze")}</span>
+              <select value={place === "1" ? ((event.event_config as any)?.champion_entry_id || "") : value} disabled={place === "1"} onChange={e => setter(e.target.value)} className="w-full rounded-md border border-accent-gold/30 bg-background p-3">
+                <option value="">{locale === "fi" ? "Ei jaeta" : "Not awarded"}</option>
+                {structure.entries.filter((entry: any) => entry.user_id).map((entry: any) => <option key={entry.id} value={entry.id}>{entry.display_name || (locale === "fi" ? "Kilpailija" : "Competitor")}</option>)}
+              </select>
+            </label>)}
+            <ArchiveCardButton disabled={issuingAwards} onClick={async () => {
+              const ids = [(event.event_config as any)?.champion_entry_id, runnerUpId, thirdPlaceId].filter(Boolean)
+              const recipients = ids.map((id: string) => structure.entries.find((entry: any) => entry.id === id)?.user_id).filter(Boolean)
+              if (recipients.length !== ids.length || new Set(recipients).size !== recipients.length || (thirdPlaceId && !runnerUpId)) { setCompletionError(locale === "fi" ? "Tarkista palkintosijat." : "Check award placements."); return }
+              if (!window.confirm(locale === "fi" ? "Jaetaanko pokaalit valituille kilpailijoille?" : "Issue trophies to the selected competitors?")) return
+              setIssuingAwards(true)
+              try { const result = await awardPersonalTrophies("tournament", eventId, recipients); if (result.success) { setPersonalAwardsIssued(true); setCompletionError("") } else setCompletionError(result.error || "Award failed") }
+              finally { setIssuingAwards(false) }
+            }}>{locale === "fi" ? "Vahvista pokaalien jako" : "Confirm trophy awards"}</ArchiveCardButton>
+          </ArchiveCardContent>
+        </ArchiveCard>}
             {event.event_type === "league" && (
               <ArchiveCard>
                 <ArchiveCardHeader>
