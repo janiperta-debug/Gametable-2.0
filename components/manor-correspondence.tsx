@@ -15,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Crown, Mail, Calendar, Loader2 } from "lucide-react"
 import Link from "next/link"
-import { useTranslations } from "@/lib/i18n"
+import { useTranslations, useI18n } from "@/lib/i18n"
 import { useUser } from "@/hooks/useUser"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
@@ -23,6 +23,7 @@ import { useToast } from "@/hooks/use-toast"
 interface EventDigestPrefs {
   enabled: boolean
   frequency: string
+  locale?: "fi" | "en"
   categories: string[]
   max_distance_km: number | null
 }
@@ -47,6 +48,7 @@ export function ManorCorrespondence() {
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
   const t = useTranslations()
+  const { locale } = useI18n()
   const { user, profile } = useUser()
   const { toast } = useToast()
 
@@ -105,7 +107,7 @@ export function ManorCorrespondence() {
       .from("profiles")
       .update({
         email_notifications: emailNotifications,
-        event_digest_prefs: digestPrefs,
+        event_digest_prefs: { ...digestPrefs, locale },
       })
       .eq("id", user.id)
 
