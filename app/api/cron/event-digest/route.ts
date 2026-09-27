@@ -12,6 +12,7 @@ function getServiceClient() {
 interface EventDigestPrefs {
   enabled: boolean
   frequency: string
+  locale?: "fi" | "en"
   categories: string[]
   max_distance_km: number | null
 }
@@ -21,7 +22,6 @@ interface UserWithDigest {
   notification_email: string | null
   display_name: string | null
   location: string | null
-  preferences: Record<string, unknown> | null
   event_digest_prefs: EventDigestPrefs
 }
 
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     // 1. Fetch all users who have enabled the event digest
     const { data: users, error: usersError } = await supabase
       .from("profiles")
-      .select("id, notification_email, display_name, location, preferences, event_digest_prefs")
+      .select("id, notification_email, display_name, location, event_digest_prefs")
       .eq("email_notifications", true)
       .not("event_digest_prefs", "is", null)
 
@@ -149,7 +149,7 @@ export async function GET(request: NextRequest) {
       const authUser = user.notification_email ? null : await supabase.auth.admin.getUserById(user.id)
       const email = user.notification_email || authUser?.data.user?.email
       if (!email) { skippedCount++; continue }
-      const locale = typeof user.preferences?.language === "string" ? user.preferences.language : "en"
+      const locale = prefs.locale || "fi"
       const { subject, html } = getEventDigestEmailTemplate(userEvents, user.display_name, locale)
 
       const result = await sendEmail({
