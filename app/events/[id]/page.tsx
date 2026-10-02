@@ -730,8 +730,8 @@ export default function EventDetailsPage() {
                 <p className="text-sm text-muted-foreground">
                   {t("auth.loginRequired") || "Kirjaudu sisään osallistuaksesi tapahtumaan."}
                 </p>
-                <ArchiveCardButton active onClick={() => router.push("/login")}>
-                  {t("auth.login") || "Kirjaudu sisään"}
+                <ArchiveCardButton active onClick={() => router.push(`/auth/login?redirect=${encodeURIComponent(`/events/${eventId}`)}`)}>
+                  {t("events.enter")}
                 </ArchiveCardButton>
               </div>
             </ArchiveCardContent>
