@@ -131,22 +131,29 @@ export default function EventDetailsPage() {
   useEffect(() => {
     const loadEvent = async () => {
       setLoading(true)
-      
-      // Get current user
+      setError(null)
+
+      // Public event pages must also work without an authenticated Supabase session.
+      // Keep the user-specific state when a session exists, but do not run
+      // authenticated-only event structure/standings queries for anonymous visitors.
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUserId(user?.id || null)
 
       const result = await getEventById(eventId)
-      
+
       if (result.error) {
         setError(result.error)
       } else if (result.event) {
         setEvent(result.event)
-        if (result.event.event_type === "tournament" && result.event.status === "completed") {
+
+        // The following sections are user-specific/management views.
+        // Anonymous visitors only need the public event itself.
+        if (user && result.event.event_type === "tournament" && result.event.status === "completed") {
           void getSourcePersonalTrophies("tournament", eventId).then((award) => setPersonalAwardsIssued(award.awarded))
         }
-        if (result.event.event_type === "league") {
+
+        if (user && result.event.event_type === "league") {
           const linked = await getLeagueTournaments(eventId)
           setLeagueTournaments(linked.tournaments)
           setAvailableTournaments(linked.available)
@@ -155,6 +162,7 @@ export default function EventDetailsPage() {
           const savedPoints = (result.event.event_config as Record<string, unknown> | null)?.placementPoints
           if (Array.isArray(savedPoints)) setPlacementPoints(savedPoints.join(", "))
         }
+
         if (result.event.event_type === "campaign") {
           const saved = (result.event.event_config as Record<string, unknown> | null)?.progression as Partial<CampaignProgression> | undefined
           if (saved) {
@@ -171,15 +179,30 @@ export default function EventDetailsPage() {
           }
         }
       }
-      
-      const structureResult = await getEventStructure(eventId)
-      const standingsResult = await getEventStandings(eventId)
-      setStandings(standingsResult.standings || [])
-      setStructure({ sessions: structureResult.sessions, rounds: structureResult.rounds, matches: structureResult.matches || [], participants: structureResult.participants || [], entries: structureResult.entries || [], profiles: structureResult.profiles || [] })
+
+      // These queries touch tables whose RLS is intentionally scoped to
+      // authenticated users. A public event can still be viewed anonymously.
+      if (user) {
+        const structureResult = await getEventStructure(eventId)
+        const standingsResult = await getEventStandings(eventId)
+        setStandings(standingsResult.standings || [])
+        setStructure({
+          sessions: structureResult.sessions,
+          rounds: structureResult.rounds,
+          matches: structureResult.matches || [],
+          participants: structureResult.participants || [],
+          entries: structureResult.entries || [],
+          profiles: structureResult.profiles || [],
+        })
+      } else {
+        setStandings([])
+        setStructure({ sessions: [], rounds: [], matches: [], participants: [], entries: [], profiles: [] })
+      }
+
       setLoading(false)
     }
 
-    loadEvent()
+    void loadEvent()
   }, [eventId])
 
   const refreshEventStructure = async () => {
