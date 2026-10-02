@@ -731,7 +731,7 @@ export default function EventDetailsPage() {
                   {t("auth.loginRequired") || "Kirjaudu sisään osallistuaksesi tapahtumaan."}
                 </p>
                 <ArchiveCardButton active onClick={() => router.push(`/auth/login?redirect=${encodeURIComponent(`/events/${eventId}`)}`)}>
-                  {t("events.enter")}
+                  {locale === "fi" ? "Astu sisään" : "Enter"}
                 </ArchiveCardButton>
               </div>
             </ArchiveCardContent>
