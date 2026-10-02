@@ -129,80 +129,103 @@ export default function EventDetailsPage() {
   const [editingProgression, setEditingProgression] = useState(false)
 
   useEffect(() => {
+    let cancelled = false
+
     const loadEvent = async () => {
       setLoading(true)
       setError(null)
 
-      // Public event pages must also work without an authenticated Supabase session.
-      // Keep the user-specific state when a session exists, but do not run
-      // authenticated-only event structure/standings queries for anonymous visitors.
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      setCurrentUserId(user?.id || null)
+      try {
+        // Public event pages must also work without an authenticated Supabase session.
+        // Keep the user-specific state when a session exists, but do not run
+        // authenticated-only event structure/standings queries for anonymous visitors.
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (cancelled) return
+        setCurrentUserId(user?.id || null)
 
-      const result = await getEventById(eventId)
+        const result = await getEventById(eventId)
 
-      if (result.error) {
-        setError(result.error)
-      } else if (result.event) {
-        setEvent(result.event)
-
-        // The following sections are user-specific/management views.
-        // Anonymous visitors only need the public event itself.
-        if (user && result.event.event_type === "tournament" && result.event.status === "completed") {
-          void getSourcePersonalTrophies("tournament", eventId).then((award) => setPersonalAwardsIssued(award.awarded))
+        if (result.error) {
+          if (!cancelled) setError(result.error)
+          return
         }
 
-        if (user && result.event.event_type === "league") {
-          const linked = await getLeagueTournaments(eventId)
-          setLeagueTournaments(linked.tournaments)
-          setAvailableTournaments(linked.available)
-          const season = await getLeagueStandings(eventId)
-          setLeagueStandings(season.standings)
-          const savedPoints = (result.event.event_config as Record<string, unknown> | null)?.placementPoints
-          if (Array.isArray(savedPoints)) setPlacementPoints(savedPoints.join(", "))
-        }
+        if (result.event) {
+          if (cancelled) return
+          setEvent(result.event)
 
-        if (result.event.event_type === "campaign") {
-          const saved = (result.event.event_config as Record<string, unknown> | null)?.progression as Partial<CampaignProgression> | undefined
-          if (saved) {
-            setCampaignProgression({
-              mode: saved.mode === "counter" || saved.mode === "freeform" ? saved.mode : "stages",
-              label: String(saved.label || "Vaihe"),
-              current: Number(saved.current || 0),
-              total: Number(saved.total || 0),
-              unit: String(saved.unit || ""),
-              currentStage: String(saved.currentStage || ""),
-              stages: Array.isArray(saved.stages) ? saved.stages.map(String) : [],
-              note: String(saved.note || ""),
+          // The following sections are user-specific/management views.
+          // Anonymous visitors only need the public event itself.
+          if (user && result.event.event_type === "tournament" && result.event.status === "completed") {
+            void getSourcePersonalTrophies("tournament", eventId).then((award) => {
+              if (!cancelled) setPersonalAwardsIssued(award.awarded)
             })
           }
+
+          if (user && result.event.event_type === "league") {
+            const linked = await getLeagueTournaments(eventId)
+            const season = await getLeagueStandings(eventId)
+            if (!cancelled) {
+              setLeagueTournaments(linked.tournaments)
+              setAvailableTournaments(linked.available)
+              setLeagueStandings(season.standings)
+              const savedPoints = (result.event.event_config as Record<string, unknown> | null)?.placementPoints
+              if (Array.isArray(savedPoints)) setPlacementPoints(savedPoints.join(", "))
+            }
+          }
+
+          if (result.event.event_type === "campaign") {
+            const saved = (result.event.event_config as Record<string, unknown> | null)?.progression as Partial<CampaignProgression> | undefined
+            if (saved && !cancelled) {
+              setCampaignProgression({
+                mode: saved.mode === "counter" || saved.mode === "freeform" ? saved.mode : "stages",
+                label: String(saved.label || "Vaihe"),
+                current: Number(saved.current || 0),
+                total: Number(saved.total || 0),
+                unit: String(saved.unit || ""),
+                currentStage: String(saved.currentStage || ""),
+                stages: Array.isArray(saved.stages) ? saved.stages.map(String) : [],
+                note: String(saved.note || ""),
+              })
+            }
+          }
         }
-      }
 
-      // These queries touch tables whose RLS is intentionally scoped to
-      // authenticated users. A public event can still be viewed anonymously.
-      if (user) {
-        const structureResult = await getEventStructure(eventId)
-        const standingsResult = await getEventStandings(eventId)
-        setStandings(standingsResult.standings || [])
-        setStructure({
-          sessions: structureResult.sessions,
-          rounds: structureResult.rounds,
-          matches: structureResult.matches || [],
-          participants: structureResult.participants || [],
-          entries: structureResult.entries || [],
-          profiles: structureResult.profiles || [],
-        })
-      } else {
-        setStandings([])
-        setStructure({ sessions: [], rounds: [], matches: [], participants: [], entries: [], profiles: [] })
+        // These queries touch tables whose RLS is intentionally scoped to
+        // authenticated users. A public event can still be viewed anonymously.
+        if (user) {
+          const structureResult = await getEventStructure(eventId)
+          const standingsResult = await getEventStandings(eventId)
+          if (!cancelled) {
+            setStandings(standingsResult.standings || [])
+            setStructure({
+              sessions: structureResult.sessions,
+              rounds: structureResult.rounds,
+              matches: structureResult.matches || [],
+              participants: structureResult.participants || [],
+              entries: structureResult.entries || [],
+              profiles: structureResult.profiles || [],
+            })
+          }
+        } else if (!cancelled) {
+          setStandings([])
+          setStructure({ sessions: [], rounds: [], matches: [], participants: [], entries: [], profiles: [] })
+        }
+      } catch (loadError) {
+        console.error("Failed to load event details:", loadError)
+        if (!cancelled) {
+          setError(loadError instanceof Error ? loadError.message : "Failed to load event")
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
       }
-
-      setLoading(false)
     }
 
     void loadEvent()
+    return () => {
+      cancelled = true
+    }
   }, [eventId])
 
   const refreshEventStructure = async () => {
@@ -635,6 +658,85 @@ export default function EventDetailsPage() {
             </div>
           </ArchiveCardContent>
         </ArchiveCard>
+      </div>
+    )
+  }
+
+  // Anonymous visitors get a deliberately small public-only view. This keeps
+  // the public event URL independent of authenticated-only controls and data.
+  if (!currentUserId && event.privacy === "public") {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-surface-dark to-background">
+        <div className="container mx-auto max-w-3xl px-4 py-8">
+          <div className="mb-6">
+            <ArchiveCardButton onClick={() => router.push("/events")} icon={<ArrowLeft className="w-4 h-4" />}>
+              {t("events.backToEvents") || "Takaisin tapahtumiin"}
+            </ArchiveCardButton>
+          </div>
+          <ArchiveCard>
+            <ArchiveCardHeader>
+              <div className="flex flex-col items-center gap-4 text-center">
+                {event.event_type && EVENT_TYPE_IMAGES[event.event_type] && (
+                  <img
+                    src={EVENT_TYPE_IMAGES[event.event_type]}
+                    alt={t(`events.types.${event.event_type}`)}
+                    className="h-32 w-32 rounded-lg border border-accent-gold/30 object-cover"
+                  />
+                )}
+                <div className="w-full">
+                  <ArchiveCardTitle className="text-3xl normal-case break-words">
+                    {event.title}
+                  </ArchiveCardTitle>
+                  <div className="mt-2 flex items-center justify-center gap-2 text-muted-foreground">
+                    {getPrivacyIcon(event.privacy)}
+                    <span className="text-sm">{getPrivacyLabel(event.privacy, t)}</span>
+                  </div>
+                </div>
+              </div>
+            </ArchiveCardHeader>
+            <ArchiveCardContent className="space-y-5">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-accent-gold" />
+                  <span>{formatEventDate(event.starts_at, locale)}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Clock className="h-5 w-5 text-accent-gold" />
+                  <span>{formatEventTime(event.starts_at, event.ends_at, locale)}</span>
+                </div>
+              </div>
+              {event.location && (
+                <div className="flex items-start gap-3">
+                  <MapPin className="mt-1 h-5 w-5 text-accent-gold" />
+                  <span>{event.location}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-3">
+                <Users className="h-5 w-5 text-accent-gold" />
+                <span>
+                  {event.participant_count || 0}
+                  {event.max_players && `/${event.max_players}`} {t("events.attending") || "osallistujaa"}
+                </span>
+              </div>
+              {event.description && (
+                <div>
+                  <h3 className="mb-2 font-cinzel text-accent-gold">
+                    {t("events.description") || "Kuvaus"}
+                  </h3>
+                  <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground">{event.description}</p>
+                </div>
+              )}
+              <div className="border-t border-accent-gold/20 pt-5 text-center">
+                <p className="text-sm text-muted-foreground">
+                  {t("auth.loginRequired") || "Kirjaudu sisään osallistuaksesi tapahtumaan."}
+                </p>
+                <ArchiveCardButton active onClick={() => router.push("/login")}>
+                  {t("auth.login") || "Kirjaudu sisään"}
+                </ArchiveCardButton>
+              </div>
+            </ArchiveCardContent>
+          </ArchiveCard>
+        </div>
       </div>
     )
   }
