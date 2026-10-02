@@ -423,6 +423,7 @@
     "noMyEvents": "No My Events Yet",
     "noMyEventsDesc": "Create your first event or join an event to see it here.",
     "loginRequired": "Login Required",
+    "enter": "Enter",
     "loginToSeeMyEvents": "Please log in to see your events.",
     "eventCreated": "Event created successfully!",
     "createFailed": "Failed to create event. Please try again.",
