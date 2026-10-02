@@ -410,6 +410,7 @@
     "noMyEvents": "Ei omia tapahtumia",
     "noMyEventsDesc": "Luo oma tapahtumasi tai liity tapahtumaan nähdäksesi sen täällä.",
     "loginRequired": "Kirjautuminen vaaditaan",
+    "enter": "Astu sisään",
     "loginToSeeMyEvents": "Kirjaudu sisään nähdäksesi omat tapahtumasi.",
     "eventCreated": "Tapahtuma luotu onnistuneesti!",
     "createFailed": "Tapahtuman luonti epäonnistui. Yritä uudelleen.",
