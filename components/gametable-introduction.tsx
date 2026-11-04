@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import { createPortal } from "react-dom"
 import { useEffect, useState } from "react"
 import { Compass, Pause, Play, SkipForward, X } from "lucide-react"
 import { ArchiveFrame } from "@/components/archive-frame"
@@ -180,9 +181,9 @@ export function GameTableIntroduction({ locale = "fi", showTrigger = true }: { l
         {language === "fi" ? "Tutustu GameTableen" : "Discover GameTable"}
       </button>}
 
-      {open && (
+      {open && createPortal(
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-black/80 px-3 py-[max(12px,env(safe-area-inset-top))] pb-[max(12px,env(safe-area-inset-bottom))] text-white backdrop-blur-sm"
+          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-black/85 px-3 pt-[max(12px,env(safe-area-inset-top))] pb-[max(12px,env(safe-area-inset-bottom))] text-white backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
           aria-label={language === "fi" ? "Tutustu GameTableen" : "Discover GameTable"}
@@ -190,7 +191,7 @@ export function GameTableIntroduction({ locale = "fi", showTrigger = true }: { l
           <ArchiveFrame
             weight="regular"
             cornerSize="md"
-            className="h-full max-h-[850px] w-full max-w-5xl"
+            className="h-[min(88dvh,850px)] max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-24px)] w-full max-w-5xl"
           >
             <div className="relative flex h-full min-h-0 flex-col bg-[#090706]">
               <div className="relative min-h-0 flex-1 overflow-hidden">
@@ -264,7 +265,8 @@ export function GameTableIntroduction({ locale = "fi", showTrigger = true }: { l
               </div>
             </div>
           </ArchiveFrame>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   )
