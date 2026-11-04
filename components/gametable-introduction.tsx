@@ -92,7 +92,7 @@ const scenes: Record<"fi" | "en", Scene[]> = {
 const SCENE_DURATION = 11000
 const TEXT_DELAY = 2200
 
-export function GameTableIntroduction({ locale = "fi" }: { locale?: string }) {
+export function GameTableIntroduction({ locale = "fi", showTrigger = true }: { locale?: string; showTrigger?: boolean }) {
   const language = locale === "en" ? "en" : "fi"
   const copy = scenes[language]
   const [open, setOpen] = useState(false)
@@ -101,6 +101,15 @@ export function GameTableIntroduction({ locale = "fi" }: { locale?: string }) {
   const [paused, setPaused] = useState(false)
   const scene = copy[sceneIndex]
   const textVisible = elapsed >= TEXT_DELAY
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.location.search.includes("intro=1")) return
+    setSceneIndex(0)
+    setElapsed(0)
+    setPaused(false)
+    setOpen(true)
+    window.history.replaceState({}, "", window.location.pathname + window.location.hash)
+  }, [])
 
   useEffect(() => {
     if (!open || paused) return
@@ -156,14 +165,14 @@ export function GameTableIntroduction({ locale = "fi" }: { locale?: string }) {
 
   return (
     <>
-      <button
+      {showTrigger && <button
         type="button"
         onClick={start}
         className="mt-4 inline-flex items-center gap-2 rounded-lg border border-[var(--archive-gold,#d9b65c)]/60 bg-black/35 px-5 py-3 font-cinzel text-xs font-semibold uppercase tracking-[0.14em] text-[var(--archive-gold,#d9b65c)] shadow-lg backdrop-blur-sm transition-all hover:bg-[var(--archive-gold,#d9b65c)]/15 hover:border-[var(--archive-gold,#d9b65c)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--archive-gold,#d9b65c)]"
       >
         <Compass className="h-4 w-4" aria-hidden="true" />
         {language === "fi" ? "Tutustu GameTableen" : "Discover GameTable"}
-      </button>
+      </button>}
 
       {open && (
         <div
