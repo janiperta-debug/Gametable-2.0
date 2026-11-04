@@ -7,11 +7,14 @@ import { useTranslation } from "@/lib/i18n"
 import { getRegisteredRoomThemePage, getRoomThemeAssets } from "@/lib/room-page-registry"
 import { useState } from "react"
 import { ArchiveFrame } from "@/components/archive-frame"
+import { GameTableIntroduction } from "@/components/gametable-introduction"
+import { useUser } from "@/hooks/useUser"
 
 export default function HomePage() {
   const { currentAppTheme } = useAppTheme()
   const { t, locale } = useTranslation()
   const [descriptionOpen, setDescriptionOpen] = useState(true)
+  const { user, loading } = useUser()
 
   // Pull the full description and hero image from the ACTIVE theme's room page
   // so the home screen always reflects the current room. Falls back to the
@@ -89,6 +92,12 @@ export default function HomePage() {
           )}
         </ArchiveFrame>
       </div>
+
+      {!loading && !user && (
+        <div className="relative z-10 max-w-lg lg:max-w-xl mx-auto md:mx-0 text-center md:text-left">
+          <GameTableIntroduction locale={locale} />
+        </div>
+      )}
     </div>
   )
 }
