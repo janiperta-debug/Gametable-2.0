@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import Link from "next/link"
 import { createPortal } from "react-dom"
 import { useEffect, useState } from "react"
 import { Compass, Pause, Play, SkipForward, X } from "lucide-react"
@@ -101,7 +102,8 @@ export function GameTableIntroduction({ locale = "fi", showTrigger = true }: { l
   const [sceneIndex, setSceneIndex] = useState(0)
   const [elapsed, setElapsed] = useState(0)
   const [paused, setPaused] = useState(false)
-  const scene = copy[sceneIndex]
+  const isFinalFrame = sceneIndex >= copy.length
+  const scene = copy[Math.min(sceneIndex, copy.length - 1)]
   const textVisible = elapsed >= TEXT_DELAY
 
   useEffect(() => {
@@ -119,18 +121,18 @@ export function GameTableIntroduction({ locale = "fi", showTrigger = true }: { l
   }, [])
 
   useEffect(() => {
-    if (!open || paused) return
+    if (!open || paused || isFinalFrame) return
     const timer = window.setInterval(() => {
       setElapsed((current) => {
         if (current + 100 >= SCENE_DURATION) {
-          setSceneIndex((index) => (index + 1) % copy.length)
+          setSceneIndex((index) => Math.min(index + 1, copy.length))
           return 0
         }
         return current + 100
       })
     }, 100)
     return () => window.clearInterval(timer)
-  }, [open, paused, copy.length])
+  }, [open, paused, isFinalFrame])
 
   useEffect(() => {
     if (!open) return
@@ -143,7 +145,7 @@ export function GameTableIntroduction({ locale = "fi", showTrigger = true }: { l
         setPaused((value) => !value)
       }
       if (event.key === "ArrowRight") {
-        setSceneIndex((index) => Math.min(index + 1, copy.length - 1))
+        setSceneIndex((index) => Math.min(index + 1, copy.length))
         setElapsed(0)
       }
     }
@@ -162,11 +164,11 @@ export function GameTableIntroduction({ locale = "fi", showTrigger = true }: { l
   }
 
   const next = () => {
-    if (sceneIndex === copy.length - 1) {
+    if (isFinalFrame) {
       setOpen(false)
       return
     }
-    setSceneIndex((index) => index + 1)
+    setSceneIndex((index) => Math.min(index + 1, copy.length))
     setElapsed(0)
   }
 
@@ -211,7 +213,7 @@ export function GameTableIntroduction({ locale = "fi", showTrigger = true }: { l
                       <div key={item.eyebrow} className="h-1 flex-1 overflow-hidden rounded-full bg-white/30">
                         <div
                           className="h-full bg-[var(--archive-gold,#d9b65c)] transition-[width] duration-100"
-                          style={{ width: index < sceneIndex ? "100%" : index === sceneIndex ? `${(elapsed / SCENE_DURATION) * 100}%` : "0%" }}
+                          style={{ width: index < sceneIndex || isFinalFrame ? "100%" : index === sceneIndex ? `${(elapsed / SCENE_DURATION) * 100}%` : "0%" }}
                         />
                       </div>
                     ))}
@@ -228,16 +230,42 @@ export function GameTableIntroduction({ locale = "fi", showTrigger = true }: { l
 
                 <div className="absolute inset-x-0 bottom-0 z-10 px-5 pb-5 pt-24 sm:px-10 sm:pb-10 sm:pt-32">
                   <div className="mx-auto max-w-3xl text-center sm:text-left">
-                    <p className={`mb-2 font-cinzel text-[10px] uppercase tracking-[0.22em] text-[var(--archive-gold,#d9b65c)] transition-all duration-700 sm:text-xs ${textVisible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"}`}>
-                      {scene.eyebrow}
-                    </p>
-                    <h1 className={`font-cinzel text-2xl font-semibold leading-tight drop-shadow-lg transition-all duration-700 sm:text-4xl lg:text-5xl ${textVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}>
-                      {scene.title}
-                    </h1>
-                    <div className={`mx-auto mt-3 max-w-2xl space-y-2 text-sm leading-relaxed text-white/95 drop-shadow-md transition-all duration-700 sm:mx-0 sm:mt-5 sm:text-lg ${textVisible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"}`}>
-                      <p>{scene.first}</p>
-                      <p className="text-white/75">{scene.second}</p>
-                    </div>
+                    {isFinalFrame ? (
+                      <>
+                        <p className="mb-2 font-cinzel text-[10px] uppercase tracking-[0.22em] text-[var(--archive-gold,#d9b65c)]">
+                          {language === "fi" ? "Ovet ovat avoinna" : "The doors are open"}
+                        </p>
+                        <h1 className="font-cinzel text-2xl font-semibold leading-tight drop-shadow-lg sm:text-4xl lg:text-5xl">
+                          {language === "fi" ? "Liity GameTableen" : "Join GameTable"}
+                        </h1>
+                        <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-white/95 drop-shadow-md sm:mx-0 sm:mt-5 sm:text-lg">
+                          {language === "fi"
+                            ? "Astu sisään, rakenna oma pelikokoelmasi ja löydä peliseuraa. Seuraava pelikokemus alkaa tästä."
+                            : "Step inside, build your game collection and find fellow players. Your next gaming experience starts here."}
+                        </p>
+                        <div className="mt-5 flex flex-wrap justify-center gap-3 sm:justify-start">
+                          <Link href="/auth/login" onClick={() => setOpen(false)} className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--archive-gold,#d9b65c)]/80 bg-black/50 px-5 py-2.5 font-cinzel text-xs uppercase tracking-wider text-[var(--archive-gold,#d9b65c)] transition hover:bg-[var(--archive-gold,#d9b65c)]/15">
+                            {language === "fi" ? "Kirjaudu sisään" : "Log in"}
+                          </Link>
+                          <Link href="/auth/signup" onClick={() => setOpen(false)} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--archive-gold,#d9b65c)] px-5 py-2.5 font-cinzel text-xs font-semibold uppercase tracking-wider text-[#211508] transition hover:brightness-110">
+                            {language === "fi" ? "Rekisteröidy" : "Sign up"}
+                          </Link>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <p className={`mb-2 font-cinzel text-[10px] uppercase tracking-[0.22em] text-[var(--archive-gold,#d9b65c)] transition-all duration-700 sm:text-xs ${textVisible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"}`}>
+                          {scene.eyebrow}
+                        </p>
+                        <h1 className={`font-cinzel text-2xl font-semibold leading-tight drop-shadow-lg transition-all duration-700 sm:text-4xl lg:text-5xl ${textVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}>
+                          {scene.title}
+                        </h1>
+                        <div className={`mx-auto mt-3 max-w-2xl space-y-2 text-sm leading-relaxed text-white/95 drop-shadow-md transition-all duration-700 sm:mx-0 sm:mt-5 sm:text-lg ${textVisible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"}`}>
+                          <p>{scene.first}</p>
+                          <p className="text-white/75">{scene.second}</p>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -245,20 +273,20 @@ export function GameTableIntroduction({ locale = "fi", showTrigger = true }: { l
               <div className="flex shrink-0 items-center justify-between gap-3 border-t border-[var(--archive-gold,#d9b65c)]/35 bg-[#1b1009] px-4 py-3 sm:px-7 sm:py-4">
                 <button
                   type="button"
-                  onClick={() => setPaused((value) => !value)}
+                  onClick={() => isFinalFrame ? setOpen(false) : setPaused((value) => !value)}
                   className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/25 bg-black/35 px-4 py-2 text-sm text-white/90 transition hover:bg-black/60"
                 >
-                  {paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
-                  <span>{paused ? (language === "fi" ? "Jatka" : "Resume") : (language === "fi" ? "Tauko" : "Pause")}</span>
+                  {isFinalFrame ? <X className="h-4 w-4" /> : paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+                  <span>{isFinalFrame ? (language === "fi" ? "Sulje esittely" : "Close introduction") : paused ? (language === "fi" ? "Jatka" : "Resume") : (language === "fi" ? "Tauko" : "Pause")}</span>
                 </button>
                 <div className="flex items-center gap-3">
-                  <span className="font-cinzel text-xs tracking-widest text-white/65">{sceneIndex + 1} / {copy.length}</span>
+                  <span className="font-cinzel text-xs tracking-widest text-white/65">{isFinalFrame ? (language === "fi" ? "Valmis" : "Complete") : `${sceneIndex + 1} / ${copy.length}`}</span>
                   <button
                     type="button"
                     onClick={next}
                     className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--archive-gold,#d9b65c)]/70 bg-black/45 px-4 py-2 font-cinzel text-xs uppercase tracking-wider text-[var(--archive-gold,#d9b65c)] transition hover:bg-[var(--archive-gold,#d9b65c)]/15"
                   >
-                    {sceneIndex === copy.length - 1 ? (language === "fi" ? "Sulje" : "Finish") : (language === "fi" ? "Seuraava" : "Next")}
+                    {isFinalFrame ? (language === "fi" ? "Sulje" : "Close") : (language === "fi" ? "Seuraava" : "Next")}
                     <SkipForward className="h-4 w-4" />
                   </button>
                 </div>
