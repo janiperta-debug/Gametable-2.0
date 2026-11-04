@@ -1896,3 +1896,19 @@ body {
   --archive-ink-faint: #6a5226;
   --archive-inset-bg: rgba(74, 52, 20, 0.1);
 }
+
+
+/* Cinematic still-image movement for the GameTable introduction */
+@keyframes gametable-scene-drift {
+  from { transform: scale(1.02) translate3d(0, 0, 0); }
+  to { transform: scale(1.12) translate3d(-1.2%, -0.8%, 0); }
+}
+.animate-gametable-scene {
+  animation: gametable-scene-drift 11s ease-in-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-gametable-scene {
+    animation: none;
+    transform: none;
+  }
+}
