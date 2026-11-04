@@ -101,15 +101,8 @@ export function GameTableIntroduction({ locale = "fi", showTrigger = true }: { l
   const [sceneIndex, setSceneIndex] = useState(0)
   const [elapsed, setElapsed] = useState(0)
   const [paused, setPaused] = useState(false)
-  const [textVisible, setTextVisible] = useState(false)
   const scene = copy[sceneIndex]
-
-  useEffect(() => {
-    if (!open) return
-    setTextVisible(false)
-    const revealTimer = window.setTimeout(() => setTextVisible(true), TEXT_DELAY)
-    return () => window.clearTimeout(revealTimer)
-  }, [open, sceneIndex])
+  const textVisible = elapsed >= TEXT_DELAY
 
   useEffect(() => {
     if (typeof window === "undefined") return
