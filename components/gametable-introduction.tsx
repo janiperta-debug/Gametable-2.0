@@ -93,7 +93,8 @@ const scenes: Record<"fi" | "en", Scene[]> = {
 }
 
 const SCENE_DURATION = 11000
-const TEXT_DELAY = 2200
+const TEXT_DELAY = 1800
+const SCENE_MOTIONS = ["gametable-zoom-in", "gametable-drift-right", "gametable-zoom-detail", "gametable-drift-left", "gametable-zoom-out"]
 
 export function GameTableIntroduction({ locale = "fi", showTrigger = true }: { locale?: string; showTrigger?: boolean }) {
   const language = locale === "en" ? "en" : "fi"
@@ -204,7 +205,15 @@ export function GameTableIntroduction({ locale = "fi", showTrigger = true }: { l
                   fill
                   priority
                   sizes="(max-width: 768px) 94vw, 960px"
-                  className="object-cover animate-gametable-scene"
+                  className="object-cover"
+                  style={{
+                    animationName: SCENE_MOTIONS[sceneIndex % SCENE_MOTIONS.length],
+                    animationDuration: `${SCENE_DURATION}ms`,
+                    animationTimingFunction: "ease-in-out",
+                    animationFillMode: "both",
+                    animationPlayState: paused ? "paused" : "running",
+                    transformOrigin: "center center",
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/10 to-black/90" />
                 <div className="absolute inset-x-4 top-4 z-20 flex items-center gap-2 sm:inset-x-7 sm:top-6">
@@ -254,13 +263,13 @@ export function GameTableIntroduction({ locale = "fi", showTrigger = true }: { l
                       </>
                     ) : (
                       <>
-                        <p className={`mb-2 font-cinzel text-[10px] uppercase tracking-[0.22em] text-[var(--archive-gold,#d9b65c)] transition-all duration-700 sm:text-xs ${textVisible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"}`}>
+                        <p className={`mb-2 font-cinzel text-[10px] uppercase tracking-[0.22em] text-[var(--archive-gold,#d9b65c)] sm:text-xs ${textVisible ? "animate-intro-eyebrow" : "translate-y-3 opacity-0"}`} style={{ animationPlayState: paused ? "paused" : "running" }}>
                           {scene.eyebrow}
                         </p>
-                        <h1 className={`font-cinzel text-2xl font-semibold leading-tight drop-shadow-lg transition-all duration-700 sm:text-4xl lg:text-5xl ${textVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}>
+                        <h1 className={`font-cinzel text-2xl font-semibold leading-tight drop-shadow-lg sm:text-4xl lg:text-5xl ${textVisible ? "animate-intro-title" : "translate-y-4 opacity-0"}`} style={{ animationPlayState: paused ? "paused" : "running" }}>
                           {scene.title}
                         </h1>
-                        <div className={`mx-auto mt-3 max-w-2xl space-y-2 text-sm leading-relaxed text-white/95 drop-shadow-md transition-all duration-700 sm:mx-0 sm:mt-5 sm:text-lg ${textVisible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"}`}>
+                        <div className={`mx-auto mt-3 max-w-2xl space-y-2 text-sm leading-relaxed text-white/95 drop-shadow-md sm:mx-0 sm:mt-5 sm:text-lg ${textVisible ? "animate-intro-copy" : "translate-y-3 opacity-0"}`} style={{ animationPlayState: paused ? "paused" : "running" }}>
                           <p>{scene.first}</p>
                           <p className="text-white/75">{scene.second}</p>
                         </div>
