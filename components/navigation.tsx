@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
-import { User, Menu, X, Zap, LogOut, Bell, Loader2, Award, MessageCircle, Settings, Bookmark, Home, ShoppingBag, Mail, Archive, Users, Calendar, DoorOpen, Trophy, Phone } from "lucide-react"
+import { User, Menu, X, Zap, LogOut, Bell, Loader2, Award, MessageCircle, Settings, Bookmark, Home, ShoppingBag, Mail, Archive, Users, Calendar, DoorOpen, Trophy, Phone, Compass } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useAppTheme } from "@/components/app-theme-provider"
 import { useTranslations } from "@/lib/i18n"
@@ -110,7 +110,11 @@ export function Navigation() {
   }))
   const crestRouteIcons: Record<MobileNavRoute, typeof Home> = { "/collection": Archive, "/discover": Users, "/events": Calendar, "/themes": DoorOpen, "/marketplace": ShoppingBag, "/messages": MessageCircle, "/trophies": Trophy, "/contact": Phone }
   const crestVariableMenuItems = MOBILE_NAV_ROUTES.filter(href => !mobileNavRoutes.includes(href)).map(href => ({ href, label: ({ "/collection": t("nav.collection"), "/discover": t("nav.community"), "/events": t("nav.events"), "/themes": t("nav.themes"), "/marketplace": t("nav.marketplace"), "/messages": t("nav.messages"), "/trophies": t("nav.trophies"), "/contact": t("nav.contact") } as Record<MobileNavRoute, string>)[href], icon: crestRouteIcons[href], ...(href === "/messages" ? { badge: unreadMessageCount } : {}) }))
-  const crestMenuItems = [{ href: "/home", label: t("nav.home"), icon: Home }, ...crestVariableMenuItems]
+  const crestMenuItems = [
+    { href: "/home", label: t("nav.home"), icon: Home },
+    ...(user && !loading ? [{ href: "/home?intro=1", label: "Tutustu GameTableen", icon: Compass }] : []),
+    ...crestVariableMenuItems,
+  ]
   const getCrestImage = (theme: string) => { const crestMap: { [key: string]: string } = { "main-hall": "/images/mainhall-crest-original.png", library: "/images/crests/library-crest.png", bar: "/images/bar-crest.png", "fireside-lounge": "/images/fireside-lounge-crest.png", spa: "/crests/spa-crest.png", conservatory: "/images/conservatory-crest.png", gallery: "/images/gallery-crest.png", artroom: "/crests/artroom-crest.png", ballroom: "/images/ballroom-crest.png", "map-room": "/images/map-room-crest.png", observatory: "/images/observatory-crest.png", "theater-room": "/images/theater-room-crest.png", "clock-tower": "/images/clock-tower-crest.png", "war-room": "/images/war-room-crest.png", "alchemist-laboratory": "/crests/alchemist-crest.png", dungeon: "/crests/dungeon-crest.png", "underground-temple": "/crests/temple-crest.png", "crystal-cavern": "/crests/crystal-crest.png", "treasure-vault": "/crests/treasure-crest.png" }; return crestMap[theme] || crestMap["main-hall"] }
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
 
@@ -164,6 +168,10 @@ export function Navigation() {
                 {isUserDropdownOpen && (
                   <ArchiveFrame weight="thin" corners={false} className="absolute right-0 mt-2 w-48 rounded-lg">
                     <div className="overflow-hidden rounded-[0.4rem] bg-[var(--archive-wood-base,#2b190c)]/90 backdrop-blur-sm">
+                      <Link href="/home?intro=1" className="flex items-center space-x-3 border-b border-accent-gold/20 px-4 py-3 transition-colors hover:bg-accent-gold/10" onClick={() => setIsUserDropdownOpen(false)}>
+                        <Compass className="h-4 w-4 text-accent-gold" />
+                        <span className="font-cinzel text-sm text-foreground">Tutustu GameTableen</span>
+                      </Link>
                       <Link href="/profile" className="flex items-center space-x-3 px-4 py-3 transition-colors hover:bg-accent-gold/10" onClick={() => setIsUserDropdownOpen(false)}>
                         <User className="h-4 w-4 text-accent-gold" />
                         <span className="font-cinzel text-sm text-foreground">{t("nav.profile")}</span>
