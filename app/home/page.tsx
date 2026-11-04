@@ -93,9 +93,9 @@ export default function HomePage() {
         </ArchiveFrame>
       </div>
 
-      {!loading && !user && (
+      {!loading && (
         <div className="relative z-10 max-w-lg lg:max-w-xl mx-auto md:mx-0 text-center md:text-left">
-          <GameTableIntroduction locale={locale} />
+          <GameTableIntroduction locale={locale} showTrigger={!user} />
         </div>
       )}
     </div>
