@@ -244,10 +244,10 @@ export function GameTableIntroduction({ locale = "fi", showTrigger = true }: { l
                             : "Step inside, build your game collection and find fellow players. Your next gaming experience starts here."}
                         </p>
                         <div className="mt-5 flex flex-wrap justify-center gap-3 sm:justify-start">
-                          <Link href="/auth/login" onClick={() => setOpen(false)} className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--archive-gold,#d9b65c)]/80 bg-black/50 px-5 py-2.5 font-cinzel text-xs uppercase tracking-wider text-[var(--archive-gold,#d9b65c)] transition hover:bg-[var(--archive-gold,#d9b65c)]/15">
+                          <Link href="/auth/login" className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--archive-gold,#d9b65c)]/80 bg-black/50 px-5 py-2.5 font-cinzel text-xs uppercase tracking-wider text-[var(--archive-gold,#d9b65c)] transition hover:bg-[var(--archive-gold,#d9b65c)]/15">
                             {language === "fi" ? "Kirjaudu sisään" : "Log in"}
                           </Link>
-                          <Link href="/auth/signup" onClick={() => setOpen(false)} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--archive-gold,#d9b65c)] px-5 py-2.5 font-cinzel text-xs font-semibold uppercase tracking-wider text-[#211508] transition hover:brightness-110">
+                          <Link href="/auth/signup" className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--archive-gold,#d9b65c)] px-5 py-2.5 font-cinzel text-xs font-semibold uppercase tracking-wider text-[#211508] transition hover:brightness-110">
                             {language === "fi" ? "Rekisteröidy" : "Sign up"}
                           </Link>
                         </div>
