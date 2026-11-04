@@ -103,12 +103,17 @@ export function GameTableIntroduction({ locale = "fi", showTrigger = true }: { l
   const textVisible = elapsed >= TEXT_DELAY
 
   useEffect(() => {
-    if (typeof window === "undefined" || !window.location.search.includes("intro=1")) return
-    setSceneIndex(0)
-    setElapsed(0)
-    setPaused(false)
-    setOpen(true)
-    window.history.replaceState({}, "", window.location.pathname + window.location.hash)
+    if (typeof window === "undefined") return
+    const launch = () => {
+      setSceneIndex(0)
+      setElapsed(0)
+      setPaused(false)
+      setOpen(true)
+      window.history.replaceState({}, "", window.location.pathname + window.location.hash)
+    }
+    if (window.location.search.includes("intro=1")) launch()
+    window.addEventListener("gametable:open-introduction", launch)
+    return () => window.removeEventListener("gametable:open-introduction", launch)
   }, [])
 
   useEffect(() => {
