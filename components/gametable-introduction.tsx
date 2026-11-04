@@ -39,7 +39,7 @@ const scenes: Record<"fi" | "en", Scene[]> = {
       second: "Pelaaminen on hauskempaa, kun kokemukset voi jakaa muiden kanssa.",
     },
     {
-      image: "/images/heroes/events/ballroom.jpg",
+      image: "/images/heroes/events/conservatory.jpg",
       eyebrow: "Tapahtumat",
       title: "Pelihetkistä yhteisiä tapahtumia",
       first: "Löydä pelitapahtumia ja lähde mukaan järjestettyyn pelaamiseen.",
@@ -76,7 +76,7 @@ const scenes: Record<"fi" | "en", Scene[]> = {
       second: "Gaming is even better when you can share the experience.",
     },
     {
-      image: "/images/heroes/events/ballroom.jpg",
+      image: "/images/heroes/events/conservatory.jpg",
       eyebrow: "Events",
       title: "Turn game nights into shared events",
       first: "Discover gaming events and join organised play.",
