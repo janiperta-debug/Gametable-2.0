@@ -51,6 +51,50 @@ create unique index if not exists group_memberships_one_founder_idx
   on public.group_memberships (group_id)
   where role = 'founder';
 
+-- RLS helper functions live outside the exposed public schema. They only answer
+-- membership/role questions for the current authenticated user.
+create schema if not exists private;
+revoke all on schema private from public;
+grant usage on schema private to authenticated;
+
+create or replace function private.is_group_member(p_group_id uuid, p_user_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select p_user_id = (select auth.uid())
+    and exists (
+      select 1 from public.group_memberships gm
+      where gm.group_id = p_group_id
+        and gm.user_id = p_user_id
+        and gm.status = 'active'
+    );
+$$;
+
+create or replace function private.is_group_admin(p_group_id uuid, p_user_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select p_user_id = (select auth.uid())
+    and exists (
+      select 1 from public.group_memberships gm
+      where gm.group_id = p_group_id
+        and gm.user_id = p_user_id
+        and gm.status = 'active'
+        and gm.role in ('founder', 'admin')
+    );
+$$;
+
+revoke all on function private.is_group_member(uuid, uuid) from public, anon;
+revoke all on function private.is_group_admin(uuid, uuid) from public, anon;
+grant execute on function private.is_group_member(uuid, uuid) to authenticated;
+grant execute on function private.is_group_admin(uuid, uuid) to authenticated;
+
 alter table public.groups enable row level security;
 alter table public.group_memberships enable row level security;
 
@@ -63,12 +107,7 @@ create policy "Groups are discoverable"
   using (
     visibility in ('public', 'private')
     or created_by = (select auth.uid())
-    or exists (
-      select 1 from public.group_memberships gm
-      where gm.group_id = groups.id
-        and gm.user_id = (select auth.uid())
-        and gm.status = 'active'
-    )
+    or private.is_group_member(id, (select auth.uid()))
   );
 
 drop policy if exists "Authenticated users can create groups" on public.groups;
@@ -81,24 +120,8 @@ drop policy if exists "Group admins can update groups" on public.groups;
 create policy "Group admins can update groups"
   on public.groups for update
   to authenticated
-  using (
-    exists (
-      select 1 from public.group_memberships gm
-      where gm.group_id = groups.id
-        and gm.user_id = (select auth.uid())
-        and gm.status = 'active'
-        and gm.role in ('founder', 'admin')
-    )
-  )
-  with check (
-    exists (
-      select 1 from public.group_memberships gm
-      where gm.group_id = groups.id
-        and gm.user_id = (select auth.uid())
-        and gm.status = 'active'
-        and gm.role in ('founder', 'admin')
-    )
-  );
+  using (private.is_group_admin(id, (select auth.uid())))
+  with check (private.is_group_admin(id, (select auth.uid())));
 
 drop policy if exists "Group founders can delete groups" on public.groups;
 create policy "Group founders can delete groups"
@@ -115,25 +138,19 @@ create policy "Group founders can delete groups"
     )
   );
 
--- Membership rows are visible to active members of the group. Public group member
--- lists are intentionally not exposed in this first migration; the UI can later add
--- a deliberate visibility control without changing the membership model.
+-- Membership rows are visible to active members of the group, plus the row's owner
+-- (so a pending request can be displayed to its requester).
 drop policy if exists "Group members can view memberships" on public.group_memberships;
 create policy "Group members can view memberships"
   on public.group_memberships for select
   to authenticated
   using (
     user_id = (select auth.uid())
-    or exists (
-      select 1 from public.group_memberships viewer
-      where viewer.group_id = group_memberships.group_id
-        and viewer.user_id = (select auth.uid())
-        and viewer.status = 'active'
-    )
+    or private.is_group_member(group_id, (select auth.uid()))
   );
 
--- A user may join an open group directly or request membership in an approval group.
--- Role is always member on self-service inserts; founder/admin roles are never self-assigned.
+-- A user may join an open public group directly or request membership in an
+-- approval-based public/private group. Role is always member on self-service inserts.
 drop policy if exists "Users can join or request group membership" on public.group_memberships;
 create policy "Users can join or request group membership"
   on public.group_memberships for insert
@@ -151,40 +168,8 @@ create policy "Users can join or request group membership"
     )
   );
 
--- Users can leave themselves; admins may remove members or approve requests.
-drop policy if exists "Users can leave groups" on public.group_memberships;
-create policy "Users can leave groups"
-  on public.group_memberships for delete
-  to authenticated
-  using (user_id = (select auth.uid()) and role <> 'founder');
-
-drop policy if exists "Group admins manage memberships" on public.group_memberships;
-create policy "Group admins manage memberships"
-  on public.group_memberships for update
-  to authenticated
-  using (
-    exists (
-      select 1 from public.group_memberships admin
-      where admin.group_id = group_memberships.group_id
-        and admin.user_id = (select auth.uid())
-        and admin.status = 'active'
-        and admin.role in ('founder', 'admin')
-    )
-    and role <> 'founder'
-  )
-  with check (
-    exists (
-      select 1 from public.group_memberships admin
-      where admin.group_id = group_memberships.group_id
-        and admin.user_id = (select auth.uid())
-        and admin.status = 'active'
-        and admin.role in ('founder', 'admin')
-    )
-    and role in ('admin', 'member')
-  );
-
--- The creator is added as the founder in a separate insert by the trusted server action.
--- This policy only permits that exact founder row; ordinary users cannot assign roles.
+-- The creator is added as founder by the server action; this policy only permits
+-- that exact founder row and cannot be used to assign a role in another group.
 drop policy if exists "Creators add their founder membership" on public.group_memberships;
 create policy "Creators add their founder membership"
   on public.group_memberships for insert
@@ -198,4 +183,23 @@ create policy "Creators add their founder membership"
       where g.id = group_memberships.group_id
         and g.created_by = (select auth.uid())
     )
+  );
+
+drop policy if exists "Users can leave groups" on public.group_memberships;
+create policy "Users can leave groups"
+  on public.group_memberships for delete
+  to authenticated
+  using (user_id = (select auth.uid()) and role <> 'founder');
+
+drop policy if exists "Group admins manage memberships" on public.group_memberships;
+create policy "Group admins manage memberships"
+  on public.group_memberships for update
+  to authenticated
+  using (
+    private.is_group_admin(group_id, (select auth.uid()))
+    and role <> 'founder'
+  )
+  with check (
+    private.is_group_admin(group_id, (select auth.uid()))
+    and role in ('admin', 'member')
   );
