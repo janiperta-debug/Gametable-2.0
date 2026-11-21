@@ -90,10 +90,28 @@ as $$
     );
 $$;
 
+create or replace function private.is_group_founder(p_group_id uuid, p_user_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $
+  select p_user_id = (select auth.uid())
+    and exists (
+      select 1 from public.group_memberships gm
+      where gm.group_id = p_group_id
+        and gm.user_id = p_user_id
+        and gm.status = 'active'
+        and gm.role = 'founder'
+    );
+$;
+
 revoke all on function private.is_group_member(uuid, uuid) from public, anon;
+revoke all on function private.is_group_founder(uuid, uuid) from public, anon;
 revoke all on function private.is_group_admin(uuid, uuid) from public, anon;
 grant execute on function private.is_group_member(uuid, uuid) to authenticated;
-grant execute on function private.is_group_admin(uuid, uuid) to authenticated;
+grant execute on function private.is_group_admin(uuid, uuid) to authenticated;\ngrant execute on function private.is_group_founder(uuid, uuid) to authenticated;
 
 alter table public.groups enable row level security;
 alter table public.group_memberships enable row level security;
@@ -129,13 +147,7 @@ create policy "Group founders can delete groups"
   to authenticated
   using (
     created_by = (select auth.uid())
-    and exists (
-      select 1 from public.group_memberships gm
-      where gm.group_id = groups.id
-        and gm.user_id = (select auth.uid())
-        and gm.status = 'active'
-        and gm.role = 'founder'
-    )
+    and private.is_group_founder(id, (select auth.uid()))
   );
 
 -- Membership rows are visible to active members of the group, plus the row's owner
