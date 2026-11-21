@@ -25,7 +25,6 @@ create table if not exists public.groups (
 
 create index if not exists groups_discovery_idx
   on public.groups (visibility, category, created_at desc);
-
 create index if not exists groups_created_by_idx
   on public.groups (created_by);
 
@@ -43,10 +42,8 @@ create table if not exists public.group_memberships (
 
 create index if not exists group_memberships_user_idx
   on public.group_memberships (user_id, status);
-
 create index if not exists group_memberships_group_idx
   on public.group_memberships (group_id, status);
-
 create unique index if not exists group_memberships_one_founder_idx
   on public.group_memberships (group_id)
   where role = 'founder';
@@ -54,7 +51,7 @@ create unique index if not exists group_memberships_one_founder_idx
 -- RLS helper functions live outside the exposed public schema. They only answer
 -- membership/role questions for the current authenticated user.
 create schema if not exists private;
-revoke all on schema private from public;
+revoke all on schema private from public, anon;
 grant usage on schema private to authenticated;
 
 create or replace function private.is_group_member(p_group_id uuid, p_user_id uuid)
@@ -96,7 +93,7 @@ language sql
 stable
 security definer
 set search_path = ''
-as $
+as $$
   select p_user_id = (select auth.uid())
     and exists (
       select 1 from public.group_memberships gm
@@ -105,19 +102,62 @@ as $
         and gm.status = 'active'
         and gm.role = 'founder'
     );
-$;
+$$;
 
 revoke all on function private.is_group_member(uuid, uuid) from public, anon;
-revoke all on function private.is_group_founder(uuid, uuid) from public, anon;
 revoke all on function private.is_group_admin(uuid, uuid) from public, anon;
+revoke all on function private.is_group_founder(uuid, uuid) from public, anon;
 grant execute on function private.is_group_member(uuid, uuid) to authenticated;
-grant execute on function private.is_group_admin(uuid, uuid) to authenticated;\ngrant execute on function private.is_group_founder(uuid, uuid) to authenticated;
+grant execute on function private.is_group_admin(uuid, uuid) to authenticated;
+grant execute on function private.is_group_founder(uuid, uuid) to authenticated;
+
+-- Keep ownership immutable and maintain updated_at on every group edit.
+create or replace function private.guard_group_metadata()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if new.created_by is distinct from old.created_by then
+    raise exception 'Group creator cannot be changed';
+  end if;
+  new.updated_at := now();
+  return new;
+end;
+$$;
+
+revoke all on function private.guard_group_metadata() from public, anon, authenticated;
+
+drop trigger if exists groups_guard_metadata on public.groups;
+create trigger groups_guard_metadata
+before update on public.groups
+for each row execute function private.guard_group_metadata();
+
+-- Create the founder membership in the same transaction as the group itself.
+create or replace function private.create_group_founder_membership()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  insert into public.group_memberships (group_id, user_id, role, status)
+  values (new.id, new.created_by, 'founder', 'active');
+  return new;
+end;
+$$;
+
+revoke all on function private.create_group_founder_membership() from public, anon, authenticated;
+
+drop trigger if exists groups_create_founder_membership on public.groups;
+create trigger groups_create_founder_membership
+after insert on public.groups
+for each row execute function private.create_group_founder_membership();
 
 alter table public.groups enable row level security;
 alter table public.group_memberships enable row level security;
 
--- Public and discoverable private groups can be listed. Invite-only groups stay hidden
--- unless the viewer is already an active member or the creator.
 drop policy if exists "Groups are discoverable" on public.groups;
 create policy "Groups are discoverable"
   on public.groups for select
@@ -150,8 +190,6 @@ create policy "Group founders can delete groups"
     and private.is_group_founder(id, (select auth.uid()))
   );
 
--- Membership rows are visible to active members of the group, plus the row's owner
--- (so a pending request can be displayed to its requester).
 drop policy if exists "Group members can view memberships" on public.group_memberships;
 create policy "Group members can view memberships"
   on public.group_memberships for select
@@ -161,8 +199,8 @@ create policy "Group members can view memberships"
     or private.is_group_member(group_id, (select auth.uid()))
   );
 
--- A user may join an open public group directly or request membership in an
--- approval-based public/private group. Role is always member on self-service inserts.
+-- Self-service: direct join for open public groups, or a pending request for
+-- approval-based public/private groups. Users cannot assign themselves a role.
 drop policy if exists "Users can join or request group membership" on public.group_memberships;
 create policy "Users can join or request group membership"
   on public.group_memberships for insert
@@ -177,23 +215,6 @@ create policy "Users can join or request group membership"
           (g.visibility = 'public' and g.join_policy = 'open' and group_memberships.status = 'active')
           or (g.visibility in ('public', 'private') and g.join_policy = 'approval' and group_memberships.status = 'pending')
         )
-    )
-  );
-
--- The creator is added as founder by the server action; this policy only permits
--- that exact founder row and cannot be used to assign a role in another group.
-drop policy if exists "Creators add their founder membership" on public.group_memberships;
-create policy "Creators add their founder membership"
-  on public.group_memberships for insert
-  to authenticated
-  with check (
-    user_id = (select auth.uid())
-    and role = 'founder'
-    and status = 'active'
-    and exists (
-      select 1 from public.groups g
-      where g.id = group_memberships.group_id
-        and g.created_by = (select auth.uid())
     )
   );
 
