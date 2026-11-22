@@ -60,6 +60,7 @@ export default function CreateEventPage() {
   const [showAwards, setShowAwards] = useState(false)
   const [awardCategory, setAwardCategory] = useState<"none" | "league" | "board-games" | "role-playing-games" | "miniatures" | "trading-card-games">("none")
   const [saving, setSaving] = useState(false)
+  const [groupId, setGroupId] = useState<string | null>(null)
   const [userGames, setUserGames] = useState<EventCollectionGame[]>([])
   const [selectedGame, setSelectedGame] = useState<EventCollectionGame | null>(null)
   const [gameCategoryFilter, setGameCategoryFilter] = useState<"all" | EventGameCategory>("all")
@@ -89,6 +90,11 @@ export default function CreateEventPage() {
     (gameCategoryFilter === "all" || userGame.category === gameCategoryFilter) && userGame.name.toLowerCase().includes(gameSearchQuery.toLowerCase())
   )
   
+  useEffect(() => {
+    const value = new URLSearchParams(window.location.search).get("groupId")
+    if (value && /^[0-9a-f-]{36}$/i.test(value)) setGroupId(value)
+  }, [])
+
   // Fetch user's collection and friends
   useEffect(() => {
     async function fetchGames() {
@@ -175,6 +181,7 @@ export default function CreateEventPage() {
         starts_at: startsAt.toISOString(),
         ends_at: endsAt.toISOString(),
         max_players: formData.maxPlayers ? parseInt(formData.maxPlayers) : undefined,
+        group_id: groupId || undefined,
         event_config: {
           format: eventConfig.format.trim() || undefined,
           rounds: eventConfig.rounds.trim() || undefined,
@@ -217,7 +224,7 @@ export default function CreateEventPage() {
           title: t("common.success"),
           description: t("events.eventCreated"),
         })
-        router.push("/events")
+        router.push(groupId ? "/groups/" + groupId + "?tab=events" : "/events")
       }
     } catch (error) {
       console.error("Error creating event:", error)
