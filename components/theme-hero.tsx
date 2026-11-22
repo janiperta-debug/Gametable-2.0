@@ -32,11 +32,16 @@ interface ThemeHeroProps {
   /** Content rendered inside the hero (a toggle in banner mode, the whole header block in backdrop mode). */
   children?: React.ReactNode
   className?: string
+  /** Optional page-specific image, with the theme hero as an automatic fallback. */
+  imageSrc?: string | null
 }
 
-export function ThemeHero({ page, mode = "banner", title, subtitle, children, className }: ThemeHeroProps) {
+export function ThemeHero({ page, mode = "banner", title, subtitle, children, className, imageSrc }: ThemeHeroProps) {
   const { currentAppTheme } = useAppTheme()
-  const candidates = useMemo(() => getPageHeroCandidates(page, currentAppTheme), [page, currentAppTheme])
+  const candidates = useMemo(() => {
+    const themeCandidates = getPageHeroCandidates(page, currentAppTheme)
+    return imageSrc ? [imageSrc, ...themeCandidates.filter(candidate => candidate !== imageSrc)] : themeCandidates
+  }, [page, currentAppTheme, imageSrc])
   const idxRef = useRef(0)
 
   useEffect(() => {
