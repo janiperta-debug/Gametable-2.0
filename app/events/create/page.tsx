@@ -156,9 +156,10 @@ export default function CreateEventPage() {
           startsOn: leagueSeason.startsOn,
           endsOn: leagueSeason.endsOn,
           awardCategory: awardCategory === "none" ? "none" : "league",
+          group_id: groupId || undefined,
         })
         if (result.error) toast({ title: t("eventDynamic.s2"), description: result.error, variant: "destructive" })
-        else if (result.id) router.push("/leagues/" + result.id)
+        else if (result.id) router.push(groupId ? "/groups/" + groupId + "?tab=events" : "/leagues/" + result.id)
       } catch {
         toast({ title: t("eventDynamic.s2"), variant: "destructive" })
       } finally { setSaving(false) }
