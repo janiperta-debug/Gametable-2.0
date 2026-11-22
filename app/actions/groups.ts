@@ -86,7 +86,7 @@ export async function createGroup(input: {
 
   const joinPolicy = input.visibility === "invite_only"
     ? "invite_only"
-    : input.join_policy === "approval" ? "approval" : "open"
+    : input.visibility === "private" || input.join_policy === "approval" ? "approval" : "open"
   const gameInterests = [...new Set((input.game_interests ?? []).map(value => value.trim()).filter(Boolean).slice(0, 20))]
 
   const { data, error } = await supabase.from("groups").insert({
