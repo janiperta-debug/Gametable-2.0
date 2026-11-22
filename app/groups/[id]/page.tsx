@@ -45,6 +45,14 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
     return notFound()
   }
   const memberCount = counts?.[0]?.member_count ?? 0
+  const { data: groupEvents } = membership?.status === "active"
+    ? await supabase.from("events")
+        .select("id, title, description, event_type, privacy, location, starts_at, ends_at, status")
+        .eq("group_id", id)
+        .neq("status", "cancelled")
+        .order("starts_at", { ascending: true })
+    : { data: [] }
+
   const isAdmin = membership && ["founder", "admin"].includes(membership.role) && membership.status === "active"
   const { data: pendingRequests } = isAdmin
     ? await supabase.from("group_memberships")
@@ -140,16 +148,35 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
         }
         chat={<GroupChat groupId={group.id} groupName={group.name} />}
         events={
-          <ArchiveCard>
-            <ArchiveCardHeader><ArchiveCardTitle>Ryhmän tapahtumat</ArchiveCardTitle></ArchiveCardHeader>
-            <ArchiveCardContent>
-              <div className="py-8 text-center">
-                <CalendarDays className="mx-auto mb-3 h-10 w-10 text-accent-gold/70" />
-                <p className="font-medium">Tapahtumat tulevat tänne</p>
-                <p className="mt-2 text-sm text-muted-foreground">Ryhmän yhteiset peli-illat, turnaukset ja muut tapaamiset löytyvät jatkossa tältä välilehdeltä.</p>
+          <div className="space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="font-cinzel text-xl font-bold text-accent-gold">Ryhmän tapahtumat</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Ryhmään liitetyt peli-illat, kampanjat ja turnaukset.</p>
               </div>
-            </ArchiveCardContent>
-          </ArchiveCard>
+              <ArchiveCardButton asChild><Link href={"/events/create?groupId=" + group.id}><CalendarDays className="mr-2 inline h-4 w-4" />Luo tapahtuma</Link></ArchiveCardButton>
+            </div>
+            {groupEvents?.length ? groupEvents.map(event => (
+              <ArchiveCard key={event.id}>
+                <ArchiveCardContent className="flex flex-wrap items-center justify-between gap-3 pt-5">
+                  <div className="min-w-0">
+                    <h3 className="font-cinzel text-lg font-semibold text-accent-gold">{event.title}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">{new Date(event.starts_at).toLocaleString("fi-FI")}{event.location ? " · " + event.location : ""}</p>
+                    {event.description ? <p className="mt-2 line-clamp-2 text-sm">{event.description}</p> : null}
+                  </div>
+                  <ArchiveCardButton asChild><Link href={"/events/" + event.id}>Avaa tapahtuma</Link></ArchiveCardButton>
+                </ArchiveCardContent>
+              </ArchiveCard>
+            )) : (
+              <ArchiveCard>
+                <ArchiveCardContent className="py-10 text-center">
+                  <CalendarDays className="mx-auto mb-3 h-10 w-10 text-accent-gold/70" />
+                  <p className="font-medium">Ryhmällä ei ole vielä tapahtumia</p>
+                  <p className="mt-2 text-sm text-muted-foreground">Voit luoda ensimmäisen tapahtuman tästä.</p>
+                </ArchiveCardContent>
+              </ArchiveCard>
+            )}
+          </div>
         }
         members={
           <div className="space-y-6">
