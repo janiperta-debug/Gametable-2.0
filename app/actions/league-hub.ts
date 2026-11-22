@@ -3,14 +3,18 @@
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
-export async function createLeague(input: { name: string; game: string; description: string; privacy: "public" | "private"; seasonName: string; startsOn?: string; endsOn?: string; awardCategory?: "none" | "league" | "board-games" | "role-playing-games" | "miniatures" | "trading-card-games" }) {
+export async function createLeague(input: { name: string; game: string; description: string; privacy: "public" | "private"; seasonName: string; startsOn?: string; endsOn?: string; awardCategory?: "none" | "league" | "board-games" | "role-playing-games" | "miniatures" | "trading-card-games"; group_id?: string }) {
  const supabase = await createClient()
  const { data: { user } } = await supabase.auth.getUser()
  if (!user) return { error: "Kirjaudu sisään." }
  if (input.name.trim().length < 2 || !input.seasonName.trim()) return { error: "Anna liigan ja ensimmäisen kauden nimet." }
  if (input.startsOn && input.endsOn && input.endsOn < input.startsOn) return { error: "Kauden päättymispäivä on ennen alkua." }
+ if (input.group_id) {
+  const { data: membership } = await supabase.from("group_memberships").select("id").eq("group_id", input.group_id).eq("user_id", user.id).eq("status", "active").maybeSingle()
+  if (!membership) return { error: "Vain ryhmän aktiivinen jäsen voi luoda ryhmälle liigan." }
+ }
  const { data: league, error } = await supabase.from("leagues").insert({
-  owner_id: user.id, name: input.name.trim(), game: input.game.trim() || null,
+  owner_id: user.id, group_id: input.group_id || null, name: input.name.trim(), game: input.game.trim() || null,
   description: input.description.trim() || null, privacy: input.privacy,
  }).select("id").single()
  if (error || !league) return { error: error?.message || "Liigan luonti epäonnistui." }
