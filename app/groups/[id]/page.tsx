@@ -6,7 +6,7 @@ import { ThemeHero } from "@/components/theme-hero"
 import { ArchiveCard, ArchiveCardButton, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle } from "@/components/archive-frame"
 import { GroupMembershipControls } from "@/components/group-membership-controls"
 import { GroupInviteLink } from "@/components/group-invite-link"
-import { GroupMembershipRequests } from "@/components/group-membership-requests"
+import { GroupMembershipRequests } from "@/components/group-membership-requests"\nimport { GroupMembers } from "@/components/group-members"
 
 const categoryLabels: Record<string, string> = {
   board_game: "Lautapelit",
@@ -65,6 +65,29 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
       avatar_url: profile?.avatar_url ?? null,
     }
   })
+  const { data: memberRows } = membership?.status === "active"
+    ? await supabase.from("group_memberships")
+        .select("user_id, role")
+        .eq("group_id", id)
+        .eq("status", "active")
+        .order("joined_at", { ascending: true })
+    : { data: [] }
+  const memberIds = (memberRows ?? []).map(row => row.user_id)
+  const { data: memberProfiles } = memberIds.length
+    ? await supabase.from("profiles")
+        .select("id, username, display_name, avatar_url")
+        .in("id", memberIds)
+    : { data: [] }
+  const membersWithProfiles = (memberRows ?? []).map(row => {
+    const profile = (memberProfiles ?? []).find(item => item.id === row.user_id)
+    return {
+      user_id: row.user_id,
+      role: row.role as "founder" | "admin" | "member",
+      username: profile?.username ?? null,
+      display_name: profile?.display_name ?? null,
+      avatar_url: profile?.avatar_url ?? null,
+    }
+  })
 
   return (
     <main className="container mx-auto max-w-5xl px-4 py-8">
@@ -84,7 +107,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
         <ThemeHero page="discover" mode="banner" title={group.name} subtitle={group.short_description} />
       )}
       {isAdmin ? <GroupInviteLink groupId={group.id} initialToken={group.invite_token} /> : null}
-      {isAdmin ? <GroupMembershipRequests groupId={group.id} requests={requestsWithProfiles} /> : null}
+      {isAdmin ? <GroupMembershipRequests groupId={group.id} requests={requestsWithProfiles} /> : null}\n      {membership?.status === "active" ? <GroupMembers groupId={group.id} members={membersWithProfiles} viewerRole={membership.role as "founder" | "admin" | "member"} /> : null}
       <div className="mb-6">
         <GroupMembershipControls
           groupId={group.id}
