@@ -1,47 +1,15 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { DiscoverPlayersFixed } from "@/components/discover-players-fixed"
+import { GroupDiscovery } from "@/components/group-discovery"
 import { ThemeHero } from "@/components/theme-hero"
-import { ArchiveCard, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle, ArchiveToggle } from "@/components/archive-frame"
-import { ArchiveDivider } from "@/components/archive-divider"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Clock, Loader2, Gamepad2, Calendar } from "lucide-react"
+import { ArchiveToggle } from "@/components/archive-frame"
 import { useTranslations } from "@/lib/i18n"
-import { getFriendActivity } from "@/app/actions/friends"
-import { useUser } from "@/hooks/useUser"
-import { formatDistanceToNow } from "date-fns"
-
-interface Activity {
-  id: string
-  type: "game_added" | "event_joined"
-  user: { id: string; display_name: string | null; avatar_url: string | null }
-  game?: { id: string; name: string; thumbnail_url: string | null }
-  event?: { id: string; title: string }
-  created_at: string
-}
 
 export default function CommunityPage() {
   const t = useTranslations()
-  const { user } = useUser()
-  const [activity, setActivity] = useState<Activity[]>([])
-  const [loadingActivity, setLoadingActivity] = useState(true)
-  const [activeTab, setActiveTab] = useState<"activity" | "search">("activity")
-
-  useEffect(() => {
-    async function loadActivity() {
-      if (!user) {
-        setLoadingActivity(false)
-        return
-      }
-      const result = await getFriendActivity()
-      if (!result.error) {
-        setActivity(result.data)
-      }
-      setLoadingActivity(false)
-    }
-    loadActivity()
-  }, [user])
+  const [activeTab, setActiveTab] = useState<"search" | "groups">("search")
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -58,59 +26,14 @@ export default function CommunityPage() {
         <div className="flex justify-center">
           <ArchiveToggle
             value={activeTab}
-            onChange={(v) => setActiveTab(v)}
+            onChange={setActiveTab}
             options={[
-              { value: "activity", label: t("community.tabActivity") },
               { value: "search", label: t("community.tabSearch") },
+              { value: "groups", label: t("community.tabGroups") },
             ]}
           />
         </div>
-
-        {activeTab === "activity" ? (
-          <ArchiveCard>
-            <ArchiveCardHeader>
-              <ArchiveCardTitle className="text-2xl flex items-center normal-case">
-                <Clock className="h-6 w-6 mr-2 text-accent-gold" />
-                {t("community.recentFriendActivity")}
-              </ArchiveCardTitle>
-            </ArchiveCardHeader>
-            <ArchiveCardContent>
-              {!user ? (
-                <p className="text-center text-muted-foreground font-body py-8">{t("community.loginToSeeActivity")}</p>
-              ) : loadingActivity ? (
-                <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-accent-gold" /></div>
-              ) : activity.length === 0 ? (
-                <p className="text-center text-muted-foreground font-body py-8">{t("community.noFriendActivity")}</p>
-              ) : (
-                <div className="space-y-0">
-                  {activity.map((item, index) => {
-                    const userName = item.user?.display_name || "Unknown"
-                    const initials = userName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
-                    const timeAgo = formatDistanceToNow(new Date(item.created_at), { addSuffix: true })
-                    return (
-                      <div key={item.id}>
-                        <div className="flex items-center space-x-4 px-1 py-4 transition-colors hover:bg-accent-gold/5">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={item.user?.avatar_url || "/placeholder.svg"} alt={userName} />
-                          <AvatarFallback className="font-cinzel">{initials}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <p className="font-merriweather text-sm"><span className="font-semibold text-accent-gold">{userName}</span>{" "}{item.type === "game_added" ? <><span className="text-muted-foreground">{t("community.addedToCollection")}</span>{" "}<span className="font-semibold">{item.game?.name}</span></> : <><span className="text-muted-foreground">{t("community.joinedEvent")}</span>{" "}<span className="font-semibold">{item.event?.title}</span></>}</p>
-                          <p className="text-xs text-muted-foreground font-merriweather">{timeAgo}</p>
-                        </div>
-                          {item.type === "game_added" ? <Gamepad2 className="h-5 w-5 text-accent-gold" /> : <Calendar className="h-5 w-5 text-accent-gold" />}
-                        </div>
-                        {index < activity.length - 1 && <ArchiveDivider className="my-1" />}
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </ArchiveCardContent>
-          </ArchiveCard>
-        ) : (
-          <DiscoverPlayersFixed />
-        )}
+        {activeTab === "search" ? <DiscoverPlayersFixed /> : <GroupDiscovery />}
       </div>
     </main>
   )
