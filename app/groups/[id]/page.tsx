@@ -50,6 +50,21 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
         .eq("status", "pending")
         .order("joined_at", { ascending: true })
     : { data: [] }
+  const pendingUserIds = (pendingRequests ?? []).map(request => request.user_id)
+  const { data: pendingProfiles } = pendingUserIds.length
+    ? await supabase.from("profiles")
+        .select("id, username, display_name, avatar_url")
+        .in("id", pendingUserIds)
+    : { data: [] }
+  const requestsWithProfiles = (pendingRequests ?? []).map(request => {
+    const profile = (pendingProfiles ?? []).find(item => item.id === request.user_id)
+    return {
+      ...request,
+      username: profile?.username ?? null,
+      display_name: profile?.display_name ?? null,
+      avatar_url: profile?.avatar_url ?? null,
+    }
+  })
 
   return (
     <main className="container mx-auto max-w-5xl px-4 py-8">
@@ -69,7 +84,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
         <ThemeHero page="discover" mode="banner" title={group.name} subtitle={group.short_description} />
       )}
       {isAdmin ? <GroupInviteLink groupId={group.id} initialToken={group.invite_token} /> : null}
-      {isAdmin ? <GroupMembershipRequests groupId={group.id} requests={pendingRequests ?? []} /> : null}
+      {isAdmin ? <GroupMembershipRequests groupId={group.id} requests={requestsWithProfiles} /> : null}
       <div className="mb-6">
         <GroupMembershipControls
           groupId={group.id}
