@@ -179,3 +179,48 @@ export async function leaveGroup(groupId: string): Promise<{ success?: boolean; 
   revalidatePath(`/groups/${groupId}`)
   return { success: true }
 }
+
+
+export async function createGroupInviteLink(groupId: string): Promise<{ token?: string; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { error: "unauthorized" }
+  if (!/^[0-9a-f-]{36}$/i.test(groupId)) return { error: "invalid_group" }
+
+  const { data: membership } = await supabase
+    .from("group_memberships")
+    .select("role")
+    .eq("group_id", groupId)
+    .eq("user_id", user.id)
+    .eq("status", "active")
+    .maybeSingle()
+  if (!membership || !["founder", "admin"].includes(membership.role)) return { error: "forbidden" }
+
+  const token = crypto.randomUUID()
+  const { error } = await supabase.from("groups")
+    .update({ invite_token: token })
+    .eq("id", groupId)
+    .eq("visibility", "invite_only")
+  if (error) {
+    console.error("Error creating group invite link:", error)
+    return { error: "create_failed" }
+  }
+  revalidatePath(`/groups/${groupId}`)
+  return { token }
+}
+
+export async function acceptGroupInvite(token: string): Promise<{ groupId?: string; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { error: "unauthorized" }
+  if (!/^[0-9a-f-]{36}$/i.test(token)) return { error: "invalid_invite" }
+
+  const { data, error } = await supabase.rpc("accept_group_invite", { p_token: token })
+  if (error || !data) {
+    console.error("Error accepting group invite:", error)
+    return { error: "invalid_invite" }
+  }
+  revalidatePath("/discover")
+  revalidatePath(`/groups/${data}`)
+  return { groupId: data }
+}
