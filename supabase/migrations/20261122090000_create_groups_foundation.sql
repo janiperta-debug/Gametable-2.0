@@ -111,6 +111,53 @@ grant execute on function private.is_group_member(uuid, uuid) to authenticated;
 grant execute on function private.is_group_admin(uuid, uuid) to authenticated;
 grant execute on function private.is_group_founder(uuid, uuid) to authenticated;
 
+-- Return aggregate membership counts without exposing individual membership rows.
+create or replace function public.get_group_member_counts(p_group_ids uuid[])
+returns table (group_id uuid, member_count bigint)
+language sql
+stable
+security definer
+set search_path = ''
+as $
+  select g.id, count(gm.id)::bigint
+  from public.groups g
+  left join public.group_memberships gm
+    on gm.group_id = g.id and gm.status = 'active'
+  where g.id = any(p_group_ids)
+    and (select auth.uid()) is not null
+    and (
+      g.visibility in ('public', 'private')
+      or private.is_group_member(g.id, (select auth.uid()))
+      or g.created_by = (select auth.uid())
+    )
+  group by g.id;
+$;
+
+revoke all on function public.get_group_member_counts(uuid[]) from public, anon;
+grant execute on function public.get_group_member_counts(uuid[]) to authenticated;
+
+-- Membership identity must never be reassigned by an administrator.
+create or replace function private.guard_group_membership_identity()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+  if new.group_id is distinct from old.group_id
+     or new.user_id is distinct from old.user_id then
+    raise exception 'Group membership identity cannot be changed';
+  end if;
+  return new;
+end;
+$;
+
+revoke all on function private.guard_group_membership_identity() from public, anon, authenticated;
+drop trigger if exists group_memberships_guard_identity on public.group_memberships;
+create trigger group_memberships_guard_identity
+before update on public.group_memberships
+for each row execute function private.guard_group_membership_identity();
+
 -- Keep ownership immutable and maintain updated_at on every group edit.
 create or replace function private.guard_group_metadata()
 returns trigger
@@ -154,6 +201,8 @@ drop trigger if exists groups_create_founder_membership on public.groups;
 create trigger groups_create_founder_membership
 after insert on public.groups
 for each row execute function private.create_group_founder_membership();
+
+grant select, insert, update, delete on public.groups, public.group_memberships to authenticated;
 
 alter table public.groups enable row level security;
 alter table public.group_memberships enable row level security;
@@ -235,4 +284,5 @@ create policy "Group admins manage memberships"
   with check (
     private.is_group_admin(group_id, (select auth.uid()))
     and role in ('admin', 'member')
+    and status in ('active', 'pending')
   );
