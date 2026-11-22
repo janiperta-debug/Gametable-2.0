@@ -66,7 +66,7 @@ export function GroupMembershipControls({
         </div>
 
         {membership?.status === "pending" ? (
-          <ArchiveButton type="button" disabled variant="secondary">{t("community.membershipPending")}</ArchiveButton>
+          <ArchiveButton type="button" disabled>{t("community.membershipPending")}</ArchiveButton>
         ) : membership?.status === "active" ? (
           membership.role === "founder" ? null : (
             <ArchiveButton type="button" disabled={isPending} onClick={handleLeave}>
