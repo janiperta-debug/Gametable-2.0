@@ -173,7 +173,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
                   <ArchiveCardButton asChild><Link href={"/leagues/" + league.id}>Avaa liiga</Link></ArchiveCardButton>
                 </ArchiveCardContent>
               </ArchiveCard>
-            )) : null}
+            ))}
             {groupEvents?.length ? groupEvents.map(event => (
               <ArchiveCard key={event.id}>
                 <ArchiveCardContent className="flex flex-wrap items-center justify-between gap-3 pt-5">
