@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, type ReactNode } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import { House, MessageCircle, CalendarDays, Users } from "lucide-react"
 
 type Tab = "overview" | "chat" | "events" | "members"
@@ -18,11 +18,14 @@ export function GroupTabs({
   events: ReactNode
   members: ReactNode
 }) {
-  const [activeTab, setActiveTab] = useState<Tab>(() => {
-    if (typeof window === "undefined") return "overview"
+  const [activeTab, setActiveTab] = useState<Tab>("overview")
+
+  useEffect(() => {
     const requested = new URLSearchParams(window.location.search).get("tab")
-    return requested === "chat" || requested === "events" || requested === "members" ? requested : "overview"
-  })
+    if (requested === "chat" || requested === "events" || requested === "members") {
+      setActiveTab(requested)
+    }
+  }, [])
 
   const tabs = [
     { value: "overview" as const, label: "Yleiskuva", icon: House },
