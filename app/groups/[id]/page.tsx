@@ -108,7 +108,8 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
         <ThemeHero page="discover" mode="banner" title={group.name} subtitle={group.short_description} />
       )}
       {isAdmin ? <GroupInviteLink groupId={group.id} initialToken={group.invite_token} /> : null}
-      {isAdmin ? <GroupMembershipRequests groupId={group.id} requests={requestsWithProfiles} /> : null}\n      {membership?.status === "active" ? <GroupMembers groupId={group.id} members={membersWithProfiles} viewerRole={membership.role as "founder" | "admin" | "member"} /> : null}
+      {isAdmin ? <GroupMembershipRequests groupId={group.id} requests={requestsWithProfiles} /> : null}
+      {membership?.status === "active" ? <GroupMembers groupId={group.id} members={membersWithProfiles} viewerRole={membership.role as "founder" | "admin" | "member"} /> : null}
       <div className="mb-6">
         <GroupMembershipControls
           groupId={group.id}
