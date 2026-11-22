@@ -581,7 +581,15 @@
     "miniatures": "Miniatures",
     "tradingCards": "Trading Cards",
     "partyGames": "Party Games",
-    "strategyGames": "Strategy Games"
+    "strategyGames": "Strategy Games",
+    "tabGroups": "Groups",
+    "groupsIntro": "Discover gaming groups and communities across different tabletop hobbies.",
+    "noGroups": "Groups will appear here as communities are created.",
+    "groupMembers": "members",
+    "openGroup": "Open group",
+    "publicGroup": "Public",
+    "privateGroup": "Private",
+    "inviteOnlyGroup": "Invite only"
   },
   "discover": {
     "title": "Discover New Games",
