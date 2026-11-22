@@ -302,9 +302,10 @@ interface ArchiveToggleProps<T extends string> {
   onChange: (value: T) => void
   className?: string
   framed?: boolean
+  stretch?: boolean
 }
 
-export function ArchiveToggle<T extends string>({ options, value, onChange, className, framed = true }: ArchiveToggleProps<T>) {
+export function ArchiveToggle<T extends string>({ options, value, onChange, className, framed = true, stretch = false }: ArchiveToggleProps<T>) {
   const manualOnlyToggle = options.length === 1 && options[0]?.value === "manual"
 
   if (manualOnlyToggle) return null
@@ -312,7 +313,7 @@ export function ArchiveToggle<T extends string>({ options, value, onChange, clas
   const toggle = (
     <div
       role="tablist"
-      className="flex items-center gap-1 p-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+      className={cn("flex items-center gap-1 p-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden", stretch && "w-full")}
     >
       {options.map((opt) => {
         const isActive = opt.value === value
@@ -324,6 +325,7 @@ export function ArchiveToggle<T extends string>({ options, value, onChange, clas
             onClick={() => onChange(opt.value)}
             className={cn(
               "relative shrink-0 rounded-md px-3 sm:px-5 py-2 font-cinzel text-xs sm:text-sm uppercase tracking-wide transition-colors whitespace-nowrap",
+              stretch && "min-w-0 flex-1 px-1 text-center whitespace-normal",
               isActive
                 ? "font-semibold text-[var(--archive-gold,#d9b65c)]"
                 : "text-[var(--archive-gold,#d9b65c)]/55 hover:text-[var(--archive-gold,#d9b65c)]",
@@ -332,7 +334,7 @@ export function ArchiveToggle<T extends string>({ options, value, onChange, clas
             {isActive && (
               <span className="absolute inset-0 rounded-md bg-[var(--archive-gold,#d9b65c)]/12 ring-1 ring-[var(--archive-gold,#d9b65c)]/40 shadow-[inset_0_1px_4px_rgba(0,0,0,0.5)]" />
             )}
-            <span className="relative flex items-center gap-1.5">
+            <span className={cn("relative flex items-center gap-1.5", stretch && "justify-center text-center")}>
               {opt.icon}
               {opt.label}
             </span>
@@ -346,7 +348,7 @@ export function ArchiveToggle<T extends string>({ options, value, onChange, clas
     <ArchiveFrame
       weight="thin"
       cornerSize="sm"
-      className={cn("inline-block max-w-full rounded-lg", className)}
+      className={cn("inline-block max-w-full rounded-lg", stretch && "w-full", className)}
     >
       {toggle}
     </ArchiveFrame>
