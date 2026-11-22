@@ -118,7 +118,7 @@ language sql
 stable
 security definer
 set search_path = ''
-as $
+as $body$
   select g.id, count(gm.id)::bigint
   from public.groups g
   left join public.group_memberships gm
@@ -131,7 +131,7 @@ as $
       or g.created_by = (select auth.uid())
     )
   group by g.id;
-$;
+$body$;
 
 revoke all on function public.get_group_member_counts(uuid[]) from public, anon;
 grant execute on function public.get_group_member_counts(uuid[]) to authenticated;
@@ -142,7 +142,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $body$
 begin
   if new.group_id is distinct from old.group_id
      or new.user_id is distinct from old.user_id then
@@ -150,7 +150,7 @@ begin
   end if;
   return new;
 end;
-$;
+$body$;
 
 revoke all on function private.guard_group_membership_identity() from public, anon, authenticated;
 drop trigger if exists group_memberships_guard_identity on public.group_memberships;
