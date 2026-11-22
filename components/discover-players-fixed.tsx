@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { searchUsers } from "@/app/actions/search-users"
 import { sendFriendRequest, removeFriend, type DiscoverUser } from "@/app/actions/friends"
 import { ArchiveButton, ArchiveCard, ArchiveCardButton } from "@/components/archive-frame"
@@ -18,12 +18,44 @@ export function DiscoverPlayersFixed() {
   const [busy, setBusy] = useState<string | null>(null)
   const t = useTranslations()
 
+  // Restore the last search after returning from a player's profile.
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("gametable-player-search")
+      if (!saved) return
+      const state = JSON.parse(saved) as {
+        location?: string
+        gameTitle?: string
+        gameType?: string
+        players?: DiscoverUser[]
+        searched?: boolean
+      }
+      setLocation(state.location ?? "")
+      setGameTitle(state.gameTitle ?? "")
+      setGameType(state.gameType ?? "")
+      setPlayers(Array.isArray(state.players) ? state.players : [])
+      setSearched(Boolean(state.searched))
+    } catch {
+      sessionStorage.removeItem("gametable-player-search")
+    }
+  }, [])
+
   async function handleSearch() {
     setLoading(true)
-    const result = await searchUsers({ location, gameTitle, gameType })
-    setPlayers(result.data)
-    setSearched(true)
-    setLoading(false)
+    try {
+      const result = await searchUsers({ location, gameTitle, gameType })
+      setPlayers(result.data)
+      setSearched(true)
+      sessionStorage.setItem("gametable-player-search", JSON.stringify({
+        location,
+        gameTitle,
+        gameType,
+        players: result.data,
+        searched: true,
+      }))
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function handleFriendAction(player: DiscoverUser) {
