@@ -223,3 +223,25 @@ export async function acceptGroupInvite(token: string): Promise<{ groupId?: stri
   revalidatePath(`/groups/${data}`)
   return { groupId: data }
 }
+
+
+export async function reviewGroupMembership(groupId: string, userId: string, approve: boolean): Promise<{ success?: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { error: "unauthorized" }
+  if (!/^[0-9a-f-]{36}$/i.test(groupId) || !/^[0-9a-f-]{36}$/i.test(userId)) return { error: "invalid_input" }
+
+  const { data, error } = await supabase.rpc("review_group_membership", {
+    p_group_id: groupId,
+    p_user_id: userId,
+    p_approve: approve,
+  })
+  if (error || !data) {
+    console.error("Error reviewing group membership:", error)
+    return { error: "review_failed" }
+  }
+
+  revalidatePath(`/groups/${groupId}`)
+  revalidatePath("/discover")
+  return { success: true }
+}
