@@ -4,7 +4,7 @@ import { ArrowLeft, MapPin, Users } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { ThemeHero } from "@/components/theme-hero"
 import { ArchiveCard, ArchiveCardButton, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle } from "@/components/archive-frame"
-import { GroupMembershipControls } from "@/components/group-membership-controls"
+import { GroupMembershipControls } from "@/components/group-membership-controls"\nimport { GroupInviteLink } from "@/components/group-invite-link"
 
 const categoryLabels: Record<string, string> = {
   board_game: "Lautapelit",
@@ -22,7 +22,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
 
   const { data: group, error } = await supabase
     .from("groups")
-    .select("id, name, short_description, description, category, game_interests, location, visibility, join_policy, cover_image_url, created_at")
+    .select("id, name, short_description, description, category, game_interests, location, visibility, join_policy, invite_token, cover_image_url, created_at")
     .eq("id", id)
     .single()
 
@@ -58,7 +58,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
       ) : (
         <ThemeHero page="discover" mode="banner" title={group.name} subtitle={group.short_description} />
       )}
-      <div className="mb-6">
+      {group.visibility === "invite_only" && membership && ["founder", "admin"].includes(membership.role) ? <GroupInviteLink groupId={group.id} initialToken={group.invite_token} /> : null}\n      <div className="mb-6">
         <GroupMembershipControls
           groupId={group.id}
           visibility={group.visibility}
