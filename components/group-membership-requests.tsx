@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { Check, X, Loader2, Users } from "lucide-react"
+import Link from "next/link"
 import { reviewGroupMembership } from "@/app/actions/groups"
 import { ArchiveCard, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle, ArchiveButton } from "@/components/archive-frame"
 
@@ -11,7 +12,7 @@ export function GroupMembershipRequests({
   requests,
 }: {
   groupId: string
-  requests: { user_id: string; joined_at: string }[]
+  requests: { user_id: string; joined_at: string; username: string | null; display_name: string | null; avatar_url: string | null }[]
 }) {
   const router = useRouter()
   const [pendingUser, setPendingUser] = useState("")
@@ -43,8 +44,13 @@ export function GroupMembershipRequests({
         {requests.map((request) => (
           <div key={request.user_id} className="flex flex-col gap-3 rounded-lg border border-accent-gold/20 p-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="font-medium">Pelaaja</p>
-              <p className="break-all text-xs text-muted-foreground">{request.user_id}</p>
+              <div className="flex items-center gap-3">
+                {request.avatar_url ? <img src={request.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover" /> : <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-gold/10 text-accent-gold"><Users className="h-5 w-5" /></div>}
+                <div className="min-w-0">
+                  <p className="font-medium">{request.display_name || request.username || "Pelaaja"}</p>
+                  {request.username ? <Link href={`/users/${request.username}`} className="text-xs text-muted-foreground hover:text-accent-gold">@{request.username}</Link> : null}
+                </div>
+              </div>
               <p className="text-xs text-muted-foreground">Pyyntö {new Date(request.joined_at).toLocaleDateString()}</p>
             </div>
             <div className="flex shrink-0 gap-2">
