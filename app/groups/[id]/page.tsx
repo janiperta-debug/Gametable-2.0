@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/server"
 import { ThemeHero } from "@/components/theme-hero"
 import { ArchiveCard, ArchiveCardButton, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle } from "@/components/archive-frame"
 import { GroupMembershipControls } from "@/components/group-membership-controls"
-import { GroupInviteLink } from "@/components/group-invite-link"\nimport { GroupMembershipRequests } from "@/components/group-membership-requests"
+import { GroupInviteLink } from "@/components/group-invite-link"
+import { GroupMembershipRequests } from "@/components/group-membership-requests"
 
 const categoryLabels: Record<string, string> = {
   board_game: "Lautapelit",
