@@ -1,5 +1,6 @@
 -- Reusable group invite links for invite-only groups.
-alter table public.groups add column if not exists invite_token uuid;\ncreate unique index if not exists groups_invite_token_unique_idx on public.groups (invite_token) where invite_token is not null;
+alter table public.groups add column if not exists invite_token uuid;
+create unique index if not exists groups_invite_token_unique_idx on public.groups (invite_token) where invite_token is not null;
 
 create or replace function public.get_group_by_invite_token(p_token uuid)
 returns table (
