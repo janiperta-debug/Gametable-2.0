@@ -245,3 +245,33 @@ export async function reviewGroupMembership(groupId: string, userId: string, app
   revalidatePath("/discover")
   return { success: true }
 }
+
+
+export async function manageGroupMember(
+  groupId: string,
+  userId: string,
+  action: "remove" | "set_role",
+  role?: "admin" | "member",
+): Promise<{ success?: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { error: "unauthorized" }
+  if (!/^[0-9a-f-]{36}$/i.test(groupId) || !/^[0-9a-f-]{36}$/i.test(userId)) return { error: "invalid_input" }
+  if (action !== "remove" && action !== "set_role") return { error: "invalid_action" }
+  if (action === "set_role" && role !== "admin" && role !== "member") return { error: "invalid_role" }
+
+  const { data, error } = await supabase.rpc("manage_group_member", {
+    p_group_id: groupId,
+    p_user_id: userId,
+    p_action: action,
+    p_role: role ?? null,
+  })
+  if (error || !data) {
+    console.error("Error managing group member:", error)
+    return { error: "manage_failed" }
+  }
+
+  revalidatePath(`/groups/${groupId}`)
+  revalidatePath("/discover")
+  return { success: true }
+}
