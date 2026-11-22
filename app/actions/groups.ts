@@ -22,10 +22,9 @@ export async function getDiscoverGroups(): Promise<{ data: DiscoverGroup[]; erro
 
   const { data, error } = await supabase
     .from("groups")
-    .select("id, name, short_description, category, game_interests, location, visibility, cover_image_url, group_memberships(count)")
+    .select("id, name, short_description, category, game_interests, location, visibility, cover_image_url")
     .in("visibility", ["public", "private"])
     .order("created_at", { ascending: false })
-    .eq("group_memberships.status", "active")
     .limit(50)
 
   if (error) {
@@ -33,8 +32,19 @@ export async function getDiscoverGroups(): Promise<{ data: DiscoverGroup[]; erro
     return { data: [], error: "failed" }
   }
 
+  const groups = data ?? []
+  const { data: counts, error: countError } = groups.length
+    ? await supabase.rpc("get_group_member_counts", { p_group_ids: groups.map(group => group.id) })
+    : { data: [], error: null }
+
+  if (countError) {
+    console.error("Error loading group member counts:", countError)
+    return { data: [], error: "failed" }
+  }
+  const countByGroup = new Map((counts ?? []).map((row: { group_id: string; member_count: number }) => [row.group_id, row.member_count]))
+
   return {
-    data: (data ?? []).map((group: any) => ({
+    data: groups.map((group) => ({
       id: group.id,
       name: group.name,
       short_description: group.short_description,
@@ -43,7 +53,7 @@ export async function getDiscoverGroups(): Promise<{ data: DiscoverGroup[]; erro
       location: group.location,
       visibility: group.visibility,
       cover_image_url: group.cover_image_url,
-      member_count: group.group_memberships?.[0]?.count ?? 0,
+      member_count: countByGroup.get(group.id) ?? 0,
     })),
   }
 }
