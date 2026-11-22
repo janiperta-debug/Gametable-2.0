@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ArrowLeft, MapPin, Users } from "lucide-react"
+import { ArrowLeft, MapPin, Users, CalendarDays } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { ThemeHero } from "@/components/theme-hero"
 import { ArchiveCard, ArchiveCardButton, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle } from "@/components/archive-frame"
@@ -9,6 +9,7 @@ import { GroupInviteLink } from "@/components/group-invite-link"
 import { GroupMembershipRequests } from "@/components/group-membership-requests"
 import { GroupMembers } from "@/components/group-members"
 import { GroupChat } from "@/components/group-chat"
+import { GroupTabs } from "@/components/group-tabs"
 
 const categoryLabels: Record<string, string> = {
   board_game: "Lautapelit",
@@ -108,35 +109,56 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
       ) : (
         <ThemeHero page="discover" mode="banner" title={group.name} subtitle={group.short_description} />
       )}
-      {isAdmin ? <GroupInviteLink groupId={group.id} initialToken={group.invite_token} /> : null}
-      {isAdmin ? <GroupMembershipRequests groupId={group.id} requests={requestsWithProfiles} /> : null}
-      {membership?.status === "active" ? <GroupMembers groupId={group.id} members={membersWithProfiles} viewerRole={membership.role as "founder" | "admin" | "member"} /> : null}
-      {membership?.status === "active" ? <GroupChat groupId={group.id} groupName={group.name} /> : null}
-      <div className="mb-6">
-        <GroupMembershipControls
-          groupId={group.id}
-          visibility={group.visibility}
-          joinPolicy={group.join_policy}
-          membership={membership ? { role: membership.role, status: membership.status } : null}
-        />
-      </div>
-      <div className="grid gap-5 md:grid-cols-[2fr_1fr]">
-        <ArchiveCard>
-          <ArchiveCardHeader><ArchiveCardTitle>Kuvaus</ArchiveCardTitle></ArchiveCardHeader>
-          <ArchiveCardContent>
-            <p className="whitespace-pre-wrap text-sm leading-7 text-foreground/90">{group.description || group.short_description}</p>
-          </ArchiveCardContent>
-        </ArchiveCard>
-        <ArchiveCard>
-          <ArchiveCardHeader><ArchiveCardTitle>Ryhmän tiedot</ArchiveCardTitle></ArchiveCardHeader>
-          <ArchiveCardContent className="space-y-3 text-sm">
-            <p>{categoryLabels[group.category] || categoryLabels.other}</p>
-            <p className="flex items-center gap-2"><Users className="h-4 w-4 text-accent-gold" />{memberCount} jäsentä</p>
-            {group.location ? <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-accent-gold" />{group.location}</p> : null}
-            {group.game_interests?.length ? <div><p className="mb-1 font-semibold">Pelit ja järjestelmät</p><p>{group.game_interests.join(" · ")}</p></div> : null}
-          </ArchiveCardContent>
-        </ArchiveCard>
-      </div>
+      <GroupTabs
+        isMember={membership?.status === "active"}
+        overview={
+          <div className="space-y-6">
+            <GroupMembershipControls
+              groupId={group.id}
+              visibility={group.visibility}
+              joinPolicy={group.join_policy}
+              membership={membership ? { role: membership.role, status: membership.status } : null}
+            />
+            <div className="grid gap-5 md:grid-cols-[2fr_1fr]">
+              <ArchiveCard>
+                <ArchiveCardHeader><ArchiveCardTitle>Kuvaus</ArchiveCardTitle></ArchiveCardHeader>
+                <ArchiveCardContent>
+                  <p className="whitespace-pre-wrap text-sm leading-7 text-foreground/90">{group.description || group.short_description}</p>
+                </ArchiveCardContent>
+              </ArchiveCard>
+              <ArchiveCard>
+                <ArchiveCardHeader><ArchiveCardTitle>Ryhmän tiedot</ArchiveCardTitle></ArchiveCardHeader>
+                <ArchiveCardContent className="space-y-3 text-sm">
+                  <p>{categoryLabels[group.category] || categoryLabels.other}</p>
+                  <p className="flex items-center gap-2"><Users className="h-4 w-4 text-accent-gold" />{memberCount} jäsentä</p>
+                  {group.location ? <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-accent-gold" />{group.location}</p> : null}
+                  {group.game_interests?.length ? <div><p className="mb-1 font-semibold">Pelit ja järjestelmät</p><p>{group.game_interests.join(" · ")}</p></div> : null}
+                </ArchiveCardContent>
+              </ArchiveCard>
+            </div>
+          </div>
+        }
+        chat={<GroupChat groupId={group.id} groupName={group.name} />}
+        events={
+          <ArchiveCard>
+            <ArchiveCardHeader><ArchiveCardTitle>Ryhmän tapahtumat</ArchiveCardTitle></ArchiveCardHeader>
+            <ArchiveCardContent>
+              <div className="py-8 text-center">
+                <CalendarDays className="mx-auto mb-3 h-10 w-10 text-accent-gold/70" />
+                <p className="font-medium">Tapahtumat tulevat tänne</p>
+                <p className="mt-2 text-sm text-muted-foreground">Ryhmän yhteiset peli-illat, turnaukset ja muut tapaamiset löytyvät jatkossa tältä välilehdeltä.</p>
+              </div>
+            </ArchiveCardContent>
+          </ArchiveCard>
+        }
+        members={
+          <div className="space-y-6">
+            {isAdmin ? <GroupInviteLink groupId={group.id} initialToken={group.invite_token} /> : null}
+            {isAdmin ? <GroupMembershipRequests groupId={group.id} requests={requestsWithProfiles} /> : null}
+            {membership?.status === "active" ? <GroupMembers groupId={group.id} members={membersWithProfiles} viewerRole={membership.role as "founder" | "admin" | "member"} /> : null}
+          </div>
+        }
+      />
     </main>
   )
 }
