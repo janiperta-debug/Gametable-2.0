@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+import { createNotification } from "./notifications"
 
 export interface DiscoverGroup {
   id: string
@@ -274,4 +275,98 @@ export async function manageGroupMember(
   revalidatePath(`/groups/${groupId}`)
   revalidatePath("/discover")
   return { success: true }
+}
+
+
+export interface GroupMessage {
+  id: string
+  group_id: string
+  sender_id: string
+  content: string
+  created_at: string
+  sender?: {
+    id: string
+    display_name: string | null
+    username: string | null
+    avatar_url: string | null
+  }
+}
+
+export async function getGroupMessages(groupId: string): Promise<{ messages: GroupMessage[]; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { messages: [], error: "unauthorized" }
+  if (!/^[0-9a-f-]{36}$/i.test(groupId)) return { messages: [], error: "invalid_group" }
+
+  const { data: membership } = await supabase
+    .from("group_memberships")
+    .select("id")
+    .eq("group_id", groupId)
+    .eq("user_id", user.id)
+    .eq("status", "active")
+    .maybeSingle()
+  if (!membership) return { messages: [], error: "not_member" }
+
+  const { data, error } = await supabase
+    .from("group_messages")
+    .select("*, sender:profiles!group_messages_sender_id_fkey(id, display_name, username, avatar_url)")
+    .eq("group_id", groupId)
+    .order("created_at", { ascending: true })
+  if (error) {
+    console.error("Error loading group messages:", error)
+    return { messages: [], error: "load_failed" }
+  }
+  return { messages: data ?? [] }
+}
+
+export async function sendGroupMessage(groupId: string, content: string): Promise<{ message?: GroupMessage; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { error: "unauthorized" }
+  if (!/^[0-9a-f-]{36}$/i.test(groupId)) return { error: "invalid_group" }
+  const cleanContent = content.trim()
+  if (!cleanContent || cleanContent.length > 5000) return { error: "invalid_message" }
+
+  const { data: membership } = await supabase
+    .from("group_memberships")
+    .select("id")
+    .eq("group_id", groupId)
+    .eq("user_id", user.id)
+    .eq("status", "active")
+    .maybeSingle()
+  if (!membership) return { error: "not_member" }
+
+  const { data: message, error } = await supabase
+    .from("group_messages")
+    .insert({ group_id: groupId, sender_id: user.id, content: cleanContent })
+    .select("*, sender:profiles!group_messages_sender_id_fkey(id, display_name, username, avatar_url)")
+    .single()
+  if (error) {
+    console.error("Error sending group message:", error)
+    return { error: "send_failed" }
+  }
+
+  const [{ data: recipients }, { data: group }, { data: senderProfile }] = await Promise.all([
+    supabase.from("group_memberships").select("user_id").eq("group_id", groupId).eq("status", "active").neq("user_id", user.id),
+    supabase.from("groups").select("name").eq("id", groupId).maybeSingle(),
+    supabase.from("profiles").select("display_name, username").eq("id", user.id).maybeSingle(),
+  ])
+  const senderName = senderProfile?.display_name || senderProfile?.username || "Pelaaja"
+  await Promise.all((recipients ?? []).map(recipient => createNotification({
+    user_id: recipient.user_id,
+    type: "message",
+    title: group?.name || "Ryhmän keskustelu",
+    body: `${senderName} lähetti viestin ryhmän keskusteluun.`,
+    data: {
+      group_id: groupId,
+      group_name: group?.name || "Ryhmän keskustelu",
+      sender_id: user.id,
+      sender_name: senderName,
+      notification_type: "group_message",
+    },
+    sendEmail: false,
+  })))
+
+  revalidatePath(`/groups/${groupId}`)
+  return { message }
 }
