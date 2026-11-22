@@ -24,7 +24,7 @@ export function GroupDiscovery() {
 
   return (
     <section className="space-y-5">
-      <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between"><p className="text-center text-muted-foreground">{t("community.groupsIntro")}</p><ArchiveButton asChild active><Link href="/groups/create"><Plus className="h-4 w-4" />{t("community.createGroup")}</Link></ArchiveButton></div>
+      <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between"><p className="text-center text-muted-foreground">{t("community.groupsIntro")}</p><ArchiveButton asChild active icon={<Plus className="h-4 w-4" />}><Link href="/groups/create">{t("community.createGroup")}</Link></ArchiveButton></div>
       {loading ? (
         <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-accent-gold" /></div>
       ) : groups.length === 0 ? (
@@ -39,9 +39,17 @@ export function GroupDiscovery() {
                 {group.cover_image_url ? (
                   <img src={group.cover_image_url} alt="" className="h-24 w-28 rounded-md object-cover" />
                 ) : (
-                  <div className="flex h-24 w-28 shrink-0 items-center justify-center rounded-md bg-black/30 text-accent-gold">
-                    <Users className="h-8 w-8" />
-                  </div>
+                  <img
+                    src={({
+                      board_game: "/images/category-board-games.png",
+                      miniature: "/images/category-miniatures.png",
+                      rpg: "/images/category-rpg.png",
+                      trading_card: "/images/category-tcg.png",
+                      other: "/images/category-board-games.png",
+                    } as Record<string, string>)[group.category] || "/images/category-board-games.png"}
+                    alt=""
+                    className="h-24 w-28 shrink-0 rounded-md object-cover"
+                  />
                 )}
                 <div className="min-w-0 flex-1">
                   <h2 className="font-cinzel text-lg font-bold text-accent-gold">{group.name}</h2>
