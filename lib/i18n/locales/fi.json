@@ -625,7 +625,7 @@
     "membershipActive": "Olet ryhmän jäsen",
     "membershipPending": "Jäsenpyyntö odottaa hyväksyntää",
     "inviteOnlyNotice": "Tähän ryhmään pääsee vain kutsulla.",
-    "founderNotice": "Olet tämän ryhmän perustaja.",
+    "founderNotice": "Ryhmän perustaja",
     "joinFailed": "Ryhmään liittyminen epäonnistui. Yritä uudelleen.",
     "leaveFailed": "Ryhmästä poistuminen epäonnistui. Yritä uudelleen.",
     "alreadyMember": "Olet jo lähettänyt jäsenpyynnön tai olet ryhmän jäsen.",
