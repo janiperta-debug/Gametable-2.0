@@ -109,3 +109,73 @@ export async function createGroup(input: {
   revalidatePath(`/groups/${data.id}`)
   return { id: data.id }
 }
+
+
+export async function joinGroup(groupId: string): Promise<{ status?: "active" | "pending"; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { error: "unauthorized" }
+  if (!/^[0-9a-f-]{36}$/i.test(groupId)) return { error: "invalid_group" }
+
+  const { data: group, error: groupError } = await supabase
+    .from("groups")
+    .select("id, visibility, join_policy")
+    .eq("id", groupId)
+    .maybeSingle()
+
+  if (groupError || !group) return { error: "group_not_found" }
+  if (group.visibility === "invite_only") return { error: "invite_only" }
+
+  const status = group.visibility === "public" && group.join_policy === "open"
+    ? "active"
+    : "pending"
+
+  const { error } = await supabase.from("group_memberships").insert({
+    group_id: groupId,
+    user_id: user.id,
+    role: "member",
+    status,
+  })
+
+  if (error) {
+    if (error.code === "23505") return { error: "already_member" }
+    console.error("Error joining group:", error)
+    return { error: "join_failed" }
+  }
+
+  revalidatePath("/discover")
+  revalidatePath(`/groups/${groupId}`)
+  return { status }
+}
+
+export async function leaveGroup(groupId: string): Promise<{ success?: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { error: "unauthorized" }
+  if (!/^[0-9a-f-]{36}$/i.test(groupId)) return { error: "invalid_group" }
+
+  const { data: membership, error: membershipError } = await supabase
+    .from("group_memberships")
+    .select("id, role, status")
+    .eq("group_id", groupId)
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+  if (membershipError || !membership) return { error: "not_member" }
+  if (membership.role === "founder") return { error: "founder_cannot_leave" }
+
+  const { error } = await supabase
+    .from("group_memberships")
+    .delete()
+    .eq("id", membership.id)
+    .eq("user_id", user.id)
+
+  if (error) {
+    console.error("Error leaving group:", error)
+    return { error: "leave_failed" }
+  }
+
+  revalidatePath("/discover")
+  revalidatePath(`/groups/${groupId}`)
+  return { success: true }
+}
