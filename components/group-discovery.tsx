@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Users, MapPin, Loader2, Plus } from "lucide-react"
+import { MapPin, Loader2, Plus } from "lucide-react"
 import { getDiscoverGroups, type DiscoverGroup } from "@/app/actions/groups"
 import { ArchiveCard, ArchiveCardButton, ArchiveButton } from "@/components/archive-frame"
 import { useTranslations } from "@/lib/i18n"
