@@ -12,7 +12,7 @@ create index if not exists group_messages_group_created_idx
 
 alter table public.group_messages enable row level security;
 
-revoke all on public.group_messages from public, anon;\ngrant select, insert on public.group_messages to authenticated;
+revoke all on public.group_messages from public, anon;grant select, insert on public.group_messages to authenticated;
 
 drop policy if exists "Active group members can read group messages" on public.group_messages;
 create policy "Active group members can read group messages"
