@@ -108,21 +108,17 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
 
   return (
     <main className="container mx-auto max-w-5xl px-4 py-8">
+      <ThemeHero page="discover" mode="backdrop" imageSrc={group.cover_image_url}>
+        <div className="text-center">
+          <h1 className="logo-text text-5xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">{group.name}</h1>
+          <p className="font-body text-foreground/90 text-xl max-w-3xl mx-auto mt-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+            {group.short_description}
+          </p>
+        </div>
+      </ThemeHero>
       <div className="mb-5">
         <ArchiveCardButton asChild><Link href="/discover"><ArrowLeft className="mr-2 inline h-4 w-4" />Yhteisö</Link></ArchiveCardButton>
       </div>
-      {group.cover_image_url ? (
-        <section className="relative mb-8 overflow-hidden rounded-xl border border-accent-gold/40">
-          <img src={group.cover_image_url} alt="" className="h-56 w-full object-cover sm:h-72" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 p-6">
-            <h1 className="font-cinzel text-3xl font-bold text-white drop-shadow-lg">{group.name}</h1>
-            <p className="mt-1 text-white/85">{group.short_description}</p>
-          </div>
-        </section>
-      ) : (
-        <ThemeHero page="discover" mode="banner" title={group.name} subtitle={group.short_description} />
-      )}
       <GroupTabs
         isMember={membership?.status === "active"}
         overview={
