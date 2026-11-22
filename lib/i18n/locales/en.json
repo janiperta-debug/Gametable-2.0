@@ -618,7 +618,18 @@
     "cancel": "Cancel",
     "createFailed": "Could not create the group. Please try again.",
     "requiredFields": "Enter a group name and short description.",
-    "backToGroups": "Back to groups"
+    "backToGroups": "Back to groups",
+    "joinGroup": "Join group",
+    "requestMembership": "Request membership",
+    "leaveGroup": "Leave group",
+    "membershipActive": "You are a member of this group",
+    "membershipPending": "Membership request awaiting approval",
+    "inviteOnlyNotice": "This group is accessible by invitation only.",
+    "founderNotice": "You are the founder of this group.",
+    "joinFailed": "Could not join the group. Please try again.",
+    "leaveFailed": "Could not leave the group. Please try again.",
+    "alreadyMember": "You already have a membership or a pending request.",
+    "founderCannotLeave": "The group founder cannot leave the group."
   },
   "discover": {
     "title": "Discover New Games",
