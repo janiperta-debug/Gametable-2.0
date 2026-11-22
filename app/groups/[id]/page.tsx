@@ -10,6 +10,7 @@ import { GroupMembershipRequests } from "@/components/group-membership-requests"
 import { GroupMembers } from "@/components/group-members"
 import { GroupChat } from "@/components/group-chat"
 import { GroupTabs } from "@/components/group-tabs"
+import { GroupCoverUploader } from "@/components/group-cover-uploader"
 
 const categoryLabels: Record<string, string> = {
   board_game: "Lautapelit",
@@ -123,6 +124,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
         isMember={membership?.status === "active"}
         overview={
           <div className="space-y-6">
+            {isAdmin ? <GroupCoverUploader groupId={group.id} currentImageUrl={group.cover_image_url} /> : null}
             <GroupMembershipControls
               groupId={group.id}
               visibility={group.visibility}
