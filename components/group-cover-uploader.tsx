@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useTransition } from "react"
+import { useRef, useState, useTransition, type ChangeEvent } from "react"
 import { useRouter } from "next/navigation"
 import { ImagePlus, Loader2, Upload, X } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
@@ -15,7 +15,7 @@ export function GroupCoverUploader({ groupId, currentImageUrl }: { groupId: stri
   const [uploading, setUploading] = useState(false)
   const [pending, startTransition] = useTransition()
 
-  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) return
     setError("")
