@@ -299,6 +299,7 @@ export async function createEvent(data: {
   ends_at?: string
   max_players?: number
   event_config?: Record<string, unknown>
+  group_id?: string
 }): Promise<{ event?: Event; error?: string }> {
   const supabase = await createClient()
 
@@ -308,10 +309,22 @@ export async function createEvent(data: {
     return { error: "Unauthorized" }
   }
 
+  if (data.group_id) {
+    const { data: membership } = await supabase
+      .from("group_memberships")
+      .select("id")
+      .eq("group_id", data.group_id)
+      .eq("user_id", user.id)
+      .eq("status", "active")
+      .maybeSingle()
+    if (!membership) return { error: "You must be an active group member to create a group event" }
+  }
+
   const { data: event, error } = await supabase
     .from("events")
     .insert({
       host_id: user.id,
+      group_id: data.group_id || null,
       title: data.title,
       description: data.description || null,
       event_type: data.event_type,
