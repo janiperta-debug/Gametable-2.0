@@ -59,7 +59,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
       ) : (
         <ThemeHero page="discover" mode="banner" title={group.name} subtitle={group.short_description} />
       )}
-      {group.visibility === "invite_only" && membership && ["founder", "admin"].includes(membership.role) ? <GroupInviteLink groupId={group.id} initialToken={group.invite_token} /> : null}
+      {membership && ["founder", "admin"].includes(membership.role) ? <GroupInviteLink groupId={group.id} initialToken={group.invite_token} /> : null}
       <div className="mb-6">
         <GroupMembershipControls
           groupId={group.id}
