@@ -21,12 +21,17 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
 
   const { data: group, error } = await supabase
     .from("groups")
-    .select("id, name, short_description, description, category, game_interests, location, visibility, cover_image_url, created_at, group_memberships(count)")
+    .select("id, name, short_description, description, category, game_interests, location, visibility, cover_image_url, created_at")
     .eq("id", id)
     .single()
 
   if (error || !group) return notFound()
-  const memberCount = group.group_memberships?.[0]?.count ?? 0
+  const { data: counts, error: countError } = await supabase.rpc("get_group_member_counts", { p_group_ids: [id] })
+  if (countError) {
+    console.error("Error loading group member count:", countError)
+    return notFound()
+  }
+  const memberCount = counts?.[0]?.member_count ?? 0
 
   return (
     <main className="container mx-auto max-w-5xl px-4 py-8">
