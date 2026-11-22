@@ -8,6 +8,7 @@ import { GroupMembershipControls } from "@/components/group-membership-controls"
 import { GroupInviteLink } from "@/components/group-invite-link"
 import { GroupMembershipRequests } from "@/components/group-membership-requests"
 import { GroupMembers } from "@/components/group-members"
+import { GroupChat } from "@/components/group-chat"
 
 const categoryLabels: Record<string, string> = {
   board_game: "Lautapelit",
@@ -110,6 +111,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
       {isAdmin ? <GroupInviteLink groupId={group.id} initialToken={group.invite_token} /> : null}
       {isAdmin ? <GroupMembershipRequests groupId={group.id} requests={requestsWithProfiles} /> : null}
       {membership?.status === "active" ? <GroupMembers groupId={group.id} members={membersWithProfiles} viewerRole={membership.role as "founder" | "admin" | "member"} /> : null}
+      {membership?.status === "active" ? <GroupChat groupId={group.id} groupName={group.name} /> : null}
       <div className="mb-6">
         <GroupMembershipControls
           groupId={group.id}
