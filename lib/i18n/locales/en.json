@@ -625,7 +625,7 @@
     "membershipActive": "You are a member of this group",
     "membershipPending": "Membership request awaiting approval",
     "inviteOnlyNotice": "This group is accessible by invitation only.",
-    "founderNotice": "You are the founder of this group.",
+    "founderNotice": "Group founder",
     "joinFailed": "Could not join the group. Please try again.",
     "leaveFailed": "Could not leave the group. Please try again.",
     "alreadyMember": "You already have a membership or a pending request.",
