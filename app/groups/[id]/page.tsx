@@ -4,6 +4,7 @@ import { ArrowLeft, MapPin, Users } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { ThemeHero } from "@/components/theme-hero"
 import { ArchiveCard, ArchiveCardButton, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle } from "@/components/archive-frame"
+import { GroupMembershipControls } from "@/components/group-membership-controls"
 
 const categoryLabels: Record<string, string> = {
   board_game: "Lautapelit",
@@ -21,12 +22,19 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
 
   const { data: group, error } = await supabase
     .from("groups")
-    .select("id, name, short_description, description, category, game_interests, location, visibility, cover_image_url, created_at")
+    .select("id, name, short_description, description, category, game_interests, location, visibility, join_policy, cover_image_url, created_at")
     .eq("id", id)
     .single()
 
   if (error || !group) return notFound()
-  const { data: counts, error: countError } = await supabase.rpc("get_group_member_counts", { p_group_ids: [id] })
+  const [{ data: counts, error: countError }, { data: membership }] = await Promise.all([
+    supabase.rpc("get_group_member_counts", { p_group_ids: [id] }),
+    supabase.from("group_memberships")
+      .select("role, status")
+      .eq("group_id", id)
+      .eq("user_id", user.id)
+      .maybeSingle(),
+  ])
   if (countError) {
     console.error("Error loading group member count:", countError)
     return notFound()
@@ -50,6 +58,14 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
       ) : (
         <ThemeHero page="discover" mode="banner" title={group.name} subtitle={group.short_description} />
       )}
+      <div className="mb-6">
+        <GroupMembershipControls
+          groupId={group.id}
+          visibility={group.visibility}
+          joinPolicy={group.join_policy}
+          membership={membership ? { role: membership.role, status: membership.status } : null}
+        />
+      </div>
       <div className="grid gap-5 md:grid-cols-[2fr_1fr]">
         <ArchiveCard>
           <ArchiveCardHeader><ArchiveCardTitle>Kuvaus</ArchiveCardTitle></ArchiveCardHeader>
