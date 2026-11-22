@@ -618,7 +618,18 @@
     "cancel": "Peruuta",
     "createFailed": "Ryhmän luominen epäonnistui. Yritä uudelleen.",
     "requiredFields": "Täytä ryhmän nimi ja lyhyt kuvaus.",
-    "backToGroups": "Takaisin ryhmiin"
+    "backToGroups": "Takaisin ryhmiin",
+    "joinGroup": "Liity ryhmään",
+    "requestMembership": "Pyydä jäsenyyttä",
+    "leaveGroup": "Poistu ryhmästä",
+    "membershipActive": "Olet ryhmän jäsen",
+    "membershipPending": "Jäsenpyyntö odottaa hyväksyntää",
+    "inviteOnlyNotice": "Tähän ryhmään pääsee vain kutsulla.",
+    "founderNotice": "Olet tämän ryhmän perustaja.",
+    "joinFailed": "Ryhmään liittyminen epäonnistui. Yritä uudelleen.",
+    "leaveFailed": "Ryhmästä poistuminen epäonnistui. Yritä uudelleen.",
+    "alreadyMember": "Olet jo lähettänyt jäsenpyynnön tai olet ryhmän jäsen.",
+    "founderCannotLeave": "Ryhmän perustaja ei voi poistua ryhmästä."
   },
   "discover": {
     "title": "Löydä uusia pelejä",
