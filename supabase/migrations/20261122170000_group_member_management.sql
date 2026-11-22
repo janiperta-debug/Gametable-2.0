@@ -25,7 +25,7 @@ begin
     and user_id = (select auth.uid())
     and status = 'active';
 
-  if v_actor_role not in ('founder', 'admin') then
+  if v_actor_role is null or v_actor_role not in ('founder', 'admin') then
     raise exception 'Not authorized to manage this group';
   end if;
 
