@@ -28,6 +28,7 @@ export async function createLeague(input: { name: string; game: string; descript
   return { error: seasonError.message }
  }
  revalidatePath("/leagues")
+ if (input.group_id) revalidatePath("/groups/" + input.group_id)
  return { id: league.id }
 }
 
