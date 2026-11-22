@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Users, MapPin, Loader2 } from "lucide-react"
+import { Users, MapPin, Loader2, Plus } from "lucide-react"
 import { getDiscoverGroups, type DiscoverGroup } from "@/app/actions/groups"
-import { ArchiveCard, ArchiveCardButton } from "@/components/archive-frame"
+import { ArchiveCard, ArchiveCardButton, ArchiveButton } from "@/components/archive-frame"
 import { useTranslations } from "@/lib/i18n"
 
 export function GroupDiscovery() {
@@ -24,7 +24,7 @@ export function GroupDiscovery() {
 
   return (
     <section className="space-y-5">
-      <p className="text-center text-muted-foreground">{t("community.groupsIntro")}</p>
+      <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between"><p className="text-center text-muted-foreground">{t("community.groupsIntro")}</p><ArchiveButton asChild active><Link href="/groups/create"><Plus className="h-4 w-4" />{t("community.createGroup")}</Link></ArchiveButton></div>
       {loading ? (
         <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-accent-gold" /></div>
       ) : groups.length === 0 ? (
