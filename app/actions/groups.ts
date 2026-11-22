@@ -112,6 +112,37 @@ export async function createGroup(input: {
 }
 
 
+export async function updateGroupCoverImage(groupId: string, imageUrl: string): Promise<{ success?: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { error: "unauthorized" }
+  if (!/^[0-9a-f-]{36}$/i.test(groupId)) return { error: "invalid_group" }
+
+  const { data: membership } = await supabase
+    .from("group_memberships")
+    .select("role")
+    .eq("group_id", groupId)
+    .eq("user_id", user.id)
+    .eq("status", "active")
+    .maybeSingle()
+  if (!membership || !["founder", "admin"].includes(membership.role)) return { error: "forbidden" }
+
+  const cleanUrl = imageUrl.trim()
+  if (cleanUrl && (!cleanUrl.startsWith(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/group-covers/`) || cleanUrl.length > 2000)) {
+    return { error: "invalid_image" }
+  }
+
+  const { error } = await supabase.from("groups").update({ cover_image_url: cleanUrl || null }).eq("id", groupId)
+  if (error) {
+    console.error("Error updating group cover:", error)
+    return { error: "update_failed" }
+  }
+  revalidatePath("/discover")
+  revalidatePath(`/groups/${groupId}`)
+  return { success: true }
+}
+
+
 export async function joinGroup(groupId: string): Promise<{ status?: "active" | "pending"; error?: string }> {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
