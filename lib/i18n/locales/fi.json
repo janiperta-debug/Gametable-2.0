@@ -581,7 +581,15 @@
     "miniatures": "Miniatyyrit",
     "tradingCards": "Keräilykortit",
     "partyGames": "Juhlapelit",
-    "strategyGames": "Strategiapelit"
+    "strategyGames": "Strategiapelit",
+    "tabGroups": "Ryhmät",
+    "groupsIntro": "Löydä peliporukoita ja yhteisöjä eri peliharrastusten ympäriltä.",
+    "noGroups": "Ryhmät tulevat näkyviin täällä, kun yhteisöjä on perustettu.",
+    "groupMembers": "jäsentä",
+    "openGroup": "Avaa ryhmä",
+    "publicGroup": "Julkinen",
+    "privateGroup": "Yksityinen",
+    "inviteOnlyGroup": "Vain kutsutuille"
   },
   "discover": {
     "title": "Löydä uusia pelejä",
