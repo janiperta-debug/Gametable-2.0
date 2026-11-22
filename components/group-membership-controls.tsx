@@ -57,8 +57,8 @@ export function GroupMembershipControls({
 
   return (
     <ArchiveCard>
-      <ArchiveCardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3 text-sm">
+      <ArchiveCardContent className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${membership?.status === "active" && membership.role === "founder" ? "min-h-[64px] justify-center sm:justify-center" : ""}`}>
+        <div className={`flex items-center gap-3 text-sm ${membership?.status === "active" && membership.role === "founder" ? "w-full justify-center text-center" : ""}`}>
           {membership?.status === "pending" ? <Clock3 className="h-5 w-5 text-accent-gold" /> :
             membership?.status === "active" ? <ShieldCheck className="h-5 w-5 text-accent-gold" /> :
             <LogIn className="h-5 w-5 text-accent-gold" />}
