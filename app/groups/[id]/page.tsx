@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server"
 import { ThemeHero } from "@/components/theme-hero"
 import { ArchiveCard, ArchiveCardButton, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle } from "@/components/archive-frame"
 import { GroupMembershipControls } from "@/components/group-membership-controls"
-import { GroupInviteLink } from "@/components/group-invite-link"
+import { GroupInviteLink } from "@/components/group-invite-link"\nimport { GroupMembershipRequests } from "@/components/group-membership-requests"
 
 const categoryLabels: Record<string, string> = {
   board_game: "Lautapelit",
@@ -41,6 +41,14 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
     return notFound()
   }
   const memberCount = counts?.[0]?.member_count ?? 0
+  const isAdmin = membership && ["founder", "admin"].includes(membership.role) && membership.status === "active"
+  const { data: pendingRequests } = isAdmin
+    ? await supabase.from("group_memberships")
+        .select("user_id, joined_at")
+        .eq("group_id", id)
+        .eq("status", "pending")
+        .order("joined_at", { ascending: true })
+    : { data: [] }
 
   return (
     <main className="container mx-auto max-w-5xl px-4 py-8">
@@ -59,7 +67,8 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
       ) : (
         <ThemeHero page="discover" mode="banner" title={group.name} subtitle={group.short_description} />
       )}
-      {membership && ["founder", "admin"].includes(membership.role) ? <GroupInviteLink groupId={group.id} initialToken={group.invite_token} /> : null}
+      {isAdmin ? <GroupInviteLink groupId={group.id} initialToken={group.invite_token} /> : null}
+      {isAdmin ? <GroupMembershipRequests groupId={group.id} requests={pendingRequests ?? []} /> : null}
       <div className="mb-6">
         <GroupMembershipControls
           groupId={group.id}
