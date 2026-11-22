@@ -52,6 +52,12 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
         .neq("status", "cancelled")
         .order("starts_at", { ascending: true })
     : { data: [] }
+  const { data: groupLeagues } = membership?.status === "active"
+    ? await supabase.from("leagues")
+        .select("id, name, game, description, privacy, created_at")
+        .eq("group_id", id)
+        .order("created_at", { ascending: false })
+    : { data: [] }
 
   const isAdmin = membership && ["founder", "admin"].includes(membership.role) && membership.status === "active"
   const { data: pendingRequests } = isAdmin
@@ -156,6 +162,18 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
               </div>
               <ArchiveCardButton asChild><Link href={"/events/create?groupId=" + group.id}><CalendarDays className="mr-2 inline h-4 w-4" />Luo tapahtuma</Link></ArchiveCardButton>
             </div>
+            {groupLeagues?.map(league => (
+              <ArchiveCard key={league.id}>
+                <ArchiveCardContent className="flex flex-wrap items-center justify-between gap-3 pt-5">
+                  <div className="min-w-0">
+                    <h3 className="font-cinzel text-lg font-semibold text-accent-gold">{league.name}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">{league.game || "Liiga"} · {league.privacy === "public" ? "Julkinen" : "Yksityinen"}</p>
+                    {league.description ? <p className="mt-2 line-clamp-2 text-sm">{league.description}</p> : null}
+                  </div>
+                  <ArchiveCardButton asChild><Link href={"/leagues/" + league.id}>Avaa liiga</Link></ArchiveCardButton>
+                </ArchiveCardContent>
+              </ArchiveCard>
+            )) : null}
             {groupEvents?.length ? groupEvents.map(event => (
               <ArchiveCard key={event.id}>
                 <ArchiveCardContent className="flex flex-wrap items-center justify-between gap-3 pt-5">
@@ -167,7 +185,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
                   <ArchiveCardButton asChild><Link href={"/events/" + event.id}>Avaa tapahtuma</Link></ArchiveCardButton>
                 </ArchiveCardContent>
               </ArchiveCard>
-            )) : (
+            )) : (!groupLeagues?.length ? (
               <ArchiveCard>
                 <ArchiveCardContent className="py-10 text-center">
                   <CalendarDays className="mx-auto mb-3 h-10 w-10 text-accent-gold/70" />
@@ -175,7 +193,7 @@ export default async function GroupPage({ params }: { params: Promise<{ id: stri
                   <p className="mt-2 text-sm text-muted-foreground">Voit luoda ensimmäisen tapahtuman tästä.</p>
                 </ArchiveCardContent>
               </ArchiveCard>
-            )}
+            ) : null)}
           </div>
         }
         members={
