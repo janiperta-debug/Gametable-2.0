@@ -200,7 +200,6 @@ export async function createGroupInviteLink(groupId: string): Promise<{ token?: 
   const { error } = await supabase.from("groups")
     .update({ invite_token: token })
     .eq("id", groupId)
-    .eq("visibility", "invite_only")
   if (error) {
     console.error("Error creating group invite link:", error)
     return { error: "create_failed" }
