@@ -25,6 +25,7 @@ export async function getDiscoverGroups(): Promise<{ data: DiscoverGroup[]; erro
     .select("id, name, short_description, category, game_interests, location, visibility, cover_image_url, group_memberships(count)")
     .in("visibility", ["public", "private"])
     .order("created_at", { ascending: false })
+    .eq("group_memberships.status", "active")
     .limit(50)
 
   if (error) {
