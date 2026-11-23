@@ -312,7 +312,7 @@ export async function manageGroupMember(
 export interface GroupMessage {
   id: string
   group_id: string
-  sender_id: string
+  sender_id: string | null
   content: string
   created_at: string
   sender?: {
@@ -320,7 +320,7 @@ export interface GroupMessage {
     display_name: string | null
     username: string | null
     avatar_url: string | null
-  }
+  } | null
 }
 
 export async function getGroupMessages(groupId: string): Promise<{ messages: GroupMessage[]; error?: string }> {
