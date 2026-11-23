@@ -242,7 +242,7 @@ export function EventChat({ eventId, eventTitle }: EventChatProps) {
                       <div className={`max-w-[80%] ${isCurrentUser ? "order-first" : ""}`}>
                         {!isCurrentUser && (
                           <p className="text-xs text-muted-foreground mb-1">
-                            {message.sender_id === null ? "Poistettu käyttäjä" : message.sender?.display_name || t("profile.anonymous") || "Anonymous"}
+                            {message.sender_id === null ? t("profile.deletedUser") || "Deleted user" : message.sender?.display_name || t("profile.anonymous") || "Anonymous"}
                           </p>
                         )}
                         <div className={`rounded-lg px-3 py-2 border border-accent-gold/15 ${isCurrentUser ? "bg-accent-gold text-accent-gold-foreground" : "bg-black/30"}`}>
