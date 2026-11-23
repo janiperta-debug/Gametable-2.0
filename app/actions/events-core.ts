@@ -743,14 +743,14 @@ export async function sendEventMessage(
 export interface EventMessage {
   id: string
   event_id: string
-  sender_id: string
+  sender_id: string | null
   content: string
   created_at: string
   sender?: {
     id: string
     display_name: string | null
     avatar_url: string | null
-  }
+  } | null
 }
 
 /**
