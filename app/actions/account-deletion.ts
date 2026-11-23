@@ -163,11 +163,7 @@ export async function deleteOwnAccount(): Promise<{ success: boolean; error?: st
 
   // Supabase Auth refuses to delete users who still own Storage objects.
   // Personal avatars are removed; community covers are retained without ownership.
-  const { data: ownedObjects, error: objectError } = await service
-    .schema("storage")
-    .from("objects")
-    .select("bucket_id, name")
-    .eq("owner_id", user.id)
+  const { data: ownedObjects, error: objectError } = await supabase.rpc("get_owned_storage_objects")
 
   if (objectError) return { success: false, error: "Tallennettujen tiedostojen tarkistus epäonnistui: " + objectError.message }
 
