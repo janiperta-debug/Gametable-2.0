@@ -445,7 +445,7 @@ export async function processCollectionImportBatch(batchId: string) {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Could not process import batch"
     await db.from("collection_import_batches")
-      .update({ status: "failed", error_message: message, updated_at: new Date().toISOString() })
+      .update({ error_message: message, updated_at: new Date().toISOString() })
       .eq("id", batchId)
       .eq("user_id", user.id)
     return { success: false as const, error: message }
