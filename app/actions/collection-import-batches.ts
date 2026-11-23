@@ -221,14 +221,14 @@ interface ParsedImportLine {
 }
 
 function parseImportLines(sourceText: string, category: CollectionImportCategory): ParsedImportLine[] {
-  const lines = sourceText.split(/\\r?\\n/).map((line) => line.trim()).filter(Boolean)
+  const lines = sourceText.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
   const parsed: ParsedImportLine[] = []
 
   for (const rawText of lines) {
     if (/^(#|\/\/|\[|sideboard:|commander:)/i.test(rawText) || rawText.endsWith(":")) continue
 
     if (category === "tcg") {
-      const match = rawText.match(/^(\\d+)x?\\s+(.+?)(?:\\s+\\(([A-Z0-9_-]+)\\))?(?:\\s+\\d+)?$/i)
+      const match = rawText.match(/^(\d+)x?\s+(.+?)(?:\s+\(([A-Z0-9_-]+)\))?(?:\s+\d+)?$/i)
       if (match) {
         parsed.push({
           quantity: Math.max(1, Number.parseInt(match[1], 10)),
@@ -243,8 +243,8 @@ function parseImportLines(sourceText: string, category: CollectionImportCategory
     }
 
     // Miniature rosters commonly use "5 Intercessors" or "Intercessors x5".
-    const leadingQuantity = rawText.match(/^(\\d+)x?\\s+(.+?)(?:\\s+\\(\\d+\\s*(?:pts|points)?\\))?$/i)
-    const trailingQuantity = rawText.match(/^(.+?)\\s+x(\\d+)(?:\\s+\\(\\d+\\s*(?:pts|points)?\\))?$/i)
+    const leadingQuantity = rawText.match(/^(\d+)x?\s+(.+?)(?:\s+\(\d+\s*(?:pts|points)?\))?$/i)
+    const trailingQuantity = rawText.match(/^(.+?)\s+x(\d+)(?:\s+\(\d+\s*(?:pts|points)?\))?$/i)
     if (leadingQuantity) {
       parsed.push({ quantity: Math.max(1, Number.parseInt(leadingQuantity[1], 10)), name: leadingQuantity[2].trim(), rawText })
     } else if (trailingQuantity) {
@@ -258,14 +258,14 @@ function parseImportLines(sourceText: string, category: CollectionImportCategory
 }
 
 function scoreCatalogMatch(query: string, candidateName: string): { score: number; reasons: string[] } {
-  const normalize = (value: string) => value.toLocaleLowerCase().replace(/[^\\p{L}\\p{N}]+/gu, " ").trim()
+  const normalize = (value: string) => value.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim()
   const wanted = normalize(query)
   const found = normalize(candidateName)
   if (wanted === found) return { score: 1, reasons: ["Exact name match"] }
   if (found.startsWith(wanted) || wanted.startsWith(found)) return { score: 0.9, reasons: ["Name prefix match"] }
   if (found.includes(wanted) || wanted.includes(found)) return { score: 0.78, reasons: ["Name contains match"] }
-  const wantedWords = new Set(wanted.split(/\\s+/).filter(Boolean))
-  const foundWords = new Set(found.split(/\\s+/).filter(Boolean))
+  const wantedWords = new Set(wanted.split(/\s+/).filter(Boolean))
+  const foundWords = new Set(found.split(/\s+/).filter(Boolean))
   const overlap = [...wantedWords].filter((word) => foundWords.has(word)).length
   const score = wantedWords.size ? 0.55 * overlap / wantedWords.size : 0
   return { score, reasons: overlap ? ["Partial word match"] : [] }
