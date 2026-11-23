@@ -45,6 +45,7 @@ export default function SignupPage() {
         email,
         password,
         options: {
+          queryParams: { prompt: "select_account" },
           emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(new URLSearchParams(window.location.search).get("next") || "/home")}`,
           data: {
             username: username || undefined,
