@@ -221,14 +221,14 @@ interface ParsedImportLine {
 }
 
 function parseImportLines(sourceText: string, category: CollectionImportCategory): ParsedImportLine[] {
-  const lines = sourceText.split(/\\r?\\n/).map((line) => line.trim()).filter(Boolean)
+  const lines = sourceText.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
   const parsed: ParsedImportLine[] = []
 
   for (const rawText of lines) {
     if (/^(#|\/\/|\[|sideboard:|commander:)/i.test(rawText) || rawText.endsWith(":")) continue
 
     if (category === "tcg") {
-      const match = rawText.match(/^(\\d+)x?\\s+(.+?)(?:\\s+\\(([A-Z0-9_-]+)\\))?(?:\\s+\\d+)?$/i)
+      const match = rawText.match(/^(\d+)x?\s+(.+?)(?:\s+\(([A-Z0-9_-]+)\))?(?:\s+\d+)?$/i)
       if (match) {
         parsed.push({
           quantity: Math.max(1, Number.parseInt(match[1], 10)),
@@ -243,8 +243,8 @@ function parseImportLines(sourceText: string, category: CollectionImportCategory
     }
 
     // Miniature rosters commonly use "5 Intercessors" or "Intercessors x5".
-    const leadingQuantity = rawText.match(/^(\\d+)x?\\s+(.+?)(?:\\s+\\(\\d+\\s*(?:pts|points)?\\))?$/i)
-    const trailingQuantity = rawText.match(/^(.+?)\\s+x(\\d+)(?:\\s+\\(\\d+\\s*(?:pts|points)?\\))?$/i)
+    const leadingQuantity = rawText.match(/^(\d+)x?\s+(.+?)(?:\s+\(\d+\s*(?:pts|points)?\))?$/i)
+    const trailingQuantity = rawText.match(/^(.+?)\s+x(\d+)(?:\s+\(\d+\s*(?:pts|points)?\))?$/i)
     if (leadingQuantity) {
       parsed.push({ quantity: Math.max(1, Number.parseInt(leadingQuantity[1], 10)), name: leadingQuantity[2].trim(), rawText })
     } else if (trailingQuantity) {
@@ -258,17 +258,83 @@ function parseImportLines(sourceText: string, category: CollectionImportCategory
 }
 
 function scoreCatalogMatch(query: string, candidateName: string): { score: number; reasons: string[] } {
-  const normalize = (value: string) => value.toLocaleLowerCase().replace(/[^\\p{L}\\p{N}]+/gu, " ").trim()
+  const normalize = (value: string) => value.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim().split(/\s+/).map((word) => word.length > 4 && word.endsWith("s") ? word.slice(0, -1) : word).join(" ")
   const wanted = normalize(query)
   const found = normalize(candidateName)
   if (wanted === found) return { score: 1, reasons: ["Exact name match"] }
   if (found.startsWith(wanted) || wanted.startsWith(found)) return { score: 0.9, reasons: ["Name prefix match"] }
   if (found.includes(wanted) || wanted.includes(found)) return { score: 0.78, reasons: ["Name contains match"] }
-  const wantedWords = new Set(wanted.split(/\\s+/).filter(Boolean))
-  const foundWords = new Set(found.split(/\\s+/).filter(Boolean))
+  const wantedWords = new Set(wanted.split(/\s+/).filter(Boolean))
+  const foundWords = new Set(found.split(/\s+/).filter(Boolean))
   const overlap = [...wantedWords].filter((word) => foundWords.has(word)).length
   const score = wantedWords.size ? 0.55 * overlap / wantedWords.size : 0
   return { score, reasons: overlap ? ["Partial word match"] : [] }
+}
+
+type ScryfallImportCard = {
+  id: string
+  name: string
+  set: string
+  set_name: string
+  rarity?: string
+  image_uris?: { small?: string }
+  card_faces?: Array<{ image_uris?: { small?: string } }>
+  mana_cost?: string
+  type_line?: string
+  cmc?: number
+  prices?: { usd?: string | null }
+}
+
+async function searchExternalMagicCard(name: string, setCode?: string): Promise<ScryfallImportCard[]> {
+  const quotedName = name.replace(/"/g, '\\"')
+  const query = `!"${quotedName}"${setCode ? ` set:${setCode.toLowerCase()}` : ""}`
+  const response = await fetch(
+    `https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}&order=released&dir=desc&unique=prints`,
+    { headers: { Accept: "application/json", "User-Agent": "GameTable/1.0 (collection import)" }, cache: "no-store" },
+  )
+  if (response.status === 404) return []
+  if (!response.ok) throw new Error(`Scryfall search failed (${response.status})`)
+  const payload = await response.json()
+  return Array.isArray(payload.data) ? payload.data.slice(0, 10) as ScryfallImportCard[] : []
+}
+
+async function ensureMagicCardInCatalog(db: ReturnType<typeof createServiceClient>, card: ScryfallImportCard) {
+  const { data: existing, error: lookupError } = await db
+    .from("tcg_cards")
+    .select("id")
+    .eq("tcg_system", "mtg")
+    .eq("external_id", card.id)
+    .maybeSingle()
+  if (lookupError) throw new Error(lookupError.message)
+  if (existing) return existing.id as string
+
+  const imageUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || null
+  const parsedPrice = card.prices?.usd ? Number.parseFloat(card.prices.usd) : null
+  const { data: inserted, error: insertError } = await db
+    .from("tcg_cards")
+    .insert({
+      tcg_system: "mtg",
+      external_id: card.id,
+      name: card.name,
+      set_code: card.set,
+      set_name: card.set_name,
+      rarity: card.rarity ?? null,
+      image_url: imageUrl,
+      mana_cost: card.mana_cost ?? null,
+      type_line: card.type_line ?? null,
+      cmc: typeof card.cmc === "number" ? card.cmc : null,
+      price_usd: Number.isFinite(parsedPrice) ? parsedPrice : null,
+      price_updated: Number.isFinite(parsedPrice) ? new Date().toISOString() : null,
+    })
+    .select("id")
+    .single()
+  if (insertError) {
+    // Another import may have inserted the same print between lookup and insert.
+    const { data: raced } = await db.from("tcg_cards").select("id").eq("tcg_system", "mtg").eq("external_id", card.id).maybeSingle()
+    if (raced) return raced.id as string
+    throw new Error(insertError.message)
+  }
+  return inserted.id as string
 }
 
 /**
@@ -344,8 +410,14 @@ export async function processCollectionImportBatch(batchId: string) {
       let matches: Array<{ id: string; name: string; extra: Record<string, unknown> }> = []
 
       if (category === "tcg") {
+        const requestedGame = String((batch.source_metadata as Record<string, unknown> | null)?.game ?? "magic").toLowerCase()
+        const dbGame = requestedGame === "magic" || requestedGame === "mtg" ? "mtg"
+          : requestedGame === "fab" || requestedGame === "flesh-and-blood" ? "fab"
+          : requestedGame === "onepiece" || requestedGame === "one-piece" ? "onepiece"
+          : requestedGame
         let query = db.from("tcg_cards")
           .select("id, name, tcg_system, external_id, set_name, set_code, rarity, image_url")
+          .eq("tcg_system", dbGame)
           .ilike("name", `%${name}%`)
           .limit(20)
         if (parsed.setCode) query = query.eq("set_code", parsed.setCode)
@@ -363,13 +435,44 @@ export async function processCollectionImportBatch(batchId: string) {
             imageUrl: card.image_url,
           },
         }))
+
+        // The local catalog is the fast first pass. For Magic, Scryfall is the
+        // authoritative fallback; newly discovered prints are persisted using
+        // the service client before they become review candidates.
+        if (matches.length === 0 && dbGame === "mtg") {
+          const externalCards = await searchExternalMagicCard(name, parsed.setCode)
+          for (const card of externalCards) {
+            const catalogId = await ensureMagicCardInCatalog(db, card)
+            matches.push({
+              id: catalogId,
+              name: card.name,
+              extra: {
+                game: "mtg",
+                externalId: card.id,
+                set: card.set_name,
+                setCode: card.set,
+                rarity: card.rarity ?? null,
+                imageUrl: card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || null,
+              },
+            })
+          }
+        }
       } else {
-        const { data, error } = await db
+        const unitSelect = "id, name, unit_type, base_points, model_count_min, model_count_max, faction:mini_factions!inner(id, name, system:mini_systems!inner(id, name, code, edition))"
+        let { data, error } = await db
           .from("mini_units")
-          .select("id, name, unit_type, base_points, model_count_min, model_count_max, faction:mini_factions!inner(id, name, system:mini_systems!inner(id, name, code, edition))")
+          .select(unitSelect)
           .ilike("name", `%${name}%`)
           .limit(20)
         if (error) throw new Error(error.message)
+        // Army lists often pluralize unit names while the canonical catalog
+        // stores singular names (e.g. Aggressors -> Aggressor Squad).
+        if (!data?.length && name.length > 4 && name.toLowerCase().endsWith("s")) {
+          const singular = name.slice(0, -1)
+          const fallback = await db.from("mini_units").select(unitSelect).ilike("name", `%${singular}%`).limit(20)
+          if (fallback.error) throw new Error(fallback.error.message)
+          data = fallback.data
+        }
         matches = (data ?? []).map((unit: any) => {
           const faction = Array.isArray(unit.faction) ? unit.faction[0] : unit.faction
           const system = Array.isArray(faction?.system) ? faction.system[0] : faction?.system
@@ -444,10 +547,13 @@ export async function processCollectionImportBatch(batchId: string) {
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "Could not process import batch"
+    // Roll back any partially-created review rows so the same batch can be retried cleanly.
+    await db.from("collection_import_items").delete().eq("batch_id", batchId)
     await db.from("collection_import_batches")
-      .update({ status: "failed", error_message: message, updated_at: new Date().toISOString() })
+      .update({ status: "uploaded", error_message: message, updated_at: new Date().toISOString() })
       .eq("id", batchId)
       .eq("user_id", user.id)
+      .eq("status", "processing")
     return { success: false as const, error: message }
   }
 }
@@ -480,4 +586,125 @@ export async function cancelCollectionImportBatch(batchId: string) {
       error: error instanceof Error ? error.message : "Could not cancel import batch",
     }
   }
+}
+
+
+/**
+ * Commits every accepted row through one database transaction per item.
+ * The database commit ledger makes retries safe: an already committed item
+ * returns its original ownership record instead of applying quantity again.
+ */
+export async function commitCollectionImportBatch(batchId: string) {
+  if (typeof batchId !== "string" || !batchId.trim()) {
+    return { success: false as const, error: "Invalid import batch" }
+  }
+
+  const user = await getAuthenticatedUser()
+  if (!user) return { success: false as const, error: "Not authenticated" }
+
+  const db = createServiceClient()
+  const { data: batch, error: batchError } = await db
+    .from("collection_import_batches")
+    .select("id, category, status")
+    .eq("id", batchId)
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+  if (batchError) return { success: false as const, error: batchError.message }
+  if (!batch) return { success: false as const, error: "Import batch not found" }
+  if (!["tcg", "miniatures"].includes(batch.category)) {
+    return { success: false as const, error: "This category is not enabled for imports yet" }
+  }
+  if (!["review", "committing", "partial"].includes(batch.status)) {
+    return { success: false as const, error: "This batch is not ready to commit" }
+  }
+
+  const { error: claimError } = await db
+    .from("collection_import_batches")
+    .update({ status: "committing", error_message: null, updated_at: new Date().toISOString() })
+    .eq("id", batchId)
+    .eq("user_id", user.id)
+    .in("status", ["review", "committing", "partial"])
+
+  if (claimError) return { success: false as const, error: claimError.message }
+
+  const { data: items, error: itemsError } = await db
+    .from("collection_import_items")
+    .select("id, status")
+    .eq("batch_id", batchId)
+    .order("row_index", { ascending: true })
+
+  if (itemsError) {
+    await db.from("collection_import_batches")
+      .update({ status: "partial", error_message: itemsError.message, updated_at: new Date().toISOString() })
+      .eq("id", batchId)
+      .eq("user_id", user.id)
+    return { success: false as const, error: itemsError.message }
+  }
+
+  let committedCount = 0
+  let failedCount = 0
+  let alreadyCommittedCount = 0
+
+  for (const item of items ?? []) {
+    if (item.status === "imported") {
+      alreadyCommittedCount++
+      continue
+    }
+    if (item.status !== "accepted") continue
+
+    const { data, error } = await db.rpc("commit_collection_import_item", {
+      p_item_id: item.id,
+      p_user_id: user.id,
+    })
+
+    if (error || !data?.success) {
+      failedCount++
+      const message = error?.message || "Could not commit import item"
+      // Keep the row accepted so the user can retry after a transient failure.
+      await db.from("collection_import_items")
+        .update({ error_message: message, updated_at: new Date().toISOString() })
+        .eq("id", item.id)
+        .eq("batch_id", batchId)
+      continue
+    }
+
+    if (data.alreadyCommitted) alreadyCommittedCount++
+    else committedCount++
+  }
+
+  const finalStatus = failedCount > 0 ? "partial" : "completed"
+  const { error: finishError } = await db
+    .from("collection_import_batches")
+    .update({
+      status: finalStatus,
+      error_message: failedCount > 0 ? `${failedCount} item(s) could not be committed` : null,
+      updated_at: new Date().toISOString(),
+      completed_at: finalStatus === "completed" ? new Date().toISOString() : null,
+    })
+    .eq("id", batchId)
+    .eq("user_id", user.id)
+
+  if (finishError) return { success: false as const, error: finishError.message }
+
+  if (committedCount > 0 || alreadyCommittedCount > 0) {
+    const { awardCategoryImportXP } = await import("@/lib/xp-engine")
+    const xpCategory = batch.category === "tcg" ? "tcg" : "miniatures"
+    const xpResult = await awardCategoryImportXP(user.id, xpCategory)
+    if (!xpResult.applied) {
+      console.info("Collection import category XP was not applied", {
+        userId: user.id,
+        category: batch.category,
+      })
+    }
+  }
+
+  return {
+    success: failedCount === 0,
+    batchId,
+    status: finalStatus,
+    committedCount,
+    alreadyCommittedCount,
+    failedCount,
+  } as const
 }

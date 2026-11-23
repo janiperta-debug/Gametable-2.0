@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Download, Loader2, Plus, FileText } from "lucide-react"
 import { useTranslations } from "@/lib/i18n"
+import { CollectionImportReview } from "@/components/collection-import-review"
 import { addCardToCollection } from "@/app/actions/tcg"
 import {
   createMiniatureArmy,
@@ -409,6 +410,16 @@ export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "m
   }
 
   const renderImportContent = () => {
+    if (selectedCategory === "trading-cards" || selectedCategory === "miniatures") {
+      return (
+        <CollectionImportReview
+          category={selectedCategory === "trading-cards" ? "tcg" : "miniatures"}
+          tcgGame={tcgGame}
+          onImportComplete={onImportComplete}
+        />
+      )
+    }
+
     if (supportsUsernameImport) {
       return (
         <div className="space-y-4">
