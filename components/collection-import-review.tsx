@@ -67,9 +67,9 @@ export function CollectionImportReview({
     try {
       const created = await createTextImportBatch({ category, sourceText })
       if (!created.success) throw new Error(created.error)
-      setBatchId(created.batch.id)
       const processed = await processCollectionImportBatch(created.batch.id)
       if (!processed.success) throw new Error(processed.error)
+      setBatchId(created.batch.id)
       await refreshBatch(created.batch.id)
       toast({ title: "Lista analysoitu", description: `${processed.itemCount} riviä käsiteltävänä. Tarkista osumat ennen tuontia.` })
     } catch (error) {
