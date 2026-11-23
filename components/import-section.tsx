@@ -414,6 +414,7 @@ export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "m
       return (
         <CollectionImportReview
           category={selectedCategory === "trading-cards" ? "tcg" : "miniatures"}
+          tcgGame={tcgGame}
           onImportComplete={onImportComplete}
         />
       )
