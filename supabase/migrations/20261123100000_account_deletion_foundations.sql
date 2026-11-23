@@ -17,6 +17,14 @@ alter table public.event_messages
   add constraint event_messages_sender_id_fkey
   foreign key (sender_id) references public.profiles(id) on delete set null;
 
+-- Keep hosted events from being cascade-deleted if an account is removed.
+-- Ownership must be transferred before the host profile can disappear.
+alter table public.events
+  drop constraint if exists events_host_id_fkey;
+alter table public.events
+  add constraint events_host_id_fkey
+  foreign key (host_id) references public.profiles(id) on delete restrict;
+
 -- Historical awards remain valid even when the organizer leaves.
 alter table public.personal_trophies alter column organizer_id drop not null;
 alter table public.personal_trophies
