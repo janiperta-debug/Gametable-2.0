@@ -183,7 +183,9 @@ export async function deleteOwnAccount(): Promise<{ success: boolean; error?: st
     }
   }
 
-  const { error: preparationError } = await supabase.rpc("prepare_account_deletion")
+  const { error: preparationError } = await service.rpc("prepare_account_deletion", {
+    p_user_id: user.id,
+  })
   if (preparationError) return { success: false, error: preparationError.message }
 
   // Global sign-out revokes refresh tokens on every device and clears this
