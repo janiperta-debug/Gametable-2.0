@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react"
 import { ArchiveCardButton, archiveField } from "@/components/archive-frame"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, Upload, Check, X, RefreshCw, ChevronDown } from "lucide-react"
+import { Loader2, Upload, Check, X, RefreshCw } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import {
   createTextImportBatch,
@@ -101,7 +101,7 @@ export function CollectionImportReview({
     setBusy(true)
     try {
       const result = await commitCollectionImportBatch(batchId)
-      if (!result.success && result.failedCount === undefined) throw new Error(result.error)
+      if (!result.success && !("failedCount" in result)) throw new Error(result.error)
       setCommitted(true)
       await refreshBatch(batchId)
       toast({
@@ -118,7 +118,6 @@ export function CollectionImportReview({
 
   const acceptedCount = items.filter((item) => item.status === "accepted" || item.status === "imported").length
   const pendingCount = items.filter((item) => !["accepted", "imported", "rejected"].includes(item.status)).length
-  const isFinished = committed || ["completed", "partial"].includes((items as any).batchStatus)
 
   return (
     <div className="space-y-4">
