@@ -128,15 +128,12 @@ async function releaseGroupCoverOwnership(
     }
   }
 
-  const { data: object, error: verifyError } = await service
-    .schema("storage")
-    .from("objects")
-    .select("owner_id")
-    .eq("bucket_id", "group-covers")
-    .eq("name", path)
-    .maybeSingle()
+  const { data: owner, error: verifyError } = await service.rpc("get_storage_object_owner", {
+    p_bucket_id: "group-covers",
+    p_name: path,
+  })
 
-  if (verifyError || !object || object.owner_id !== null) {
+  if (verifyError || owner !== null) {
     return {
       success: false,
       error: verifyError
