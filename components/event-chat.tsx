@@ -96,6 +96,27 @@ export function EventChat({ eventId, eventTitle }: EventChatProps) {
           }
         }
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "event_messages",
+          filter: `event_id=eq.${eventId}`,
+        },
+        async (payload) => {
+          const { data: updatedMsg } = await supabase
+            .from("event_messages")
+            .select("*, sender:profiles!event_messages_sender_id_fkey(id, display_name, avatar_url)")
+            .eq("id", payload.new.id)
+            .single()
+          if (updatedMsg) {
+            setMessages((prev) => prev.map((message) =>
+              message.id === updatedMsg.id ? updatedMsg as EventMessage : message
+            ))
+          }
+        }
+      )
       .subscribe()
 
     return () => {
