@@ -213,6 +213,111 @@ export async function reviewCollectionImportItem(input: {
 }
 
 
+/**
+ * Runs a second, user-directed search for an unmatched row. The supplied
+ * search text is never committed to the collection; candidates remain review-only.
+ */
+export async function searchCollectionImportItem(input: { itemId: string; searchName: string }) {
+  const searchName = typeof input?.searchName === "string" ? input.searchName.trim().slice(0, 120) : ""
+  if (!input?.itemId || !searchName) return { success: false as const, error: "Anna haettava nimi" as const }
+
+  const user = await getAuthenticatedUser()
+  if (!user) return { success: false as const, error: "Not authenticated" as const }
+
+  const db = createServiceClient()
+  const { data: item, error: itemError } = await db
+    .from("collection_import_items")
+    .select("id, batch_id, status, parsed_data, batch:collection_import_batches!inner(user_id, category, status, source_metadata)")
+    .eq("id", input.itemId)
+    .eq("batch.user_id", user.id)
+    .maybeSingle()
+  if (itemError) return { success: false as const, error: itemError.message }
+  if (!item) return { success: false as const, error: "Import item not found" as const }
+
+  const batch = Array.isArray(item.batch) ? item.batch[0] : item.batch
+  if (batch?.status !== "review" || !["unmatched", "needs_review", "matched"].includes(item.status)) {
+    return { success: false as const, error: "This row cannot be searched in its current state" as const }
+  }
+
+  const matches: Array<{ id: string; name: string; extra: Record<string, unknown> }> = []
+  if (batch.category === "tcg") {
+    const requestedGame = String((batch.source_metadata as Record<string, unknown> | null)?.game ?? "magic").toLowerCase()
+    const dbGame = requestedGame === "magic" || requestedGame === "mtg" ? "mtg"
+      : requestedGame === "fab" || requestedGame === "flesh-and-blood" ? "fab"
+      : requestedGame === "onepiece" || requestedGame === "one-piece" ? "onepiece" : requestedGame
+    const { data, error } = await db.from("tcg_cards")
+      .select("id, name, tcg_system, external_id, set_name, set_code, rarity, image_url")
+      .eq("tcg_system", dbGame).ilike("name", `%${searchName}%`).limit(30)
+    if (error) return { success: false as const, error: error.message }
+    for (const card of data ?? []) matches.push({ id: card.id, name: card.name, extra: {
+      game: card.tcg_system, externalId: card.external_id, set: card.set_name,
+      setCode: card.set_code, rarity: card.rarity, imageUrl: card.image_url,
+    } })
+
+    if (dbGame === "mtg") {
+      const tokens = searchName.split(/\\s+/).filter(Boolean).slice(0, 5)
+      const broadQuery = tokens.map((token) => `name:${token.replace(/[^a-zA-Z0-9'-]/g, "")}`).filter(Boolean).join(" ")
+      if (broadQuery) {
+        const response = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(broadQuery)}&order=edhrec&dir=desc&unique=prints`, {
+          headers: { Accept: "application/json", "User-Agent": "GameTable/1.0 (collection import)" }, cache: "no-store",
+        })
+        if (response.ok) {
+          const payload = await response.json()
+          for (const card of (Array.isArray(payload.data) ? payload.data.slice(0, 30) : []) as ScryfallImportCard[]) {
+            const catalogId = await ensureMagicCardInCatalog(db, card)
+            if (!matches.some((match) => match.id === catalogId)) matches.push({ id: catalogId, name: card.name, extra: {
+              game: "mtg", externalId: card.id, set: card.set_name, setCode: card.set,
+              rarity: card.rarity ?? null, imageUrl: card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || null,
+            } })
+          }
+        } else if (response.status !== 404) {
+          return { success: false as const, error: `Scryfall search failed (${response.status})` }
+        }
+      }
+    }
+  } else {
+    const unitSelect = "id, name, unit_type, base_points, model_count_min, model_count_max, faction:mini_factions!inner(id, name, system:mini_systems!inner(id, name, code, edition))"
+    const { data, error } = await db.from("mini_units").select(unitSelect).ilike("name", `%${searchName}%`).limit(40)
+    if (error) return { success: false as const, error: error.message }
+    for (const unit of data ?? []) {
+      const faction = Array.isArray((unit as any).faction) ? (unit as any).faction[0] : (unit as any).faction
+      const system = Array.isArray(faction?.system) ? faction.system[0] : faction?.system
+      matches.push({ id: (unit as any).id, name: (unit as any).name, extra: {
+        unitType: (unit as any).unit_type, basePoints: (unit as any).base_points,
+        modelCountMin: (unit as any).model_count_min, modelCountMax: (unit as any).model_count_max,
+        factionId: faction?.id, factionName: faction?.name, systemId: system?.id,
+        systemName: system?.name, systemCode: system?.code, edition: system?.edition,
+      } })
+    }
+  }
+
+  const ranked = matches.map((match) => ({ ...match, ...scoreCatalogMatch(searchName, match.name) }))
+    .filter((match) => match.score >= 0.25).sort((x, y) => y.score - x.score).slice(0, 8)
+
+  const { error: deleteError } = await db.from("collection_import_candidates").delete().eq("item_id", item.id)
+  if (deleteError) return { success: false as const, error: deleteError.message }
+
+  if (ranked.length) {
+    const { error } = await db.from("collection_import_candidates").insert(ranked.map((match) => ({
+      item_id: item.id, catalog_id: match.id,
+      catalog_source: batch.category === "tcg" ? "tcg_cards" : "mini_units",
+      match_score: match.score, match_reasons: match.reasons,
+      candidate_data: { name: match.name, ...match.extra },
+    })))
+    if (error) return { success: false as const, error: error.message }
+  }
+
+  const { error: updateError } = await db.from("collection_import_items").update({
+    status: ranked.length ? "needs_review" : "unmatched",
+    selected_candidate_id: null, resolved_catalog_id: null,
+    review_reason: ranked.length ? `Search suggestions for: ${searchName}` : `No suggestions for: ${searchName}`,
+    error_message: null, updated_at: new Date().toISOString(),
+  }).eq("id", item.id)
+  if (updateError) return { success: false as const, error: updateError.message }
+  return { success: true as const, candidateCount: ranked.length }
+}
+
+
 interface ParsedImportLine {
   name: string
   quantity: number
