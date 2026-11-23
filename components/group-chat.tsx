@@ -114,7 +114,7 @@ export function GroupChat({ groupId, groupName }: { groupId: string; groupName: 
               ) : messages.map((message, index) => {
                 const own = message.sender_id === currentUserId
                 const showDate = index === 0 || formatDate(message.created_at) !== formatDate(messages[index - 1].created_at)
-                const senderName = message.sender?.display_name || message.sender?.username || "Pelaaja"
+                const senderName = message.sender_id === null ? "Poistettu käyttäjä" : message.sender?.display_name || message.sender?.username || "Pelaaja"
                 return (
                   <div key={message.id}>
                     {showDate ? <ArchiveDivider variant="subtle" className="my-2" /> : null}
