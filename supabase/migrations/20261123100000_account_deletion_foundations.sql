@@ -102,7 +102,7 @@ begin
     from storage.objects o
     where o.owner_id = v_user::text;
 end;
-$;
+$$;
 revoke all on function public.get_owned_storage_objects() from public, anon;
 grant execute on function public.get_owned_storage_objects() to authenticated;
 
@@ -122,7 +122,7 @@ begin
   return (select o.owner_id from storage.objects o
     where o.bucket_id = p_bucket_id and o.name = p_name);
 end;
-$;
+$$;
 revoke all on function public.get_storage_object_owner(text, text) from public, anon, authenticated;
 grant execute on function public.get_storage_object_owner(text, text) to service_role;
 
