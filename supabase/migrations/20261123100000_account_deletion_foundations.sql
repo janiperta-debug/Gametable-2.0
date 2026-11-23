@@ -91,7 +91,8 @@ returns table(bucket_id text, name text)
 language plpgsql
 security definer
 set search_path = ''
-as $$1declare
+as $$
+declare
   v_user uuid := (select auth.uid());
 begin
   if v_user is null then raise exception 'Authentication required'; end if;
@@ -113,7 +114,8 @@ returns text
 language plpgsql
 security definer
 set search_path = ''
-as $$1begin
+as $$
+begin
   if coalesce(auth.role(), '') <> 'service_role' then
     raise exception 'Service role required';
   end if;
