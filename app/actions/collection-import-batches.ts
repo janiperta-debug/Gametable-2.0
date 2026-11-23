@@ -271,6 +271,72 @@ function scoreCatalogMatch(query: string, candidateName: string): { score: numbe
   return { score, reasons: overlap ? ["Partial word match"] : [] }
 }
 
+type ScryfallImportCard = {
+  id: string
+  name: string
+  set: string
+  set_name: string
+  rarity?: string
+  image_uris?: { small?: string }
+  card_faces?: Array<{ image_uris?: { small?: string } }>
+  mana_cost?: string
+  type_line?: string
+  cmc?: number
+  prices?: { usd?: string | null }
+}
+
+async function searchExternalMagicCard(name: string, setCode?: string): Promise<ScryfallImportCard[]> {
+  const quotedName = name.replace(/"/g, '\\"')
+  const query = `!"${quotedName}"${setCode ? ` set:${setCode.toLowerCase()}` : ""}`
+  const response = await fetch(
+    `https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}&order=released&dir=desc&unique=prints`,
+    { headers: { Accept: "application/json", "User-Agent": "GameTable/1.0 (collection import)" }, cache: "no-store" },
+  )
+  if (response.status === 404) return []
+  if (!response.ok) throw new Error(`Scryfall search failed (${response.status})`)
+  const payload = await response.json()
+  return Array.isArray(payload.data) ? payload.data.slice(0, 10) as ScryfallImportCard[] : []
+}
+
+async function ensureMagicCardInCatalog(db: ReturnType<typeof createServiceClient>, card: ScryfallImportCard) {
+  const { data: existing, error: lookupError } = await db
+    .from("tcg_cards")
+    .select("id")
+    .eq("tcg_system", "mtg")
+    .eq("external_id", card.id)
+    .maybeSingle()
+  if (lookupError) throw new Error(lookupError.message)
+  if (existing) return existing.id as string
+
+  const imageUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || null
+  const parsedPrice = card.prices?.usd ? Number.parseFloat(card.prices.usd) : null
+  const { data: inserted, error: insertError } = await db
+    .from("tcg_cards")
+    .insert({
+      tcg_system: "mtg",
+      external_id: card.id,
+      name: card.name,
+      set_code: card.set,
+      set_name: card.set_name,
+      rarity: card.rarity ?? null,
+      image_url: imageUrl,
+      mana_cost: card.mana_cost ?? null,
+      type_line: card.type_line ?? null,
+      cmc: typeof card.cmc === "number" ? card.cmc : null,
+      price_usd: Number.isFinite(parsedPrice) ? parsedPrice : null,
+      price_updated: Number.isFinite(parsedPrice) ? new Date().toISOString() : null,
+    })
+    .select("id")
+    .single()
+  if (insertError) {
+    // Another import may have inserted the same print between lookup and insert.
+    const { data: raced } = await db.from("tcg_cards").select("id").eq("tcg_system", "mtg").eq("external_id", card.id).maybeSingle()
+    if (raced) return raced.id as string
+    throw new Error(insertError.message)
+  }
+  return inserted.id as string
+}
+
 /**
  * Parses a text batch and proposes matches from GameTable's canonical catalog.
  * Nothing is added to a user's collection here: all matches require review.
@@ -344,8 +410,14 @@ export async function processCollectionImportBatch(batchId: string) {
       let matches: Array<{ id: string; name: string; extra: Record<string, unknown> }> = []
 
       if (category === "tcg") {
+        const requestedGame = String((batch.source_metadata as Record<string, unknown> | null)?.game ?? "magic").toLowerCase()
+        const dbGame = requestedGame === "magic" || requestedGame === "mtg" ? "mtg"
+          : requestedGame === "fab" || requestedGame === "flesh-and-blood" ? "fab"
+          : requestedGame === "onepiece" || requestedGame === "one-piece" ? "onepiece"
+          : requestedGame
         let query = db.from("tcg_cards")
           .select("id, name, tcg_system, external_id, set_name, set_code, rarity, image_url")
+          .eq("tcg_system", dbGame)
           .ilike("name", `%${name}%`)
           .limit(20)
         if (parsed.setCode) query = query.eq("set_code", parsed.setCode)
@@ -363,6 +435,28 @@ export async function processCollectionImportBatch(batchId: string) {
             imageUrl: card.image_url,
           },
         }))
+
+        // The local catalog is the fast first pass. For Magic, Scryfall is the
+        // authoritative fallback; newly discovered prints are persisted using
+        // the service client before they become review candidates.
+        if (matches.length === 0 && dbGame === "mtg") {
+          const externalCards = await searchExternalMagicCard(name, parsed.setCode)
+          for (const card of externalCards) {
+            const catalogId = await ensureMagicCardInCatalog(db, card)
+            matches.push({
+              id: catalogId,
+              name: card.name,
+              extra: {
+                game: "mtg",
+                externalId: card.id,
+                set: card.set_name,
+                setCode: card.set,
+                rarity: card.rarity ?? null,
+                imageUrl: card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || null,
+              },
+            })
+          }
+        }
       } else {
         const { data, error } = await db
           .from("mini_units")
