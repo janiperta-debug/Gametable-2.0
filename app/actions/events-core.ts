@@ -11,7 +11,7 @@ export type RSVPStatus = "invited" | "attending" | "declined" | "maybe"
 
 export interface Event {
   id: string
-  host_id: string
+  host_id: string | null
   title: string
   description: string | null
   event_type: EventType | null
@@ -28,7 +28,7 @@ export interface Event {
     id: string
     display_name: string | null
     avatar_url: string | null
-  }
+  } | null
   participant_count?: number
   user_rsvp?: RSVPStatus | null
   winner_name?: string | null
