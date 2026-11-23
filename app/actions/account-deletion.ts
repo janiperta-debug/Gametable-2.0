@@ -1,5 +1,6 @@
 "use server"
 
+import { randomUUID } from "node:crypto"
 import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
 import { createServiceClient } from "@/lib/supabase/service"
@@ -38,7 +39,9 @@ export async function getAccountDeletionPlan(): Promise<{
       .eq("status", "active")
       .neq("user_id", user.id)
     if (memberError) return { responsibilities: [], error: memberError.message }
-    const eligibleUsers = (memberships ?? []).map((row: any) => Array.isArray(row.profile) ? row.profile[0] : row.profile).filter(Boolean)
+    const eligibleUsers = (memberships ?? [])
+      .map((row: any) => Array.isArray(row.profile) ? row.profile[0] : row.profile)
+      .filter(Boolean)
     responsibilities.push({ id: group.id, name: group.name, kind: "group", eligibleUsers })
   }
 
@@ -51,7 +54,9 @@ export async function getAccountDeletionPlan(): Promise<{
 
   for (const event of events) {
     responsibilities.push({
-      id: event.id, name: event.name, kind: "event",
+      id: event.id,
+      name: event.name,
+      kind: "event",
       detail: event.starts_at ? new Date(event.starts_at).toLocaleString("fi-FI") : undefined,
       eligibleUsers: profiles ?? [],
     })
@@ -85,6 +90,64 @@ export async function transferAccountResponsibility(
   return { success: true }
 }
 
+/**
+ * Recreate a community cover through the service role so it no longer belongs
+ * to the departing user. A temporary copy is kept until the original path has
+ * been restored and its owner_id has been verified as null.
+ */
+async function releaseGroupCoverOwnership(
+  service: ReturnType<typeof createServiceClient>,
+  path: string,
+): Promise<{ success: true } | { success: false; error: string }> {
+  const bucket = service.storage.from("group-covers")
+  const tempPath = `__account-deletion-transfer/${randomUUID()}/${path.split("/").pop() || "cover"}`
+
+  const { error: copyError } = await bucket.copy(path, tempPath)
+  if (copyError) {
+    return { success: false, error: "Väliaikaisen kansikuvakopion luominen epäonnistui: " + copyError.message }
+  }
+
+  const { error: removeError } = await bucket.remove([path])
+  if (removeError) {
+    await bucket.remove([tempPath])
+    return { success: false, error: "Alkuperäisen kansikuvan vapauttaminen epäonnistui: " + removeError.message }
+  }
+
+  const { error: moveError } = await bucket.move(tempPath, path)
+  if (moveError) {
+    // Best-effort recovery: restore the original public path from the temp copy.
+    const { error: restoreError } = await bucket.copy(tempPath, path)
+    if (!restoreError) {
+      await bucket.remove([tempPath])
+      return { success: false, error: "Kansikuvan palautus onnistui, mutta omistajuuden siirto epäonnistui: " + moveError.message }
+    }
+    return {
+      success: false,
+      error: "Kansikuvan siirto epäonnistui ja automaattinen palautus ei onnistunut. Väliaikainen kopio säilytettiin palautusta varten. Siirto: "
+        + moveError.message + ". Palautus: " + restoreError.message,
+    }
+  }
+
+  const { data: object, error: verifyError } = await service
+    .schema("storage")
+    .from("objects")
+    .select("owner_id")
+    .eq("bucket_id", "group-covers")
+    .eq("name", path)
+    .maybeSingle()
+
+  if (verifyError || !object || object.owner_id !== null) {
+    return {
+      success: false,
+      error: verifyError
+        ? "Kansikuvan omistajuuden tarkistus epäonnistui: " + verifyError.message
+        : "Kansikuvan omistajuus ei vapautunut odotetusti. Tilin poisto keskeytettiin.",
+    }
+  }
+
+  return { success: true }
+}
+
 export async function deleteOwnAccount(): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -96,10 +159,15 @@ export async function deleteOwnAccount(): Promise<{ success: boolean; error?: st
     return { success: false, error: "Siirrä ensin kaikki ryhmien, tapahtumien ja liigojen vastuut." }
   }
 
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+  if (sessionError || !sessionData.session?.access_token) {
+    return { success: false, error: "Kirjautumisistunnon tarkistus epäonnistui. Kirjaudu uudelleen sisään." }
+  }
+
   const service = createServiceClient()
 
   // Supabase Auth refuses to delete users who still own Storage objects.
-  // Personal avatar files are removed; community cover files must remain.
+  // Personal avatars are removed; community covers are retained without ownership.
   const { data: ownedObjects, error: objectError } = await service
     .schema("storage")
     .from("objects")
@@ -116,23 +184,24 @@ export async function deleteOwnAccount(): Promise<{ success: boolean; error?: st
     }
 
     if (object.bucket_id === "group-covers") {
-      const { data: file, error: downloadError } = await service.storage.from("group-covers").download(object.name)
-      if (downloadError || !file) {
-        return { success: false, error: "Ryhmän kansikuvan säilyttäminen epäonnistui." }
-      }
-      const { error: uploadError } = await service.storage.from("group-covers").upload(object.name, file, {
-        upsert: true,
-        contentType: file.type || "application/octet-stream",
-      })
-      if (uploadError) return { success: false, error: "Ryhmän kansikuvan omistajuuden siirto epäonnistui: " + uploadError.message }
+      const result = await releaseGroupCoverOwnership(service, object.name)
+      if (!result.success) return { success: false, error: result.error }
       continue
     }
 
-    return { success: false, error: "Tilillä on tiedostoja, joiden säilytystapaa ei tunnisteta (" + object.bucket_id + "). Poisto keskeytettiin turvallisuussyistä." }
+    return {
+      success: false,
+      error: "Tilillä on tiedostoja, joiden säilytystapaa ei tunnisteta (" + object.bucket_id + "). Poisto keskeytettiin turvallisuussyistä.",
+    }
   }
 
   const { error: preparationError } = await supabase.rpc("prepare_account_deletion")
   if (preparationError) return { success: false, error: preparationError.message }
+
+  // Revoke refresh tokens on every device immediately before deleting the user.
+  // Already-issued access JWTs remain valid until their normal expiry.
+  const { error: signOutError } = await service.auth.admin.signOut(sessionData.session.access_token)
+  if (signOutError) return { success: false, error: "Kaikkien istuntojen päättäminen epäonnistui: " + signOutError.message }
 
   const { error: deletionError } = await service.auth.admin.deleteUser(user.id)
   if (deletionError) return { success: false, error: deletionError.message }
