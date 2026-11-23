@@ -56,6 +56,21 @@ export function GroupChat({ groupId, groupName }: { groupId: string; groupName: 
           setMessages(previous => previous.some(item => item.id === data.id) ? previous : [...previous, data as GroupMessage])
         }
       })
+      .on("postgres_changes", {
+        event: "UPDATE",
+        schema: "public",
+        table: "group_messages",
+        filter: `group_id=eq.${groupId}`,
+      }, async payload => {
+        const { data } = await supabase
+          .from("group_messages")
+          .select("*, sender:profiles!group_messages_sender_id_fkey(id, display_name, username, avatar_url)")
+          .eq("id", payload.new.id)
+          .single()
+        if (active && data) {
+          setMessages(previous => previous.map(item => item.id === data.id ? data as GroupMessage : item))
+        }
+      })
       .subscribe()
 
     return () => {
