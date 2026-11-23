@@ -299,7 +299,7 @@ export async function processCollectionImportBatch(batchId: string) {
   if (!["tcg", "miniatures"].includes(batch.category)) {
     return { success: false as const, error: "This category is not enabled for imports yet" }
   }
-  if (!["uploaded", "failed"].includes(batch.status)) {
+  if (batch.status !== "uploaded") {
     return { success: false as const, error: "This batch has already been processed or cannot be processed" }
   }
 
@@ -308,7 +308,7 @@ export async function processCollectionImportBatch(batchId: string) {
     .update({ status: "processing", error_message: null, updated_at: new Date().toISOString() })
     .eq("id", batchId)
     .eq("user_id", user.id)
-    .in("status", ["uploaded", "failed"])
+    .eq("status", "uploaded")
     .select("id")
     .maybeSingle()
 
