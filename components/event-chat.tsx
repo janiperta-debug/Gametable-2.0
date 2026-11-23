@@ -213,7 +213,7 @@ export function EventChat({ eventId, eventTitle }: EventChatProps) {
                             <img src={message.sender.avatar_url} alt={message.sender.display_name || ""} className="w-8 h-8 rounded-full object-cover" />
                           ) : (
                             <span className="text-xs font-medium text-accent-gold">
-                              {(message.sender?.display_name || "?").charAt(0).toUpperCase()}
+                              {(message.sender_id === null ? "P" : message.sender?.display_name || "?").charAt(0).toUpperCase()}
                             </span>
                           )}
                         </div>
@@ -221,7 +221,7 @@ export function EventChat({ eventId, eventTitle }: EventChatProps) {
                       <div className={`max-w-[80%] ${isCurrentUser ? "order-first" : ""}`}>
                         {!isCurrentUser && (
                           <p className="text-xs text-muted-foreground mb-1">
-                            {message.sender?.display_name || t("profile.anonymous") || "Anonymous"}
+                            {message.sender_id === null ? "Poistettu käyttäjä" : message.sender?.display_name || t("profile.anonymous") || "Anonymous"}
                           </p>
                         )}
                         <div className={`rounded-lg px-3 py-2 border border-accent-gold/15 ${isCurrentUser ? "bg-accent-gold text-accent-gold-foreground" : "bg-black/30"}`}>
