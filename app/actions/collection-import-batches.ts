@@ -481,3 +481,123 @@ export async function cancelCollectionImportBatch(batchId: string) {
     }
   }
 }
+
+
+/**
+ * Commits every accepted row through one database transaction per item.
+ * The database commit ledger makes retries safe: an already committed item
+ * returns its original ownership record instead of applying quantity again.
+ */
+export async function commitCollectionImportBatch(batchId: string) {
+  if (typeof batchId !== "string" || !batchId.trim()) {
+    return { success: false as const, error: "Invalid import batch" }
+  }
+
+  const user = await getAuthenticatedUser()
+  if (!user) return { success: false as const, error: "Not authenticated" }
+
+  const db = createServiceClient()
+  const { data: batch, error: batchError } = await db
+    .from("collection_import_batches")
+    .select("id, category, status")
+    .eq("id", batchId)
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+  if (batchError) return { success: false as const, error: batchError.message }
+  if (!batch) return { success: false as const, error: "Import batch not found" }
+  if (!["tcg", "miniatures"].includes(batch.category)) {
+    return { success: false as const, error: "This category is not enabled for imports yet" }
+  }
+  if (!["review", "committing", "partial"].includes(batch.status)) {
+    return { success: false as const, error: "This batch is not ready to commit" }
+  }
+
+  const { error: claimError } = await db
+    .from("collection_import_batches")
+    .update({ status: "committing", error_message: null, updated_at: new Date().toISOString() })
+    .eq("id", batchId)
+    .eq("user_id", user.id)
+    .in("status", ["review", "committing", "partial"])
+
+  if (claimError) return { success: false as const, error: claimError.message }
+
+  const { data: items, error: itemsError } = await db
+    .from("collection_import_items")
+    .select("id, status")
+    .eq("batch_id", batchId)
+    .order("row_index", { ascending: true })
+
+  if (itemsError) {
+    await db.from("collection_import_batches")
+      .update({ status: "partial", error_message: itemsError.message, updated_at: new Date().toISOString() })
+      .eq("id", batchId)
+      .eq("user_id", user.id)
+    return { success: false as const, error: itemsError.message }
+  }
+
+  let committedCount = 0
+  let failedCount = 0
+  let alreadyCommittedCount = 0
+
+  for (const item of items ?? []) {
+    if (item.status === "imported") {
+      alreadyCommittedCount++
+      continue
+    }
+    if (item.status !== "accepted") continue
+
+    const { data, error } = await db.rpc("commit_collection_import_item", {
+      p_item_id: item.id,
+      p_user_id: user.id,
+    })
+
+    if (error || !data?.success) {
+      failedCount++
+      const message = error?.message || "Could not commit import item"
+      await db.from("collection_import_items")
+        .update({ status: "failed", error_message: message, updated_at: new Date().toISOString() })
+        .eq("id", item.id)
+        .eq("batch_id", batchId)
+      continue
+    }
+
+    if (data.alreadyCommitted) alreadyCommittedCount++
+    else committedCount++
+  }
+
+  const finalStatus = failedCount > 0 ? "partial" : "completed"
+  const { error: finishError } = await db
+    .from("collection_import_batches")
+    .update({
+      status: finalStatus,
+      error_message: failedCount > 0 ? `${failedCount} item(s) could not be committed` : null,
+      updated_at: new Date().toISOString(),
+      completed_at: finalStatus === "completed" ? new Date().toISOString() : null,
+    })
+    .eq("id", batchId)
+    .eq("user_id", user.id)
+
+  if (finishError) return { success: false as const, error: finishError.message }
+
+  if (committedCount > 0 || alreadyCommittedCount > 0) {
+    const { awardCategoryImportXP } = await import("@/lib/xp-engine")
+    const xpCategory = batch.category === "tcg" ? "tcg" : "miniatures"
+    const xpResult = await awardCategoryImportXP(user.id, xpCategory)
+    if (!xpResult.applied) {
+      console.info("Collection import category XP was not applied", {
+        userId: user.id,
+        category: batch.category,
+      })
+    }
+  }
+
+  return {
+    success: failedCount === 0,
+    batchId,
+    status: finalStatus,
+    committedCount,
+    alreadyCommittedCount,
+    failedCount,
+  } as const
+}
