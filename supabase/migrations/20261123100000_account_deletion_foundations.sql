@@ -106,6 +106,26 @@ $;
 revoke all on function public.get_owned_storage_objects() from public, anon;
 grant execute on function public.get_owned_storage_objects() to authenticated;
 
+
+
+-- Service-role-only verification that a retained cover has no user owner.
+create or replace function public.get_storage_object_owner(p_bucket_id text, p_name text)
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+  if coalesce(auth.role(), '') <> 'service_role' then
+    raise exception 'Service role required';
+  end if;
+  return (select o.owner_id from storage.objects o
+    where o.bucket_id = p_bucket_id and o.name = p_name);
+end;
+$;
+revoke all on function public.get_storage_object_owner(text, text) from public, anon, authenticated;
+grant execute on function public.get_storage_object_owner(text, text) to service_role;
+
 -- One atomic transfer operation for groups, events, and permanent leagues.
 create or replace function public.transfer_account_responsibility(
   p_kind text,
