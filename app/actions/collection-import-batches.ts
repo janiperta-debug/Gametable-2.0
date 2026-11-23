@@ -444,10 +444,13 @@ export async function processCollectionImportBatch(batchId: string) {
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "Could not process import batch"
+    // Roll back any partially-created review rows so the same batch can be retried cleanly.
+    await db.from("collection_import_items").delete().eq("batch_id", batchId)
     await db.from("collection_import_batches")
-      .update({ error_message: message, updated_at: new Date().toISOString() })
+      .update({ status: "uploaded", error_message: message, updated_at: new Date().toISOString() })
       .eq("id", batchId)
       .eq("user_id", user.id)
+      .eq("status", "processing")
     return { success: false as const, error: message }
   }
 }
