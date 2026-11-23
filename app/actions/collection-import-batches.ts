@@ -212,6 +212,246 @@ export async function reviewCollectionImportItem(input: {
   }
 }
 
+
+interface ParsedImportLine {
+  name: string
+  quantity: number
+  setCode?: string
+  rawText: string
+}
+
+function parseImportLines(sourceText: string, category: CollectionImportCategory): ParsedImportLine[] {
+  const lines = sourceText.split(/\\r?\\n/).map((line) => line.trim()).filter(Boolean)
+  const parsed: ParsedImportLine[] = []
+
+  for (const rawText of lines) {
+    if (/^(#|\/\/|\[|sideboard:|commander:)/i.test(rawText) || rawText.endsWith(":")) continue
+
+    if (category === "tcg") {
+      const match = rawText.match(/^(\\d+)x?\\s+(.+?)(?:\\s+\\(([A-Z0-9_-]+)\\))?(?:\\s+\\d+)?$/i)
+      if (match) {
+        parsed.push({
+          quantity: Math.max(1, Number.parseInt(match[1], 10)),
+          name: match[2].trim(),
+          setCode: match[3]?.toUpperCase(),
+          rawText,
+        })
+      } else {
+        parsed.push({ quantity: 1, name: rawText, rawText })
+      }
+      continue
+    }
+
+    // Miniature rosters commonly use "5 Intercessors" or "Intercessors x5".
+    const leadingQuantity = rawText.match(/^(\\d+)x?\\s+(.+?)(?:\\s+\\(\\d+\\s*(?:pts|points)?\\))?$/i)
+    const trailingQuantity = rawText.match(/^(.+?)\\s+x(\\d+)(?:\\s+\\(\\d+\\s*(?:pts|points)?\\))?$/i)
+    if (leadingQuantity) {
+      parsed.push({ quantity: Math.max(1, Number.parseInt(leadingQuantity[1], 10)), name: leadingQuantity[2].trim(), rawText })
+    } else if (trailingQuantity) {
+      parsed.push({ quantity: Math.max(1, Number.parseInt(trailingQuantity[2], 10)), name: trailingQuantity[1].trim(), rawText })
+    } else {
+      parsed.push({ quantity: 1, name: rawText, rawText })
+    }
+  }
+
+  return parsed.filter((line) => line.name.length > 0).slice(0, 500)
+}
+
+function scoreCatalogMatch(query: string, candidateName: string): { score: number; reasons: string[] } {
+  const normalize = (value: string) => value.toLocaleLowerCase().replace(/[^\\p{L}\\p{N}]+/gu, " ").trim()
+  const wanted = normalize(query)
+  const found = normalize(candidateName)
+  if (wanted === found) return { score: 1, reasons: ["Exact name match"] }
+  if (found.startsWith(wanted) || wanted.startsWith(found)) return { score: 0.9, reasons: ["Name prefix match"] }
+  if (found.includes(wanted) || wanted.includes(found)) return { score: 0.78, reasons: ["Name contains match"] }
+  const wantedWords = new Set(wanted.split(/\\s+/).filter(Boolean))
+  const foundWords = new Set(found.split(/\\s+/).filter(Boolean))
+  const overlap = [...wantedWords].filter((word) => foundWords.has(word)).length
+  const score = wantedWords.size ? 0.55 * overlap / wantedWords.size : 0
+  return { score, reasons: overlap ? ["Partial word match"] : [] }
+}
+
+/**
+ * Parses a text batch and proposes matches from GameTable's canonical catalog.
+ * Nothing is added to a user's collection here: all matches require review.
+ */
+export async function processCollectionImportBatch(batchId: string) {
+  if (typeof batchId !== "string" || !batchId.trim()) {
+    return { success: false as const, error: "Invalid import batch" }
+  }
+
+  const user = await getAuthenticatedUser()
+  if (!user) return { success: false as const, error: "Not authenticated" }
+
+  const db = createServiceClient()
+  const { data: batch, error: batchError } = await db
+    .from("collection_import_batches")
+    .select("id, category, input_type, status, source_text, source_metadata")
+    .eq("id", batchId)
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+  if (batchError) return { success: false as const, error: batchError.message }
+  if (!batch) return { success: false as const, error: "Import batch not found" }
+  if (batch.input_type !== "text" || !batch.source_text) {
+    return { success: false as const, error: "This batch does not contain text input" }
+  }
+  if (!["tcg", "miniatures"].includes(batch.category)) {
+    return { success: false as const, error: "This category is not enabled for imports yet" }
+  }
+  if (!["uploaded", "failed"].includes(batch.status)) {
+    return { success: false as const, error: "This batch has already been processed or cannot be processed" }
+  }
+
+  const { data: claimed, error: claimError } = await db
+    .from("collection_import_batches")
+    .update({ status: "processing", error_message: null, updated_at: new Date().toISOString() })
+    .eq("id", batchId)
+    .eq("user_id", user.id)
+    .in("status", ["uploaded", "failed"])
+    .select("id")
+    .maybeSingle()
+
+  if (claimError) return { success: false as const, error: claimError.message }
+  if (!claimed) return { success: false as const, error: "This batch is already being processed" }
+
+  try {
+    const category = batch.category as CollectionImportCategory
+    const lines = parseImportLines(batch.source_text, category)
+    if (lines.length === 0) throw new Error("No importable rows were found in the text")
+
+    const itemRows = lines.map((line, index) => ({
+      batch_id: batchId,
+      row_index: index,
+      raw_text: line.rawText,
+      parsed_data: { name: line.name, quantity: line.quantity, setCode: line.setCode ?? null },
+      status: "pending",
+    }))
+
+    const { data: items, error: itemInsertError } = await db
+      .from("collection_import_items")
+      .insert(itemRows)
+      .select("id, row_index, parsed_data")
+
+    if (itemInsertError) throw new Error(itemInsertError.message)
+
+    const candidateRows: Array<Record<string, unknown>> = []
+    const itemStatusUpdates: Array<{ id: string; status: string; review_reason: string | null }> = []
+
+    for (const item of items ?? []) {
+      const parsed = item.parsed_data as { name?: string; quantity?: number; setCode?: string | null }
+      const name = (parsed.name ?? "").trim()
+      let matches: Array<{ id: string; name: string; extra: Record<string, unknown> }> = []
+
+      if (category === "tcg") {
+        let query = db.from("tcg_cards")
+          .select("id, name, tcg_system, external_id, set_name, set_code, rarity, image_url")
+          .ilike("name", `%${name}%`)
+          .limit(20)
+        if (parsed.setCode) query = query.eq("set_code", parsed.setCode)
+        const { data, error } = await query
+        if (error) throw new Error(error.message)
+        matches = (data ?? []).map((card) => ({
+          id: card.id,
+          name: card.name,
+          extra: {
+            game: card.tcg_system,
+            externalId: card.external_id,
+            set: card.set_name,
+            setCode: card.set_code,
+            rarity: card.rarity,
+            imageUrl: card.image_url,
+          },
+        }))
+      } else {
+        const { data, error } = await db
+          .from("mini_units")
+          .select("id, name, unit_type, base_points, model_count_min, model_count_max, faction:mini_factions!inner(id, name, system:mini_systems!inner(id, name, code, edition))")
+          .ilike("name", `%${name}%`)
+          .limit(20)
+        if (error) throw new Error(error.message)
+        matches = (data ?? []).map((unit: any) => {
+          const faction = Array.isArray(unit.faction) ? unit.faction[0] : unit.faction
+          const system = Array.isArray(faction?.system) ? faction.system[0] : faction?.system
+          return {
+            id: unit.id,
+            name: unit.name,
+            extra: {
+              unitType: unit.unit_type,
+              basePoints: unit.base_points,
+              modelCountMin: unit.model_count_min,
+              modelCountMax: unit.model_count_max,
+              factionId: faction?.id,
+              factionName: faction?.name,
+              systemId: system?.id,
+              systemName: system?.name,
+              systemCode: system?.code,
+              edition: system?.edition,
+            },
+          }
+        })
+      }
+
+      const ranked = matches
+        .map((match) => ({ ...match, ...scoreCatalogMatch(name, match.name) }))
+        .filter((match) => match.score >= 0.5)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 5)
+
+      for (const match of ranked) {
+        candidateRows.push({
+          item_id: item.id,
+          catalog_id: match.id,
+          catalog_source: category === "tcg" ? "tcg_cards" : "mini_units",
+          match_score: match.score,
+          match_reasons: match.reasons,
+          candidate_data: { name: match.name, ...match.extra },
+        })
+      }
+
+      itemStatusUpdates.push({
+        id: item.id,
+        status: ranked.length === 0 ? "unmatched" : ranked[0].score >= 0.95 ? "matched" : "needs_review",
+        review_reason: ranked.length === 0 ? "No catalog match found" : ranked.length > 1 ? "Multiple possible catalog matches" : ranked[0].reasons.join(", "),
+      })
+    }
+
+    if (candidateRows.length > 0) {
+      const { error } = await db.from("collection_import_candidates").insert(candidateRows)
+      if (error) throw new Error(error.message)
+    }
+
+    for (const update of itemStatusUpdates) {
+      const { error } = await db.from("collection_import_items")
+        .update({ status: update.status, review_reason: update.review_reason, updated_at: new Date().toISOString() })
+        .eq("id", update.id)
+      if (error) throw new Error(error.message)
+    }
+
+    const { error: finishError } = await db.from("collection_import_batches")
+      .update({ status: "review", updated_at: new Date().toISOString() })
+      .eq("id", batchId)
+      .eq("user_id", user.id)
+      .eq("status", "processing")
+    if (finishError) throw new Error(finishError.message)
+
+    return {
+      success: true as const,
+      batchId,
+      itemCount: itemRows.length,
+      candidateCount: candidateRows.length,
+      reviewCount: itemStatusUpdates.filter((item) => item.status !== "matched").length,
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Could not process import batch"
+    await db.from("collection_import_batches")
+      .update({ status: "failed", error_message: message, updated_at: new Date().toISOString() })
+      .eq("id", batchId)
+      .eq("user_id", user.id)
+    return { success: false as const, error: message }
+  }
+}
+
 export async function cancelCollectionImportBatch(batchId: string) {
   if (typeof batchId !== "string" || !batchId.trim()) {
     return { success: false as const, error: "Invalid import batch" }
