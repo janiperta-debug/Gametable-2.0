@@ -43,6 +43,7 @@ export function CollectionImportReview({
   const [candidates, setCandidates] = useState<Candidate[]>([])
   const [busy, setBusy] = useState(false)
   const [committed, setCommitted] = useState(false)
+  const [analysisError, setAnalysisError] = useState<string | null>(null)
   const { toast } = useToast()
 
   const candidatesByItem = useMemo(() => {
@@ -64,18 +65,21 @@ export function CollectionImportReview({
   const handleAnalyze = async () => {
     if (!sourceText.trim() || busy) return
     setBusy(true)
+    setAnalysisError(null)
     try {
       const created = await createTextImportBatch({ category, sourceText })
       if (!created.success) throw new Error(created.error)
       const processed = await processCollectionImportBatch(created.batch.id)
       if (!processed.success) throw new Error(processed.error)
-      setBatchId(created.batch.id)
       await refreshBatch(created.batch.id)
+      setBatchId(created.batch.id)
       toast({ title: "Lista analysoitu", description: `${processed.itemCount} riviä käsiteltävänä. Tarkista osumat ennen tuontia.` })
     } catch (error) {
+      const message = error instanceof Error ? error.message : "Tuntematon virhe"
+      setAnalysisError(message)
       toast({
         title: "Tuontia ei voitu analysoida",
-        description: error instanceof Error ? error.message : "Tuntematon virhe",
+        description: message,
         variant: "destructive",
       })
     } finally {
@@ -134,6 +138,11 @@ export function CollectionImportReview({
           placeholder={category === "tcg" ? "4 Lightning Bolt\n2 Counterspell\n1 Sol Ring" : "5 Intercessors\n3 Aggressors\n1 Captain"}
           className={`w-full min-h-[130px] rounded-md px-3 py-2 text-sm font-mono ${archiveField}`}
         />
+        {analysisError && !batchId && (
+          <div role="alert" className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive break-words">
+            Analysointi epäonnistui: {analysisError}
+          </div>
+        )}
         {!batchId && (
           <ArchiveCardButton onClick={handleAnalyze} active fullWidth disabled={!sourceText.trim() || busy} icon={busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}>
             {busy ? "Analysoidaan…" : "Analysoi lista ja tarkista osumat"}
