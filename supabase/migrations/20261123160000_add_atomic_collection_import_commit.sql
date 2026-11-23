@@ -130,7 +130,7 @@ begin
       p_user_id,
       u.id,
       v_quantity,
-      u.base_points,
+      coalesce(u.base_points, 0),
       true,
       'unpainted',
       null,
