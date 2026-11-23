@@ -165,6 +165,9 @@ begin
   update public.personal_trophies set organizer_id = null where organizer_id = v_user;
   update public.play_results set user_id = null where user_id = v_user;
   update public.rule_disputes set logged_by = null where logged_by = v_user;
+  -- Miniature collection entries are personal inventory, including entries not
+  -- attached to an army; do not leave orphaned user-owned rows behind.
+  delete from public.mini_army_units where user_id = v_user;
 
   return true;
 end;
