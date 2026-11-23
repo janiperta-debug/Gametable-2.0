@@ -235,7 +235,8 @@
     "otherMiniatureGames": "Other Miniature Games",
     "roleplayingGames": "Roleplaying Games (RPGs)",
     "tradingCards": "Trading Cards",
-    "anonymous": "Anonymous"
+    "anonymous": "Anonymous",
+    "deletedUser": "Deleted user"
   },
   "collection": {
     "title": "Game Collection",
