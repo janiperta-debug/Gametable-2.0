@@ -159,11 +159,6 @@ export async function deleteOwnAccount(): Promise<{ success: boolean; error?: st
     return { success: false, error: "Siirrä ensin kaikki ryhmien, tapahtumien ja liigojen vastuut." }
   }
 
-  const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-  if (sessionError || !sessionData.session?.access_token) {
-    return { success: false, error: "Kirjautumisistunnon tarkistus epäonnistui. Kirjaudu uudelleen sisään." }
-  }
-
   const service = createServiceClient()
 
   // Supabase Auth refuses to delete users who still own Storage objects.
@@ -198,15 +193,13 @@ export async function deleteOwnAccount(): Promise<{ success: boolean; error?: st
   const { error: preparationError } = await supabase.rpc("prepare_account_deletion")
   if (preparationError) return { success: false, error: preparationError.message }
 
-  // Revoke refresh tokens on every device immediately before deleting the user.
-  // Already-issued access JWTs remain valid until their normal expiry.
-  const { error: signOutError } = await service.auth.admin.signOut(sessionData.session.access_token)
+  // Global sign-out revokes refresh tokens on every device and clears this
+  // request's auth cookies. Already-issued access JWTs remain valid until expiry.
+  const { error: signOutError } = await supabase.auth.signOut()
   if (signOutError) return { success: false, error: "Kaikkien istuntojen päättäminen epäonnistui: " + signOutError.message }
 
   const { error: deletionError } = await service.auth.admin.deleteUser(user.id)
   if (deletionError) return { success: false, error: deletionError.message }
-
-  await supabase.auth.signOut()
   revalidatePath("/")
   return { success: true }
 }
