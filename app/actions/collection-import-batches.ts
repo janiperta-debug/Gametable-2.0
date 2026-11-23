@@ -258,7 +258,7 @@ function parseImportLines(sourceText: string, category: CollectionImportCategory
 }
 
 function scoreCatalogMatch(query: string, candidateName: string): { score: number; reasons: string[] } {
-  const normalize = (value: string) => value.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim()
+  const normalize = (value: string) => value.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim().split(/\s+/).map((word) => word.length > 4 && word.endsWith("s") ? word.slice(0, -1) : word).join(" ")
   const wanted = normalize(query)
   const found = normalize(candidateName)
   if (wanted === found) return { score: 1, reasons: ["Exact name match"] }
@@ -458,12 +458,21 @@ export async function processCollectionImportBatch(batchId: string) {
           }
         }
       } else {
-        const { data, error } = await db
+        const unitSelect = "id, name, unit_type, base_points, model_count_min, model_count_max, faction:mini_factions!inner(id, name, system:mini_systems!inner(id, name, code, edition))"
+        let { data, error } = await db
           .from("mini_units")
-          .select("id, name, unit_type, base_points, model_count_min, model_count_max, faction:mini_factions!inner(id, name, system:mini_systems!inner(id, name, code, edition))")
+          .select(unitSelect)
           .ilike("name", `%${name}%`)
           .limit(20)
         if (error) throw new Error(error.message)
+        // Army lists often pluralize unit names while the canonical catalog
+        // stores singular names (e.g. Aggressors -> Aggressor Squad).
+        if (!data?.length && name.length > 4 && name.toLowerCase().endsWith("s")) {
+          const singular = name.slice(0, -1)
+          const fallback = await db.from("mini_units").select(unitSelect).ilike("name", `%${singular}%`).limit(20)
+          if (fallback.error) throw new Error(fallback.error.message)
+          data = fallback.data
+        }
         matches = (data ?? []).map((unit: any) => {
           const faction = Array.isArray(unit.faction) ? unit.faction[0] : unit.faction
           const system = Array.isArray(faction?.system) ? faction.system[0] : faction?.system
