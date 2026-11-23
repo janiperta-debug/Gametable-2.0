@@ -90,8 +90,11 @@ export async function deleteOwnAccount(): Promise<{ success: boolean; error?: st
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return { success: false, error: "Kirjaudu sisään jatkaaksesi." }
 
-  const { error: preparationError } = await supabase.rpc("prepare_account_deletion")
-  if (preparationError) return { success: false, error: preparationError.message }
+  const { data: responsibilityData, error: responsibilityError } = await supabase.rpc("get_account_deletion_responsibilities")
+  if (responsibilityError) return { success: false, error: responsibilityError.message }
+  if ((responsibilityData?.groups?.length ?? 0) + (responsibilityData?.events?.length ?? 0) + (responsibilityData?.leagues?.length ?? 0) > 0) {
+    return { success: false, error: "Siirrä ensin kaikki ryhmien, tapahtumien ja liigojen vastuut." }
+  }
 
   const service = createServiceClient()
 
@@ -127,6 +130,9 @@ export async function deleteOwnAccount(): Promise<{ success: boolean; error?: st
 
     return { success: false, error: "Tilillä on tiedostoja, joiden säilytystapaa ei tunnisteta (" + object.bucket_id + "). Poisto keskeytettiin turvallisuussyistä." }
   }
+
+  const { error: preparationError } = await supabase.rpc("prepare_account_deletion")
+  if (preparationError) return { success: false, error: preparationError.message }
 
   const { error: deletionError } = await service.auth.admin.deleteUser(user.id)
   if (deletionError) return { success: false, error: deletionError.message }
