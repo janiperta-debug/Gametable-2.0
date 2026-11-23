@@ -84,6 +84,28 @@ $$;
 revoke all on function public.get_account_deletion_responsibilities() from public, anon;
 grant execute on function public.get_account_deletion_responsibilities() to authenticated;
 
+-- Expose only the current user's Storage ownership through a narrowly scoped RPC.
+-- This avoids depending on the internal storage schema being exposed through PostgREST.
+create or replace function public.get_owned_storage_objects()
+returns table(bucket_id text, name text)
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_user uuid := (select auth.uid());
+begin
+  if v_user is null then raise exception 'Authentication required'; end if;
+
+  return query
+    select o.bucket_id, o.name
+    from storage.objects o
+    where o.owner_id = v_user::text;
+end;
+$;
+revoke all on function public.get_owned_storage_objects() from public, anon;
+grant execute on function public.get_owned_storage_objects() to authenticated;
+
 -- One atomic transfer operation for groups, events, and permanent leagues.
 create or replace function public.transfer_account_responsibility(
   p_kind text,
