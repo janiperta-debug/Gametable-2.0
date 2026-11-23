@@ -555,8 +555,9 @@ export async function commitCollectionImportBatch(batchId: string) {
     if (error || !data?.success) {
       failedCount++
       const message = error?.message || "Could not commit import item"
+      // Keep the row accepted so the user can retry after a transient failure.
       await db.from("collection_import_items")
-        .update({ status: "failed", error_message: message, updated_at: new Date().toISOString() })
+        .update({ error_message: message, updated_at: new Date().toISOString() })
         .eq("id", item.id)
         .eq("batch_id", batchId)
       continue
