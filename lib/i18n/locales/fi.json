@@ -235,7 +235,8 @@
     "otherMiniatureGames": "Muut miniatyyrit",
     "roleplayingGames": "Roolipelit (RPG)",
     "tradingCards": "Keräilykortit",
-    "anonymous": "Nimetön"
+    "anonymous": "Nimetön",
+    "deletedUser": "Poistettu käyttäjä"
   },
   "collection": {
     "title": "Pelikokoelma",
