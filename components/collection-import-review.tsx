@@ -11,6 +11,7 @@ import {
   getCollectionImportBatch,
   reviewCollectionImportItem,
   commitCollectionImportBatch,
+  searchCollectionImportItem,
 } from "@/app/actions/collection-import-batches"
 
 type ImportCategory = "tcg" | "miniatures"
@@ -46,6 +47,7 @@ export function CollectionImportReview({
   const [busy, setBusy] = useState(false)
   const [committed, setCommitted] = useState(false)
   const [analysisError, setAnalysisError] = useState<string | null>(null)
+  const [searchTerms, setSearchTerms] = useState<Record<string, string>>({})
   const { toast } = useToast()
 
   const candidatesByItem = useMemo(() => {
@@ -97,6 +99,26 @@ export function CollectionImportReview({
       if (batchId) await refreshBatch(batchId)
     } catch (error) {
       toast({ title: "Tallennus epäonnistui", description: error instanceof Error ? error.message : "Tuntematon virhe", variant: "destructive" })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const handleSearchAgain = async (item: ImportItem) => {
+    if (busy || !batchId) return
+    const searchName = (searchTerms[item.id] ?? item.parsed_data.name ?? "").trim()
+    if (!searchName) return
+    setBusy(true)
+    try {
+      const result = await searchCollectionImportItem({ itemId: item.id, searchName })
+      if (!result.success) throw new Error(result.error)
+      await refreshBatch(batchId)
+      toast({
+        title: result.candidateCount > 0 ? "Uusia ehdotuksia löytyi" : "Ei vieläkään osumia",
+        description: result.candidateCount > 0 ? `${result.candidateCount} vaihtoehtoa tarkistettavaksi.` : "Voit muokata hakusanaa ja yrittää uudelleen.",
+      })
+    } catch (error) {
+      toast({ title: "Uusi haku epäonnistui", description: error instanceof Error ? error.message : "Tuntematon virhe", variant: "destructive" })
     } finally {
       setBusy(false)
     }
@@ -212,7 +234,23 @@ export function CollectionImportReview({
                       {item.review_reason && <p className="text-xs text-muted-foreground">{item.review_reason}</p>}
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">Tietokannasta ei löytynyt sopivaa osumaa. Tätä riviä ei voi lisätä ennen kuin sille löytyy oikea tietue.</p>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Tarkkaa osumaa ei löytynyt. Kokeile lyhyempää nimeä, vaihtoehtoista kirjoitusasua tai yksikön yleisnimeä.</p>
+                      <label className="block text-xs text-muted-foreground">
+                        Muokkaa hakusanaa
+                        <input
+                          value={searchTerms[item.id] ?? item.parsed_data.name ?? ""}
+                          onChange={(event) => setSearchTerms((current) => ({ ...current, [item.id]: event.target.value }))}
+                          disabled={locked || busy}
+                          className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground"
+                          placeholder="Kirjoita nimi uudelleen"
+                        />
+                      </label>
+                      <ArchiveCardButton onClick={() => handleSearchAgain(item)} active disabled={busy || locked || !(searchTerms[item.id] ?? item.parsed_data.name ?? "").trim()} icon={busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}>
+                        {busy ? "Haetaan…" : "Hae ehdotuksia uudelleen"}
+                      </ArchiveCardButton>
+                      <p className="text-xs text-muted-foreground">Haku etsii myös osittaisia nimiosumia. Mikään ehdotus ei siirry kokoelmaan ilman hyväksyntääsi.</p>
+                    </div>
                   )}
 
                   {item.error_message && <p className="text-xs text-destructive">{item.error_message}</p>}
