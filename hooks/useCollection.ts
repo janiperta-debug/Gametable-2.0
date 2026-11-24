@@ -155,6 +155,8 @@ export function useCollection() {
             base_points,
             model_count_min,
             model_count_max,
+            image_url,
+            image_source_url,
             faction:mini_factions (
               id,
               name,
@@ -181,6 +183,8 @@ export function useCollection() {
             base_points,
             model_count_min,
             model_count_max,
+            image_url,
+            image_source_url,
             faction:mini_factions (
               id,
               name,
