@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { createServiceClient } from "@/lib/supabase/service"
+import { scoreCatalogMatch } from "@/lib/collection/import-matching"
 
 export type CollectionImportCategory = "tcg" | "miniatures" | "board_game" | "rpg"
 export type CollectionImportInputType = "text" | "image" | "file" | "screenshot"
@@ -338,7 +339,7 @@ export async function searchCollectionImportItem(input: { itemId: string; search
   }
 
   const ranked = matches.map((match) => ({ ...match, ...scoreCatalogMatch(searchName, match.name) }))
-    .filter((match) => match.score >= 0.25).sort((x, y) => y.score - x.score).slice(0, 8)
+    .filter((match) => match.score >= 0.25).sort((x, y) => y.score - x.score || x.name.localeCompare(y.name)).slice(0, 8)
 
   const { error: deleteError } = await db.from("collection_import_candidates").delete().eq("item_id", item.id)
   if (deleteError) return { success: false as const, error: deleteError.message }
@@ -409,19 +410,7 @@ function parseImportLines(sourceText: string, category: CollectionImportCategory
   return parsed.filter((line) => line.name.length > 0).slice(0, 500)
 }
 
-function scoreCatalogMatch(query: string, candidateName: string): { score: number; reasons: string[] } {
-  const normalize = (value: string) => value.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim().split(/\s+/).map((word) => word.length > 4 && word.endsWith("s") ? word.slice(0, -1) : word).join(" ")
-  const wanted = normalize(query)
-  const found = normalize(candidateName)
-  if (wanted === found) return { score: 1, reasons: ["Exact name match"] }
-  if (found.startsWith(wanted) || wanted.startsWith(found)) return { score: 0.9, reasons: ["Name prefix match"] }
-  if (found.includes(wanted) || wanted.includes(found)) return { score: 0.78, reasons: ["Name contains match"] }
-  const wantedWords = new Set(wanted.split(/\s+/).filter(Boolean))
-  const foundWords = new Set(found.split(/\s+/).filter(Boolean))
-  const overlap = [...wantedWords].filter((word) => foundWords.has(word)).length
-  const score = wantedWords.size ? 0.55 * overlap / wantedWords.size : 0
-  return { score, reasons: overlap ? ["Partial word match"] : [] }
-}
+
 
 type ScryfallImportCard = {
   id: string
@@ -793,7 +782,7 @@ export async function processCollectionImportBatch(batchId: string) {
       const ranked = matches
         .map((match) => ({ ...match, ...scoreCatalogMatch(name, match.name) }))
         .filter((match) => match.score >= 0.5)
-        .sort((a, b) => b.score - a.score)
+        .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
         .slice(0, 5)
 
       for (const match of ranked) {
