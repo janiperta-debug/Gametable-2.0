@@ -6,6 +6,8 @@ import { ArchiveCardButton, archiveField } from "@/components/archive-frame"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, Upload, Check, X, RefreshCw } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { createClient as createSupabaseBrowserClient } from "@/lib/supabase/client"
+import { processPokemonCardImageImport } from "@/app/actions/pokemon-card-image-import"
 import {
   createTextImportBatch,
   processCollectionImportBatch,
@@ -43,7 +45,9 @@ export function CollectionImportReview({
   miniatureSystemCode?: string
   onImportComplete?: () => void
 }) {
-  const [sourceText, setSourceText] = useState("")\n  const [imageFile, setImageFile] = useState<File | null>(null)\n  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [sourceText, setSourceText] = useState("")
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [batchId, setBatchId] = useState<string | null>(null)
   const [items, setItems] = useState<ImportItem[]>([])
   const [candidates, setCandidates] = useState<Candidate[]>([])
