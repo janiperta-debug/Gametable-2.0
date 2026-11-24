@@ -124,7 +124,7 @@ export async function processPokemonCardImageImport(storagePath: string) {
     }
     const exactMatches = (Array.isArray(catalogCards) ? catalogCards : [])
       .filter((card) => card.name.toLocaleLowerCase() === recognition.name.toLocaleLowerCase())
-      .filter((card) => !recognition.collectorNumber || normalizeCardNumber(card.localId ?? "") === normalizeCardNumber(recognition.collectorNumber))
+      .filter((card) => !recognition.collectorNumber || !card.localId || normalizeCardNumber(card.localId) === normalizeCardNumber(recognition.collectorNumber))
       // Printed set symbols and TCGdex set IDs are not always the same format.
       // Do not discard a strong name + collector-number match based on that unverified mapping.
       .slice(0, 8)
