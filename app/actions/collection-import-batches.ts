@@ -144,6 +144,47 @@ export async function getCollectionImportBatch(batchId: string) {
   }
 }
 
+export async function acceptAllImportItems(input: { batchId: string; selections: Array<{ itemId: string; candidateId: string }> }) {
+  if (!input?.batchId || !Array.isArray(input.selections) || input.selections.length < 1 || input.selections.length > 500) {
+    return { success: false as const, error: "No reviewable suggestions were selected" }
+  }
+
+  const user = await getAuthenticatedUser()
+  if (!user) return { success: false as const, error: "Not authenticated" }
+
+  const db = createServiceClient()
+  const { data: batch, error: batchError } = await db.from("collection_import_batches")
+    .select("id, status").eq("id", input.batchId).eq("user_id", user.id).maybeSingle()
+  if (batchError) return { success: false as const, error: batchError.message }
+  if (!batch || batch.status !== "review") return { success: false as const, error: "Import batch is not awaiting review" }
+
+  const itemIds = input.selections.map((selection) => selection.itemId)
+  if (new Set(itemIds).size !== itemIds.length || input.selections.some((selection) => !selection.itemId || !selection.candidateId)) {
+    return { success: false as const, error: "Invalid or duplicate review selections" }
+  }
+
+  const results = await Promise.all(input.selections.map(async (selection) => {
+    const { data: candidate, error: candidateError } = await db.from("collection_import_candidates")
+      .select("id, catalog_id").eq("id", selection.candidateId).eq("item_id", selection.itemId).maybeSingle()
+    if (candidateError) throw new Error(candidateError.message)
+    if (!candidate) throw new Error("A selected suggestion does not belong to its import row")
+    const { data: item, error: itemError } = await db.from("collection_import_items")
+      .select("id, status").eq("id", selection.itemId).eq("batch_id", input.batchId).maybeSingle()
+    if (itemError) throw new Error(itemError.message)
+    if (!item || ["imported", "failed", "rejected"].includes(item.status)) return false
+    const { error: updateError } = await db.from("collection_import_items").update({
+      status: "accepted",
+      selected_candidate_id: candidate.id,
+      resolved_catalog_id: candidate.catalog_id,
+      updated_at: new Date().toISOString(),
+    }).eq("id", item.id)
+    if (updateError) throw new Error(updateError.message)
+    return true
+  }))
+
+  return { success: true as const, acceptedCount: results.filter(Boolean).length }
+}
+
 export async function reviewCollectionImportItem(input: {
   itemId: string
   decision: "accept" | "reject"
