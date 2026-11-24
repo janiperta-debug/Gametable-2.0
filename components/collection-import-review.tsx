@@ -15,6 +15,7 @@ import {
   reviewCollectionImportItem,
   commitCollectionImportBatch,
   searchCollectionImportItem,
+  acceptAllImportItems,
 } from "@/app/actions/collection-import-batches"
 
 type ImportCategory = "tcg" | "miniatures"
@@ -184,6 +185,33 @@ export function CollectionImportReview({
     }
   }
 
+  const handleAcceptAll = async () => {
+    if (!batchId || busy) return
+    const selections = items.flatMap((item) => {
+      if (["accepted", "imported", "rejected", "failed"].includes(item.status)) return []
+      const itemCandidates = candidatesByItem.get(item.id) ?? []
+      if (!itemCandidates.length) return []
+      const savedId = (item as any).selected_candidate_id as string | undefined
+      const chosenId = selectedCandidateIds[item.id] ?? savedId ?? itemCandidates[0].id
+      return itemCandidates.some((candidate) => candidate.id === chosenId)
+        ? [{ itemId: item.id, candidateId: chosenId }]
+        : []
+    })
+    if (!selections.length) return
+    setBusy(true)
+    try {
+      const result = await acceptAllImportItems({ batchId, selections })
+      if (!result.success) throw new Error(result.error)
+      await refreshBatch(batchId)
+      setSelectedCandidateIds({})
+      toast({ title: "Ehdotukset hyväksytty", description: `${result.acceptedCount} korttia tai yksikköä hyväksytty. Voit nyt lisätä ne kokoelmaan.` })
+    } catch (error) {
+      toast({ title: "Massahyväksyntä epäonnistui", description: error instanceof Error ? error.message : "Tuntematon virhe", variant: "destructive" })
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const handleCommit = async () => {
     if (!batchId || busy) return
     setBusy(true)
@@ -267,6 +295,11 @@ export function CollectionImportReview({
             </button>
           </div>
 
+          {items.some((item) => !["accepted", "imported", "rejected", "failed"].includes(item.status) && (candidatesByItem.get(item.id)?.length ?? 0) > 0) && (
+            <ArchiveCardButton onClick={handleAcceptAll} active fullWidth disabled={busy}>
+              {busy ? "Hyväksytään…" : `Hyväksy kaikki ehdotukset (${items.filter((item) => !["accepted", "imported", "rejected", "failed"].includes(item.status) && (candidatesByItem.get(item.id)?.length ?? 0) > 0).length})`}
+            </ArchiveCardButton>
+          )}
           <div className="max-h-[65vh] overflow-y-auto overscroll-contain pr-1 space-y-3">
             {items.map((item) => {
               const itemCandidates = candidatesByItem.get(item.id) ?? []
