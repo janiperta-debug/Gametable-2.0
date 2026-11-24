@@ -127,10 +127,10 @@ export function CollectionImportReview({
       await refreshBatch(processed.batchId)
       setBatchId(processed.batchId)
       toast({
-        title: "Kortti tunnistettu",
+        title: "Kortit tunnistettu",
         description: processed.candidateCount > 0
-          ? `${processed.candidateCount} TCGdex-osumaa tarkistettavaksi.`
-          : "Nimeä ei saatu yhdistettyä TCGdex-painokseen. Voit tarkistaa tunnistetun nimen.",
+          ? `${processed.itemCount} korttia tunnistettu, ${processed.candidateCount} TCGdex-osumaa tarkistettavaksi.`
+          : `${processed.itemCount} korttia tunnistettu, mutta tietokantaosumia ei löytynyt. Voit tarkistaa nimet.`,
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : "Tuntematon virhe"
@@ -208,8 +208,8 @@ export function CollectionImportReview({
         </p>
         {category === "tcg" && tcgGame.toLowerCase() === "pokemon" && !batchId && (
           <div className="rounded-lg border border-accent-gold/25 bg-background/30 p-3 space-y-2">
-            <div className="text-sm font-medium">Tuo Pokémon-kortti kuvasta</div>
-            <p className="text-xs text-muted-foreground">Valitse yksi kortti kerrallaan. Tekoäly tunnistaa kortin tiedot ja ehdottaa vastaavia painoksia TCGdexistä.</p>
+            <div className="text-sm font-medium">Tuo Pokémon-kortteja kuvasta</div>
+            <p className="text-xs text-muted-foreground">Voit kuvata useita kortteja samalla kertaa. Tekoäly tunnistaa kuvasta enintään 12 korttia ja ehdottaa niille vastaavia painoksia TCGdexistä.</p>
             <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" disabled={busy}
               onChange={(event) => {
                 const file = event.target.files?.[0] ?? null
@@ -219,9 +219,9 @@ export function CollectionImportReview({
               }}
               className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-md file:border file:border-accent-gold/30 file:bg-background file:px-3 file:py-2 file:text-sm file:text-foreground"
             />
-            {imagePreview && <div className="flex items-start gap-3"><img src={imagePreview} alt="Valittu Pokémon-kortti" className="max-h-48 max-w-36 rounded-md object-contain bg-black/10" /><p className="text-xs text-muted-foreground">Varmista, että kortin nimi ja keräilynumero näkyvät kuvassa.</p></div>}
+            {imagePreview && <div className="flex items-start gap-3"><img src={imagePreview} alt="Valitut Pokémon-kortit" className="max-h-48 max-w-36 rounded-md object-contain bg-black/10" /><p className="text-xs text-muted-foreground">Asettele kortit erilleen niin, että jokaisen nimi ja keräilynumero näkyvät mahdollisimman selvästi.</p></div>}
             <ArchiveCardButton onClick={handleImageAnalyze} active fullWidth disabled={!imageFile || busy} icon={busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}>
-              {busy ? "Tunnistetaan korttia…" : "Tunnista kortti kuvasta"}
+              {busy ? "Tunnistetaan kortteja…" : "Tunnista kortit kuvasta"}
             </ArchiveCardButton>
           </div>
         )}
@@ -246,7 +246,7 @@ export function CollectionImportReview({
 
       {batchId && (
         <div className="space-y-3">
-          {imagePreview && <div className="flex items-center gap-3 rounded-md border border-accent-gold/20 p-2"><img src={imagePreview} alt="Tunnistettava alkuperäinen kortti" className="h-32 w-24 rounded object-contain" /><span className="text-xs text-muted-foreground">Alkuperäinen korttikuva</span></div>}
+          {imagePreview && <div className="flex items-center gap-3 rounded-md border border-accent-gold/20 p-2"><img src={imagePreview} alt="Alkuperäinen korttikuva" className="h-32 w-24 rounded object-contain" /><span className="text-xs text-muted-foreground">Alkuperäinen korttikuva</span></div>}
           <div className="flex flex-wrap items-center justify-between gap-2 border-y border-accent-gold/20 py-3">
             <div className="flex flex-wrap gap-2 text-sm">
               <Badge variant="outline">{items.length} riviä</Badge>
