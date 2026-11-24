@@ -118,12 +118,16 @@ export async function processPokemonCardImageImport(storagePath: string) {
       id: string; name: string; localId?: string; image?: string; rarity?: string; set?: { id?: string; name?: string }
     }>
 
-    const exactMatches = (Array.isArray(catalogCards) ? catalogCards : []).filter((card) => {
-      const nameMatch = card.name.toLocaleLowerCase() === recognition.name.toLocaleLowerCase()
-      const numberMatch = !recognition.collectorNumber || !card.localId || card.localId === recognition.collectorNumber.split("/")[0]
-      const setMatch = !recognition.setCode || !card.set?.id || card.set.id.toLowerCase() === recognition.setCode.toLowerCase()
-      return nameMatch && numberMatch && setMatch
-    }).slice(0, 8)
+    const normalizeCardNumber = (value: string) => {
+      const cleaned = value.trim().split("/")[0].replace(/^0+(?=\\d)/, "")
+      return cleaned.toLocaleLowerCase()
+    }
+    const exactMatches = (Array.isArray(catalogCards) ? catalogCards : [])
+      .filter((card) => card.name.toLocaleLowerCase() === recognition.name.toLocaleLowerCase())
+      .filter((card) => !recognition.collectorNumber || normalizeCardNumber(card.localId ?? "") === normalizeCardNumber(recognition.collectorNumber))
+      // Printed set symbols and TCGdex set IDs are not always the same format.
+      // Do not discard a strong name + collector-number match based on that unverified mapping.
+      .slice(0, 8)
 
     const candidateRows = []
     for (const card of exactMatches) {
