@@ -267,9 +267,9 @@ export async function searchCollectionImportItem(input: { itemId: string; search
         const catalogId = await ensurePokemonCardInCatalog(db, card)
         if (!matches.some((match) => match.id === catalogId)) matches.push({ id: catalogId, name: card.name, extra: {
           game: "pokemon", externalId: card.id, set: card.set?.name ?? null,
-          setCode: card.set?.id ?? String(card.id).split("-")[0] ?? null, collectorNumber: card.printed_number ?? card.number ?? null,
+          setCode: card.set?.id ?? String(card.id).split("-")[0] ?? null, collectorNumber: card.localId ?? null,
           rarity: card.rarity ?? null,
-          imageUrl: card.images?.find((image) => image.type === "front")?.small ?? card.images?.[0]?.small ?? null,
+          imageUrl: card.image ? `${card.image}/low.png` : null,
         } })
       }
     }
