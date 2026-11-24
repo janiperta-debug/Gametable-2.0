@@ -125,6 +125,7 @@ export async function processPokemonCardImageImport(input: string | string[]) {
           language: recognition.language,
           recognitionConfidence: recognition.confidence,
           cardCategory: recognition.category,
+          sourceImageIndex: recognition.sourceImageIndex,
         },
         status: "pending",
       }).select("id").single()
