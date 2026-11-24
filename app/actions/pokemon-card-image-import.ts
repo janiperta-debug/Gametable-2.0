@@ -123,12 +123,27 @@ export async function processPokemonCardImageImport(storagePath: string) {
       }).select("id").single()
       if (itemError) throw new Error(itemError.message)
 
-      const query = new URLSearchParams({ name: recognition.name, "pagination:page": "1", "pagination:itemsPerPage": "40" })
-      const catalogResponse = await fetch(`https://api.tcgdex.net/v2/en/cards?${query.toString()}`, {
-        headers: { Accept: "application/json" }, cache: "no-store",
-      })
-      if (!catalogResponse.ok) throw new Error(`TCGdex-haku epäonnistui (${catalogResponse.status})`)
-      const catalogCards = await catalogResponse.json() as TcgdexCard[]
+      const searchCards = async (params: Record<string, string>) => {
+        const query = new URLSearchParams({
+          ...params,
+          "pagination:page": "1",
+          "pagination:itemsPerPage": "40",
+        })
+        const response = await fetch(`https://api.tcgdex.net/v2/en/cards?${query.toString()}`, {
+          headers: { Accept: "application/json" }, cache: "no-store",
+        })
+        if (!response.ok) throw new Error(`TCGdex-haku epäonnistui (${response.status})`)
+        return await response.json() as TcgdexCard[]
+      }
+
+      let catalogCards = await searchCards({ name: recognition.name })
+      // Energy cards have a separate category in TCGdex. Search that category
+      // by its elemental name as a fallback when the full printed name returns no result.
+      if (recognition.category === "Energy" && (!Array.isArray(catalogCards) || catalogCards.length === 0)) {
+        const basicEnergyType = recognition.name.match(/^Basic\\s+(.+?)\\s+Energy$/i)?.[1]
+        const energySearchTerm = basicEnergyType ?? recognition.name
+        catalogCards = await searchCards({ category: "eq:Energy", name: energySearchTerm })
+      }
 
       const matches = (Array.isArray(catalogCards) ? catalogCards : [])
         .filter((card) => card.name.toLocaleLowerCase() === recognition.name.toLocaleLowerCase())
