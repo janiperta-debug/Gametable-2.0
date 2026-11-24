@@ -261,6 +261,19 @@ export async function searchCollectionImportItem(input: { itemId: string; search
       setCode: card.set_code, rarity: card.rarity, imageUrl: card.image_url,
     } })
 
+    if (dbGame === "pokemon") {
+      const externalCards = await searchExternalPokemonCard(searchName)
+      for (const card of externalCards) {
+        const catalogId = await ensurePokemonCardInCatalog(db, card)
+        if (!matches.some((match) => match.id === catalogId)) matches.push({ id: catalogId, name: card.name, extra: {
+          game: "pokemon", externalId: card.id, set: card.expansion?.name ?? null,
+          setCode: card.expansion?.id ?? null, collectorNumber: card.printed_number ?? card.number ?? null,
+          rarity: card.rarity ?? null,
+          imageUrl: card.images?.find((image) => image.type === "front")?.small ?? card.images?.[0]?.small ?? null,
+        } })
+      }
+    }
+
     if (dbGame === "mtg") {
       const tokens = searchName.split(/\\s+/).filter(Boolean).slice(0, 5)
       const nameQuery = tokens.map((token) => `name:${token.replace(/[^a-zA-Z0-9'-]/g, "")}`).filter(Boolean).join(" ")
@@ -412,6 +425,57 @@ async function searchExternalMagicCard(name: string, setCode?: string, collector
   if (!response.ok) throw new Error(`Scryfall search failed (${response.status})`)
   const payload = await response.json()
   return Array.isArray(payload.data) ? payload.data.slice(0, 10) as ScryfallImportCard[] : []
+}
+
+type ScrydexPokemonCard = {
+  id: string
+  name: string
+  number?: string
+  printed_number?: string
+  rarity?: string
+  images?: Array<{ type?: string; small?: string }>
+  expansion?: { id?: string; name?: string; code?: string }
+}
+
+async function searchExternalPokemonCard(name: string): Promise<ScrydexPokemonCard[]> {
+  const headers: Record<string, string> = { Accept: "application/json" }
+  if (process.env.SCRYDEX_API_KEY) headers["X-Api-Key"] = process.env.SCRYDEX_API_KEY
+  if (process.env.SCRYDEX_TEAM_ID) headers["X-Team-ID"] = process.env.SCRYDEX_TEAM_ID
+  const query = `name:"${name.replace(/"/g, '\\\\"')}"`
+  const response = await fetch(
+    `https://api.scrydex.com/pokemon/v1/en/cards?q=${encodeURIComponent(query)}&page=1&page_size=20&select=id,name,number,printed_number,rarity,images,expansion`,
+    { headers, cache: "no-store" },
+  )
+  if (!response.ok) {
+    if (response.status === 404) return []
+    throw new Error(`Pokémon catalog search failed (${response.status})`)
+  }
+  const payload = await response.json()
+  return Array.isArray(payload.data) ? payload.data.slice(0, 20) as ScrydexPokemonCard[] : []
+}
+
+async function ensurePokemonCardInCatalog(db: ReturnType<typeof createServiceClient>, card: ScrydexPokemonCard) {
+  const { data: existing, error: lookupError } = await db
+    .from("tcg_cards").select("id").eq("tcg_system", "pokemon").eq("external_id", card.id).maybeSingle()
+  if (lookupError) throw new Error(lookupError.message)
+  if (existing) return existing.id as string
+
+  const imageUrl = card.images?.find((image) => image.type === "front")?.small ?? card.images?.[0]?.small ?? null
+  const { data: inserted, error: insertError } = await db.from("tcg_cards").insert({
+    tcg_system: "pokemon",
+    external_id: card.id,
+    name: card.name,
+    set_code: card.expansion?.id ?? null,
+    set_name: card.expansion?.name ?? null,
+    rarity: card.rarity ?? null,
+    image_url: imageUrl,
+  }).select("id").single()
+  if (insertError) {
+    const { data: raced } = await db.from("tcg_cards").select("id").eq("tcg_system", "pokemon").eq("external_id", card.id).maybeSingle()
+    if (raced) return raced.id as string
+    throw new Error(insertError.message)
+  }
+  return inserted.id as string
 }
 
 async function ensureMagicCardInCatalog(db: ReturnType<typeof createServiceClient>, card: ScryfallImportCard) {
@@ -569,6 +633,28 @@ export async function processCollectionImportBatch(batchId: string) {
                 setCode: card.set,
                 rarity: card.rarity ?? null,
                 imageUrl: card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || null,
+              },
+            })
+          }
+        }
+
+        // Scrydex is the maintained Pokémon data source. Search it when the
+        // local catalog has no match, then persist each print before review.
+        if (matches.length === 0 && dbGame === "pokemon") {
+          const externalCards = await searchExternalPokemonCard(name)
+          for (const card of externalCards) {
+            const catalogId = await ensurePokemonCardInCatalog(db, card)
+            matches.push({
+              id: catalogId,
+              name: card.name,
+              extra: {
+                game: "pokemon",
+                externalId: card.id,
+                set: card.expansion?.name ?? null,
+                setCode: card.expansion?.id ?? null,
+                collectorNumber: card.printed_number ?? card.number ?? null,
+                rarity: card.rarity ?? null,
+                imageUrl: card.images?.find((image) => image.type === "front")?.small ?? card.images?.[0]?.small ?? null,
               },
             })
           }
