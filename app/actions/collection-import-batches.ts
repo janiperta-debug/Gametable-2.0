@@ -261,6 +261,20 @@ export async function searchCollectionImportItem(input: { itemId: string; search
       setCode: card.set_code, rarity: card.rarity, imageUrl: card.image_url,
     } })
 
+    if (dbGame === "yugioh") {
+      const externalCards = await searchExternalYuGiOhCard(searchName)
+      for (const card of externalCards) {
+        const catalogId = await ensureYuGiOhCardInCatalog(db, card)
+        if (!matches.some((match) => match.id === catalogId)) matches.push({ id: catalogId, name: card.name, extra: {
+          game: "yugioh", externalId: String(card.id),
+          set: card.card_sets?.[0]?.set_name ?? null, setCode: card.card_sets?.[0]?.set_code ?? null,
+          rarity: card.card_sets?.[0]?.set_rarity ?? null,
+          imageUrl: card.card_images?.[0]?.image_url_small ?? card.card_images?.[0]?.image_url ?? null,
+          cardType: card.type ?? null, race: card.race ?? null, attribute: card.attribute ?? null,
+        } })
+      }
+    }
+
     if (dbGame === "pokemon") {
       const externalCards = await searchExternalPokemonCard(searchName)
       for (const card of externalCards) {
@@ -475,6 +489,60 @@ async function ensurePokemonCardInCatalog(db: ReturnType<typeof createServiceCli
   return inserted.id as string
 }
 
+type YgoProDeckCard = {
+  id: number
+  name: string
+  type?: string
+  race?: string
+  attribute?: string
+  desc?: string
+  card_images?: Array<{ id: number; image_url?: string; image_url_small?: string; image_url_cropped?: string }>
+  card_sets?: Array<{ set_name?: string; set_code?: string; set_rarity?: string }>
+}
+
+async function searchExternalYuGiOhCard(name: string): Promise<YgoProDeckCard[]> {
+  const base = "https://db.ygoprodeck.com/api/v7/cardinfo.php"
+  const request = async (parameter: "name" | "fname") => {
+    const response = await fetch(`${base}?${parameter}=${encodeURIComponent(name)}`, {
+      headers: { Accept: "application/json" }, cache: "no-store",
+    })
+    if (response.status === 400 || response.status === 404) return []
+    if (!response.ok) throw new Error(`Yu-Gi-Oh! catalog search failed (${response.status})`)
+    const payload = await response.json()
+    return Array.isArray(payload.data) ? payload.data as YgoProDeckCard[] : []
+  }
+  const exact = await request("name")
+  if (exact.length) return exact.slice(0, 20)
+  return (await request("fname")).slice(0, 20)
+}
+
+async function ensureYuGiOhCardInCatalog(db: ReturnType<typeof createServiceClient>, card: YgoProDeckCard) {
+  const externalId = String(card.id)
+  const { data: existing, error: lookupError } = await db.from("tcg_cards")
+    .select("id").eq("tcg_system", "yugioh").eq("external_id", externalId).maybeSingle()
+  if (lookupError) throw new Error(lookupError.message)
+  if (existing) return existing.id as string
+
+  const print = card.card_sets?.[0]
+  const imageUrl = card.card_images?.[0]?.image_url_small ?? card.card_images?.[0]?.image_url ?? null
+  const { data: inserted, error: insertError } = await db.from("tcg_cards").insert({
+    tcg_system: "yugioh",
+    external_id: externalId,
+    name: card.name,
+    set_code: print?.set_code ?? null,
+    set_name: print?.set_name ?? null,
+    rarity: print?.set_rarity ?? null,
+    image_url: imageUrl,
+  }).select("id").single()
+  if (insertError) {
+    const { data: raced } = await db.from("tcg_cards").select("id")
+      .eq("tcg_system", "yugioh").eq("external_id", externalId).maybeSingle()
+    if (raced) return raced.id as string
+    throw new Error(insertError.message)
+  }
+  return inserted.id as string
+}
+
 async function ensureMagicCardInCatalog(db: ReturnType<typeof createServiceClient>, card: ScryfallImportCard) {
   const { data: existing, error: lookupError } = await db
     .from("tcg_cards")
@@ -637,6 +705,25 @@ export async function processCollectionImportBatch(batchId: string) {
 
         // Scrydex is the maintained Pokémon data source. Search it when the
         // local catalog has no match, then persist each print before review.
+        if (matches.length === 0 && dbGame === "yugioh") {
+          const externalCards = await searchExternalYuGiOhCard(name)
+          for (const card of externalCards) {
+            const catalogId = await ensureYuGiOhCardInCatalog(db, card)
+            matches.push({
+              id: catalogId,
+              name: card.name,
+              extra: {
+                game: "yugioh", externalId: String(card.id),
+                set: card.card_sets?.[0]?.set_name ?? null,
+                setCode: card.card_sets?.[0]?.set_code ?? null,
+                rarity: card.card_sets?.[0]?.set_rarity ?? null,
+                imageUrl: card.card_images?.[0]?.image_url_small ?? card.card_images?.[0]?.image_url ?? null,
+                cardType: card.type ?? null, race: card.race ?? null, attribute: card.attribute ?? null,
+              },
+            })
+          }
+        }
+
         if (matches.length === 0 && dbGame === "pokemon") {
           const externalCards = await searchExternalPokemonCard(name)
           for (const card of externalCards) {
