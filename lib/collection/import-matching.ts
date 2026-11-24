@@ -10,8 +10,8 @@ function normalizeCatalogName(value: string): string {
     .map((word) => {
       // Normalize common English plurals without damaging names such as
       // Chaos, Adeptus or words that already end in "ss".
-      if (word.length > 5 && word.endsWith("ies")) return word.slice(0, -3) + "y"
-      if (word.length > 5 && word.endsWith("s") && !/(ss|us|is|os)$/.test(word)) {
+      if (word.length > 4 && word.endsWith("ies")) return word.slice(0, -3) + "y"
+      if (word.length > 3 && word.endsWith("s") && !/(ss|us|is|os)$/.test(word)) {
         return word.slice(0, -1)
       }
       return word
