@@ -599,6 +599,11 @@ export default function AddGamePage() {
                         : "miniatures"
                 }
                 tcgGame={tcgGame}
+                onTcgGameChange={(game) => {
+                  setTcgGame(game)
+                  setSearchResults([])
+                  setSelectedGame(null)
+                }}
                 embedded
                 onImportComplete={() => router.push("/collection")}
               />
@@ -673,30 +678,7 @@ export default function AddGamePage() {
                 </div>
               )}
 
-              <div className="border-t border-accent-gold/20 pt-5">
-                {selectedCategory === "trading_card" && (
-                  <div className="mb-5">
-                    <label className="sr-only" htmlFor="add-tcg-game-selector">Valitse korttipeli</label>
-                    <select
-                      id="add-tcg-game-selector"
-                      value={tcgGame}
-                      onChange={(e) => {
-                        setTcgGame(e.target.value as typeof tcgGame)
-                        setSearchResults([])
-                        setSelectedGame(null)
-                      }}
-                      className="h-10 w-full rounded-md px-3 text-sm font-body bg-background/40 text-foreground border border-accent-gold/20"
-                    >
-                      <option value="magic">Magic: The Gathering</option>
-                      <option value="pokemon">Pokemon</option>
-                      <option value="yugioh">Yu-Gi-Oh!</option>
-                      <option value="lorcana">Lorcana</option>
-                      <option value="flesh-and-blood">Flesh & Blood</option>
-                      <option value="one-piece">One Piece</option>
-                    </select>
-                  </div>
-                )}
-              </div>
+
 
                   {/* Selected Game Preview */}
                   {selectedGame && (
