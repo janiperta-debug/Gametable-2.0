@@ -113,8 +113,10 @@ export function CollectionImportReview({
     setAnalysisError(null)
     try {
       const supabase = createSupabaseBrowserClient()
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      if (userError || !user) throw new Error("Kirjaudu sisään ennen kuvan tuontia.")
       const extension = imageFile.type === "image/png" ? "png" : imageFile.type === "image/webp" ? "webp" : "jpg"
-      const storagePath = `${(await supabase.auth.getUser()).data.user?.id}/${crypto.randomUUID()}.${extension}`
+      const storagePath = `${user.id}/${crypto.randomUUID()}.${extension}`
       const { error: uploadError } = await supabase.storage.from("collection-import-images").upload(storagePath, imageFile, {
         contentType: imageFile.type,
         upsert: false,
