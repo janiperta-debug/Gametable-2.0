@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { createServiceClient } from "@/lib/supabase/service"
-import { scoreCatalogMatch } from "@/lib/collection/import-matching"
+import { miniatureSearchTerms, scoreCatalogMatch, splitMiniatureListLine } from "@/lib/collection/import-matching"
 
 export type CollectionImportCategory = "tcg" | "miniatures" | "board_game" | "rpg"
 export type CollectionImportInputType = "text" | "image" | "file" | "screenshot"
@@ -316,11 +316,10 @@ export async function searchCollectionImportItem(input: { itemId: string; search
   } else {
     const unitSelect = "id, name, unit_type, base_points, model_count_min, model_count_max, image_url, image_source_url, faction:mini_factions!inner(id, name, system:mini_systems!inner(id, name, code, edition))"
     const systemCode = String((batch.source_metadata as Record<string, unknown> | null)?.systemCode ?? "wh40k")
-    const searchNames = [searchName]
-    if (searchName.length > 4 && searchName.toLowerCase().endsWith("s")) searchNames.push(searchName.slice(0, -1))
+    const searchNames = miniatureSearchTerms(searchName)
     const results = await Promise.all(searchNames.map((term) =>
       db.from("mini_units").select(unitSelect).ilike("name", `%${term}%`)
-        .eq("faction.system.code", systemCode).limit(40)
+        .eq("faction.system.code", systemCode).limit(60)
     ))
     const failed = results.find((result) => result.error)
     if (failed?.error) return { success: false as const, error: failed.error.message }
@@ -395,15 +394,18 @@ function parseImportLines(sourceText: string, category: CollectionImportCategory
       continue
     }
 
-    // Miniature rosters commonly use "5 Intercessors" or "Intercessors x5".
-    const leadingQuantity = rawText.match(/^(\d+)x?\s+(.+?)(?:\s+\(\d+\s*(?:pts|points)?\))?$/i)
-    const trailingQuantity = rawText.match(/^(.+?)\s+x(\d+)(?:\s+\(\d+\s*(?:pts|points)?\))?$/i)
-    if (leadingQuantity) {
-      parsed.push({ quantity: Math.max(1, Number.parseInt(leadingQuantity[1], 10)), name: leadingQuantity[2].trim(), rawText })
-    } else if (trailingQuantity) {
-      parsed.push({ quantity: Math.max(1, Number.parseInt(trailingQuantity[2], 10)), name: trailingQuantity[1].trim(), rawText })
-    } else {
-      parsed.push({ quantity: 1, name: rawText, rawText })
+    // Miniature rosters can contain one unit per line or comma/semicolon/"ja"-separated lists.
+    const parts = splitMiniatureListLine(rawText)
+    for (const part of parts.length ? parts : [rawText]) {
+      const leadingQuantity = part.match(/^(\d+)x?\s+(.+?)(?:\s+\(\d+\s*(?:pts|points)?\))?$/i)
+      const trailingQuantity = part.match(/^(.+?)\s+x(\d+)(?:\s+\(\d+\s*(?:pts|points)?\))?$/i)
+      if (leadingQuantity) {
+        parsed.push({ quantity: Math.max(1, Number.parseInt(leadingQuantity[1], 10)), name: leadingQuantity[2].trim(), rawText: part })
+      } else if (trailingQuantity) {
+        parsed.push({ quantity: Math.max(1, Number.parseInt(trailingQuantity[2], 10)), name: trailingQuantity[1].trim(), rawText: part })
+      } else {
+        parsed.push({ quantity: 1, name: part, rawText: part })
+      }
     }
   }
 
@@ -744,13 +746,12 @@ export async function processCollectionImportBatch(batchId: string) {
       } else {
         const unitSelect = "id, name, unit_type, base_points, model_count_min, model_count_max, image_url, image_source_url, faction:mini_factions!inner(id, name, system:mini_systems!inner(id, name, code, edition))"
         const systemCode = String((batch.source_metadata as Record<string, unknown> | null)?.systemCode ?? "wh40k")
-        const searchNames = [name]
-        if (name.length > 4 && name.toLowerCase().endsWith("s")) searchNames.push(name.slice(0, -1))
+        const searchNames = miniatureSearchTerms(name)
         const results = await Promise.all(searchNames.map((term) =>
           db.from("mini_units").select(unitSelect)
             .ilike("name", `%${term}%`)
             .eq("faction.system.code", systemCode)
-            .limit(30)
+            .limit(60)
         ))
         const failed = results.find((result) => result.error)
         if (failed?.error) throw new Error(failed.error.message)
