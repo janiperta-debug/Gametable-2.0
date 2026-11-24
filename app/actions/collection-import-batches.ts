@@ -401,9 +401,9 @@ type ScryfallImportCard = {
   prices?: { usd?: string | null }
 }
 
-async function searchExternalMagicCard(name: string, setCode?: string): Promise<ScryfallImportCard[]> {
+async function searchExternalMagicCard(name: string, setCode?: string, collectorNumber?: string): Promise<ScryfallImportCard[]> {
   const quotedName = name.replace(/"/g, '\\"')
-  const query = `!"${quotedName}"${setCode ? ` set:${setCode.toLowerCase()}` : ""}`
+  const query = `!"${quotedName}"${setCode ? ` set:${setCode.toLowerCase()}` : ""}${collectorNumber ? ` cn:${collectorNumber}` : ""}`
   const response = await fetch(
     `https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}&order=released&dir=desc&unique=prints`,
     { headers: { Accept: "application/json", "User-Agent": "GameTable/1.0 (collection import)" }, cache: "no-store" },
@@ -556,7 +556,7 @@ export async function processCollectionImportBatch(batchId: string) {
         // authoritative fallback; newly discovered prints are persisted using
         // the service client before they become review candidates.
         if (matches.length === 0 && dbGame === "mtg") {
-          const externalCards = await searchExternalMagicCard(name, parsed.setCode)
+          const externalCards = await searchExternalMagicCard(name, parsed.setCode, parsed.collectorNumber ?? undefined)
           for (const card of externalCards) {
             const catalogId = await ensureMagicCardInCatalog(db, card)
             matches.push({
