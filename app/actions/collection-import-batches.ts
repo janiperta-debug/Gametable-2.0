@@ -777,6 +777,8 @@ export async function processCollectionImportBatch(batchId: string) {
               basePoints: unit.base_points,
               modelCountMin: unit.model_count_min,
               modelCountMax: unit.model_count_max,
+              imageUrl: unit.image_url,
+              imageSourceUrl: unit.image_source_url,
               factionId: faction?.id,
               factionName: faction?.name,
               systemId: system?.id,
