@@ -35,10 +35,12 @@ type Candidate = {
 export function CollectionImportReview({
   category,
   tcgGame = "magic",
+  miniatureSystemCode = "wh40k",
   onImportComplete,
 }: {
   category: ImportCategory
   tcgGame?: string
+  miniatureSystemCode?: string
   onImportComplete?: () => void
 }) {
   const [sourceText, setSourceText] = useState("")
@@ -73,7 +75,7 @@ export function CollectionImportReview({
     setBusy(true)
     setAnalysisError(null)
     try {
-      const created = await createTextImportBatch({ category, sourceText, sourceMetadata: { game: tcgGame } })
+      const created = await createTextImportBatch({ category, sourceText, sourceMetadata: { game: tcgGame, systemCode: miniatureSystemCode } })
       if (!created.success) throw new Error(created.error)
       const processed = await processCollectionImportBatch(created.batch.id)
       if (!processed.success) throw new Error(processed.error)
