@@ -10,6 +10,7 @@ type PokemonRecognition = {
   collectorNumber: string | null
   language: string | null
   confidence: number
+  category: "Pokemon" | "Energy" | "Trainer" | null
 }
 
 type TcgdexCard = {
@@ -66,7 +67,7 @@ export async function processPokemonCardImageImport(storagePath: string) {
           content: [
             {
               type: "text",
-              text: "Etsi kuvasta kaikki selvästi näkyvät Pokémon-keräilykortit, enintään 12 korttia. Käsittele jokainen kortti erillisenä. Älä keksi kortteja äläkä arvaa epäselviä tietoja. Palauta JSON-objekti muodossa {cards:[{name:string,setName:string|null,setCode:string|null,collectorNumber:string|null,language:string|null,confidence:number}]}. Jokaiselle kortille lue nimi, setin nimi, setin tunnus jos näkyy, keräilynumero (esim. 025/198) ja kieli. confidence on 0-1. Jos kortin nimeä ei voi lukea luotettavasti, jätä kyseinen kortti pois. Älä palauta muuta tekstiä.",
+              text: "Etsi kuvasta kaikki selvästi näkyvät Pokémon TCG -kortit, enintään 12 korttia. Mukaan kuuluvat Pokémon-kortit, Energy-kortit (Basic ja Special) sekä Trainer-kortit (Item, Supporter, Stadium, Tool jne.). Käsittele jokainen kortti erillisenä. Älä jätä energia- tai trainer-kortteja pois. Älä keksi kortteja äläkä arvaa epäselviä tietoja. Palauta JSON-objekti muodossa {cards:[{name:string,category:'Pokemon'|'Energy'|'Trainer'|null,setName:string|null,setCode:string|null,collectorNumber:string|null,language:string|null,confidence:number}]}. Käytä nimessä TCGdexin virallista englanninkielistä korttinimeä aina kun mahdollista (esim. Basic Fighting Energy). Jokaiselle kortille lue nimi, korttityyppi/category, setin nimi, setin tunnus jos näkyy, keräilynumero (esim. 025/198 tai 006) ja kieli. Jos kortti on Basic Energy, nimeä se muodossa Basic [Energy Type] Energy. confidence on 0-1. Jos kortin nimeä ei voi lukea luotettavasti, jätä kyseinen kortti pois. Älä palauta muuta tekstiä.",
             },
             { type: "image_url", image_url: { url: dataUrl, detail: "high" } },
           ],
@@ -86,6 +87,7 @@ export async function processPokemonCardImageImport(storagePath: string) {
       collectorNumber: typeof card.collectorNumber === "string" ? card.collectorNumber.slice(0, 30) : null,
       language: typeof card.language === "string" ? card.language.slice(0, 20) : null,
       confidence: Math.max(0, Math.min(1, Number(card.confidence) || 0)),
+      category: card.category === "Pokemon" || card.category === "Energy" || card.category === "Trainer" ? card.category : null,
     })).filter((card) => card.name)
     if (!recognitions.length) throw new Error("Kuvasta ei löytynyt luotettavasti tunnistettavia Pokémon-kortteja. Kokeile kuvaa, jossa kortit näkyvät kokonaan.")
 
@@ -115,6 +117,7 @@ export async function processPokemonCardImageImport(storagePath: string) {
           setName: recognition.setName,
           language: recognition.language,
           recognitionConfidence: recognition.confidence,
+          cardCategory: recognition.category,
         },
         status: "pending",
       }).select("id").single()
@@ -163,6 +166,9 @@ export async function processPokemonCardImageImport(storagePath: string) {
           candidate_data: {
             name: card.name,
             game: "pokemon",
+            category: detail.category ?? recognition.category ?? null,
+            energyType: detail.energyType ?? null,
+            trainerType: detail.trainerType ?? null,
             externalId: card.id,
             set: detail.set?.name ?? card.set?.name ?? null,
             setCode: detail.set?.id ?? card.set?.id ?? null,
