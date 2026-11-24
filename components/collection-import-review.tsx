@@ -49,6 +49,7 @@ export function CollectionImportReview({
   const [committed, setCommitted] = useState(false)
   const [analysisError, setAnalysisError] = useState<string | null>(null)
   const [searchTerms, setSearchTerms] = useState<Record<string, string>>({})
+  const [selectedCandidateIds, setSelectedCandidateIds] = useState<Record<string, string>>({})
   const { toast } = useToast()
 
   const candidatesByItem = useMemo(() => {
@@ -97,6 +98,7 @@ export function CollectionImportReview({
     try {
       const result = await reviewCollectionImportItem({ itemId, decision, candidateId })
       if (!result.success) throw new Error(result.error)
+      if (decision === "accept") setSelectedCandidateIds((current) => { const next = { ...current }; delete next[itemId]; return next })
       if (batchId) await refreshBatch(batchId)
     } catch (error) {
       toast({ title: "Tallennus epäonnistui", description: error instanceof Error ? error.message : "Tuntematon virhe", variant: "destructive" })
@@ -191,7 +193,10 @@ export function CollectionImportReview({
           <div className="max-h-[65vh] overflow-y-auto overscroll-contain pr-1 space-y-3">
             {items.map((item) => {
               const itemCandidates = candidatesByItem.get(item.id) ?? []
-              const chosen = itemCandidates.find((candidate) => candidate.id === (item as any).selected_candidate_id) ?? itemCandidates[0]
+              const savedCandidateId = (item as any).selected_candidate_id as string | undefined
+              const selectedCandidateId = selectedCandidateIds[item.id] ?? savedCandidateId
+              const chosen = itemCandidates.find((candidate) => candidate.id === selectedCandidateId) ?? itemCandidates[0]
+              const hasUnconfirmedSelection = !!selectedCandidateIds[item.id] && selectedCandidateIds[item.id] !== savedCandidateId
               const locked = item.status === "imported" || item.status === "rejected"
               return (
                 <div key={item.id} className="rounded-lg border border-accent-gold/20 bg-background/40 p-3 space-y-3">
@@ -219,7 +224,7 @@ export function CollectionImportReview({
                           <select
                             value={chosen?.id ?? ""}
                             disabled={locked || busy}
-                            onChange={(event) => handleDecision(item.id, "accept", event.target.value)}
+                            onChange={(event) => setSelectedCandidateIds((current) => ({ ...current, [item.id]: event.target.value }))}
                             className={`mt-1 h-9 w-full rounded-md border px-2 text-sm text-foreground ${item.status === "accepted" ? "border-green-600/50 bg-green-600/5" : "border-input bg-background"}`}
                           >
                             {itemCandidates.map((candidate) => (
