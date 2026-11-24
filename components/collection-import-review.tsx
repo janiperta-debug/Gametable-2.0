@@ -187,7 +187,8 @@ export function CollectionImportReview({
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="max-h-[65vh] overflow-y-auto overscroll-contain pr-1">
+            <div className="space-y-3">
             {items.map((item) => {
               const itemCandidates = candidatesByItem.get(item.id) ?? []
               const chosen = itemCandidates.find((candidate) => candidate.id === (item as any).selected_candidate_id) ?? itemCandidates[0]
@@ -288,7 +289,9 @@ export function CollectionImportReview({
               Uusi tuonti
             </ArchiveCardButton>
           </div>
-          {pendingCount > 0 && <p className="text-xs text-muted-foreground">Vain hyväksytyt rivit lisätään. Tarkistamattomat ja hylätyt rivit ohitetaan.</p>}
+            {pendingCount > 0 && <p className="text-xs text-muted-foreground">Vain hyväksytyt rivit lisätään. Tarkistamattomat ja hylätyt rivit ohitetaan.</p>}
+            </div>
+          </div>
         </div>
       )}
     </div>
