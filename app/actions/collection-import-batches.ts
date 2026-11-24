@@ -314,9 +314,17 @@ export async function searchCollectionImportItem(input: { itemId: string; search
     }
   } else {
     const unitSelect = "id, name, unit_type, base_points, model_count_min, model_count_max, image_url, image_source_url, faction:mini_factions!inner(id, name, system:mini_systems!inner(id, name, code, edition))"
-    const { data, error } = await db.from("mini_units").select(unitSelect).ilike("name", `%${searchName}%`).limit(40)
-    if (error) return { success: false as const, error: error.message }
-    for (const unit of data ?? []) {
+    const systemCode = String((batch.source_metadata as Record<string, unknown> | null)?.systemCode ?? "wh40k")
+    const searchNames = [searchName]
+    if (searchName.length > 4 && searchName.toLowerCase().endsWith("s")) searchNames.push(searchName.slice(0, -1))
+    const results = await Promise.all(searchNames.map((term) =>
+      db.from("mini_units").select(unitSelect).ilike("name", `%${term}%`)
+        .eq("faction.system.code", systemCode).limit(40)
+    ))
+    const failed = results.find((result) => result.error)
+    if (failed?.error) return { success: false as const, error: failed.error.message }
+    const data = Array.from(new Map(results.flatMap((result) => result.data ?? []).map((unit: any) => [unit.id, unit])).values())
+    for (const unit of data) {
       const faction = Array.isArray((unit as any).faction) ? (unit as any).faction[0] : (unit as any).faction
       const system = Array.isArray(faction?.system) ? faction.system[0] : faction?.system
       matches.push({ id: (unit as any).id, name: (unit as any).name, extra: {
@@ -745,21 +753,19 @@ export async function processCollectionImportBatch(batchId: string) {
           }
         }
       } else {
-        const unitSelect = "id, name, unit_type, base_points, model_count_min, model_count_max, faction:mini_factions!inner(id, name, system:mini_systems!inner(id, name, code, edition))"
-        let { data, error } = await db
-          .from("mini_units")
-          .select(unitSelect)
-          .ilike("name", `%${name}%`)
-          .limit(20)
-        if (error) throw new Error(error.message)
-        // Army lists often pluralize unit names while the canonical catalog
-        // stores singular names (e.g. Aggressors -> Aggressor Squad).
-        if (!data?.length && name.length > 4 && name.toLowerCase().endsWith("s")) {
-          const singular = name.slice(0, -1)
-          const fallback = await db.from("mini_units").select(unitSelect).ilike("name", `%${singular}%`).limit(20)
-          if (fallback.error) throw new Error(fallback.error.message)
-          data = fallback.data
-        }
+        const unitSelect = "id, name, unit_type, base_points, model_count_min, model_count_max, image_url, image_source_url, faction:mini_factions!inner(id, name, system:mini_systems!inner(id, name, code, edition))"
+        const systemCode = String((batch.source_metadata as Record<string, unknown> | null)?.systemCode ?? "wh40k")
+        const searchNames = [name]
+        if (name.length > 4 && name.toLowerCase().endsWith("s")) searchNames.push(name.slice(0, -1))
+        const results = await Promise.all(searchNames.map((term) =>
+          db.from("mini_units").select(unitSelect)
+            .ilike("name", `%${term}%`)
+            .eq("faction.system.code", systemCode)
+            .limit(30)
+        ))
+        const failed = results.find((result) => result.error)
+        if (failed?.error) throw new Error(failed.error.message)
+        const data = Array.from(new Map(results.flatMap((result) => result.data ?? []).map((unit: any) => [unit.id, unit])).values());
         matches = (data ?? []).map((unit: any) => {
           const faction = Array.isArray(unit.faction) ? unit.faction[0] : unit.faction
           const system = Array.isArray(faction?.system) ? faction.system[0] : faction?.system
