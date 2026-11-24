@@ -313,7 +313,7 @@ export async function searchCollectionImportItem(input: { itemId: string; search
       }
     }
   } else {
-    const unitSelect = "id, name, unit_type, base_points, model_count_min, model_count_max, faction:mini_factions!inner(id, name, system:mini_systems!inner(id, name, code, edition))"
+    const unitSelect = "id, name, unit_type, base_points, model_count_min, model_count_max, image_url, image_source_url, faction:mini_factions!inner(id, name, system:mini_systems!inner(id, name, code, edition))"
     const { data, error } = await db.from("mini_units").select(unitSelect).ilike("name", `%${searchName}%`).limit(40)
     if (error) return { success: false as const, error: error.message }
     for (const unit of data ?? []) {
@@ -322,6 +322,7 @@ export async function searchCollectionImportItem(input: { itemId: string; search
       matches.push({ id: (unit as any).id, name: (unit as any).name, extra: {
         unitType: (unit as any).unit_type, basePoints: (unit as any).base_points,
         modelCountMin: (unit as any).model_count_min, modelCountMax: (unit as any).model_count_max,
+        imageUrl: (unit as any).image_url, imageSourceUrl: (unit as any).image_source_url,
         factionId: faction?.id, factionName: faction?.name, systemId: system?.id,
         systemName: system?.name, systemCode: system?.code, edition: system?.edition,
       } })
