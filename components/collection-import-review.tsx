@@ -233,7 +233,7 @@ export function CollectionImportReview({
                           <div className="font-medium">{chosen?.candidate_data.name}</div>
                           <div className="text-xs text-muted-foreground">
                             {chosen?.candidate_data.set}{chosen?.candidate_data.factionName ? ` · ${chosen.candidate_data.factionName}` : ""}{chosen?.candidate_data.systemName ? ` · ${chosen.candidate_data.systemName}` : ""}
-                            {typeof chosen?.candidate_data.basePoints === "number" ? ` · ${chosen.candidate_data.basePoints} pts` : ""}
+                            {typeof chosen?.candidate_data.modelCountMin === "number" && typeof chosen?.candidate_data.modelCountMax === "number" ? ` · ${chosen.candidate_data.modelCountMin}–${chosen.candidate_data.modelCountMax} models` : typeof chosen?.candidate_data.modelCountMin === "number" ? ` · ${chosen.candidate_data.modelCountMin}+ models` : ""}{typeof chosen?.candidate_data.basePoints === "number" && chosen.candidate_data.basePoints > 0 ? ` · ${chosen.candidate_data.basePoints} pts` : ""}
                           </div>
                         </div>
                       )}
