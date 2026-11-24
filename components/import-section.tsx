@@ -31,10 +31,11 @@ interface ImportSectionProps {
   selectedCategory: CategoryType
   onImportComplete?: () => void
   tcgGame?: string
+  onTcgGameChange?: (game: string) => void
   embedded?: boolean
 }
 
-export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "mtg", embedded = false }: ImportSectionProps) {
+export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "mtg", onTcgGameChange, embedded = false }: ImportSectionProps) {
   const [username, setUsername] = useState("")
   const [importing, setImporting] = useState(false)
   
@@ -412,11 +413,36 @@ export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "m
   const renderImportContent = () => {
     if (selectedCategory === "trading-cards" || selectedCategory === "miniatures") {
       return (
-        <CollectionImportReview
-          category={selectedCategory === "trading-cards" ? "tcg" : "miniatures"}
-          tcgGame={tcgGame}
-          onImportComplete={onImportComplete}
-        />
+        <div className="space-y-4">
+          {selectedCategory === "trading-cards" && (
+            <div className="space-y-1.5">
+              <label htmlFor="mass-import-tcg-game" className="text-sm font-medium text-foreground">
+                Korttipeli
+              </label>
+              <select
+                id="mass-import-tcg-game"
+                value={tcgGame}
+                onChange={(event) => onTcgGameChange?.(event.target.value)}
+                className={cn("h-11 w-full rounded-md px-3 text-sm font-body bg-background/40 text-foreground border border-accent-gold/30", archiveField)}
+              >
+                <option value="magic">Magic: The Gathering</option>
+                <option value="pokemon">Pokémon</option>
+                <option value="yugioh">Yu-Gi-Oh!</option>
+                <option value="lorcana">Lorcana</option>
+                <option value="flesh-and-blood">Flesh &amp; Blood</option>
+                <option value="one-piece">One Piece</option>
+              </select>
+              <p className="text-xs text-muted-foreground">
+                Valitse korttipeli ennen listan liittämistä ja analysointia.
+              </p>
+            </div>
+          )}
+          <CollectionImportReview
+            category={selectedCategory === "trading-cards" ? "tcg" : "miniatures"}
+            tcgGame={tcgGame}
+            onImportComplete={onImportComplete}
+          />
+        </div>
       )
     }
 
