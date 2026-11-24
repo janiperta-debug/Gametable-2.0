@@ -43,7 +43,7 @@ export function CollectionImportReview({
   miniatureSystemCode?: string
   onImportComplete?: () => void
 }) {
-  const [sourceText, setSourceText] = useState("")
+  const [sourceText, setSourceText] = useState("")\n  const [imageFile, setImageFile] = useState<File | null>(null)\n  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [batchId, setBatchId] = useState<string | null>(null)
   const [items, setItems] = useState<ImportItem[]>([])
   const [candidates, setCandidates] = useState<Candidate[]>([])
@@ -90,6 +90,46 @@ export function CollectionImportReview({
         description: message,
         variant: "destructive",
       })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const handleImageAnalyze = async () => {
+    if (!imageFile || busy) return
+    if (!["image/jpeg", "image/png", "image/webp"].includes(imageFile.type)) {
+      setAnalysisError("Valitse JPEG-, PNG- tai WebP-kuva.")
+      return
+    }
+    if (imageFile.size > 10 * 1024 * 1024) {
+      setAnalysisError("Kuvan enimmäiskoko on 10 Mt.")
+      return
+    }
+    setBusy(true)
+    setAnalysisError(null)
+    try {
+      const supabase = createSupabaseBrowserClient()
+      const extension = imageFile.type === "image/png" ? "png" : imageFile.type === "image/webp" ? "webp" : "jpg"
+      const storagePath = `${(await supabase.auth.getUser()).data.user?.id}/${crypto.randomUUID()}.${extension}`
+      const { error: uploadError } = await supabase.storage.from("collection-import-images").upload(storagePath, imageFile, {
+        contentType: imageFile.type,
+        upsert: false,
+      })
+      if (uploadError) throw new Error(uploadError.message)
+      const processed = await processPokemonCardImageImport(storagePath)
+      if (!processed.success) throw new Error(processed.error)
+      await refreshBatch(processed.batchId)
+      setBatchId(processed.batchId)
+      toast({
+        title: "Kortti tunnistettu",
+        description: processed.candidateCount > 0
+          ? `${processed.candidateCount} TCGdex-osumaa tarkistettavaksi.`
+          : "Nimeä ei saatu yhdistettyä TCGdex-painokseen. Voit tarkistaa tunnistetun nimen.",
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Tuntematon virhe"
+      setAnalysisError(message)
+      toast({ title: "Kuvantunnistus epäonnistui", description: message, variant: "destructive" })
     } finally {
       setBusy(false)
     }
@@ -312,7 +352,7 @@ export function CollectionImportReview({
             <ArchiveCardButton onClick={handleCommit} active fullWidth disabled={busy || acceptedCount === 0 || committed} icon={busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}>
               {busy ? "Lisätään…" : `Lisää hyväksytyt kokoelmaan (${acceptedCount})`}
             </ArchiveCardButton>
-            <ArchiveCardButton onClick={() => { setBatchId(null); setItems([]); setCandidates([]); setSourceText(""); setCommitted(false) }} fullWidth disabled={busy}>
+            <ArchiveCardButton onClick={() => { setBatchId(null); setItems([]); setCandidates([]); setSourceText(""); setImageFile(null); setImagePreview(null); setCommitted(false) }} fullWidth disabled={busy}>
               Uusi tuonti
             </ArchiveCardButton>
           </div>
