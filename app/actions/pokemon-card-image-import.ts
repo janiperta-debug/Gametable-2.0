@@ -26,15 +26,16 @@ function normalizeCardNumber(value: string) {
   return value.trim().split("/")[0].replace(/^0+(?=\d)/, "").toLocaleLowerCase()
 }
 
-export async function processPokemonCardImageImport(storagePath: string) {
-  if (typeof storagePath !== "string" || !storagePath.trim() || storagePath.length > 500) {
-    return { success: false as const, error: "Virheellinen kuvatiedoston polku" }
+export async function processPokemonCardImageImport(input: string | string[]) {
+  const storagePaths = (Array.isArray(input) ? input : [input]).filter((path): path is string => typeof path === "string")
+  if (storagePaths.length < 1 || storagePaths.length > 10 || storagePaths.some((path) => !path.trim() || path.length > 500)) {
+    return { success: false as const, error: "Valitse 1–10 kelvollista kuvatiedostoa." }
   }
 
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return { success: false as const, error: "Kirjautuminen vaaditaan" }
-  if (!storagePath.startsWith(`${user.id}/`) || storagePath.includes("..")) {
+  if (storagePaths.some((path) => !path.startsWith(`${user.id}/`) || path.includes(".."))) {
     return { success: false as const, error: "Kuvatiedoston käyttö estetty" }
   }
 
@@ -42,62 +43,68 @@ export async function processPokemonCardImageImport(storagePath: string) {
   let batchId: string | null = null
 
   try {
-    const { data: file, error: downloadError } = await db.storage
-      .from("collection-import-images").download(storagePath)
-    if (downloadError || !file) throw new Error(downloadError?.message ?? "Kuvan lataus epäonnistui")
-
-    const mimeType = file.type
-    if (!["image/jpeg", "image/png", "image/webp"].includes(mimeType)) throw new Error("Käytä JPEG-, PNG- tai WebP-kuvaa")
-    if (file.size > 10 * 1024 * 1024) throw new Error("Kuvan enimmäiskoko on 10 Mt")
-
-    const bytes = Buffer.from(await file.arrayBuffer())
-    const dataUrl = `data:${mimeType};base64,${bytes.toString("base64")}`
     const gatewayKey = process.env.AI_GATEWAY_API_KEY
     if (!gatewayKey) throw new Error("AI Gateway -yhteys puuttuu Vercelin ympäristömuuttujista")
 
-    const aiResponse = await fetch("https://ai-gateway.vercel.sh/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${gatewayKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "openai/gpt-4.1-mini",
-        temperature: 0,
-        response_format: { type: "json_object" },
-        messages: [{
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: "Etsi kuvasta kaikki selvästi näkyvät Pokémon TCG -kortit, enintään 12 korttia. Mukaan kuuluvat Pokémon-kortit, Energy-kortit (Basic ja Special) sekä Trainer-kortit (Item, Supporter, Stadium, Tool jne.). Käsittele jokainen kortti erillisenä. Älä jätä energia- tai trainer-kortteja pois. Älä keksi kortteja äläkä arvaa epäselviä tietoja. Palauta JSON-objekti muodossa {cards:[{name:string,category:'Pokemon'|'Energy'|'Trainer'|null,setName:string|null,setCode:string|null,collectorNumber:string|null,language:string|null,confidence:number}]}. Käytä nimessä TCGdexin virallista englanninkielistä korttinimeä aina kun mahdollista (esim. Basic Fighting Energy). Jokaiselle kortille lue nimi, korttityyppi/category, setin nimi, setin tunnus jos näkyy, keräilynumero (esim. 025/198 tai 006) ja kieli. Jos kortti on Basic Energy, nimeä se muodossa Basic [Energy Type] Energy. confidence on 0-1. Jos kortin nimeä ei voi lukea luotettavasti, jätä kyseinen kortti pois. Älä palauta muuta tekstiä.",
-            },
-            { type: "image_url", image_url: { url: dataUrl, detail: "high" } },
-          ],
-        }],
-      }),
-      cache: "no-store",
-    })
-    if (!aiResponse.ok) throw new Error(`Kuvantunnistus epäonnistui (${aiResponse.status})`)
-    const aiPayload = await aiResponse.json()
-    const raw = aiPayload.choices?.[0]?.message?.content
-    if (typeof raw !== "string") throw new Error("Tekoäly ei palauttanut korttien tunnistustietoja")
-    const parsed = JSON.parse(raw) as { cards?: Partial<PokemonRecognition>[] }
-    const recognitions = (Array.isArray(parsed.cards) ? parsed.cards : []).slice(0, 12).map((card) => ({
-      name: String(card.name ?? "").trim().slice(0, 120),
-      setName: typeof card.setName === "string" ? card.setName.slice(0, 120) : null,
-      setCode: typeof card.setCode === "string" ? card.setCode.slice(0, 30) : null,
-      collectorNumber: typeof card.collectorNumber === "string" ? card.collectorNumber.slice(0, 30) : null,
-      language: typeof card.language === "string" ? card.language.slice(0, 20) : null,
-      confidence: Math.max(0, Math.min(1, Number(card.confidence) || 0)),
-      category: card.category === "Pokemon" || card.category === "Energy" || card.category === "Trainer" ? card.category : null,
-    })).filter((card) => card.name)
-    if (!recognitions.length) throw new Error("Kuvasta ei löytynyt luotettavasti tunnistettavia Pokémon-kortteja. Kokeile kuvaa, jossa kortit näkyvät kokonaan.")
+    const recognitions: (PokemonRecognition & { sourceImageIndex: number })[] = []
+    for (let imageIndex = 0; imageIndex < storagePaths.length; imageIndex++) {
+      const { data: file, error: downloadError } = await db.storage
+        .from("collection-import-images").download(storagePaths[imageIndex])
+      if (downloadError || !file) throw new Error(downloadError?.message ?? `Kuvan ${imageIndex + 1} lataus epäonnistui`)
+
+      const mimeType = file.type
+      if (!["image/jpeg", "image/png", "image/webp"].includes(mimeType)) throw new Error("Käytä JPEG-, PNG- tai WebP-kuvia")
+      if (file.size > 10 * 1024 * 1024) throw new Error(`Kuvan ${imageIndex + 1} enimmäiskoko on 10 Mt`)
+
+      const bytes = Buffer.from(await file.arrayBuffer())
+      const dataUrl = `data:${mimeType};base64,${bytes.toString("base64")}`
+      const aiResponse = await fetch("https://ai-gateway.vercel.sh/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${gatewayKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "openai/gpt-4.1-mini",
+          temperature: 0,
+          response_format: { type: "json_object" },
+          messages: [{
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Etsi kuvasta kaikki selvästi näkyvät Pokémon TCG -kortit, enintään 12 korttia. Mukaan kuuluvat Pokémon-kortit, Energy-kortit (Basic ja Special) sekä Trainer-kortit (Item, Supporter, Stadium, Tool jne.). Käsittele jokainen kortti erillisenä. Älä jätä energia- tai trainer-kortteja pois. Älä keksi kortteja äläkä arvaa epäselviä tietoja. Palauta JSON-objekti muodossa {cards:[{name:string,category:'Pokemon'|'Energy'|'Trainer'|null,setName:string|null,setCode:string|null,collectorNumber:string|null,language:string|null,confidence:number}]}. Käytä nimessä TCGdexin virallista englanninkielistä korttinimeä aina kun mahdollista (esim. Basic Fighting Energy). Jokaiselle kortille lue nimi, korttityyppi/category, setin nimi, setin tunnus jos näkyy, keräilynumero (esim. 025/198 tai 006) ja kieli. Jos kortti on Basic Energy, nimeä se muodossa Basic [Energy Type] Energy. confidence on 0-1. Jos kortin nimeä ei voi lukea luotettavasti, jätä kyseinen kortti pois. Älä palauta muuta tekstiä.",
+              },
+              { type: "image_url", image_url: { url: dataUrl, detail: "high" } },
+            ],
+          }],
+        }),
+        cache: "no-store",
+      })
+      if (!aiResponse.ok) throw new Error(`Kuvan ${imageIndex + 1} tunnistus epäonnistui (${aiResponse.status})`)
+      const aiPayload = await aiResponse.json()
+      const raw = aiPayload.choices?.[0]?.message?.content
+      if (typeof raw !== "string") throw new Error(`Kuvan ${imageIndex + 1} tunnistus ei palauttanut korttitietoja`)
+      const parsed = JSON.parse(raw) as { cards?: Partial<PokemonRecognition>[] }
+      const imageRecognitions = (Array.isArray(parsed.cards) ? parsed.cards : []).slice(0, 12).map((card) => ({
+        name: String(card.name ?? "").trim().slice(0, 120),
+        setName: typeof card.setName === "string" ? card.setName.slice(0, 120) : null,
+        setCode: typeof card.setCode === "string" ? card.setCode.slice(0, 30) : null,
+        collectorNumber: typeof card.collectorNumber === "string" ? card.collectorNumber.slice(0, 30) : null,
+        language: typeof card.language === "string" ? card.language.slice(0, 20) : null,
+        confidence: Math.max(0, Math.min(1, Number(card.confidence) || 0)),
+        category: card.category === "Pokemon" || card.category === "Energy" || card.category === "Trainer" ? card.category : null,
+        sourceImageIndex: imageIndex,
+      })).filter((card) => card.name)
+      recognitions.push(...imageRecognitions)
+    }
+    if (!recognitions.length) throw new Error("Valituista kuvista ei löytynyt luotettavasti tunnistettavia Pokémon-kortteja.")
+    if (recognitions.length > 120) throw new Error("Tuontierässä voi olla enintään 120 tunnistettua korttia.")
 
     const { data: batch, error: batchError } = await db.from("collection_import_batches").insert({
       user_id: user.id,
       category: "tcg",
       input_type: "image",
       status: "processing",
-      source_storage_path: storagePath,
-      source_metadata: { game: "pokemon", recognitions },
+      source_storage_path: storagePaths[0],
+      source_metadata: { game: "pokemon", storagePaths, imageCount: storagePaths.length, recognitions },
     }).select("id").single()
     if (batchError) throw new Error(batchError.message)
     batchId = batch.id
