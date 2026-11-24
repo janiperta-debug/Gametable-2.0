@@ -206,14 +206,20 @@ export function CollectionImportReview({
 
                   {itemCandidates.length > 0 ? (
                     <div className="space-y-2">
+                      {item.status === "accepted" && (
+                        <div className="flex items-center gap-2 rounded-md border border-green-600/40 bg-green-600/10 px-3 py-2 text-sm text-green-700 dark:text-green-300">
+                          <Check className="h-4 w-4 shrink-0" />
+                          <span>Valittu osuma on hyväksytty</span>
+                        </div>
+                      )}
                       {itemCandidates.length > 1 ? (
                         <label className="block text-xs text-muted-foreground">
-                          Valitse oikea tietokantaosuma
+                          {item.status === "accepted" ? "Hyväksytty osuma (voit vaihtaa valintaa)" : "Valitse oikea tietokantaosuma"}
                           <select
                             value={chosen?.id ?? ""}
                             disabled={locked || busy}
                             onChange={(event) => handleDecision(item.id, "accept", event.target.value)}
-                            className="mt-1 h-9 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground"
+                            className={`mt-1 h-9 w-full rounded-md border px-2 text-sm text-foreground ${item.status === "accepted" ? "border-green-600/50 bg-green-600/5" : "border-input bg-background"}`}
                           >
                             {itemCandidates.map((candidate) => (
                               <option key={candidate.id} value={candidate.id}>
@@ -223,7 +229,7 @@ export function CollectionImportReview({
                           </select>
                         </label>
                       ) : (
-                        <div className="text-sm">
+                        <div className={`rounded-md border px-3 py-2 text-sm ${item.status === "accepted" ? "border-green-600/50 bg-green-600/5" : "border-transparent"}`}>
                           <div className="font-medium">{chosen?.candidate_data.name}</div>
                           <div className="text-xs text-muted-foreground">
                             {chosen?.candidate_data.set}{chosen?.candidate_data.factionName ? ` · ${chosen.candidate_data.factionName}` : ""}{chosen?.candidate_data.systemName ? ` · ${chosen.candidate_data.systemName}` : ""}
@@ -231,7 +237,7 @@ export function CollectionImportReview({
                           </div>
                         </div>
                       )}
-                      {item.review_reason && <p className="text-xs text-muted-foreground">{item.review_reason}</p>}
+                      {item.review_reason && item.status !== "accepted" && <p className="text-xs text-muted-foreground">{item.review_reason}</p>}
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -256,7 +262,13 @@ export function CollectionImportReview({
                   {item.error_message && <p className="text-xs text-destructive">{item.error_message}</p>}
                   {!locked && item.status !== "failed" && itemCandidates.length > 0 && (
                     <div className="flex flex-wrap gap-2">
-                      <ArchiveCardButton onClick={() => handleDecision(item.id, "accept", chosen?.id)} active disabled={busy} icon={<Check className="h-4 w-4" />}>Hyväksy osuma</ArchiveCardButton>
+                      {item.status !== "accepted" ? (
+                        <ArchiveCardButton onClick={() => handleDecision(item.id, "accept", chosen?.id)} active disabled={busy} icon={<Check className="h-4 w-4" />}>Hyväksy osuma</ArchiveCardButton>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 rounded-md border border-green-600/40 px-3 py-2 text-xs font-medium text-green-700 dark:text-green-300">
+                          <Check className="h-4 w-4" /> Hyväksytty – valmis lisättäväksi
+                        </span>
+                      )}
                       <ArchiveCardButton onClick={() => handleDecision(item.id, "reject")} disabled={busy} icon={<X className="h-4 w-4" />}>Hylkää rivi</ArchiveCardButton>
                     </div>
                   )}
