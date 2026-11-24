@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import Image from "next/image"
 import { ArchiveCardButton, archiveField } from "@/components/archive-frame"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, Upload, Check, X, RefreshCw } from "lucide-react"
@@ -234,6 +235,26 @@ export function CollectionImportReview({
                           <div className="text-xs text-muted-foreground">
                             {chosen?.candidate_data.set}{chosen?.candidate_data.factionName ? ` · ${chosen.candidate_data.factionName}` : ""}{chosen?.candidate_data.systemName ? ` · ${chosen.candidate_data.systemName}` : ""}
                             {typeof chosen?.candidate_data.modelCountMin === "number" && typeof chosen?.candidate_data.modelCountMax === "number" ? ` · ${chosen.candidate_data.modelCountMin}–${chosen.candidate_data.modelCountMax} models` : typeof chosen?.candidate_data.modelCountMin === "number" ? ` · ${chosen.candidate_data.modelCountMin}+ models` : ""}{typeof chosen?.candidate_data.basePoints === "number" && chosen.candidate_data.basePoints > 0 ? ` · ${chosen.candidate_data.basePoints} pts` : ""}
+                          </div>
+                        </div>
+                      )}
+                      {chosen?.candidate_data.imageUrl && (
+                        <div className="flex items-start gap-3 rounded-md border border-accent-gold/20 bg-background/30 p-2">
+                          <div className="relative h-28 w-20 shrink-0 overflow-hidden rounded bg-black/20">
+                            <Image
+                              src={chosen.candidate_data.imageUrl}
+                              alt={chosen.candidate_data.name ?? "Ehdotettu kortti"}
+                              fill
+                              sizes="80px"
+                              unoptimized
+                              className="object-contain"
+                            />
+                          </div>
+                          <div className="min-w-0 text-xs text-muted-foreground">
+                            <div className="font-medium text-foreground">{chosen.candidate_data.name}</div>
+                            {chosen.candidate_data.set && <div className="mt-1">{chosen.candidate_data.set}</div>}
+                            {chosen.candidate_data.collectorNumber && <div>Numero: {chosen.candidate_data.collectorNumber}</div>}
+                            {chosen.candidate_data.rarity && <div>{chosen.candidate_data.rarity}</div>}
                           </div>
                         </div>
                       )}
