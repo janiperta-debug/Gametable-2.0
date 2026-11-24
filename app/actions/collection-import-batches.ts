@@ -239,6 +239,9 @@ export async function searchCollectionImportItem(input: { itemId: string; search
     return { success: false as const, error: "This row cannot be searched in its current state" as const }
   }
 
+  const parsedData = item.parsed_data as { name?: string; setCode?: string | null; collectorNumber?: string | null }
+  const originalSetCode = parsedData.setCode?.trim().toLowerCase()
+  const originalCollectorNumber = parsedData.collectorNumber?.trim()
   const matches: Array<{ id: string; name: string; extra: Record<string, unknown> }> = []
   if (batch.category === "tcg") {
     const requestedGame = String((batch.source_metadata as Record<string, unknown> | null)?.game ?? "magic").toLowerCase()
@@ -247,16 +250,23 @@ export async function searchCollectionImportItem(input: { itemId: string; search
       : requestedGame === "onepiece" || requestedGame === "one-piece" ? "onepiece" : requestedGame
     const { data, error } = await db.from("tcg_cards")
       .select("id, name, tcg_system, external_id, set_name, set_code, rarity, image_url")
-      .eq("tcg_system", dbGame).ilike("name", `%${searchName}%`).limit(30)
+      .eq("tcg_system", dbGame).ilike("name", `%${searchName}%`)
+      .limit(30)
     if (error) return { success: false as const, error: error.message }
-    for (const card of data ?? []) matches.push({ id: card.id, name: card.name, extra: {
+    const localCards = originalSetCode
+      ? (data ?? []).filter((card) => String(card.set_code ?? "").toLowerCase() === originalSetCode)
+      : (data ?? [])
+    for (const card of localCards) matches.push({ id: card.id, name: card.name, extra: {
       game: card.tcg_system, externalId: card.external_id, set: card.set_name,
       setCode: card.set_code, rarity: card.rarity, imageUrl: card.image_url,
     } })
 
     if (dbGame === "mtg") {
       const tokens = searchName.split(/\\s+/).filter(Boolean).slice(0, 5)
-      const broadQuery = tokens.map((token) => `name:${token.replace(/[^a-zA-Z0-9'-]/g, "")}`).filter(Boolean).join(" ")
+      const nameQuery = tokens.map((token) => `name:${token.replace(/[^a-zA-Z0-9'-]/g, "")}`).filter(Boolean).join(" ")
+      const setQuery = originalSetCode ? ` set:${originalSetCode}` : ""
+      const collectorQuery = originalCollectorNumber ? ` cn:${originalCollectorNumber}` : ""
+      const broadQuery = `${nameQuery}${setQuery}${collectorQuery}`.trim()
       if (broadQuery) {
         const response = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(broadQuery)}&order=edhrec&dir=desc&unique=prints`, {
           headers: { Accept: "application/json", "User-Agent": "GameTable/1.0 (collection import)" }, cache: "no-store",
@@ -322,6 +332,7 @@ interface ParsedImportLine {
   name: string
   quantity: number
   setCode?: string
+  collectorNumber?: string
   rawText: string
 }
 
@@ -495,7 +506,7 @@ export async function processCollectionImportBatch(batchId: string) {
       batch_id: batchId,
       row_index: index,
       raw_text: line.rawText,
-      parsed_data: { name: line.name, quantity: line.quantity, setCode: line.setCode ?? null },
+      parsed_data: { name: line.name, quantity: line.quantity, setCode: line.setCode ?? null, collectorNumber: line.collectorNumber ?? null },
       status: "pending",
     }))
 
@@ -510,7 +521,7 @@ export async function processCollectionImportBatch(batchId: string) {
     const itemStatusUpdates: Array<{ id: string; status: string; review_reason: string | null }> = []
 
     for (const item of items ?? []) {
-      const parsed = item.parsed_data as { name?: string; quantity?: number; setCode?: string | null }
+      const parsed = item.parsed_data as { name?: string; quantity?: number; setCode?: string | null; collectorNumber?: string | null }
       const name = (parsed.name ?? "").trim()
       let matches: Array<{ id: string; name: string; extra: Record<string, unknown> }> = []
 
