@@ -79,6 +79,8 @@ export interface CollectionQueryInputs {
       base_points?: number | null
       model_count_min?: number | null
       model_count_max?: number | null
+      image_url?: string | null
+      image_source_url?: string | null
       faction?: {
         id?: string | null
         name?: string | null
@@ -101,6 +103,8 @@ export interface CollectionQueryInputs {
       base_points?: number | null
       model_count_min?: number | null
       model_count_max?: number | null
+      image_url?: string | null
+      image_source_url?: string | null
       faction?: {
         id?: string | null
         name?: string | null
