@@ -209,7 +209,7 @@ export function CollectionImportReview({
         {category === "tcg" && tcgGame.toLowerCase() === "pokemon" && !batchId && (
           <div className="rounded-lg border border-accent-gold/25 bg-background/30 p-3 space-y-2">
             <div className="text-sm font-medium">Tuo Pokémon-kortteja kuvasta</div>
-            <p className="text-xs text-muted-foreground">Voit kuvata useita kortteja samalla kertaa. Tekoäly tunnistaa kuvasta enintään 12 korttia ja ehdottaa niille vastaavia painoksia TCGdexistä.</p>
+            <p className="text-xs text-muted-foreground">Voit kuvata useita kortteja samalla kertaa. Tekoäly tunnistaa kuvasta enintään 12 Pokémon-, energia- ja Trainer-korttia ja ehdottaa niille vastaavia painoksia TCGdexistä.</p>
             <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" disabled={busy}
               onChange={(event) => {
                 const file = event.target.files?.[0] ?? null
