@@ -8,7 +8,8 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-    "verify:manor": "tsx scripts/verify-manor-progression.ts"
+    "verify:manor": "tsx scripts/verify-manor-progression.ts",
+    "verify:collection-import-matching": "tsx scripts/verify-collection-import-matching.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
