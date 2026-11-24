@@ -53,6 +53,7 @@ export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "m
   const [bulkArmyName, setBulkArmyName] = useState("")
   const [bulkArmyLoading, setBulkArmyLoading] = useState(false)
   const [pendingImportRows, setPendingImportRows] = useState<ResolvedMiniatureImportRow[] | null>(null)
+  const [miniatureSystemCode, setMiniatureSystemCode] = useState("wh40k")
   
   const t = useTranslations()
   const { toast } = useToast()
@@ -414,6 +415,40 @@ export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "m
     if (selectedCategory === "trading-cards" || selectedCategory === "miniatures") {
       return (
         <div className="space-y-4">
+          {selectedCategory === "miniatures" && (
+            <div className="space-y-1.5">
+              <label htmlFor="mass-import-miniature-system" className="text-sm font-medium text-foreground">
+                Pelijärjestelmä
+              </label>
+              <select
+                id="mass-import-miniature-system"
+                value={miniatureSystemCode}
+                onChange={(event) => setMiniatureSystemCode(event.target.value)}
+                className={cn("h-11 w-full rounded-md px-3 text-sm font-body bg-background/40 text-foreground border border-accent-gold/30", archiveField)}
+              >
+                <option value="wh40k">Warhammer 40,000</option>
+                <option value="aos_3e">Age of Sigmar</option>
+                <option value="kill_team">Kill Team</option>
+                <option value="the_horus_heresy">The Horus Heresy</option>
+                <option value="the_old_world">Warhammer: The Old World</option>
+                <option value="warcry">Warcry</option>
+                <option value="blood_bowl">Blood Bowl</option>
+                <option value="sw_legion">Star Wars: Legion</option>
+                <option value="star_wars_shatterpoint">Star Wars: Shatterpoint</option>
+                <option value="marvel_crisis_protocol">Marvel: Crisis Protocol</option>
+                <option value="infinity">Infinity</option>
+                <option value="malifaux">Malifaux</option>
+                <option value="necromunda">Necromunda</option>
+                <option value="middle_earth_sbg">Middle-earth Strategy Battle Game</option>
+                <option value="adeptus_titanicus">Adeptus Titanicus</option>
+                <option value="legions_imperialis">Legions Imperialis</option>
+                <option value="warhammer_underworlds">Warhammer Underworlds</option>
+              </select>
+              <p className="text-xs text-muted-foreground">
+                Valitse pelijärjestelmä ennen listan liittämistä ja analysointia.
+              </p>
+            </div>
+          )}
           {selectedCategory === "trading-cards" && (
             <div className="space-y-1.5">
               <label htmlFor="mass-import-tcg-game" className="text-sm font-medium text-foreground">
@@ -440,6 +475,7 @@ export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "m
           <CollectionImportReview
             category={selectedCategory === "trading-cards" ? "tcg" : "miniatures"}
             tcgGame={tcgGame}
+            miniatureSystemCode={miniatureSystemCode}
             onImportComplete={onImportComplete}
           />
         </div>
