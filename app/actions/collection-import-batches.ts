@@ -266,8 +266,8 @@ export async function searchCollectionImportItem(input: { itemId: string; search
       for (const card of externalCards) {
         const catalogId = await ensurePokemonCardInCatalog(db, card)
         if (!matches.some((match) => match.id === catalogId)) matches.push({ id: catalogId, name: card.name, extra: {
-          game: "pokemon", externalId: card.id, set: card.expansion?.name ?? null,
-          setCode: card.expansion?.id ?? null, collectorNumber: card.printed_number ?? card.number ?? null,
+          game: "pokemon", externalId: card.id, set: card.set?.name ?? null,
+          setCode: card.set?.id ?? String(card.id).split("-")[0] ?? null, collectorNumber: card.printed_number ?? card.number ?? null,
           rarity: card.rarity ?? null,
           imageUrl: card.images?.find((image) => image.type === "front")?.small ?? card.images?.[0]?.small ?? null,
         } })
@@ -427,48 +427,45 @@ async function searchExternalMagicCard(name: string, setCode?: string, collector
   return Array.isArray(payload.data) ? payload.data.slice(0, 10) as ScryfallImportCard[] : []
 }
 
-type ScrydexPokemonCard = {
+type TcgdexPokemonCard = {
   id: string
   name: string
-  number?: string
-  printed_number?: string
+  localId?: string
+  image?: string
   rarity?: string
-  images?: Array<{ type?: string; small?: string }>
-  expansion?: { id?: string; name?: string; code?: string }
+  set?: { id?: string; name?: string }
 }
 
-async function searchExternalPokemonCard(name: string): Promise<ScrydexPokemonCard[]> {
-  const headers: Record<string, string> = { Accept: "application/json" }
-  if (process.env.SCRYDEX_API_KEY) headers["X-Api-Key"] = process.env.SCRYDEX_API_KEY
-  if (process.env.SCRYDEX_TEAM_ID) headers["X-Team-ID"] = process.env.SCRYDEX_TEAM_ID
-  const query = `name:"${name.replace(/"/g, '\\\\"')}"`
-  const response = await fetch(
-    `https://api.scrydex.com/pokemon/v1/en/cards?q=${encodeURIComponent(query)}&page=1&page_size=20&select=id,name,number,printed_number,rarity,images,expansion`,
-    { headers, cache: "no-store" },
-  )
+async function searchExternalPokemonCard(name: string): Promise<TcgdexPokemonCard[]> {
+  const url = `https://api.tcgdex.net/v2/en/cards?name=${encodeURIComponent(name)}&pagination:page=1&pagination:itemsPerPage=30`
+  const response = await fetch(url, { headers: { Accept: "application/json" }, cache: "no-store" })
   if (!response.ok) {
     if (response.status === 404) return []
     throw new Error(`Pokémon catalog search failed (${response.status})`)
   }
   const payload = await response.json()
-  return Array.isArray(payload.data) ? payload.data.slice(0, 20) as ScrydexPokemonCard[] : []
+  return Array.isArray(payload) ? payload.slice(0, 30) as TcgdexPokemonCard[] : []
 }
 
-async function ensurePokemonCardInCatalog(db: ReturnType<typeof createServiceClient>, card: ScrydexPokemonCard) {
+async function ensurePokemonCardInCatalog(db: ReturnType<typeof createServiceClient>, card: TcgdexPokemonCard) {
   const { data: existing, error: lookupError } = await db
     .from("tcg_cards").select("id").eq("tcg_system", "pokemon").eq("external_id", card.id).maybeSingle()
   if (lookupError) throw new Error(lookupError.message)
   if (existing) return existing.id as string
 
-  const imageUrl = card.images?.find((image) => image.type === "front")?.small ?? card.images?.[0]?.small ?? null
+  const detailResponse = await fetch(`https://api.tcgdex.net/v2/en/cards/${encodeURIComponent(card.id)}`, {
+    headers: { Accept: "application/json" }, cache: "no-store",
+  })
+  const detail = detailResponse.ok ? await detailResponse.json() : card
+  const setCode = String(card.id).split("-")[0] || null
   const { data: inserted, error: insertError } = await db.from("tcg_cards").insert({
     tcg_system: "pokemon",
     external_id: card.id,
     name: card.name,
-    set_code: card.expansion?.id ?? null,
-    set_name: card.expansion?.name ?? null,
-    rarity: card.rarity ?? null,
-    image_url: imageUrl,
+    set_code: detail.set?.id ?? setCode,
+    set_name: detail.set?.name ?? null,
+    rarity: detail.rarity ?? card.rarity ?? null,
+    image_url: card.image ? `${card.image}/low.png` : null,
   }).select("id").single()
   if (insertError) {
     const { data: raced } = await db.from("tcg_cards").select("id").eq("tcg_system", "pokemon").eq("external_id", card.id).maybeSingle()
@@ -650,8 +647,8 @@ export async function processCollectionImportBatch(batchId: string) {
               extra: {
                 game: "pokemon",
                 externalId: card.id,
-                set: card.expansion?.name ?? null,
-                setCode: card.expansion?.id ?? null,
+                set: card.set?.name ?? null,
+                setCode: card.set?.id ?? String(card.id).split("-")[0] ?? null,
                 collectorNumber: card.printed_number ?? card.number ?? null,
                 rarity: card.rarity ?? null,
                 imageUrl: card.images?.find((image) => image.type === "front")?.small ?? card.images?.[0]?.small ?? null,
