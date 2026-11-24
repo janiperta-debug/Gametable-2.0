@@ -46,8 +46,8 @@ export function CollectionImportReview({
   onImportComplete?: () => void
 }) {
   const [sourceText, setSourceText] = useState("")
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [imageFiles, setImageFiles] = useState<File[]>([])
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
   const [batchId, setBatchId] = useState<string | null>(null)
   const [items, setItems] = useState<ImportItem[]>([])
   const [candidates, setCandidates] = useState<Candidate[]>([])
@@ -100,13 +100,18 @@ export function CollectionImportReview({
   }
 
   const handleImageAnalyze = async () => {
-    if (!imageFile || busy) return
-    if (!["image/jpeg", "image/png", "image/webp"].includes(imageFile.type)) {
-      setAnalysisError("Valitse JPEG-, PNG- tai WebP-kuva.")
+    if (!imageFiles.length || busy) return
+    if (imageFiles.length > 10) {
+      setAnalysisError("Voit valita enintään 10 kuvaa kerralla.")
       return
     }
-    if (imageFile.size > 10 * 1024 * 1024) {
-      setAnalysisError("Kuvan enimmäiskoko on 10 Mt.")
+    const invalidFile = imageFiles.find((file) => !["image/jpeg", "image/png", "image/webp"].includes(file.type))
+    if (invalidFile) {
+      setAnalysisError("Käytä JPEG-, PNG- tai WebP-kuvia.")
+      return
+    }
+    if (imageFiles.some((file) => file.size > 10 * 1024 * 1024)) {
+      setAnalysisError("Yksittäisen kuvan enimmäiskoko on 10 Mt.")
       return
     }
     setBusy(true)
@@ -115,22 +120,26 @@ export function CollectionImportReview({
       const supabase = createSupabaseBrowserClient()
       const { data: { user }, error: userError } = await supabase.auth.getUser()
       if (userError || !user) throw new Error("Kirjaudu sisään ennen kuvan tuontia.")
-      const extension = imageFile.type === "image/png" ? "png" : imageFile.type === "image/webp" ? "webp" : "jpg"
-      const storagePath = `${user.id}/${crypto.randomUUID()}.${extension}`
-      const { error: uploadError } = await supabase.storage.from("collection-import-images").upload(storagePath, imageFile, {
-        contentType: imageFile.type,
-        upsert: false,
-      })
-      if (uploadError) throw new Error(uploadError.message)
-      const processed = await processPokemonCardImageImport(storagePath)
+      const storagePaths: string[] = []
+      for (const file of imageFiles) {
+        const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg"
+        const storagePath = `${user.id}/${crypto.randomUUID()}.${extension}`
+        const { error: uploadError } = await supabase.storage.from("collection-import-images").upload(storagePath, file, {
+          contentType: file.type,
+          upsert: false,
+        })
+        if (uploadError) throw new Error(uploadError.message)
+        storagePaths.push(storagePath)
+      }
+      const processed = await processPokemonCardImageImport(storagePaths)
       if (!processed.success) throw new Error(processed.error)
       await refreshBatch(processed.batchId)
       setBatchId(processed.batchId)
       toast({
         title: "Kortit tunnistettu",
         description: processed.candidateCount > 0
-          ? `${processed.itemCount} korttia tunnistettu, ${processed.candidateCount} TCGdex-osumaa tarkistettavaksi.`
-          : `${processed.itemCount} korttia tunnistettu, mutta tietokantaosumia ei löytynyt. Voit tarkistaa nimet.`,
+          ? `${processed.itemCount} korttia tunnistettu ${imageFiles.length} kuvasta, ${processed.candidateCount} tietokantaosumaa tarkistettavaksi.`
+          : `${processed.itemCount} korttia tunnistettu ${imageFiles.length} kuvasta, mutta tietokantaosumia ei löytynyt. Voit tarkistaa nimet.`,
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : "Tuntematon virhe"
@@ -209,18 +218,18 @@ export function CollectionImportReview({
         {category === "tcg" && tcgGame.toLowerCase() === "pokemon" && !batchId && (
           <div className="rounded-lg border border-accent-gold/25 bg-background/30 p-3 space-y-2">
             <div className="text-sm font-medium">Tuo Pokémon-kortteja kuvasta</div>
-            <p className="text-xs text-muted-foreground">Voit kuvata useita kortteja samalla kertaa. Tekoäly tunnistaa kuvasta enintään 12 Pokémon-, energia- ja Trainer-korttia ja ehdottaa niille vastaavia painoksia TCGdexistä.</p>
-            <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" disabled={busy}
+            <p className="text-xs text-muted-foreground">Voit kuvata useita kortteja samalla kertaa. Valitse enintään 10 kansiosivua kerralla. Jokaisesta kuvasta tunnistetaan enintään 12 Pokémon-, energia- ja Trainer-korttia; kaikki tulokset kootaan yhteen tarkistettavaan tuontierään.</p>
+            <input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" multiple disabled={busy}
               onChange={(event) => {
-                const file = event.target.files?.[0] ?? null
-                setImageFile(file)
-                setImagePreview(file ? URL.createObjectURL(file) : null)
+                const files = Array.from(event.target.files ?? [])
+                setImageFiles(files)
+                setImagePreviews(files.map((file) => URL.createObjectURL(file)))
                 setAnalysisError(null)
               }}
               className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-md file:border file:border-accent-gold/30 file:bg-background file:px-3 file:py-2 file:text-sm file:text-foreground"
             />
-            {imagePreview && <div className="flex items-start gap-3"><img src={imagePreview} alt="Valitut Pokémon-kortit" className="max-h-48 max-w-36 rounded-md object-contain bg-black/10" /><p className="text-xs text-muted-foreground">Asettele kortit erilleen niin, että jokaisen nimi ja keräilynumero näkyvät mahdollisimman selvästi.</p></div>}
-            <ArchiveCardButton onClick={handleImageAnalyze} active fullWidth disabled={!imageFile || busy} icon={busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}>
+            {imagePreviews.length > 0 && <div className="space-y-2"><div className="grid grid-cols-3 sm:grid-cols-5 gap-2">{imagePreviews.map((preview, index) => <div key={preview} className="relative"><img src={preview} alt={`Kansiosivu ${index + 1}`} className="h-28 w-full rounded-md object-contain bg-black/10" /><span className="text-[10px] text-muted-foreground">{index + 1}. kuva</span></div>)}</div><p className="text-xs text-muted-foreground">{imageFiles.length} kuvaa valittuna. Varmista, että kortit näkyvät kokonaan ja keräilynumerot ovat luettavissa.</p></div>}
+            <ArchiveCardButton onClick={handleImageAnalyze} active fullWidth disabled={!imageFiles.length || busy} icon={busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}>
               {busy ? "Tunnistetaan kortteja…" : "Tunnista kortit kuvasta"}
             </ArchiveCardButton>
           </div>
@@ -246,7 +255,7 @@ export function CollectionImportReview({
 
       {batchId && (
         <div className="space-y-3">
-          {imagePreview && <div className="flex items-center gap-3 rounded-md border border-accent-gold/20 p-2"><img src={imagePreview} alt="Alkuperäinen korttikuva" className="h-32 w-24 rounded object-contain" /><span className="text-xs text-muted-foreground">Alkuperäinen korttikuva</span></div>}
+          {imagePreviews.length > 0 && <div className="rounded-md border border-accent-gold/20 p-2 space-y-2"><div className="text-xs text-muted-foreground">Tuodut kansiosivut ({imagePreviews.length})</div><div className="flex gap-2 overflow-x-auto">{imagePreviews.map((preview, index) => <img key={preview} src={preview} alt={`Alkuperäinen kansiosivu ${index + 1}`} className="h-28 w-20 shrink-0 rounded object-contain" />)}</div></div>}
           <div className="flex flex-wrap items-center justify-between gap-2 border-y border-accent-gold/20 py-3">
             <div className="flex flex-wrap gap-2 text-sm">
               <Badge variant="outline">{items.length} riviä</Badge>
@@ -378,7 +387,7 @@ export function CollectionImportReview({
             <ArchiveCardButton onClick={handleCommit} active fullWidth disabled={busy || acceptedCount === 0 || committed} icon={busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}>
               {busy ? "Lisätään…" : `Lisää hyväksytyt kokoelmaan (${acceptedCount})`}
             </ArchiveCardButton>
-            <ArchiveCardButton onClick={() => { setBatchId(null); setItems([]); setCandidates([]); setSourceText(""); setImageFile(null); setImagePreview(null); setCommitted(false) }} fullWidth disabled={busy}>
+            <ArchiveCardButton onClick={() => { setBatchId(null); setItems([]); setCandidates([]); setSourceText(""); setImageFiles([]); setImagePreviews([]); setCommitted(false) }} fullWidth disabled={busy}>
               Uusi tuonti
             </ArchiveCardButton>
           </div>
