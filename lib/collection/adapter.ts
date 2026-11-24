@@ -71,6 +71,8 @@ interface MiniatureUnitRowLike {
   base_points?: number | null
   model_count_min?: number | null
   model_count_max?: number | null
+  image_url?: string | null
+  image_source_url?: string | null
   faction?: MiniatureFactionRowLike | null
 }
 
@@ -243,7 +245,7 @@ export function mapMiniatureCollectionToCollectionEntry(row: MiniatureCollection
     catalogId,
     ownershipId: row.id,
     displayName: row.custom_name || unit?.name || 'Unknown miniature',
-    image: null,
+    image: unit?.image_url ?? unit?.image_source_url ?? null,
     status: 'owned',
     detailTarget: null,
     metadata: buildMiniatureMetadata(row),
@@ -263,7 +265,7 @@ export function mapMiniatureWishlistToCollectionEntry(row: MiniatureWishlistRowL
     catalogId,
     ownershipId: row.id,
     displayName: unit?.name ?? 'Unknown miniature',
-    image: null,
+    image: unit?.image_url ?? unit?.image_source_url ?? null,
     status: 'wishlist',
     detailTarget: null,
     metadata: buildMiniatureMetadata(row),
