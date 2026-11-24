@@ -288,8 +288,8 @@ export function CollectionImportReview({
                   {item.error_message && <p className="text-xs text-destructive">{item.error_message}</p>}
                   {!locked && item.status !== "failed" && itemCandidates.length > 0 && (
                     <div className="flex flex-wrap gap-2">
-                      {item.status !== "accepted" ? (
-                        <ArchiveCardButton onClick={() => handleDecision(item.id, "accept", chosen?.id)} active disabled={busy} icon={<Check className="h-4 w-4" />}>Hyväksy osuma</ArchiveCardButton>
+                      {item.status !== "accepted" || hasUnconfirmedSelection ? (
+                        <ArchiveCardButton onClick={() => handleDecision(item.id, "accept", selectedCandidateIds[item.id] ?? chosen?.id)} active disabled={busy} icon={<Check className="h-4 w-4" />}>{item.status === "accepted" ? "Vahvista uusi osuma" : "Hyväksy osuma"}</ArchiveCardButton>
                       ) : (
                         <span className="inline-flex items-center gap-1.5 rounded-md border border-green-600/40 px-3 py-2 text-xs font-medium text-green-700 dark:text-green-300">
                           <Check className="h-4 w-4" /> Hyväksytty – valmis lisättäväksi
