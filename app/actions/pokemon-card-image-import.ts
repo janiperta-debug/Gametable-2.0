@@ -145,8 +145,17 @@ export async function processPokemonCardImageImport(storagePath: string) {
         catalogCards = await searchCards({ category: "eq:Energy", name: energySearchTerm })
       }
 
+      const basicEnergyType = recognition.category === "Energy"
+        ? recognition.name.match(/^Basic\\s+(.+?)\\s+Energy$/i)?.[1]?.toLocaleLowerCase()
+        : null
       const matches = (Array.isArray(catalogCards) ? catalogCards : [])
-        .filter((card) => card.name.toLocaleLowerCase() === recognition.name.toLocaleLowerCase())
+        .filter((card) => {
+          const catalogName = card.name.toLocaleLowerCase()
+          if (catalogName === recognition.name.toLocaleLowerCase()) return true
+          // TCGdex naming can differ slightly for energy printings; retain only
+          // Energy-named results containing the recognized elemental type.
+          return Boolean(basicEnergyType && catalogName.includes("energy") && catalogName.includes(basicEnergyType))
+        })
         .filter((card) => !recognition.collectorNumber || !card.localId || normalizeCardNumber(card.localId) === normalizeCardNumber(recognition.collectorNumber))
         .slice(0, 8)
 
