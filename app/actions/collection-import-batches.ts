@@ -337,10 +337,21 @@ export async function searchCollectionImportItem(input: { itemId: string; search
       const collectorQuery = originalCollectorNumber ? ` cn:${originalCollectorNumber}` : ""
       // First try the recognized print details. Image OCR can misread tiny set
       // codes or collector numbers, so always fall back to a name-only lookup.
+      const meaningfulTokens = tokens
+        .map((token) => token.replace(/[^a-zA-Z0-9'-]/g, ""))
+        .filter((token) => token.length >= 3 && !["the", "and", "of"].includes(token.toLowerCase()))
+      const tokenFallbacks = meaningfulTokens.length > 1
+        ? meaningfulTokens.slice(1).map((_, index) =>
+            meaningfulTokens.filter((token, tokenIndex) => tokenIndex !== index)
+              .map((token) => `name:${token}`).join(" ")
+          )
+        : []
       const queries = [
         `${nameQuery}${setQuery}${collectorQuery}`.trim(),
         `!${JSON.stringify(searchName)}`,
         nameQuery,
+        ...tokenFallbacks,
+        ...meaningfulTokens.map((token) => `name:${token}`),
       ].filter((query, index, all) => query && all.indexOf(query) === index)
       const found = new Map<string, ScryfallImportCard>()
       for (const query of queries) {
