@@ -335,23 +335,34 @@ export async function searchCollectionImportItem(input: { itemId: string; search
       const nameQuery = tokens.map((token) => `name:${token.replace(/[^a-zA-Z0-9'-]/g, "")}`).filter(Boolean).join(" ")
       const setQuery = originalSetCode ? ` set:${originalSetCode}` : ""
       const collectorQuery = originalCollectorNumber ? ` cn:${originalCollectorNumber}` : ""
-      const broadQuery = `${nameQuery}${setQuery}${collectorQuery}`.trim()
-      if (broadQuery) {
-        const response = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(broadQuery)}&order=edhrec&dir=desc&unique=prints`, {
+      // First try the recognized print details. Image OCR can misread tiny set
+      // codes or collector numbers, so always fall back to a name-only lookup.
+      const queries = [
+        `${nameQuery}${setQuery}${collectorQuery}`.trim(),
+        `!${JSON.stringify(searchName)}`,
+        nameQuery,
+      ].filter((query, index, all) => query && all.indexOf(query) === index)
+      const found = new Map<string, ScryfallImportCard>()
+      for (const query of queries) {
+        const response = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}&order=edhrec&dir=desc&unique=prints`, {
           headers: { Accept: "application/json", "User-Agent": "GameTable/1.0 (collection import)" }, cache: "no-store",
         })
-        if (response.ok) {
-          const payload = await response.json()
-          for (const card of (Array.isArray(payload.data) ? payload.data.slice(0, 30) : []) as ScryfallImportCard[]) {
-            const catalogId = await ensureMagicCardInCatalog(db, card)
-            if (!matches.some((match) => match.id === catalogId)) matches.push({ id: catalogId, name: card.name, extra: {
-              game: "mtg", externalId: card.id, set: card.set_name, setCode: card.set,
-              rarity: card.rarity ?? null, imageUrl: card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || null,
-            } })
-          }
-        } else if (response.status !== 404) {
-          return { success: false as const, error: `Scryfall search failed (${response.status})` }
+        if (response.status === 404) continue
+        if (!response.ok) return { success: false as const, error: `Scryfall search failed (${response.status})` }
+        const payload = await response.json()
+        for (const card of (Array.isArray(payload.data) ? payload.data.slice(0, 30) : []) as ScryfallImportCard[]) {
+          found.set(card.id, card)
         }
+        // The first query that returns candidates is enough to avoid flooding
+        // review with unrelated printings from progressively broader queries.
+        if (found.size) break
+      }
+      for (const card of found.values()) {
+        const catalogId = await ensureMagicCardInCatalog(db, card)
+        if (!matches.some((match) => match.id === catalogId)) matches.push({ id: catalogId, name: card.name, extra: {
+          game: "mtg", externalId: card.id, set: card.set_name, setCode: card.set,
+          rarity: card.rarity ?? null, imageUrl: card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || null,
+        } })
       }
     }
   } else {
