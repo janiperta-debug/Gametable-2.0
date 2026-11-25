@@ -2,7 +2,7 @@ import "server-only"
 
 import { createServiceClient } from "@/lib/supabase/service"
 
-export type TcgSystem = "mtg" | "pokemon" | "yugioh" | "lorcana" | "fab" | "onepiece"
+export type TcgSystem = "mtg" | "pokemon" | "yugioh" | "lorcana" | "fab" | "onepiece" | "riftbound" | "digimon" | "gundam" | "star-wars-unlimited" | "dragon-ball-fusion-world"
 export type TcgSourceKey =
   | "scryfall" | "pokemontcg" | "tcgdex" | "ygoprodeck"
   | "lorcast" | "lorcana_api" | "goagain" | "optcgapi"
