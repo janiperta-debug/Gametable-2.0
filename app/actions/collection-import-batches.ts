@@ -618,7 +618,7 @@ async function searchExternalPokemonCard(name: string): Promise<TcgdexPokemonCar
   return Array.isArray(payload) ? payload.slice(0, 30) as TcgdexPokemonCard[] : []
 }
 
-async function ensurePokemonCardInCatalog(db: ReturnType<typeof createServiceClient>, card: TcgdexPokemonCard) {
+async function ensurePokemonCardInCatalog(_db: ReturnType<typeof createServiceClient>, card: TcgdexPokemonCard) {
   const detailResponse = await fetch(`https://api.tcgdex.net/v2/en/cards/${encodeURIComponent(card.id)}`, {
     headers: { Accept: "application/json" }, cache: "no-store",
   })
@@ -659,7 +659,7 @@ async function searchExternalYuGiOhCard(name: string): Promise<YgoProDeckCard[]>
   return (await request("fname")).slice(0, 20)
 }
 
-async function ensureYuGiOhCardInCatalog(db: ReturnType<typeof createServiceClient>, card: YgoProDeckCard) {
+async function ensureYuGiOhCardInCatalog(_db: ReturnType<typeof createServiceClient>, card: YgoProDeckCard) {
   const print = card.card_sets?.[0]
   const imageUrl = card.card_images?.[0]?.image_url_small ?? card.card_images?.[0]?.image_url ?? null
   return upsertTcgSourceCard({
@@ -683,7 +683,7 @@ type GoAgainPrinting = {
 type GoAgainCard = { unique_id: string; name: string; printings?: GoAgainPrinting[] }
 
 async function ensureExternalTcgCard(
-  db: ReturnType<typeof createServiceClient>,
+  _db: ReturnType<typeof createServiceClient>,
   system: "lorcana" | "fab",
   card: { externalId: string; name: string; setCode?: string | null; setName?: string | null; rarity?: string | null; imageUrl?: string | null },
 ) {
@@ -695,7 +695,7 @@ async function ensureExternalTcgCard(
   })
 }
 
-async function ensureMagicCardInCatalog(db: ReturnType<typeof createServiceClient>, card: ScryfallImportCard) {
+async function ensureMagicCardInCatalog(_db: ReturnType<typeof createServiceClient>, card: ScryfallImportCard) {
   const imageUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || null
   const parsedPrice = card.prices?.usd ? Number.parseFloat(card.prices.usd) : null
   return upsertTcgSourceCard({
