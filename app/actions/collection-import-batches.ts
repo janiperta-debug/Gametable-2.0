@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { createServiceClient } from "@/lib/supabase/service"
+import { upsertTcgSourceCard } from "@/lib/tcg/upsert-source-card"
 import { miniatureSearchTerms, scoreCatalogMatch, splitMiniatureListLine } from "@/lib/collection/import-matching"
 
 export type CollectionImportCategory = "tcg" | "miniatures" | "board_game" | "rpg"
@@ -618,31 +619,17 @@ async function searchExternalPokemonCard(name: string): Promise<TcgdexPokemonCar
 }
 
 async function ensurePokemonCardInCatalog(db: ReturnType<typeof createServiceClient>, card: TcgdexPokemonCard) {
-  const { data: existing, error: lookupError } = await db
-    .from("tcg_cards").select("id").eq("tcg_system", "pokemon").eq("external_id", card.id).maybeSingle()
-  if (lookupError) throw new Error(lookupError.message)
-  if (existing) return existing.id as string
-
   const detailResponse = await fetch(`https://api.tcgdex.net/v2/en/cards/${encodeURIComponent(card.id)}`, {
     headers: { Accept: "application/json" }, cache: "no-store",
   })
   const detail = detailResponse.ok ? await detailResponse.json() : card
-  const setCode = String(card.id).split("-")[0] || null
-  const { data: inserted, error: insertError } = await db.from("tcg_cards").insert({
-    tcg_system: "pokemon",
-    external_id: card.id,
-    name: card.name,
-    set_code: detail.set?.id ?? setCode,
-    set_name: detail.set?.name ?? null,
-    rarity: detail.rarity ?? card.rarity ?? null,
-    image_url: card.image ? `${card.image}/low.png` : null,
-  }).select("id").single()
-  if (insertError) {
-    const { data: raced } = await db.from("tcg_cards").select("id").eq("tcg_system", "pokemon").eq("external_id", card.id).maybeSingle()
-    if (raced) return raced.id as string
-    throw new Error(insertError.message)
-  }
-  return inserted.id as string
+  return upsertTcgSourceCard({
+    system: "pokemon", sourceKey: "tcgdex", externalId: card.id, name: card.name,
+    setCode: detail.set?.id ?? String(card.id).split("-")[0] ?? null,
+    setName: detail.set?.name ?? null, rarity: detail.rarity ?? card.rarity ?? null,
+    imageUrl: card.image ? `${card.image}/low.png` : null,
+    sourceUrl: `https://api.tcgdex.net/v2/en/cards/${encodeURIComponent(card.id)}`,
+  })
 }
 
 type YgoProDeckCard = {
@@ -673,30 +660,15 @@ async function searchExternalYuGiOhCard(name: string): Promise<YgoProDeckCard[]>
 }
 
 async function ensureYuGiOhCardInCatalog(db: ReturnType<typeof createServiceClient>, card: YgoProDeckCard) {
-  const externalId = String(card.id)
-  const { data: existing, error: lookupError } = await db.from("tcg_cards")
-    .select("id").eq("tcg_system", "yugioh").eq("external_id", externalId).maybeSingle()
-  if (lookupError) throw new Error(lookupError.message)
-  if (existing) return existing.id as string
-
   const print = card.card_sets?.[0]
   const imageUrl = card.card_images?.[0]?.image_url_small ?? card.card_images?.[0]?.image_url ?? null
-  const { data: inserted, error: insertError } = await db.from("tcg_cards").insert({
-    tcg_system: "yugioh",
-    external_id: externalId,
-    name: card.name,
-    set_code: print?.set_code ?? null,
-    set_name: print?.set_name ?? null,
-    rarity: print?.set_rarity ?? null,
-    image_url: imageUrl,
-  }).select("id").single()
-  if (insertError) {
-    const { data: raced } = await db.from("tcg_cards").select("id")
-      .eq("tcg_system", "yugioh").eq("external_id", externalId).maybeSingle()
-    if (raced) return raced.id as string
-    throw new Error(insertError.message)
-  }
-  return inserted.id as string
+  return upsertTcgSourceCard({
+    system: "yugioh", sourceKey: "ygoprodeck", externalId: String(card.id), name: card.name,
+    setCode: print?.set_code ?? null, setName: print?.set_name ?? null,
+    rarity: print?.set_rarity ?? null, imageUrl,
+    typeLine: card.type ?? null,
+    sourceUrl: `https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${card.id}`,
+  })
 }
 
 type LorcastImportCard = {
@@ -715,61 +687,25 @@ async function ensureExternalTcgCard(
   system: "lorcana" | "fab",
   card: { externalId: string; name: string; setCode?: string | null; setName?: string | null; rarity?: string | null; imageUrl?: string | null },
 ) {
-  const { data: existing, error: lookupError } = await db.from("tcg_cards")
-    .select("id").eq("tcg_system", system).eq("external_id", card.externalId).maybeSingle()
-  if (lookupError) throw new Error(lookupError.message)
-  if (existing) return existing.id as string
-  const { data: inserted, error: insertError } = await db.from("tcg_cards").insert({
-    tcg_system: system, external_id: card.externalId, name: card.name,
-    set_code: card.setCode ?? null, set_name: card.setName ?? null,
-    rarity: card.rarity ?? null, image_url: card.imageUrl ?? null,
-  }).select("id").single()
-  if (insertError) {
-    const { data: raced } = await db.from("tcg_cards").select("id")
-      .eq("tcg_system", system).eq("external_id", card.externalId).maybeSingle()
-    if (raced) return raced.id as string
-    throw new Error(insertError.message)
-  }
-  return inserted.id as string
+  const sourceKey = system === "lorcana" ? "lorcast" : "goagain"
+  return upsertTcgSourceCard({
+    system, sourceKey, externalId: card.externalId, name: card.name,
+    setCode: card.setCode, setName: card.setName, rarity: card.rarity,
+    imageUrl: card.imageUrl,
+  })
 }
 
 async function ensureMagicCardInCatalog(db: ReturnType<typeof createServiceClient>, card: ScryfallImportCard) {
-  const { data: existing, error: lookupError } = await db
-    .from("tcg_cards")
-    .select("id")
-    .eq("tcg_system", "mtg")
-    .eq("external_id", card.id)
-    .maybeSingle()
-  if (lookupError) throw new Error(lookupError.message)
-  if (existing) return existing.id as string
-
   const imageUrl = card.image_uris?.small || card.card_faces?.[0]?.image_uris?.small || null
   const parsedPrice = card.prices?.usd ? Number.parseFloat(card.prices.usd) : null
-  const { data: inserted, error: insertError } = await db
-    .from("tcg_cards")
-    .insert({
-      tcg_system: "mtg",
-      external_id: card.id,
-      name: card.name,
-      set_code: card.set,
-      set_name: card.set_name,
-      rarity: card.rarity ?? null,
-      image_url: imageUrl,
-      mana_cost: card.mana_cost ?? null,
-      type_line: card.type_line ?? null,
-      cmc: typeof card.cmc === "number" ? card.cmc : null,
-      price_usd: Number.isFinite(parsedPrice) ? parsedPrice : null,
-      price_updated: Number.isFinite(parsedPrice) ? new Date().toISOString() : null,
-    })
-    .select("id")
-    .single()
-  if (insertError) {
-    // Another import may have inserted the same print between lookup and insert.
-    const { data: raced } = await db.from("tcg_cards").select("id").eq("tcg_system", "mtg").eq("external_id", card.id).maybeSingle()
-    if (raced) return raced.id as string
-    throw new Error(insertError.message)
-  }
-  return inserted.id as string
+  return upsertTcgSourceCard({
+    system: "mtg", sourceKey: "scryfall", externalId: card.id, name: card.name,
+    setCode: card.set, setName: card.set_name, rarity: card.rarity ?? null,
+    imageUrl, manaCost: card.mana_cost ?? null, typeLine: card.type_line ?? null,
+    cmc: typeof card.cmc === "number" ? card.cmc : null,
+    priceUsd: Number.isFinite(parsedPrice) ? parsedPrice : null,
+    sourceUrl: `https://api.scryfall.com/cards/${card.id}`,
+  })
 }
 
 /**
