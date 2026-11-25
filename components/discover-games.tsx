@@ -157,7 +157,7 @@ export function DiscoverGames() {
   const [loadingDetails, setLoadingDetails] = useState<number | string | null>(null)
   const [addingGame, setAddingGame] = useState<{ id: number | string; type: 'collection' | 'wishlist' } | null>(null)
   const [tcgQuantity, setTcgQuantity] = useState(1)
-  const [tcgGame, setTcgGame] = useState<"magic" | "pokemon" | "yugioh" | "lorcana" | "flesh-and-blood" | "one-piece">("magic")
+  const [tcgGame, setTcgGame] = useState<"magic" | "pokemon" | "yugioh" | "lorcana" | "flesh-and-blood" | "one-piece" | "riftbound" | "digimon" | "gundam" | "star-wars-unlimited" | "dragon-ball-fusion-world">("magic")
   const [miniQuantity, setMiniQuantity] = useState(1)
   const [miniPaintStatus, setMiniPaintStatus] = useState<PaintStatus>("unpainted")
   const [miniatureSystems, setMiniatureSystems] = useState<Array<{ id: string; name: string; code: string; edition?: string }>>([])
@@ -445,6 +445,11 @@ export function DiscoverGames() {
                 <option value="lorcana">Lorcana</option>
                 <option value="flesh-and-blood">Flesh & Blood</option>
                 <option value="one-piece">One Piece</option>
+                <option value="riftbound">Riftbound</option>
+                <option value="digimon">Digimon Card Game</option>
+                <option value="gundam">Gundam Card Game</option>
+                <option value="star-wars-unlimited">Star Wars: Unlimited</option>
+                <option value="dragon-ball-fusion-world">Dragon Ball Super: Fusion World</option>
               </select>
             </div>
           )}
