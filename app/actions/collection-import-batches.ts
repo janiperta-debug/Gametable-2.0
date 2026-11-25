@@ -376,6 +376,61 @@ export async function searchCollectionImportItem(input: { itemId: string; search
         } })
       }
     }
+
+    if (dbGame === "lorcana") {
+      const query = [searchName, originalSetCode ? `set:${originalSetCode}` : ""].filter(Boolean).join(" ")
+      const response = await fetch(`https://api.lorcast.com/v0/cards/search?q=${encodeURIComponent(query)}&unique=prints`, {
+        headers: { Accept: "application/json" }, cache: "no-store",
+      })
+      if (!response.ok && response.status !== 404) return { success: false as const, error: `Lorcana catalog search failed (${response.status})` }
+      const payload = response.ok ? await response.json() : null
+      const cards = (Array.isArray(payload?.results) ? payload.results : []) as LorcastImportCard[]
+      for (const card of cards.slice(0, 40)) {
+        if (!card.id || !card.name) continue
+        if (originalCollectorNumber && card.collector_number && card.collector_number !== originalCollectorNumber) continue
+        if (originalSetCode && card.set?.code && card.set.code.toLowerCase() !== originalSetCode) continue
+        const displayName = card.version ? `${card.name} - ${card.version}` : card.name
+        const catalogId = await ensureExternalTcgCard(db, "lorcana", {
+          externalId: card.id, name: displayName, setCode: card.set?.code,
+          setName: card.set?.name, rarity: card.rarity,
+          imageUrl: card.image_uris?.digital?.small || card.image_uris?.digital?.normal,
+        })
+        if (!matches.some((match) => match.id === catalogId)) matches.push({ id: catalogId, name: displayName, extra: {
+          game: "lorcana", externalId: card.id, set: card.set?.name ?? null,
+          setCode: card.set?.code ?? null, collectorNumber: card.collector_number ?? null,
+          rarity: card.rarity ?? null, imageUrl: card.image_uris?.digital?.small || card.image_uris?.digital?.normal || null,
+        } })
+      }
+    }
+
+    if (dbGame === "fab") {
+      const params = new URLSearchParams({ name: searchName, limit: "50" })
+      if (originalSetCode) params.set("set", originalSetCode)
+      const response = await fetch(`https://api.goagain.dev/v1/cards?${params.toString()}`, {
+        headers: { Accept: "application/json" }, cache: "no-store",
+      })
+      if (!response.ok) return { success: false as const, error: `Flesh and Blood catalog search failed (${response.status})` }
+      const payload = await response.json()
+      const cards = (Array.isArray(payload?.data) ? payload.data : []) as GoAgainCard[]
+      for (const card of cards) {
+        const printings = Array.isArray(card.printings) ? card.printings : []
+        for (const printing of printings) {
+          const externalId = String(printing.unique_id || printing.id || "").trim()
+          if (!externalId) continue
+          if (originalCollectorNumber && printing.id && printing.id !== originalCollectorNumber) continue
+          const catalogId = await ensureExternalTcgCard(db, "fab", {
+            externalId, name: card.name, setCode: printing.set_id,
+            setName: printing.edition, rarity: printing.rarity,
+            imageUrl: printing.image_url || null,
+          })
+          if (!matches.some((match) => match.id === catalogId)) matches.push({ id: catalogId, name: card.name, extra: {
+            game: "fab", externalId, set: printing.edition ?? null, setCode: printing.set_id ?? null,
+            collectorNumber: printing.id ?? null, rarity: printing.rarity ?? null,
+            foiling: printing.foiling ?? null, imageUrl: printing.image_url ?? null,
+          } })
+        }
+      }
+    }
   } else {
     const unitSelect = "id, name, unit_type, base_points, model_count_min, model_count_max, image_url, image_source_url, faction:mini_factions!inner(id, name, system:mini_systems!inner(id, name, code, edition))"
     const systemCode = String((batch.source_metadata as Record<string, unknown> | null)?.systemCode ?? "wh40k")
@@ -600,6 +655,40 @@ async function ensureYuGiOhCardInCatalog(db: ReturnType<typeof createServiceClie
   if (insertError) {
     const { data: raced } = await db.from("tcg_cards").select("id")
       .eq("tcg_system", "yugioh").eq("external_id", externalId).maybeSingle()
+    if (raced) return raced.id as string
+    throw new Error(insertError.message)
+  }
+  return inserted.id as string
+}
+
+type LorcastImportCard = {
+  id: string; name: string; version?: string; collector_number?: string;
+  set?: { code?: string; name?: string }; rarity?: string;
+  image_uris?: { digital?: { small?: string; normal?: string } };
+}
+type GoAgainPrinting = {
+  unique_id?: string; id?: string; set_id?: string; edition?: string;
+  foiling?: string; rarity?: string; image_url?: string | null;
+}
+type GoAgainCard = { unique_id: string; name: string; printings?: GoAgainPrinting[] }
+
+async function ensureExternalTcgCard(
+  db: ReturnType<typeof createServiceClient>,
+  system: "lorcana" | "fab",
+  card: { externalId: string; name: string; setCode?: string | null; setName?: string | null; rarity?: string | null; imageUrl?: string | null },
+) {
+  const { data: existing, error: lookupError } = await db.from("tcg_cards")
+    .select("id").eq("tcg_system", system).eq("external_id", card.externalId).maybeSingle()
+  if (lookupError) throw new Error(lookupError.message)
+  if (existing) return existing.id as string
+  const { data: inserted, error: insertError } = await db.from("tcg_cards").insert({
+    tcg_system: system, external_id: card.externalId, name: card.name,
+    set_code: card.setCode ?? null, set_name: card.setName ?? null,
+    rarity: card.rarity ?? null, image_url: card.imageUrl ?? null,
+  }).select("id").single()
+  if (insertError) {
+    const { data: raced } = await db.from("tcg_cards").select("id")
+      .eq("tcg_system", system).eq("external_id", card.externalId).maybeSingle()
     if (raced) return raced.id as string
     throw new Error(insertError.message)
   }
