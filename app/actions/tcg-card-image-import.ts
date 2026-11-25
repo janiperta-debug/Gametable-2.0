@@ -96,7 +96,7 @@ export async function processTcgCardImageImport(input: { game: "magic" | "yugioh
         language: card.language, recognitionConfidence: card.confidence,
         sourceImageIndex: card.sourceImageIndex,
       },
-      status: "pending",
+      status: "unmatched",
     }))
     const { data: items, error: itemsError } = await db.from("collection_import_items")
       .insert(itemRows).select("id, parsed_data")
