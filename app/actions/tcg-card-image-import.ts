@@ -11,11 +11,12 @@ type RecognizedCard = {
   collectorNumber: string | null
   language: string | null
   confidence: number
+  position?: string | null
 }
 
-export async function processTcgCardImageImport(input: { game: "magic" | "yugioh"; storagePaths: string[] }) {
+export async function processTcgCardImageImport(input: { game: "magic" | "yugioh" | "lorcana" | "flesh-and-blood"; storagePaths: string[] }) {
   const { game, storagePaths } = input ?? {}
-  if (!["magic", "yugioh"].includes(game) || !Array.isArray(storagePaths) ||
+  if (!["magic", "yugioh", "lorcana", "flesh-and-blood"].includes(game) || !Array.isArray(storagePaths) ||
       storagePaths.length < 1 || storagePaths.length > 10 ||
       storagePaths.some((path) => typeof path !== "string" || !path.trim() || path.length > 500)) {
     return { success: false as const, error: "Valitse 1–10 kelvollista kuvatiedostoa." }
@@ -34,10 +35,14 @@ export async function processTcgCardImageImport(input: { game: "magic" | "yugioh
     const gatewayKey = process.env.AI_GATEWAY_API_KEY
     if (!gatewayKey) throw new Error("AI Gateway -yhteys puuttuu Vercelin ympäristömuuttujista")
 
-    const gameName = game === "magic" ? "Magic: The Gathering" : "Yu-Gi-Oh!"
+    const gameName = game === "magic" ? "Magic: The Gathering" : game === "yugioh" ? "Yu-Gi-Oh!" : game === "lorcana" ? "Disney Lorcana" : "Flesh and Blood"
     const prompt = game === "magic"
       ? "Tunnista kuvasta fyysiset Magic: The Gathering -kortit järjestelmällisesti vasemmalta oikealle ja ylhäältä alas. Kuvassa voi olla enintään 12 korttia. Laske ensin näkyvät korttipaikat ja palauta yksi cards-listan alkio JOKAISESTA fyysisestä kortista. ÄLÄ yhdistä tai poista kaksoiskappaleita: jos kuvassa on kaksi täysin samanlaista korttia, palauta ne kahtena erillisenä alkiona. Anna jokaiselle kortille sijainti kuvassa (esim. ylävasen, keskellä oikea, alavasen), jotta saman kortin kappaleet erottuvat. Lue kortin nimi täsmälleen; setin nimi, setin koodi, keräilynumero ja kieli jos ne näkyvät. Jos kortissa on kaksi puolta, se on silti yksi fyysinen kortti ja käytä etupuolen nimeä. Älä sekoita setin koodia keräilynumeroon. Älä keksi kortteja tai tietoja. Jos nimi on osittain epäselvä, palauta paras perusteltu nimilukema matalammalla confidence-arvolla sen sijaan, että jättäisit fyysisen kortin kokonaan pois. Palauta vain JSON muodossa {cards:[{name:string,setName:string|null,setCode:string|null,collectorNumber:string|null,language:string|null,confidence:number,position:string|null}]}. confidence 0-1."
-      : "Tunnista kuvasta kaikki selvästi näkyvät Yu-Gi-Oh! -kortit, enintään 12. Lue kortin virallinen englanninkielinen nimi täsmälleen, kortin tyyppi (Monster/Spell/Trap) jos tunnistettavissa, setin nimi ja set code jos näkyvät, keräilynumero jos näkyy sekä kortin kieli. Älä sekoita kortin sarjanumeroa set codeen. Älä arvaa epäselviä tietoja tai keksi kortteja. Palauta vain JSON muodossa {cards:[{name:string,setName:string|null,setCode:string|null,collectorNumber:string|null,language:string|null,confidence:number}]}. Jätä kortti pois, jos nimeä ei voi lukea luotettavasti. confidence 0-1."
+      : game === "yugioh"
+        ? "Tunnista kuvasta kaikki selvästi näkyvät Yu-Gi-Oh! -kortit, enintään 12. Lue kortin virallinen englanninkielinen nimi täsmälleen, kortin tyyppi, setin nimi ja set code, keräilynumero sekä kieli jos ne näkyvät. Älä arvaa epäselviä tietoja. Palauta JSON muodossa {cards:[{name,setName,setCode,collectorNumber,language,confidence}]}. Jätä kortti pois, jos nimeä ei voi lukea luotettavasti."
+        : game === "lorcana"
+          ? "Tunnista kuvasta kaikki fyysiset Disney Lorcana -kortit järjestyksessä vasemmalta oikealle ja ylhäältä alas, enintään 12. Palauta yksi alkio jokaisesta fyysisestä kortista, myös kaksoiskappaleista. Lue nimi ja version/alaotsikon teksti erikseen, jos näkyvissä. Lue setin nimi tai koodi, collector number ja kieli vain jos näkyvissä. Älä sekoita lore-arvoa keräilynumeroon. Älä keksi tietoja. Palauta JSON muodossa {cards:[{name,setName,setCode,collectorNumber,language,confidence,position}]}. Confidence 0-1."
+          : "Tunnista kuvasta kaikki fyysiset Flesh and Blood -kortit järjestyksessä vasemmalta oikealle ja ylhäältä alas, enintään 12. Palauta yksi alkio jokaisesta fyysisestä kortista, myös kaksoiskappaleista. Lue kortin nimi, setin nimi tai koodi, keräilynumero/printin tunniste sekä kieli vain jos näkyvissä. Älä sekoita pitch-arvoa keräilynumeroon. Älä arvaa tietoja. Palauta JSON muodossa {cards:[{name,setName,setCode,collectorNumber,language,confidence,position}]}. Confidence 0-1."
 
     const recognitions: (RecognizedCard & { sourceImageIndex: number })[] = []
     for (let imageIndex = 0; imageIndex < storagePaths.length; imageIndex++) {
@@ -75,6 +80,7 @@ export async function processTcgCardImageImport(input: { game: "magic" | "yugioh
         language: typeof card.language === "string" ? card.language.slice(0, 20) : null,
         confidence: Math.max(0, Math.min(1, Number(card.confidence) || 0)),
         sourceImageIndex: imageIndex,
+        position: typeof card.position === "string" ? card.position.slice(0, 40) : null,
       })).filter((card) => card.name))
     }
     if (!recognitions.length) throw new Error(`Valituista kuvista ei löytynyt luotettavasti tunnistettavia ${gameName}-kortteja.`)
