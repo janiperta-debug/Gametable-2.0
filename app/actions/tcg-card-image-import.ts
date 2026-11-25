@@ -36,7 +36,7 @@ export async function processTcgCardImageImport(input: { game: "magic" | "yugioh
 
     const gameName = game === "magic" ? "Magic: The Gathering" : "Yu-Gi-Oh!"
     const prompt = game === "magic"
-      ? "Tunnista kuvasta kaikki selvästi näkyvät Magic: The Gathering -kortit, enintään 12. Lue kortin nimi täsmälleen, setin nimi jos näkyy, setin kolmen tai kahden merkin koodi jos näkyy, keräilynumero (collector number) jos näkyy sekä kortin kieli. Jos kortissa on kaksi puolta, tunnista kortti yhtenä korttina ja käytä etupuolen nimeä. Älä sekoita setin koodia keräilynumeroon. Älä arvaa epäselviä tietoja tai keksi kortteja. Palauta vain JSON muodossa {cards:[{name:string,setName:string|null,setCode:string|null,collectorNumber:string|null,language:string|null,confidence:number}]}. Jätä kortti pois, jos nimeä ei voi lukea luotettavasti. confidence 0-1."
+      ? "Tunnista kuvasta fyysiset Magic: The Gathering -kortit järjestelmällisesti vasemmalta oikealle ja ylhäältä alas. Kuvassa voi olla enintään 12 korttia. Laske ensin näkyvät korttipaikat ja palauta yksi cards-listan alkio JOKAISESTA fyysisestä kortista. ÄLÄ yhdistä tai poista kaksoiskappaleita: jos kuvassa on kaksi täysin samanlaista korttia, palauta ne kahtena erillisenä alkiona. Anna jokaiselle kortille sijainti kuvassa (esim. ylävasen, keskellä oikea, alavasen), jotta saman kortin kappaleet erottuvat. Lue kortin nimi täsmälleen; setin nimi, setin koodi, keräilynumero ja kieli jos ne näkyvät. Jos kortissa on kaksi puolta, se on silti yksi fyysinen kortti ja käytä etupuolen nimeä. Älä sekoita setin koodia keräilynumeroon. Älä keksi kortteja tai tietoja. Jos nimi on osittain epäselvä, palauta paras perusteltu nimilukema matalammalla confidence-arvolla sen sijaan, että jättäisit fyysisen kortin kokonaan pois. Palauta vain JSON muodossa {cards:[{name:string,setName:string|null,setCode:string|null,collectorNumber:string|null,language:string|null,confidence:number,position:string|null}]}. confidence 0-1."
       : "Tunnista kuvasta kaikki selvästi näkyvät Yu-Gi-Oh! -kortit, enintään 12. Lue kortin virallinen englanninkielinen nimi täsmälleen, kortin tyyppi (Monster/Spell/Trap) jos tunnistettavissa, setin nimi ja set code jos näkyvät, keräilynumero jos näkyy sekä kortin kieli. Älä sekoita kortin sarjanumeroa set codeen. Älä arvaa epäselviä tietoja tai keksi kortteja. Palauta vain JSON muodossa {cards:[{name:string,setName:string|null,setCode:string|null,collectorNumber:string|null,language:string|null,confidence:number}]}. Jätä kortti pois, jos nimeä ei voi lukea luotettavasti. confidence 0-1."
 
     const recognitions: (RecognizedCard & { sourceImageIndex: number })[] = []
@@ -94,7 +94,7 @@ export async function processTcgCardImageImport(input: { game: "magic" | "yugioh
         name: card.name, quantity: 1, setCode: card.setCode,
         collectorNumber: card.collectorNumber, setName: card.setName,
         language: card.language, recognitionConfidence: card.confidence,
-        sourceImageIndex: card.sourceImageIndex,
+        sourceImageIndex: card.sourceImageIndex, position: card.position,
       },
       status: "unmatched",
     }))
