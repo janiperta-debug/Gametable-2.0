@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { upsertTcgSourceCard, type TcgSourceKey } from "@/lib/tcg/upsert-source-card"
 
-export type TCGGame = "magic" | "pokemon" | "lorcana" | "yugioh" | "flesh-and-blood" | "one-piece"
-type DBTCGSystem = "mtg" | "pokemon" | "lorcana" | "yugioh" | "fab" | "onepiece"
+export type TCGGame = "magic" | "pokemon" | "lorcana" | "yugioh" | "flesh-and-blood" | "one-piece" | "riftbound" | "digimon" | "gundam" | "star-wars-unlimited" | "dragon-ball-fusion-world"
+type DBTCGSystem = "mtg" | "pokemon" | "lorcana" | "yugioh" | "fab" | "onepiece" | "riftbound" | "digimon" | "gundam" | "star-wars-unlimited" | "dragon-ball-fusion-world"
 
 function toDbTCGSystem(game: TCGGame): DBTCGSystem {
   return game === "magic" ? "mtg" : game === "flesh-and-blood" ? "fab" : game === "one-piece" ? "onepiece" : game
@@ -24,6 +24,11 @@ const gameSystemMap: Record<string, TCGGame> = {
   "flesh-and-blood": "flesh-and-blood",
   "onepiece": "one-piece",
   "one-piece": "one-piece",
+  "riftbound": "riftbound",
+  "digimon": "digimon",
+  "gundam": "gundam",
+  "star-wars-unlimited": "star-wars-unlimited",
+  "dragon-ball-fusion-world": "dragon-ball-fusion-world",
 }
 
 export interface TCGSearchResult {
@@ -131,6 +136,11 @@ async function saveToSupabase(cards: TCGSearchResult[], tcgSystem: TCGGame): Pro
     lorcana: "lorcast",
     "flesh-and-blood": "goagain",
     "one-piece": "optcgapi",
+    "riftbound": "apitcg",
+    "digimon": "apitcg",
+    "gundam": "apitcg",
+    "star-wars-unlimited": "apitcg",
+    "dragon-ball-fusion-world": "apitcg",
   }
 
   await Promise.all(cards.map(async (card) => {
@@ -153,6 +163,50 @@ async function saveToSupabase(cards: TCGSearchResult[], tcgSystem: TCGGame): Pro
       console.error("Error saving TCG source card to Supabase:", error)
     }
   }))
+}
+
+// APITCG supplements the existing providers and powers games without a dedicated provider.
+async function searchAPITCG(query: string, game: TCGGame): Promise<TCGSearchResult[]> {
+  const apiKey = process.env.APITCG_API_KEY
+  if (!apiKey) {
+    console.warn("APITCG_API_KEY is not configured; skipping APITCG search")
+    return []
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.apitcg.com/api/products?tcg=${encodeURIComponent(game)}&type=card&name=${encodeURIComponent(query)}&limit=20`,
+      { headers: { Accept: "application/json", "x-api-key": apiKey }, next: { revalidate: 300 } },
+    )
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "")
+      console.error(`APITCG search error (${game}): ${response.status} ${detail.slice(0, 250)}`)
+      return []
+    }
+
+    const payload = await response.json()
+    const products = Array.isArray(payload?.data) ? payload.data : []
+    return products.map((product: Record<string, any>) => {
+      const set = product.set as Record<string, any> | undefined
+      const images = Array.isArray(product.images) ? product.images[0] as Record<string, string> | undefined : undefined
+      const attributes = product.attributes as Record<string, string> | undefined
+      const market = product.markets?.tcgplayer?.prices?.market
+      const imageUrl = images?.medium || images?.large || images?.small || ""
+      const id = String(product._id ?? "")
+      return {
+        id, name: String(product.name || ""), game, sourceKey: "apitcg" as const,
+        set: String(set?.name || "Unknown Set"), setCode: String(set?.code || ""),
+        rarity: String(attributes?.Rarity || ""), imageUrl,
+        thumbnailUrl: images?.small || imageUrl,
+        price: typeof market === "number" ? market : undefined,
+        type: String(attributes?.["Card Type"] || attributes?.Type || ""),
+        externalId: id,
+      }
+    }).filter((card: TCGSearchResult) => card.id && card.name).slice(0, 20)
+  } catch (error) {
+    console.error("APITCG search failed:", error)
+    return []
+  }
 }
 
 // Scryfall API for Magic: The Gathering
@@ -464,6 +518,10 @@ export async function GET(request: NextRequest) {
       externalResults = []
   }
 
+  // APITCG supplements the native provider for existing games and serves new games.
+  const apitcgResults = await searchAPITCG(query, tcgSystem)
+  externalResults = [...externalResults, ...apitcgResults]
+
   // Save newly discovered external cards for future Catalog-first searches.
   if (externalResults.length > 0) {
     saveToSupabase(externalResults, tcgSystem).catch(err =>
@@ -473,7 +531,7 @@ export async function GET(request: NextRequest) {
 
   const results = mergeSearchResults(catalogResults, externalResults)
 
-  if (results.length === 0 && (tcgSystem === "flesh-and-blood" || tcgSystem === "one-piece")) {
+  if (results.length === 0 && ["flesh-and-blood", "one-piece", "riftbound", "digimon", "gundam", "star-wars-unlimited", "dragon-ball-fusion-world"].includes(tcgSystem)) {
     return NextResponse.json({
       results: [],
       message: "No results found. Try adding cards manually for this game."
