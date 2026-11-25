@@ -466,6 +466,11 @@ export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "m
                 <option value="lorcana">Lorcana</option>
                 <option value="flesh-and-blood">Flesh &amp; Blood</option>
                 <option value="one-piece">One Piece</option>
+                <option value="riftbound">Riftbound</option>
+                <option value="digimon">Digimon Card Game</option>
+                <option value="gundam">Gundam Card Game</option>
+                <option value="star-wars-unlimited">Star Wars: Unlimited</option>
+                <option value="dragon-ball-fusion-world">Dragon Ball Super: Fusion World</option>
               </select>
               <p className="text-xs text-muted-foreground">
                 Valitse korttipeli ennen listan liittämistä ja analysointia.
