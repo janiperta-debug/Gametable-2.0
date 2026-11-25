@@ -644,7 +644,7 @@ export function ImportSection({ selectedCategory, onImportComplete, tcgGame = "m
     )
   }
 
-  const importTitle = t("collection.bulkImport") || "Massalisäys"
+  const importTitle = t("collection.bulkImport") || "Korttien lisääminen"
 
   if (embedded) {
     return (
