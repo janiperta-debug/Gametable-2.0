@@ -135,7 +135,7 @@ export function CollectionImportReview({
       }
       const processed = tcgGame.toLowerCase() === "pokemon"
         ? await processPokemonCardImageImport(storagePaths)
-        : await processTcgCardImageImport({ game: tcgGame.toLowerCase() as "magic" | "yugioh", storagePaths })
+        : await processTcgCardImageImport({ game: tcgGame.toLowerCase() as "magic" | "yugioh" | "lorcana" | "flesh-and-blood", storagePaths })
       if (!processed.success) throw new Error(processed.error)
       await refreshBatch(processed.batchId)
       setBatchId(processed.batchId)
@@ -246,9 +246,9 @@ export function CollectionImportReview({
             ? "Liitä korttilista. Jokainen rivi täsmäytetään GameTablen korttitietokantaan, ja voit tarkistaa ehdotukset ennen kokoelmaan lisäämistä."
             : "Liitä miniatyyri- tai armeijalista. Tarkista yksikköehdotukset ennen kuin ne lisätään omistamaasi kokoelmaan."}
         </p>
-        {category === "tcg" && ["pokemon", "magic", "mtg", "yugioh"].includes(tcgGame.toLowerCase()) && !batchId && (
+        {category === "tcg" && ["pokemon", "magic", "mtg", "yugioh", "lorcana", "flesh-and-blood", "fab"].includes(tcgGame.toLowerCase()) && !batchId && (
           <div className="rounded-lg border border-accent-gold/25 bg-background/30 p-3 space-y-2">
-            <div className="text-sm font-medium">Tuo {tcgGame.toLowerCase() === "pokemon" ? "Pokémon" : tcgGame.toLowerCase() === "yugioh" ? "Yu-Gi-Oh!" : "Magic: The Gathering"}-kortteja kuvasta</div>
+            <div className="text-sm font-medium">Tuo {tcgGame.toLowerCase() === "pokemon" ? "Pokémon" : tcgGame.toLowerCase() === "yugioh" ? "Yu-Gi-Oh!" : tcgGame.toLowerCase() === "lorcana" ? "Disney Lorcana" : tcgGame.toLowerCase() === "fab" || tcgGame.toLowerCase() === "flesh-and-blood" ? "Flesh and Blood" : "Magic: The Gathering"}-kortteja kuvasta</div>
             <p className="text-xs text-muted-foreground">Voit kuvata useita kortteja samalla kertaa. Valitse enintään 10 kansiosivua kerralla joko laitteen kuvakirjastosta tai ottamalla uudet kuvat. Jokaisesta kuvasta tunnistetaan enintään 12 korttia. Tunnistetut kortit haetaan valitun pelin omasta korttilähteestä ja kootaan yhteen tarkistettavaan tuontierään.</p>
             <input type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={busy}
               onChange={(event) => {
