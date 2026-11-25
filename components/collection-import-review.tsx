@@ -135,7 +135,7 @@ export function CollectionImportReview({
       }
       const processed = tcgGame.toLowerCase() === "pokemon"
         ? await processPokemonCardImageImport(storagePaths)
-        : await processTcgCardImageImport({ game: tcgGame.toLowerCase() as "magic" | "yugioh" | "lorcana" | "flesh-and-blood", storagePaths })
+        : await processTcgCardImageImport({ game: (tcgGame.toLowerCase() === "fab" ? "flesh-and-blood" : tcgGame.toLowerCase()) as "magic" | "yugioh" | "lorcana" | "flesh-and-blood", storagePaths })
       if (!processed.success) throw new Error(processed.error)
       await refreshBatch(processed.batchId)
       setBatchId(processed.batchId)
