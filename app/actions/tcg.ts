@@ -4,9 +4,9 @@ import { createClient } from "@/lib/supabase/server"
 import { awardXP } from "./xp"
 import type { TCGSearchResult } from "@/app/api/tcg/search/route"
 
-export type TCGGame = "mtg" | "pokemon" | "lorcana" | "yugioh" | "fab" | "onepiece"
+export type TCGGame = "mtg" | "pokemon" | "lorcana" | "yugioh" | "fab" | "onepiece" | "riftbound" | "digimon" | "gundam" | "star-wars-unlimited" | "dragon-ball-fusion-world"
 
-type SearchTCGGame = "magic" | "pokemon" | "lorcana" | "yugioh" | "flesh-and-blood" | "one-piece"
+type SearchTCGGame = "magic" | "pokemon" | "lorcana" | "yugioh" | "flesh-and-blood" | "one-piece" | "riftbound" | "digimon" | "gundam" | "star-wars-unlimited" | "dragon-ball-fusion-world"
 
 type TCGCollectionCard = TCGSearchResult & { game: SearchTCGGame }
 
