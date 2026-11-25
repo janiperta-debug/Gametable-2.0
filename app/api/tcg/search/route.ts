@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { upsertTcgSourceCard, type TcgSourceKey } from "@/lib/tcg/upsert-source-card"
 
 export type TCGGame = "magic" | "pokemon" | "lorcana" | "yugioh" | "flesh-and-blood" | "one-piece"
 type DBTCGSystem = "mtg" | "pokemon" | "lorcana" | "yugioh" | "fab" | "onepiece"
@@ -39,6 +40,7 @@ export interface TCGSearchResult {
   manaCost?: string
   cmc?: number
   externalId?: string
+  sourceKey?: TcgSourceKey
 }
 
 interface TCGCard {
@@ -122,40 +124,35 @@ function mergeSearchResults(catalogResults: TCGSearchResult[], externalResults: 
 // Save external API results to Supabase
 async function saveToSupabase(cards: TCGSearchResult[], tcgSystem: TCGGame): Promise<void> {
   if (cards.length === 0) return
-  const dbTcgSystem = toDbTCGSystem(tcgSystem)
-  
-  try {
-    const supabase = await createClient()
-    
-    for (const card of cards) {
-      // Check if card already exists by external_id
-      const { data: existing } = await supabase
-        .from("tcg_cards")
-        .select("id")
-        .eq("tcg_system", dbTcgSystem)
-        .eq("external_id", card.externalId || card.id)
-        .single()
-      
-      if (!existing) {
-        await supabase.from("tcg_cards").insert({
-          name: card.name,
-          tcg_system: dbTcgSystem,
-          external_id: card.externalId || card.id,
-          set_code: card.setCode || null,
-          set_name: card.set || null,
-          rarity: card.rarity || null,
-          image_url: card.imageUrl || null,
-          mana_cost: card.manaCost || null,
-          type_line: card.type || null,
-          cmc: card.cmc || null,
-          price_usd: card.price || null,
-          price_updated: card.price ? new Date().toISOString() : null,
-        })
-      }
-    }
-  } catch (error) {
-    console.error("Error saving cards to Supabase:", error)
+  const defaultSource: Record<TCGGame, TcgSourceKey> = {
+    magic: "scryfall",
+    pokemon: "pokemontcg",
+    yugioh: "ygoprodeck",
+    lorcana: "lorcast",
+    "flesh-and-blood": "goagain",
+    "one-piece": "optcgapi",
   }
+
+  await Promise.all(cards.map(async (card) => {
+    try {
+      await upsertTcgSourceCard({
+        system: toDbTCGSystem(tcgSystem),
+        sourceKey: card.sourceKey ?? defaultSource[tcgSystem],
+        externalId: card.externalId || card.id,
+        name: card.name,
+        setCode: card.setCode,
+        setName: card.set,
+        rarity: card.rarity,
+        imageUrl: card.imageUrl,
+        manaCost: card.manaCost,
+        typeLine: card.type,
+        cmc: card.cmc,
+        priceUsd: card.price,
+      })
+    } catch (error) {
+      console.error("Error saving TCG source card to Supabase:", error)
+    }
+  }))
 }
 
 // Scryfall API for Magic: The Gathering
@@ -195,6 +192,7 @@ async function searchScryfall(query: string): Promise<TCGSearchResult[]> {
         id: String(card.id),
         name: String(card.name || ""),
         game: "magic" as TCGGame,
+        sourceKey: "scryfall",
         set: String(card.set_name || "Unknown Set"),
         setCode: String(card.set || ""),
         rarity: String(card.rarity || ""),
@@ -243,6 +241,7 @@ async function searchPokemonTCG(query: string): Promise<TCGSearchResult[]> {
         id: String(card.id),
         name: String(card.name || ""),
         game: "pokemon" as TCGGame,
+        sourceKey: "pokemontcg",
         set: String(set?.name || "Unknown Set"),
         setCode: String(set?.id || ""),
         rarity: String(card.rarity || ""),
@@ -285,6 +284,7 @@ async function searchYGOProDeck(query: string): Promise<TCGSearchResult[]> {
         id: String(card.id),
         name: String(card.name || ""),
         game: "yugioh" as TCGGame,
+        sourceKey: "ygoprodeck",
         set: "Yu-Gi-Oh!",
         rarity: undefined,
         imageUrl: String(cardImages?.[0]?.image_url || ""),
@@ -341,6 +341,7 @@ async function searchLorcast(query: string): Promise<TCGSearchResult[]> {
           id,
           name: version ? `${baseName} - ${version}` : baseName,
           game: "lorcana" as TCGGame,
+          sourceKey: "lorcast",
           set: String(set?.name || "Unknown Set"),
           setCode: String(set?.code || set?.id || ""),
           rarity: String(card.rarity || ""),
@@ -397,6 +398,7 @@ async function searchLorcanaApi(query: string): Promise<TCGSearchResult[]> {
           id,
           name: String(card.Name || ""),
           game: "lorcana" as TCGGame,
+          sourceKey: "lorcana_api",
           set: String(card.Set_Name || "Unknown Set"),
           setCode: setId || undefined,
           rarity: String(card.Rarity || ""),
