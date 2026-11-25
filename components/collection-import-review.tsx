@@ -248,7 +248,7 @@ export function CollectionImportReview({
         </p>
         {category === "tcg" && ["pokemon", "magic", "mtg", "yugioh"].includes(tcgGame.toLowerCase()) && !batchId && (
           <div className="rounded-lg border border-accent-gold/25 bg-background/30 p-3 space-y-2">
-            <div className="text-sm font-medium">Tuo {tcgGame.toLowerCase() === "pokemon" ? "Pokémon" : tcgGame.toLowerCase() === "yugioh" ? "Yu-Gi-Oh!" : "Magic: The Gathering"} -kortteja kuvasta</div>
+            <div className="text-sm font-medium">Tuo {tcgGame.toLowerCase() === "pokemon" ? "Pokémon" : tcgGame.toLowerCase() === "yugioh" ? "Yu-Gi-Oh!" : "Magic: The Gathering"}-kortteja kuvasta</div>
             <p className="text-xs text-muted-foreground">Voit kuvata useita kortteja samalla kertaa. Valitse enintään 10 kansiosivua kerralla joko laitteen kuvakirjastosta tai ottamalla uudet kuvat. Jokaisesta kuvasta tunnistetaan enintään 12 korttia. Tunnistetut kortit haetaan valitun pelin omasta korttilähteestä ja kootaan yhteen tarkistettavaan tuontierään.</p>
             <input type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={busy}
               onChange={(event) => {
