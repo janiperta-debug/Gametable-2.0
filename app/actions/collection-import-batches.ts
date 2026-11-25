@@ -378,17 +378,35 @@ export async function searchCollectionImportItem(input: { itemId: string; search
     }
 
     if (dbGame === "lorcana") {
-      const query = [searchName, originalSetCode ? `set:${originalSetCode}` : ""].filter(Boolean).join(" ")
-      const response = await fetch(`https://api.lorcast.com/v0/cards/search?q=${encodeURIComponent(query)}&unique=prints`, {
-        headers: { Accept: "application/json" }, cache: "no-store",
-      })
-      if (!response.ok && response.status !== 404) return { success: false as const, error: `Lorcana catalog search failed (${response.status})` }
-      const payload = response.ok ? await response.json() : null
-      const cards = (Array.isArray(payload?.results) ? payload.results : []) as LorcastImportCard[]
-      for (const card of cards.slice(0, 40)) {
-        if (!card.id || !card.name) continue
-        if (originalCollectorNumber && card.collector_number && card.collector_number !== originalCollectorNumber) continue
-        if (originalSetCode && card.set?.code && card.set.code.toLowerCase() !== originalSetCode) continue
+      // Do not let OCR mistakes in set codes or collector numbers hide a valid
+      // card. Search by the recognized name first, then broaden to individual
+      // meaningful name tokens only when the full-name query returns nothing.
+      const nameTokens = searchName
+        .split(/\\s+/)
+        .map((token) => token.replace(/[^\\p{L}\\p{N}'-]/gu, "").trim())
+        .filter((token) => token.length >= 3 && !["the", "and", "of"].includes(token.toLowerCase()))
+      const queries = [searchName, ...nameTokens]
+        .filter((query, index, all) => query && all.indexOf(query) === index)
+      const found = new Map<string, LorcastImportCard>()
+
+      for (const query of queries) {
+        const response = await fetch(`https://api.lorcast.com/v0/cards/search?q=${encodeURIComponent(query)}&unique=prints`, {
+          headers: { Accept: "application/json" }, cache: "no-store",
+        })
+        if (!response.ok && response.status !== 404) {
+          return { success: false as const, error: `Lorcana catalog search failed (${response.status})` }
+        }
+        const payload = response.ok ? await response.json() : null
+        const cards = (Array.isArray(payload?.results) ? payload.results : []) as LorcastImportCard[]
+        for (const card of cards) {
+          if (card.id && card.name) found.set(card.id, card)
+        }
+        // A successful full-name search is more precise. Broaden only when
+        // it yields no cards, avoiding a flood of unrelated token matches.
+        if (found.size) break
+      }
+
+      for (const card of Array.from(found.values()).slice(0, 40)) {
         const displayName = card.version ? `${card.name} - ${card.version}` : card.name
         const catalogId = await ensureExternalTcgCard(db, "lorcana", {
           externalId: card.id, name: displayName, setCode: card.set?.code,
@@ -399,6 +417,8 @@ export async function searchCollectionImportItem(input: { itemId: string; search
           game: "lorcana", externalId: card.id, set: card.set?.name ?? null,
           setCode: card.set?.code ?? null, collectorNumber: card.collector_number ?? null,
           rarity: card.rarity ?? null, imageUrl: card.image_uris?.digital?.small || card.image_uris?.digital?.normal || null,
+          recognizedSetCode: originalSetCode ?? null,
+          recognizedCollectorNumber: originalCollectorNumber ?? null,
         } })
       }
     }
