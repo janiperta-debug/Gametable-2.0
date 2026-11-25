@@ -8,6 +8,7 @@ import { Loader2, Upload, Check, X, RefreshCw } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { createClient as createSupabaseBrowserClient } from "@/lib/supabase/client"
 import { processPokemonCardImageImport } from "@/app/actions/pokemon-card-image-import"
+import { processTcgCardImageImport } from "@/app/actions/tcg-card-image-import"
 import {
   createTextImportBatch,
   processCollectionImportBatch,
@@ -132,7 +133,9 @@ export function CollectionImportReview({
         if (uploadError) throw new Error(uploadError.message)
         storagePaths.push(storagePath)
       }
-      const processed = await processPokemonCardImageImport(storagePaths)
+      const processed = tcgGame.toLowerCase() === "pokemon"
+        ? await processPokemonCardImageImport(storagePaths)
+        : await processTcgCardImageImport({ game: tcgGame.toLowerCase() as "magic" | "yugioh", storagePaths })
       if (!processed.success) throw new Error(processed.error)
       await refreshBatch(processed.batchId)
       setBatchId(processed.batchId)
@@ -140,7 +143,7 @@ export function CollectionImportReview({
         title: "Kortit tunnistettu",
         description: processed.candidateCount > 0
           ? `${processed.itemCount} korttia tunnistettu ${imageFiles.length} kuvasta, ${processed.candidateCount} tietokantaosumaa tarkistettavaksi.`
-          : `${processed.itemCount} korttia tunnistettu ${imageFiles.length} kuvasta, mutta tietokantaosumia ei löytynyt. Voit tarkistaa nimet.`,
+          : `${processed.itemCount} korttia tunnistettu ${imageFiles.length} kuvasta, mutta tietokantaosumia ei löytynyt. Voit tarkistaa nimet.` ,
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : "Tuntematon virhe"
@@ -243,10 +246,10 @@ export function CollectionImportReview({
             ? "Liitä korttilista. Jokainen rivi täsmäytetään GameTablen korttitietokantaan, ja voit tarkistaa ehdotukset ennen kokoelmaan lisäämistä."
             : "Liitä miniatyyri- tai armeijalista. Tarkista yksikköehdotukset ennen kuin ne lisätään omistamaasi kokoelmaan."}
         </p>
-        {category === "tcg" && tcgGame.toLowerCase() === "pokemon" && !batchId && (
+        {category === "tcg" && ["pokemon", "magic", "mtg", "yugioh"].includes(tcgGame.toLowerCase()) && !batchId && (
           <div className="rounded-lg border border-accent-gold/25 bg-background/30 p-3 space-y-2">
-            <div className="text-sm font-medium">Tuo Pokémon-kortteja kuvasta</div>
-            <p className="text-xs text-muted-foreground">Voit kuvata useita kortteja samalla kertaa. Valitse enintään 10 kansiosivua kerralla joko laitteen kuvakirjastosta tai ottamalla uudet kuvat. Jokaisesta kuvasta tunnistetaan enintään 12 Pokémon-, energia- ja Trainer-korttia; kaikki tulokset kootaan yhteen tarkistettavaan tuontierään.</p>
+            <div className="text-sm font-medium">Tuo {tcgGame.toLowerCase() === "pokemon" ? "Pokémon" : tcgGame.toLowerCase() === "yugioh" ? "Yu-Gi-Oh!" : "Magic: The Gathering"} -kortteja kuvasta</div>
+            <p className="text-xs text-muted-foreground">Voit kuvata useita kortteja samalla kertaa. Valitse enintään 10 kansiosivua kerralla joko laitteen kuvakirjastosta tai ottamalla uudet kuvat. Jokaisesta kuvasta tunnistetaan enintään 12 korttia. Tunnistetut kortit haetaan valitun pelin omasta korttilähteestä ja kootaan yhteen tarkistettavaan tuontierään.</p>
             <input type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={busy}
               onChange={(event) => {
                 const files = Array.from(event.target.files ?? [])
