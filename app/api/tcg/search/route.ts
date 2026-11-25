@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 
 export type TCGGame = "magic" | "pokemon" | "lorcana" | "yugioh" | "flesh-and-blood" | "one-piece"
-type DBTCGSystem = "mtg" | "pokemon" | "lorcana" | "yugioh" | "flesh-and-blood" | "one-piece"
+type DBTCGSystem = "mtg" | "pokemon" | "lorcana" | "yugioh" | "fab" | "onepiece"
 
 function toDbTCGSystem(game: TCGGame): DBTCGSystem {
-  return game === "magic" ? "mtg" : game
+  return game === "magic" ? "mtg" : game === "flesh-and-blood" ? "fab" : game === "one-piece" ? "onepiece" : game
 }
 
 function fromDbTCGSystem(game: DBTCGSystem): TCGGame {
-  return game === "mtg" ? "magic" : game
+  return game === "mtg" ? "magic" : game === "fab" ? "flesh-and-blood" : game === "onepiece" ? "one-piece" : game
 }
 
 // Map old game codes to new tcg_system values
