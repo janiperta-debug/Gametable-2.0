@@ -424,20 +424,36 @@ export async function searchCollectionImportItem(input: { itemId: string; search
     }
 
     if (dbGame === "fab") {
-      const params = new URLSearchParams({ name: searchName, limit: "50" })
-      if (originalSetCode) params.set("set", originalSetCode)
-      const response = await fetch(`https://api.goagain.dev/v1/cards?${params.toString()}`, {
-        headers: { Accept: "application/json" }, cache: "no-store",
-      })
-      if (!response.ok) return { success: false as const, error: `Flesh and Blood catalog search failed (${response.status})` }
-      const payload = await response.json()
-      const cards = (Array.isArray(payload?.data) ? payload.data : []) as GoAgainCard[]
-      for (const card of cards) {
+      // Search by name first. OCR may read a full printing code such as
+      // MPW145 as a set code, while the API's set filter expects only MPW.
+      // Never let uncertain set/collector data exclude a valid card.
+      const nameTokens = searchName
+        .split(/\\s+/)
+        .map((token) => token.replace(/[^\\p{L}\\p{N}'-]/gu, "").trim())
+        .filter((token) => token.length >= 3 && !["the", "and", "of"].includes(token.toLowerCase()))
+      const queries = [searchName, ...nameTokens]
+        .filter((query, index, all) => query && all.indexOf(query) === index)
+      const found = new Map<string, GoAgainCard>()
+
+      for (const query of queries) {
+        const params = new URLSearchParams({ name: query, limit: "100" })
+        const response = await fetch(`https://api.goagain.dev/v1/cards?${params.toString()}`, {
+          headers: { Accept: "application/json" }, cache: "no-store",
+        })
+        if (!response.ok) return { success: false as const, error: `Flesh and Blood catalog search failed (${response.status})` }
+        const payload = await response.json()
+        const cards = (Array.isArray(payload?.data) ? payload.data : []) as GoAgainCard[]
+        for (const card of cards) {
+          if (card.unique_id && card.name) found.set(card.unique_id, card)
+        }
+        if (found.size) break
+      }
+
+      for (const card of found.values()) {
         const printings = Array.isArray(card.printings) ? card.printings : []
         for (const printing of printings) {
           const externalId = String(printing.unique_id || printing.id || "").trim()
           if (!externalId) continue
-          if (originalCollectorNumber && printing.id && printing.id !== originalCollectorNumber) continue
           const catalogId = await ensureExternalTcgCard(db, "fab", {
             externalId, name: card.name, setCode: printing.set_id,
             setName: printing.edition, rarity: printing.rarity,
@@ -447,6 +463,8 @@ export async function searchCollectionImportItem(input: { itemId: string; search
             game: "fab", externalId, set: printing.edition ?? null, setCode: printing.set_id ?? null,
             collectorNumber: printing.id ?? null, rarity: printing.rarity ?? null,
             foiling: printing.foiling ?? null, imageUrl: printing.image_url ?? null,
+            recognizedSetCode: originalSetCode ?? null,
+            recognizedCollectorNumber: originalCollectorNumber ?? null,
           } })
         }
       }
