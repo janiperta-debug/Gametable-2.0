@@ -17,6 +17,9 @@ importers:
       '@zxing/text-encoding':
         specifier: 0.9.0
         version: 0.9.0
+      pdfjs-dist:
+        specifier: 4.10.38
+        version: 4.10.38
       '@hookform/resolvers':
         specifier: ^3.9.1
         version: 3.10.0(react-hook-form@7.71.1(react@19.2.4))
@@ -5210,3 +5213,10 @@ snapshots:
     optional: true
 
   zod@3.25.76: {}
+
+  pdfjs-dist@4.10.38:
+    resolution: {tarball: https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-4.10.38.tgz}
+    engines: {node: '>=18'}
+
+snapshots:
+  pdfjs-dist@4.10.38: {}
