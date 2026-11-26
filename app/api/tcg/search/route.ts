@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { upsertTcgSourceCard, type TcgSourceKey } from "@/lib/tcg/upsert-source-card"
+import { searchApitcgProducts } from "@/lib/tcg/apitcg"
 
 export type TCGGame = "magic" | "pokemon" | "lorcana" | "yugioh" | "flesh-and-blood" | "one-piece" | "riftbound" | "digimon" | "gundam" | "star-wars-unlimited" | "dragon-ball-fusion-world"
 type DBTCGSystem = "mtg" | "pokemon" | "lorcana" | "yugioh" | "fab" | "onepiece" | "riftbound" | "digimon" | "gundam" | "star-wars-unlimited" | "dragon-ball-fusion-world"
@@ -178,59 +179,6 @@ const apitcgSlugs: Record<TCGGame, string> = {
   gundam: "gundam",
   "star-wars-unlimited": "star-wars-unlimited",
   "dragon-ball-fusion-world": "dragon-ball-super-fusion-world",
-}
-
-interface APITCGSearchOutcome {
-  results: TCGSearchResult[]
-  status: number | null
-  error?: string
-  responseKeys?: string[]
-  rawCount?: number
-}
-
-async function searchAPITCG(query: string, game: TCGGame): Promise<APITCGSearchOutcome> {
-  const apiKey = process.env.APITCG_API_KEY
-  if (!apiKey) {
-    console.warn("APITCG_API_KEY is not configured; skipping APITCG search")
-    return { results: [], status: null, error: "APITCG_API_KEY is not configured" }
-  }
-
-  try {
-    const apiSlug = apitcgSlugs[game]
-    const response = await fetch(
-      `https://api.apitcg.com/api/products?tcg=${encodeURIComponent(apiSlug)}&type=card&name=${encodeURIComponent(query)}&limit=20`,
-      { headers: { Accept: "application/json", "x-api-key": apiKey }, next: { revalidate: 300 } },
-    )
-    if (!response.ok) {
-      const detail = await response.text().catch(() => "")
-      console.error(`APITCG search error (${game}/${apiSlug}): ${response.status} ${detail.slice(0, 250)}`)
-      return { results: [], status: response.status, error: detail.slice(0, 250) }
-    }
-
-    const payload = await response.json()
-    const products = Array.isArray(payload) ? payload : Array.isArray(payload?.data) ? payload.data : Array.isArray(payload?.products) ? payload.products : []
-    const results = products.map((product: Record<string, any>) => {
-      const set = product.set as Record<string, any> | undefined
-      const images = Array.isArray(product.images) ? product.images[0] as Record<string, string> | undefined : undefined
-      const attributes = product.attributes as Record<string, string> | undefined
-      const market = product.markets?.tcgplayer?.prices?.market
-      const imageUrl = images?.medium || images?.large || images?.small || ""
-      const id = String(product._id ?? "")
-      return {
-        id, name: String(product.name || ""), game, sourceKey: "apitcg" as const,
-        set: String(set?.name || "Unknown Set"), setCode: String(set?.code || ""),
-        rarity: String(attributes?.Rarity || ""), imageUrl,
-        thumbnailUrl: images?.small || imageUrl,
-        price: typeof market === "number" ? market : undefined,
-        type: String(attributes?.["Card Type"] || attributes?.Type || ""),
-        externalId: id,
-      }
-    }).filter((card: TCGSearchResult) => card.id && card.name).slice(0, 20)
-    return { results, status: response.status, responseKeys: payload && typeof payload === "object" ? Object.keys(payload) : [], rawCount: products.length }
-  } catch (error) {
-    console.error("APITCG search failed:", error)
-    return { results: [], status: null, error: error instanceof Error ? error.message : "Unknown APITCG error" }
-  }
 }
 
 // Scryfall API for Magic: The Gathering
@@ -543,7 +491,7 @@ export async function GET(request: NextRequest) {
   }
 
   // APITCG supplements the native provider for existing games and serves new games.
-  const apitcgOutcome = await searchAPITCG(query, tcgSystem)
+  const apitcgOutcome = await searchApitcgProducts(query, tcgSystem === "mtg" ? "magic" : tcgSystem === "fab" ? "flesh-and-blood" : tcgSystem === "onepiece" ? "one-piece" : tcgSystem)
   externalResults = [...externalResults, ...apitcgOutcome.results]
 
   // Save newly discovered external cards for future Catalog-first searches.
