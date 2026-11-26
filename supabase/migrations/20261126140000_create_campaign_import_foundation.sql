@@ -22,9 +22,30 @@ create table if not exists public.campaign_import_batches (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   completed_at timestamptz,
-  constraint campaign_import_batches_campaign_type
-    check (event_id is not null)
 );
+
+-- A batch may only be created for an actual campaign, never for a regular event.
+create or replace function public.validate_campaign_import_batch_event()
+returns trigger
+language plpgsql
+set search_path = public, pg_temp
+as $
+begin
+  if not exists (
+    select 1 from public.events e
+    where e.id = new.event_id and e.event_type = 'campaign'
+  ) then
+    raise exception 'Campaign imports can only be attached to campaign events';
+  end if;
+  return new;
+end;
+$;
+
+drop trigger if exists trg_validate_campaign_import_batch_event on public.campaign_import_batches;
+create trigger trg_validate_campaign_import_batch_event
+before insert or update of event_id
+on public.campaign_import_batches
+for each row execute function public.validate_campaign_import_batch_event();
 
 create index if not exists campaign_import_batches_event_recent_idx
   on public.campaign_import_batches (event_id, created_at desc);
@@ -53,6 +74,29 @@ create table if not exists public.campaign_import_sources (
   constraint campaign_import_sources_has_content
     check (storage_path is not null or source_text is not null)
 );
+
+-- Source records must point to a batch belonging to the same campaign.
+create or replace function public.validate_campaign_import_source_links()
+returns trigger
+language plpgsql
+set search_path = public, pg_temp
+as $
+begin
+  if not exists (
+    select 1 from public.campaign_import_batches b
+    where b.id = new.batch_id and b.event_id = new.event_id
+  ) then
+    raise exception 'Campaign import source batch does not belong to this campaign';
+  end if;
+  return new;
+end;
+$;
+
+drop trigger if exists trg_validate_campaign_import_source_links on public.campaign_import_sources;
+create trigger trg_validate_campaign_import_source_links
+before insert or update of batch_id, event_id
+on public.campaign_import_sources
+for each row execute function public.validate_campaign_import_source_links();
 
 create index if not exists campaign_import_sources_batch_idx
   on public.campaign_import_sources (batch_id, created_at);
