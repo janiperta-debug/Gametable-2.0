@@ -38,6 +38,8 @@ export interface TCGSearchResult {
   game: TCGGame
   set: string
   setCode?: string
+  collectorNumber?: string
+  language?: string
   rarity?: string
   imageUrl?: string
   thumbnailUrl?: string
