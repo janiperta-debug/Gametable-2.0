@@ -145,7 +145,6 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
     }
   }
 
-  const handleExtractPdfs = async (batchId: string) => {\n    if (busy) return\n    setBusy(true)\n    setError("")\n    setExtractionSummary("")\n    try {\n      const result = await extractCampaignPdfText(batchId)\n      if (!result.success) {\n        const message = "error" in result ? result.error : result.errors?.join(" ")\n        throw new Error(message || "PDF-tekstin poiminta epäonnistui.")\n      }\n      const extracted = result.results.reduce((sum, item) => sum + item.extractedPages, 0)\n      const total = result.results.reduce((sum, item) => sum + item.pageCount, 0)\n      const ocrCount = result.results.filter((item) => item.needsOcr).length\n      setExtractionSummary(\n        `PDF-käsittely valmis: ${result.results.length} tiedostoa, ${extracted}/${total} sivua sisälsi tekstiä.${ocrCount ? ` ${ocrCount} tiedostossa on sivuja, jotka voivat vaatia OCR-tunnistuksen.` : ""}`\n      )\n      if (result.errors?.length) setError(result.errors.join(" "))\n      await refreshBatches()\n    } catch (extractError) {\n      setError(extractError instanceof Error ? extractError.message : "PDF-tekstin poiminta epäonnistui.")\n      try { await refreshBatches() } catch { /* Keep the extraction error visible. */ }\n    } finally {\n      setBusy(false)\n    }\n  }\n\n  const handleExtractPdfs = async (batchId: string) => {
     if (busy) return
     setBusy(true)
     setError("")
@@ -233,7 +232,6 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
           </ArchiveCardButton>
         </div>
 
-        {extractionSummary && <p className="rounded-md border border-accent-gold/20 bg-background/30 p-3 text-sm">{extractionSummary}</p>}\n        {extractionSummary && <p className="rounded-md border border-accent-gold/20 bg-background/30 p-3 text-sm">{extractionSummary}</p>}
         {error && <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">{error}</p>}
 
         <div className="space-y-3">
