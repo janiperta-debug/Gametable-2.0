@@ -43,7 +43,6 @@ export default function CreateEventPage() {
   const router = useRouter()
   const [gameSelection, setGameSelection] = useState("collection")
   const [eventType, setEventType] = useState<EventType>("game_night")
-  const [campaignCreationMode, setCampaignCreationMode] = useState<"manual" | "material">("manual")
   const [privacy, setPrivacy] = useState<EventPrivacy>("public")
   const [eventConfig, setEventConfig] = useState({
     format: "",
@@ -435,18 +434,12 @@ export default function CreateEventPage() {
                       <ArchiveCardButton type="button" fullWidth active={campaignCreationMode === "manual"} onClick={() => setCampaignCreationMode("manual")}>
                         {locale === "fi" ? "Tyhjä kampanja" : "Start from scratch"}
                       </ArchiveCardButton>
-                      <ArchiveCardButton type="button" fullWidth active={campaignCreationMode === "material"} onClick={() => { setCampaignCreationMode("material"); setPrivacy("private") }}>
+                      <ArchiveCardButton type="button" fullWidth onClick={() => router.push("/events/create/campaign-material")}>
                         {locale === "fi" ? "Luo materiaalista" : "Create from material"}
                       </ArchiveCardButton>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {campaignCreationMode === "material"
-                        ? (locale === "fi"
-                            ? "Kampanja luodaan ensin yksityisenä. Seuraavalla sivulla voit lisätä PDF:t, käsikirjoitukset, kuvat ja muistiinpanot aineiston tuontiin. Tekoälyanalyysi ja hyväksyntä tulevat seuraavassa vaiheessa."
-                            : "The campaign is created privately first. On the next page you can add PDFs, manuscripts, images and notes to the import batch. AI analysis and approval will be added in the next step.")
-                        : (locale === "fi"
-                            ? "Aloita kampanja ilman lähdeaineistoa. Voit lisätä materiaalia myöhemmin kampanjan sisältä."
-                            : "Start without source material. You can add material later from inside the campaign.")}
+                      {locale === "fi" ? "Aloita kampanja ilman lähdeaineistoa. Voit lisätä materiaalia myöhemmin kampanjan sisältä." : "Start without source material. You can add material later from inside the campaign."}
                     </p>
                   </div>
                 )}
