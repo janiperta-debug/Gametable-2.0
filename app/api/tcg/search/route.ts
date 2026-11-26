@@ -555,13 +555,6 @@ export async function GET(request: NextRequest) {
 
   const results = mergeSearchResults(catalogResults, externalResults)
 
-  if (results.length === 0 && ["flesh-and-blood", "one-piece", "riftbound", "digimon", "gundam", "star-wars-unlimited", "dragon-ball-fusion-world"].includes(tcgSystem)) {
-    return NextResponse.json({
-      results: [],
-      message: "No results found. Try adding cards manually for this game."
-    })
-  }
-
   const debug = searchParams.get("debug") === "1"
   const diagnostics = {
     game: tcgSystem,
