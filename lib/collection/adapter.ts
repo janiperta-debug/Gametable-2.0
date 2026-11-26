@@ -29,6 +29,8 @@ interface TCGCardRowLike {
   tcg_system?: string | null
   set_name?: string | null
   set_code?: string | null
+  collector_number?: string | null
+  language?: string | null
   rarity?: string | null
   image_url?: string | null
   mana_cost?: string | null
@@ -183,6 +185,8 @@ export function mapTCGCollectionToCollectionEntry(row: TCGCollectionRowLike): Co
   if (card?.external_id) metadata.external_id = card.external_id
   if (card?.set_name) metadata.set_name = card.set_name
   if (card?.set_code) metadata.set_code = card.set_code
+  if (card?.collector_number) metadata.collector_number = card.collector_number
+  if (card?.language) metadata.language = card.language
   if (card?.rarity) metadata.rarity = card.rarity
   if (card?.mana_cost) metadata.mana_cost = card.mana_cost
   if (card?.type_line || card?.card_type) metadata.type_line = card?.type_line ?? card?.card_type ?? null
