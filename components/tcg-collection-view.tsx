@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import Image from "next/image"
 import { Search, ArrowLeft, Minus, Plus, SlidersHorizontal } from "lucide-react"
 import { updateTCGCollectionQuantity } from "@/app/actions/tcg"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import type { CollectionEntry } from "@/lib/types/collection"
 
 type GameInfo = { id: string; label: string; logo: string; style: string }
@@ -51,6 +52,7 @@ export function TCGCollectionView({ entries, onUpdate }: { entries: CollectionEn
   const [query, setQuery] = useState("")
   const [sort, setSort] = useState<"name" | "set" | "rarity" | "recent">("name")
   const [busyId, setBusyId] = useState<string | null>(null)
+  const [selectedCard, setSelectedCard] = useState<CollectionEntry | null>(null)
 
   const tcgEntries = useMemo(() => entries.filter((entry) => entry.domain === "tcg"), [entries])
   const grouped = useMemo(() => {
@@ -143,24 +145,60 @@ export function TCGCollectionView({ entries, onUpdate }: { entries: CollectionEn
             const rarity = readString(entry, "rarity")
             return (
               <article key={entry.ownershipId} className="min-w-0 overflow-hidden rounded-lg border border-accent-gold/15 bg-card/50">
-                <div className="aspect-[3/4] bg-black/20">
-                  <Image src={entry.image || "/images/fallbacks/tcg-fallback.png"} alt={entry.displayName} width={300} height={400} sizes="(max-width: 640px) 31vw, (max-width: 1024px) 19vw, 14vw" className="h-full w-full object-contain" />
-                </div>
-                <div className="space-y-1 p-2">
-                  <h3 className="line-clamp-2 min-h-9 text-xs font-semibold leading-4 sm:text-sm">{entry.displayName}</h3>
+                <button type="button" onClick={() => setSelectedCard(entry)} className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-gold">
+                  <div className="aspect-[3/4] bg-black/20">
+                    <Image src={entry.image || "/images/fallbacks/tcg-fallback.png"} alt={entry.displayName} width={300} height={400} sizes="(max-width: 640px) 31vw, (max-width: 1024px) 19vw, 14vw" className="h-full w-full object-contain" />
+                  </div>
+                  <div className="space-y-1 p-2 pb-0">
+                    <h3 className="line-clamp-2 min-h-9 text-xs font-semibold leading-4 sm:text-sm">{entry.displayName}</h3>
                   {(setName || setCode) && <p className="line-clamp-1 text-[10px] text-muted-foreground sm:text-xs">{[setName, setCode].filter(Boolean).join(" · ")}</p>}
-                  {rarity && <p className="line-clamp-1 text-[10px] text-muted-foreground sm:text-xs">{rarity}</p>}
-                  <div className="flex items-center justify-between gap-1 pt-1">
+                    {rarity && <p className="line-clamp-1 text-[10px] text-muted-foreground sm:text-xs">{rarity}</p>}
+                  </div>
+                </button>
+                <div className="flex items-center justify-between gap-1 p-2 pt-1">
                     <button type="button" disabled={busyId === entry.ownershipId} onClick={() => changeQuantity(entry, -1)} aria-label="Vähennä kappalemäärää" className="flex h-7 w-7 items-center justify-center rounded border border-accent-gold/30 disabled:opacity-40"><Minus className="h-3 w-3" /></button>
                     <span className="text-xs font-semibold tabular-nums">×{quantity}</span>
                     <button type="button" disabled={busyId === entry.ownershipId} onClick={() => changeQuantity(entry, 1)} aria-label="Lisää kappalemäärää" className="flex h-7 w-7 items-center justify-center rounded border border-accent-gold/30 disabled:opacity-40"><Plus className="h-3 w-3" /></button>
-                  </div>
                 </div>
               </article>
             )
           })}
         </div>
       )}
+      <Dialog open={Boolean(selectedCard)} onOpenChange={(open) => { if (!open) setSelectedCard(null) }}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-accent-gold/30 bg-background sm:max-w-2xl">
+          {selectedCard && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="pr-7 font-heading text-xl">{selectedCard.displayName}</DialogTitle>
+                <DialogDescription>Valitun kortin tiedot ja kokoelmamäärä.</DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-5 sm:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)]">
+                <div className="mx-auto w-full max-w-[280px] overflow-hidden rounded-lg bg-black/20">
+                  <Image src={selectedCard.image || "/images/fallbacks/tcg-fallback.png"} alt={selectedCard.displayName} width={600} height={840} sizes="(max-width: 640px) 75vw, 280px" className="h-auto w-full object-contain" />
+                </div>
+                <div className="space-y-4">
+                  <dl className="space-y-3 text-sm">
+                    {readString(selectedCard, "set_name") && <div><dt className="text-muted-foreground">Setti</dt><dd className="font-medium">{readString(selectedCard, "set_name")}</dd></div>}
+                    {readString(selectedCard, "set_code") && <div><dt className="text-muted-foreground">Settikoodi</dt><dd className="font-medium">{readString(selectedCard, "set_code")}</dd></div>}
+                    {readString(selectedCard, "rarity") && <div><dt className="text-muted-foreground">Harvinaisuus</dt><dd className="font-medium">{readString(selectedCard, "rarity")}</dd></div>}
+                    {readString(selectedCard, "condition") && <div><dt className="text-muted-foreground">Kunto</dt><dd className="font-medium">{readString(selectedCard, "condition")}</dd></div>}
+                    <div><dt className="text-muted-foreground">Versio</dt><dd className="font-medium">{selectedCard.metadata.foil === true ? "Foil" : "Non-foil"}</dd></div>
+                    {readString(selectedCard, "external_id") && <div><dt className="text-muted-foreground">Korttitunniste</dt><dd className="break-all font-medium">{readString(selectedCard, "external_id")}</dd></div>}
+                  </dl>
+                  <div className="flex items-center justify-between rounded-lg border border-accent-gold/20 p-3">
+                    <div><p className="text-sm text-muted-foreground">Kokoelmassa</p><p className="text-lg font-semibold">×{typeof selectedCard.metadata.quantity === "number" ? selectedCard.metadata.quantity : 1}</p></div>
+                    <div className="flex items-center gap-2">
+                      <button type="button" disabled={busyId === selectedCard.ownershipId} onClick={() => changeQuantity(selectedCard, -1)} aria-label="Vähennä kappalemäärää" className="flex h-9 w-9 items-center justify-center rounded border border-accent-gold/30 disabled:opacity-40"><Minus className="h-4 w-4" /></button>
+                      <button type="button" disabled={busyId === selectedCard.ownershipId} onClick={() => changeQuantity(selectedCard, 1)} aria-label="Lisää kappalemäärää" className="flex h-9 w-9 items-center justify-center rounded border border-accent-gold/30 disabled:opacity-40"><Plus className="h-4 w-4" /></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   )
 }
