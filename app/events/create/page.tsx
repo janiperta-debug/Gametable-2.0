@@ -43,6 +43,7 @@ export default function CreateEventPage() {
   const router = useRouter()
   const [gameSelection, setGameSelection] = useState("collection")
   const [eventType, setEventType] = useState<EventType>("game_night")
+  const [campaignCreationMode, setCampaignCreationMode] = useState<"manual" | "material">("manual")
   const [privacy, setPrivacy] = useState<EventPrivacy>("public")
   const [eventConfig, setEventConfig] = useState({
     format: "",
@@ -165,22 +166,23 @@ export default function CreateEventPage() {
       } finally { setSaving(false) }
       return
     }
-    if (!formData.date || !formData.time || !formData.endDate || !formData.endTime) return
+    const materialCampaign = eventType === "campaign" && campaignCreationMode === "material"
+    if (!materialCampaign && (!formData.date || !formData.time || !formData.endDate || !formData.endTime)) return
 
     setSaving(true)
 
     try {
-      const startsAt = new Date(formData.date + "T" + formData.time + ":00")
-      const endsAt = new Date(formData.endDate + "T" + formData.endTime + ":00")
+      const startsAt = materialCampaign ? new Date() : new Date(formData.date + "T" + formData.time + ":00")
+      const endsAt = materialCampaign ? undefined : new Date(formData.endDate + "T" + formData.endTime + ":00")
 
       const result = await createEvent({
         title: formData.title.trim(),
         description: formData.description.trim() || undefined,
         event_type: eventType,
-        privacy: privacy,
+        privacy: materialCampaign ? "private" : privacy,
         location: formData.location.trim() || undefined,
         starts_at: startsAt.toISOString(),
-        ends_at: endsAt.toISOString(),
+        ends_at: endsAt?.toISOString(),
         max_players: formData.maxPlayers ? parseInt(formData.maxPlayers) : undefined,
         group_id: groupId || undefined,
         event_config: {
@@ -202,6 +204,7 @@ export default function CreateEventPage() {
             rounds: undefined,
           } : {}),
           organizerNotes: eventConfig.organizerNotes.trim() || undefined,
+          ...(materialCampaign ? { campaignImportSetup: { status: "awaiting_sources", createdAt: new Date().toISOString() } } : {}),
           ...(formData.game.trim() ? { gameSelection: selectedGame ? {gameId:selectedGame.id,category:selectedGame.category,name:selectedGame.name,source:selectedGame.source,system:selectedGame.system||null} : {gameId:null,category:null,name:formData.game.trim(),source:"manual"} } : {}),
           ...(eventType === "tournament" ? { awards: { category: awardCategory, places: awardCategory === "none" ? [] : [1, 2, 3], confirmed: false } } : {}),
         },
@@ -225,7 +228,7 @@ export default function CreateEventPage() {
           title: t("common.success"),
           description: t("events.eventCreated"),
         })
-        router.push(groupId ? "/groups/" + groupId + "?tab=events" : "/events")
+        router.push(materialCampaign ? "/events/" + result.event.id : groupId ? "/groups/" + groupId + "?tab=events" : "/events")
       }
     } catch (error) {
       console.error("Error creating event:", error)
@@ -425,6 +428,29 @@ export default function CreateEventPage() {
                   </div>
                 )}
 
+                {eventType === "campaign" && (
+                  <div className="space-y-3 rounded-lg border border-accent-gold/25 bg-background/20 p-4">
+                    <h3 className="font-heading text-lg text-accent-gold">{locale === "fi" ? "Kampanjan aloitustapa" : "Campaign setup"}</h3>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <ArchiveCardButton type="button" fullWidth active={campaignCreationMode === "manual"} onClick={() => setCampaignCreationMode("manual")}>
+                        {locale === "fi" ? "Tyhjä kampanja" : "Start from scratch"}
+                      </ArchiveCardButton>
+                      <ArchiveCardButton type="button" fullWidth active={campaignCreationMode === "material"} onClick={() => setCampaignCreationMode("material")}>
+                        {locale === "fi" ? "Luo materiaalista" : "Create from material"}
+                      </ArchiveCardButton>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {campaignCreationMode === "material"
+                        ? (locale === "fi"
+                            ? "Kampanja luodaan ensin yksityisenä. Seuraavalla sivulla voit lisätä PDF:t, käsikirjoitukset, kuvat ja muistiinpanot aineiston tuontiin. Tekoälyanalyysi ja hyväksyntä tulevat seuraavassa vaiheessa."
+                            : "The campaign is created privately first. On the next page you can add PDFs, manuscripts, images and notes to the import batch. AI analysis and approval will be added in the next step.")
+                        : (locale === "fi"
+                            ? "Aloita kampanja ilman lähdeaineistoa. Voit lisätä materiaalia myöhemmin kampanjan sisältä."
+                            : "Start without source material. You can add material later from inside the campaign.")}
+                    </p>
+                  </div>
+                )}
+
                 {/* Organizer-defined event structure */}
                 {eventType !== "game_night" && eventType !== "league" && (
                   <div className="space-y-4">
@@ -610,7 +636,7 @@ export default function CreateEventPage() {
                 )}
 
                 {/* Date & Time Range */}
-                {eventType !== "league" && <div className="space-y-4">
+                {eventType !== "league" && !(eventType === "campaign" && campaignCreationMode === "material") && <div className="space-y-4">
                   <div className="space-y-3">
                   <Label className="font-body text-accent-gold">{eventType === "league" ? t("eventFix.season") : t("eventFix.schedule")}</Label>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
