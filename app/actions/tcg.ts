@@ -483,6 +483,8 @@ export async function addManualTCGCard(input: ManualTCGCardInput): Promise<AddCa
         condition: input.condition,
         foil: input.foil,
       })
+      .select("id")
+      .single()
 
     if (collectionError) {
       await supabase.from("tcg_cards").delete().eq("id", card.id)
@@ -495,7 +497,7 @@ export async function addManualTCGCard(input: ManualTCGCardInput): Promise<AddCa
       // when a dedicated schema field exists in a future migration.
     }
 
-    await awardXP(user.id, "tcg_card_added", 5, card.id)
+    await awardXP(user.id, "tcg_card_added", 5, collectionEntry?.id)
     return { success: true, cardId: card.id, isNew: true }
   } catch (error) {
     console.error("Manual TCG card add failed:", error)
