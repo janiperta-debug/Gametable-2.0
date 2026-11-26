@@ -1,12 +1,9 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { createRequire } from "node:module"
 import { pathToFileURL } from "node:url"
 import { createClient } from "@/lib/supabase/server"
 import { createServiceClient } from "@/lib/supabase/service"
-
-const require = createRequire(`${process.cwd()}/package.json`)
 
 const STORAGE_BUCKET = "campaign-import-sources"
 const MAX_PDF_BYTES = 25 * 1024 * 1024
@@ -72,7 +69,7 @@ export async function extractCampaignPdfText(batchId: string) {
     const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs")
     // Next.js bundles the PDF.js API into a server chunk, but its relative worker import
     // is not emitted beside that chunk. Resolve the installed worker as a real file URL.
-    const workerPath = require.resolve("pdfjs-dist/legacy/build/pdf.worker.mjs")
+    const workerPath = `${process.cwd()}/node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs`
     pdfjs.GlobalWorkerOptions.workerSrc = pathToFileURL(workerPath).href
 
     for (const source of sources) {
