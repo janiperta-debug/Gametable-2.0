@@ -253,6 +253,34 @@ export async function updateTCGCollectionQuantity(
 }
 
 
+export async function updateTCGCollectionDetails(
+  collectionEntryId: string,
+  alternateEntryIds: string[],
+  details: { condition: string; foil: boolean },
+): Promise<{ success: boolean; error?: string }> {
+  const allowedConditions = ["near_mint", "lightly_played", "moderately_played", "heavily_played", "damaged"]
+  if (!allowedConditions.includes(details.condition) || typeof details.foil !== "boolean") {
+    return { success: false, error: "Invalid card details" }
+  }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: "Not authenticated" }
+
+  const ids = [...new Set([collectionEntryId, ...alternateEntryIds])].filter(Boolean)
+  const { error } = await supabase
+    .from("tcg_collection")
+    .update({ condition: details.condition, foil: details.foil })
+    .in("id", ids)
+    .eq("user_id", user.id)
+
+  if (error) {
+    console.error("Error updating TCG collection details:", error)
+    return { success: false, error: error.message }
+  }
+  return { success: true }
+}
+
 export async function bulkAddCards(
   cards: Array<{ card: TCGSearchResult; quantity: number }>,
   status: "owned" | "wishlist" = "owned"
