@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react"
 import Image from "next/image"
 import { Search, ArrowLeft, Minus, Plus, SlidersHorizontal } from "lucide-react"
-import { updateTCGCollectionQuantity } from "@/app/actions/tcg"
+import { updateTCGCollectionDetails, updateTCGCollectionQuantity } from "@/app/actions/tcg"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import type { CollectionEntry } from "@/lib/types/collection"
 
@@ -53,6 +53,9 @@ export function TCGCollectionView({ entries, onUpdate }: { entries: CollectionEn
   const [sort, setSort] = useState<"name" | "set" | "rarity" | "recent">("name")
   const [busyId, setBusyId] = useState<string | null>(null)
   const [selectedCard, setSelectedCard] = useState<CollectionEntry | null>(null)
+  const [editCondition, setEditCondition] = useState("near_mint")
+  const [editFoil, setEditFoil] = useState(false)
+  const [savingDetails, setSavingDetails] = useState(false)
 
   const tcgEntries = useMemo(() => entries.filter((entry) => entry.domain === "tcg"), [entries])
   const grouped = useMemo(() => {
@@ -145,7 +148,7 @@ export function TCGCollectionView({ entries, onUpdate }: { entries: CollectionEn
             const rarity = readString(entry, "rarity")
             return (
               <article key={entry.ownershipId} className="min-w-0 overflow-hidden rounded-lg border border-accent-gold/15 bg-card/50">
-                <button type="button" onClick={() => setSelectedCard(entry)} className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-gold">
+                <button type="button" onClick={() => { setSelectedCard(entry); setEditCondition(readString(entry, "condition") ?? "near_mint"); setEditFoil(entry.metadata.foil === true) }} className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-gold">
                   <div className="aspect-[3/4] bg-black/20">
                     <Image src={entry.image || "/images/fallbacks/tcg-fallback.png"} alt={entry.displayName} width={300} height={400} sizes="(max-width: 640px) 31vw, (max-width: 1024px) 19vw, 14vw" className="h-full w-full object-contain" />
                   </div>
@@ -182,10 +185,36 @@ export function TCGCollectionView({ entries, onUpdate }: { entries: CollectionEn
                     {readString(selectedCard, "set_name") && <div><dt className="text-muted-foreground">Setti</dt><dd className="font-medium">{readString(selectedCard, "set_name")}</dd></div>}
                     {readString(selectedCard, "set_code") && <div><dt className="text-muted-foreground">Settikoodi</dt><dd className="font-medium">{readString(selectedCard, "set_code")}</dd></div>}
                     {readString(selectedCard, "rarity") && <div><dt className="text-muted-foreground">Harvinaisuus</dt><dd className="font-medium">{readString(selectedCard, "rarity")}</dd></div>}
-                    {readString(selectedCard, "condition") && <div><dt className="text-muted-foreground">Kunto</dt><dd className="font-medium">{readString(selectedCard, "condition")}</dd></div>}
-                    <div><dt className="text-muted-foreground">Versio</dt><dd className="font-medium">{selectedCard.metadata.foil === true ? "Foil" : "Non-foil"}</dd></div>
+                    <div>
+                      <dt className="mb-1 text-muted-foreground">Kortin kunto</dt>
+                      <dd>
+                        <select value={editCondition} onChange={(event) => setEditCondition(event.target.value)} className="h-10 w-full rounded-md border border-accent-gold/30 bg-background px-3 text-sm">
+                          <option value="near_mint">Near Mint</option>
+                          <option value="lightly_played">Lightly Played</option>
+                          <option value="moderately_played">Moderately Played</option>
+                          <option value="heavily_played">Heavily Played</option>
+                          <option value="damaged">Damaged</option>
+                        </select>
+                      </dd>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <div><dt className="text-muted-foreground">Kortin versio</dt><dd className="text-sm font-medium">{editFoil ? "Foil" : "Non-foil"}</dd></div>
+                      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editFoil} onChange={(event) => setEditFoil(event.target.checked)} className="h-4 w-4 accent-accent-gold" /> Foil</label>
+                    </div>
                     {readString(selectedCard, "external_id") && <div><dt className="text-muted-foreground">Korttitunniste</dt><dd className="break-all font-medium">{readString(selectedCard, "external_id")}</dd></div>}
                   </dl>
+                  <button type="button" disabled={savingDetails} onClick={async () => {
+                    if (!selectedCard) return
+                    setSavingDetails(true)
+                    const result = await updateTCGCollectionDetails(selectedCard.ownershipId, readIds(selectedCard), { condition: editCondition, foil: editFoil })
+                    setSavingDetails(false)
+                    if (result.success) {
+                      setSelectedCard({ ...selectedCard, metadata: { ...selectedCard.metadata, condition: editCondition, foil: editFoil } })
+                      onUpdate()
+                    } else {
+                      window.alert(result.error ?? "Kortin tietojen tallentaminen epäonnistui.")
+                    }
+                  }} className="h-10 w-full rounded-md bg-accent-gold px-4 text-sm font-semibold text-background disabled:opacity-50">{savingDetails ? "Tallennetaan..." : "Tallenna muutokset"}</button>
                   <div className="flex items-center justify-between rounded-lg border border-accent-gold/20 p-3">
                     <div><p className="text-sm text-muted-foreground">Kokoelmassa</p><p className="text-lg font-semibold">×{typeof selectedCard.metadata.quantity === "number" ? selectedCard.metadata.quantity : 1}</p></div>
                     <div className="flex items-center gap-2">
