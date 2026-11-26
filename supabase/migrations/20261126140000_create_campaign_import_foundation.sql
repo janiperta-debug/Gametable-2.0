@@ -30,11 +30,15 @@ returns trigger
 language plpgsql
 set search_path = public, pg_temp
 as $function$
+declare
+  is_campaign boolean;
 begin
-  if not (exists (
+  select exists (
     select 1 from public.events e
     where e.id = new.event_id and e.event_type = 'campaign'
-  )) then
+  ) into is_campaign;
+
+  if not is_campaign then
     raise exception 'Campaign imports can only be attached to campaign events';
   end if;
   return new;
@@ -75,17 +79,20 @@ create table if not exists public.campaign_import_sources (
     check (storage_path is not null or source_text is not null)
 );
 
--- Source records must point to a batch belonging to the same campaign.
 create or replace function public.validate_campaign_import_source_links()
 returns trigger
 language plpgsql
 set search_path = public, pg_temp
 as $function$
+declare
+  batch_matches boolean;
 begin
-  if not (exists (
+  select exists (
     select 1 from public.campaign_import_batches b
     where b.id = new.batch_id and b.event_id = new.event_id
-  )) then
+  ) into batch_matches;
+
+  if not batch_matches then
     raise exception 'Campaign import source batch does not belong to this campaign';
   end if;
   return new;
@@ -131,6 +138,47 @@ create table if not exists public.campaign_import_items (
   unique (batch_id, item_index)
 );
 
+create or replace function public.validate_campaign_import_item_links()
+returns trigger
+language plpgsql
+set search_path = public, pg_temp
+as $function$
+declare
+  batch_matches boolean;
+  source_matches boolean;
+begin
+  select exists (
+    select 1 from public.campaign_import_batches b
+    where b.id = new.batch_id and b.event_id = new.event_id
+  ) into batch_matches;
+
+  if not batch_matches then
+    raise exception 'Campaign import item batch does not belong to this campaign';
+  end if;
+
+  if new.source_id is not null then
+    select exists (
+      select 1 from public.campaign_import_sources s
+      where s.id = new.source_id
+        and s.batch_id = new.batch_id
+        and s.event_id = new.event_id
+    ) into source_matches;
+
+    if not source_matches then
+      raise exception 'Campaign import item source does not belong to this batch';
+    end if;
+  end if;
+
+  return new;
+end;
+$function$;
+
+drop trigger if exists trg_validate_campaign_import_item_links on public.campaign_import_items;
+create trigger trg_validate_campaign_import_item_links
+before insert or update of batch_id, event_id, source_id
+on public.campaign_import_items
+for each row execute function public.validate_campaign_import_item_links();
+
 create index if not exists campaign_import_items_batch_idx
   on public.campaign_import_items (batch_id, item_index);
 create index if not exists campaign_import_items_event_type_idx
@@ -138,39 +186,6 @@ create index if not exists campaign_import_items_event_type_idx
 create index if not exists campaign_import_items_source_idx
   on public.campaign_import_items (source_id)
   where source_id is not null;
-
--- Keep event_id, batch_id and source_id relationships within the same campaign.
-create or replace function public.validate_campaign_import_item_links()
-returns trigger
-language plpgsql
-set search_path = public, pg_temp
-as $function$
-begin
-  if not (exists (
-    select 1 from public.campaign_import_batches b
-    where b.id = new.batch_id and b.event_id = new.event_id
-  )) then
-    raise exception 'Campaign import item batch does not belong to this campaign';
-  end if;
-
-  if new.source_id is not null and not (exists (
-    select 1 from public.campaign_import_sources s
-    where s.id = new.source_id
-      and s.batch_id = new.batch_id
-      and s.event_id = new.event_id
-  )) then
-    raise exception 'Campaign import item source does not belong to this batch';
-  end if;
-
-  return new;
-end;
-$$;
-
-drop trigger if exists trg_validate_campaign_import_item_links on public.campaign_import_items;
-create trigger trg_validate_campaign_import_item_links
-before insert or update of batch_id, event_id, source_id
-on public.campaign_import_items
-for each row execute function public.validate_campaign_import_item_links();
 
 -- Import records are host/GM-readable for now. Writes will go through validated
 -- server actions; players do not receive access to raw source material or drafts.
