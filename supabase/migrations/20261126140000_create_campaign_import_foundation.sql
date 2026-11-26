@@ -144,7 +144,7 @@ create or replace function public.validate_campaign_import_item_links()
 returns trigger
 language plpgsql
 set search_path = public, pg_temp
-as $function$$
+as $function$
 begin
   if not (exists (
     select 1 from public.campaign_import_batches b
