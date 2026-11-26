@@ -165,23 +165,22 @@ export default function CreateEventPage() {
       } finally { setSaving(false) }
       return
     }
-    const materialCampaign = eventType === "campaign" && campaignCreationMode === "material"
-    if (!materialCampaign && (!formData.date || !formData.time || !formData.endDate || !formData.endTime)) return
+    if (!formData.date || !formData.time || !formData.endDate || !formData.endTime) return
 
     setSaving(true)
 
     try {
-      const startsAt = materialCampaign ? new Date() : new Date(formData.date + "T" + formData.time + ":00")
-      const endsAt = materialCampaign ? undefined : new Date(formData.endDate + "T" + formData.endTime + ":00")
+      const startsAt = new Date(formData.date + "T" + formData.time + ":00")
+      const endsAt = new Date(formData.endDate + "T" + formData.endTime + ":00")
 
       const result = await createEvent({
         title: formData.title.trim(),
         description: formData.description.trim() || undefined,
         event_type: eventType,
-        privacy: materialCampaign ? "private" : privacy,
+        privacy,
         location: formData.location.trim() || undefined,
         starts_at: startsAt.toISOString(),
-        ends_at: endsAt?.toISOString(),
+        ends_at: endsAt.toISOString(),
         max_players: formData.maxPlayers ? parseInt(formData.maxPlayers) : undefined,
         group_id: groupId || undefined,
         event_config: {
@@ -203,7 +202,6 @@ export default function CreateEventPage() {
             rounds: undefined,
           } : {}),
           organizerNotes: eventConfig.organizerNotes.trim() || undefined,
-          ...(materialCampaign ? { campaignImportSetup: { status: "awaiting_sources", createdAt: new Date().toISOString() } } : {}),
           ...(formData.game.trim() ? { gameSelection: selectedGame ? {gameId:selectedGame.id,category:selectedGame.category,name:selectedGame.name,source:selectedGame.source,system:selectedGame.system||null} : {gameId:null,category:null,name:formData.game.trim(),source:"manual"} } : {}),
           ...(eventType === "tournament" ? { awards: { category: awardCategory, places: awardCategory === "none" ? [] : [1, 2, 3], confirmed: false } } : {}),
         },
@@ -217,7 +215,7 @@ export default function CreateEventPage() {
         })
       } else if (result.event) {
         // Invite selected friends if any
-        if (!materialCampaign && selectedFriends.length > 0 && (privacy === "private" || privacy === "friends")) {
+        if (selectedFriends.length > 0 && (privacy === "private" || privacy === "friends")) {
           for (const friendId of selectedFriends) {
             await inviteToEvent(result.event.id, friendId)
           }
@@ -227,7 +225,7 @@ export default function CreateEventPage() {
           title: t("common.success"),
           description: t("events.eventCreated"),
         })
-        router.push(materialCampaign ? "/events/" + result.event.id : groupId ? "/groups/" + groupId + "?tab=events" : "/events")
+        router.push(groupId ? "/groups/" + groupId + "?tab=events" : "/events")
       }
     } catch (error) {
       console.error("Error creating event:", error)
@@ -431,7 +429,7 @@ export default function CreateEventPage() {
                   <div className="space-y-3 rounded-lg border border-accent-gold/25 bg-background/20 p-4">
                     <h3 className="font-heading text-lg text-accent-gold">{locale === "fi" ? "Kampanjan aloitustapa" : "Campaign setup"}</h3>
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <ArchiveCardButton type="button" fullWidth active={campaignCreationMode === "manual"} onClick={() => setCampaignCreationMode("manual")}>
+                      <ArchiveCardButton type="button" fullWidth active>
                         {locale === "fi" ? "Tyhjä kampanja" : "Start from scratch"}
                       </ArchiveCardButton>
                       <ArchiveCardButton type="button" fullWidth onClick={() => router.push("/events/create/campaign-material")}>
@@ -629,7 +627,7 @@ export default function CreateEventPage() {
                 )}
 
                 {/* Date & Time Range */}
-                {eventType !== "league" && !(eventType === "campaign" && campaignCreationMode === "material") && <div className="space-y-4">
+                {eventType !== "league" && <div className="space-y-4">
                   <div className="space-y-3">
                   <Label className="font-body text-accent-gold">{eventType === "league" ? t("eventFix.season") : t("eventFix.schedule")}</Label>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -732,7 +730,7 @@ export default function CreateEventPage() {
                 </div>
 
                 {/* Privacy Settings */}
-                {!(eventType === "campaign" && campaignCreationMode === "material") && <div className="space-y-4">
+                <div className="space-y-4">
                   <Label className="font-body text-accent-gold">{t("events.eventPrivacy")}</Label>
                   <RadioGroup value={privacy} onValueChange={setPrivacy} className="space-y-3">
                     <div className="flex items-center space-x-3">
@@ -779,7 +777,7 @@ export default function CreateEventPage() {
                 </div>}
 
                 {/* Invite Friends Section - Show for private/friends events */}
-                {eventType !== "league" && !(eventType === "campaign" && campaignCreationMode === "material") && (privacy === "private" || privacy === "friends") && (
+                {eventType !== "league" && (privacy === "private" || privacy === "friends") && (
                   <div className="space-y-4 p-4 border border-accent-gold/30 rounded-lg bg-accent-gold/5">
                     <div className="flex items-center gap-2">
                       <UserPlus className="h-5 w-5 text-accent-gold" />
