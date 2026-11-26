@@ -6,6 +6,7 @@ import { CollectionHeader, type SortOption, type ViewMode, type StatusFilter } f
 import { CollectionFilters } from "@/components/collection-filters"
 import { GameGrid } from "@/components/game-grid"
 import { GameList } from "@/components/game-list"
+import { TCGCollectionView } from "@/components/tcg-collection-view"
 import { DiscoverGames } from "@/components/discover-games"
 import { ThemeHero } from "@/components/theme-hero"
 import { ArchiveButton, ArchiveToggle } from "@/components/archive-frame"
@@ -201,6 +202,8 @@ export default function Collection() {
                   <div className="flex items-center justify-center py-16">
                     <Loader2 className="h-8 w-8 animate-spin text-accent-gold" />
                   </div>
+                ) : selectedCategory === "trading-cards" ? (
+                  <TCGCollectionView entries={collectionEntries} onUpdate={handleUpdateCollection} />
                 ) : viewMode === "grid" ? (
                   <GameGrid
                     cards={filteredAndSortedGames}
