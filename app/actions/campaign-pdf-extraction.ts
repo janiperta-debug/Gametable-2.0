@@ -194,7 +194,8 @@ export async function extractCampaignPdfText(batchId: string) {
     if (batchUpdateError) throw new Error(batchUpdateError.message)
 
     revalidatePath("/events/" + access.eventId)
-    return { success: results.length > 0, results, errors }
+    if (results.length > 0) return { success: true as const, results, errors }
+    return { success: false as const, error: errors.join(" ") || "PDF-tiedostoista ei saatu poimittua tekstiä.", results, errors }
   } catch (error) {
     const message = error instanceof Error ? error.message : "PDF-tekstin poiminta epäonnistui."
     await db.from("campaign_import_batches").update({
