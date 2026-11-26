@@ -2699,6 +2699,10 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
+  pdfjs-dist@4.10.38:
+    resolution: {tarball: https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-4.10.38.tgz}
+    engines: {node: '>=18'}
+
 snapshots:
 
   '@zxing/browser@0.1.5(@zxing/library@0.21.3)':
@@ -5214,9 +5218,4 @@ snapshots:
 
   zod@3.25.76: {}
 
-  pdfjs-dist@4.10.38:
-    resolution: {tarball: https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-4.10.38.tgz}
-    engines: {node: '>=18'}
-
-snapshots:
   pdfjs-dist@4.10.38: {}
