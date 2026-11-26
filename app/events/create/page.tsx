@@ -218,7 +218,7 @@ export default function CreateEventPage() {
         })
       } else if (result.event) {
         // Invite selected friends if any
-        if (selectedFriends.length > 0 && (privacy === "private" || privacy === "friends")) {
+        if (!materialCampaign && selectedFriends.length > 0 && (privacy === "private" || privacy === "friends")) {
           for (const friendId of selectedFriends) {
             await inviteToEvent(result.event.id, friendId)
           }
@@ -435,7 +435,7 @@ export default function CreateEventPage() {
                       <ArchiveCardButton type="button" fullWidth active={campaignCreationMode === "manual"} onClick={() => setCampaignCreationMode("manual")}>
                         {locale === "fi" ? "Tyhjä kampanja" : "Start from scratch"}
                       </ArchiveCardButton>
-                      <ArchiveCardButton type="button" fullWidth active={campaignCreationMode === "material"} onClick={() => setCampaignCreationMode("material")}>
+                      <ArchiveCardButton type="button" fullWidth active={campaignCreationMode === "material"} onClick={() => { setCampaignCreationMode("material"); setPrivacy("private") }}>
                         {locale === "fi" ? "Luo materiaalista" : "Create from material"}
                       </ArchiveCardButton>
                     </div>
