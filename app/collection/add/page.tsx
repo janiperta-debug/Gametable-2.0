@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Search, ScanLine, Loader2, Plus, Minus, Star, Users, Clock, Puzzle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { addGameToCollection, type AddGameResult } from "@/app/actions/games"
-import { addCardToCollection } from "@/app/actions/tcg"
+import { addCardToCollection, addManualTCGCard } from "@/app/actions/tcg"
 import {
   addMiniatureToCollection,
   createMiniatureArmy,
@@ -176,6 +176,9 @@ export default function AddGamePage() {
     imageUrl: "",
   })
   const [savingManual, setSavingManual] = useState(false)
+  const [manualTcg, setManualTcg] = useState({ name: "", setName: "", setCode: "", collectorNumber: "", rarity: "", language: "", imageUrl: "", quantity: "1", condition: "near_mint", foil: false })
+  const [manualTcgSearch, setManualTcgSearch] = useState("")
+  const [savingManualTcg, setSavingManualTcg] = useState(false)
   
   const categoryConfig = categories.find(c => c.id === selectedCategory)!
 
@@ -888,6 +891,47 @@ export default function AddGamePage() {
 
 
 
+{selectedCategory === "trading_card" ? (
+                <div className="mt-6 border-t border-accent-gold/20 pt-5 space-y-5">
+                  <div>
+                    <h2 className="font-cinzel text-lg text-accent-gold">MANUAALINEN KORTIN LISÄYS</h2>
+                    <p className="mt-2 text-sm text-muted-foreground font-body">Etsi ensin korttia valitun pelin tietokannasta. Jos sitä ei löydy, voit luoda korttitietueen käsin.</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Input value={manualTcgSearch} onChange={(e) => setManualTcgSearch(e.target.value)} placeholder="Etsi korttia nimellä…" className={archiveField}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleSearch(manualTcgSearch) } }} />
+                    <ArchiveButton type="button" onClick={() => handleSearch(manualTcgSearch)} disabled={!manualTcgSearch.trim() || searching} icon={searching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}>Hae</ArchiveButton>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Haku käyttää valitun korttipelin omia lähteitä ja GameTablen korttikatalogia.</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><Label className="text-accent-gold font-cinzel text-sm">Kortin nimi *</Label><Input value={manualTcg.name} onChange={(e) => setManualTcg({...manualTcg,name:e.target.value})} placeholder="Esim. Lightning Bolt" className={archiveField}/></div>
+                    <div><Label className="text-accent-gold font-cinzel text-sm">Setin nimi</Label><Input value={manualTcg.setName} onChange={(e) => setManualTcg({...manualTcg,setName:e.target.value})} placeholder="Setti / julkaisu" className={archiveField}/></div>
+                    <div><Label className="text-accent-gold font-cinzel text-sm">Settikoodi</Label><Input value={manualTcg.setCode} onChange={(e) => setManualTcg({...manualTcg,setCode:e.target.value})} className={archiveField}/></div>
+                    <div><Label className="text-accent-gold font-cinzel text-sm">Kortin numero</Label><Input value={manualTcg.collectorNumber} onChange={(e) => setManualTcg({...manualTcg,collectorNumber:e.target.value})} className={archiveField}/></div>
+                    <div><Label className="text-accent-gold font-cinzel text-sm">Harvinaisuus</Label><Input value={manualTcg.rarity} onChange={(e) => setManualTcg({...manualTcg,rarity:e.target.value})} className={archiveField}/></div>
+                    <div><Label className="text-accent-gold font-cinzel text-sm">Kieli</Label><Input value={manualTcg.language} onChange={(e) => setManualTcg({...manualTcg,language:e.target.value})} placeholder="Esim. FI, EN, JP" className={archiveField}/></div>
+                    <div><Label className="text-accent-gold font-cinzel text-sm">Kuvan URL</Label><Input value={manualTcg.imageUrl} onChange={(e) => setManualTcg({...manualTcg,imageUrl:e.target.value})} placeholder="https://…" className={archiveField}/></div>
+                    <div><Label className="text-accent-gold font-cinzel text-sm">Määrä</Label><Input type="number" min="1" value={manualTcg.quantity} onChange={(e) => setManualTcg({...manualTcg,quantity:e.target.value})} className={archiveField}/></div>
+                    <div><Label className="text-accent-gold font-cinzel text-sm">Kunto</Label><select value={manualTcg.condition} onChange={(e) => setManualTcg({...manualTcg,condition:e.target.value})} className={"h-10 w-full rounded-md border px-3 bg-background/40 " + archiveField}><option value="near_mint">Near Mint</option><option value="lightly_played">Lightly Played</option><option value="moderately_played">Moderately Played</option><option value="heavily_played">Heavily Played</option><option value="damaged">Damaged</option></select></div>
+                    <label className="flex items-center gap-2 self-end text-sm text-foreground pb-2"><input type="checkbox" checked={manualTcg.foil} onChange={(e) => setManualTcg({...manualTcg,foil:e.target.checked})}/>Foil</label>
+                  </div>
+                  <div className="flex justify-end">
+                    <ArchiveButton type="button" disabled={savingManualTcg || !manualTcg.name.trim() || Number(manualTcg.quantity) < 1}
+                      onClick={async () => {
+                        setSavingManualTcg(true)
+                        try {
+                          const result = await addManualTCGCard({ game: tcgGame, name: manualTcg.name, setName: manualTcg.setName, setCode: manualTcg.setCode, collectorNumber: manualTcg.collectorNumber, rarity: manualTcg.rarity, language: manualTcg.language, imageUrl: manualTcg.imageUrl, quantity: Math.floor(Number(manualTcg.quantity)), condition: manualTcg.condition, foil: manualTcg.foil })
+                          if (!result.success) throw new Error(result.error || "Kortin lisääminen epäonnistui.")
+                          toast({title:t("common.success"),description:manualTcg.name + " lisätty kokoelmaan."})
+                          router.push("/collection")
+                        } catch (error) {
+                          toast({title:t("common.error"),description:error instanceof Error ? error.message : "Kortin lisääminen epäonnistui.",variant:"destructive"})
+                        } finally { setSavingManualTcg(false) }
+                      }}
+                      icon={savingManualTcg ? <Loader2 className="h-4 w-4 animate-spin"/> : <Plus className="h-4 w-4"/>}>Lisää kortti kokoelmaan</ArchiveButton>
+                  </div>
+                </div>
+              ) : (
               <div className="mt-6 border-t border-accent-gold/20 pt-5">
                 <div className="space-y-6">
                   <p className="font-body text-muted-foreground text-sm">
@@ -1033,6 +1077,7 @@ export default function AddGamePage() {
                   </div>
                 </div>
               </div>
+              )}
 
             </ArchiveCardContent>
           </ArchiveCard>
