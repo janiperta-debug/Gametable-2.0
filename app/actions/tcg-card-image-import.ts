@@ -14,9 +14,12 @@ type RecognizedCard = {
   position?: string | null
 }
 
-export async function processTcgCardImageImport(input: { game: "magic" | "yugioh" | "lorcana" | "flesh-and-blood"; storagePaths: string[] }) {
+type SupportedImageTcgGame = "magic" | "yugioh" | "lorcana" | "flesh-and-blood" | "riftbound" | "digimon" | "gundam" | "star-wars-unlimited" | "dragon-ball-fusion-world"
+
+export async function processTcgCardImageImport(input: { game: SupportedImageTcgGame; storagePaths: string[] }) {
   const { game, storagePaths } = input ?? {}
-  if (!["magic", "yugioh", "lorcana", "flesh-and-blood"].includes(game) || !Array.isArray(storagePaths) ||
+  const supportedGames: SupportedImageTcgGame[] = ["magic", "yugioh", "lorcana", "flesh-and-blood", "riftbound", "digimon", "gundam", "star-wars-unlimited", "dragon-ball-fusion-world"]
+  if (!supportedGames.includes(game) || !Array.isArray(storagePaths) ||
       storagePaths.length < 1 || storagePaths.length > 10 ||
       storagePaths.some((path) => typeof path !== "string" || !path.trim() || path.length > 500)) {
     return { success: false as const, error: "Valitse 1–10 kelvollista kuvatiedostoa." }
@@ -35,14 +38,27 @@ export async function processTcgCardImageImport(input: { game: "magic" | "yugioh
     const gatewayKey = process.env.AI_GATEWAY_API_KEY
     if (!gatewayKey) throw new Error("AI Gateway -yhteys puuttuu Vercelin ympäristömuuttujista")
 
-    const gameName = game === "magic" ? "Magic: The Gathering" : game === "yugioh" ? "Yu-Gi-Oh!" : game === "lorcana" ? "Disney Lorcana" : "Flesh and Blood"
+    const gameNames: Record<SupportedImageTcgGame, string> = {
+      magic: "Magic: The Gathering",
+      yugioh: "Yu-Gi-Oh!",
+      lorcana: "Disney Lorcana",
+      "flesh-and-blood": "Flesh and Blood",
+      riftbound: "Riftbound",
+      digimon: "Digimon Card Game",
+      gundam: "Gundam Card Game",
+      "star-wars-unlimited": "Star Wars: Unlimited",
+      "dragon-ball-fusion-world": "Dragon Ball Super: Fusion World",
+    }
+    const gameName = gameNames[game]
     const prompt = game === "magic"
       ? "Tunnista kuvasta fyysiset Magic: The Gathering -kortit järjestelmällisesti vasemmalta oikealle ja ylhäältä alas. Kuvassa voi olla enintään 12 korttia. Laske ensin näkyvät korttipaikat ja palauta yksi cards-listan alkio JOKAISESTA fyysisestä kortista. ÄLÄ yhdistä tai poista kaksoiskappaleita: jos kuvassa on kaksi täysin samanlaista korttia, palauta ne kahtena erillisenä alkiona. Anna jokaiselle kortille sijainti kuvassa (esim. ylävasen, keskellä oikea, alavasen), jotta saman kortin kappaleet erottuvat. Lue kortin nimi täsmälleen; setin nimi, setin koodi, keräilynumero ja kieli jos ne näkyvät. Jos kortissa on kaksi puolta, se on silti yksi fyysinen kortti ja käytä etupuolen nimeä. Älä sekoita setin koodia keräilynumeroon. Älä keksi kortteja tai tietoja. Jos nimi on osittain epäselvä, palauta paras perusteltu nimilukema matalammalla confidence-arvolla sen sijaan, että jättäisit fyysisen kortin kokonaan pois. Palauta vain JSON muodossa {cards:[{name:string,setName:string|null,setCode:string|null,collectorNumber:string|null,language:string|null,confidence:number,position:string|null}]}. confidence 0-1."
       : game === "yugioh"
         ? "Tunnista kuvasta kaikki selvästi näkyvät Yu-Gi-Oh! -kortit, enintään 12. Lue kortin virallinen englanninkielinen nimi täsmälleen, kortin tyyppi, setin nimi ja set code, keräilynumero sekä kieli jos ne näkyvät. Älä arvaa epäselviä tietoja. Palauta JSON muodossa {cards:[{name,setName,setCode,collectorNumber,language,confidence}]}. Jätä kortti pois, jos nimeä ei voi lukea luotettavasti."
         : game === "lorcana"
           ? "Tunnista kuvasta kaikki fyysiset Disney Lorcana -kortit järjestyksessä vasemmalta oikealle ja ylhäältä alas, enintään 12. Palauta yksi alkio jokaisesta fyysisestä kortista, myös kaksoiskappaleista. Lue nimi ja version/alaotsikon teksti erikseen, jos näkyvissä. Lue setin nimi tai koodi, collector number ja kieli vain jos näkyvissä. Älä sekoita lore-arvoa keräilynumeroon. Älä keksi tietoja. Palauta JSON muodossa {cards:[{name,setName,setCode,collectorNumber,language,confidence,position}]}. Confidence 0-1."
-          : "Tunnista kuvasta kaikki fyysiset Flesh and Blood -kortit järjestyksessä vasemmalta oikealle ja ylhäältä alas, enintään 12. Palauta yksi alkio jokaisesta fyysisestä kortista, myös kaksoiskappaleista. Lue kortin nimi, setin nimi tai koodi, keräilynumero/printin tunniste sekä kieli vain jos näkyvissä. Älä sekoita pitch-arvoa keräilynumeroon. Älä arvaa tietoja. Palauta JSON muodossa {cards:[{name,setName,setCode,collectorNumber,language,confidence,position}]}. Confidence 0-1."
+          : game === "flesh-and-blood"
+            ? "Tunnista kuvasta kaikki fyysiset Flesh and Blood -kortit järjestyksessä vasemmalta oikealle ja ylhäältä alas, enintään 12. Palauta yksi alkio jokaisesta fyysisestä kortista, myös kaksoiskappaleista. Lue kortin nimi, setin nimi tai koodi, keräilynumero/printin tunniste sekä kieli vain jos näkyvissä. Älä sekoita pitch-arvoa keräilynumeroon. Älä arvaa tietoja. Palauta JSON muodossa {cards:[{name,setName,setCode,collectorNumber,language,confidence,position}]}. Confidence 0-1."
+            : `Tunnista kuvasta kaikki fyysiset ${gameName}-kortit järjestyksessä vasemmalta oikealle ja ylhäältä alas, enintään 12 korttia. Palauta yksi alkio jokaisesta fyysisestä kortista, myös täysin samanlaisista kaksoiskappaleista. Lue kortin nimi mahdollisimman tarkasti sekä setin nimi, setin koodi, keräilynumero ja kieli vain jos ne näkyvät kuvassa. Älä päättele numeroita hahmonumerosta, hyökkäysarvosta, kustannuksesta tai muusta pelillisestä arvosta. Älä keksi tietoja. Jos nimi on osittain epäselvä, palauta paras perusteltu nimilukema matalammalla confidence-arvolla sen sijaan, että jättäisit kortin pois. Palauta vain JSON muodossa {cards:[{name:string,setName:string|null,setCode:string|null,collectorNumber:string|null,language:string|null,confidence:number,position:string|null}]}. confidence 0-1.`
 
     const recognitions: (RecognizedCard & { sourceImageIndex: number })[] = []
     for (let imageIndex = 0; imageIndex < storagePaths.length; imageIndex++) {
