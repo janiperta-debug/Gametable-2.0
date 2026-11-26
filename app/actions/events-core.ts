@@ -72,6 +72,9 @@ export async function getPublicEvents(): Promise<{ events: Event[]; error?: stri
 
   const now = new Date()
   const upcomingOrActive = (events || []).filter((event) => {
+    const config = event.event_config as Record<string, unknown> | null
+    const importSetup = config?.campaignImportSetup as { status?: string } | undefined
+    if (["awaiting_sources", "processing", "review"].includes(importSetup?.status || "")) return false
     const start = new Date(event.starts_at)
     const end = event.ends_at ? new Date(event.ends_at) : null
     return start >= now || (start < now && end ? end > now : false)
@@ -171,6 +174,9 @@ export async function getMyEvents(): Promise<{ events: Event[]; error?: string }
   
   const now = new Date()
   const upcomingOrActive = allEvents.filter((event) => {
+    const config = event.event_config as Record<string, unknown> | null
+    const importSetup = config?.campaignImportSetup as { status?: string } | undefined
+    if (["awaiting_sources", "processing", "review"].includes(importSetup?.status || "")) return true
     const start = new Date(event.starts_at)
     const end = event.ends_at ? new Date(event.ends_at) : null
     return start >= now || (start < now && end ? end > now : false)
@@ -237,6 +243,9 @@ export async function getPastEvents(): Promise<{ events: Event[]; error?: string
 
   const now = new Date()
   const pastEvents = (events || []).filter((event) => {
+    const config = event.event_config as Record<string, unknown> | null
+    const importSetup = config?.campaignImportSetup as { status?: string } | undefined
+    if (["awaiting_sources", "processing", "review"].includes(importSetup?.status || "")) return false
     const start = new Date(event.starts_at)
     const end = event.ends_at ? new Date(event.ends_at) : null
     return event.status === "completed" || (end ? end <= now : start < now)
