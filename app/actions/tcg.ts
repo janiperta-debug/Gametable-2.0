@@ -474,7 +474,7 @@ export async function addManualTCGCard(input: ManualTCGCardInput): Promise<AddCa
 
     if (cardError || !card) throw new Error(cardError?.message || "Kortin luonti epäonnistui.")
 
-    const { error: collectionError } = await supabase
+    const { data: collectionEntry, error: collectionError } = await supabase
       .from("tcg_collection")
       .insert({
         user_id: user.id,
