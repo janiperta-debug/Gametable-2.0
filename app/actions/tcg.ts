@@ -464,6 +464,8 @@ export async function addManualTCGCard(input: ManualTCGCardInput): Promise<AddCa
         tcg_system: dbSystem,
         set_name: input.setName?.trim() || null,
         set_code: input.setCode?.trim() || null,
+        collector_number: input.collectorNumber?.trim() || null,
+        language: input.language?.trim() || null,
         rarity: input.rarity?.trim() || null,
         image_url: input.imageUrl?.trim() || null,
       })
