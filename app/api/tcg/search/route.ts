@@ -521,8 +521,8 @@ export async function GET(request: NextRequest) {
   }
 
   // APITCG supplements the native provider for existing games and serves new games.
-  const apitcgResults = await searchAPITCG(query, tcgSystem)
-  externalResults = [...externalResults, ...apitcgResults]
+  const apitcgOutcome = await searchAPITCG(query, tcgSystem)
+  externalResults = [...externalResults, ...apitcgOutcome.results]
 
   // Save newly discovered external cards for future Catalog-first searches.
   if (externalResults.length > 0) {
