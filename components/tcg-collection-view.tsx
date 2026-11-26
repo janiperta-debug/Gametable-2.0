@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import Image from "next/image"
-import { Search, ArrowLeft, ChevronDown, Layers, Minus, Plus, SlidersHorizontal } from "lucide-react"
+import { Search, ArrowLeft, Minus, Plus, SlidersHorizontal } from "lucide-react"
 import { updateTCGCollectionQuantity } from "@/app/actions/tcg"
 import type { CollectionEntry } from "@/lib/types/collection"
 
