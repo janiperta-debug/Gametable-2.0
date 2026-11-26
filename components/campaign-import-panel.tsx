@@ -145,10 +145,12 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
     }
   }
 
+  const handleExtractPdfs = async (batchId: string) => {
     if (busy) return
     setBusy(true)
     setError("")
     setExtractionSummary("")
+
     try {
       const result = await extractCampaignPdfText(batchId)
       if (!result.success) {
