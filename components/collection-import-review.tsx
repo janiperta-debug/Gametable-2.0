@@ -135,7 +135,7 @@ export function CollectionImportReview({
       }
       const processed = tcgGame.toLowerCase() === "pokemon"
         ? await processPokemonCardImageImport(storagePaths)
-        : await processTcgCardImageImport({ game: (tcgGame.toLowerCase() === "fab" ? "flesh-and-blood" : tcgGame.toLowerCase()) as "magic" | "yugioh" | "lorcana" | "flesh-and-blood", storagePaths })
+        : await processTcgCardImageImport({ game: (tcgGame.toLowerCase() === "fab" ? "flesh-and-blood" : tcgGame.toLowerCase()) as "magic" | "yugioh" | "lorcana" | "flesh-and-blood" | "riftbound" | "digimon" | "gundam" | "star-wars-unlimited" | "dragon-ball-fusion-world", storagePaths })
       if (!processed.success) throw new Error(processed.error)
       await refreshBatch(processed.batchId)
       setBatchId(processed.batchId)
@@ -246,9 +246,9 @@ export function CollectionImportReview({
             ? "Liitä korttilista. Jokainen rivi täsmäytetään GameTablen korttitietokantaan, ja voit tarkistaa ehdotukset ennen kokoelmaan lisäämistä."
             : "Liitä miniatyyri- tai armeijalista. Tarkista yksikköehdotukset ennen kuin ne lisätään omistamaasi kokoelmaan."}
         </p>
-        {category === "tcg" && ["pokemon", "magic", "mtg", "yugioh", "lorcana", "flesh-and-blood", "fab"].includes(tcgGame.toLowerCase()) && !batchId && (
+        {category === "tcg" && ["pokemon", "magic", "mtg", "yugioh", "lorcana", "flesh-and-blood", "fab", "riftbound", "digimon", "gundam", "star-wars-unlimited", "dragon-ball-fusion-world"].includes(tcgGame.toLowerCase()) && !batchId && (
           <div className="rounded-lg border border-accent-gold/25 bg-background/30 p-3 space-y-2">
-            <div className="text-sm font-medium">Tuo {tcgGame.toLowerCase() === "pokemon" ? "Pokémon" : tcgGame.toLowerCase() === "yugioh" ? "Yu-Gi-Oh!" : tcgGame.toLowerCase() === "lorcana" ? "Disney Lorcana" : tcgGame.toLowerCase() === "fab" || tcgGame.toLowerCase() === "flesh-and-blood" ? "Flesh and Blood" : "Magic: The Gathering"}-kortteja kuvasta</div>
+            <div className="text-sm font-medium">Tuo {({ pokemon: "Pokémon", magic: "Magic: The Gathering", mtg: "Magic: The Gathering", yugioh: "Yu-Gi-Oh!", lorcana: "Disney Lorcana", fab: "Flesh and Blood", "flesh-and-blood": "Flesh and Blood", riftbound: "Riftbound", digimon: "Digimon Card Game", gundam: "Gundam Card Game", "star-wars-unlimited": "Star Wars: Unlimited", "dragon-ball-fusion-world": "Dragon Ball Super: Fusion World" } as Record<string, string>)[tcgGame.toLowerCase()]}-kortteja kuvasta</div>
             <p className="text-xs text-muted-foreground">Voit kuvata useita kortteja samalla kertaa. Valitse enintään 10 kansiosivua kerralla joko laitteen kuvakirjastosta tai ottamalla uudet kuvat. Jokaisesta kuvasta tunnistetaan enintään 12 korttia. Tunnistetut kortit haetaan valitun pelin omasta korttilähteestä ja kootaan yhteen tarkistettavaan tuontierään.</p>
             <input type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={busy}
               onChange={(event) => {
