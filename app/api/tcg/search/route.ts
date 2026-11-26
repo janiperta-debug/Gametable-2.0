@@ -94,6 +94,8 @@ async function searchSupabase(query: string, tcgSystem: TCGGame): Promise<TCGSea
       game: fromDbTCGSystem(card.tcg_system),
       set: card.set_name || "Unknown Set",
       setCode: card.set_code || undefined,
+      collectorNumber: card.collector_number || undefined,
+      language: card.language || undefined,
       rarity: card.rarity || undefined,
       imageUrl: card.image_url || undefined,
       thumbnailUrl: card.image_url || undefined,
