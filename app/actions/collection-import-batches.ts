@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { createServiceClient } from "@/lib/supabase/service"
 import { upsertTcgSourceCard } from "@/lib/tcg/upsert-source-card"
+import { searchApitcgProducts, type ApitcgGame } from "@/lib/tcg/apitcg"
 import { miniatureSearchTerms, scoreCatalogMatch, splitMiniatureListLine } from "@/lib/collection/import-matching"
 
 export type CollectionImportCategory = "tcg" | "miniatures" | "board_game" | "rpg"
@@ -470,6 +471,29 @@ export async function searchCollectionImportItem(input: { itemId: string; search
         }
       }
     }
+        // APITCG supplements the game's native provider. Persist each provider
+        // printing through the shared source-aware catalog before ranking.
+        const apitcgGame = (dbGame === "mtg" ? "magic"
+          : dbGame === "fab" ? "flesh-and-blood"
+          : dbGame === "onepiece" ? "one-piece"
+          : dbGame) as ApitcgGame
+        const apitcg = await searchApitcgProducts(searchName, apitcgGame)
+        for (const card of apitcg.results) {
+          const catalogId = await upsertTcgSourceCard({
+            system: dbGame as Parameters<typeof upsertTcgSourceCard>[0]["system"],
+            sourceKey: "apitcg", externalId: card.externalId, name: card.name,
+            setCode: card.setCode, setName: card.set, rarity: card.rarity,
+            imageUrl: card.imageUrl, typeLine: card.type, priceUsd: card.price,
+          })
+          if (!matches.some((match) => match.id === catalogId)) matches.push({
+            id: catalogId, name: card.name, extra: {
+              game: dbGame, externalId: card.externalId, set: card.set,
+              setCode: card.setCode ?? null, rarity: card.rarity ?? null,
+              imageUrl: card.imageUrl ?? null, sourceKey: "apitcg",
+            },
+          })
+        }
+
   } else {
     const unitSelect = "id, name, unit_type, base_points, model_count_min, model_count_max, image_url, image_source_url, faction:mini_factions!inner(id, name, system:mini_systems!inner(id, name, code, edition))"
     const systemCode = String((batch.source_metadata as Record<string, unknown> | null)?.systemCode ?? "wh40k")
@@ -869,6 +893,29 @@ export async function processCollectionImportBatch(batchId: string) {
             })
           }
         }
+        // APITCG supplements the game's native provider. Persist each provider
+        // printing through the shared source-aware catalog before ranking.
+        const apitcgGame = (dbGame === "mtg" ? "magic"
+          : dbGame === "fab" ? "flesh-and-blood"
+          : dbGame === "onepiece" ? "one-piece"
+          : dbGame) as ApitcgGame
+        const apitcg = await searchApitcgProducts(name, apitcgGame)
+        for (const card of apitcg.results) {
+          const catalogId = await upsertTcgSourceCard({
+            system: dbGame as Parameters<typeof upsertTcgSourceCard>[0]["system"],
+            sourceKey: "apitcg", externalId: card.externalId, name: card.name,
+            setCode: card.setCode, setName: card.set, rarity: card.rarity,
+            imageUrl: card.imageUrl, typeLine: card.type, priceUsd: card.price,
+          })
+          if (!matches.some((match) => match.id === catalogId)) matches.push({
+            id: catalogId, name: card.name, extra: {
+              game: dbGame, externalId: card.externalId, set: card.set,
+              setCode: card.setCode ?? null, rarity: card.rarity ?? null,
+              imageUrl: card.imageUrl ?? null, sourceKey: "apitcg",
+            },
+          })
+        }
+
       } else {
         const unitSelect = "id, name, unit_type, base_points, model_count_min, model_count_max, image_url, image_source_url, faction:mini_factions!inner(id, name, system:mini_systems!inner(id, name, code, edition))"
         const systemCode = String((batch.source_metadata as Record<string, unknown> | null)?.systemCode ?? "wh40k")
