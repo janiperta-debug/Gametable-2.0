@@ -21,7 +21,7 @@ create table if not exists public.campaign_import_batches (
   metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  completed_at timestamptz,
+  completed_at timestamptz
 );
 
 -- A batch may only be created for an actual campaign, never for a regular event.
@@ -29,7 +29,7 @@ create or replace function public.validate_campaign_import_batch_event()
 returns trigger
 language plpgsql
 set search_path = public, pg_temp
-as $
+as $function$
 begin
   if not exists (
     select 1 from public.events e
@@ -39,7 +39,7 @@ begin
   end if;
   return new;
 end;
-$;
+$function$;
 
 drop trigger if exists trg_validate_campaign_import_batch_event on public.campaign_import_batches;
 create trigger trg_validate_campaign_import_batch_event
@@ -80,7 +80,7 @@ create or replace function public.validate_campaign_import_source_links()
 returns trigger
 language plpgsql
 set search_path = public, pg_temp
-as $
+as $function$
 begin
   if not exists (
     select 1 from public.campaign_import_batches b
@@ -90,7 +90,7 @@ begin
   end if;
   return new;
 end;
-$;
+$function$;
 
 drop trigger if exists trg_validate_campaign_import_source_links on public.campaign_import_sources;
 create trigger trg_validate_campaign_import_source_links
@@ -144,7 +144,7 @@ create or replace function public.validate_campaign_import_item_links()
 returns trigger
 language plpgsql
 set search_path = public, pg_temp
-as $$
+as $function$$
 begin
   if not exists (
     select 1 from public.campaign_import_batches b
