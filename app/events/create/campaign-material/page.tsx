@@ -37,38 +37,37 @@ export default function CreateCampaignFromMaterialPage() {
           </ArchiveCardButton>
         </div>
 
-        <ArchiveCard>
-          <ArchiveCardHeader>
-            <ArchiveCardTitle className="text-2xl normal-case">Luo kampanja materiaalista</ArchiveCardTitle>
-          </ArchiveCardHeader>
-          <ArchiveCardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Lisää valmis kampanjamateriaali. GameTable tunnistaa siitä kampanjan tiedot ja auttaa muodostamaan
-              nimen, kuvauksen, pelijärjestelmän, henkilöt, paikat, tehtävät ja sessiorungon.
-            </p>
-            <div className="rounded-md border border-accent-gold/20 bg-background/20 p-4">
-              <div className="flex items-start gap-3">
-                <BookOpen className="mt-1 h-5 w-5 shrink-0 text-accent-gold" />
-                <div className="space-y-1">
-                  <p className="font-medium text-accent-gold">Ensin aineisto, sitten kampanja</p>
-                  <p className="text-sm text-muted-foreground">
-                    Aluksi luodaan vain yksityinen valmistelupohja, jotta tiedostot voidaan tallentaa turvallisesti.
-                    Kampanjan varsinaiset tiedot muodostetaan myöhemmin tunnistetun aineiston ja sinun hyväksyntäsi perusteella.
-                  </p>
+        {!eventId ? (
+          <ArchiveCard>
+            <ArchiveCardHeader>
+              <ArchiveCardTitle className="text-2xl normal-case">Luo kampanja materiaalista</ArchiveCardTitle>
+            </ArchiveCardHeader>
+            <ArchiveCardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Lisää valmis kampanjamateriaali. GameTable tunnistaa siitä kampanjan tiedot ja auttaa muodostamaan
+                nimen, kuvauksen, pelijärjestelmän, henkilöt, paikat, tehtävät ja sessiorungon.
+              </p>
+              <div className="rounded-md border border-accent-gold/20 bg-background/20 p-4">
+                <div className="flex items-start gap-3">
+                  <BookOpen className="mt-1 h-5 w-5 shrink-0 text-accent-gold" />
+                  <div className="space-y-1">
+                    <p className="font-medium text-accent-gold">Ensin aineisto, sitten kampanja</p>
+                    <p className="text-sm text-muted-foreground">
+                      Aluksi luodaan vain yksityinen valmistelupohja, jotta tiedostot voidaan tallentaa turvallisesti.
+                      Kampanjan varsinaiset tiedot muodostetaan myöhemmin tunnistetun aineiston ja sinun hyväksyntäsi perusteella.
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {!eventId ? (
               <ArchiveCardButton onClick={startImport} active fullWidth disabled={busy} icon={busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <FilePlus2 className="h-4 w-4" />}>
                 {busy ? "Valmistellaan…" : "Aloita ja lisää kampanjamateriaali"}
               </ArchiveCardButton>
-            ) : (
-              <CampaignImportPanel eventId={eventId} />
-            )}
-            {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-          </ArchiveCardContent>
-        </ArchiveCard>
+              {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+            </ArchiveCardContent>
+          </ArchiveCard>
+        ) : (
+          <CampaignImportPanel eventId={eventId} />
+        )}
       </main>
     </div>
   )
