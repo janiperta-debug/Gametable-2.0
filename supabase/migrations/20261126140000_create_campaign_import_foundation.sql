@@ -31,10 +31,10 @@ language plpgsql
 set search_path = public, pg_temp
 as $function$
 begin
-  if not exists (
+  if not (exists (
     select 1 from public.events e
     where e.id = new.event_id and e.event_type = 'campaign'
-  ) then
+  )) then
     raise exception 'Campaign imports can only be attached to campaign events';
   end if;
   return new;
@@ -82,10 +82,10 @@ language plpgsql
 set search_path = public, pg_temp
 as $function$
 begin
-  if not exists (
+  if not (exists (
     select 1 from public.campaign_import_batches b
     where b.id = new.batch_id and b.event_id = new.event_id
-  ) then
+  )) then
     raise exception 'Campaign import source batch does not belong to this campaign';
   end if;
   return new;
@@ -146,19 +146,19 @@ language plpgsql
 set search_path = public, pg_temp
 as $function$$
 begin
-  if not exists (
+  if not (exists (
     select 1 from public.campaign_import_batches b
     where b.id = new.batch_id and b.event_id = new.event_id
-  ) then
+  )) then
     raise exception 'Campaign import item batch does not belong to this campaign';
   end if;
 
-  if new.source_id is not null and not exists (
+  if new.source_id is not null and not (exists (
     select 1 from public.campaign_import_sources s
     where s.id = new.source_id
       and s.batch_id = new.batch_id
       and s.event_id = new.event_id
-  ) then
+  )) then
     raise exception 'Campaign import item source does not belong to this batch';
   end if;
 
