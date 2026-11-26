@@ -739,7 +739,7 @@ export default function CreateEventPage() {
                 </div>
 
                 {/* Privacy Settings */}
-                <div className="space-y-4">
+                {!(eventType === "campaign" && campaignCreationMode === "material") && <div className="space-y-4">
                   <Label className="font-body text-accent-gold">{t("events.eventPrivacy")}</Label>
                   <RadioGroup value={privacy} onValueChange={setPrivacy} className="space-y-3">
                     <div className="flex items-center space-x-3">
@@ -783,10 +783,10 @@ export default function CreateEventPage() {
                       </div>
                     </div>
                   </RadioGroup>
-                </div>
+                </div>}
 
                 {/* Invite Friends Section - Show for private/friends events */}
-                {eventType !== "league" && (privacy === "private" || privacy === "friends") && (
+                {eventType !== "league" && !(eventType === "campaign" && campaignCreationMode === "material") && (privacy === "private" || privacy === "friends") && (
                   <div className="space-y-4 p-4 border border-accent-gold/30 rounded-lg bg-accent-gold/5">
                     <div className="flex items-center gap-2">
                       <UserPlus className="h-5 w-5 text-accent-gold" />
