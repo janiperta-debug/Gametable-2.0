@@ -166,7 +166,29 @@ async function saveToSupabase(cards: TCGSearchResult[], tcgSystem: TCGGame): Pro
 }
 
 // APITCG supplements the existing providers and powers games without a dedicated provider.
-const apitcgSlugs: Record<TCGGame, string> = {\n  magic: "magic", pokemon: "pokemon", yugioh: "yugioh", lorcana: "lorcana",\n  "flesh-and-blood": "flesh-and-blood", "one-piece": "one-piece",\n  riftbound: "riftbound", digimon: "digimon", gundam: "gundam",\n  "star-wars-unlimited": "star-wars-unlimited",\n  "dragon-ball-fusion-world": "dragon-ball-super-fusion-world",\n}\n\ninterface APITCGSearchOutcome { results: TCGSearchResult[]; status: number | null; error?: string; responseKeys?: string[]; rawCount?: number }\n\nasync function searchAPITCG(query: string, game: TCGGame): Promise<APITCGSearchOutcome> {
+const apitcgSlugs: Record<TCGGame, string> = {
+  magic: "magic",
+  pokemon: "pokemon",
+  yugioh: "yugioh",
+  lorcana: "lorcana",
+  "flesh-and-blood": "flesh-and-blood",
+  "one-piece": "one-piece",
+  riftbound: "riftbound",
+  digimon: "digimon",
+  gundam: "gundam",
+  "star-wars-unlimited": "star-wars-unlimited",
+  "dragon-ball-fusion-world": "dragon-ball-super-fusion-world",
+}
+
+interface APITCGSearchOutcome {
+  results: TCGSearchResult[]
+  status: number | null
+  error?: string
+  responseKeys?: string[]
+  rawCount?: number
+}
+
+async function searchAPITCG(query: string, game: TCGGame): Promise<APITCGSearchOutcome> {
   const apiKey = process.env.APITCG_API_KEY
   if (!apiKey) {
     console.warn("APITCG_API_KEY is not configured; skipping APITCG search")
