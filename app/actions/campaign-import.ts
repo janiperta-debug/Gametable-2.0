@@ -282,3 +282,65 @@ export async function cancelCampaignImportBatch(batchId: string) {
   revalidatePath("/events/" + access.eventId)
   return { success: true as const, batch }
 }
+
+
+/**
+ * Creates a private campaign draft that can receive source files before the
+ * final event details are generated from the imported material.
+ */
+export async function createCampaignImportDraft() {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { success: false as const, error: "Kirjautuminen vaaditaan." }
+
+  try {
+    const db = createServiceClient()
+    const now = new Date().toISOString()
+    const { data: event, error: eventError } = await db
+      .from("events")
+      .insert({
+        host_id: user.id,
+        title: "Kampanjan valmistelu",
+        description: null,
+        event_type: "campaign",
+        privacy: "private",
+        starts_at: now,
+        ends_at: null,
+        status: "upcoming",
+        event_config: {
+          campaignImportSetup: {
+            status: "awaiting_sources",
+            createdAt: now,
+          },
+        },
+      })
+      .select("id")
+      .single()
+
+    if (eventError || !event) {
+      return { success: false as const, error: eventError?.message || "Kampanjan valmistelun luonti epäonnistui." }
+    }
+
+    const { error: participantError } = await db
+      .from("event_participants")
+      .insert({
+        event_id: event.id,
+        user_id: user.id,
+        status: "attending",
+      })
+
+    if (participantError) {
+      await db.from("events").delete().eq("id", event.id).eq("host_id", user.id)
+      return { success: false as const, error: participantError.message }
+    }
+
+    revalidatePath("/events")
+    return { success: true as const, eventId: event.id }
+  } catch (error) {
+    console.error("Create campaign import draft failed:", error)
+    return {
+      success: false as const,
+      error: error instanceof Error ? error.message : "Kampanjan valmistelun luonti epäonnistui.",
+    }
+  }
+}
