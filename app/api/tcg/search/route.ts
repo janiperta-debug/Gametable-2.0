@@ -166,7 +166,7 @@ async function saveToSupabase(cards: TCGSearchResult[], tcgSystem: TCGGame): Pro
 }
 
 // APITCG supplements the existing providers and powers games without a dedicated provider.
-async function searchAPITCG(query: string, game: TCGGame): Promise<TCGSearchResult[]> {
+const apitcgSlugs: Record<TCGGame, string> = {\n  magic: "magic", pokemon: "pokemon", yugioh: "yugioh", lorcana: "lorcana",\n  "flesh-and-blood": "flesh-and-blood", "one-piece": "one-piece",\n  riftbound: "riftbound", digimon: "digimon", gundam: "gundam",\n  "star-wars-unlimited": "star-wars-unlimited",\n  "dragon-ball-fusion-world": "dragon-ball-super-fusion-world",\n}\n\ninterface APITCGSearchOutcome { results: TCGSearchResult[]; status: number | null; error?: string; responseKeys?: string[]; rawCount?: number }\n\nasync function searchAPITCG(query: string, game: TCGGame): Promise<APITCGSearchOutcome> {
   const apiKey = process.env.APITCG_API_KEY
   if (!apiKey) {
     console.warn("APITCG_API_KEY is not configured; skipping APITCG search")
@@ -538,5 +538,5 @@ export async function GET(request: NextRequest) {
     })
   }
 
-  return NextResponse.json({ results })
+  const debug = searchParams.get("debug") === "1"\n  return NextResponse.json(debug ? { results, diagnostics: { game: tcgSystem, apitcg: { status: apitcgOutcome.status, error: apitcgOutcome.error, responseKeys: apitcgOutcome.responseKeys, rawCount: apitcgOutcome.rawCount, mappedCount: apitcgOutcome.results.length } } } : { results })
 }
