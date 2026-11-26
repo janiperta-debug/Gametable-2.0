@@ -166,21 +166,6 @@ async function saveToSupabase(cards: TCGSearchResult[], tcgSystem: TCGGame): Pro
   }))
 }
 
-// APITCG supplements the existing providers and powers games without a dedicated provider.
-const apitcgSlugs: Record<TCGGame, string> = {
-  magic: "magic",
-  pokemon: "pokemon",
-  yugioh: "yugioh",
-  lorcana: "lorcana",
-  "flesh-and-blood": "flesh-and-blood",
-  "one-piece": "one-piece",
-  riftbound: "riftbound",
-  digimon: "digimon",
-  gundam: "gundam",
-  "star-wars-unlimited": "star-wars-unlimited",
-  "dragon-ball-fusion-world": "dragon-ball-super-fusion-world",
-}
-
 // Scryfall API for Magic: The Gathering
 async function searchScryfall(query: string): Promise<TCGSearchResult[]> {
   try {
