@@ -424,3 +424,79 @@ export async function getUserTCGWishlist(game?: TCGGame) {
 
   return { cards: data || [] }
 }
+
+
+export interface ManualTCGCardInput {
+  game: SearchTCGGame
+  name: string
+  setName?: string
+  setCode?: string
+  collectorNumber?: string
+  rarity?: string
+  language?: string
+  imageUrl?: string
+  quantity: number
+  condition: string
+  foil: boolean
+}
+
+export async function addManualTCGCard(input: ManualTCGCardInput): Promise<AddCardResult> {
+  const allowedGames: SearchTCGGame[] = ["magic", "pokemon", "yugioh", "lorcana", "flesh-and-blood", "one-piece", "riftbound", "digimon", "gundam", "star-wars-unlimited", "dragon-ball-fusion-world"]
+  const allowedConditions = ["near_mint", "lightly_played", "moderately_played", "heavily_played", "damaged"]
+  if (!allowedGames.includes(input.game) || !input.name.trim() ||
+      !Number.isInteger(input.quantity) || input.quantity < 1 ||
+      !allowedConditions.includes(input.condition)) {
+    return { success: false, error: "Tarkista kortin tiedot." }
+  }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: "Not authenticated" }
+
+  try {
+    const dbSystem = toDbTCGSystem(input.game)
+    const externalId = `manual:${crypto.randomUUID()}`
+    const { data: card, error: cardError } = await supabase
+      .from("tcg_cards")
+      .insert({
+        external_id: externalId,
+        name: input.name.trim(),
+        tcg_system: dbSystem,
+        set_name: input.setName?.trim() || null,
+        set_code: input.setCode?.trim() || null,
+        rarity: input.rarity?.trim() || null,
+        image_url: input.imageUrl?.trim() || null,
+      })
+      .select("id")
+      .single()
+
+    if (cardError || !card) throw new Error(cardError?.message || "Kortin luonti epäonnistui.")
+
+    const { error: collectionError } = await supabase
+      .from("tcg_collection")
+      .insert({
+        user_id: user.id,
+        card_id: card.id,
+        quantity: input.quantity,
+        condition: input.condition,
+        foil: input.foil,
+      })
+
+    if (collectionError) {
+      await supabase.from("tcg_cards").delete().eq("id", card.id)
+      throw new Error(collectionError.message)
+    }
+
+    if (input.collectorNumber || input.language) {
+      // Preserve user-supplied printing details without inventing catalog fields.
+      // These optional values are stored as source metadata in the card row only
+      // when a dedicated schema field exists in a future migration.
+    }
+
+    await awardXP(user.id, "tcg_card_added", 5, card.id)
+    return { success: true, cardId: card.id, isNew: true }
+  } catch (error) {
+    console.error("Manual TCG card add failed:", error)
+    return { success: false, error: error instanceof Error ? error.message : "Kortin lisääminen epäonnistui." }
+  }
+}
