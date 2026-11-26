@@ -562,5 +562,24 @@ export async function GET(request: NextRequest) {
     })
   }
 
-  const debug = searchParams.get("debug") === "1"\n  return NextResponse.json(debug ? { results, diagnostics: { game: tcgSystem, apitcg: { status: apitcgOutcome.status, error: apitcgOutcome.error, responseKeys: apitcgOutcome.responseKeys, rawCount: apitcgOutcome.rawCount, mappedCount: apitcgOutcome.results.length } } } : { results })
+  const debug = searchParams.get("debug") === "1"
+  const diagnostics = {
+    game: tcgSystem,
+    apitcg: {
+      status: apitcgOutcome.status,
+      error: apitcgOutcome.error,
+      responseKeys: apitcgOutcome.responseKeys,
+      rawCount: apitcgOutcome.rawCount,
+      mappedCount: apitcgOutcome.results.length,
+    },
+  }
+
+  if (results.length === 0 && ["flesh-and-blood", "one-piece", "riftbound", "digimon", "gundam", "star-wars-unlimited", "dragon-ball-fusion-world"].includes(tcgSystem)) {
+    return NextResponse.json(debug
+      ? { results: [], message: "No results found. Try adding cards manually for this game.", diagnostics }
+      : { results: [], message: "No results found. Try adding cards manually for this game." }
+    )
+  }
+
+  return NextResponse.json(debug ? { results, diagnostics } : { results })
 }
