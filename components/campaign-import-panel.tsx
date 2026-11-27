@@ -94,7 +94,10 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
   const [extractionSummary, setExtractionSummary] = useState("")
   const [expandedBatchId, setExpandedBatchId] = useState<string | null>(null)
   const [extractedFiles, setExtractedFiles] = useState<ExtractedPdfFile[]>([])
-  const [textLoading, setTextLoading] = useState(false)\n  const [expandedItemsBatchId, setExpandedItemsBatchId] = useState<string | null>(null)\n  const [reviewItems, setReviewItems] = useState<CampaignImportItem[]>([])\n  const [itemsLoading, setItemsLoading] = useState(false)
+  const [textLoading, setTextLoading] = useState(false)
+  const [expandedItemsBatchId, setExpandedItemsBatchId] = useState<string | null>(null)
+  const [reviewItems, setReviewItems] = useState<CampaignImportItem[]>([])
+  const [itemsLoading, setItemsLoading] = useState(false)
 
   const refreshBatches = async () => {
     const result = await listCampaignImportBatches(eventId)
