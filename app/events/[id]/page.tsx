@@ -25,6 +25,7 @@ import { createClient } from "@/lib/supabase/client"
 import { convertLegacyLeague } from "@/app/actions/league-hub"
 import { addEventRound, addPlannedEventRounds, addEventSession, addPlannedEventSessions, updateEventSession, updateCampaignProgression, addEventMatch, addEventEntry, removeEventEntry, recordEventMatch, getEventStructure, getEventStandings, type CampaignProgression } from "@/app/actions/event-structure"
 import { CampaignImportPanel } from "@/components/campaign-import-panel"
+import { CampaignWorldPanel } from "@/components/campaign-world-panel"
 
 const EVENT_TYPE_IMAGES: Record<string, string> = {
   game_night: "/images/events/game-night.png",
@@ -1390,6 +1391,7 @@ export default function EventDetailsPage() {
             )}
 
             {event.event_type === "campaign" && isHost && <CampaignImportPanel eventId={eventId} />}
+            {event.event_type === "campaign" && <CampaignWorldPanel eventId={eventId} />}
 
             {/* Event Structure */}
             {event.event_type && event.event_type !== "game_night" && (
