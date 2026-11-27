@@ -250,9 +250,9 @@ export async function getCampaignExtractedPdfTexts(batchId: string) {
           page: Number(page.page) || index + 1,
           text: typeof page.text === "string" ? page.text : "",
         }))
-      : (source.source_text ?? "").split(/(?=\\[Sivu \\d+\\]\\s*)/g)
+      : (source.source_text ?? "").split(/(?=\[Sivu \d+\]\s*)/g)
           .map((section) => {
-            const match = section.match(/^\\[Sivu (\\d+)\\]\\s*([\\s\\S]*)$/)
+            const match = section.match(/^\[Sivu (\d+)\]\s*([\s\S]*)$/)
             return match ? { page: Number(match[1]), text: match[2].trim() } : null
           })
           .filter((page): page is { page: number; text: string } => page !== null)
