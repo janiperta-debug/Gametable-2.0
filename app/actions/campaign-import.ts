@@ -430,7 +430,6 @@ export async function finalizeCampaignImportDraft(input: { eventId: string; titl
       title,
       description: description || null,
       event_config: nextConfig,
-      updated_at: new Date().toISOString(),
     })
     .eq("id", eventId)
     .eq("host_id", user.id)
