@@ -404,21 +404,80 @@ ${JSON.stringify(sourcePayload)}`
     if (!Array.isArray(parsed.items)) throw new Error("Tekoälyn palauttama JSON ei sisältänyt items-listaa.")
 
     const sourceById = new Map(usableSources.map((source) => [source.id, source]))
+    const invalidReasons: Record<string, number> = {}
+    const reject = (reason: string) => { invalidReasons[reason] = (invalidReasons[reason] ?? 0) + 1 }
+
     const proposals: CampaignAiProposal[] = parsed.items.slice(0, 100).flatMap((candidate: any) => {
-      if (!candidate || typeof candidate !== "object") return []
-      const sourceId = typeof candidate.sourceId === "string" ? candidate.sourceId : ""
+      if (!candidate || typeof candidate !== "object") {
+        reject("invalid_object")
+        return []
+      }
+
+      const suppliedSourceId = typeof candidate.sourceId === "string"
+        ? candidate.sourceId
+        : typeof candidate.source_id === "string" ? candidate.source_id : ""
+      const sourceId = sourceById.has(suppliedSourceId)
+        ? suppliedSourceId
+        : usableSources.length === 1 ? usableSources[0].id : ""
       const source = sourceById.get(sourceId)
-      const entityType = String(candidate.entityType ?? "")
-      const name = typeof candidate.name === "string" ? candidate.name.trim().slice(0, 180) : ""
-      const page = Number(candidate.page)
-      if (!source || !CAMPAIGN_ENTITY_TYPES.has(entityType) || !name ||
-          !Number.isInteger(page) || page < 1 || page > (source.page_count ?? 500)) return []
+      if (!source) {
+        reject("unknown_source")
+        return []
+      }
+
+      const rawType = String(candidate.entityType ?? candidate.entity_type ?? candidate.type ?? "").toLowerCase()
+      const typeAliases: Record<string, CampaignAiProposal["entityType"]> = {
+        npc: "person", person: "person", character: "character", player_character: "character",
+        location: "location", place: "location", faction: "faction", group: "faction",
+        quest: "quest", mission: "quest", objective: "quest", item: "item", artifact: "item",
+        creature: "creature", monster: "creature", history: "history", event: "history",
+        rule: "rule", mechanic: "rule", other: "other",
+      }
+      const entityType = typeAliases[rawType]
+      if (!entityType || !CAMPAIGN_ENTITY_TYPES.has(entityType)) {
+        reject("unknown_entity_type")
+        return []
+      }
+
+      const name = typeof candidate.name === "string"
+        ? candidate.name.trim().slice(0, 180)
+        : typeof candidate.title === "string" ? candidate.title.trim().slice(0, 180) : ""
+      if (!name) {
+        reject("missing_name")
+        return []
+      }
+
+      const quote = typeof candidate.quote === "string"
+        ? candidate.quote.slice(0, 1200)
+        : typeof candidate.sourceQuote === "string" ? candidate.sourceQuote.slice(0, 1200) : ""
+      const sourceReference = candidate.sourceReference && typeof candidate.sourceReference === "object"
+        ? candidate.sourceReference
+        : candidate.source_reference && typeof candidate.source_reference === "object"
+          ? candidate.source_reference : {}
+      let page = Number(candidate.page ?? candidate.pageNumber ?? sourceReference.page ?? sourceReference.pageNumber)
+      if (!Number.isInteger(page) || page < 1 || page > (source.page_count ?? 500)) {
+        page = 0
+        if (quote) {
+          const quoteIndex = source.source_text.indexOf(quote)
+          if (quoteIndex >= 0) {
+            const prefix = source.source_text.slice(0, quoteIndex)
+            const pageMatches = [...prefix.matchAll(/\[Sivu (\d+)\]/g)]
+            page = pageMatches.length ? Number(pageMatches[pageMatches.length - 1][1]) : 1
+          }
+        }
+      }
+      if (!Number.isInteger(page) || page < 1 || page > (source.page_count ?? 500)) {
+        reject("missing_page_reference")
+        return []
+      }
 
       const parsedData = candidate.parsedData && typeof candidate.parsedData === "object" && !Array.isArray(candidate.parsedData)
         ? candidate.parsedData as Record<string, unknown>
-        : {}
-      const relationships = Array.isArray(candidate.relationships)
-        ? candidate.relationships.slice(0, 20).flatMap((relationship: any) => {
+        : candidate.details && typeof candidate.details === "object" && !Array.isArray(candidate.details)
+          ? candidate.details as Record<string, unknown> : {}
+      const rawRelationships = candidate.relationships ?? candidate.proposedRelationships ?? candidate.proposed_relationships
+      const relationships = Array.isArray(rawRelationships)
+        ? rawRelationships.slice(0, 20).flatMap((relationship: any) => {
             if (!relationship || typeof relationship.targetName !== "string" || typeof relationship.relationshipType !== "string") return []
             return [{
               targetName: relationship.targetName.slice(0, 180),
@@ -430,17 +489,27 @@ ${JSON.stringify(sourcePayload)}`
 
       return [{
         sourceId,
-        entityType: entityType as CampaignAiProposal["entityType"],
+        entityType,
         name,
-        rawText: typeof candidate.rawText === "string" ? candidate.rawText.slice(0, 3000) : "",
+        rawText: typeof candidate.rawText === "string" ? candidate.rawText.slice(0, 3000)
+          : typeof candidate.description === "string" ? candidate.description.slice(0, 3000) : "",
         parsedData,
         confidence: Math.max(0, Math.min(1, Number(candidate.confidence) || 0)),
         page,
-        quote: typeof candidate.quote === "string" ? candidate.quote.slice(0, 1200) : "",
+        quote,
         relationships,
         reviewReason: typeof candidate.reviewReason === "string" ? candidate.reviewReason.slice(0, 1000) : null,
       }]
     })
+
+    if (!proposals.length) {
+      console.warn("Campaign import AI returned no valid proposals", {
+        batchId,
+        returnedItems: parsed.items.length,
+        invalidReasons,
+        firstItemKeys: parsed.items[0] && typeof parsed.items[0] === "object" ? Object.keys(parsed.items[0] as object) : [],
+      })
+    }
 
     if (!proposals.length) throw new Error("Aineistosta ei löytynyt tallennettavia kohde-ehdotuksia.")
 
