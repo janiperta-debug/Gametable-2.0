@@ -438,6 +438,15 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
                         <div className="text-sm font-medium text-accent-gold">Tunnistetut ehdotukset</div>
                         <Badge variant="outline" className="border-accent-gold/30 text-accent-gold">{reviewItems.length} ehdotusta</Badge>
                       </div>
+                      <ArchiveCardButton
+                        onClick={() => {
+                          setExpandedItemsBatchId(null)
+                          setSelectedItemIds([])
+                          window.scrollTo({ top: 0, behavior: "smooth" })
+                        }}
+                      >
+                        Palaa kampanjan tietoihin
+                      </ArchiveCardButton>
                       <p className="text-xs text-muted-foreground">Valitse hyväksymäsi kohteet. Ne lisätään kampanjan tietopankkiin pelinjohtajan yksityisinä tietoina.</p>
                       <div className="flex flex-wrap items-center gap-2">
                         <ArchiveCardButton active disabled={busy || selectedItemIds.length === 0} onClick={() => handleApproveSelected(batch.id)}>
