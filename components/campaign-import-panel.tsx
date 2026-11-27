@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { ArchiveCard, ArchiveCardButton, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle } from "@/components/archive-frame"
 import { Badge } from "@/components/ui/badge"
 import { FileText, Image as ImageIcon, Loader2, Upload, X } from "lucide-react"
@@ -10,6 +11,7 @@ import {
   createCampaignImportBatch,
   listCampaignImportBatches,
   registerCampaignImportSource,
+  finalizeCampaignImportDraft,
 } from "@/app/actions/campaign-import"
 import { processCampaignImportBatch, analyzeCampaignImportBatch, getCampaignImportItems } from "@/app/actions/campaign-pdf-extraction"
 import { approveCampaignImportItems } from "@/app/actions/campaign-world"
@@ -76,7 +78,8 @@ const STATUS_LABELS: Record<string, string> = {
   cancelled: "Peruttu",
 }
 
-export function CampaignImportPanel({ eventId }: { eventId: string }) {
+export function CampaignImportPanel({ eventId, finalizeOnComplete = false }: { eventId: string; finalizeOnComplete?: boolean }) {
+  const router = useRouter()
   const [files, setFiles] = useState<File[]>([])
   const [batches, setBatches] = useState<ImportBatch[]>([])
   const [busy, setBusy] = useState(false)
@@ -88,6 +91,8 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
   const [reviewItems, setReviewItems] = useState<CampaignImportItem[]>([])
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([])
   const [itemsLoading, setItemsLoading] = useState(false)
+  const [campaignTitle, setCampaignTitle] = useState("")
+  const [campaignDescription, setCampaignDescription] = useState("")
 
   const refreshBatches = async () => {
     const result = await listCampaignImportBatches(eventId)
@@ -261,6 +266,22 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
         if (refreshed.success) setReviewItems(refreshed.items as CampaignImportItem[])
         await refreshBatches()
       } catch { /* Keep the original error visible. */ }
+    } finally {
+      setBusy(false)
+    }
+  }
+
+
+  const handleFinalizeCampaign = async () => {
+    if (busy) return
+    setBusy(true)
+    setError("")
+    try {
+      const result = await finalizeCampaignImportDraft({ eventId, title: campaignTitle, description: campaignDescription })
+      if (!result.success) throw new Error(result.error)
+      router.push(`/events/${result.eventId}`)
+    } catch (finalizeError) {
+      setError(finalizeError instanceof Error ? finalizeError.message : "Kampanjan viimeistely epäonnistui.")
     } finally {
       setBusy(false)
     }
@@ -466,6 +487,24 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
             </div>
           )}
         </div>
+
+        {finalizeOnComplete && (
+          <div className="space-y-3 rounded-md border border-accent-gold/25 bg-background/30 p-3">
+            <div className="text-sm font-medium text-accent-gold">Muodosta kampanjatapahtuma</div>
+            <p className="text-sm text-muted-foreground">Kun olet tuonut haluamasi kohteet kampanjan tietopankkiin, viimeistele tämä valmistelu oikeaksi kampanjatapahtumaksi.</p>
+            <label className="block space-y-1 text-sm">
+              <span className="text-accent-gold">Kampanjan nimi</span>
+              <input value={campaignTitle} onChange={(event) => setCampaignTitle(event.target.value)} maxLength={120} placeholder="Esim. Varjot sumusuolla" className="w-full rounded-md border border-accent-gold/25 bg-background px-3 py-2 text-foreground" />
+            </label>
+            <label className="block space-y-1 text-sm">
+              <span className="text-accent-gold">Kuvaus (valinnainen)</span>
+              <textarea value={campaignDescription} onChange={(event) => setCampaignDescription(event.target.value)} maxLength={5000} rows={3} placeholder="Kampanjan lyhyt esittely pelaajille…" className="w-full rounded-md border border-accent-gold/25 bg-background px-3 py-2 text-foreground" />
+            </label>
+            <ArchiveCardButton active fullWidth disabled={busy || campaignTitle.trim().length < 3} onClick={handleFinalizeCampaign} icon={busy ? <Loader2 className="h-4 w-4 animate-spin" /> : undefined}>
+              {busy ? "Viimeistellään kampanjaa…" : "Luo kampanjatapahtuma"}
+            </ArchiveCardButton>
+          </div>
+        )}
       </ArchiveCardContent>
     </ArchiveCard>
   )
