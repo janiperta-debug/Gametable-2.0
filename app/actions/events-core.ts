@@ -178,6 +178,8 @@ export async function getMyEvents(): Promise<{ events: Event[]; error?: string }
   
   const now = new Date()
   const upcomingOrActive = allEvents.filter((event) => {
+    // Keep the host's unconfirmed campaign workspace visible regardless of its placeholder start date.
+    if (event.event_type === "campaign" && event.host_id === user.id && event.campaign_status !== "confirmed") return true
     const config = event.event_config as Record<string, unknown> | null
     const importSetup = config?.campaignImportSetup as { status?: string } | undefined
     if (["awaiting_sources", "processing", "review"].includes(importSetup?.status || "")) return true
