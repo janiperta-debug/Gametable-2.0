@@ -67,7 +67,14 @@ export async function approveCampaignImportItems(batchId: string, itemIds: strin
   let imported = 0
 
   for (const item of items) {
-    if (item.status === "imported") continue
+    if (item.status === "imported") {
+      const { data: prior } = await db.from("campaign_entity_sources")
+        .select("entity_id").eq("import_item_id", item.id).maybeSingle()
+      if (prior?.entity_id && Array.isArray(item.proposed_relationships) && item.proposed_relationships.length) {
+        relationshipCandidates.push({ sourceEntityId: prior.entity_id, relationships: item.proposed_relationships })
+      }
+      continue
+    }
     if (!["needs_review", "accepted"].includes(item.status)) continue
 
     const entityType = item.entity_type as CampaignEntityType
@@ -101,14 +108,14 @@ export async function approveCampaignImportItems(batchId: string, itemIds: strin
           .select("id, entity_type, name")
           .eq("event_id", access.eventId)
           .eq("entity_type", entityType)
-          .ilike("name", name)
           .eq("status", "active")
-          .maybeSingle()
-        if (!retryMatch) {
+          .limit(100)
+        const exactRetryMatch = (retryMatch ?? []).find((candidate) => candidate.name.trim().toLocaleLowerCase("fi-FI") === name.toLocaleLowerCase("fi-FI"))
+        if (!exactRetryMatch) {
           errors.push(`${name}: ${createError?.message ?? "Kohteen luonti epäonnistui."}`)
           continue
         }
-        entity = retryMatch
+        entity = exactRetryMatch
       } else {
         entity = created
       }
@@ -191,7 +198,7 @@ export async function approveCampaignImportItems(batchId: string, itemIds: strin
   }).eq("id", batchId).eq("event_id", access.eventId)
 
   revalidatePath("/events/" + access.eventId)
-  return { success: errors.length === 0, imported, relationshipsCreated, remaining: pendingCount ?? 0, errors }
+  return { success: errors.length === 0, error: errors.length ? errors.join(" ") : undefined, imported, relationshipsCreated, remaining: pendingCount ?? 0, errors }
 }
 
 export async function getCampaignWorldEntities(eventId: string) {
