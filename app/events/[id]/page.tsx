@@ -26,6 +26,7 @@ import { convertLegacyLeague } from "@/app/actions/league-hub"
 import { addEventRound, addPlannedEventRounds, addEventSession, addPlannedEventSessions, updateEventSession, updateCampaignProgression, addEventMatch, addEventEntry, removeEventEntry, recordEventMatch, getEventStructure, getEventStandings, type CampaignProgression } from "@/app/actions/event-structure"
 import { CampaignImportPanel } from "@/components/campaign-import-panel"
 import { CampaignWorldPanel } from "@/components/campaign-world-panel"
+import { CampaignSetupPanel } from "@/components/campaign-setup-panel"
 
 const EVENT_TYPE_IMAGES: Record<string, string> = {
   game_night: "/images/events/game-night.png",
@@ -1390,8 +1391,9 @@ export default function EventDetailsPage() {
               </ArchiveCard>
             )}
 
+            {event.event_type === "campaign" && isHost && <CampaignSetupPanel eventId={eventId} status={event.campaign_status} onConfirmed={(confirmedAt) => setEvent((current) => current ? { ...current, campaign_status: "confirmed", campaign_confirmed_at: confirmedAt ?? current.campaign_confirmed_at } : current)} />}
             {event.event_type === "campaign" && isHost && <CampaignImportPanel eventId={eventId} />}
-            {event.event_type === "campaign" && <CampaignWorldPanel eventId={eventId} />}
+            {event.event_type === "campaign" && <CampaignWorldPanel eventId={eventId} />
 
             {/* Event Structure */}
             {event.event_type && event.event_type !== "game_night" && (
@@ -1681,10 +1683,10 @@ export default function EventDetailsPage() {
               </ArchiveCard>
             )}
             {/* Attendees */}
-            <ArchiveCard>
+            <ArchiveCard id={event.event_type === "campaign" ? "campaign-participants" : undefined}>
               <ArchiveCardHeader>
                 <ArchiveCardTitle className="normal-case">
-                  {t("events.attendees") || "Attendees"} ({event.participants?.length || 0})
+                  {event.event_type === "campaign" ? "Kampanjan osallistujat" : (t("events.attendees") || "Attendees")} ({event.participants?.length || 0})
                 </ArchiveCardTitle>
               </ArchiveCardHeader>
               <ArchiveCardContent>
@@ -1752,12 +1754,12 @@ export default function EventDetailsPage() {
                         onClick={loadInvitableUsers}
                         icon={<UserPlus className="w-4 h-4" />}
                       >
-                        {t("events.inviteFriends") || "Invite Friends"}
+                        {event.event_type === "campaign" ? "Kutsu osallistujia" : (t("events.inviteFriends") || "Invite Friends")}
                       </ArchiveCardButton>
                     ) : (
                       <div className="space-y-3">
                         <h4 className="font-medium text-accent-gold">
-                          {t("events.inviteFriends") || "Invite Friends"}
+                          {event.event_type === "campaign" ? "Kutsu osallistujia" : (t("events.inviteFriends") || "Invite Friends")}
                         </h4>
                         {invitableUsers.length > 0 ? (
                           <div className="space-y-2">
