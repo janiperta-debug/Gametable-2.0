@@ -520,7 +520,7 @@ export async function getEventById(
     .from("event_participants")
     .select("*")
     .eq("event_id", eventId)
-    .in("status", ["attending", "maybe"])
+    .in("status", user?.id === event.host_id ? ["attending", "maybe", "invited"] : ["attending", "maybe"])
     .order("joined_at", { ascending: true })
 
   // Resolve participant profiles explicitly for the detail view.
