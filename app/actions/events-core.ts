@@ -498,7 +498,7 @@ export async function getEventById(
       .eq("event_id", eventId)
       .eq("user_id", user.id)
       .maybeSingle()
-    if (!invitation || invitation.status !== "invited") {
+    if (!invitation || !["invited", "attending", "maybe"].includes(invitation.status || "")) {
       return { error: "This campaign is not available yet." }
     }
   }
