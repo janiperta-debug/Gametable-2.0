@@ -274,7 +274,7 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
     setError("")
     try {
       const result = await approveCampaignImportItems(batchId, selectedItemIds)
-      if (!result.success) throw new Error(result.errors?.join(" ") || result.error || "Kohteiden siirto kampanjaan epäonnistui.")
+      if (!result.success) throw new Error(result.error || "Kohteiden siirto kampanjaan epäonnistui.")
       setExtractionSummary(`Kampanjaan lisättiin ${result.imported} kohdetta. ${result.remaining ? `${result.remaining} ehdotusta odottaa vielä tarkistusta.` : "Tuontierä on valmis."}`)
       setSelectedItemIds([])
       const refreshed = await getCampaignImportItems(batchId)
