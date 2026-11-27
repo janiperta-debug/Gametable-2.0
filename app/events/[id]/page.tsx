@@ -1255,9 +1255,6 @@ export default function EventDetailsPage() {
             {event.event_type === "campaign" && (
               <CampaignAccordionSection title="Kampanjan eteneminen">
               <ArchiveCard>
-                <ArchiveCardHeader>
-                  <ArchiveCardTitle className="text-xl normal-case">{t("eventUi.s55")}</ArchiveCardTitle>
-                </ArchiveCardHeader>
                 <ArchiveCardContent className="space-y-4">
                   {!editingProgression && !campaignProgression.currentStage && campaignProgression.stages.length === 0 && campaignProgression.total === 0 ? (
                     <div className="space-y-3">
@@ -1410,18 +1407,20 @@ export default function EventDetailsPage() {
             )}
 
             {event.event_type === "campaign" && isHost && <CampaignAccordionSection title="Kampanjan tila" meta={event.campaign_status === "confirmed" ? "Vahvistettu" : "Luonnos"}><CampaignSetupPanel eventId={eventId} status={event.campaign_status} onConfirmed={(confirmedAt) => setEvent((current) => current ? { ...current, campaign_status: "confirmed", campaign_confirmed_at: confirmedAt ?? current.campaign_confirmed_at } : current)} /></CampaignAccordionSection>}
-            {event.event_type === "campaign" && isHost && <CampaignAccordionSection title="Kampanjan aineisto"><CampaignImportPanel eventId={eventId} /></CampaignAccordionSection>}
-            {event.event_type === "campaign" && <CampaignAccordionSection title="Pelinjohtajan tietopankki"><CampaignWorldPanel eventId={eventId} /></CampaignAccordionSection>}
+            {event.event_type === "campaign" && isHost && <CampaignAccordionSection title="Lisämateriaalit"><CampaignImportPanel eventId={eventId} /></CampaignAccordionSection>}
+            {event.event_type === "campaign" && <CampaignAccordionSection title="Pelimaailma"><CampaignWorldPanel eventId={eventId} /></CampaignAccordionSection>}
 
             {/* Event Structure */}
             {event.event_type && event.event_type !== "game_night" && (
               <CampaignAccordionSection title={event.event_type === "campaign" ? "Pelisessiot" : t("eventFix.eventRounds")} meta={event.event_type === "campaign" ? `${structure.sessions.length} pelikertaa` : undefined} defaultOpen={event.event_type !== "campaign"}>
               <ArchiveCard>
+                {event.event_type !== "campaign" && (
                 <ArchiveCardHeader>
                   <ArchiveCardTitle className="text-xl normal-case">
                     {event.event_type === "campaign" ? t("eventFix.campaignSessions") : t("eventFix.eventRounds")}
                   </ArchiveCardTitle>
                 </ArchiveCardHeader>
+                )}
                 <ArchiveCardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground">
                     {event.event_type === "campaign"
@@ -1705,11 +1704,13 @@ export default function EventDetailsPage() {
             {/* Attendees */}
             <CampaignAccordionSection title={event.event_type === "campaign" ? "Osallistujat" : (t("events.attendees") || "Attendees")} meta={String(event.participants?.length || 0)} defaultOpen={event.event_type !== "campaign"}>
             <ArchiveCard id={event.event_type === "campaign" ? "campaign-participants" : undefined}>
+              {event.event_type !== "campaign" && (
               <ArchiveCardHeader>
                 <ArchiveCardTitle className="normal-case">
                   {event.event_type === "campaign" ? "Kampanjan osallistujat" : (t("events.attendees") || "Attendees")} ({event.participants?.length || 0})
                 </ArchiveCardTitle>
               </ArchiveCardHeader>
+              )}
               <ArchiveCardContent>
                 {event.participants && event.participants.length > 0 ? (
                   <div className="space-y-3">
