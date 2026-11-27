@@ -631,3 +631,22 @@ export async function getCampaignImportItems(batchId: string) {
     })),
   }
 }
+
+/** Runs the PDF text extraction and content recognition as one user-facing operation. */
+export async function processCampaignImportBatch(batchId: string) {
+  const extraction = await extractCampaignPdfText(batchId)
+  if (!extraction.success) return extraction
+
+  const analysis = await analyzeCampaignImportBatch(batchId)
+  if (!analysis.success) return analysis
+
+  return {
+    success: true as const,
+    count: analysis.count,
+    model: analysis.model,
+    extractedFiles: extraction.results.length,
+    extractedPages: extraction.results.reduce((sum, item) => sum + item.extractedPages, 0),
+    totalPages: extraction.results.reduce((sum, item) => sum + item.pageCount, 0),
+    errors: extraction.errors,
+  }
+}
