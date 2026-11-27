@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, type ReactNode } from "react"
 import { useParams, useRouter } from "next/navigation"
 import {
   ArchiveCard,
@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { EventChat } from "@/components/event-chat"
 import { 
   ArrowLeft, Calendar, Clock, MapPin, Users, Globe, UserCheck, Lock, 
-  Edit, Loader2, User, XCircle, CheckCircle2, UserPlus, X
+  Edit, Loader2, User, XCircle, CheckCircle2, UserPlus, X, ChevronDown
 } from "lucide-react"
 import { useTranslation } from "@/lib/i18n"
 import { getEventById, updateRSVP, cancelEvent, completeEvent, getInvitableUsers, inviteToEvent, uninviteFromEvent, type Event, type EventParticipant, type RSVPStatus } from "@/app/actions/events"
@@ -27,6 +27,22 @@ import { addEventRound, addPlannedEventRounds, addEventSession, addPlannedEventS
 import { CampaignImportPanel } from "@/components/campaign-import-panel"
 import { CampaignWorldPanel } from "@/components/campaign-world-panel"
 import { CampaignSetupPanel } from "@/components/campaign-setup-panel"
+
+
+function CampaignAccordionSection({ title, meta, children }: { title: string; meta?: string; children: ReactNode }) {
+  return (
+    <details className="group overflow-hidden rounded-xl border border-accent-gold/20 bg-black/20">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-4 transition-colors hover:bg-accent-gold/5 [&::-webkit-details-marker]:hidden">
+        <span className="font-cinzel text-base text-accent-gold sm:text-lg">{title}</span>
+        <span className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground sm:text-sm">
+          {meta && <span>{meta}</span>}
+          <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
+        </span>
+      </summary>
+      <div className="space-y-4 border-t border-accent-gold/15 p-3 sm:p-4">{children}</div>
+    </details>
+  )
+}
 
 const EVENT_TYPE_IMAGES: Record<string, string> = {
   game_night: "/images/events/game-night.png",
@@ -1236,7 +1252,7 @@ export default function EventDetailsPage() {
               </ArchiveCard>
             )}
 
-            {event.event_type === "campaign" && (
+            <CampaignAccordionSection title="Kampanjan eteneminen">{event.event_type === "campaign" && (
               <ArchiveCard>
                 <ArchiveCardHeader>
                   <ArchiveCardTitle className="text-xl normal-case">{t("eventUi.s55")}</ArchiveCardTitle>
@@ -1388,15 +1404,24 @@ export default function EventDetailsPage() {
                     </div>
                   )}
                 </ArchiveCardContent>
+</CampaignAccordionSection>
               </ArchiveCard>
             )}
 
-            {event.event_type === "campaign" && isHost && <CampaignSetupPanel eventId={eventId} status={event.campaign_status} onConfirmed={(confirmedAt) => setEvent((current) => current ? { ...current, campaign_status: "confirmed", campaign_confirmed_at: confirmedAt ?? current.campaign_confirmed_at } : current)} />}
-            {event.event_type === "campaign" && isHost && <CampaignImportPanel eventId={eventId} />}
-            {event.event_type === "campaign" && <CampaignWorldPanel eventId={eventId} />}
+            <CampaignAccordionSection title="Kampanjan tila" meta={event.campaign_status === "confirmed" ? "Vahvistettu" : "Luonnos"}>
+              {event.event_type === "campaign" && isHost && <CampaignSetupPanel eventId={eventId} status={event.campaign_status} onConfirmed={(confirmedAt) => setEvent((current) => current ? { ...current, campaign_status: "confirmed", campaign_confirmed_at: confirmedAt ?? current.campaign_confirmed_at } : current)}</CampaignAccordionSection>
+             />}
+            <CampaignAccordionSection title="Kampanjan aineisto">
+              {event.event_type === "campaign" && isHost && <CampaignImportPanel eventId={eventId}</CampaignAccordionSection>
+             />}
+            <CampaignAccordionSection title="Pelinjohtajan tietopankki">
+              {event.event_type === "campaign" && <CampaignWorldPanel eventId={eventId}</CampaignAccordionSection>
+             />}
 
             {/* Event Structure */}
-            {event.event_type && event.event_type !== "game_night" && (
+            {event.event_type === "campaign" ? (
+              <CampaignAccordionSection title="Pelisessiot" meta={`${structure.sessions.length} pelikertaa`}>
+                {event.event_type && event.event_type !== "game_night" && (
               <ArchiveCard>
                 <ArchiveCardHeader>
                   <ArchiveCardTitle className="text-xl normal-case">
@@ -1660,8 +1685,10 @@ export default function EventDetailsPage() {
                     </>
                   )}
                 </ArchiveCardContent>
-              </ArchiveCard>
-            )}
+              </CampaignAccordionSection>
+            ) : (
+                            </ArchiveCard>
+
 
             {event.event_type === "tournament" && (
               <ArchiveCard>
@@ -1681,13 +1708,13 @@ export default function EventDetailsPage() {
                   )}
                 </ArchiveCardContent>
               </ArchiveCard>
-            )}
+            )}}
             {/* Attendees */}
-            <ArchiveCard id={event.event_type === "campaign" ? "campaign-participants" : undefined}>
+            {event.event_type === "campaign" ? (
+              <CampaignAccordionSection title="Osallistujat" meta={String(event.participants?.length || 0)}>
+                <ArchiveCard id="campaign-participants">
               <ArchiveCardHeader>
-                <ArchiveCardTitle className="normal-case">
-                  {event.event_type === "campaign" ? "Kampanjan osallistujat" : (t("events.attendees") || "Attendees")} ({event.participants?.length || 0})
-                </ArchiveCardTitle>
+                <ArchiveCardTitle className="normal-case">{t("events.attendees") || "Attendees"} ({event.participants?.length || 0})</ArchiveCardTitle>
               </ArchiveCardHeader>
               <ArchiveCardContent>
                 {event.participants && event.participants.length > 0 ? (
@@ -1797,7 +1824,11 @@ export default function EventDetailsPage() {
                   </div>
                 )}
               </ArchiveCardContent>
+                </ArchiveCard>
+              </CampaignAccordionSection>
+            ) : (
             </ArchiveCard>
+            )}
           </div>
 
           {/* Event Chat - only show for participants/host */}
