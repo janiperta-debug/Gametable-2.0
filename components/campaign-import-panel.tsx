@@ -12,6 +12,7 @@ import {
   registerCampaignImportSource,
 } from "@/app/actions/campaign-import"
 import { analyzeCampaignImportBatch, extractCampaignPdfText, getCampaignImportItems, getCampaignExtractedPdfTexts } from "@/app/actions/campaign-pdf-extraction"
+import { approveCampaignImportItems } from "@/app/actions/campaign-world"
 
 const MAX_FILES = 10
 const MAX_FILE_SIZE = 25 * 1024 * 1024
@@ -97,6 +98,7 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
   const [textLoading, setTextLoading] = useState(false)
   const [expandedItemsBatchId, setExpandedItemsBatchId] = useState<string | null>(null)
   const [reviewItems, setReviewItems] = useState<CampaignImportItem[]>([])
+  const [selectedItemIds, setSelectedItemIds] = useState<string[]>([])
   const [itemsLoading, setItemsLoading] = useState(false)
 
   const refreshBatches = async () => {
@@ -244,6 +246,7 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
     if (expandedItemsBatchId === batchId) {
       setExpandedItemsBatchId(null)
       setReviewItems([])
+      setSelectedItemIds([])
       return
     }
 
@@ -251,6 +254,7 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
     setError("")
     setExpandedItemsBatchId(batchId)
     setReviewItems([])
+    setSelectedItemIds([])
     try {
       const result = await getCampaignImportItems(batchId)
       if (!result.success) throw new Error(result.error)
@@ -261,6 +265,30 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
       setError(loadError instanceof Error ? loadError.message : "Ehdotusten lataaminen epäonnistui.")
     } finally {
       setItemsLoading(false)
+    }
+  }
+
+  const handleApproveSelected = async (batchId: string) => {
+    if (!selectedItemIds.length || busy) return
+    setBusy(true)
+    setError("")
+    try {
+      const result = await approveCampaignImportItems(batchId, selectedItemIds)
+      if (!result.success) throw new Error(result.errors?.join(" ") || result.error || "Kohteiden siirto kampanjaan epäonnistui.")
+      setExtractionSummary(`Kampanjaan lisättiin ${result.imported} kohdetta. ${result.remaining ? `${result.remaining} ehdotusta odottaa vielä tarkistusta.` : "Tuontierä on valmis."}`)
+      setSelectedItemIds([])
+      const refreshed = await getCampaignImportItems(batchId)
+      if (refreshed.success) setReviewItems(refreshed.items as CampaignImportItem[])
+      await refreshBatches()
+    } catch (approveError) {
+      setError(approveError instanceof Error ? approveError.message : "Kohteiden siirto kampanjaan epäonnistui.")
+      try {
+        const refreshed = await getCampaignImportItems(batchId)
+        if (refreshed.success) setReviewItems(refreshed.items as CampaignImportItem[])
+        await refreshBatches()
+      } catch { /* Keep the original error visible. */ }
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -410,6 +438,15 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
                         <div className="text-sm font-medium text-accent-gold">Tunnistetut ehdotukset</div>
                         <Badge variant="outline" className="border-accent-gold/30 text-accent-gold">{reviewItems.length} ehdotusta</Badge>
                       </div>
+                      <p className="text-xs text-muted-foreground">Valitse hyväksymäsi kohteet. Ne lisätään kampanjan tietopankkiin pelinjohtajan yksityisinä tietoina.</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <ArchiveCardButton active disabled={busy || selectedItemIds.length === 0} onClick={() => handleApproveSelected(batch.id)}>
+                          {busy ? "Tallennetaan…" : `Tuo valitut kampanjaan (${selectedItemIds.length})`}
+                        </ArchiveCardButton>
+                        <ArchiveCardButton disabled={busy || reviewItems.filter((item) => item.status === "needs_review").length === 0} onClick={() => setSelectedItemIds(reviewItems.filter((item) => item.status === "needs_review").map((item) => item.id))}>
+                          Valitse kaikki odottavat
+                        </ArchiveCardButton>
+                      </div>
                       {itemsLoading ? (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Ladataan ehdotuksia…</div>
                       ) : reviewItems.length === 0 ? (
@@ -419,8 +456,18 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
                           {reviewItems.map((item) => (
                             <details key={item.id} className="rounded-md border border-accent-gold/15 bg-background/40 p-3">
                               <summary className="flex cursor-pointer list-none flex-wrap items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  className="h-4 w-4 accent-amber-500"
+                                  aria-label={`Valitse ${item.name}`}
+                                  checked={selectedItemIds.includes(item.id)}
+                                  disabled={item.status === "imported" || busy}
+                                  onChange={(event) => setSelectedItemIds((current) => event.target.checked ? [...current, item.id] : current.filter((id) => id !== item.id))}
+                                  onClick={(event) => event.stopPropagation()}
+                                />
                                 <span className="min-w-0 flex-1 text-sm font-medium">{item.name}</span>
                                 <Badge variant="outline" className="border-accent-gold/25 text-accent-gold">{ENTITY_TYPE_LABELS[item.entityType] ?? item.entityType}</Badge>
+                                {item.status === "imported" && <Badge variant="outline" className="border-green-600/30 text-green-500">Kampanjassa</Badge>}
                               </summary>
                               <div className="mt-3 space-y-3 text-sm">
                                 {item.description && <p className="whitespace-pre-wrap">{item.description}</p>}
