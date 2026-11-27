@@ -489,6 +489,20 @@ export async function getEventById(
     host = hostProfile
   }
 
+  // Unconfirmed campaigns are visible only to the host and users who have been invited.
+  if (event.event_type === "campaign" && event.campaign_status !== "confirmed" && event.host_id !== user?.id) {
+    if (!user) return { error: "This campaign is not available yet." }
+    const { data: invitation } = await supabase
+      .from("event_participants")
+      .select("status")
+      .eq("event_id", eventId)
+      .eq("user_id", user.id)
+      .maybeSingle()
+    if (!invitation || invitation.status !== "invited") {
+      return { error: "This campaign is not available yet." }
+    }
+  }
+
   // Check access for private events only - public and friends events are visible
   if (event.privacy === "private" && event.host_id !== user?.id) {
     // Check if user is a participant
@@ -609,6 +623,7 @@ export async function updateEvent(
       max_players: data.max_players,
       status: data.status,
       event_config: data.event_config,
+      ...(data.event_type && data.event_type !== "campaign" ? { campaign_status: null, campaign_confirmed_at: null, campaign_confirmed_by: null } : {}),
     })
     .eq("id", eventId)
     .select()
