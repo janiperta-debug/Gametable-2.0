@@ -37,7 +37,7 @@ export default function CreateCampaignFromMaterialPage() {
         </div>
 
         {eventId ? (
-          <CampaignImportPanel eventId={eventId} />
+          <CampaignImportPanel eventId={eventId} finalizeOnComplete />
         ) : busy ? (
           <ArchiveCard>
             <ArchiveCardContent className="flex items-center gap-3 py-8 text-sm text-muted-foreground">
