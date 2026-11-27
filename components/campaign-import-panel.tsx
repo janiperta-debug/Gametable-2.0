@@ -27,16 +27,6 @@ const ALLOWED_TYPES = [
   "image/webp",
 ]
 
-type ExtractedPdfFile = {
-  id: string
-  fileName: string
-  pageCount: number
-  pages: Array<{ page: number; text: string }>
-  truncated: boolean
-  emptyPages: number[]
-  extractedAt: string | null
-}
-
 
 type CampaignImportItem = {
   id: string
