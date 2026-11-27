@@ -26,7 +26,17 @@ const ALLOWED_TYPES = [
   "image/webp",
 ]
 
-type ExtractedPdfFile = {\n  id: string\n  fileName: string\n  pageCount: number\n  pages: Array<{ page: number; text: string }>\n  truncated: boolean\n  emptyPages: number[]\n  extractedAt: string | null\n}\n\ntype ImportBatch = {
+type ExtractedPdfFile = {
+  id: string
+  fileName: string
+  pageCount: number
+  pages: Array<{ page: number; text: string }>
+  truncated: boolean
+  emptyPages: number[]
+  extractedAt: string | null
+}
+
+type ImportBatch = {
   id: string
   status: string
   source_count: number
@@ -51,7 +61,10 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
   const [busy, setBusy] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const [extractionSummary, setExtractionSummary] = useState("")\n  const [expandedBatchId, setExpandedBatchId] = useState<string | null>(null)\n  const [extractedFiles, setExtractedFiles] = useState<ExtractedPdfFile[]>([])\n  const [textLoading, setTextLoading] = useState(false)
+  const [extractionSummary, setExtractionSummary] = useState("")
+  const [expandedBatchId, setExpandedBatchId] = useState<string | null>(null)
+  const [extractedFiles, setExtractedFiles] = useState<ExtractedPdfFile[]>([])
+  const [textLoading, setTextLoading] = useState(false)
 
   const refreshBatches = async () => {
     const result = await listCampaignImportBatches(eventId)
