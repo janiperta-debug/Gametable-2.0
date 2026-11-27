@@ -11,7 +11,7 @@ import {
   listCampaignImportBatches,
   registerCampaignImportSource,
 } from "@/app/actions/campaign-import"
-import { analyzeCampaignImportBatch, extractCampaignPdfText, getCampaignImportItems, getCampaignExtractedPdfTexts } from "@/app/actions/campaign-pdf-extraction"
+import { processCampaignImportBatch, analyzeCampaignImportBatch, getCampaignImportItems } from "@/app/actions/campaign-pdf-extraction"
 import { approveCampaignImportItems } from "@/app/actions/campaign-world"
 
 const MAX_FILES = 10
@@ -93,9 +93,6 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [extractionSummary, setExtractionSummary] = useState("")
-  const [expandedBatchId, setExpandedBatchId] = useState<string | null>(null)
-  const [extractedFiles, setExtractedFiles] = useState<ExtractedPdfFile[]>([])
-  const [textLoading, setTextLoading] = useState(false)
   const [expandedItemsBatchId, setExpandedItemsBatchId] = useState<string | null>(null)
   const [reviewItems, setReviewItems] = useState<CampaignImportItem[]>([])
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([])
@@ -181,9 +178,17 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
         uploadedCount += 1
       }
 
+      const pdfOnly = files.every((file) => file.type === "application/pdf")
       setFiles([])
+      if (pdfOnly) {
+        const processed = await processCampaignImportBatch(created.batch.id)
+        if (!processed.success) throw new Error(processed.error)
+        setExtractionSummary(`Aineiston käsittely valmis: ${processed.count} ehdotusta odottaa tarkistusta.`)
+        if (processed.errors?.length) setError(processed.errors.join(" "))
+      } else {
+        setExtractionSummary("Aineisto tallennettiin. Tämän tiedostomuodon automaattinen sisällöntunnistus otetaan käyttöön seuraavassa vaiheessa.")
+      }
       await refreshBatches()
-      setError("")
     } catch (uploadError) {
       const message = uploadError instanceof Error ? uploadError.message : "Lähdetiedostojen lisääminen epäonnistui."
       setError(uploadedCount > 0 ? `${uploadedCount} tiedostoa lisättiin. ${message}` : message)
@@ -193,54 +198,30 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
     }
   }
 
-  const handleExtractPdfs = async (batchId: string) => {
+  const handleProcessBatch = async (batchId: string, status: string) => {
     if (busy) return
     setBusy(true)
     setError("")
     setExtractionSummary("")
-
     try {
-      const result = await extractCampaignPdfText(batchId)
-      if (!result.success) {
-        const message = "error" in result ? result.error : result.errors?.join(" ")
-        throw new Error(message || "PDF-tekstin poiminta epäonnistui.")
+      if (status === "review") {
+        const result = await analyzeCampaignImportBatch(batchId)
+        if (!result.success) throw new Error(result.error)
+        setExtractionSummary(`Aineiston käsittely valmis. ${result.count} ehdotusta odottaa tarkistusta.`)
+      } else {
+        const result = await processCampaignImportBatch(batchId)
+        if (!result.success) throw new Error(result.error)
+        setExtractionSummary(`Aineiston käsittely valmis: ${result.count} ehdotusta odottaa tarkistusta.`)
+        if (result.errors?.length) setError(result.errors.join(" "))
       }
-      const extracted = result.results.reduce((sum, item) => sum + item.extractedPages, 0)
-      const total = result.results.reduce((sum, item) => sum + item.pageCount, 0)
-      const ocrCount = result.results.filter((item) => item.needsOcr).length
-      setExtractionSummary(
-        `PDF-käsittely valmis: ${result.results.length} tiedostoa, ${extracted}/${total} sivua sisälsi tekstiä.${ocrCount ? ` ${ocrCount} tiedostossa on sivuja, jotka voivat vaatia OCR-tunnistuksen.` : ""}`
-      )
-      if (result.errors?.length) setError(result.errors.join(" "))
       await refreshBatches()
-    } catch (extractError) {
-      setError(extractError instanceof Error ? extractError.message : "PDF-tekstin poiminta epäonnistui.")
-      try { await refreshBatches() } catch { /* Keep the extraction error visible. */ }
-    } finally {
-      setBusy(false)
-    }
-  }
-
-
-
-  const handleAnalyzeCampaign = async (batchId: string) => {
-    if (busy) return
-    setBusy(true)
-    setError("")
-    setExtractionSummary("")
-    try {
-      const result = await analyzeCampaignImportBatch(batchId)
-      if (!result.success) throw new Error(result.error)
-      setExtractionSummary(`Tekoäly muodosti ${result.count} tarkistettavaa ehdotusta. Mitään ei ole vielä lisätty kampanjan varsinaiseen sisältöön.`)
-      await refreshBatches()
-    } catch (analysisError) {
-      setError(analysisError instanceof Error ? analysisError.message : "Kampanjan tekoälytunnistus epäonnistui.")
+    } catch (processError) {
+      setError(processError instanceof Error ? processError.message : "Aineiston käsittely epäonnistui.")
       try { await refreshBatches() } catch { /* Keep the original error visible. */ }
     } finally {
       setBusy(false)
     }
   }
-
 
   const handleViewImportItems = async (batchId: string) => {
     if (expandedItemsBatchId === batchId) {
@@ -289,30 +270,6 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
       } catch { /* Keep the original error visible. */ }
     } finally {
       setBusy(false)
-    }
-  }
-
-  const handleViewExtractedText = async (batchId: string) => {
-    if (expandedBatchId === batchId) {
-      setExpandedBatchId(null)
-      setExtractedFiles([])
-      return
-    }
-
-    setTextLoading(true)
-    setError("")
-    setExpandedBatchId(batchId)
-    setExtractedFiles([])
-    try {
-      const result = await getCampaignExtractedPdfTexts(batchId)
-      if (!result.success) throw new Error(result.error)
-      setExtractedFiles(result.files as ExtractedPdfFile[])
-      if (result.files.length === 0) setError("Tästä tuontierästä ei löytynyt poimittua PDF-tekstiä.")
-    } catch (loadError) {
-      setExpandedBatchId(null)
-      setError(loadError instanceof Error ? loadError.message : "Poimitun tekstin lataaminen epäonnistui.")
-    } finally {
-      setTextLoading(false)
     }
   }
 
@@ -401,11 +358,13 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {["uploaded", "failed"].includes(batch.status) && batch.source_count > 0 && (
-                      <ArchiveCardButton active disabled={busy} onClick={() => handleExtractPdfs(batch.id)}>Poimi PDF-tekstit</ArchiveCardButton>
+                      <ArchiveCardButton active disabled={busy} onClick={() => handleProcessBatch(batch.id, batch.status)}>
+                        {busy ? "Käsitellään…" : "Käsittele aineisto"}
+                      </ArchiveCardButton>
                     )}
                     {batch.status === "review" && batch.item_count === 0 && (
-                      <ArchiveCardButton active disabled={busy} onClick={() => handleAnalyzeCampaign(batch.id)}>
-                        {busy ? "Tunnistetaan…" : "Tunnista sisältö tekoälyllä"}
+                      <ArchiveCardButton active disabled={busy} onClick={() => handleProcessBatch(batch.id, "review")}>
+                        {busy ? "Tunnistetaan…" : "Tunnista aineisto"}
                       </ArchiveCardButton>
                     )}
                     {batch.item_count > 0 && (
@@ -417,14 +376,6 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
                         {itemsLoading && expandedItemsBatchId === batch.id
                           ? <Loader2 className="h-4 w-4 animate-spin" />
                           : expandedItemsBatchId === batch.id ? "Piilota ehdotukset" : "Tarkista ehdotukset"}
-                      </ArchiveCardButton>
-                    )}
-                    {["review", "completed", "partial"].includes(batch.status) && (
-                      <ArchiveCardButton
-                        disabled={textLoading && expandedBatchId === batch.id}
-                        onClick={() => handleViewExtractedText(batch.id)}
-                      >
-                        {textLoading && expandedBatchId === batch.id ? <Loader2 className="h-4 w-4 animate-spin" /> : expandedBatchId === batch.id ? "Piilota poimittu teksti" : "Näytä poimittu teksti"}
                       </ArchiveCardButton>
                     )}
                     {["uploaded", "review", "failed"].includes(batch.status) && (
@@ -516,33 +467,7 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
                       )}
                     </div>
                   )}
-                  {expandedBatchId === batch.id && (
-                    <div className="mt-3 w-full space-y-3 rounded-md border border-accent-gold/20 bg-background/30 p-3">
-                      <div className="text-sm font-medium text-accent-gold">Poimittu PDF-teksti</div>
-                      {textLoading ? (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Ladataan tekstiä…</div>
-                      ) : extractedFiles.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">Poimittua tekstiä ei löytynyt.</p>
-                      ) : extractedFiles.map((file) => (
-                        <div key={file.id} className="space-y-2">
-                          <div className="text-sm font-medium break-words">{file.fileName}</div>
-                          <p className="text-xs text-muted-foreground">
-                            {file.pages.length} tekstisivua / {file.pageCount} sivua
-                            {file.truncated ? " · Tekstiä on rajattu enimmäispituuden vuoksi." : ""}
-                            {file.emptyPages.length ? ` · OCR-tarkistusta mahdollisesti vaativat sivut: ${file.emptyPages.join(", ")}.` : ""}
-                          </p>
-                          <div className="space-y-2">
-                            {file.pages.map((page) => (
-                              <details key={page.page} className="rounded border border-accent-gold/10 bg-background/40 p-2">
-                                <summary className="cursor-pointer text-sm font-medium">Sivu {page.page}</summary>
-                                <pre className="mt-2 max-h-96 overflow-auto whitespace-pre-wrap break-words font-sans text-xs leading-relaxed text-foreground">{page.text || "Sivulta ei löytynyt tekstikerrosta."}</pre>
-                              </details>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+
                 </div>
               ))}
             </div>
