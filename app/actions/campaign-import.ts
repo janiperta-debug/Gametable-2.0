@@ -357,3 +357,87 @@ export async function createCampaignImportDraft() {
     }
   }
 }
+
+/** Finalizes the import draft as the actual campaign event. */
+export async function finalizeCampaignImportDraft(input: { eventId: string; title: string; description?: string }) {
+  const eventId = typeof input?.eventId === "string" ? input.eventId : ""
+  const title = typeof input?.title === "string" ? input.title.trim() : ""
+  const description = typeof input?.description === "string" ? input.description.trim() : ""
+
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(eventId)) {
+    return { success: false as const, error: "Virheellinen kampanja." }
+  }
+  if (title.length < 3 || title.length > 120) {
+    return { success: false as const, error: "Anna kampanjalle nimi (3–120 merkkiä)." }
+  }
+  if (description.length > 5000) {
+    return { success: false as const, error: "Kuvaus on liian pitkä (enintään 5000 merkkiä)." }
+  }
+
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { success: false as const, error: "Kirjautuminen vaaditaan." }
+
+  const db = createServiceClient()
+  const { data: event, error: eventError } = await db
+    .from("events")
+    .select("id, host_id, event_type, title, event_config, campaign_status")
+    .eq("id", eventId)
+    .maybeSingle()
+
+  if (eventError || !event) return { success: false as const, error: "Kampanjan valmistelua ei löytynyt." }
+  if (event.host_id !== user.id || event.event_type !== "campaign") {
+    return { success: false as const, error: "Vain kampanjanjohtaja voi viimeistellä kampanjan." }
+  }
+
+  const currentConfig = event.event_config && typeof event.event_config === "object"
+    ? event.event_config as Record<string, unknown>
+    : {}
+  const setup = currentConfig.campaignImportSetup as { status?: string } | undefined
+  if (!setup || setup.status !== "awaiting_sources") {
+    return { success: false as const, error: "Tämä kampanja on jo viimeistelty tai sitä ei voi viimeistellä tässä näkymässä." }
+  }
+
+  const { count: sourceCount, error: sourceError } = await db
+    .from("campaign_import_sources")
+    .select("id", { count: "exact", head: true })
+    .eq("event_id", eventId)
+  if (sourceError) return { success: false as const, error: sourceError.message }
+  if (!sourceCount) return { success: false as const, error: "Lisää kampanjalle vähintään yksi lähdeaineisto ennen viimeistelyä." }
+
+  const { count: importedCount, error: itemError } = await db
+    .from("campaign_import_items")
+    .select("id", { count: "exact", head: true })
+    .eq("event_id", eventId)
+    .eq("status", "imported")
+  if (itemError) return { success: false as const, error: itemError.message }
+  if (!importedCount) return { success: false as const, error: "Hyväksy ensin vähintään yksi tunnistettu kohde kampanjan tietopankkiin." }
+
+  const nextConfig = {
+    ...currentConfig,
+    campaignImportSetup: {
+      ...setup,
+      status: "ready",
+      finalizedAt: new Date().toISOString(),
+      sourceCount,
+      importedEntityCount: importedCount,
+    },
+  }
+
+  const { error: updateError } = await db
+    .from("events")
+    .update({
+      title,
+      description: description || null,
+      event_config: nextConfig,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", eventId)
+    .eq("host_id", user.id)
+
+  if (updateError) return { success: false as const, error: updateError.message }
+
+  revalidatePath("/events")
+  revalidatePath("/events/" + eventId)
+  return { success: true as const, eventId, title }
+}
