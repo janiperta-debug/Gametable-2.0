@@ -359,9 +359,24 @@ Sallitut entityType-arvot:
 - rule: pelisäännöt, erikoissäännöt ja järjestelmäkohtaiset mekaniikat
 - other: tärkeät kampanjan käsitteet, joita muut luokat eivät kata
 
-Palauta jokaiselle kohteelle lähdetiedoston sourceId, lähdesivun numero ja lyhyt sanatarkka quote, joka todistaa kohteen. rawText on lyhyt lähteeseen perustuva kuvaus. parsedData sisältää vain lähteessä tuetut lisäkentät JSON-objektina. relationships sisältää vain lähteessä selvästi ilmaistut suhteet. confidence on 0–1. Jos tieto on epävarma tai tarvitsee pelinjohtajan tulkintaa, kerro se reviewReason-kentässä.
+JOKAISEN items-listan kohteen ON sisällettävä kaikki seuraavat kentät täsmälleen näillä nimillä:
+- entityType: yksi sallituista luokista
+- name: kohteen nimi TÄSSÄ YLIMMÄN TASON KENTÄSSÄ. Tämä on pakollinen. ÄLÄ jätä sitä pois äläkä sijoita nimeä vain parsedData-objektiin.
+- sourceId: täsmälleen lähdetiedoston sourceId
+- page: lähdesivun numero kokonaislukuna
+- quote: lyhyt sanatarkka tekstikatkelma lähteestä
+- rawText: lyhyt lähteeseen perustuva kuvaus
+- parsedData: JSON-objekti, jossa on vain lähteessä tuetut lisätiedot
+- relationships: taulukko selvästi ilmaistuista suhteista; tyhjä taulukko jos ei suhteita
+- confidence: numero välillä 0 ja 1
+- reviewReason: merkkijono tai null
 
-Älä palauta yleisiä teemoja erillisinä kohteina, elleivät ne ole kampanjassa konkreettisesti merkityksellisiä. Älä luo erillistä kohdetta jokaisesta tekstissä mainitusta yleissanasta. Palauta vain JSON-objekti muodossa { "items": [...] }.`
+Esimerkki yhden kohteen rakenteesta:
+{ "entityType": "person", "name": "Aila Venn", "sourceId": "LÄHTEEN_TÄSMÄLLINEN_ID", "page": 2, "quote": "Aila Venn Kylänvanhin.", "rawText": "Rautalammen kylänvanhin.", "parsedData": { "role": "Kylänvanhin" }, "relationships": [], "confidence": 0.99, "reviewReason": null }
+
+Nimi kuuluu aina name-kenttään, ei ainoastaan parsedData-kenttään. Älä koskaan palauta kohdetta ilman name-kenttää. Palauta vain JSON-objekti muodossa { "items": [...] }.
+
+Älä palauta yleisiä teemoja erillisinä kohteina, elleivät ne ole kampanjassa konkreettisesti merkityksellisiä. Älä luo erillistä kohdetta jokaisesta tekstissä mainitusta yleissanasta.`
 
   const userPrompt = `Poimi seuraavista kampanjan lähdeteksteistä yksilöitävät kohteet. Säilytä lähdeviitteet tarkasti. Älä lisää mitään, mitä teksti ei tue.
 
@@ -439,9 +454,13 @@ ${JSON.stringify(sourcePayload)}`
         return []
       }
 
-      const name = typeof candidate.name === "string"
-        ? candidate.name.trim().slice(0, 180)
-        : typeof candidate.title === "string" ? candidate.title.trim().slice(0, 180) : ""
+      const candidateData = candidate.parsedData && typeof candidate.parsedData === "object" && !Array.isArray(candidate.parsedData)
+        ? candidate.parsedData
+        : candidate.details && typeof candidate.details === "object" && !Array.isArray(candidate.details)
+          ? candidate.details : {}
+      const nameValue = candidate.name ?? candidate.title ?? candidate.entityName ??
+        candidateData.name ?? candidateData.title ?? candidateData.entityName
+      const name = typeof nameValue === "string" ? nameValue.trim().slice(0, 180) : ""
       if (!name) {
         reject("missing_name")
         return []
