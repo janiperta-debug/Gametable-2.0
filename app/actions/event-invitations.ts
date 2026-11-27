@@ -22,7 +22,7 @@ export async function inviteToEvent(
 
   const { data: event } = await supabase
     .from("events")
-    .select("host_id, title")
+    .select("host_id, title, event_type")
     .eq("id", eventId)
     .single()
 
@@ -47,6 +47,7 @@ export async function inviteToEvent(
       event_id: eventId,
       user_id: userId,
       status: "invited",
+      ...(event.event_type === "campaign" ? { campaign_role: "player" } : {}),
     })
 
   if (error) {
