@@ -212,3 +212,61 @@ export async function extractCampaignPdfText(batchId: string) {
     return { success: false as const, error: message }
   }
 }
+
+
+export async function getCampaignExtractedPdfTexts(batchId: string) {
+  if (typeof batchId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(batchId)) {
+    return { success: false as const, error: "Virheellinen tuontierä." }
+  }
+
+  const access = await requireCampaignGMFromBatch(batchId)
+  if ("error" in access) return { success: false as const, error: access.error }
+  if (!["review", "completed", "partial"].includes(access.status)) {
+    return { success: false as const, error: "Tämän tuontierän PDF-tekstejä ei voi vielä tarkastella." }
+  }
+
+  const db = createServiceClient()
+  const { data: sources, error } = await db
+    .from("campaign_import_sources")
+    .select("id, file_name, page_count, source_text, metadata")
+    .eq("batch_id", batchId)
+    .eq("event_id", access.eventId)
+    .eq("source_kind", "pdf")
+    .not("source_text", "is", null)
+    .order("created_at", { ascending: true })
+
+  if (error) return { success: false as const, error: error.message }
+
+  const files = (sources ?? []).map((source) => {
+    const metadata = source.metadata && typeof source.metadata === "object"
+      ? source.metadata as Record<string, unknown>
+      : {}
+    const extraction = metadata.extraction && typeof metadata.extraction === "object"
+      ? metadata.extraction as Record<string, unknown>
+      : {}
+    const storedPages = Array.isArray(extraction.pages) ? extraction.pages : []
+    const pages = storedPages.length
+      ? storedPages.map((page: any, index: number) => ({
+          page: Number(page.page) || index + 1,
+          text: typeof page.text === "string" ? page.text : "",
+        }))
+      : (source.source_text ?? "").split(/(?=\\[Sivu \\d+\\]\\s*)/g)
+          .map((section) => {
+            const match = section.match(/^\\[Sivu (\\d+)\\]\\s*([\\s\\S]*)$/)
+            return match ? { page: Number(match[1]), text: match[2].trim() } : null
+          })
+          .filter((page): page is { page: number; text: string } => page !== null)
+
+    return {
+      id: source.id,
+      fileName: source.file_name,
+      pageCount: source.page_count ?? pages.length,
+      pages,
+      truncated: extraction.truncated === true,
+      emptyPages: Array.isArray(extraction.emptyPages) ? extraction.emptyPages : [],
+      extractedAt: typeof extraction.extractedAt === "string" ? extraction.extractedAt : null,
+    }
+  })
+
+  return { success: true as const, files }
+}
