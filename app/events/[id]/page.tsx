@@ -1393,7 +1393,7 @@ export default function EventDetailsPage() {
 
             {event.event_type === "campaign" && isHost && <CampaignSetupPanel eventId={eventId} status={event.campaign_status} onConfirmed={(confirmedAt) => setEvent((current) => current ? { ...current, campaign_status: "confirmed", campaign_confirmed_at: confirmedAt ?? current.campaign_confirmed_at } : current)} />}
             {event.event_type === "campaign" && isHost && <CampaignImportPanel eventId={eventId} />}
-            {event.event_type === "campaign" && <CampaignWorldPanel eventId={eventId} />
+            {event.event_type === "campaign" && <CampaignWorldPanel eventId={eventId} />}
 
             {/* Event Structure */}
             {event.event_type && event.event_type !== "game_night" && (
