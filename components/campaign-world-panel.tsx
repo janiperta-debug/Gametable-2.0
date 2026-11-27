@@ -78,7 +78,7 @@ export function CampaignWorldPanel({ eventId }: { eventId: string }) {
           <div className="space-y-3">
             <div className="flex flex-wrap gap-2">
               <Badge variant="outline" className="border-accent-gold/30 text-accent-gold">{entities.length} kohdetta</Badge>
-              <Badge variant="outline">Näkyvyys määräytyy kohteen asetuksista</Badge>
+              <Badge variant="outline">Pelinjohtajan tuomat tiedot ovat oletuksena yksityisiä</Badge>
             </div>
             {groups.map(([type, group]) => (
               <details key={type} className="rounded-md border border-accent-gold/20 bg-background/30 p-3" open>
