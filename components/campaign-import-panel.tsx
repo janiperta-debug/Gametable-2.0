@@ -11,7 +11,7 @@ import {
   listCampaignImportBatches,
   registerCampaignImportSource,
 } from "@/app/actions/campaign-import"
-import { extractCampaignPdfText } from "@/app/actions/campaign-pdf-extraction"
+import { extractCampaignPdfText, getCampaignExtractedPdfTexts } from "@/app/actions/campaign-pdf-extraction"
 
 const MAX_FILES = 10
 const MAX_FILE_SIZE = 25 * 1024 * 1024
@@ -26,7 +26,7 @@ const ALLOWED_TYPES = [
   "image/webp",
 ]
 
-type ImportBatch = {
+type ExtractedPdfFile = {\n  id: string\n  fileName: string\n  pageCount: number\n  pages: Array<{ page: number; text: string }>\n  truncated: boolean\n  emptyPages: number[]\n  extractedAt: string | null\n}\n\ntype ImportBatch = {
   id: string
   status: string
   source_count: number
@@ -51,7 +51,7 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
   const [busy, setBusy] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const [extractionSummary, setExtractionSummary] = useState("")
+  const [extractionSummary, setExtractionSummary] = useState("")\n  const [expandedBatchId, setExpandedBatchId] = useState<string | null>(null)\n  const [extractedFiles, setExtractedFiles] = useState<ExtractedPdfFile[]>([])\n  const [textLoading, setTextLoading] = useState(false)
 
   const refreshBatches = async () => {
     const result = await listCampaignImportBatches(eventId)
@@ -173,6 +173,31 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
     }
   }
 
+
+  const handleViewExtractedText = async (batchId: string) => {
+    if (expandedBatchId === batchId) {
+      setExpandedBatchId(null)
+      setExtractedFiles([])
+      return
+    }
+
+    setTextLoading(true)
+    setError("")
+    setExpandedBatchId(batchId)
+    setExtractedFiles([])
+    try {
+      const result = await getCampaignExtractedPdfTexts(batchId)
+      if (!result.success) throw new Error(result.error)
+      setExtractedFiles(result.files as ExtractedPdfFile[])
+      if (result.files.length === 0) setError("Tästä tuontierästä ei löytynyt poimittua PDF-tekstiä.")
+    } catch (loadError) {
+      setExpandedBatchId(null)
+      setError(loadError instanceof Error ? loadError.message : "Poimitun tekstin lataaminen epäonnistui.")
+    } finally {
+      setTextLoading(false)
+    }
+  }
+
   const handleCancel = async (batchId: string) => {
     if (busy) return
     setBusy(true)
@@ -258,10 +283,45 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
                     {["uploaded", "failed"].includes(batch.status) && batch.source_count > 0 && (
                       <ArchiveCardButton active disabled={busy} onClick={() => handleExtractPdfs(batch.id)}>Poimi PDF-tekstit</ArchiveCardButton>
                     )}
+                    {["review", "completed", "partial"].includes(batch.status) && (
+                      <ArchiveCardButton
+                        disabled={textLoading && expandedBatchId === batch.id}
+                        onClick={() => handleViewExtractedText(batch.id)}
+                      >
+                        {textLoading && expandedBatchId === batch.id ? <Loader2 className="h-4 w-4 animate-spin" /> : expandedBatchId === batch.id ? "Piilota poimittu teksti" : "Näytä poimittu teksti"}
+                      </ArchiveCardButton>
+                    )}
                     {["uploaded", "review", "failed"].includes(batch.status) && (
                       <ArchiveCardButton disabled={busy} onClick={() => handleCancel(batch.id)}>Peruuta erä</ArchiveCardButton>
                     )}
                   </div>
+                  {expandedBatchId === batch.id && (
+                    <div className="mt-3 w-full space-y-3 rounded-md border border-accent-gold/20 bg-background/30 p-3">
+                      <div className="text-sm font-medium text-accent-gold">Poimittu PDF-teksti</div>
+                      {textLoading ? (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Ladataan tekstiä…</div>
+                      ) : extractedFiles.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">Poimittua tekstiä ei löytynyt.</p>
+                      ) : extractedFiles.map((file) => (
+                        <div key={file.id} className="space-y-2">
+                          <div className="text-sm font-medium break-words">{file.fileName}</div>
+                          <p className="text-xs text-muted-foreground">
+                            {file.pages.length} tekstisivua / {file.pageCount} sivua
+                            {file.truncated ? " · Tekstiä on rajattu enimmäispituuden vuoksi." : ""}
+                            {file.emptyPages.length ? ` · OCR-tarkistusta mahdollisesti vaativat sivut: ${file.emptyPages.join(", ")}.` : ""}
+                          </p>
+                          <div className="space-y-2">
+                            {file.pages.map((page) => (
+                              <details key={page.page} className="rounded border border-accent-gold/10 bg-background/40 p-2">
+                                <summary className="cursor-pointer text-sm font-medium">Sivu {page.page}</summary>
+                                <pre className="mt-2 max-h-96 overflow-auto whitespace-pre-wrap break-words font-sans text-xs leading-relaxed text-foreground">{page.text || "Sivulta ei löytynyt tekstikerrosta."}</pre>
+                              </details>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
