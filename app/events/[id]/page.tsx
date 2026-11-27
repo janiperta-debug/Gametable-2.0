@@ -9,6 +9,7 @@ import {
   ArchiveCardHeader,
   ArchiveCardTitle,
   ArchiveIconButton,
+  ArchiveFrame,
 } from "@/components/archive-frame"
 import { Badge } from "@/components/ui/badge"
 import { EventChat } from "@/components/event-chat"
@@ -31,16 +32,18 @@ import { CampaignSetupPanel } from "@/components/campaign-setup-panel"
 
 function CampaignAccordionSection({ title, meta, children, defaultOpen = false }: { title: string; meta?: string; children: ReactNode; defaultOpen?: boolean }) {
   return (
-    <details open={defaultOpen} className="group overflow-hidden rounded-xl border border-accent-gold/20 bg-black/20">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-4 transition-colors hover:bg-accent-gold/5 [&::-webkit-details-marker]:hidden">
-        <span className="font-cinzel text-base text-accent-gold sm:text-lg">{title}</span>
-        <span className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground sm:text-sm">
-          {meta && <span>{meta}</span>}
-          <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
-        </span>
-      </summary>
-      <div className="space-y-4 border-t border-accent-gold/15 p-3 sm:p-4">{children}</div>
-    </details>
+    <ArchiveFrame corners={false} centerOrnaments={false} className="rounded-xl">
+      <details open={defaultOpen} className="group">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 transition-colors hover:bg-black/15 [&::-webkit-details-marker]:hidden">
+          <span className="font-cinzel text-base font-bold uppercase tracking-wide text-[var(--archive-gold,#d9b65c)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] sm:text-lg">{title}</span>
+          <span className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground sm:text-sm">
+            {meta && <span>{meta}</span>}
+            <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
+          </span>
+        </summary>
+        <div className="space-y-4 border-t border-[var(--archive-gold,#d9b65c)]/20 p-3 sm:p-4">{children}</div>
+      </details>
+    </ArchiveFrame>
   )
 }
 
