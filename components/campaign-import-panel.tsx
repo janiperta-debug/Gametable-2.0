@@ -80,6 +80,7 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
   const [files, setFiles] = useState<File[]>([])
   const [batches, setBatches] = useState<ImportBatch[]>([])
   const [busy, setBusy] = useState(false)
+  const [processingLabel, setProcessingLabel] = useState("Lisätään lähteitä…")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [extractionSummary, setExtractionSummary] = useState("")
@@ -134,6 +135,7 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
   const handleUpload = async () => {
     if (!files.length || busy) return
     setBusy(true)
+    setProcessingLabel("Lisätään lähteitä…")
     setError("")
     let uploadedCount = 0
 
@@ -170,6 +172,7 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
 
       const pdfOnly = files.every((file) => file.type === "application/pdf")
       setFiles([])
+      if (pdfOnly) setProcessingLabel("Kartanon henkilökunta käsittelee aineistoa…")
       if (pdfOnly) {
         const processed = await processCampaignImportBatch(created.batch.id)
         if (!processed.success) throw new Error(processed.error)
@@ -286,7 +289,7 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
       <ArchiveCardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
           Lisää kampanjan käsikirjoituksia, PDF-tiedostoja, kuvia tai muistiinpanoja samaan tuontierään.
-          Alkuperäiset tiedostot säilytetään yksityisinä. Niitä ei vielä analysoida eikä lisätä kampanjaan automaattisesti.
+          Kartanon henkilökunta kokoaa aineistosta tarkistettavat ehdotukset. Mitään ei lisätä kampanjaan ilman hyväksyntääsi.
         </p>
 
         <div className="space-y-3 rounded-md border border-accent-gold/20 bg-background/20 p-3">
@@ -320,7 +323,7 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
           )}
 
           <ArchiveCardButton onClick={handleUpload} active fullWidth disabled={!files.length || busy} icon={busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}>
-            {busy ? "Lisätään lähteitä…" : `Lisää ${files.length || ""} lähdettä tuontierään`}
+            {busy ? processingLabel : `Lisää ${files.length || ""} lähdettä tuontierään`}
           </ArchiveCardButton>
         </div>
 
