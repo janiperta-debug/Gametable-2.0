@@ -11,7 +11,7 @@ import {
   listCampaignImportBatches,
   registerCampaignImportSource,
 } from "@/app/actions/campaign-import"
-import { analyzeCampaignImportBatch, extractCampaignPdfText, getCampaignExtractedPdfTexts } from "@/app/actions/campaign-pdf-extraction"
+import { analyzeCampaignImportBatch, extractCampaignPdfText, getCampaignImportItems, getCampaignExtractedPdfTexts } from "@/app/actions/campaign-pdf-extraction"
 
 const MAX_FILES = 10
 const MAX_FILE_SIZE = 25 * 1024 * 1024
@@ -34,6 +34,36 @@ type ExtractedPdfFile = {
   truncated: boolean
   emptyPages: number[]
   extractedAt: string | null
+}
+
+
+type CampaignImportItem = {
+  id: string
+  index: number
+  entityType: string
+  name: string
+  description: string
+  details: Record<string, unknown>
+  confidence: number | null
+  sourceName: string
+  page: number | null
+  quote: string
+  relationships: Array<{ targetName?: string; relationshipType?: string; description?: string }>
+  status: string
+  reviewReason: string | null
+}
+
+const ENTITY_TYPE_LABELS: Record<string, string> = {
+  character: "Pelaajahahmo",
+  person: "Henkilö",
+  location: "Paikka",
+  faction: "Ryhmittymä",
+  quest: "Tehtävä",
+  item: "Esine",
+  creature: "Olento",
+  history: "Historia",
+  rule: "Sääntö",
+  other: "Muu kohde",
 }
 
 type ImportBatch = {
@@ -64,7 +94,7 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
   const [extractionSummary, setExtractionSummary] = useState("")
   const [expandedBatchId, setExpandedBatchId] = useState<string | null>(null)
   const [extractedFiles, setExtractedFiles] = useState<ExtractedPdfFile[]>([])
-  const [textLoading, setTextLoading] = useState(false)
+  const [textLoading, setTextLoading] = useState(false)\n  const [expandedItemsBatchId, setExpandedItemsBatchId] = useState<string | null>(null)\n  const [reviewItems, setReviewItems] = useState<CampaignImportItem[]>([])\n  const [itemsLoading, setItemsLoading] = useState(false)
 
   const refreshBatches = async () => {
     const result = await listCampaignImportBatches(eventId)
@@ -206,6 +236,31 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
     }
   }
 
+
+  const handleViewImportItems = async (batchId: string) => {
+    if (expandedItemsBatchId === batchId) {
+      setExpandedItemsBatchId(null)
+      setReviewItems([])
+      return
+    }
+
+    setItemsLoading(true)
+    setError("")
+    setExpandedItemsBatchId(batchId)
+    setReviewItems([])
+    try {
+      const result = await getCampaignImportItems(batchId)
+      if (!result.success) throw new Error(result.error)
+      setReviewItems(result.items as CampaignImportItem[])
+      if (result.items.length === 0) setError("Tästä tuontierästä ei löytynyt tarkistettavia ehdotuksia.")
+    } catch (loadError) {
+      setExpandedItemsBatchId(null)
+      setError(loadError instanceof Error ? loadError.message : "Ehdotusten lataaminen epäonnistui.")
+    } finally {
+      setItemsLoading(false)
+    }
+  }
+
   const handleViewExtractedText = async (batchId: string) => {
     if (expandedBatchId === batchId) {
       setExpandedBatchId(null)
@@ -322,6 +377,17 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
                         {busy ? "Tunnistetaan…" : "Tunnista sisältö tekoälyllä"}
                       </ArchiveCardButton>
                     )}
+                    {batch.item_count > 0 && (
+                      <ArchiveCardButton
+                        active={expandedItemsBatchId === batch.id}
+                        disabled={itemsLoading && expandedItemsBatchId === batch.id}
+                        onClick={() => handleViewImportItems(batch.id)}
+                      >
+                        {itemsLoading && expandedItemsBatchId === batch.id
+                          ? <Loader2 className="h-4 w-4 animate-spin" />
+                          : expandedItemsBatchId === batch.id ? "Piilota ehdotukset" : "Tarkista ehdotukset"}
+                      </ArchiveCardButton>
+                    )}
                     {["review", "completed", "partial"].includes(batch.status) && (
                       <ArchiveCardButton
                         disabled={textLoading && expandedBatchId === batch.id}
@@ -334,6 +400,63 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
                       <ArchiveCardButton disabled={busy} onClick={() => handleCancel(batch.id)}>Peruuta erä</ArchiveCardButton>
                     )}
                   </div>
+
+                  {expandedItemsBatchId === batch.id && (
+                    <div className="mt-3 w-full space-y-3 rounded-md border border-accent-gold/25 bg-background/30 p-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="text-sm font-medium text-accent-gold">Tunnistetut ehdotukset</div>
+                        <Badge variant="outline" className="border-accent-gold/30 text-accent-gold">{reviewItems.length} ehdotusta</Badge>
+                      </div>
+                      {itemsLoading ? (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Ladataan ehdotuksia…</div>
+                      ) : reviewItems.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">Ehdotuksia ei löytynyt.</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {reviewItems.map((item) => (
+                            <details key={item.id} className="rounded-md border border-accent-gold/15 bg-background/40 p-3">
+                              <summary className="flex cursor-pointer list-none flex-wrap items-center gap-2">
+                                <span className="min-w-0 flex-1 text-sm font-medium">{item.name}</span>
+                                <Badge variant="outline" className="border-accent-gold/25 text-accent-gold">{ENTITY_TYPE_LABELS[item.entityType] ?? item.entityType}</Badge>
+                              </summary>
+                              <div className="mt-3 space-y-3 text-sm">
+                                {item.description && <p className="whitespace-pre-wrap">{item.description}</p>}
+                                {Object.keys(item.details).length > 0 && (
+                                  <div className="space-y-1 rounded border border-accent-gold/10 bg-background/40 p-2">
+                                    <div className="text-xs font-medium text-accent-gold">Lisätiedot</div>
+                                    {Object.entries(item.details).map(([key, value]) => (
+                                      <div key={key} className="break-words text-xs">
+                                        <span className="text-muted-foreground">{key}: </span>
+                                        {typeof value === "string" ? value : JSON.stringify(value)}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                <div className="rounded border border-accent-gold/10 bg-background/40 p-2">
+                                  <div className="text-xs font-medium text-accent-gold">Lähde</div>
+                                  <p className="mt-1 text-xs">{item.sourceName}{item.page ? ` · sivu ${item.page}` : ""}</p>
+                                  {item.quote && <blockquote className="mt-2 border-l-2 border-accent-gold/40 pl-2 text-xs italic text-muted-foreground">”{item.quote}”</blockquote>}
+                                </div>
+                                <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                                  {item.confidence !== null && <span>Varmuusarvio: {Math.round(item.confidence * 100)} %</span>}
+                                  <span>Tila: {item.status === "needs_review" ? "Odottaa tarkistusta" : item.status}</span>
+                                </div>
+                                {item.reviewReason && <p className="text-xs text-amber-400">{item.reviewReason}</p>}
+                                {item.relationships.length > 0 && (
+                                  <div className="space-y-1">
+                                    <div className="text-xs font-medium text-accent-gold">Ehdotetut suhteet</div>
+                                    {item.relationships.map((relationship, index) => (
+                                      <p key={index} className="text-xs">{relationship.targetName} · {relationship.relationshipType}{relationship.description ? ` — ${relationship.description}` : ""}</p>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </details>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                   {expandedBatchId === batch.id && (
                     <div className="mt-3 w-full space-y-3 rounded-md border border-accent-gold/20 bg-background/30 p-3">
                       <div className="text-sm font-medium text-accent-gold">Poimittu PDF-teksti</div>
