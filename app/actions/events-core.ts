@@ -21,6 +21,8 @@ export interface Event {
   ends_at: string | null
   max_players: number | null
   status: EventStatus | null
+  campaign_status?: "setup" | "confirmed" | null
+  campaign_confirmed_at?: string | null
   event_config?: Record<string, unknown> | null
   created_at: string | null
   // Joined data
@@ -40,6 +42,7 @@ export interface EventParticipant {
   user_id: string
   status: RSVPStatus | null
   joined_at: string | null
+  campaign_role?: "player" | "observer" | null
   user?: {
     id: string
     display_name: string | null
@@ -75,6 +78,7 @@ export async function getPublicEvents(): Promise<{ events: Event[]; error?: stri
     const config = event.event_config as Record<string, unknown> | null
     const importSetup = config?.campaignImportSetup as { status?: string } | undefined
     if (["awaiting_sources", "processing", "review"].includes(importSetup?.status || "")) return false
+    if (event.event_type === "campaign" && event.campaign_status !== "confirmed") return false
     const start = new Date(event.starts_at)
     const end = event.ends_at ? new Date(event.ends_at) : null
     return start >= now || (start < now && end ? end > now : false)
@@ -435,7 +439,7 @@ export async function getEventParticipants(
       user:profiles!event_participants_user_id_fkey(id, display_name, avatar_url)
     `)
     .eq("event_id", eventId)
-    .in("status", ["attending", "maybe"])
+    .in("status", user?.id === event.host_id ? ["attending", "maybe", "invited"] : ["attending", "maybe"])
     .order("joined_at", { ascending: true })
 
   if (error) {
