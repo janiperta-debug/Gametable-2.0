@@ -11,7 +11,7 @@ import {
   listCampaignImportBatches,
   registerCampaignImportSource,
 } from "@/app/actions/campaign-import"
-import { extractCampaignPdfText, getCampaignExtractedPdfTexts } from "@/app/actions/campaign-pdf-extraction"
+import { analyzeCampaignImportBatch, extractCampaignPdfText, getCampaignExtractedPdfTexts } from "@/app/actions/campaign-pdf-extraction"
 
 const MAX_FILES = 10
 const MAX_FILE_SIZE = 25 * 1024 * 1024
@@ -187,6 +187,25 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
   }
 
 
+
+  const handleAnalyzeCampaign = async (batchId: string) => {
+    if (busy) return
+    setBusy(true)
+    setError("")
+    setExtractionSummary("")
+    try {
+      const result = await analyzeCampaignImportBatch(batchId)
+      if (!result.success) throw new Error(result.error)
+      setExtractionSummary(`Tekoäly muodosti ${result.count} tarkistettavaa ehdotusta. Mitään ei ole vielä lisätty kampanjan varsinaiseen sisältöön.`)
+      await refreshBatches()
+    } catch (analysisError) {
+      setError(analysisError instanceof Error ? analysisError.message : "Kampanjan tekoälytunnistus epäonnistui.")
+      try { await refreshBatches() } catch { /* Keep the original error visible. */ }
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const handleViewExtractedText = async (batchId: string) => {
     if (expandedBatchId === batchId) {
       setExpandedBatchId(null)
@@ -272,7 +291,7 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
           </ArchiveCardButton>
         </div>
 
-        {error && <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">{error}</p>}
+        {extractionSummary && <p className="rounded-md border border-accent-gold/20 bg-background/30 p-3 text-sm text-accent-gold">{extractionSummary}</p>}\n\n        {error && <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">{error}</p>}
 
         <div className="space-y-3">
           <div className="text-sm font-medium">Aiemmat tuontierät</div>
@@ -296,7 +315,7 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
                     {["uploaded", "failed"].includes(batch.status) && batch.source_count > 0 && (
                       <ArchiveCardButton active disabled={busy} onClick={() => handleExtractPdfs(batch.id)}>Poimi PDF-tekstit</ArchiveCardButton>
                     )}
-                    {["review", "completed", "partial"].includes(batch.status) && (
+                    {batch.status === "review" && batch.item_count === 0 && (\n                      <ArchiveCardButton active disabled={busy} onClick={() => handleAnalyzeCampaign(batch.id)}>\n                        {busy ? "Tunnistetaan…" : "Tunnista sisältö tekoälyllä"}\n                      </ArchiveCardButton>\n                    )}\n                    {["review", "completed", "partial"].includes(batch.status) && (
                       <ArchiveCardButton
                         disabled={textLoading && expandedBatchId === batch.id}
                         onClick={() => handleViewExtractedText(batch.id)}
