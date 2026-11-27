@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { ArchiveCard, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle } from "@/components/archive-frame"
 import { Badge } from "@/components/ui/badge"
 import { getCampaignWorldEntities } from "@/app/actions/campaign-world"
@@ -32,12 +32,6 @@ export function CampaignWorldPanel({ eventId }: { eventId: string }) {
   const [entities, setEntities] = useState<WorldEntity[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-
-  const refresh = useCallback(async () => {
-    const result = await getCampaignWorldEntities(eventId)
-    if (!result.success) throw new Error(result.error)
-    setEntities(result.entities as WorldEntity[])
-  }, [eventId])
 
   useEffect(() => {
     let active = true
