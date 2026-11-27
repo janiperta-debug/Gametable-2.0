@@ -291,7 +291,9 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
           </ArchiveCardButton>
         </div>
 
-        {extractionSummary && <p className="rounded-md border border-accent-gold/20 bg-background/30 p-3 text-sm text-accent-gold">{extractionSummary}</p>}\n\n        {error && <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">{error}</p>}
+        {extractionSummary && <p className="rounded-md border border-accent-gold/20 bg-background/30 p-3 text-sm text-accent-gold">{extractionSummary}</p>}
+
+        {error && <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">{error}</p>}
 
         <div className="space-y-3">
           <div className="text-sm font-medium">Aiemmat tuontierät</div>
@@ -315,7 +317,12 @@ export function CampaignImportPanel({ eventId }: { eventId: string }) {
                     {["uploaded", "failed"].includes(batch.status) && batch.source_count > 0 && (
                       <ArchiveCardButton active disabled={busy} onClick={() => handleExtractPdfs(batch.id)}>Poimi PDF-tekstit</ArchiveCardButton>
                     )}
-                    {batch.status === "review" && batch.item_count === 0 && (\n                      <ArchiveCardButton active disabled={busy} onClick={() => handleAnalyzeCampaign(batch.id)}>\n                        {busy ? "Tunnistetaan…" : "Tunnista sisältö tekoälyllä"}\n                      </ArchiveCardButton>\n                    )}\n                    {["review", "completed", "partial"].includes(batch.status) && (
+                    {batch.status === "review" && batch.item_count === 0 && (
+                      <ArchiveCardButton active disabled={busy} onClick={() => handleAnalyzeCampaign(batch.id)}>
+                        {busy ? "Tunnistetaan…" : "Tunnista sisältö tekoälyllä"}
+                      </ArchiveCardButton>
+                    )}
+                    {["review", "completed", "partial"].includes(batch.status) && (
                       <ArchiveCardButton
                         disabled={textLoading && expandedBatchId === batch.id}
                         onClick={() => handleViewExtractedText(batch.id)}
