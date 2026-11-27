@@ -295,6 +295,19 @@ export async function createCampaignImportDraft() {
 
   try {
     const db = createServiceClient()
+    const { data: existingDraft, error: existingError } = await db
+      .from("events")
+      .select("id")
+      .eq("host_id", user.id)
+      .eq("event_type", "campaign")
+      .contains("event_config", { campaignImportSetup: { status: "awaiting_sources" } })
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (existingError) throw new Error(existingError.message)
+    if (existingDraft) return { success: true as const, eventId: existingDraft.id }
+
     const now = new Date().toISOString()
     const { data: event, error: eventError } = await db
       .from("events")
