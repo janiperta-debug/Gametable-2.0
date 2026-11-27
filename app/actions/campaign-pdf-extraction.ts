@@ -577,3 +577,57 @@ ${JSON.stringify(sourcePayload)}`
     return { success: false as const, error: message }
   }
 }
+
+
+export async function getCampaignImportItems(batchId: string) {
+  if (typeof batchId !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(batchId)) {
+    return { success: false as const, error: "Virheellinen tuontierä." }
+  }
+
+  const access = await requireCampaignGMFromBatch(batchId)
+  if ("error" in access) return { success: false as const, error: access.error }
+  if (!["review", "completed", "partial"].includes(access.status)) {
+    return { success: false as const, error: "Tämän tuontierän ehdotuksia ei voi vielä tarkastella." }
+  }
+
+  const db = createServiceClient()
+  const { data: items, error } = await db
+    .from("campaign_import_items")
+    .select("id, item_index, entity_type, name, raw_text, parsed_data, confidence, source_id, source_reference, proposed_relationships, status, review_reason")
+    .eq("batch_id", batchId)
+    .eq("event_id", access.eventId)
+    .order("item_index", { ascending: true })
+
+  if (error) return { success: false as const, error: error.message }
+  const sourceIds = [...new Set((items ?? []).map((item) => item.source_id).filter(Boolean))]
+  const sourceNames = new Map<string, string>()
+  if (sourceIds.length) {
+    const { data: sources, error: sourceError } = await db
+      .from("campaign_import_sources")
+      .select("id, file_name")
+      .eq("batch_id", batchId)
+      .eq("event_id", access.eventId)
+      .in("id", sourceIds)
+    if (sourceError) return { success: false as const, error: sourceError.message }
+    for (const source of sources ?? []) sourceNames.set(source.id, source.file_name ?? "Lähdetiedosto")
+  }
+
+  return {
+    success: true as const,
+    items: (items ?? []).map((item) => ({
+      id: item.id,
+      index: item.item_index,
+      entityType: item.entity_type,
+      name: item.name || "Nimeämätön kohde",
+      description: item.raw_text,
+      details: item.parsed_data && typeof item.parsed_data === "object" ? item.parsed_data : {},
+      confidence: item.confidence,
+      sourceName: item.source_id ? sourceNames.get(item.source_id) ?? "Lähdetiedosto" : "Lähde ei tiedossa",
+      page: Number(item.source_reference?.page) || null,
+      quote: typeof item.source_reference?.quote === "string" ? item.source_reference.quote : "",
+      relationships: Array.isArray(item.proposed_relationships) ? item.proposed_relationships : [],
+      status: item.status,
+      reviewReason: item.review_reason,
+    })),
+  }
+}
