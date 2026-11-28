@@ -6,6 +6,7 @@ import { Search, ArrowLeft, Minus, Plus, SlidersHorizontal } from "lucide-react"
 import { updateTCGCollectionDetails, updateTCGCollectionQuantity } from "@/app/actions/tcg"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import type { CollectionEntry } from "@/lib/types/collection"
+import { ArchiveCard, ArchiveFrame, ArchiveIconButton, archiveField } from "@/components/archive-frame"
 
 type GameInfo = { id: string; label: string; logo: string; style: string }
 
@@ -37,7 +38,7 @@ function readIds(entry: CollectionEntry): string[] {
 function GameLogo({ game }: { game: GameInfo }) {
   const [failed, setFailed] = useState(false)
   return (
-    <div className="flex h-20 items-center justify-center rounded-lg border border-accent-gold/20 bg-black/20 p-3">
+    <div className="flex h-20 items-center justify-center p-3">
       {!failed ? (
         <Image src={game.logo} alt={game.label} width={220} height={76} className="max-h-14 w-full object-contain" onError={() => setFailed(true)} />
       ) : (
@@ -99,17 +100,19 @@ export function TCGCollectionView({ entries, onUpdate }: { entries: CollectionEn
           <p className="mt-1 text-sm text-muted-foreground">Valitse peli avataksesi sen korttikokoelman.</p>
         </div>
         {available.length === 0 ? (
-          <div className="rounded-xl border border-accent-gold/20 p-8 text-center text-muted-foreground">Kokoelmassasi ei ole vielä kortteja.</div>
+          <ArchiveCard><div className="p-8 text-center text-muted-foreground">Kokoelmassasi ei ole vielä kortteja.</div></ArchiveCard>
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {available.map((item) => (
-              <button key={item.id} type="button" onClick={() => { setSelectedGame(item.id); setQuery("") }} className="group rounded-xl border border-accent-gold/20 bg-card/60 p-3 text-left transition hover:border-accent-gold/60 hover:bg-accent-gold/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold">
-                <GameLogo game={item} />
-                <div className="mt-3 flex items-center justify-between gap-2">
-                  <span className="min-w-0 text-sm font-medium">{item.label}</span>
-                  <span className="shrink-0 rounded-full bg-accent-gold/10 px-2 py-1 text-xs text-accent-gold">{grouped.get(item.id)?.length ?? 0}</span>
-                </div>
-              </button>
+              <ArchiveCard key={item.id} className="h-full transition-transform hover:scale-[1.02]">
+                <button type="button" onClick={() => { setSelectedGame(item.id); setQuery("") }} className="group flex h-full w-full flex-col p-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-gold">
+                  <GameLogo game={item} />
+                  <div className="mt-3 flex w-full items-center justify-between gap-2">
+                    <span className="min-w-0 text-sm font-medium">{item.label}</span>
+                    <span className="shrink-0 rounded-full bg-[var(--archive-gold,#d9b65c)]/15 px-2 py-1 text-xs text-[var(--archive-gold,#d9b65c)]">{grouped.get(item.id)?.length ?? 0}</span>
+                  </div>
+                </button>
+              </ArchiveCard>
             ))}
           </div>
         )}
@@ -123,16 +126,18 @@ export function TCGCollectionView({ entries, onUpdate }: { entries: CollectionEn
         <button type="button" onClick={() => setSelectedGame(null)} className="inline-flex items-center gap-2 text-sm text-accent-gold hover:underline"><ArrowLeft className="h-4 w-4" /> Kaikki korttipelit</button>
         <span className="text-sm text-muted-foreground">{visibleEntries.length} korttia</span>
       </div>
-      <div className="flex items-center gap-3 rounded-xl border border-accent-gold/20 bg-card/50 p-3">
-        {game && <div className="w-36 shrink-0"><GameLogo game={game} /></div>}
-        <div className="min-w-0"><h2 className="font-heading text-xl font-semibold">{game?.label}</h2><p className="text-sm text-muted-foreground">{grouped.get(selectedGame)?.length ?? 0} erilaista korttia</p></div>
-      </div>
+      <ArchiveCard>
+        <div className="flex items-center gap-3 p-3">
+          {game && <div className="w-36 shrink-0"><GameLogo game={game} /></div>}
+          <div className="min-w-0"><h2 className="font-heading text-xl font-semibold">{game?.label}</h2><p className="text-sm text-muted-foreground">{grouped.get(selectedGame)?.length ?? 0} erilaista korttia</p></div>
+        </div>
+      </ArchiveCard>
       <div className="flex flex-col gap-2 sm:flex-row">
         <div className="relative min-w-0 flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Hae korteista..." className="h-10 w-full rounded-md border border-accent-gold/30 bg-background pl-9 pr-3 text-sm outline-none focus:border-accent-gold" />
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Hae korteista..." className={`h-10 w-full rounded-md px-3 pl-9 text-sm outline-none ${archiveField}`} />
         </div>
-        <label className="flex h-10 items-center gap-2 rounded-md border border-accent-gold/30 px-3 text-sm">
+        <label className={`flex h-10 items-center gap-2 rounded-md px-3 text-sm ${archiveField}`}>
           <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
           <select value={sort} onChange={(event) => setSort(event.target.value as typeof sort)} className="min-w-0 bg-transparent outline-none">
             <option value="name">Nimi A–Ö</option><option value="set">Setti</option><option value="rarity">Harvinaisuus</option><option value="recent">Viimeksi lisätty</option>
@@ -147,23 +152,25 @@ export function TCGCollectionView({ entries, onUpdate }: { entries: CollectionEn
             const setCode = readString(entry, "set_code")
             const rarity = readString(entry, "rarity")
             return (
-              <article key={entry.ownershipId} className="min-w-0 overflow-hidden rounded-lg border border-accent-gold/15 bg-card/50">
-                <button type="button" onClick={() => { setSelectedCard(entry); setEditCondition(readString(entry, "condition") ?? "near_mint"); setEditFoil(entry.metadata.foil === true) }} className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-gold">
-                  <div className="aspect-[3/4] bg-black/20">
-                    <Image src={entry.image || "/images/fallbacks/tcg-fallback.png"} alt={entry.displayName} width={300} height={400} sizes="(max-width: 640px) 31vw, (max-width: 1024px) 19vw, 14vw" className="h-full w-full object-contain" />
-                  </div>
-                  <div className="space-y-1 p-2 pb-0">
-                    <h3 className="line-clamp-2 min-h-9 text-xs font-semibold leading-4 sm:text-sm">{entry.displayName}</h3>
-                  {(setName || setCode) && <p className="line-clamp-1 text-[10px] text-muted-foreground sm:text-xs">{[setName, setCode].filter(Boolean).join(" · ")}</p>}
-                    {rarity && <p className="line-clamp-1 text-[10px] text-muted-foreground sm:text-xs">{rarity}</p>}
-                  </div>
-                </button>
-                <div className="flex items-center justify-between gap-1 p-2 pt-1">
-                    <button type="button" disabled={busyId === entry.ownershipId} onClick={() => changeQuantity(entry, -1)} aria-label="Vähennä kappalemäärää" className="flex h-7 w-7 items-center justify-center rounded border border-accent-gold/30 disabled:opacity-40"><Minus className="h-3 w-3" /></button>
+              <ArchiveFrame key={entry.ownershipId} weight="hairline" corners={false} centerOrnaments={false} className="min-w-0 overflow-hidden rounded-lg">
+                <article className="min-w-0">
+                  <button type="button" onClick={() => { setSelectedCard(entry); setEditCondition(readString(entry, "condition") ?? "near_mint"); setEditFoil(entry.metadata.foil === true) }} className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--archive-gold,#d9b65c)]">
+                    <div className="aspect-[3/4] bg-black/20">
+                      <Image src={entry.image || "/images/fallbacks/tcg-fallback.png"} alt={entry.displayName} width={300} height={400} sizes="(max-width: 640px) 31vw, (max-width: 1024px) 19vw, 14vw" className="h-full w-full object-contain" />
+                    </div>
+                    <div className="space-y-1 p-2 pb-0">
+                      <h3 className="line-clamp-2 min-h-9 text-xs font-semibold leading-4 sm:text-sm">{entry.displayName}</h3>
+                      {(setName || setCode) && <p className="line-clamp-1 text-[10px] text-muted-foreground sm:text-xs">{[setName, setCode].filter(Boolean).join(" · ")}</p>}
+                      {rarity && <p className="line-clamp-1 text-[10px] text-muted-foreground sm:text-xs">{rarity}</p>}
+                    </div>
+                  </button>
+                  <div className="flex items-center justify-between gap-1 p-2 pt-1">
+                    <ArchiveIconButton onClick={() => changeQuantity(entry, -1)} disabled={busyId === entry.ownershipId} aria-label="Vähennä kappalemäärää" icon={<Minus className="h-3 w-3" />} />
                     <span className="text-xs font-semibold tabular-nums">×{quantity}</span>
-                    <button type="button" disabled={busyId === entry.ownershipId} onClick={() => changeQuantity(entry, 1)} aria-label="Lisää kappalemäärää" className="flex h-7 w-7 items-center justify-center rounded border border-accent-gold/30 disabled:opacity-40"><Plus className="h-3 w-3" /></button>
-                </div>
-              </article>
+                    <ArchiveIconButton onClick={() => changeQuantity(entry, 1)} disabled={busyId === entry.ownershipId} aria-label="Lisää kappalemäärää" icon={<Plus className="h-3 w-3" />} />
+                  </div>
+                </article>
+              </ArchiveFrame>
             )
           })}
         </div>
