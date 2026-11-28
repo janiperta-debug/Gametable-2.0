@@ -14,6 +14,7 @@ import {
   finalizeCampaignImportDraft,
 } from "@/app/actions/campaign-import"
 import { processCampaignImportBatch, analyzeCampaignImportBatch, getCampaignImportItems } from "@/app/actions/campaign-pdf-extraction"
+import { recognizeCampaignImages } from "@/app/actions/campaign-image-recognition"
 import { approveCampaignImportItems } from "@/app/actions/campaign-world"
 
 const MAX_FILES = 10
@@ -176,15 +177,21 @@ export function CampaignImportPanel({ eventId, finalizeOnComplete = false }: { e
       }
 
       const pdfOnly = files.every((file) => file.type === "application/pdf")
+      const imageOnly = files.every((file) => file.type.startsWith("image/"))
       setFiles([])
-      if (pdfOnly) setProcessingLabel("Kartanon henkilökunta käsittelee aineistoa…")
+      if (pdfOnly || imageOnly) setProcessingLabel("Kartanon henkilökunta tunnistaa aineistoa…")
       if (pdfOnly) {
         const processed = await processCampaignImportBatch(created.batch.id)
         if (!processed.success) throw new Error(processed.error)
-        setExtractionSummary(`Aineiston käsittely valmis: ${processed.count} ehdotusta odottaa tarkistusta.`)
+        setExtractionSummary(`PDF-käsittely valmis: ${processed.count} ehdotusta odottaa tarkistusta.`)
+        if (processed.errors?.length) setError(processed.errors.join(" "))
+      } else if (imageOnly) {
+        const processed = await recognizeCampaignImages(created.batch.id)
+        if (!processed.success) throw new Error(processed.error)
+        setExtractionSummary(`Kuvien tunnistus valmis: ${processed.count} ehdotusta odottaa tarkistusta.`)
         if (processed.errors?.length) setError(processed.errors.join(" "))
       } else {
-        setExtractionSummary("Aineisto tallennettiin. Tämän tiedostomuodon automaattinen sisällöntunnistus otetaan käyttöön seuraavassa vaiheessa.")
+        setExtractionSummary("Aineisto tallennettiin. PDF- ja kuvatiedostot tunnistetaan tällä hetkellä erillisinä tuontierinä. Lisää sekamuotoinen aineisto erissä tiedostotyypin mukaan.")
       }
       await refreshBatches()
     } catch (uploadError) {
