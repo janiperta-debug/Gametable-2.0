@@ -129,7 +129,7 @@ Palauta vain JSON muodossa { "items": [...] }. Jokaisessa kohteessa on oltava na
       const parsed = JSON.parse(raw) as { items?: unknown }
       if (!Array.isArray(parsed.items)) throw new Error("Tekoälyn palauttama JSON ei sisältänyt items-listaa.")
 
-      const proposals = parsed.items.slice(0, 30).flatMap((candidate: any) => {
+      const proposals = parsed.items.slice(0, 30).flatMap((candidate: any, proposalIndex: number) => {
         if (!candidate || typeof candidate !== "object") return []
         const entityType = String(candidate.entityType ?? candidate.entity_type ?? "").toLowerCase()
         const name = typeof candidate.name === "string" ? candidate.name.trim().slice(0, 180) : ""
@@ -145,7 +145,7 @@ Palauta vain JSON muodossa { "items": [...] }. Jokaisessa kohteessa on oltava na
           batch_id: batchId,
           event_id: access.eventId,
           source_id: source.id,
-          item_index: allProposals.length,
+          item_index: allProposals.length + proposalIndex,
           entity_type: entityType,
           name,
           raw_text: typeof candidate.rawText === "string" ? candidate.rawText.slice(0, 3000) : "",
