@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 import Image from "next/image"
 import { Search, ArrowLeft, Minus, Plus, SlidersHorizontal } from "lucide-react"
+import { cn } from "@/lib/utils"
 import { updateTCGCollectionDetails, updateTCGCollectionQuantity } from "@/app/actions/tcg"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import type { CollectionEntry } from "@/lib/types/collection"
