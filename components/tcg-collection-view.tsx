@@ -6,7 +6,7 @@ import Image from "next/image"
 import { Search, ArrowLeft, Minus, Plus, SlidersHorizontal } from "lucide-react"
 import { updateTCGCollectionDetails, updateTCGCollectionQuantity } from "@/app/actions/tcg"
 import type { CollectionEntry } from "@/lib/types/collection"
-import { ArchiveCard, ArchiveFrame, ArchiveIconButton } from "@/components/archive-frame"
+import { ArchiveCard, ArchiveFrame, ArchiveIconButton, archiveField } from "@/components/archive-frame"
 
 type GameInfo = { id: string; label: string; logo: string; style: string }
 
