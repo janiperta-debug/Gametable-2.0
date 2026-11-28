@@ -255,6 +255,7 @@ export function CampaignImportPanel({ eventId, finalizeOnComplete = false }: { e
       const result = await approveCampaignImportItems(batchId, selectedItemIds)
       if (!result.success) throw new Error(result.error || "Kohteiden siirto kampanjaan epäonnistui.")
       setExtractionSummary(`Kampanjaan lisättiin ${result.imported} kohdetta. ${result.remaining ? `${result.remaining} ehdotusta odottaa vielä tarkistusta.` : "Tuontierä on valmis."}`)
+      window.dispatchEvent(new Event("gametable:campaign-world-updated"))
       setSelectedItemIds([])
       const refreshed = await getCampaignImportItems(batchId)
       if (refreshed.success) setReviewItems(refreshed.items as CampaignImportItem[])
