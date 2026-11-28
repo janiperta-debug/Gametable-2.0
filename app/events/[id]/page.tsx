@@ -1257,8 +1257,7 @@ export default function EventDetailsPage() {
 
             {event.event_type === "campaign" && (
               <CampaignAccordionSection title="Kampanjan eteneminen">
-              <ArchiveCard>
-                <ArchiveCardContent className="space-y-4">
+                <div className="space-y-4">
                   {!editingProgression && !campaignProgression.currentStage && campaignProgression.stages.length === 0 && campaignProgression.total === 0 ? (
                     <div className="space-y-3">
                       <p className="text-sm text-muted-foreground">
@@ -1404,8 +1403,7 @@ export default function EventDetailsPage() {
                       {isHost && <ArchiveCardButton onClick={() => setEditingProgression(true)}>{t("eventUi.s62")}</ArchiveCardButton>}
                     </div>
                   )}
-                </ArchiveCardContent>
-              </ArchiveCard>
+                </div>
               </CampaignAccordionSection>
             )}
 
@@ -1416,15 +1414,7 @@ export default function EventDetailsPage() {
             {/* Event Structure */}
             {event.event_type && event.event_type !== "game_night" && (
               <CampaignAccordionSection title={event.event_type === "campaign" ? "Pelisessiot" : t("eventFix.eventRounds")} meta={event.event_type === "campaign" ? `${structure.sessions.length} pelikertaa` : undefined} defaultOpen={event.event_type !== "campaign"}>
-              <ArchiveCard>
-                {event.event_type !== "campaign" && (
-                <ArchiveCardHeader>
-                  <ArchiveCardTitle className="text-xl normal-case">
-                    {event.event_type === "campaign" ? t("eventFix.campaignSessions") : t("eventFix.eventRounds")}
-                  </ArchiveCardTitle>
-                </ArchiveCardHeader>
-                )}
-                <ArchiveCardContent className="space-y-4">
+                <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">
                     {event.event_type === "campaign"
                       ? t("eventDynamic.s17")
@@ -1680,8 +1670,7 @@ export default function EventDetailsPage() {
                       )}
                     </>
                   )}
-                </ArchiveCardContent>
-              </ArchiveCard>
+                </div>
               </CampaignAccordionSection>
             )}
 
@@ -1706,15 +1695,7 @@ export default function EventDetailsPage() {
             )}
             {/* Attendees */}
             <CampaignAccordionSection title={event.event_type === "campaign" ? "Osallistujat" : (t("events.attendees") || "Attendees")} meta={String(event.participants?.length || 0)} defaultOpen={event.event_type !== "campaign"}>
-            <ArchiveCard id={event.event_type === "campaign" ? "campaign-participants" : undefined}>
-              {event.event_type !== "campaign" && (
-              <ArchiveCardHeader>
-                <ArchiveCardTitle className="normal-case">
-                  {event.event_type === "campaign" ? "Kampanjan osallistujat" : (t("events.attendees") || "Attendees")} ({event.participants?.length || 0})
-                </ArchiveCardTitle>
-              </ArchiveCardHeader>
-              )}
-              <ArchiveCardContent>
+              <div id={event.event_type === "campaign" ? "campaign-participants" : undefined}>
                 {event.participants && event.participants.length > 0 ? (
                   <div className="space-y-3">
                     {event.participants.map((participant) => (
@@ -1821,8 +1802,7 @@ export default function EventDetailsPage() {
                     )}
                   </div>
                 )}
-              </ArchiveCardContent>
-            </ArchiveCard>
+              </div>
             </CampaignAccordionSection>
           </div>
 
