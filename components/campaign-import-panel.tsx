@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { ArchiveCard, ArchiveCardButton, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle } from "@/components/archive-frame"
+import { ArchiveCardButton } from "@/components/archive-frame"
 import { Badge } from "@/components/ui/badge"
 import { FileText, Image as ImageIcon, Loader2, Upload, X } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
@@ -303,11 +303,7 @@ export function CampaignImportPanel({ eventId, finalizeOnComplete = false }: { e
   }
 
   return (
-    <ArchiveCard>
-      <ArchiveCardHeader>
-        <ArchiveCardTitle className="text-xl normal-case">Kampanjan aineiston tuonti</ArchiveCardTitle>
-      </ArchiveCardHeader>
-      <ArchiveCardContent className="space-y-4">
+    <div className="space-y-4">
         <p className="text-sm text-muted-foreground">
           Lisää kampanjan käsikirjoituksia, PDF-tiedostoja, kuvia tai muistiinpanoja samaan tuontierään.
           Kartanon henkilökunta kokoaa aineistosta tarkistettavat ehdotukset. Mitään ei lisätä kampanjaan ilman hyväksyntääsi.
@@ -505,7 +501,6 @@ export function CampaignImportPanel({ eventId, finalizeOnComplete = false }: { e
             </ArchiveCardButton>
           </div>
         )}
-      </ArchiveCardContent>
-    </ArchiveCard>
+    </div>
   )
 }
