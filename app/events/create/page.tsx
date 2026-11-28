@@ -258,6 +258,69 @@ export default function CreateEventPage() {
             </ArchiveCardHeader>
             <ArchiveCardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Event Type Selection */}
+                <div className="space-y-4">
+                  <Label className="font-body text-accent-gold">{t("events.eventType")}</Label>
+                  <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                    {eventTypes.map(({ value, image }) => {
+                      const label = t(`events.types.${value}`)
+                      const selected = eventType === value
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => setEventType(value)}
+                          className={cn(
+                            "group relative flex min-h-[145px] flex-col items-center justify-center overflow-hidden rounded-lg px-3 py-3 text-center transition-all duration-200",
+                            "border border-[var(--archive-gold,#d9b65c)]/25",
+                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--archive-gold,#d9b65c)]/70",
+                            selected
+                              ? "bg-[var(--archive-surface-shade,rgba(0,0,0,0.28))] border-[var(--archive-gold,#d9b65c)]/75 shadow-[inset_0_0_18px_rgba(217,182,92,0.10)]"
+                              : "bg-[var(--archive-surface-shade,rgba(0,0,0,0.16))] hover:bg-[var(--archive-surface-shade,rgba(0,0,0,0.24))] hover:border-[var(--archive-gold,#d9b65c)]/50"
+                          )}
+                        >
+                          <img
+                            src={image}
+                            alt=""
+                            className="h-20 w-full object-contain drop-shadow-[0_5px_9px_rgba(0,0,0,0.45)] transition-transform duration-200 group-hover:scale-105"
+                          />
+                          <span className={cn(
+                            "mt-2 font-cinzel text-sm font-semibold",
+                            selected ? "text-[var(--archive-gold,#d9b65c)]" : "text-foreground"
+                          )}>
+                            {label}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {eventType === "league" && (
+                  <div className="rounded-lg border border-accent-gold/25 bg-background/20 p-4 space-y-2">
+                    <h3 className="font-heading text-lg text-accent-gold">{t("eventUi.s0")}</h3>
+                    <p className="text-sm text-muted-foreground">{t("eventUi.s1")}</p>
+                  </div>
+                )}
+
+                {eventType === "campaign" && (
+                  <div className="space-y-3 rounded-lg border border-accent-gold/25 bg-background/20 p-4">
+                    <h3 className="font-heading text-lg text-accent-gold">{locale === "fi" ? "Kampanjan aloitustapa" : "Campaign setup"}</h3>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <ArchiveCardButton type="button" fullWidth active>
+                        {locale === "fi" ? "Tyhjä kampanja" : "Start from scratch"}
+                      </ArchiveCardButton>
+                      <ArchiveCardButton type="button" fullWidth onClick={() => router.push("/events/create/campaign-material")}>
+                        {locale === "fi" ? "Luo materiaalista" : "Create from material"}
+                      </ArchiveCardButton>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {locale === "fi" ? "Aloita kampanja ilman lähdeaineistoa. Voit lisätä materiaalia myöhemmin kampanjan sisältä." : "Start without source material. You can add material later from inside the campaign."}
+                    </p>
+                  </div>
+                )}
+
                 {/* Title */}
                 <div className="space-y-2">
                   <Label htmlFor="title" className="font-body text-accent-gold">
@@ -378,69 +441,6 @@ export default function CreateEventPage() {
                     />
                   )}
                 </div>
-
-                {/* Event Type Selection */}
-                <div className="space-y-4">
-                  <Label className="font-body text-accent-gold">{t("events.eventType")}</Label>
-                  <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                    {eventTypes.map(({ value, image }) => {
-                      const label = t(`events.types.${value}`)
-                      const selected = eventType === value
-                      return (
-                        <button
-                          key={value}
-                          type="button"
-                          aria-pressed={selected}
-                          onClick={() => setEventType(value)}
-                          className={cn(
-                            "group relative flex min-h-[145px] flex-col items-center justify-center overflow-hidden rounded-lg px-3 py-3 text-center transition-all duration-200",
-                            "border border-[var(--archive-gold,#d9b65c)]/25",
-                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--archive-gold,#d9b65c)]/70",
-                            selected
-                              ? "bg-[var(--archive-surface-shade,rgba(0,0,0,0.28))] border-[var(--archive-gold,#d9b65c)]/75 shadow-[inset_0_0_18px_rgba(217,182,92,0.10)]"
-                              : "bg-[var(--archive-surface-shade,rgba(0,0,0,0.16))] hover:bg-[var(--archive-surface-shade,rgba(0,0,0,0.24))] hover:border-[var(--archive-gold,#d9b65c)]/50"
-                          )}
-                        >
-                          <img
-                            src={image}
-                            alt=""
-                            className="h-20 w-full object-contain drop-shadow-[0_5px_9px_rgba(0,0,0,0.45)] transition-transform duration-200 group-hover:scale-105"
-                          />
-                          <span className={cn(
-                            "mt-2 font-cinzel text-sm font-semibold",
-                            selected ? "text-[var(--archive-gold,#d9b65c)]" : "text-foreground"
-                          )}>
-                            {label}
-                          </span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                {eventType === "league" && (
-                  <div className="rounded-lg border border-accent-gold/25 bg-background/20 p-4 space-y-2">
-                    <h3 className="font-heading text-lg text-accent-gold">{t("eventUi.s0")}</h3>
-                    <p className="text-sm text-muted-foreground">{t("eventUi.s1")}</p>
-                  </div>
-                )}
-
-                {eventType === "campaign" && (
-                  <div className="space-y-3 rounded-lg border border-accent-gold/25 bg-background/20 p-4">
-                    <h3 className="font-heading text-lg text-accent-gold">{locale === "fi" ? "Kampanjan aloitustapa" : "Campaign setup"}</h3>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <ArchiveCardButton type="button" fullWidth active>
-                        {locale === "fi" ? "Tyhjä kampanja" : "Start from scratch"}
-                      </ArchiveCardButton>
-                      <ArchiveCardButton type="button" fullWidth onClick={() => router.push("/events/create/campaign-material")}>
-                        {locale === "fi" ? "Luo materiaalista" : "Create from material"}
-                      </ArchiveCardButton>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {locale === "fi" ? "Aloita kampanja ilman lähdeaineistoa. Voit lisätä materiaalia myöhemmin kampanjan sisältä." : "Start without source material. You can add material later from inside the campaign."}
-                    </p>
-                  </div>
-                )}
 
                 {/* Organizer-defined event structure */}
                 {eventType !== "game_night" && eventType !== "league" && (
