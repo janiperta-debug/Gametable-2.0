@@ -1407,7 +1407,7 @@ export default function EventDetailsPage() {
               </CampaignAccordionSection>
             )}
 
-            {event.event_type === "campaign" && isHost && <CampaignAccordionSection title="Kampanjan tila" meta={event.campaign_status === "confirmed" ? "Vahvistettu" : "Luonnos"}><CampaignSetupPanel eventId={eventId} status={event.campaign_status} onConfirmed={(confirmedAt) => setEvent((current) => current ? { ...current, campaign_status: "confirmed", campaign_confirmed_at: confirmedAt ?? current.campaign_confirmed_at } : current)} /></CampaignAccordionSection>}
+            {event.event_type === "campaign" && isHost && <CampaignAccordionSection title="Kampanjan tila" meta={event.status === "completed" ? "Päättynyt" : event.campaign_status === "confirmed" ? "Vahvistettu" : "Luonnos"}><CampaignSetupPanel eventId={eventId} status={event.campaign_status} eventStatus={event.status} onConfirmed={(confirmedAt) => setEvent((current) => current ? { ...current, campaign_status: "confirmed", campaign_confirmed_at: confirmedAt ?? current.campaign_confirmed_at } : current)} onCompleted={() => setEvent((current) => current ? { ...current, status: "completed" } : current)} /></CampaignAccordionSection>}
             {event.event_type === "campaign" && isHost && <CampaignAccordionSection title="Lisämateriaalit"><CampaignImportPanel eventId={eventId} /></CampaignAccordionSection>}
             {event.event_type === "campaign" && <CampaignAccordionSection title="Pelimaailma"><CampaignWorldPanel eventId={eventId} /></CampaignAccordionSection>}
 
