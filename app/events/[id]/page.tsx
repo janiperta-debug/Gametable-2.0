@@ -32,7 +32,7 @@ import { CampaignSetupPanel } from "@/components/campaign-setup-panel"
 
 function CampaignAccordionSection({ title, meta, children, defaultOpen = false }: { title: string; meta?: string; children: ReactNode; defaultOpen?: boolean }) {
   return (
-    <ArchiveFrame corners={false} centerOrnaments={false} className="rounded-xl">
+    <ArchiveFrame className="rounded-xl">
       <details open={defaultOpen} className="group">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 transition-colors hover:bg-black/15 [&::-webkit-details-marker]:hidden">
           <span className="font-cinzel text-base font-bold uppercase tracking-wide text-[var(--archive-gold,#d9b65c)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] sm:text-lg">{title}</span>
