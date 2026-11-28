@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { ArchiveCardButton } from "@/components/archive-frame"
+import { ArchiveCard, ArchiveCardButton, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle } from "@/components/archive-frame"
 import { Badge } from "@/components/ui/badge"
 import { FileText, Image as ImageIcon, Loader2, Upload, X } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
@@ -402,11 +402,12 @@ export function CampaignImportPanel({ eventId, finalizeOnComplete = false }: { e
                   </div>
 
                   {expandedItemsBatchId === batch.id && (
-                    <div className="mt-3 w-full space-y-3 rounded-md border border-accent-gold/25 bg-background/30 p-3">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div className="text-sm font-medium text-accent-gold">Tunnistetut ehdotukset</div>
-                        <Badge variant="outline" className="border-accent-gold/30 text-accent-gold">{reviewItems.length} ehdotusta</Badge>
-                      </div>
+                    <ArchiveCard className="mt-3 w-full" scrim>
+                      <ArchiveCardHeader className="flex flex-wrap items-center justify-between gap-2">
+                        <ArchiveCardTitle>Tunnistetut ehdotukset</ArchiveCardTitle>
+                        <Badge variant="outline" className="border-accent-gold/40 bg-black/50 text-[var(--archive-gold,#d9b65c)]">{reviewItems.length} ehdotusta</Badge>
+                      </ArchiveCardHeader>
+                      <ArchiveCardContent className="space-y-3">
                       <ArchiveCardButton
                         onClick={() => {
                           setExpandedItemsBatchId(null)
@@ -432,7 +433,7 @@ export function CampaignImportPanel({ eventId, finalizeOnComplete = false }: { e
                       ) : (
                         <div className="space-y-2">
                           {reviewItems.map((item) => (
-                            <details key={item.id} className="rounded-md border border-accent-gold/15 bg-background/40 p-3">
+                            <details key={item.id} className="rounded-lg border border-[var(--archive-gold,#d9b65c)]/35 bg-black/55 p-3 text-[var(--archive-gold,#d9b65c)] shadow-[inset_0_1px_8px_rgba(0,0,0,0.65)]">
                               <summary className="flex cursor-pointer list-none flex-wrap items-center gap-2">
                                 <input
                                   type="checkbox"
@@ -450,7 +451,7 @@ export function CampaignImportPanel({ eventId, finalizeOnComplete = false }: { e
                               <div className="mt-3 space-y-3 text-sm">
                                 {item.description && <p className="whitespace-pre-wrap">{item.description}</p>}
                                 {Object.keys(item.details).length > 0 && (
-                                  <div className="space-y-1 rounded border border-accent-gold/10 bg-background/40 p-2">
+                                  <div className="space-y-1 rounded border border-[var(--archive-gold,#d9b65c)]/25 bg-black/45 p-2 text-[var(--archive-gold,#d9b65c)]">
                                     <div className="text-xs font-medium text-accent-gold">Lisätiedot</div>
                                     {Object.entries(item.details).map(([key, value]) => (
                                       <div key={key} className="break-words text-xs">
@@ -460,12 +461,12 @@ export function CampaignImportPanel({ eventId, finalizeOnComplete = false }: { e
                                     ))}
                                   </div>
                                 )}
-                                <div className="rounded border border-accent-gold/10 bg-background/40 p-2">
+                                <div className="rounded border border-[var(--archive-gold,#d9b65c)]/25 bg-black/45 p-2 text-[var(--archive-gold,#d9b65c)]">
                                   <div className="text-xs font-medium text-accent-gold">Lähde</div>
                                   <p className="mt-1 text-xs">{item.sourceName}{item.page ? ` · sivu ${item.page}` : ""}</p>
-                                  {item.quote && <blockquote className="mt-2 border-l-2 border-accent-gold/40 pl-2 text-xs italic text-muted-foreground">”{item.quote}”</blockquote>}
+                                  {item.quote && <blockquote className="mt-2 border-l-2 border-accent-gold/60 pl-2 text-xs italic text-[var(--archive-gold,#d9b65c)]/85">”{item.quote}”</blockquote>}
                                 </div>
-                                <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                                <div className="flex flex-wrap gap-3 text-xs text-[var(--archive-gold,#d9b65c)]/75">
                                   {item.confidence !== null && <span>Varmuusarvio: {Math.round(item.confidence * 100)} %</span>}
                                   <span>Tila: {item.status === "needs_review" ? "Odottaa tarkistusta" : item.status}</span>
                                 </div>
@@ -483,7 +484,8 @@ export function CampaignImportPanel({ eventId, finalizeOnComplete = false }: { e
                           ))}
                         </div>
                       )}
-                    </div>
+                      </ArchiveCardContent>
+                    </ArchiveCard>
                   )}
 
                 </div>
