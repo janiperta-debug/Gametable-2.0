@@ -34,16 +34,26 @@ export function CampaignWorldPanel({ eventId }: { eventId: string }) {
 
   useEffect(() => {
     let active = true
-    getCampaignWorldEntities(eventId).then((result) => {
-      if (!active) return
-      if (result.success) setEntities(result.entities as WorldEntity[])
-      else setError(result.error)
-    }).catch((loadError) => {
-      if (active) setError(loadError instanceof Error ? loadError.message : "Kampanjan tietojen lataaminen epäonnistui.")
-    }).finally(() => {
-      if (active) setLoading(false)
-    })
-    return () => { active = false }
+    const loadEntities = async () => {
+      setError("")
+      try {
+        const result = await getCampaignWorldEntities(eventId)
+        if (!active) return
+        if (result.success) setEntities(result.entities as WorldEntity[])
+        else setError(result.error)
+      } catch (loadError) {
+        if (active) setError(loadError instanceof Error ? loadError.message : "Kampanjan tietojen lataaminen epäonnistui.")
+      } finally {
+        if (active) setLoading(false)
+      }
+    }
+    const handleWorldUpdated = () => { void loadEntities() }
+    void loadEntities()
+    window.addEventListener("gametable:campaign-world-updated", handleWorldUpdated)
+    return () => {
+      active = false
+      window.removeEventListener("gametable:campaign-world-updated", handleWorldUpdated)
+    }
   }, [eventId])
 
   const groups = useMemo(() => {
