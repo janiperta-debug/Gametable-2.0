@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ArchiveCard, ArchiveCardButton, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle } from "@/components/archive-frame"
+import { ArchiveCardButton } from "@/components/archive-frame"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle2, Loader2, Users } from "lucide-react"
 import { confirmCampaign } from "@/app/actions/campaign-lifecycle"
@@ -37,16 +37,7 @@ export function CampaignSetupPanel({
   }
 
   return (
-    <ArchiveCard>
-      <ArchiveCardHeader>
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <ArchiveCardTitle className="text-xl normal-case">Kampanjan perustaminen</ArchiveCardTitle>
-          <Badge variant="outline" className={isConfirmed ? "border-green-600/40 text-green-500" : "border-accent-gold/30 text-accent-gold"}>
-            {isConfirmed ? "Vahvistettu" : "Luonnos"}
-          </Badge>
-        </div>
-      </ArchiveCardHeader>
-      <ArchiveCardContent className="space-y-3">
+    <div className="space-y-3">
         {isConfirmed ? (
           <>
             <div className="flex items-start gap-2 text-sm text-green-500">
@@ -72,7 +63,6 @@ export function CampaignSetupPanel({
             <p className="text-xs text-muted-foreground">Vahvistaminen ei päätä kampanjaa. Se ainoastaan julkaisee sen osallistujille.</p>
           </>
         )}
-      </ArchiveCardContent>
-    </ArchiveCard>
+    </div>
   )
 }
