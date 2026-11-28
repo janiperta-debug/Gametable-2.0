@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { ArchiveCard, ArchiveCardContent, ArchiveCardHeader, ArchiveCardTitle } from "@/components/archive-frame"
 import { Badge } from "@/components/ui/badge"
 import { getCampaignWorldEntities } from "@/app/actions/campaign-world"
 
@@ -58,11 +57,7 @@ export function CampaignWorldPanel({ eventId }: { eventId: string }) {
   }, [entities])
 
   return (
-    <ArchiveCard>
-      <ArchiveCardHeader>
-        <ArchiveCardTitle>Kampanjan tietopankki</ArchiveCardTitle>
-      </ArchiveCardHeader>
-      <ArchiveCardContent className="space-y-3">
+    <div className="space-y-3">
         <p className="text-sm text-muted-foreground">
           Kampanjan henkilöt, paikat, tehtävät ja muu pelimaailman tieto yhdessä paikassa.
         </p>
@@ -113,7 +108,6 @@ export function CampaignWorldPanel({ eventId }: { eventId: string }) {
             ))}
           </div>
         )}
-      </ArchiveCardContent>
-    </ArchiveCard>
+    </div>
   )
 }
