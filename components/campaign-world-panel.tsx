@@ -32,22 +32,6 @@ export function CampaignWorldPanel({ eventId }: { eventId: string }) {
   const [error, setError] = useState("")
   const [saving, setSaving] = useState<string | null>(null)
 
-  const loadEntities = async () => {
-    setError("")
-    try {
-      const result = await getCampaignWorldEntities(eventId)
-      if (result.success) {
-        setEntities(result.entities as WorldEntity[])
-        setParticipants(result.participants as Participant[])
-        setIsGM(result.isGM)
-      } else setError(result.error)
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Kampanjan tietojen lataaminen epäonnistui.")
-    } finally {
-      setLoading(false)
-    }
-  }
-
   useEffect(() => {
     let active = true
     const load = async () => {
