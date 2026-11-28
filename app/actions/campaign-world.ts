@@ -6,6 +6,27 @@ import { createServiceClient } from "@/lib/supabase/service"
 
 type CampaignVisibility = "gm_only" | "players"
 
+async function requireCampaignGMFromBatch(batchId: string) {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { error: "Kirjautuminen vaaditaan." as const }
+
+  const db = createServiceClient()
+  const { data: batch, error } = await db
+    .from("campaign_import_batches")
+    .select("id, event_id, status, event:events!inner(id, host_id, event_type)")
+    .eq("id", batchId)
+    .maybeSingle()
+
+  if (error || !batch) return { error: "Tuontierää ei löytynyt." as const }
+  const event = Array.isArray(batch.event) ? batch.event[0] : batch.event
+  if (!event || event.event_type !== "campaign" || event.host_id !== user.id) {
+    return { error: "Vain kampanjanjohtaja voi käsitellä tämän kampanjan aineistoa." as const }
+  }
+
+  return { userId: user.id, eventId: batch.event_id, status: batch.status }
+}
+
 export async function approveCampaignImportItems(batchId: string, itemIds: string[]) {
   if (!Array.isArray(itemIds) || itemIds.length < 1 || itemIds.length > 100 ||
       itemIds.some((id) => typeof id !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))) {
